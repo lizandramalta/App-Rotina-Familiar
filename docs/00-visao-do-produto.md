@@ -1,7 +1,7 @@
 # Documento de visão — MVP
 
 **Projeto:** App de Organização Familiar  
-**Versão:** 1.3  
+**Versão:** 1.4  
 **Data:** 2026-10-02  
 **Situação:** visão consolidada do produto
 
@@ -70,7 +70,7 @@ Os fluxos completos estão na [especificação dos casos de uso](03-casos-de-uso
 
 ## 7. Regras centrais da experiência
 
-| Tema | Comportamento da versão 1.3 | Referências |
+| Tema | Comportamento da versão 1.4 | Referências |
 |---|---|---|
 | Acesso e vínculo | Apple exclusivo do Criador; demais perfis ingressam com link e senha de uso único. Remover um membro revoga o acesso, inclusive por sessões abertas. | [RN10](01-regras-de-negocio.md#rn10), [RN44](01-regras-de-negocio.md#rn44), [RN46](01-regras-de-negocio.md#rn46), [UC09](03-casos-de-uso.md#uc09) |
 | Tarefas e rotinas | Tarefa única ou rotina diária ou a cada 7, 14, 21 ou 28 dias. Não existe frequência mensal. Cada ocorrência possui identificação e estado próprios. | [RN14](01-regras-de-negocio.md#rn14), [RN16](01-regras-de-negocio.md#rn16), [UC08](03-casos-de-uso.md#uc08) |
@@ -86,7 +86,7 @@ Os fluxos completos estão na [especificação dos casos de uso](03-casos-de-uso
 
 ## 8. Escopo do MVP
 
-O escopo vigente corresponde ao conjunto consolidado de regras, requisitos e casos de uso da versão 1.3. A priorização inicial foi ajustada para incorporar as decisões posteriores; assumir tarefas e atribuir vários responsáveis já fazem parte do MVP.
+O escopo vigente corresponde ao conjunto consolidado de regras, requisitos e casos de uso da versão 1.4. A priorização inicial foi ajustada para incorporar as decisões posteriores; assumir tarefas e atribuir vários responsáveis já fazem parte do MVP.
 
 | Capacidade incluída | Casos de uso |
 |---|---|
@@ -151,7 +151,7 @@ Os comportamentos são detalhados nas [regras de negócio](01-regras-de-negocio.
 
 ## Área Família
 
-Família é uma área da navegação principal adulta. Administradores e Membros acompanham o progresso coletivo diário ou semanal, consultam tarefas da família pelo seletor Dia/Semana e acessam a carga diária ou semanal. O progresso conta tarefas concluídas sobre o total de tarefas previstas para o período, uma vez por tarefa, inclusive compartilhadas ou sem responsável. Somente Administradores gerenciam membros e confirmam sinalizações Kids. Sem tarefas no período, o aplicativo informa essa condição.
+A tela Família apresenta diretamente carga e progresso por dia/semana, lista de membros, botão Gerar relatório PDF e, para Administradores, Adicionar membro. Selecionar uma pessoa abre seu detalhe com tarefas por dia/semana; edição de perfil e reenvio de convite ficam nesse detalhe, quando permitidos. A consulta da lista e das tarefas é adulta; a gestão continua exclusiva dos Administradores. O relatório permanece semanal.
 
 ## Continuidade e recuperação de acesso
 
@@ -171,6 +171,7 @@ Referências: RN61–65; RF61–66; UC18–19; TEL-051/052; UF-14/15. RF48, RF55
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.4 | 2026-10-02 | Família concentra indicadores, lista, inclusão de membros e PDF; detalhe do membro reúne tarefas Dia/Semana, edição e reenvio quando permitidos. RN60–61, RF60–61/RF66 e UC02/11/13/18 revisados. |
 | 1.3 | 2026-10-02 | Duas abas Kids, câmera direta, foto/apelido e badges, progresso/carga Dia/Semana, PDF semanal e reconhecimento com WhatsApp; RN61–65, RF61–66, RNF26–27 e UC18–19. Empates e visibilidade do apelido confirmados. |
 | 1.2 | 2026-10-01 | Área Família na navegação adulta, progresso coletivo diário e consulta por carrossel: RN60, RF60 e UC11. Design em elaboração na versão 1.0. |
 | 1.1 | 2026-10-01 | Recuperação do mesmo perfil por novo convite e renovação sem expiração temporal, com revogação preservada: RN47, RF41, RF46, RF54, RNF22, UC02 e UC09. |

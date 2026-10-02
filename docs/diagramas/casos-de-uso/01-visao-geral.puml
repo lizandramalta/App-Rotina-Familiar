@@ -14,7 +14,7 @@ skinparam rectangleBorderColor #64748B
 skinparam packageStyle rectangle
 skinparam nodesep 32
 skinparam ranksep 55
-title Visão geral do sistema\nApp de Organização Familiar · MVP 1.3
+title Visão geral do sistema\nApp de Organização Familiar · MVP 1.4
 
 actor "Administrador" as Admin
 actor "Membro" as Membro

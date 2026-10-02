@@ -1,7 +1,7 @@
 # Requisitos funcionais e não funcionais
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.3  
+**Versão:** 1.4  
 **Data:** 2026-10-02  
 **Situação:** base documental consolidada
 
@@ -433,16 +433,18 @@ Ao excluir uma tarefa não concluída, o sistema deve remover seus vínculos de 
 
 ### RF60
 
-O sistema deve oferecer a Administradores e Membros a área Família (Minha família) na navegação principal, com progresso coletivo e consulta das tarefas por dia ou semana conforme RN60–61, abrindo no dia atual e preservando o período ao abrir a lista familiar. Deve mostrar concluídas/total e percentual, contar cada tarefa uma vez e apresentar “Sem tarefas” quando o total for zero. Deve atualizar os indicadores após alterações válidas.
+O sistema deve oferecer a Administradores e Membros a área Família (Minha família) na navegação principal, apresentando diretamente carga e progresso total por dia ou semana e uma lista de membros. Cada item abre o detalhe com as tarefas daquele membro e seletor Dia/Semana. Deve abrir no dia atual, herdar o período ao abrir o detalhe e preservar membro e período ao consultar suas tarefas; voltar restaura o contexto da origem. Todas as tarefas, inclusive sem responsável, permanecem acessíveis pela consulta familiar complementar.
 
-A área oferece carga diária ou semanal e geração de relatório semanal PDF para ambos os perfis. Gestão de membros e validação Kids permanecem exclusivas de Administradores. Kids não acessam a área Família.
+O progresso deve mostrar concluídas/total e percentual, contar cada tarefa uma vez e apresentar “Sem tarefas” quando o total for zero. Carga e progresso seguem RN60–61 e são atualizados após alterações válidas.
+
+O botão Gerar relatório semanal PDF fica na própria Família para ambos os perfis adultos. O botão Adicionar membro também fica em Família, somente para Administradores. Editar perfil e gerar/reenviar convite ficam no detalhe do membro, somente para Administradores quando permitido, respeitando o acesso Apple do Criador e a edição exclusiva do próprio apelido. Confirmações Kids permanecem exclusivas dos Administradores. Kids não acessam a área Família.
 
 **Regras de negócio:** [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61)  
 **Casos de uso:** [UC11](03-casos-de-uso.md#uc11)
 
 ### RF61
 
-O sistema deve permitir selecionar uma semana, gerar, visualizar e salvar ou compartilhar o PDF de RN62, com gráficos de carga e progresso familiar e tabela com peso creditado e tarefas realizadas por membro. Deve mostrar geração em andamento, falha com nova tentativa e semana atual parcial. Selecionar Dia na carga não transforma o PDF em relatório diário.
+O sistema deve oferecer Gerar relatório PDF na própria tela Família e permitir selecionar uma semana, gerar, visualizar e salvar ou compartilhar o PDF de RN62, com gráficos de carga e progresso familiar e tabela com peso creditado e tarefas realizadas por membro. Deve mostrar geração em andamento, falha com nova tentativa e semana atual parcial. Selecionar Dia na carga não transforma o PDF em relatório diário.
 
 **Regras de negócio:** [RN62](01-regras-de-negocio.md#rn62)  
 **Casos de uso:** [UC18](03-casos-de-uso.md#uc18)
@@ -477,7 +479,7 @@ O sistema deve oferecer ao perfil Kids exatamente duas abas independentes: “Mi
 
 ### RF66
 
-O sistema deve oferecer o seletor Dia/Semana em Minhas tarefas e Minha família e na consulta adulta de carga/sobrecarga. Deve informar datas, preservar período ao navegar para detalhes e listas e aplicar as fórmulas e limites de RN61. A consulta semanal não altera o período livre de prazo das missões.
+O sistema deve oferecer o seletor Dia/Semana em Minhas tarefas, nos indicadores de carga/progresso integrados em Minha família e nas tarefas do membro selecionado em seu detalhe. Deve informar datas, preservar período ao navegar para detalhes e listas e aplicar as fórmulas e limites de RN61. A consulta semanal não altera o período livre de prazo das missões.
 
 **Regras de negócio:** [RN28](01-regras-de-negocio.md#rn28), [RN33](01-regras-de-negocio.md#rn33), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61)  
 **Casos de uso:** [UC11](03-casos-de-uso.md#uc11), [UC13](03-casos-de-uso.md#uc13)
@@ -736,6 +738,7 @@ A configuração de apelido deve ser protegida por titularidade no backend, incl
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.4 | 2026-10-02 | Família concentra indicadores, lista, inclusão de membros e PDF; detalhe do membro reúne tarefas Dia/Semana, edição e reenvio quando permitidos. RN60–61, RF60–61/RF66 e UC02/11/13/18 revisados. |
 | 1.3 | 2026-10-02 | Duas abas Kids, câmera direta, foto/apelido e badges, progresso/carga Dia/Semana, PDF semanal e reconhecimento com WhatsApp; RN61–65, RF61–66, RNF26–27 e UC18–19. Empates e visibilidade do apelido confirmados. |
 | 1.2 | 2026-10-01 | Área Família na navegação adulta, progresso coletivo diário e consulta por carrossel: RN60, RF60 e UC11. Design em elaboração na versão 1.0. |
 | 1.1 | 2026-10-01 | Recuperação do mesmo perfil por novo convite e renovação sem expiração temporal, com revogação preservada: RN47, RF41, RF46, RF54, RNF22, UC02 e UC09. |

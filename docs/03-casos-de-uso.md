@@ -1,7 +1,7 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.3  
+**Versão:** 1.4  
 **Data:** 2026-10-02  
 **Situação:** base documental consolidada
 
@@ -102,9 +102,11 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Pré-condição:** família existente e permissão de Administrador.
 
+**Entrada de edição/convite:** Família → selecionar item da lista → TEL-032. Consultar o detalhe e suas tarefas é permitido aos adultos por UC11; as ações administrativas seguem este caso de uso. Reenviar permite compartilhar convite ainda disponível; se consumido ou para recuperar acesso, gerar novo convite para o mesmo perfil ativo, sem recriar o membro. O Criador retorna por Apple; a configuração de apelido só pode ser alterada pelo titular em UC10.
+
 **Fluxo principal — Adicionar membro:**
 
-1. O Administrador acessa o gerenciamento de membros e seleciona adicionar.
+1. O Administrador acessa Família (TEL-050) e aciona o botão Adicionar membro na própria tela.
 2. Informa os dados do perfil e define sua configuração, incluindo o Modo Kids quando aplicável.
 3. O sistema valida e salva o perfil na família.
 4. O Administrador solicita o convite.
@@ -448,7 +450,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 2. O sistema abre o dia atual e oferece Dia/Semana; apresenta concluídas/total de tarefas previstas no período, contando cada tarefa uma vez, inclusive compartilhadas ou sem responsável.
 3. O adulto seleciona dia ou semana dentro dos limites de RN49 e RN61; o progresso acompanha o período.
 4. Ao abrir as tarefas da família, o sistema mantém o período e permite consultar tarefas de outras pessoas e sem responsável. Gerenciar e concluir continuam sujeitos a UC07 e UC12.
-5. A área oferece acesso à carga diária ou semanal por UC13 e ao PDF semanal por UC18. Somente Administradores também acessam gerenciamento de membros (UC02) e confirmações Kids (UC03).
+5. A própria área apresenta a carga diária ou semanal por UC13 e o botão Gerar relatório PDF por UC18. Também apresenta a lista de membros: selecionar uma pessoa abre TEL-032 com suas tarefas por dia/semana. O detalhe herda o período e mantém o filtro por pessoa; voltar restaura o contexto da Família. Somente Administradores têm Adicionar membro na Família e, no detalhe, Editar perfil e Gerar/reenviar convite quando permitidos por UC02. Confirmações Kids continuam exclusivas dos Administradores.
 
 Sem tarefas no período, o sistema informa essa condição sem divisão por zero. Tarefas aguardando confirmação não entram nas concluídas. Conclusão, reabertura e exclusão autorizadas atualizam o progresso. Kids não acessam esta área. UC11 também abrange a consulta diária ou semanal familiar adulta.
 
@@ -510,7 +512,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 **Fluxo principal:**
 
-1. O usuário acessa a carga pela área Família e seleciona Dia ou Semana e uma data de referência.
+1. O usuário consulta a carga diretamente na tela Família (TEL-050) e seleciona Dia ou Semana e uma data de referência.
 2. O sistema preserva o período da origem; para Semana, considera segunda-feira a domingo.
 3. Identifica as tarefas com conclusão válida no período.
 4. Soma o peso integral de cada tarefa para cada responsável registrado em sua conclusão.
@@ -693,7 +695,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 **Fluxo principal:**
 
-1. O adulto aciona Gerar relatório em Minha família ou Carga e abre TEL-051.
+1. O adulto aciona Gerar relatório PDF na própria tela Minha família (TEL-050) e abre TEL-051.
 2. Seleciona uma semana de segunda a domingo; a data da origem sugere a semana correspondente.
 3. O sistema identifica o período e, se atual, indica que o relatório é parcial até o momento da geração.
 4. O adulto confirma gerar. O sistema obtém os dados de forma consistente e monta gráficos de carga semanal por membro e progresso total da família, com concluídas/total e percentual.
@@ -753,6 +755,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.4 | 2026-10-02 | Família concentra indicadores, lista, inclusão de membros e PDF; detalhe do membro reúne tarefas Dia/Semana, edição e reenvio quando permitidos. RN60–61, RF60–61/RF66 e UC02/11/13/18 revisados. |
 | 1.3 | 2026-10-02 | Duas abas Kids, câmera direta, foto/apelido e badges, progresso/carga Dia/Semana, PDF semanal e reconhecimento com WhatsApp; RN61–65, RF61–66, RNF26–27 e UC18–19. Empates e visibilidade do apelido confirmados. |
 | 1.2 | 2026-10-01 | Área Família na navegação adulta, progresso coletivo diário e consulta por carrossel: RN60, RF60 e UC11. Design em elaboração na versão 1.0. |
 | 1.1 | 2026-10-01 | Recuperação do mesmo perfil por novo convite e renovação sem expiração temporal, com revogação preservada: RN47, RF41, RF46, RF54, RNF22, UC02 e UC09. |

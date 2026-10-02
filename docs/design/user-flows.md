@@ -2,7 +2,7 @@
 
 **Projeto:** App de Organização Familiar — MVP  
 **Versão dos fluxos:** 1.0  
-**Base funcional:** 1.3  
+**Base funcional:** 1.4  
 **Screen map:** 1.0 — revisão de 2026-10-02  
 **Data:** 2026-10-02  
 **Situação:** primeira versão para revisão de design
@@ -17,7 +17,7 @@ Nos diagramas, retângulos representam telas ou ações, losangos representam de
 
 **Minhas tarefas, Meu perfil, Missões e conquistas e Família são destinos independentes da navegação principal adulta.** Minhas tarefas é o destino inicial após acesso. Os fluxos iniciados em Família, Meu perfil ou Missões não passam por Minhas tarefas. Kids possuem duas abas independentes: Minhas tarefas e Missões e conquistas; Meu perfil é acessado pelo avatar/cabeçalho.
 
-O detalhamento traduz a base 1.3 em caminhos para design; premissas pendentes estão identificadas nas regras e no índice documental. Falhas e retornos comuns são definidos abaixo e se aplicam a todos os diagramas, mesmo quando não repetidos em cada desenho.
+O detalhamento traduz a base 1.4 em caminhos para design; premissas pendentes estão identificadas nas regras e no índice documental. Falhas e retornos comuns são definidos abaixo e se aplicam a todos os diagramas, mesmo quando não repetidos em cada desenho.
 
 ## Condições comuns
 
@@ -92,8 +92,7 @@ flowchart TD
 ```mermaid
 flowchart TD
     subgraph Admin["Administrador"]
-      A["TEL-050 · Família"] --> B["TEL-031 · Membros"]
-      B --> C["TEL-033 · Adicionar membro e definir perfil"]
+      A["TEL-050 · Família"] -->|Adicionar membro| C["TEL-033 · Adicionar membro e definir perfil"]
       C --> D{"Dados e perfil válidos?"}
       D -->|Não · corrigir| C
       D -->|Sim · salvar| E["TEL-032 · Perfil salvo"]
@@ -135,7 +134,7 @@ flowchart TD
     B --> C{"É o Criador?"}
     C -->|Sim| D(["UF-01 · Retornar com Apple"])
     C -->|Não| E["Solicitar novo convite a um Administrador fora do app"]
-    E --> F["Admin: TEL-050 → TEL-031 → TEL-032"]
+    E --> F["Admin: TEL-050 → selecionar membro → TEL-032"]
     F --> G{"Mesmo perfil ainda ativo?"}
     G -->|Não| H(["Recuperação indisponível para perfil removido"])
     G -->|Sim| I["Gerar novo convite · TEL-034"]
@@ -159,9 +158,11 @@ flowchart TD
     B -->|Pessoal adulto| C["TEL-010 · Minhas tarefas"]
     B -->|Pessoal Kids| D["TEL-040 · Minhas tarefas Kids"]
     B -->|Familiar adulto| E["TEL-050 · Família"]
-    C --> F["Abrir hoje; escolher Dia ou Semana e data de referência"]
+    C --> F["Escolher Dia ou Semana mantendo a data de referência atual"]
     D --> F
-    E --> F
+    E -->|Consultar totais da família| F
+    E -->|Selecionar membro da lista| PM["TEL-032 · Tarefas daquele membro · Dia/Semana"]
+    PM --> F
     F --> G{"Período no intervalo permitido?"}
     G -->|Não| H["Impedir seleção e manter data válida"]
     H --> F
@@ -172,11 +173,14 @@ flowchart TD
     L -->|Não| M(["Permanecer na consulta"])
     L -->|Pessoal adulto| N["TEL-012 · Detalhe da tarefa"]
     L -->|Pessoal Kids| O["TEL-041 · Detalhe da minha tarefa"]
-    L -->|Família| P["TEL-011 · Preservar período e selecionar tarefa"]
+    L -->|Membro selecionado| N
+    L -->|Todas as tarefas da família| P["TEL-011 · Preservar período e selecionar tarefa"]
     P --> N
 ```
 
 Dia/Semana mantém a data de referência. A semana vai de segunda a domingo; semanas de borda indicam os dias disponíveis. Progresso semanal usa concluídas/total da semana, não a média dos percentuais diários. O intervalo vai da criação da família ao último dia do mês corrente, incluindo dias futuros desse mês. Na visão familiar, cada tarefa prevista no período conta uma vez no total e, se concluída, uma vez no numerador; peso e quantidade de responsáveis não multiplicam o progresso. Tarefas sem responsável entram no total. Aguardando confirmação não conta como concluída.
+
+TEL-032 mantém o membro selecionado ao alternar Dia/Semana e abre TEL-012 para uma tarefa. Herdar o período da Família não liga os seletores: voltar restaura a seleção anterior de TEL-050. Membro sem tarefas mostra estado vazio; falha de consulta não é apresentada como ausência de tarefas. Ações administrativas no detalhe seguem UF-12.
 
 **Continuação:** adultos podem seguir UF-05, UF-06 ou UF-08 a partir das telas permitidas; Kids seguem UF-07 somente para tarefa própria pendente. Voltar do detalhe restaura a origem, que pode ser uma lista pessoal, familiar ou missão. Consultar outra data não altera tarefas. Ao abrir o checklist em um novo dia, o padrão volta a ser o dia atual.
 
@@ -335,8 +339,7 @@ A reabertura é uma operação independente: retira o crédito do dia e da seman
 
 ```mermaid
 flowchart TD
-    A["TEL-050 · Minha família"] --> B["TEL-014 · Carga"]
-    B --> C["Escolher Dia ou Semana e data de referência"]
+    A["TEL-050 · Minha família · carga e progresso integrados"] --> C["Escolher Dia ou Semana e data de referência"]
     C --> D{"Há conclusões válidas no período?"}
     D -->|Não| E["Informar ausência de carga"]
     D -->|Sim| F["Mostrar peso por membro e participação no total"]
@@ -347,7 +350,7 @@ flowchart TD
     G -->|Voltar| A
 ```
 
-Cada responsável recebe o peso integral; o total soma cargas individuais. Pendentes e Aguardando confirmação não entram. Reaberturas ajustam o dia e a semana originais. Sem carga, não dividir por zero. A semana vai de segunda a domingo; vindo da área Família, manter a referência selecionada. Kids não acessam esta tela. O destaque semanal é consultado separadamente em UF-15.
+Cada responsável recebe o peso integral; o total soma cargas individuais. Pendentes e Aguardando confirmação não entram. Reaberturas ajustam o dia e a semana originais. Sem carga, não dividir por zero. A semana vai de segunda a domingo; a consulta ocorre na própria TEL-050 e mantém a referência selecionada. Kids não acessam esta tela. O destaque semanal é consultado separadamente em UF-15.
 
 <a id="uf-10"></a>
 
@@ -428,13 +431,12 @@ Cadastrar um item é opcional e independente: a roleta já dispõe dos itens pre
 ## UF-12 — Gerenciar membros e permissões
 
 **Objetivo:** ajustar perfil, modo Kids e papel, ou remover membro com efeitos claros.  
-**Entrada:** Família → Membros; Administrador.  
+**Entrada:** selecionar um item da lista de membros na própria Família → Detalhe do membro; Administrador para gestão.  
 **Referências:** [UC02](../03-casos-de-uso.md#uc02); RN01–10; RF02–06, RF40–41.
 
 ```mermaid
 flowchart TD
-    A["TEL-050 · Família"] --> B["TEL-031 · Membros"]
-    B --> C["TEL-032 · Selecionar membro"]
+    A["TEL-050 · Família · lista de membros"] -->|Selecionar membro| C["TEL-032 · Detalhe e tarefas do membro"]
     C --> D{"Ação"}
     D -->|Editar| E["TEL-033 · Alterar dados ou configuração"]
     E --> F{"Mudança permitida?"}
@@ -449,9 +451,11 @@ flowchart TD
     K -->|Sim| L(["Remoção impedida"])
     K -->|Não| M["MOD-010 · Explicar efeitos e confirmar remoção"]
     M -->|Cancelar| C
-    M -->|Confirmar e salvar| N(["TEL-031 · Membro removido"])
-    D -->|Gerar convite| O(["UF-02 ou UF-03"])
+    M -->|Confirmar e salvar| N(["TEL-050 · Lista atualizada após remoção"])
+    D -->|Gerar ou reenviar convite| O(["TEL-034 · UF-02 ou UF-03"])
 ```
+
+Administradores e Membros podem consultar as tarefas em TEL-032; somente Administradores acessam ações de gestão quando permitidas. Reenviar abre TEL-034 para compartilhar link e senha ainda disponíveis; convite consumido ou recuperação exige novo convite para o mesmo perfil ativo. Cancelar volta ao detalhe preservando membro/período; falha não cria membro duplicado. O Criador recupera acesso por Apple.
 
 **Restrições:** o Criador não pode ser removido, rebaixado nem sair. Um Administrador não pode permanecer em modo Kids; Kids devem sair desse modo antes da promoção. Alterações obedecem à permissão corrente de quem executa.
 
@@ -486,12 +490,12 @@ O formulário permite adicionar/substituir/remover foto opcional e configurar et
 ## UF-14 — Gerar relatório semanal em PDF
 
 **Objetivo:** obter a visão semanal da família em arquivo.  
-**Entrada:** Minha família (TEL-050) ou Carga (TEL-014), por adulto.  
+**Entrada:** botão Gerar relatório PDF na própria Minha família (TEL-050), por adulto.  
 **Referências:** [UC18](../03-casos-de-uso.md#uc18); RN62; RF61; RNF26–27.
 
 ```mermaid
 flowchart TD
-    A["TEL-050 ou TEL-014 · Gerar relatório"] --> B["TEL-051 · Selecionar semana segunda–domingo"]
+    A["TEL-050 · Gerar relatório PDF"] --> B["TEL-051 · Selecionar semana segunda–domingo"]
     B --> C{"Semana atual ou passada válida?"}
     C -->|Não| B
     C -->|Sim| D["Gerar PDF · atual identificada como parcial"]
@@ -551,5 +555,6 @@ Texto do convite: “Mande para sua família e sugira algo para vocês fazerem j
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.0 | 1.4 | 1.0 | 2026-10-02 | UF-02/03/04/09/12/14 alinhados à lista integrada em Família e ao detalhe com tarefas do membro; mantido Dia/Semana. |
 | 1.0 | 1.3 | 1.0 | 2026-10-02 | Revisão dos fluxos Kids, câmera, perfil, períodos e badges; novos UF-14/15 para PDF e destaque semanal. |
 | 1.0 | 1.2 | 1.0 | 2026-10-01 | Primeira elaboração: 13 fluxos com Mermaid, decisões, alternativas, retornos e cobertura dos 17 casos de uso. |

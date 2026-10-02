@@ -3,7 +3,7 @@
 Organização colaborativa das responsabilidades domésticas, com tarefas compartilhadas, participação infantil e conquistas coletivas.
 
 **Escopo:** MVP  
-**Versão da base do projeto:** 1.3  
+**Versão da base do projeto:** 1.4  
 **Data:** 2026-10-02
 
 ## Por que este projeto existe
@@ -89,11 +89,11 @@ As possibilidades de evolução estão no [documento de visão](docs/00-visao-do
 | [Modelo de dados (DER)](docs/05-modelo-de-dados.md) | Entidades, atributos, chaves e relacionamentos do banco de dados. |
 | [Índice e controle documental](docs/DOCUMENTACAO.md) | Rastreabilidade e convenções para manter a documentação consistente. |
 
-A versão 1.3 identifica a base de definição do MVP. Não representa, por si só, uma declaração de que o aplicativo foi implementado ou publicado.
+A versão 1.4 identifica a base de definição do MVP. Não representa, por si só, uma declaração de que o aplicativo foi implementado ou publicado.
 
 ## Área Família
 
-Família é uma área da navegação principal adulta. Administradores e Membros acompanham o progresso coletivo diário ou semanal, consultam tarefas da família pelo seletor Dia/Semana e acessam a carga diária ou semanal. O progresso conta tarefas concluídas sobre o total de tarefas previstas para o período, uma vez por tarefa, inclusive compartilhadas ou sem responsável. Somente Administradores gerenciam membros e confirmam sinalizações Kids. Sem tarefas no período, o aplicativo informa essa condição.
+A tela Família apresenta diretamente carga e progresso por dia/semana, lista de membros, botão Gerar relatório PDF e, para Administradores, Adicionar membro. Selecionar uma pessoa abre seu detalhe com tarefas por dia/semana; edição de perfil e reenvio de convite ficam nesse detalhe, quando permitidos. A consulta da lista e das tarefas é adulta; a gestão continua exclusiva dos Administradores. O relatório permanece semanal.
 
 ## Continuidade e recuperação de acesso
 
@@ -113,6 +113,7 @@ Referências: RN61–65; RF61–66; UC18–19; TEL-051/052; UF-14/15. RF48, RF55
 
 | Versão | Data | Marco |
 |---|---|---|
+| 1.4 | 2026-10-02 | Família concentra indicadores, lista, inclusão de membros e PDF; detalhe do membro reúne tarefas Dia/Semana, edição e reenvio quando permitidos. RN60–61, RF60–61/RF66 e UC02/11/13/18 revisados. |
 | 1.3 | 2026-10-02 | Duas abas Kids, câmera direta, foto/apelido e badges, progresso/carga Dia/Semana, PDF semanal e reconhecimento com WhatsApp; RN61–65, RF61–66, RNF26–27 e UC18–19. Empates e visibilidade do apelido confirmados. |
 | 1.2 | 2026-10-01 | Área Família na navegação adulta, progresso coletivo diário e consulta por carrossel: RN60, RF60 e UC11. Design em elaboração na versão 1.0. |
 | 1.1 | 2026-10-01 | Recuperação do mesmo perfil por novo convite e renovação sem expiração temporal, com revogação preservada: RN47, RF41, RF46, RF54, RNF22, UC02 e UC09. |
