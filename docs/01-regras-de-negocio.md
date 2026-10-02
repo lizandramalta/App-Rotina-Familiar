@@ -5,7 +5,7 @@
 **Data:** 2026-10-01  
 **Situação:** base documental consolidada
 
-[Índice e versões](README.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md)
+[Projeto](README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md)
 
 Este documento contém todas as regras vigentes da versão 1.0. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
 
@@ -468,4 +468,4 @@ A exclusão de tarefa não concluída remove seus vínculos com missões em anda
 
 | Versão | Data | Alteração |
 |---|---|---|
-| 1.0 | 2026-10-01 | Primeira versão consolidada, incluindo todas as decisões registradas até esta publicação. |
+| 1.0 | 2026-10-01 | Primeira versão consolidada, incluindo todas as decisões registradas até esta publicação e links para a visão e a apresentação do projeto. |

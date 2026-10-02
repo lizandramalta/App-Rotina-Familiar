@@ -5,7 +5,7 @@
 **Data:** 2026-10-01  
 **Situação:** base documental consolidada
 
-[Índice e versões](README.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md)
+[Projeto](README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md)
 
 Os 17 casos de uso abaixo descrevem os fluxos vigentes. As referências de regras são derivadas dos RF associados; os RNFs indicam as condições de qualidade aplicáveis.
 
@@ -617,4 +617,4 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 | Versão | Data | Alteração |
 |---|---|---|
-| 1.0 | 2026-10-01 | Primeira versão consolidada, incluindo todas as decisões registradas até esta publicação. |
+| 1.0 | 2026-10-01 | Primeira versão consolidada, incluindo todas as decisões registradas até esta publicação e links para a visão e a apresentação do projeto. |

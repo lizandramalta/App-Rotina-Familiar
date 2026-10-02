@@ -5,24 +5,28 @@
 **Data:** 2026-10-01  
 **Situação:** base documental consolidada
 
-[Índice e versões](README.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md)
+[Projeto](README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md)
 
 ## Documentos
 
 | Arquivo | Conteúdo |
 |---|---|
+| [Apresentação do projeto](README.md) | Propósito, público, jornada e escopo do MVP. |
+| [Visão do produto](00-visao-do-produto.md) | Contexto, objetivos, princípios, escopo e critérios de sucesso. |
+| [Índice e versões](DOCUMENTACAO.md) | Organização documental, rastreabilidade e política de versões. |
 | [Regras de negócio](01-regras-de-negocio.md) | 56 regras vigentes e suas relações com RF, RNF e UC. |
 | [Requisitos](02-requisitos.md) | 59 requisitos funcionais e 25 não funcionais, com vínculos às regras e aos casos de uso. |
 | [Especificação dos casos de uso](03-casos-de-uso.md) | 17 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições. |
 
 ## Como usar
 
-Copie os quatro arquivos para a mesma pasta do projeto. Os links são relativos e continuam funcionando quando a pasta é movida. Cada regra, requisito e caso de uso tem uma seção identificada por seu código. Em ambientes que não naveguem por links locais, o código permite localizar a referência no arquivo correspondente.
+Copie os seis arquivos para a mesma pasta do projeto. Os links são relativos e continuam funcionando quando a pasta é movida. Cada regra, requisito e caso de uso tem uma seção identificada por seu código. Em ambientes que não naveguem por links locais, o código permite localizar a referência no arquivo correspondente.
 
 Esta é uma base completa e consolidada. Não é uma lista de correções e não depende do PDF original ou do documento intermediário de revisão para descrever o comportamento vigente. Os documentos anteriores servem apenas como referência histórica.
 
 ## Rastreabilidade
 
+- **Visão → RN/RF/UC:** as tabelas de regras centrais e de escopo conectam a proposta do produto aos comportamentos detalhados. Todos os documentos têm navegação para a visão e para a apresentação do projeto.
 - **RN → RF/RNF → UC:** cada regra aponta para os requisitos relacionados e os fluxos associados.
 - **RF → RN e UC:** cada requisito funcional aponta para suas regras e os casos de uso que o realizam.
 - **RNF → RN e UC:** cada requisito não funcional aponta para as regras específicas, quando houver, e para os fluxos em que se aplica.
@@ -56,7 +60,7 @@ As relações RN–UC são derivadas de RN–RF–UC. As relações de RNF repre
 
 ## Política de versionamento
 
-1. Os quatro arquivos compõem a mesma versão documental: **1.0**.
+1. Os seis arquivos compõem a mesma versão documental: **1.0**.
 2. Em revisão futura, preserve os identificadores existentes; novos itens recebem novos códigos. Não reutilize códigos removidos para outro significado.
 3. Publique o conjunto completo em uma nova pasta de versão, preservando esta base para comparação. Atualize versão, data e histórico de todos os arquivos do conjunto.
 4. No histórico, registre os códigos afetados, a decisão e o motivo. Alterações de comportamento e suas referências devem ser atualizadas juntas.
@@ -66,4 +70,4 @@ As relações RN–UC são derivadas de RN–RF–UC. As relações de RNF repre
 
 | Versão | Data | Alteração |
 |---|---|---|
-| 1.0 | 2026-10-01 | Primeira versão consolidada, incluindo todas as decisões registradas até esta publicação. |
+| 1.0 | 2026-10-01 | Primeira versão consolidada, incluindo a visão alinhada ao MVP, a apresentação global do projeto e todas as decisões registradas até esta publicação. |
