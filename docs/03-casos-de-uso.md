@@ -1,13 +1,13 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.2  
-**Data:** 2026-10-01  
+**Versão:** 1.3  
+**Data:** 2026-10-02  
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md)
 
-Os 17 casos de uso abaixo descrevem os fluxos vigentes. As referências de regras são derivadas dos RF associados; os RNFs indicam as condições de qualidade aplicáveis.
+Os 19 casos de uso abaixo descrevem os fluxos vigentes. As referências de regras são derivadas dos RF associados; os RNFs indicam as condições de qualidade aplicáveis.
 
 [Consultar os diagramas UML](04-diagramas-de-caso-de-uso.md) — visão geral e quatro recortes por área.
 
@@ -17,10 +17,12 @@ Os 17 casos de uso abaixo descrevem os fluxos vigentes. As referências de regra
 |---|---|
 | Administrador | Gerencia membros, missões e recompensas; valida sinalizações Kids e executa as ações adultas de tarefas. |
 | Criador da Família | Administrador com identificação especial, autenticação Apple e proteção contra remoção, rebaixamento e saída; não é um quarto perfil. |
-| Membro | Perfil adulto com acesso às operações de tarefas, ao próprio perfil, à carga semanal e ao acompanhamento de missões. |
-| Kids | Consulta suas tarefas e progresso, sinaliza realização com foto opcional e acompanha missões e recompensas. |
+| Membro | Perfil adulto com acesso às operações de tarefas, ao próprio perfil, à carga diária ou semanal e ao acompanhamento de missões. |
+| Kids | Consulta tarefas e progresso diário/semanal, sinaliza com câmera opcional, edita foto/apelido próprios, consulta badges e recebe seu reconhecimento semanal. |
 | Pessoa convidada | Pessoa que ainda irá efetivar o vínculo ao perfil previamente criado usando link e senha. |
 | Serviço Apple | Sistema externo que participa da autenticação do Criador. |
+| Agendador | Dispara a apuração automática semanal, independentemente de sessão aberta. |
+| WhatsApp | Aplicativo externo em que a pessoa revisa e confirma o envio do destaque. |
 
 ## Condições comuns
 
@@ -39,14 +41,16 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 | [UC07](#uc07) | Gerenciar tarefas | [RF07](02-requisitos.md#rf07), [RF08](02-requisitos.md#rf08), [RF09](02-requisitos.md#rf09), [RF10](02-requisitos.md#rf10), [RF15](02-requisitos.md#rf15), [RF16](02-requisitos.md#rf16), [RF27](02-requisitos.md#rf27), [RF58](02-requisitos.md#rf58), [RF59](02-requisitos.md#rf59) |
 | [UC08](#uc08) | Definir recorrência de rotina | [RF13](02-requisitos.md#rf13), [RF14](02-requisitos.md#rf14) |
 | [UC09](#uc09) | Ingressar por convite | [RF42](02-requisitos.md#rf42), [RF43](02-requisitos.md#rf43), [RF44](02-requisitos.md#rf44), [RF45](02-requisitos.md#rf45), [RF46](02-requisitos.md#rf46), [RF54](02-requisitos.md#rf54) |
-| [UC10](#uc10) | Editar perfil | [RF48](02-requisitos.md#rf48) |
-| [UC11](#uc11) | Visualizar minhas tarefas e consultar o dia da família | [RF60](02-requisitos.md#rf60), [RF11](02-requisitos.md#rf11), [RF17](02-requisitos.md#rf17), [RF22](02-requisitos.md#rf22), [RF49](02-requisitos.md#rf49) |
+| [UC10](#uc10) | Editar perfil | [RF48](02-requisitos.md#rf48), [RF62](02-requisitos.md#rf62), [RF65](02-requisitos.md#rf65) |
+| [UC11](#uc11) | Visualizar minhas tarefas | [RF60](02-requisitos.md#rf60), [RF11](02-requisitos.md#rf11), [RF17](02-requisitos.md#rf17), [RF22](02-requisitos.md#rf22), [RF49](02-requisitos.md#rf49), [RF65](02-requisitos.md#rf65), [RF66](02-requisitos.md#rf66) |
 | [UC12](#uc12) | Concluir tarefa | [RF12](02-requisitos.md#rf12), [RF47](02-requisitos.md#rf47), [RF56](02-requisitos.md#rf56) |
-| [UC13](#uc13) | Visualizar carga semanal | [RF18](02-requisitos.md#rf18), [RF19](02-requisitos.md#rf19), [RF20](02-requisitos.md#rf20), [RF21](02-requisitos.md#rf21), [RF56](02-requisitos.md#rf56), [RF57](02-requisitos.md#rf57) |
-| [UC14](#uc14) | Acompanhar missões e recompensas | [RF30](02-requisitos.md#rf30), [RF31](02-requisitos.md#rf31), [RF36](02-requisitos.md#rf36), [RF58](02-requisitos.md#rf58) |
+| [UC13](#uc13) | Visualizar carga diária ou semanal | [RF18](02-requisitos.md#rf18), [RF19](02-requisitos.md#rf19), [RF20](02-requisitos.md#rf20), [RF21](02-requisitos.md#rf21), [RF56](02-requisitos.md#rf56), [RF57](02-requisitos.md#rf57), [RF66](02-requisitos.md#rf66) |
+| [UC14](#uc14) | Acompanhar missões e recompensas | [RF30](02-requisitos.md#rf30), [RF31](02-requisitos.md#rf31), [RF36](02-requisitos.md#rf36), [RF58](02-requisitos.md#rf58), [RF62](02-requisitos.md#rf62), [RF65](02-requisitos.md#rf65) |
 | [UC15](#uc15) | Sinalizar tarefa como realizada | [RF23](02-requisitos.md#rf23), [RF24](02-requisitos.md#rf24), [RF55](02-requisitos.md#rf55), [RF56](02-requisitos.md#rf56) |
 | [UC16](#uc16) | Resgatar recompensa da missão | [RF35](02-requisitos.md#rf35), [RF51](02-requisitos.md#rf51), [RF52](02-requisitos.md#rf52), [RF53](02-requisitos.md#rf53) |
 | [UC17](#uc17) | Retornar tarefa concluída para Pendente | [RF57](02-requisitos.md#rf57), [RF58](02-requisitos.md#rf58), [RF59](02-requisitos.md#rf59) |
+| [UC18](#uc18) | Gerar relatório semanal em PDF | [RF61](02-requisitos.md#rf61) |
+| [UC19](#uc19) | Apurar e compartilhar destaque semanal | [RF63](02-requisitos.md#rf63), [RF64](02-requisitos.md#rf64) |
 
 ## UC01
 
@@ -196,7 +200,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Missões e recompensas](04-diagramas-de-caso-de-uso.md#05-missoes-recompensas)
 
 **Requisitos funcionais:** [RF28](02-requisitos.md#rf28), [RF29](02-requisitos.md#rf29), [RF31](02-requisitos.md#rf31), [RF32](02-requisitos.md#rf32), [RF50](02-requisitos.md#rf50), [RF58](02-requisitos.md#rf58)  
-**Regras relacionadas:** [RN16](01-regras-de-negocio.md#rn16), [RN35](01-regras-de-negocio.md#rn35), [RN36](01-regras-de-negocio.md#rn36), [RN37](01-regras-de-negocio.md#rn37), [RN38](01-regras-de-negocio.md#rn38), [RN39](01-regras-de-negocio.md#rn39), [RN40](01-regras-de-negocio.md#rn40), [RN50](01-regras-de-negocio.md#rn50), [RN51](01-regras-de-negocio.md#rn51), [RN53](01-regras-de-negocio.md#rn53), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59)  
+**Regras relacionadas:** [RN16](01-regras-de-negocio.md#rn16), [RN35](01-regras-de-negocio.md#rn35), [RN36](01-regras-de-negocio.md#rn36), [RN37](01-regras-de-negocio.md#rn37), [RN38](01-regras-de-negocio.md#rn38), [RN39](01-regras-de-negocio.md#rn39), [RN40](01-regras-de-negocio.md#rn40), [RN50](01-regras-de-negocio.md#rn50), [RN51](01-regras-de-negocio.md#rn51), [RN53](01-regras-de-negocio.md#rn53), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59), [RN64](01-regras-de-negocio.md#rn64)  
 **Requisitos não funcionais:** [RNF01](02-requisitos.md#rnf01), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF08](02-requisitos.md#rnf08), [RNF09](02-requisitos.md#rnf09), [RNF11](02-requisitos.md#rnf11), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF14](02-requisitos.md#rnf14), [RNF22](02-requisitos.md#rnf22), [RNF25](02-requisitos.md#rnf25)
 
 **Objetivo:** criar e editar missões coletivas sem prazo, vinculadas a tarefas individuais.
@@ -375,25 +379,30 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Acesso, família e perfis](04-diagramas-de-caso-de-uso.md#02-acesso-familia-perfis)
 
-**Requisitos funcionais:** [RF48](02-requisitos.md#rf48)  
-**Regras relacionadas:** Sem RN específica; aplica-se o RF48.  
-**Requisitos não funcionais:** [RNF01](02-requisitos.md#rnf01), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF08](02-requisitos.md#rnf08), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF14](02-requisitos.md#rnf14), [RNF22](02-requisitos.md#rnf22)
+**Requisitos funcionais:** [RF48](02-requisitos.md#rf48), [RF62](02-requisitos.md#rf62), [RF65](02-requisitos.md#rf65)  
+**Regras relacionadas:** [RN63](01-regras-de-negocio.md#rn63), [RN64](01-regras-de-negocio.md#rn64), [RN33](01-regras-de-negocio.md#rn33)  
+**Requisitos não funcionais:** [RNF01](02-requisitos.md#rnf01), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF08](02-requisitos.md#rnf08), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF14](02-requisitos.md#rnf14), [RNF22](02-requisitos.md#rnf22), [RNF24](02-requisitos.md#rnf24), [RNF27](02-requisitos.md#rnf27)
 
 **Objetivo:** alterar os dados editáveis do próprio perfil.
 
-**Atores:** Administrador e Membro.
+**Atores:** Administrador, Membro e Kids.
 
 
 **Pré-condição:** perfil ativo com sessão válida.
 
 **Fluxo principal:**
 
-1. O usuário acessa seu perfil e seleciona editar.
-2. O sistema apresenta os campos permitidos.
-3. O usuário altera os dados e confirma.
+1. O usuário acessa Meu perfil pela navegação adulta ou pelo avatar/cabeçalho Kids; consulta foto, apelido e badges coletivos.
+2. Ao selecionar editar, o sistema apresenta foto opcional e etiqueta/apelido próprios.
+3. O usuário adiciona, substitui ou remove a foto e/ou altera o apelido e confirma.
 4. O sistema valida e salva as alterações.
 
-**Alternativas e exceções:** dados inválidos exigem correção; alterações sem permissão são impedidas; cancelamento antes de salvar mantém os dados anteriores.
+**Alternativas e exceções:**
+
+- Somente o titular acessa a configuração do apelido; outros membros, inclusive Administradores, podem vê-lo, mas não editá-lo.
+- Sem foto, apresentar identificação padrão. Falha de upload mantém a foto anterior e oferece nova tentativa; cancelar não salva.
+- Os badges são atribuídos coletivamente pela conclusão de missão com selo (RN64), sem edição manual. Selecionar um badge abre a missão; voltar retorna ao perfil. Sem badges, apresentar estado vazio.
+- Dados inválidos exigem correção; alterações de permissões são impedidas. Kids não podem ativar/desativar seu modo por este fluxo.
 
 **Pós-condição:** os dados permitidos estão atualizados, sem alteração indevida de permissões.
 
@@ -403,11 +412,11 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Tarefas e rotina](04-diagramas-de-caso-de-uso.md#03-tarefas-rotina) · [Participação Kids](04-diagramas-de-caso-de-uso.md#04-participacao-kids)
 
-**Requisitos funcionais:** [RF60](02-requisitos.md#rf60), [RF11](02-requisitos.md#rf11), [RF17](02-requisitos.md#rf17), [RF22](02-requisitos.md#rf22), [RF49](02-requisitos.md#rf49)  
-**Regras relacionadas:** [RN60](01-regras-de-negocio.md#rn60), [RN16](01-regras-de-negocio.md#rn16), [RN22](01-regras-de-negocio.md#rn22), [RN26](01-regras-de-negocio.md#rn26), [RN27](01-regras-de-negocio.md#rn27), [RN33](01-regras-de-negocio.md#rn33), [RN49](01-regras-de-negocio.md#rn49), [RN55](01-regras-de-negocio.md#rn55)  
+**Requisitos funcionais:** [RF60](02-requisitos.md#rf60), [RF11](02-requisitos.md#rf11), [RF17](02-requisitos.md#rf17), [RF22](02-requisitos.md#rf22), [RF49](02-requisitos.md#rf49), [RF65](02-requisitos.md#rf65), [RF66](02-requisitos.md#rf66)  
+**Regras relacionadas:** [RN60](01-regras-de-negocio.md#rn60), [RN16](01-regras-de-negocio.md#rn16), [RN22](01-regras-de-negocio.md#rn22), [RN26](01-regras-de-negocio.md#rn26), [RN27](01-regras-de-negocio.md#rn27), [RN33](01-regras-de-negocio.md#rn33), [RN49](01-regras-de-negocio.md#rn49), [RN55](01-regras-de-negocio.md#rn55), [RN28](01-regras-de-negocio.md#rn28), [RN61](01-regras-de-negocio.md#rn61), [RN63](01-regras-de-negocio.md#rn63)  
 **Requisitos não funcionais:** [RNF01](02-requisitos.md#rnf01), [RNF02](02-requisitos.md#rnf02), [RNF04](02-requisitos.md#rnf04), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF08](02-requisitos.md#rnf08), [RNF09](02-requisitos.md#rnf09), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF14](02-requisitos.md#rnf14), [RNF22](02-requisitos.md#rnf22)
 
-**Objetivo:** consultar as próprias tarefas e o próprio progresso diário; para adultos, também consultar as tarefas e o progresso coletivo pela área Família.
+**Objetivo:** consultar as próprias tarefas e o próprio progresso diário ou semanal; para adultos, também consultar as tarefas e o progresso coletivo pela área Família.
 
 **Atores:** Administrador, Membro e Kids.
 
@@ -419,29 +428,31 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 1. O usuário abre o checklist.
 2. O sistema seleciona o dia atual por padrão.
 3. Apresenta as tarefas e os respectivos estados, respeitando as permissões do perfil.
-4. Apresenta o progresso diário do usuário, independentemente de seu perfil.
-5. O usuário navega pelo carrossel.
-6. O sistema apresenta as tarefas e o progresso da data selecionada.
+4. Apresenta o progresso do usuário e o seletor Dia/Semana.
+5. O usuário escolhe o modo e a data de referência, navegando entre dias ou semanas permitidos.
+6. O sistema apresenta tarefas e progresso do período, contando concluídas sobre o total previsto conforme RN61.
 
 **Alternativas e exceções:**
 
 - O intervalo permitido vai da data de criação da família até o último dia do mês corrente, inclusive.
 - Dias futuros do mês corrente podem ser consultados. Datas anteriores à criação e meses seguintes são bloqueados.
+- No modo Semana, usar segunda–domingo e informar limites de borda; o percentual é calculado a partir dos totais, sem média dos percentuais diários.
+- Kids alternam diretamente entre Minhas tarefas e Missões e conquistas pelo tab bar de duas abas (RF65).
 - Dias sem tarefas são apresentados como tal, sem registros fictícios de conclusão.
 - Na mudança de dia, o checklist passa a abrir no novo dia; tarefas não realizadas não geram penalidades.
-- Kids visualizam seu próprio progresso diário, mas não a carga semanal da família.
+- Kids visualizam seu próprio progresso diário ou semanal, mas não a carga diária ou semanal da família.
 
 **Consulta complementar — Família (Administrador e Membro):**
 
 1. O adulto seleciona Família na navegação principal.
-2. O sistema abre o dia atual e apresenta o progresso coletivo: tarefas concluídas dividido pelo total de tarefas daquele dia, contando cada tarefa individual uma vez, inclusive tarefas compartilhadas ou sem responsável.
-3. O adulto navega pelo mesmo intervalo do carrossel de dias do checklist pessoal; o progresso acompanha a data selecionada.
-4. Ao abrir as tarefas da família, o sistema mantém a data e permite consultar tarefas de outras pessoas e sem responsável. Gerenciar e concluir continuam sujeitos a UC07 e UC12.
-5. A área oferece acesso à carga semanal por UC13. Somente Administradores também acessam gerenciamento de membros (UC02) e confirmações Kids (UC03).
+2. O sistema abre o dia atual e oferece Dia/Semana; apresenta concluídas/total de tarefas previstas no período, contando cada tarefa uma vez, inclusive compartilhadas ou sem responsável.
+3. O adulto seleciona dia ou semana dentro dos limites de RN49 e RN61; o progresso acompanha o período.
+4. Ao abrir as tarefas da família, o sistema mantém o período e permite consultar tarefas de outras pessoas e sem responsável. Gerenciar e concluir continuam sujeitos a UC07 e UC12.
+5. A área oferece acesso à carga diária ou semanal por UC13 e ao PDF semanal por UC18. Somente Administradores também acessam gerenciamento de membros (UC02) e confirmações Kids (UC03).
 
-Sem tarefas no dia, o sistema informa essa condição sem divisão por zero. Tarefas aguardando confirmação não entram nas concluídas. Conclusão, reabertura e exclusão autorizadas atualizam o progresso. Kids não acessam esta área. UC11 também abrange a consulta diária familiar adulta.
+Sem tarefas no período, o sistema informa essa condição sem divisão por zero. Tarefas aguardando confirmação não entram nas concluídas. Conclusão, reabertura e exclusão autorizadas atualizam o progresso. Kids não acessam esta área. UC11 também abrange a consulta diária ou semanal familiar adulta.
 
-**Pós-condição:** o usuário consulta uma data permitida sem alterar o estado das tarefas.
+**Pós-condição:** o usuário consulta um período permitido sem alterar o estado das tarefas.
 
 ## UC12
 
@@ -482,12 +493,12 @@ Sem tarefas no dia, o sistema informa essa condição sem divisão por zero. Tar
 
 ## UC13
 
-**Nome:** Visualizar carga semanal
+**Nome:** Visualizar carga diária ou semanal
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Tarefas e rotina](04-diagramas-de-caso-de-uso.md#03-tarefas-rotina)
 
-**Requisitos funcionais:** [RF18](02-requisitos.md#rf18), [RF19](02-requisitos.md#rf19), [RF20](02-requisitos.md#rf20), [RF21](02-requisitos.md#rf21), [RF56](02-requisitos.md#rf56), [RF57](02-requisitos.md#rf57)  
-**Regras relacionadas:** [RN26](01-regras-de-negocio.md#rn26), [RN28](01-regras-de-negocio.md#rn28), [RN30](01-regras-de-negocio.md#rn30), [RN31](01-regras-de-negocio.md#rn31), [RN33](01-regras-de-negocio.md#rn33), [RN34](01-regras-de-negocio.md#rn34), [RN35](01-regras-de-negocio.md#rn35), [RN55](01-regras-de-negocio.md#rn55), [RN56](01-regras-de-negocio.md#rn56), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58)  
+**Requisitos funcionais:** [RF18](02-requisitos.md#rf18), [RF19](02-requisitos.md#rf19), [RF20](02-requisitos.md#rf20), [RF21](02-requisitos.md#rf21), [RF56](02-requisitos.md#rf56), [RF57](02-requisitos.md#rf57), [RF66](02-requisitos.md#rf66)  
+**Regras relacionadas:** [RN26](01-regras-de-negocio.md#rn26), [RN28](01-regras-de-negocio.md#rn28), [RN30](01-regras-de-negocio.md#rn30), [RN31](01-regras-de-negocio.md#rn31), [RN33](01-regras-de-negocio.md#rn33), [RN34](01-regras-de-negocio.md#rn34), [RN35](01-regras-de-negocio.md#rn35), [RN55](01-regras-de-negocio.md#rn55), [RN56](01-regras-de-negocio.md#rn56), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61)  
 **Requisitos não funcionais:** [RNF01](02-requisitos.md#rnf01), [RNF03](02-requisitos.md#rnf03), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF08](02-requisitos.md#rnf08), [RNF09](02-requisitos.md#rnf09), [RNF10](02-requisitos.md#rnf10), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF14](02-requisitos.md#rnf14), [RNF22](02-requisitos.md#rnf22), [RNF25](02-requisitos.md#rnf25)
 
 **Objetivo:** acompanhar a distribuição da carga entre os membros da família.
@@ -495,12 +506,12 @@ Sem tarefas no dia, o sistema informa essa condição sem divisão por zero. Tar
 **Atores:** Administrador e Membro.
 
 
-**Pré-condição:** permissão de consulta da carga semanal.
+**Pré-condição:** permissão de consulta da carga diária ou semanal.
 
 **Fluxo principal:**
 
-1. O usuário acessa a carga semanal.
-2. O sistema considera a semana de segunda-feira a domingo.
+1. O usuário acessa a carga pela área Família e seleciona Dia ou Semana e uma data de referência.
+2. O sistema preserva o período da origem; para Semana, considera segunda-feira a domingo.
 3. Identifica as tarefas com conclusão válida no período.
 4. Soma o peso integral de cada tarefa para cada responsável registrado em sua conclusão.
 5. Calcula a carga total da família somando as cargas individuais.
@@ -510,10 +521,12 @@ Sem tarefas no dia, o sistema informa essa condição sem divisão por zero. Tar
 **Alternativas e exceções:**
 
 - Tarefas pendentes ou aguardando confirmação não entram no cálculo.
-- A reabertura autorizada retira o peso de todos os responsáveis da semana da conclusão desfeita, inclusive se for uma semana anterior.
+- A reabertura autorizada retira o peso de todos os responsáveis do dia e da semana da conclusão desfeita, inclusive se for uma semana anterior.
 - Uma tarefa concluída não pode ser excluída diretamente. A exclusão depois da reabertura não produz nova subtração de carga.
-- Sem carga na semana, o sistema informa a ausência de conclusões e não divide por zero.
+- Sem carga no período, o sistema informa a ausência de conclusões e não divide por zero.
 - Kids não podem acessar esta visualização.
+- Gerar relatório abre UC18 com a semana correspondente à data selecionada, mesmo se a consulta estava em Dia.
+- O primeiro lugar semanal é apurado e consultado separadamente em UC19.
 
 **Pós-condição:** a carga corresponde às conclusões válidas. Exemplo: uma tarefa de peso 3 com dois responsáveis adiciona 3 para cada um e 6 à carga total da família.
 
@@ -523,8 +536,8 @@ Sem tarefas no dia, o sistema informa essa condição sem divisão por zero. Tar
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Missões e recompensas](04-diagramas-de-caso-de-uso.md#05-missoes-recompensas)
 
-**Requisitos funcionais:** [RF30](02-requisitos.md#rf30), [RF31](02-requisitos.md#rf31), [RF36](02-requisitos.md#rf36), [RF58](02-requisitos.md#rf58)  
-**Regras relacionadas:** [RN26](01-regras-de-negocio.md#rn26), [RN35](01-regras-de-negocio.md#rn35), [RN36](01-regras-de-negocio.md#rn36), [RN38](01-regras-de-negocio.md#rn38), [RN39](01-regras-de-negocio.md#rn39), [RN43](01-regras-de-negocio.md#rn43), [RN51](01-regras-de-negocio.md#rn51), [RN52](01-regras-de-negocio.md#rn52), [RN53](01-regras-de-negocio.md#rn53), [RN55](01-regras-de-negocio.md#rn55), [RN58](01-regras-de-negocio.md#rn58)  
+**Requisitos funcionais:** [RF30](02-requisitos.md#rf30), [RF31](02-requisitos.md#rf31), [RF36](02-requisitos.md#rf36), [RF58](02-requisitos.md#rf58), [RF62](02-requisitos.md#rf62), [RF65](02-requisitos.md#rf65)  
+**Regras relacionadas:** [RN26](01-regras-de-negocio.md#rn26), [RN35](01-regras-de-negocio.md#rn35), [RN36](01-regras-de-negocio.md#rn36), [RN38](01-regras-de-negocio.md#rn38), [RN39](01-regras-de-negocio.md#rn39), [RN43](01-regras-de-negocio.md#rn43), [RN51](01-regras-de-negocio.md#rn51), [RN52](01-regras-de-negocio.md#rn52), [RN53](01-regras-de-negocio.md#rn53), [RN55](01-regras-de-negocio.md#rn55), [RN58](01-regras-de-negocio.md#rn58), [RN33](01-regras-de-negocio.md#rn33), [RN63](01-regras-de-negocio.md#rn63), [RN64](01-regras-de-negocio.md#rn64)  
 **Requisitos não funcionais:** [RNF01](02-requisitos.md#rnf01), [RNF04](02-requisitos.md#rnf04), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF08](02-requisitos.md#rnf08), [RNF09](02-requisitos.md#rnf09), [RNF11](02-requisitos.md#rnf11), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF14](02-requisitos.md#rnf14), [RNF22](02-requisitos.md#rnf22), [RNF23](02-requisitos.md#rnf23), [RNF25](02-requisitos.md#rnf25)
 
 **Objetivo:** consultar o progresso das missões coletivas e suas recompensas.
@@ -536,11 +549,11 @@ Sem tarefas no dia, o sistema informa essa condição sem divisão por zero. Tar
 
 **Fluxo principal:**
 
-1. O usuário acessa as missões e seleciona uma delas.
+1. O usuário acessa Missões e conquistas diretamente na navegação principal adulta ou no tab bar Kids e seleciona uma missão.
 2. O sistema apresenta seus dados, tarefas vinculadas e estado, sem prazo ou data de expiração.
 3. Calcula o progresso dividindo a quantidade de tarefas vinculadas concluídas pelo total de tarefas vinculadas e multiplicando por 100.
 4. Apresenta a missão em andamento enquanto houver tarefas não concluídas.
-5. Quando todas estão concluídas, apresenta a missão concluída e a situação do resgate.
+5. Quando todas estão concluídas, apresenta a missão concluída, a situação do resgate e concede o selo opcional coletivamente aos perfis, exibindo o badge em Meu perfil conforme RN64.
 6. Se a recompensa já tiver sido aceita, apresenta o item registrado.
 
 **Alternativas e exceções:**
@@ -574,14 +587,14 @@ Sem tarefas no dia, o sistema informa essa condição sem divisão por zero. Tar
 **Fluxo principal:**
 
 1. A criança seleciona a tarefa e informa que realizou sua parte.
-2. O sistema oferece a opção de anexar uma foto.
+2. Ao escolher adicionar foto, o aplicativo abre diretamente a câmera, solicitando permissão se necessário. A criança captura e revisa a foto, podendo refazer ou descartar.
 3. A criança envia a sinalização, com ou sem foto.
 4. O sistema registra quem sinalizou e altera a tarefa para Aguardando confirmação.
 5. O sistema disponibiliza a sinalização e a foto, quando existente, para avaliação do Administrador.
 
 **Alternativas e exceções:**
 
-- A foto é opcional; não anexá-la não impede enviar a sinalização.
+- A foto é opcional; não anexá-la não impede enviar a sinalização. Negativa de permissão, câmera indisponível ou captura cancelada retornam à sinalização com opção de continuar sem foto. Não há seletor câmera/galeria.
 - Se o envio de uma foto falhar, o sistema informa que ela não foi salva e permite nova tentativa ou envio da sinalização sem foto.
 - Kids não podem sinalizar tarefas das quais não sejam responsáveis.
 - Tarefas já concluídas ou aguardando confirmação não recebem nova transição de status.
@@ -645,10 +658,10 @@ Sem tarefas no dia, o sistema informa essa condição sem divisão por zero. Tar
 
 1. O Administrador seleciona a tarefa e solicita o retorno para Pendente.
 2. O sistema verifica o perfil, o estado e os vínculos da tarefa.
-3. Informa que a operação desfaz a conclusão para todos os responsáveis e altera a carga semanal e o progresso das missões em andamento.
+3. Informa que a operação desfaz a conclusão para todos os responsáveis e altera a carga diária ou semanal e o progresso das missões em andamento.
 4. O Administrador confirma.
 5. O sistema retorna a tarefa para Pendente, mantendo seus responsáveis.
-6. O sistema retira o peso anteriormente creditado a cada responsável da semana correspondente.
+6. O sistema retira o peso anteriormente creditado a cada responsável do dia e da semana correspondentes.
 7. Recalcula o progresso das missões em andamento vinculadas à tarefa.
 
 **Alternativas e exceções:**
@@ -662,10 +675,85 @@ Sem tarefas no dia, o sistema informa essa condição sem divisão por zero. Tar
 **Pós-condição:** tarefa pendente para todos os responsáveis, sem contribuição de sua conclusão anterior para a carga ou o progresso. O histórico da operação é preservado para consistência dos registros.
 
 
+## UC18
+
+**Nome:** Gerar relatório semanal em PDF
+
+**Diagramas:** [Visão geral](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Tarefas e rotina](04-diagramas-de-caso-de-uso.md#03-tarefas-rotina)
+
+**Requisitos funcionais:** [RF61](02-requisitos.md#rf61)  
+**Regras relacionadas:** [RN62](01-regras-de-negocio.md#rn62)  
+**Requisitos não funcionais:** RNF05–08, RNF10, RNF12–13, RNF22, RNF26–27.
+
+**Objetivo:** exportar carga e progresso familiar de uma semana em PDF.
+
+**Atores:** Administrador e Membro.
+
+**Pré-condição:** sessão válida e acesso à família; semana atual ou passada com interseção com a existência da família.
+
+**Fluxo principal:**
+
+1. O adulto aciona Gerar relatório em Minha família ou Carga e abre TEL-051.
+2. Seleciona uma semana de segunda a domingo; a data da origem sugere a semana correspondente.
+3. O sistema identifica o período e, se atual, indica que o relatório é parcial até o momento da geração.
+4. O adulto confirma gerar. O sistema obtém os dados de forma consistente e monta gráficos de carga semanal por membro e progresso total da família, com concluídas/total e percentual.
+5. Inclui tabela com o peso total creditado e o número de tarefas realizadas por membro, período, família, geração e explicação das métricas e do crédito compartilhado (RN62).
+6. Disponibiliza o PDF para visualizar, salvar ou compartilhar por ação do usuário.
+
+**Alternativas e exceções:**
+
+- Sem dados, gerar com zeros e indicação “Sem tarefas”, sem divisão por zero.
+- Semana futura é impedida. Semana da criação informa a ausência de registros anteriores à criação.
+- Falha de geração informa erro e permite tentar de novo, preservando seleção; não apresentar arquivo incompleto.
+- Cancelar geração ou compartilhamento retorna à origem sem alterar tarefas; abrir interface externa não confirma envio.
+- Kids e usuários sem acesso à família não podem gerar o relatório.
+- Alterações posteriores de tarefas não modificam um arquivo exportado; gerar novamente para consultar os valores atualizados.
+
+**Pós-condição:** PDF referente ao período e ao momento de geração disponível, ou falha/cancelamento informado sem alterações nos dados da rotina.
+
+## UC19
+
+**Nome:** Apurar e compartilhar destaque semanal
+
+**Diagramas:** [Visão geral](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Destaque semanal](04-diagramas-de-caso-de-uso.md#06-destaque-semanal)
+
+**Requisitos funcionais:** [RF63](02-requisitos.md#rf63), [RF64](02-requisitos.md#rf64)  
+**Regras relacionadas:** [RN28](01-regras-de-negocio.md#rn28), [RN30](01-regras-de-negocio.md#rn30), [RN65](01-regras-de-negocio.md#rn65)  
+**Requisitos não funcionais:** RNF01, RNF04–08, RNF10, RNF12–13, RNF22, RNF26–27.
+
+**Objetivo:** reconhecer o primeiro lugar em pontos da semana encerrada e incentivar convivência familiar.
+
+**Atores:** Agendador; pessoa reconhecida (Administrador, Membro ou Kids); WhatsApp no compartilhamento opcional.
+
+**Pré-condição:** semana anterior encerrada no fuso de referência comum; consulta exige sessão válida do reconhecido. A apuração automática independe de sessão aberta.
+
+**Fluxo principal:**
+
+1. Na virada para segunda-feira, o Agendador inicia a apuração da semana anterior de segunda a domingo.
+2. O sistema soma os pesos de conclusões válidas por responsável final, segundo RN30 e RN65.
+3. Identifica a maior pontuação positiva. Em empate, reconhece todos os empatados no primeiro lugar.
+4. Registra o resultado e notifica cada pessoa reconhecida sem duplicar processamento ou notificação em retentativas.
+5. A pessoa abre a notificação ou o acesso ao destaque em Minhas tarefas; TEL-052 apresenta período, pontos e tarefas realizadas.
+6. A tela convida: “Mande para sua família e sugira algo para vocês fazerem juntos.”
+7. Se escolher compartilhar, o sistema prepara mensagem editável e abre o WhatsApp para a pessoa escolher o destinatário, revisar e confirmar o envio.
+
+**Alternativas e exceções:**
+
+- Sem pontos positivos, registrar ausência de vencedor, conforme premissa RN65.
+- Falha na apuração permite retentativa idempotente; não publicar resultado incompleto.
+- Sem permissão de notificação externa ou falha de entrega, o destaque continua disponível no app.
+- Sem sessão, concluir o acesso e revalidar a titularidade antes de mostrar o resultado; usuário removido não acessa.
+- Sem WhatsApp, oferecer copiar mensagem. Cancelar ou voltar não desfaz o reconhecimento e não indica envio.
+- Kids reconhecidos acessam a variante apropriada sem ganhar acesso à carga ou ao relatório familiar.
+- Fuso/horário operacional e revisão após reabertura posterior seguem as pendências de RN65.
+
+**Pós-condição:** resultado semanal registrado e acessível ao reconhecido; compartilhamento é opcional e o envio é controlado pelo usuário no aplicativo externo.
+
 ## Histórico de versões
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.3 | 2026-10-02 | Duas abas Kids, câmera direta, foto/apelido e badges, progresso/carga Dia/Semana, PDF semanal e reconhecimento com WhatsApp; RN61–65, RF61–66, RNF26–27 e UC18–19. Empates e visibilidade do apelido confirmados. |
 | 1.2 | 2026-10-01 | Área Família na navegação adulta, progresso coletivo diário e consulta por carrossel: RN60, RF60 e UC11. Design em elaboração na versão 1.0. |
 | 1.1 | 2026-10-01 | Recuperação do mesmo perfil por novo convite e renovação sem expiração temporal, com revogação preservada: RN47, RF41, RF46, RF54, RNF22, UC02 e UC09. |
 | 1.0 | 2026-10-01 | Primeira versão consolidada, incluindo todas as decisões registradas até esta publicação e links para a visão e a apresentação do projeto. |

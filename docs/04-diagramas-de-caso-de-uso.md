@@ -1,13 +1,13 @@
 # Diagramas de caso de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão de referência:** 1.2  
-**Data:** 2026-10-01  
+**Versão de referência:** 1.3  
+**Data:** 2026-10-02  
 **Situação:** complemento visual da base documental
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice documental](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Especificação dos casos de uso](03-casos-de-uso.md) · [Screen map](design/screen-map.md)
 
-Os cinco diagramas representam os 17 casos de uso da versão 1.2. Os códigos, nomes e permissões seguem a especificação textual, que continua sendo a referência para pré-condições, fluxos, exceções e resultados. A visão geral reúne todo o escopo; os recortes permitem ler cada área em maior detalhe. Casos repetidos em mais de um desenho têm o mesmo significado.
+Os seis diagramas representam os 19 casos de uso da versão 1.3. Os códigos, nomes e permissões seguem a especificação textual, que continua sendo a referência para pré-condições, fluxos, exceções e resultados. A visão geral reúne todo o escopo; os recortes permitem ler cada área em maior detalhe. Casos repetidos em mais de um desenho têm o mesmo significado.
 
 ## Como ler
 
@@ -30,12 +30,13 @@ Administrador e Membro têm associações explícitas; não foi criada uma heran
 - [Tarefas e rotina](#03-tarefas-rotina)
 - [Participação Kids](#04-participacao-kids)
 - [Missões e recompensas](#05-missoes-recompensas)
+- [Destaque semanal](#06-destaque-semanal)
 
 <a id="01-visao-geral"></a>
 
 ## Visão geral do sistema
 
-Mapa completo dos 17 casos de uso, agrupados por área. Por ser maior, abra o SVG para ampliar; os diagramas seguintes oferecem recortes para leitura cotidiana.
+Mapa completo dos 19 casos de uso, agrupados por área. Por ser maior, abra o SVG para ampliar; os diagramas seguintes oferecem recortes para leitura cotidiana.
 
 ![Diagrama UML — Visão geral do sistema](diagramas/casos-de-uso/01-visao-geral.svg)
 
@@ -55,17 +56,19 @@ Mapa completo dos 17 casos de uso, agrupados por área. Por ser maior, abra o SV
 | [UC10](03-casos-de-uso.md#uc10) | Editar perfil |
 | [UC11](03-casos-de-uso.md#uc11) | Visualizar minhas tarefas |
 | [UC12](03-casos-de-uso.md#uc12) | Concluir tarefa |
-| [UC13](03-casos-de-uso.md#uc13) | Visualizar carga semanal |
+| [UC13](03-casos-de-uso.md#uc13) | Visualizar carga diária ou semanal |
 | [UC14](03-casos-de-uso.md#uc14) | Acompanhar missões e recompensas |
 | [UC15](03-casos-de-uso.md#uc15) | Sinalizar tarefa como realizada |
 | [UC16](03-casos-de-uso.md#uc16) | Resgatar recompensa da missão |
 | [UC17](03-casos-de-uso.md#uc17) | Retornar tarefa concluída para Pendente |
+| [UC18](03-casos-de-uso.md#uc18) | Gerar relatório semanal em PDF |
+| [UC19](03-casos-de-uso.md#uc19) | Apurar e compartilhar destaque semanal |
 
 <a id="02-acesso-familia-perfis"></a>
 
 ## Acesso, família e perfis
 
-Distingue a entrada do Criador via Apple, o ingresso da pessoa convidada e a administração dos perfis. O serviço Apple participa somente da autenticação. Editar o próprio perfil (UC10) difere de gerenciar membros (UC02).
+Distingue a entrada do Criador via Apple, o ingresso da pessoa convidada e a administração dos perfis. O serviço Apple participa somente da autenticação. Editar o próprio perfil (UC10) inclui Kids, foto opcional e apelido exclusivo do titular e difere de gerenciar membros (UC02).
 
 ![Diagrama UML — Acesso, família e perfis](diagramas/casos-de-uso/02-acesso-familia-perfis.svg)
 
@@ -95,8 +98,9 @@ Mostra as operações compartilhadas por Administrador e Membro e as consultas p
 | [UC08](03-casos-de-uso.md#uc08) | Definir recorrência de rotina |
 | [UC11](03-casos-de-uso.md#uc11) | Visualizar minhas tarefas |
 | [UC12](03-casos-de-uso.md#uc12) | Concluir tarefa |
-| [UC13](03-casos-de-uso.md#uc13) | Visualizar carga semanal |
+| [UC13](03-casos-de-uso.md#uc13) | Visualizar carga diária ou semanal |
 | [UC17](03-casos-de-uso.md#uc17) | Retornar tarefa concluída para Pendente |
+| [UC18](03-casos-de-uso.md#uc18) | Gerar relatório semanal em PDF |
 
 <a id="04-participacao-kids"></a>
 
@@ -132,6 +136,16 @@ Separa a administração de missões e itens da roleta, a consulta por todos os 
 | [UC14](03-casos-de-uso.md#uc14) | Acompanhar missões e recompensas |
 | [UC16](03-casos-de-uso.md#uc16) | Resgatar recompensa da missão |
 
+<a id="06-destaque-semanal"></a>
+
+## Destaque semanal
+
+O Agendador inicia a apuração sem depender de sessão aberta. Administrador, Membro e Kids participam da consulta e do compartilhamento quando reconhecidos. WhatsApp recebe a mensagem somente por ação da pessoa; empate reconhece todos os primeiros colocados.
+
+![Diagrama UML — Destaque semanal](diagramas/casos-de-uso/06-destaque-semanal.svg)
+
+[Abrir SVG](diagramas/casos-de-uso/06-destaque-semanal.svg) · [Fonte PlantUML](diagramas/casos-de-uso/06-destaque-semanal.puml) · [UC19](03-casos-de-uso.md#uc19)
+
 ## Manutenção
 
 Edite a fonte `.puml` correspondente e regenere os SVGs com PlantUML e Graphviz disponíveis localmente. As imagens desta revisão foram geradas com PlantUML 1.2025.2. A partir da raiz do repositório:
@@ -146,9 +160,10 @@ Ao alterar um UC, confira sua presença na visão geral e em todos os recortes l
 
 | Versão de referência | Data | Alteração |
 |---|---|---|
+| 1.3 | 2026-10-02 | Duas abas Kids, câmera direta, foto/apelido e badges, progresso/carga Dia/Semana, PDF semanal e reconhecimento com WhatsApp; RN61–65, RF61–66, RNF26–27 e UC18–19. Empates e visibilidade do apelido confirmados. |
 | 1.2 | 2026-10-01 | Área Família na navegação adulta, progresso coletivo diário e consulta por carrossel: RN60, RF60 e UC11. Design em elaboração na versão 1.0. |
 | 1.1 | 2026-10-01 | Recuperação do mesmo perfil por novo convite e renovação sem expiração temporal, com revogação preservada: RN47, RF41, RF46, RF54, RNF22, UC02 e UC09. |
 | 1.0 | 2026-10-01 | Complemento visual: visão geral e quatro recortes dos 17 UCs, sem alteração de escopo ou comportamento. |
 
 
-UC11 abrange a consulta diária pessoal e a área Família para adultos, conforme a especificação textual. A separação de telas por perfil está no screen map.
+UC11 abrange a consulta diária ou semanal pessoal e a área Família para adultos, conforme a especificação textual. A separação de telas por perfil está no screen map.

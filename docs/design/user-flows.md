@@ -2,9 +2,9 @@
 
 **Projeto:** App de Organização Familiar — MVP  
 **Versão dos fluxos:** 1.0  
-**Base funcional:** 1.2 — estável  
-**Screen map:** 1.0 — estável  
-**Data:** 2026-10-01  
+**Base funcional:** 1.3  
+**Screen map:** 1.0 — revisão de 2026-10-02  
+**Data:** 2026-10-02  
 **Situação:** primeira versão para revisão de design
 
 [Projeto](../../README.md) · [Índice documental](../DOCUMENTACAO.md) · [Screen map](screen-map.md) · [Regras](../01-regras-de-negocio.md) · [Requisitos](../02-requisitos.md) · [Casos de uso](../03-casos-de-uso.md)
@@ -15,9 +15,9 @@ Cada fluxo representa um objetivo do usuário e usa as telas `TEL` e os modais `
 
 Nos diagramas, retângulos representam telas ou ações, losangos representam decisões e formas arredondadas representam resultados ou pontos de entrada/saída. Um nó de ação ou resultado não cria uma tela adicional. As setas mostram a sequência dentro daquele objetivo. A condição escrita na seta determina o caminho.
 
-**Minhas tarefas, Meu perfil, Missões e conquistas e Família são destinos independentes da navegação principal adulta.** Minhas tarefas é o destino inicial após acesso. Os fluxos iniciados em Família, Meu perfil ou Missões não passam por Minhas tarefas. Kids mantêm a experiência própria definida no screen map.
+**Minhas tarefas, Meu perfil, Missões e conquistas e Família são destinos independentes da navegação principal adulta.** Minhas tarefas é o destino inicial após acesso. Os fluxos iniciados em Família, Meu perfil ou Missões não passam por Minhas tarefas. Kids possuem duas abas independentes: Minhas tarefas e Missões e conquistas; Meu perfil é acessado pelo avatar/cabeçalho.
 
-O detalhamento traduz a base estável em caminhos para design; não altera regras ou permissões. Falhas e retornos comuns são definidos abaixo e se aplicam a todos os diagramas, mesmo quando não repetidos em cada desenho.
+O detalhamento traduz a base 1.3 em caminhos para design; premissas pendentes estão identificadas nas regras e no índice documental. Falhas e retornos comuns são definidos abaixo e se aplicam a todos os diagramas, mesmo quando não repetidos em cada desenho.
 
 ## Condições comuns
 
@@ -42,16 +42,18 @@ Referências transversais: RNF01, RNF05–13 e RNF17–25, conforme a operação
 | [UF-01](#uf-01) | Criar família ou retornar como Criador | Criador | UC01, UC04 |
 | [UF-02](#uf-02) | Convidar e ingressar | Administrador e pessoa convidada | UC02, UC09 |
 | [UF-03](#uf-03) | Recuperar acesso ao perfil | Usuário sem sessão e Administrador | UC02, UC04, UC09 |
-| [UF-04](#uf-04) | Consultar tarefas e progresso diário | Todos; área Família somente adultos | UC11 |
+| [UF-04](#uf-04) | Consultar tarefas e progresso diário ou semanal | Todos; área Família somente adultos | UC11 |
 | [UF-05](#uf-05) | Criar ou editar tarefa e rotina | Administrador, Membro | UC07, UC08 |
 | [UF-06](#uf-06) | Concluir tarefa mantendo ou assumindo responsáveis | Administrador, Membro | UC12 |
 | [UF-07](#uf-07) | Sinalizar e validar tarefa Kids | Kids e Administrador | UC15, UC03 |
 | [UF-08](#uf-08) | Reabrir e excluir tarefa | Administrador; exclusão também Membro | UC17, UC07 |
-| [UF-09](#uf-09) | Consultar carga semanal | Administrador, Membro | UC13 |
+| [UF-09](#uf-09) | Consultar carga diária ou semanal | Administrador, Membro | UC13 |
 | [UF-10](#uf-10) | Criar, editar e acompanhar missão | Gestão: Administrador; consulta: todos | UC05, UC14 |
 | [UF-11](#uf-11) | Cadastrar item e resgatar recompensa | Administrador | UC06, UC16 |
 | [UF-12](#uf-12) | Gerenciar membros e permissões | Administrador | UC02 |
-| [UF-13](#uf-13) | Editar o próprio perfil | Administrador, Membro | UC10 |
+| [UF-13](#uf-13) | Editar o próprio perfil e consultar badges | Todos | UC10 |
+| [UF-14](#uf-14) | Gerar relatório semanal PDF | Administrador, Membro | UC18 |
+| [UF-15](#uf-15) | Receber e compartilhar destaque semanal | Sistema e reconhecido, inclusive Kids | UC19 |
 
 <a id="uf-01"></a>
 
@@ -145,36 +147,36 @@ flowchart TD
 
 <a id="uf-04"></a>
 
-## UF-04 — Consultar tarefas e progresso diário
+## UF-04 — Consultar tarefas e progresso diário ou semanal
 
-**Objetivo:** consultar o dia pessoal ou o dia da família e abrir uma tarefa permitida.  
+**Objetivo:** consultar o período pessoal ou o período da família e abrir uma tarefa permitida.  
 **Entrada:** Minhas tarefas ou Família, escolhidas independentemente.  
-**Referências:** [UC11](../03-casos-de-uso.md#uc11); RN26, RN49, RN60; RF11, RF17, RF22, RF49, RF60.
+**Referências:** [UC11](../03-casos-de-uso.md#uc11); RN26, RN49, RN60–61; RF11, RF17, RF22, RF49, RF60, RF66.
 
 ```mermaid
 flowchart TD
-    A(["Escolher visão diária"]) --> B{"Qual visão?"}
+    A(["Escolher visão e período"]) --> B{"Qual visão?"}
     B -->|Pessoal adulto| C["TEL-010 · Minhas tarefas"]
     B -->|Pessoal Kids| D["TEL-040 · Minhas tarefas Kids"]
     B -->|Familiar adulto| E["TEL-050 · Família"]
-    C --> F["Abrir no dia atual ou selecionar outra data"]
+    C --> F["Abrir hoje; escolher Dia ou Semana e data de referência"]
     D --> F
     E --> F
-    F --> G{"Data no intervalo permitido?"}
+    F --> G{"Período no intervalo permitido?"}
     G -->|Não| H["Impedir seleção e manter data válida"]
     H --> F
-    G -->|Sim| I{"Há tarefas nessa visão e data?"}
+    G -->|Sim| I{"Há tarefas nessa visão e período?"}
     I -->|Não| J(["Mostrar Sem tarefas"])
     I -->|Sim| K["Mostrar tarefas ou resumo e progresso da visão escolhida"]
     K --> L{"Abrir uma tarefa?"}
     L -->|Não| M(["Permanecer na consulta"])
     L -->|Pessoal adulto| N["TEL-012 · Detalhe da tarefa"]
     L -->|Pessoal Kids| O["TEL-041 · Detalhe da minha tarefa"]
-    L -->|Família| P["TEL-011 · Preservar data e selecionar tarefa"]
+    L -->|Família| P["TEL-011 · Preservar período e selecionar tarefa"]
     P --> N
 ```
 
-O intervalo vai da criação da família ao último dia do mês corrente, incluindo dias futuros desse mês. Na visão familiar, cada tarefa do dia conta uma vez no total e, se concluída, uma vez no numerador; peso e quantidade de responsáveis não multiplicam o progresso. Tarefas sem responsável entram no total. Aguardando confirmação não conta como concluída.
+Dia/Semana mantém a data de referência. A semana vai de segunda a domingo; semanas de borda indicam os dias disponíveis. Progresso semanal usa concluídas/total da semana, não a média dos percentuais diários. O intervalo vai da criação da família ao último dia do mês corrente, incluindo dias futuros desse mês. Na visão familiar, cada tarefa prevista no período conta uma vez no total e, se concluída, uma vez no numerador; peso e quantidade de responsáveis não multiplicam o progresso. Tarefas sem responsável entram no total. Aguardando confirmação não conta como concluída.
 
 **Continuação:** adultos podem seguir UF-05, UF-06 ou UF-08 a partir das telas permitidas; Kids seguem UF-07 somente para tarefa própria pendente. Voltar do detalhe restaura a origem, que pode ser uma lista pessoal, familiar ou missão. Consultar outra data não altera tarefas. Ao abrir o checklist em um novo dia, o padrão volta a ser o dia atual.
 
@@ -236,7 +238,7 @@ flowchart TD
     L -->|Falha ou outra conclusão| N["Informar resultado e consultar estado atual"]
 ```
 
-As escolhas de responsável só são efetivadas com a conclusão confirmada. Cada responsável final recebe o peso integral; quem apenas executou a ação não recebe crédito se não for responsável. A tarefa conta uma vez no progresso de cada missão e no progresso coletivo diário. Uma conclusão manual encerra eventual pendência Kids, valendo também para a criança. Outras ocorrências da rotina não mudam.
+As escolhas de responsável só são efetivadas com a conclusão confirmada. Cada responsável final recebe o peso integral; quem apenas executou a ação não recebe crédito se não for responsável. A tarefa conta uma vez no progresso de cada missão e no progresso coletivo diário ou semanal. Uma conclusão manual encerra eventual pendência Kids, valendo também para a criança. Outras ocorrências da rotina não mudam.
 
 <a id="uf-07"></a>
 
@@ -252,9 +254,18 @@ flowchart TD
       A["TEL-040 · Selecionar tarefa"] --> B["TEL-041 · Detalhe"]
       B --> C{"Própria tarefa pendente?"}
       C -->|Não| D(["Consultar estado sem nova sinalização"])
-      C -->|Sim| E["MOD-011 · Foto opcional e enviar"]
-      E --> F{"Foto anexada foi enviada?"}
-      F -->|Não anexou ou enviou| G["Salvar sinalização"]
+      C -->|Sim| E["MOD-011 · Preparar sinalização"]
+      E --> CF{"Adicionar foto?"}
+      CF -->|Não · enviar sem foto| G
+      CF -->|Sim| CAM[["Abrir câmera / solicitar permissão"]]
+      CAM --> CP{"Câmera disponível e autorizada?"}
+      CP -->|Não ou cancelou| E
+      CP -->|Sim| CAP["Capturar e revisar foto"]
+      CAP -->|Refazer| CAM
+      CAP -->|Descartar| E
+      CAP -->|Usar e enviar| F
+      F{"Foto anexada foi enviada?"}
+      F -->|Sim| G["Salvar sinalização"]
       F -->|Falhou| H{"Tentar de novo ou seguir sem foto?"}
       H -->|Tentar de novo| E
       H -->|Sem foto| G
@@ -273,6 +284,8 @@ flowchart TD
     end
     I -.->|Sinalização disponível na fila| K
 ```
+
+Permissão negada ou câmera indisponível exibe orientação e permite continuar sem foto; não abre galeria automaticamente. Revisar captura não envia a sinalização por si só.
 
 A seta tracejada liga os registros entre os dois usuários; não representa navegação da criança para a área administrativa. Sinalização e decisão só mudam a tela após gravação confirmada. Cancelar MOD-011 mantém a tarefa como estava. Voltar de TEL-016 sem decidir mantém a sinalização na fila.
 
@@ -310,35 +323,38 @@ flowchart TD
 
 Não existe exclusão direta de tarefa concluída. Se não houver missão em andamento, não há reabertura neste MVP. Em exclusão de rotina, preservar ocorrências concluídas e informar os registros que não podem ser excluídos. A última tarefa de uma missão exige vincular outra antes de tentar excluí-la. Não se contorna a proteção de missão concluída pela mudança de alcance.
 
-A reabertura é uma operação independente: retira o crédito da semana da conclusão anterior para todos os responsáveis, mantém responsáveis e atualiza progresso. Se a exclusão posterior falhar ou for cancelada, a reabertura já salva permanece. A exclusão não desconta o peso novamente. Cada gravação segue as condições comuns de falha e concorrência.
+A reabertura é uma operação independente: retira o crédito do dia e da semana da conclusão anterior para todos os responsáveis, mantém responsáveis e atualiza progresso. Se a exclusão posterior falhar ou for cancelada, a reabertura já salva permanece. A exclusão não desconta o peso novamente. Cada gravação segue as condições comuns de falha e concorrência.
 
 <a id="uf-09"></a>
 
-## UF-09 — Consultar carga semanal
+## UF-09 — Consultar carga diária ou semanal
 
-**Objetivo:** entender a distribuição da participação creditada sem ranking.  
+**Objetivo:** entender a distribuição da participação creditada no período.  
 **Entrada:** Família, por Administrador ou Membro.  
-**Referências:** [UC13](../03-casos-de-uso.md#uc13); RN28, RN30–34; RF18–21, RF56–57.
+**Referências:** [UC13](../03-casos-de-uso.md#uc13); RN28, RN30–34, RN61; RF18–21, RF56–57, RF66.
 
 ```mermaid
 flowchart TD
-    A["TEL-050 · Família"] --> B["TEL-014 · Carga semanal"]
-    B --> C["Considerar conclusões válidas de segunda a domingo"]
-    C --> D{"Existe carga na semana?"}
-    D -->|Não| E(["Informar ausência de conclusões"])
-    D -->|Sim| F["Mostrar carga por membro e participação no total"]
-    F --> G(["Voltar para Família"])
-    E --> G
+    A["TEL-050 · Minha família"] --> B["TEL-014 · Carga"]
+    B --> C["Escolher Dia ou Semana e data de referência"]
+    C --> D{"Há conclusões válidas no período?"}
+    D -->|Não| E["Informar ausência de carga"]
+    D -->|Sim| F["Mostrar peso por membro e participação no total"]
+    E --> G{"Próxima ação"}
+    F --> G
+    G -->|Outro período| C
+    G -->|Gerar PDF semanal| H(["UF-14 · TEL-051"])
+    G -->|Voltar| A
 ```
 
-Cada responsável recebe o peso integral de uma tarefa compartilhada; a carga total soma as cargas individuais. Pendentes e Aguardando confirmação não entram. Reaberturas ajustam a semana original. Sem carga, não dividir por zero. Kids não acessam esta tela. A base define a semana de segunda a domingo; este fluxo não acrescenta seleção de semanas ou vínculo automático entre semana e data do carrossel diário.
+Cada responsável recebe o peso integral; o total soma cargas individuais. Pendentes e Aguardando confirmação não entram. Reaberturas ajustam o dia e a semana originais. Sem carga, não dividir por zero. A semana vai de segunda a domingo; vindo da área Família, manter a referência selecionada. Kids não acessam esta tela. O destaque semanal é consultado separadamente em UF-15.
 
 <a id="uf-10"></a>
 
 ## UF-10 — Criar, editar e acompanhar missão
 
 **Objetivo:** organizar uma conquista coletiva sem prazo e acompanhar seu progresso.  
-**Entrada:** Missões e conquistas, diretamente na navegação adulta; Kids pelo acesso definido no screen map.  
+**Entrada:** Missões e conquistas, diretamente na navegação adulta; Kids diretamente na aba Missões e conquistas.  
 **Referências:** [UC05](../03-casos-de-uso.md#uc05), [UC14](../03-casos-de-uso.md#uc14); RN35–40, RN50–51, RN58; RF28–32, RF36, RF50, RF58.
 
 ```mermaid
@@ -446,12 +462,12 @@ A remoção revoga também sessões e renovação de acesso, deixa tarefas futur
 ## UF-13 — Editar o próprio perfil
 
 **Objetivo:** alterar os dados pessoais permitidos, sem modificar permissões.  
-**Entrada:** Meu perfil, diretamente na navegação principal; Administrador ou Membro.  
-**Referências:** [UC10](../03-casos-de-uso.md#uc10); RF48.
+**Entrada:** Meu perfil na navegação adulta ou pelo avatar/cabeçalho Kids; todos os perfis.  
+**Referências:** [UC10](../03-casos-de-uso.md#uc10); RF48, RF62, RF65; RN63–64.
 
 ```mermaid
 flowchart TD
-    A["TEL-030 · Meu perfil"] --> B["MOD-009 · Editar dados permitidos"]
+    A["TEL-030 · Meu perfil"] --> B["MOD-009 · Editar foto opcional e apelido próprios"]
     B -->|Cancelar| A
     B -->|Salvar| C{"Dados válidos e permitidos?"}
     C -->|Não · corrigir| B
@@ -459,21 +475,81 @@ flowchart TD
     D --> E{"Gravação confirmada?"}
     E -->|Não · informar falha| B
     E -->|Sim| F(["TEL-030 · Dados atualizados"])
+    A -->|Consultar badge| G["TEL-021 · Missão da conquista"]
+    G -->|Voltar| A
 ```
 
-Os campos concretos seguem a definição de design dos dados editáveis. Este fluxo não cria troca de papel, família ou modo Kids; a alteração administrativa de papel segue UF-12. Kids não possuem edição do próprio perfil no escopo atual.
+O formulário permite adicionar/substituir/remover foto opcional e configurar etiqueta/apelido. Só o titular acessa a configuração de apelido, inclusive para Kids; a gestão administrativa de UF-12 não concede esse acesso. Cancelar ou falhar mantém os dados salvos anteriores. Foto ausente usa identificação padrão. Meu perfil também lista badges coletivos e permite abrir TEL-021; sem badges, apresenta estado vazio. Não altera papel, família ou modo Kids. O apelido é visível à família; ver RN64 para a premissa de concessão dos badges.
+
+<a id="uf-14"></a>
+
+## UF-14 — Gerar relatório semanal em PDF
+
+**Objetivo:** obter a visão semanal da família em arquivo.  
+**Entrada:** Minha família (TEL-050) ou Carga (TEL-014), por adulto.  
+**Referências:** [UC18](../03-casos-de-uso.md#uc18); RN62; RF61; RNF26–27.
+
+```mermaid
+flowchart TD
+    A["TEL-050 ou TEL-014 · Gerar relatório"] --> B["TEL-051 · Selecionar semana segunda–domingo"]
+    B --> C{"Semana atual ou passada válida?"}
+    C -->|Não| B
+    C -->|Sim| D["Gerar PDF · atual identificada como parcial"]
+    D --> E{"Arquivo gerado?"}
+    E -->|Falha · informar e tentar novamente| B
+    E -->|Sim| F["Visualizar gráficos, progresso e tabela por membro"]
+    F --> G{"Ação"}
+    G -->|Salvar ou compartilhar| H[["Interface do dispositivo"]]
+    H -->|Concluir ou cancelar| F
+    G -->|Outra semana| B
+    G -->|Voltar| I(["Retornar à origem preservando período"])
+```
+
+O PDF contém gráficos de carga semanal e progresso total da família e, por membro, peso creditado e número de tarefas realizadas. Identifica período, geração e métricas de RN62; compartilhadas não duplicam o total familiar de tarefas. Ausência de dados permite PDF com indicação apropriada. Falha de geração não disponibiliza arquivo incompleto. Abrir compartilhamento não comprova envio. Kids não têm acesso.
+
+<a id="uf-15"></a>
+
+## UF-15 — Receber e compartilhar destaque semanal
+
+**Objetivo:** reconhecer o primeiro lugar em pontos e incentivar uma atividade em família.  
+**Entrada:** apuração automática na segunda-feira; consulta pela notificação ou destaque em Minhas tarefas.  
+**Referências:** [UC19](../03-casos-de-uso.md#uc19); RN65; RF63–64; RNF26–27.
+
+```mermaid
+flowchart TD
+    A["Sistema · virada para segunda-feira"] --> B["Apurar pontos da semana anterior encerrada"]
+    B --> C{"Pontuação positiva?"}
+    C -->|Não| D(["Registrar semana sem vencedor · premissa RN65"])
+    C -->|Sim| E["Registrar primeiro lugar sem duplicar · empate conforme RN65"]
+    E --> F["Notificar reconhecido e disponibilizar destaque no app"]
+    F --> G["Pessoa abre notificação ou Minhas tarefas"]
+    G --> H{"Sessão válida e pessoa autorizada?"}
+    H -->|Não| I["Acesso/recuperação ou informar acesso negado"]
+    I -->|Acesso recuperado · revalidar| H
+    H -->|Sim| J["TEL-052 · Semana, pontos e tarefas realizadas"]
+    J --> K{"Compartilhar?"}
+    K -->|Não| L(["Fechar · voltar à origem"])
+    K -->|Sim| M{"WhatsApp disponível?"}
+    M -->|Não| N["Oferecer copiar mensagem"]
+    M -->|Sim| O[["WhatsApp · revisar texto, escolher destinatário e enviar"]]
+    N --> J
+    O -->|Retornar ou cancelar| J
+```
+
+Texto do convite: “Mande para sua família e sugira algo para vocês fazerem juntos.” Sugestão editável: “Fiquei em primeiro em pontos nas tarefas desta semana! Que tal fazermos algo juntos para celebrar? Minha sugestão é: ____.” Em empate, adaptar para “Fiquei entre os primeiros…”. Nada é enviado automaticamente. Sem notificação externa, o resultado continua disponível no app. Kids reconhecidos usam a mesma tela em variante adequada, sem acesso à carga familiar. Falha de apuração exige retentativa idempotente, sem publicar resultado parcial. Empate reconhece todos os primeiros colocados; elegibilidade e ausência de pontos seguem as premissas explicitadas em RN65; horário/fuso e revisão após reabertura ainda exigem definição.
 
 ## Critérios de revisão
 
 - Cada fluxo pode ser percorrido desde sua entrada até resultado, cancelamento ou impedimento explicado.
 - Operações administrativas respeitam perfil, estado atual e proteção do Criador e das conquistas.
 - As quatro telas principais adultas são entradas independentes; Minhas tarefas continua como inicial.
-- Fluxos Kids não concedem carga semanal, gestão ou conclusão direta.
+- Fluxos Kids não concedem carga, relatório familiar, gestão ou conclusão direta. Perfil próprio e reconhecimento recebido são permitidos.
 - Toda alteração só é apresentada como concluída após confirmação da gravação.
-- TEL/MOD preservam o screen map 1.0; UF-01–UF-13 cobrem UC01–UC17 sem criar telas ou requisitos adicionais.
+- TEL/MOD preservam o screen map 1.0; UF-01–UF-15 cobrem UC01–UC19, incluindo TEL-051/052.
 
 ## Histórico
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.0 | 1.3 | 1.0 | 2026-10-02 | Revisão dos fluxos Kids, câmera, perfil, períodos e badges; novos UF-14/15 para PDF e destaque semanal. |
 | 1.0 | 1.2 | 1.0 | 2026-10-01 | Primeira elaboração: 13 fluxos com Mermaid, decisões, alternativas, retornos e cobertura dos 17 casos de uso. |

@@ -1,19 +1,19 @@
 # Regras de negócio
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.2  
-**Data:** 2026-10-01  
+**Versão:** 1.3  
+**Data:** 2026-10-02  
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md)
 
-Este documento contém todas as regras vigentes da versão 1.2. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
+Este documento contém todas as regras vigentes da versão 1.3. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
 
 **Identificadores preservados:** RN15, RN29 e RN32 não estavam definidos na base recebida e permanecem não utilizados. Não representam conteúdo faltante desta versão.
 
 ## Índice de regras
 
-[RN01](#rn01) · [RN02](#rn02) · [RN03](#rn03) · [RN04](#rn04) · [RN05](#rn05) · [RN06](#rn06) · [RN07](#rn07) · [RN08](#rn08) · [RN09](#rn09) · [RN10](#rn10) · [RN11](#rn11) · [RN12](#rn12) · [RN13](#rn13) · [RN14](#rn14) · [RN16](#rn16) · [RN17](#rn17) · [RN18](#rn18) · [RN19](#rn19) · [RN20](#rn20) · [RN21](#rn21) · [RN22](#rn22) · [RN23](#rn23) · [RN24](#rn24) · [RN25](#rn25) · [RN26](#rn26) · [RN27](#rn27) · [RN28](#rn28) · [RN30](#rn30) · [RN31](#rn31) · [RN33](#rn33) · [RN34](#rn34) · [RN35](#rn35) · [RN36](#rn36) · [RN37](#rn37) · [RN38](#rn38) · [RN39](#rn39) · [RN40](#rn40) · [RN41](#rn41) · [RN42](#rn42) · [RN43](#rn43) · [RN44](#rn44) · [RN45](#rn45) · [RN46](#rn46) · [RN47](#rn47) · [RN48](#rn48) · [RN49](#rn49) · [RN50](#rn50) · [RN51](#rn51) · [RN52](#rn52) · [RN53](#rn53) · [RN54](#rn54) · [RN55](#rn55) · [RN56](#rn56) · [RN57](#rn57) · [RN58](#rn58) · [RN59](#rn59) · [RN60](#rn60)
+[RN01](#rn01) · [RN02](#rn02) · [RN03](#rn03) · [RN04](#rn04) · [RN05](#rn05) · [RN06](#rn06) · [RN07](#rn07) · [RN08](#rn08) · [RN09](#rn09) · [RN10](#rn10) · [RN11](#rn11) · [RN12](#rn12) · [RN13](#rn13) · [RN14](#rn14) · [RN16](#rn16) · [RN17](#rn17) · [RN18](#rn18) · [RN19](#rn19) · [RN20](#rn20) · [RN21](#rn21) · [RN22](#rn22) · [RN23](#rn23) · [RN24](#rn24) · [RN25](#rn25) · [RN26](#rn26) · [RN27](#rn27) · [RN28](#rn28) · [RN30](#rn30) · [RN31](#rn31) · [RN33](#rn33) · [RN34](#rn34) · [RN35](#rn35) · [RN36](#rn36) · [RN37](#rn37) · [RN38](#rn38) · [RN39](#rn39) · [RN40](#rn40) · [RN41](#rn41) · [RN42](#rn42) · [RN43](#rn43) · [RN44](#rn44) · [RN45](#rn45) · [RN46](#rn46) · [RN47](#rn47) · [RN48](#rn48) · [RN49](#rn49) · [RN50](#rn50) · [RN51](#rn51) · [RN52](#rn52) · [RN53](#rn53) · [RN54](#rn54) · [RN55](#rn55) · [RN56](#rn56) · [RN57](#rn57) · [RN58](#rn58) · [RN59](#rn59) · [RN60](#rn60) · [RN61](#rn61) · [RN62](#rn62) · [RN63](#rn63) · [RN64](#rn64) · [RN65](#rn65)
 
 ## RN01
 
@@ -65,7 +65,7 @@ Existem três perfis: Administrador, Membro e Kids. O Criador da Família é um 
 
 ## RN07
 
-Apenas Administradores podem adicionar, editar e remover membros.
+Apenas Administradores podem adicionar, editar e remover membros administrativamente. A edição do próprio perfil é permitida a todos conforme RN63; a configuração de etiqueta/apelido pertence exclusivamente ao titular, inclusive quando o titular é Kids.
 
 **Requisitos funcionais:** [RF02](02-requisitos.md#rf02), [RF03](02-requisitos.md#rf03), [RF04](02-requisitos.md#rf04), [RF40](02-requisitos.md#rf40)  
 **Requisitos não funcionais específicos:** [RNF07](02-requisitos.md#rnf07)  
@@ -209,7 +209,7 @@ O registro de confirmação guarda qual Administrador confirmou.
 
 ## RN26
 
-Tarefas aguardando confirmação não contam para carga, progresso diário concluído ou progresso de missões. Passam a contar após confirmação ou conclusão manual válida por adulto.
+Tarefas aguardando confirmação não contam para carga, progresso diário ou semanal concluído ou progresso de missões. Passam a contar após confirmação ou conclusão manual válida por adulto.
 
 **Requisitos funcionais:** [RF19](02-requisitos.md#rf19), [RF26](02-requisitos.md#rf26), [RF30](02-requisitos.md#rf30), [RF49](02-requisitos.md#rf49)  
 **Requisitos não funcionais específicos:** [RNF10](02-requisitos.md#rnf10), [RNF11](02-requisitos.md#rnf11)  
@@ -225,19 +225,19 @@ Tarefas não realizadas não geram penalidade nem perda de pontos. O checklist a
 
 ## RN28
 
-A semana vai de segunda-feira a domingo.
+A semana vai de segunda-feira a domingo. Consultas, relatório e apuração semanal devem usar o mesmo fuso de referência da família, sem variar conforme o dispositivo. O fuso e o horário operacional da apuração permanecem pendentes de definição; não há configuração de fuso pelo usuário especificada nesta versão.
 
-**Requisitos funcionais:** [RF18](02-requisitos.md#rf18)  
+**Requisitos funcionais:** [RF18](02-requisitos.md#rf18), [RF63](02-requisitos.md#rf63), [RF66](02-requisitos.md#rf66)  
 **Requisitos não funcionais específicos:** [RNF10](02-requisitos.md#rnf10)  
-**Casos de uso relacionados:** [UC13](03-casos-de-uso.md#uc13)
+**Casos de uso relacionados:** [UC13](03-casos-de-uso.md#uc13), [UC11](03-casos-de-uso.md#uc11), [UC19](03-casos-de-uso.md#uc19)
 
 ## RN30
 
-A carga semanal de um membro é a soma dos pesos integrais das tarefas com conclusão válida na semana nas quais ele consta como responsável da conclusão. Em tarefas compartilhadas, cada responsável recebe o peso integral. Executar a ação de concluir não gera crédito para quem não for responsável.
+A carga de um membro é a soma dos pesos integrais das tarefas com conclusão válida no dia ou na semana selecionada nas quais ele consta como responsável da conclusão. Em tarefas compartilhadas, cada responsável recebe o peso integral. Executar a ação de concluir não gera crédito para quem não for responsável. Pontos do destaque semanal usam essa mesma soma, sem uma segunda moeda de pontuação.
 
-**Requisitos funcionais:** [RF15](02-requisitos.md#rf15), [RF18](02-requisitos.md#rf18), [RF19](02-requisitos.md#rf19), [RF20](02-requisitos.md#rf20), [RF56](02-requisitos.md#rf56)  
+**Requisitos funcionais:** [RF15](02-requisitos.md#rf15), [RF18](02-requisitos.md#rf18), [RF19](02-requisitos.md#rf19), [RF20](02-requisitos.md#rf20), [RF56](02-requisitos.md#rf56), [RF63](02-requisitos.md#rf63)  
 **Requisitos não funcionais específicos:** [RNF03](02-requisitos.md#rnf03), [RNF10](02-requisitos.md#rnf10)  
-**Casos de uso relacionados:** [UC03](03-casos-de-uso.md#uc03), [UC07](03-casos-de-uso.md#uc07), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC15](03-casos-de-uso.md#uc15)
+**Casos de uso relacionados:** [UC03](03-casos-de-uso.md#uc03), [UC07](03-casos-de-uso.md#uc07), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC15](03-casos-de-uso.md#uc15), [UC19](03-casos-de-uso.md#uc19)
 
 ## RN31
 
@@ -249,15 +249,15 @@ A carga total da família é a soma das cargas individuais. A participação de 
 
 ## RN33
 
-Administradores e Membros visualizam a carga semanal da família. Todos os perfis visualizam seu próprio progresso diário. Kids não acessam a carga semanal.
+Todos os perfis visualizam seu próprio progresso por dia ou semana. Administradores e Membros também visualizam o progresso familiar e a distribuição da carga/sobrecarga por dia ou semana. Kids não acessam a distribuição de carga, a área Família nem o relatório familiar. Podem receber seu próprio reconhecimento semanal conforme RN65.
 
-**Requisitos funcionais:** [RF20](02-requisitos.md#rf20), [RF49](02-requisitos.md#rf49)  
+**Requisitos funcionais:** [RF20](02-requisitos.md#rf20), [RF49](02-requisitos.md#rf49), [RF65](02-requisitos.md#rf65), [RF66](02-requisitos.md#rf66)  
 **Requisitos não funcionais específicos:** [RNF04](02-requisitos.md#rnf04), [RNF06](02-requisitos.md#rnf06)  
-**Casos de uso relacionados:** [UC11](03-casos-de-uso.md#uc11), [UC13](03-casos-de-uso.md#uc13)
+**Casos de uso relacionados:** [UC11](03-casos-de-uso.md#uc11), [UC13](03-casos-de-uso.md#uc13), [UC10](03-casos-de-uso.md#uc10), [UC14](03-casos-de-uso.md#uc14)
 
 ## RN34
 
-A carga é apresentada como distribuição e equilíbrio, nunca como ranking ou indicação de quem fez mais.
+A visualização de carga apresenta distribuição e equilíbrio. O destaque de primeiro lugar semanal é uma funcionalidade específica prevista em RN65, com convite a uma atividade em família. Não há ranking completo, competição entre famílias ou penalidade para os demais membros.
 
 **Requisitos funcionais:** [RF20](02-requisitos.md#rf20), [RF21](02-requisitos.md#rf21)  
 **Requisitos não funcionais específicos:** [RNF03](02-requisitos.md#rnf03)  
@@ -419,7 +419,7 @@ Ao aceitar a recompensa, o sistema a registra nos dados da missão concluída e 
 
 ## RN54
 
-O perfil Kids pode anexar uma foto à sinalização da tarefa. A ausência de foto não impede sinalizar nem confirmar. O Administrador pode visualizar a foto ao avaliar a sinalização.
+O perfil Kids pode anexar uma foto à sinalização da tarefa. Ao tocar em adicionar foto, o aplicativo abre diretamente a câmera, solicitando permissão do dispositivo quando necessária, sem etapa de escolha entre câmera e galeria. A criança pode revisar, refazer ou descartar a captura antes de enviar. Cancelamento, permissão negada ou câmera indisponível permitem continuar sem foto. A ausência de foto não impede sinalizar nem confirmar. O Administrador pode visualizar a foto ao avaliar a sinalização.
 
 **Requisitos funcionais:** [RF23](02-requisitos.md#rf23), [RF25](02-requisitos.md#rf25), [RF55](02-requisitos.md#rf55)  
 **Requisitos não funcionais específicos:** [RNF24](02-requisitos.md#rnf24)  
@@ -468,20 +468,83 @@ A exclusão de tarefa não concluída remove seus vínculos com missões em anda
 
 ## RN60
 
-Administradores e Membros acessam a área Família, consultam tarefas de outras pessoas e sem responsável e acompanham o progresso coletivo do dia selecionado. A consulta diária abre no dia atual e usa o mesmo intervalo do carrossel de RN49: da criação da família até o último dia do mês corrente.
+Administradores e Membros acessam a área Família (Minha família), consultam tarefas de outras pessoas e sem responsável e acompanham o progresso coletivo por dia ou semana. A consulta abre no dia atual; o período segue RN49 e RN61 e é preservado ao abrir a lista de tarefas da família.
 
-O progresso diário da família é a quantidade de tarefas concluídas daquele dia dividida pelo total de tarefas daquele dia, em percentual. Cada tarefa individual conta uma única vez, independentemente do peso ou da quantidade de responsáveis; tarefas sem responsável também pertencem ao total. Pendentes e Aguardando confirmação não entram no numerador. Sem tarefas no dia, apresentar “Sem tarefas”, sem divisão por zero ou conclusão fictícia. Conclusões válidas, reaberturas e exclusões autorizadas atualizam o indicador conforme o estado corrente das tarefas.
+O progresso familiar é a quantidade de tarefas concluídas dentre as tarefas previstas para o período dividida pelo total de tarefas previstas para esse período. Cada tarefa conta uma vez, independentemente do peso ou dos responsáveis, incluindo as sem responsável no total. Pendentes e Aguardando confirmação não entram no numerador. Sem tarefas, apresentar “Sem tarefas”, sem divisão por zero. Alterações válidas atualizam o indicador.
 
-A área reúne acesso à carga semanal para adultos e, exclusivamente para Administradores, ao gerenciamento de membros e à confirmação de tarefas Kids. Kids continuam com suas tarefas, seu progresso pessoal e as missões; não acessam esta área adulta.
+A área reúne carga diária ou semanal e relatório semanal em PDF para adultos; gerenciamento de membros e confirmações Kids são exclusivos de Administradores. Kids não acessam esta área.
 
-**Requisitos funcionais:** [RF60](02-requisitos.md#rf60)  
+**Requisitos funcionais:** [RF60](02-requisitos.md#rf60), [RF66](02-requisitos.md#rf66)  
 **Requisitos não funcionais específicos:** [RNF01](02-requisitos.md#rnf01), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF09](02-requisitos.md#rnf09)  
-**Casos de uso relacionados:** [UC11](03-casos-de-uso.md#uc11)
+**Casos de uso relacionados:** [UC11](03-casos-de-uso.md#uc11), [UC13](03-casos-de-uso.md#uc13)
+
+## RN61
+
+**Tema:** Períodos e métricas
+
+Minhas tarefas (todos os perfis) e Minha família (adultos) oferecem alternância Dia/Semana. A semana contém a data selecionada e vai de segunda a domingo. O intervalo de consulta de tarefas continua da criação da família até o último dia do mês corrente; nas semanas de borda, informar os dias efetivamente disponíveis. O progresso pessoal conta tarefas próprias concluídas sobre o total próprio previsto para o período; o familiar usa RN60. O progresso semanal é calculado sobre os totais da semana, nunca pela média simples dos percentuais diários.
+
+A carga/sobrecarga usa a data da conclusão válida, enquanto o progresso usa as tarefas previstas para o período e seu estado atual. Uma tarefa atrasada pode contribuir para a carga de hoje e para o progresso do dia em que estava prevista. A carga indica participação creditada, sem limiar de diagnóstico de sobrecarga definido. Seleção, gráficos e rótulos devem explicitar período e métrica. Sem tarefas ou carga, informar ausência de dados; não simular 100%.
+
+**Requisitos funcionais:** [RF18](02-requisitos.md#rf18), [RF49](02-requisitos.md#rf49), [RF60](02-requisitos.md#rf60), [RF66](02-requisitos.md#rf66)  
+**Requisitos não funcionais específicos:** [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF09](02-requisitos.md#rnf09), [RNF10](02-requisitos.md#rnf10)  
+**Casos de uso relacionados:** [UC11](03-casos-de-uso.md#uc11), [UC13](03-casos-de-uso.md#uc13)
+
+## RN62
+
+**Tema:** Relatório semanal em PDF
+
+Administradores e Membros podem gerar um relatório familiar em PDF para uma semana selecionada de segunda a domingo. O documento identifica família, período e momento de geração, inclui gráficos da distribuição de carga semanal por membro e do progresso total da família, além do peso total creditado e número de tarefas realizadas por membro. O gráfico de progresso usa concluídas/total de tarefas previstas para a semana (RN60); peso e quantidade realizada por membro usam conclusões válidas naquela semana (RN30).
+
+Uma tarefa compartilhada conta uma vez para cada responsável no número individual e credita o peso integral a cada um; o total familiar de tarefas realizadas conta tarefas distintas, sem somar contagens individuais. O relatório explica essa diferença. Semana atual é identificada como parcial até o momento da geração; semanas futuras não geram relatório. Na semana de criação, indicar ausência de registros anteriores à criação, mantendo o cabeçalho segunda–domingo. Semana sem dados pode gerar relatório com zeros e indicação “Sem tarefas” onde aplicável. O PDF reflete os dados no momento de geração; reabrir uma tarefa exige gerar novo arquivo para obter valores atualizados. Não incluir fotos de validação, credenciais ou configuração privada de perfil.
+
+**Requisitos funcionais:** [RF61](02-requisitos.md#rf61)  
+**Requisitos não funcionais específicos:** [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF10](02-requisitos.md#rnf10), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF26](02-requisitos.md#rnf26), [RNF27](02-requisitos.md#rnf27)  
+**Casos de uso relacionados:** [UC18](03-casos-de-uso.md#uc18)
+
+## RN63
+
+**Tema:** Foto e etiqueta/apelido do perfil
+
+Todos os perfis, inclusive Kids, podem adicionar, substituir ou remover a própria foto, que é opcional. Sem foto, exibir identificação padrão. Todos podem configurar a própria etiqueta/apelido; outras pessoas, inclusive Administradores, não acessam sua configuração nem podem alterá-la. O nome de identificação permanece separado do apelido.
+
+O apelido é visível à família, com edição exclusiva do titular. A forma de escolher a foto de perfil permanece para design e não herda obrigatoriamente a câmera direta da validação Kids. Kids acessam Meu perfil pelo avatar/cabeçalho, sem terceira aba no tab bar.
+
+**Requisitos funcionais:** [RF48](02-requisitos.md#rf48), [RF65](02-requisitos.md#rf65)  
+**Requisitos não funcionais específicos:** [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF12](02-requisitos.md#rnf12), [RNF24](02-requisitos.md#rnf24), [RNF27](02-requisitos.md#rnf27)  
+**Casos de uso relacionados:** [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC14](03-casos-de-uso.md#uc14)
+
+## RN64
+
+**Tema:** Badges coletivos no perfil
+
+Badge e selo designam a mesma conquista. Concluir uma missão que tenha selo atribui coletivamente esse badge aos perfis da família, independentemente de responsabilidade individual nas tarefas. Ele aparece no perfil de cada pessoa e nas conquistas da missão, sem depender do resgate da recompensa. Missão sem selo não cria badge. A concessão não pode duplicar o mesmo badge da mesma missão para uma pessoa.
+
+Premissa de detalhamento: recebem o badge os perfis ativos no momento da conclusão e a conquista permanece em seu histórico. A política para concessão retroativa a novos membros permanece pendente.
+
+**Requisitos funcionais:** [RF32](02-requisitos.md#rf32), [RF62](02-requisitos.md#rf62)  
+**Requisitos não funcionais específicos:** [RNF06](02-requisitos.md#rnf06), [RNF09](02-requisitos.md#rnf09), [RNF11](02-requisitos.md#rnf11), [RNF25](02-requisitos.md#rnf25)  
+**Casos de uso relacionados:** [UC10](03-casos-de-uso.md#uc10), [UC14](03-casos-de-uso.md#uc14), [UC05](03-casos-de-uso.md#uc05)
+
+## RN65
+
+**Tema:** Reconhecimento semanal e compartilhamento
+
+Na virada da semana, na segunda-feira, o sistema apura automaticamente o primeiro lugar em pontos da semana anterior encerrada (segunda a domingo), sem depender de o aplicativo estar aberto. Pontos são a soma dos pesos de conclusões válidas creditadas aos responsáveis finais. Quantidade de tarefas é informação complementar, não o critério principal. Kids só recebem crédito após confirmação ou conclusão manual válida por adulto. Não há perda de pontos por tarefas pendentes.
+
+A pessoa reconhecida é notificada e pode abrir uma visualização dentro do aplicativo com período, pontos, tarefas realizadas e convite para compartilhar via WhatsApp: “Mande para sua família e sugira algo para vocês fazerem juntos.” O envio depende da ação da pessoa, que escolhe o destinatário e confirma no WhatsApp. Cancelar ou não ter WhatsApp não perde o reconhecimento; oferecer copiar mensagem. O resultado permanece acessível dentro do app mesmo sem permissão de notificação externa.
+
+Em caso de empate, todos os empatados no primeiro lugar são reconhecidos. Premissas para revisão: todos os perfis ativos, inclusive Kids, são elegíveis; semana sem pontuação positiva não gera vencedor. Registrar um resultado por família/semana e uma notificação por pessoa reconhecida, evitando duplicidade em retentativas. O fuso/horário exato e a política de revisão de resultado após reabertura tardia são decisões pendentes; devem ser resolvidos antes da implementação da apuração.
+
+**Requisitos funcionais:** [RF63](02-requisitos.md#rf63), [RF64](02-requisitos.md#rf64)  
+**Requisitos não funcionais específicos:** [RNF04](02-requisitos.md#rnf04), [RNF06](02-requisitos.md#rnf06), [RNF10](02-requisitos.md#rnf10), [RNF12](02-requisitos.md#rnf12), [RNF26](02-requisitos.md#rnf26), [RNF27](02-requisitos.md#rnf27)  
+**Casos de uso relacionados:** [UC19](03-casos-de-uso.md#uc19)
 
 ## Histórico de versões
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.3 | 2026-10-02 | Duas abas Kids, câmera direta, foto/apelido e badges, progresso/carga Dia/Semana, PDF semanal e reconhecimento com WhatsApp; RN61–65, RF61–66, RNF26–27 e UC18–19. Empates e visibilidade do apelido confirmados. |
 | 1.2 | 2026-10-01 | Área Família na navegação adulta, progresso coletivo diário e consulta por carrossel: RN60, RF60 e UC11. Design em elaboração na versão 1.0. |
 | 1.1 | 2026-10-01 | Recuperação do mesmo perfil por novo convite e renovação sem expiração temporal, com revogação preservada: RN47, RF41, RF46, RF54, RNF22, UC02 e UC09. |
 | 1.0 | 2026-10-01 | Primeira versão consolidada, incluindo todas as decisões registradas até esta publicação e links para a visão e a apresentação do projeto. |

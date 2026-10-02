@@ -14,7 +14,7 @@ skinparam rectangleBorderColor #64748B
 skinparam packageStyle rectangle
 skinparam nodesep 32
 skinparam ranksep 55
-title Visão geral do sistema\nApp de Organização Familiar · MVP 1.0
+title Visão geral do sistema\nApp de Organização Familiar · MVP 1.3
 
 actor "Administrador" as Admin
 actor "Membro" as Membro
@@ -22,6 +22,8 @@ actor "Kids" as Kids
 actor "Criador da Família" as Criador
 actor "Pessoa convidada" as Convidado
 actor "Serviço Apple" as Apple
+actor "Agendador" as Agendador
+actor "WhatsApp" as WhatsApp
 
 rectangle "App de Organização Familiar" {
   package "Acesso, família e perfis" {
@@ -36,13 +38,15 @@ rectangle "App de Organização Familiar" {
   usecase "UC08\nDefinir recorrência de\nrotina" as UC08
   usecase "UC11\nVisualizar minhas tarefas" as UC11
   usecase "UC12\nConcluir tarefa" as UC12
-  usecase "UC13\nVisualizar carga semanal" as UC13
+  usecase "UC13\nVisualizar carga diária\nou semanal" as UC13
+  usecase "UC18\nGerar relatório semanal\nem PDF" as UC18
   usecase "UC17\nRetornar tarefa concluída\npara Pendente" as UC17
   }
   package "Participação Kids" {
   usecase "UC15\nSinalizar tarefa como\nrealizada" as UC15
   usecase "UC03\nValidar conclusão de tarefa\nKids" as UC03
   }
+  usecase "UC19\nApurar e compartilhar\ndestaque semanal" as UC19
   package "Missões e recompensas" {
   usecase "UC05\nGerenciar missões" as UC05
   usecase "UC06\nGerenciar itens de\nrecompensas coletivas" as UC06
@@ -61,15 +65,18 @@ Admin -- UC10
 Admin -- UC11
 Admin -- UC12
 Admin -- UC13
+Admin -- UC18
 Admin -- UC14
 Admin -- UC16
 Admin -- UC17
 Membro -- UC07
 Membro -- UC08
 Membro -- UC10
+Kids -- UC10
 Membro -- UC11
 Membro -- UC12
 Membro -- UC13
+Membro -- UC18
 Membro -- UC14
 Kids -- UC11
 Kids -- UC14
@@ -88,6 +95,16 @@ UC08 ..> UC07 : <<extend>>\n[configurar repetição]
 note right of UC07
   Ponto de extensão:
   configuração de repetição.
+end note
+
+Agendador -- UC19
+Admin -- UC19
+Membro -- UC19
+Kids -- UC19
+UC19 -- WhatsApp
+note right of UC19
+  Consulta e compartilhamento pelo reconhecido.
+  Empate reconhece todos no primeiro lugar.
 end note
 
 @enduml
