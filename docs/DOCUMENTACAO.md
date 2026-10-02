@@ -5,22 +5,24 @@
 **Data:** 2026-10-01  
 **Situação:** base documental consolidada
 
-[Projeto](README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md)
+[Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md)
 
 ## Documentos
 
 | Arquivo | Conteúdo |
 |---|---|
-| [Apresentação do projeto](README.md) | Propósito, público, jornada e escopo do MVP. |
+| [Apresentação do projeto](../README.md) | Propósito, público, jornada e escopo do MVP. |
 | [Visão do produto](00-visao-do-produto.md) | Contexto, objetivos, princípios, escopo e critérios de sucesso. |
 | [Índice e versões](DOCUMENTACAO.md) | Organização documental, rastreabilidade e política de versões. |
 | [Regras de negócio](01-regras-de-negocio.md) | 56 regras vigentes e suas relações com RF, RNF e UC. |
 | [Requisitos](02-requisitos.md) | 59 requisitos funcionais e 25 não funcionais, com vínculos às regras e aos casos de uso. |
 | [Especificação dos casos de uso](03-casos-de-uso.md) | 17 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições. |
 
+| [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) | Visão geral e quatro recortes UML, com fontes PlantUML e imagens SVG. |
+
 ## Como usar
 
-Copie os seis arquivos para a mesma pasta do projeto. Os links são relativos e continuam funcionando quando a pasta é movida. Cada regra, requisito e caso de uso tem uma seção identificada por seu código. Em ambientes que não naveguem por links locais, o código permite localizar a referência no arquivo correspondente.
+Mantenha o `README.md` na raiz e preserve a pasta `docs/`, incluindo `diagramas/casos-de-uso/`. Os links são relativos e continuam funcionando quando a pasta é movida. Cada regra, requisito e caso de uso tem uma seção identificada por seu código. Em ambientes que não naveguem por links locais, o código permite localizar a referência no arquivo correspondente.
 
 Esta é uma base completa e consolidada. Não é uma lista de correções e não depende do PDF original ou do documento intermediário de revisão para descrever o comportamento vigente. Os documentos anteriores servem apenas como referência histórica.
 
@@ -60,7 +62,7 @@ As relações RN–UC são derivadas de RN–RF–UC. As relações de RNF repre
 
 ## Política de versionamento
 
-1. Os seis arquivos compõem a mesma versão documental: **1.0**.
+1. A base funcional permanece na versão **1.0**. O documento de diagramas e seus arquivos são um complemento visual dessa base, sem mudança de comportamento.
 2. Em revisão futura, preserve os identificadores existentes; novos itens recebem novos códigos. Não reutilize códigos removidos para outro significado.
 3. Publique o conjunto completo em uma nova pasta de versão, preservando esta base para comparação. Atualize versão, data e histórico de todos os arquivos do conjunto.
 4. No histórico, registre os códigos afetados, a decisão e o motivo. Alterações de comportamento e suas referências devem ser atualizadas juntas.
@@ -71,3 +73,5 @@ As relações RN–UC são derivadas de RN–RF–UC. As relações de RNF repre
 | Versão | Data | Alteração |
 |---|---|---|
 | 1.0 | 2026-10-01 | Primeira versão consolidada, incluindo a visão alinhada ao MVP, a apresentação global do projeto e todas as decisões registradas até esta publicação. |
+
+Complemento visual de 2026-10-01: adicionados cinco diagramas de UC01–UC17 e referências de navegação; mantida a base funcional 1.0.

@@ -1,0 +1,93 @@
+@startuml
+' Fonte editável. Renderização: java -jar plantuml.jar -charset UTF-8 -tsvg *.puml
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 14
+skinparam ArrowColor #334155
+skinparam actorBorderColor #334155
+skinparam actorFontColor #0F172A
+skinparam usecaseBackgroundColor #F8FAFC
+skinparam usecaseBorderColor #475569
+skinparam rectangleBorderColor #64748B
+skinparam packageStyle rectangle
+skinparam nodesep 32
+skinparam ranksep 55
+title Visão geral do sistema\nApp de Organização Familiar · MVP 1.0
+
+actor "Administrador" as Admin
+actor "Membro" as Membro
+actor "Kids" as Kids
+actor "Criador da Família" as Criador
+actor "Pessoa convidada" as Convidado
+actor "Serviço Apple" as Apple
+
+rectangle "App de Organização Familiar" {
+  package "Acesso, família e perfis" {
+  usecase "UC01\nGerenciar família" as UC01
+  usecase "UC02\nGerenciar membros" as UC02
+  usecase "UC04\nAutenticar com Apple" as UC04
+  usecase "UC09\nIngressar por convite" as UC09
+  usecase "UC10\nEditar perfil" as UC10
+  }
+  package "Tarefas e rotina" {
+  usecase "UC07\nGerenciar tarefas" as UC07
+  usecase "UC08\nDefinir recorrência de\nrotina" as UC08
+  usecase "UC11\nVisualizar minhas tarefas" as UC11
+  usecase "UC12\nConcluir tarefa" as UC12
+  usecase "UC13\nVisualizar carga semanal" as UC13
+  usecase "UC17\nRetornar tarefa concluída\npara Pendente" as UC17
+  }
+  package "Participação Kids" {
+  usecase "UC15\nSinalizar tarefa como\nrealizada" as UC15
+  usecase "UC03\nValidar conclusão de tarefa\nKids" as UC03
+  }
+  package "Missões e recompensas" {
+  usecase "UC05\nGerenciar missões" as UC05
+  usecase "UC06\nGerenciar itens de\nrecompensas coletivas" as UC06
+  usecase "UC14\nAcompanhar missões e\nrecompensas" as UC14
+  usecase "UC16\nResgatar recompensa da\nmissão" as UC16
+  }
+}
+
+Admin -- UC02
+Admin -- UC03
+Admin -- UC05
+Admin -- UC06
+Admin -- UC07
+Admin -- UC08
+Admin -- UC10
+Admin -- UC11
+Admin -- UC12
+Admin -- UC13
+Admin -- UC14
+Admin -- UC16
+Admin -- UC17
+Membro -- UC07
+Membro -- UC08
+Membro -- UC10
+Membro -- UC11
+Membro -- UC12
+Membro -- UC13
+Membro -- UC14
+Kids -- UC11
+Kids -- UC14
+Kids -- UC15
+Criador -- UC01
+Criador -- UC04
+Convidado -- UC09
+UC04 -- Apple
+Criador -up-|> Admin
+note bottom of Criador
+  Papel de Administrador após criar a família.
+  UC01 e UC04 também representam o usuário
+  que ainda irá criá-la.
+end note
+UC08 ..> UC07 : <<extend>>\n[configurar repetição]
+note right of UC07
+  Ponto de extensão:
+  configuração de repetição.
+end note
+
+@enduml

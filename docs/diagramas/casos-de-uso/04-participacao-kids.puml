@@ -1,0 +1,50 @@
+@startuml
+' Fonte editável. Renderização: java -jar plantuml.jar -charset UTF-8 -tsvg *.puml
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 14
+skinparam ArrowColor #334155
+skinparam actorBorderColor #334155
+skinparam actorFontColor #0F172A
+skinparam usecaseBackgroundColor #F8FAFC
+skinparam usecaseBorderColor #475569
+skinparam rectangleBorderColor #64748B
+skinparam packageStyle rectangle
+skinparam nodesep 32
+skinparam ranksep 55
+title Participação Kids\nApp de Organização Familiar · MVP 1.0
+
+actor "Administrador" as Admin
+actor "Membro" as Membro
+actor "Kids" as Kids
+
+rectangle "App de Organização Familiar" {
+  usecase "UC11\nVisualizar minhas tarefas" as UC11
+  usecase "UC15\nSinalizar tarefa como\nrealizada" as UC15
+  usecase "UC03\nValidar conclusão de tarefa\nKids" as UC03
+  usecase "UC12\nConcluir tarefa" as UC12
+}
+
+Admin -- UC03
+Admin -- UC11
+Admin -- UC12
+Membro -- UC11
+Membro -- UC12
+Kids -- UC11
+Kids -- UC15
+note right of UC15
+  Foto opcional; tarefa aguarda confirmação.
+  Nenhuma conclusão parcial ou peso creditado.
+end note
+note right of UC03
+  Confirmar conclui para todos os responsáveis.
+  Recusar retorna a tarefa para Pendente.
+end note
+note right of UC12
+  Administrador ou Membro pode concluir
+  manualmente uma tarefa que aguarda confirmação.
+end note
+
+@enduml

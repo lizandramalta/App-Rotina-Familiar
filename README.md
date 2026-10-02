@@ -70,17 +70,18 @@ Não estão incluídos calendário compartilhado, widgets, lista de compras, dis
 
 O produto não prevê recorrência mensal, missões com prazo, conclusão parcial por responsável, rankings, streaks, controle de tempo de tela, mascote virtual ou recursos de localização. Tarefas com vários responsáveis e a opção de assumir ao concluir já estão no MVP.
 
-As possibilidades de evolução estão no [documento de visão](00-visao-do-produto.md), sem compromisso de implementação nesta versão.
+As possibilidades de evolução estão no [documento de visão](docs/00-visao-do-produto.md), sem compromisso de implementação nesta versão.
 
 ## Conheça o projeto em detalhe
 
 | Documento | O que você encontra |
 |---|---|
-| [Visão do produto](00-visao-do-produto.md) | Problema, público, objetivos, jornada, escopo e critérios de sucesso. |
-| [Regras de negócio](01-regras-de-negocio.md) | As condições que regem a experiência e suas exceções. |
-| [Requisitos funcionais e não funcionais](02-requisitos.md) | Comportamentos esperados, qualidade, segurança e integridade. |
-| [Casos de uso](03-casos-de-uso.md) | Os 17 fluxos, com atores, pré-condições, alternativas e resultados. |
-| [Índice e controle documental](DOCUMENTACAO.md) | Rastreabilidade e convenções para manter a documentação consistente. |
+| [Visão do produto](docs/00-visao-do-produto.md) | Problema, público, objetivos, jornada, escopo e critérios de sucesso. |
+| [Regras de negócio](docs/01-regras-de-negocio.md) | As condições que regem a experiência e suas exceções. |
+| [Requisitos funcionais e não funcionais](docs/02-requisitos.md) | Comportamentos esperados, qualidade, segurança e integridade. |
+| [Casos de uso](docs/03-casos-de-uso.md) | Os 17 fluxos, com atores, pré-condições, alternativas e resultados. |
+| [Diagramas de caso de uso](docs/04-diagramas-de-caso-de-uso.md) | Visão geral e quatro diagramas UML por área, com fontes editáveis. |
+| [Índice e controle documental](docs/DOCUMENTACAO.md) | Rastreabilidade e convenções para manter a documentação consistente. |
 
 A versão 1.0 identifica a base de definição do MVP. Não representa, por si só, uma declaração de que o aplicativo foi implementado ou publicado.
 

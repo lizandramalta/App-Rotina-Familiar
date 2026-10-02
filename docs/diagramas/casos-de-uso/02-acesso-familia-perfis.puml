@@ -1,0 +1,54 @@
+@startuml
+' Fonte editável. Renderização: java -jar plantuml.jar -charset UTF-8 -tsvg *.puml
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 14
+skinparam ArrowColor #334155
+skinparam actorBorderColor #334155
+skinparam actorFontColor #0F172A
+skinparam usecaseBackgroundColor #F8FAFC
+skinparam usecaseBorderColor #475569
+skinparam rectangleBorderColor #64748B
+skinparam packageStyle rectangle
+skinparam nodesep 32
+skinparam ranksep 55
+title Acesso, família e perfis\nApp de Organização Familiar · MVP 1.0
+
+actor "Administrador" as Admin
+actor "Membro" as Membro
+actor "Criador da Família" as Criador
+actor "Pessoa convidada" as Convidado
+actor "Serviço Apple" as Apple
+
+rectangle "App de Organização Familiar" {
+  usecase "UC01\nGerenciar família" as UC01
+  usecase "UC02\nGerenciar membros" as UC02
+  usecase "UC04\nAutenticar com Apple" as UC04
+  usecase "UC09\nIngressar por convite" as UC09
+  usecase "UC10\nEditar perfil" as UC10
+}
+
+Admin -- UC02
+Admin -- UC10
+Membro -- UC10
+Criador -- UC01
+Criador -- UC04
+Convidado -- UC09
+UC04 -- Apple
+Criador -up-|> Admin
+note bottom of Criador
+  Papel de Administrador após criar a família.
+  UC01 e UC04 também representam o usuário
+  que ainda irá criá-la.
+end note
+note right of UC01
+  Pré-condição: autenticação Apple válida.
+end note
+note right of UC09
+  Link e senha permitem um único ingresso.
+  Depois, o acesso usa a sessão válida.
+end note
+
+@enduml

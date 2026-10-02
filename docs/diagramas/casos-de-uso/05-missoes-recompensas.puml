@@ -1,0 +1,41 @@
+@startuml
+' Fonte editável. Renderização: java -jar plantuml.jar -charset UTF-8 -tsvg *.puml
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 14
+skinparam ArrowColor #334155
+skinparam actorBorderColor #334155
+skinparam actorFontColor #0F172A
+skinparam usecaseBackgroundColor #F8FAFC
+skinparam usecaseBorderColor #475569
+skinparam rectangleBorderColor #64748B
+skinparam packageStyle rectangle
+skinparam nodesep 32
+skinparam ranksep 55
+title Missões e recompensas\nApp de Organização Familiar · MVP 1.0
+
+actor "Administrador" as Admin
+actor "Membro" as Membro
+actor "Kids" as Kids
+
+rectangle "App de Organização Familiar" {
+  usecase "UC05\nGerenciar missões" as UC05
+  usecase "UC06\nGerenciar itens de\nrecompensas coletivas" as UC06
+  usecase "UC14\nAcompanhar missões e\nrecompensas" as UC14
+  usecase "UC16\nResgatar recompensa da\nmissão" as UC16
+}
+
+Admin -- UC05
+Admin -- UC06
+Admin -- UC14
+Admin -- UC16
+Membro -- UC14
+Kids -- UC14
+note right of UC16
+  Exige missão concluída e nenhum resgate aceito.
+  Somente Administrador sorteia e aceita.
+end note
+
+@enduml
