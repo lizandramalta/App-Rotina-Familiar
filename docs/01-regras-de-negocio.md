@@ -1,19 +1,19 @@
 # Regras de negócio
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.0  
+**Versão:** 1.2  
 **Data:** 2026-10-01  
 **Situação:** base documental consolidada
 
-[Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md)
+[Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md)
 
-Este documento contém todas as regras vigentes da versão 1.0. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
+Este documento contém todas as regras vigentes da versão 1.2. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
 
 **Identificadores preservados:** RN15, RN29 e RN32 não estavam definidos na base recebida e permanecem não utilizados. Não representam conteúdo faltante desta versão.
 
 ## Índice de regras
 
-[RN01](#rn01) · [RN02](#rn02) · [RN03](#rn03) · [RN04](#rn04) · [RN05](#rn05) · [RN06](#rn06) · [RN07](#rn07) · [RN08](#rn08) · [RN09](#rn09) · [RN10](#rn10) · [RN11](#rn11) · [RN12](#rn12) · [RN13](#rn13) · [RN14](#rn14) · [RN16](#rn16) · [RN17](#rn17) · [RN18](#rn18) · [RN19](#rn19) · [RN20](#rn20) · [RN21](#rn21) · [RN22](#rn22) · [RN23](#rn23) · [RN24](#rn24) · [RN25](#rn25) · [RN26](#rn26) · [RN27](#rn27) · [RN28](#rn28) · [RN30](#rn30) · [RN31](#rn31) · [RN33](#rn33) · [RN34](#rn34) · [RN35](#rn35) · [RN36](#rn36) · [RN37](#rn37) · [RN38](#rn38) · [RN39](#rn39) · [RN40](#rn40) · [RN41](#rn41) · [RN42](#rn42) · [RN43](#rn43) · [RN44](#rn44) · [RN45](#rn45) · [RN46](#rn46) · [RN47](#rn47) · [RN48](#rn48) · [RN49](#rn49) · [RN50](#rn50) · [RN51](#rn51) · [RN52](#rn52) · [RN53](#rn53) · [RN54](#rn54) · [RN55](#rn55) · [RN56](#rn56) · [RN57](#rn57) · [RN58](#rn58) · [RN59](#rn59)
+[RN01](#rn01) · [RN02](#rn02) · [RN03](#rn03) · [RN04](#rn04) · [RN05](#rn05) · [RN06](#rn06) · [RN07](#rn07) · [RN08](#rn08) · [RN09](#rn09) · [RN10](#rn10) · [RN11](#rn11) · [RN12](#rn12) · [RN13](#rn13) · [RN14](#rn14) · [RN16](#rn16) · [RN17](#rn17) · [RN18](#rn18) · [RN19](#rn19) · [RN20](#rn20) · [RN21](#rn21) · [RN22](#rn22) · [RN23](#rn23) · [RN24](#rn24) · [RN25](#rn25) · [RN26](#rn26) · [RN27](#rn27) · [RN28](#rn28) · [RN30](#rn30) · [RN31](#rn31) · [RN33](#rn33) · [RN34](#rn34) · [RN35](#rn35) · [RN36](#rn36) · [RN37](#rn37) · [RN38](#rn38) · [RN39](#rn39) · [RN40](#rn40) · [RN41](#rn41) · [RN42](#rn42) · [RN43](#rn43) · [RN44](#rn44) · [RN45](#rn45) · [RN46](#rn46) · [RN47](#rn47) · [RN48](#rn48) · [RN49](#rn49) · [RN50](#rn50) · [RN51](#rn51) · [RN52](#rn52) · [RN53](#rn53) · [RN54](#rn54) · [RN55](#rn55) · [RN56](#rn56) · [RN57](#rn57) · [RN58](#rn58) · [RN59](#rn59) · [RN60](#rn60)
 
 ## RN01
 
@@ -361,9 +361,11 @@ O conjunto de link e senha está vinculado a uma única família e a um único p
 
 ## RN47
 
-Após o ingresso, o membro mantém sessão válida e não precisa usar o link a cada acesso.
+Após o ingresso, o membro mantém a sessão por renovação com refresh token sem expiração temporal e não precisa usar o link a cada acesso. A ausência de expiração não impede a revogação: a remoção do perfil revoga também a capacidade de renovar seu acesso.
 
-**Requisitos funcionais:** [RF45](02-requisitos.md#rf45), [RF46](02-requisitos.md#rf46), [RF54](02-requisitos.md#rf54)  
+Se perder a sessão, o usuário solicita a um Administrador um novo convite (link e senha de uso único) para o mesmo perfil ativo. O novo ingresso recupera o acesso sem criar outro perfil, mantendo histórico, tarefas e vínculos. O Criador recupera o acesso pelo Sign in with Apple.
+
+**Requisitos funcionais:** [RF41](02-requisitos.md#rf41), [RF45](02-requisitos.md#rf45), [RF46](02-requisitos.md#rf46), [RF54](02-requisitos.md#rf54)  
 **Requisitos não funcionais específicos:** [RNF22](02-requisitos.md#rnf22)  
 **Casos de uso relacionados:** [UC02](03-casos-de-uso.md#uc02), [UC09](03-casos-de-uso.md#uc09)
 
@@ -464,8 +466,22 @@ A exclusão de tarefa não concluída remove seus vínculos com missões em anda
 **Casos de uso relacionados:** [UC05](03-casos-de-uso.md#uc05), [UC07](03-casos-de-uso.md#uc07), [UC17](03-casos-de-uso.md#uc17)
 
 
+## RN60
+
+Administradores e Membros acessam a área Família, consultam tarefas de outras pessoas e sem responsável e acompanham o progresso coletivo do dia selecionado. A consulta diária abre no dia atual e usa o mesmo intervalo do carrossel de RN49: da criação da família até o último dia do mês corrente.
+
+O progresso diário da família é a quantidade de tarefas concluídas daquele dia dividida pelo total de tarefas daquele dia, em percentual. Cada tarefa individual conta uma única vez, independentemente do peso ou da quantidade de responsáveis; tarefas sem responsável também pertencem ao total. Pendentes e Aguardando confirmação não entram no numerador. Sem tarefas no dia, apresentar “Sem tarefas”, sem divisão por zero ou conclusão fictícia. Conclusões válidas, reaberturas e exclusões autorizadas atualizam o indicador conforme o estado corrente das tarefas.
+
+A área reúne acesso à carga semanal para adultos e, exclusivamente para Administradores, ao gerenciamento de membros e à confirmação de tarefas Kids. Kids continuam com suas tarefas, seu progresso pessoal e as missões; não acessam esta área adulta.
+
+**Requisitos funcionais:** [RF60](02-requisitos.md#rf60)  
+**Requisitos não funcionais específicos:** [RNF01](02-requisitos.md#rnf01), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF09](02-requisitos.md#rnf09)  
+**Casos de uso relacionados:** [UC11](03-casos-de-uso.md#uc11)
+
 ## Histórico de versões
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.2 | 2026-10-01 | Área Família na navegação adulta, progresso coletivo diário e consulta por carrossel: RN60, RF60 e UC11. Design em elaboração na versão 1.0. |
+| 1.1 | 2026-10-01 | Recuperação do mesmo perfil por novo convite e renovação sem expiração temporal, com revogação preservada: RN47, RF41, RF46, RF54, RNF22, UC02 e UC09. |
 | 1.0 | 2026-10-01 | Primeira versão consolidada, incluindo todas as decisões registradas até esta publicação e links para a visão e a apresentação do projeto. |

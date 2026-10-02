@@ -3,7 +3,7 @@
 Organização colaborativa das responsabilidades domésticas, com tarefas compartilhadas, participação infantil e conquistas coletivas.
 
 **Escopo:** MVP  
-**Versão da base do projeto:** 1.0  
+**Versão da base do projeto:** 1.2  
 **Data:** 2026-10-01
 
 ## Por que este projeto existe
@@ -81,12 +81,23 @@ As possibilidades de evolução estão no [documento de visão](docs/00-visao-do
 | [Requisitos funcionais e não funcionais](docs/02-requisitos.md) | Comportamentos esperados, qualidade, segurança e integridade. |
 | [Casos de uso](docs/03-casos-de-uso.md) | Os 17 fluxos, com atores, pré-condições, alternativas e resultados. |
 | [Diagramas de caso de uso](docs/04-diagramas-de-caso-de-uso.md) | Visão geral e quatro diagramas UML por área, com fontes editáveis. |
+| [Screen map](docs/design/screen-map.md) | Estrutura de navegação, telas, modais, estados e permissões para apoiar o design. |
 | [Índice e controle documental](docs/DOCUMENTACAO.md) | Rastreabilidade e convenções para manter a documentação consistente. |
 
-A versão 1.0 identifica a base de definição do MVP. Não representa, por si só, uma declaração de que o aplicativo foi implementado ou publicado.
+A versão 1.2 identifica a base de definição do MVP. Não representa, por si só, uma declaração de que o aplicativo foi implementado ou publicado.
+
+## Área Família
+
+Família é uma área da navegação principal adulta. Administradores e Membros acompanham o progresso coletivo diário, consultam tarefas da família pelo mesmo carrossel de dias e acessam a carga semanal. O progresso conta tarefas concluídas sobre o total do dia, uma vez por tarefa, inclusive compartilhadas ou sem responsável. Somente Administradores gerenciam membros e confirmam sinalizações Kids. Sem tarefas no dia, o aplicativo informa essa condição.
+
+## Continuidade e recuperação de acesso
+
+A sessão dos convidados é mantida por refresh token sem expiração temporal, sujeito à revogação de acesso. Se a sessão for perdida, um Administrador gera novo link e senha de uso único para o mesmo perfil ativo, preservando histórico e vínculos. O Criador retorna pelo Sign in with Apple.
 
 ## Histórico
 
 | Versão | Data | Marco |
 |---|---|---|
+| 1.2 | 2026-10-01 | Área Família na navegação adulta, progresso coletivo diário e consulta por carrossel: RN60, RF60 e UC11. Design em elaboração na versão 1.0. |
+| 1.1 | 2026-10-01 | Recuperação do mesmo perfil por novo convite e renovação sem expiração temporal, com revogação preservada: RN47, RF41, RF46, RF54, RNF22, UC02 e UC09. |
 | 1.0 | 2026-10-01 | Consolidação da visão, do escopo e dos comportamentos do MVP, com regras, requisitos e casos de uso rastreáveis. |

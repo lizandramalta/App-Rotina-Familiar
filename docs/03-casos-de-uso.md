@@ -1,11 +1,11 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.0  
+**Versão:** 1.2  
 **Data:** 2026-10-01  
 **Situação:** base documental consolidada
 
-[Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md)
+[Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md)
 
 Os 17 casos de uso abaixo descrevem os fluxos vigentes. As referências de regras são derivadas dos RF associados; os RNFs indicam as condições de qualidade aplicáveis.
 
@@ -40,7 +40,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 | [UC08](#uc08) | Definir recorrência de rotina | [RF13](02-requisitos.md#rf13), [RF14](02-requisitos.md#rf14) |
 | [UC09](#uc09) | Ingressar por convite | [RF42](02-requisitos.md#rf42), [RF43](02-requisitos.md#rf43), [RF44](02-requisitos.md#rf44), [RF45](02-requisitos.md#rf45), [RF46](02-requisitos.md#rf46), [RF54](02-requisitos.md#rf54) |
 | [UC10](#uc10) | Editar perfil | [RF48](02-requisitos.md#rf48) |
-| [UC11](#uc11) | Visualizar minhas tarefas | [RF11](02-requisitos.md#rf11), [RF17](02-requisitos.md#rf17), [RF22](02-requisitos.md#rf22), [RF49](02-requisitos.md#rf49) |
+| [UC11](#uc11) | Visualizar minhas tarefas e consultar o dia da família | [RF60](02-requisitos.md#rf60), [RF11](02-requisitos.md#rf11), [RF17](02-requisitos.md#rf17), [RF22](02-requisitos.md#rf22), [RF49](02-requisitos.md#rf49) |
 | [UC12](#uc12) | Concluir tarefa | [RF12](02-requisitos.md#rf12), [RF47](02-requisitos.md#rf47), [RF56](02-requisitos.md#rf56) |
 | [UC13](#uc13) | Visualizar carga semanal | [RF18](02-requisitos.md#rf18), [RF19](02-requisitos.md#rf19), [RF20](02-requisitos.md#rf20), [RF21](02-requisitos.md#rf21), [RF56](02-requisitos.md#rf56), [RF57](02-requisitos.md#rf57) |
 | [UC14](#uc14) | Acompanhar missões e recompensas | [RF30](02-requisitos.md#rf30), [RF31](02-requisitos.md#rf31), [RF36](02-requisitos.md#rf36), [RF58](02-requisitos.md#rf58) |
@@ -109,6 +109,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Alternativas e exceções:**
 
+- Se um usuário perder a sessão, o Administrador pode selecionar seu perfil ativo existente e gerar um novo convite com link e senha de uso único. A recuperação preserva o perfil, o histórico, as tarefas e os vínculos; não exige adicionar outro membro.
 - O Administrador pode editar os dados permitidos de outros perfis.
 - Pode promover um Membro adulto a Administrador; perfis Kids devem sair desse modo antes da promoção.
 - Pode rebaixar outro Administrador, exceto o Criador. Um Administrador também pode deixar seu próprio papel, exceto o Criador.
@@ -340,7 +341,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 **Regras relacionadas:** [RN10](01-regras-de-negocio.md#rn10), [RN45](01-regras-de-negocio.md#rn45), [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47)  
 **Requisitos não funcionais:** [RNF01](02-requisitos.md#rnf01), [RNF04](02-requisitos.md#rnf04), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF08](02-requisitos.md#rnf08), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF14](02-requisitos.md#rnf14), [RNF17](02-requisitos.md#rnf17), [RNF18](02-requisitos.md#rnf18), [RNF19](02-requisitos.md#rnf19), [RNF20](02-requisitos.md#rnf20), [RNF21](02-requisitos.md#rnf21), [RNF22](02-requisitos.md#rnf22)
 
-**Objetivo:** efetivar o vínculo ao perfil mediante link e senha de ingresso.
+**Objetivo:** efetivar o vínculo ou recuperar o acesso ao mesmo perfil ativo mediante novo link e senha de ingresso.
 
 **Atores:** pessoa convidada para perfil Membro, Kids ou Administrador promovido.
 
@@ -362,7 +363,9 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 - Senha incorreta não efetiva o vínculo nem consome o convite como ingresso bem-sucedido. O sistema permite correção, respeitando os controles contra tentativas abusivas.
 - Link inválido, já consumido ou associado a perfil removido não concede acesso.
 - Tentativas simultâneas permitem somente um ingresso bem-sucedido.
-- Nos acessos seguintes, uma sessão válida dispensa o link e a senha de ingresso.
+- Nos acessos seguintes, a sessão é renovada por refresh token sem expiração temporal e dispensa o link e a senha de ingresso, respeitando a revogação de acesso.
+- Se perder a sessão, a pessoa solicita um novo convite a um Administrador. O mesmo fluxo de link e senha recupera o acesso ao perfil ativo existente, preservando histórico, tarefas e vínculos.
+- Perfil removido não pode recuperar acesso nem renovar sessão. O Criador retorna pelo Sign in with Apple (UC04), com redirecionamento à família existente (UC01).
 
 **Pós-condição:** perfil vinculado, sessão criada e convite consumido. A senha serve exclusivamente para o ingresso, não como senha de login posterior.
 
@@ -400,11 +403,11 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Tarefas e rotina](04-diagramas-de-caso-de-uso.md#03-tarefas-rotina) · [Participação Kids](04-diagramas-de-caso-de-uso.md#04-participacao-kids)
 
-**Requisitos funcionais:** [RF11](02-requisitos.md#rf11), [RF17](02-requisitos.md#rf17), [RF22](02-requisitos.md#rf22), [RF49](02-requisitos.md#rf49)  
-**Regras relacionadas:** [RN16](01-regras-de-negocio.md#rn16), [RN22](01-regras-de-negocio.md#rn22), [RN26](01-regras-de-negocio.md#rn26), [RN27](01-regras-de-negocio.md#rn27), [RN33](01-regras-de-negocio.md#rn33), [RN49](01-regras-de-negocio.md#rn49), [RN55](01-regras-de-negocio.md#rn55)  
+**Requisitos funcionais:** [RF60](02-requisitos.md#rf60), [RF11](02-requisitos.md#rf11), [RF17](02-requisitos.md#rf17), [RF22](02-requisitos.md#rf22), [RF49](02-requisitos.md#rf49)  
+**Regras relacionadas:** [RN60](01-regras-de-negocio.md#rn60), [RN16](01-regras-de-negocio.md#rn16), [RN22](01-regras-de-negocio.md#rn22), [RN26](01-regras-de-negocio.md#rn26), [RN27](01-regras-de-negocio.md#rn27), [RN33](01-regras-de-negocio.md#rn33), [RN49](01-regras-de-negocio.md#rn49), [RN55](01-regras-de-negocio.md#rn55)  
 **Requisitos não funcionais:** [RNF01](02-requisitos.md#rnf01), [RNF02](02-requisitos.md#rnf02), [RNF04](02-requisitos.md#rnf04), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF08](02-requisitos.md#rnf08), [RNF09](02-requisitos.md#rnf09), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF14](02-requisitos.md#rnf14), [RNF22](02-requisitos.md#rnf22)
 
-**Objetivo:** consultar as próprias tarefas e o próprio progresso diário.
+**Objetivo:** consultar as próprias tarefas e o próprio progresso diário; para adultos, também consultar as tarefas e o progresso coletivo pela área Família.
 
 **Atores:** Administrador, Membro e Kids.
 
@@ -427,6 +430,16 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 - Dias sem tarefas são apresentados como tal, sem registros fictícios de conclusão.
 - Na mudança de dia, o checklist passa a abrir no novo dia; tarefas não realizadas não geram penalidades.
 - Kids visualizam seu próprio progresso diário, mas não a carga semanal da família.
+
+**Consulta complementar — Família (Administrador e Membro):**
+
+1. O adulto seleciona Família na navegação principal.
+2. O sistema abre o dia atual e apresenta o progresso coletivo: tarefas concluídas dividido pelo total de tarefas daquele dia, contando cada tarefa individual uma vez, inclusive tarefas compartilhadas ou sem responsável.
+3. O adulto navega pelo mesmo intervalo do carrossel de dias do checklist pessoal; o progresso acompanha a data selecionada.
+4. Ao abrir as tarefas da família, o sistema mantém a data e permite consultar tarefas de outras pessoas e sem responsável. Gerenciar e concluir continuam sujeitos a UC07 e UC12.
+5. A área oferece acesso à carga semanal por UC13. Somente Administradores também acessam gerenciamento de membros (UC02) e confirmações Kids (UC03).
+
+Sem tarefas no dia, o sistema informa essa condição sem divisão por zero. Tarefas aguardando confirmação não entram nas concluídas. Conclusão, reabertura e exclusão autorizadas atualizam o progresso. Kids não acessam esta área. UC11 também abrange a consulta diária familiar adulta.
 
 **Pós-condição:** o usuário consulta uma data permitida sem alterar o estado das tarefas.
 
@@ -653,6 +666,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.2 | 2026-10-01 | Área Família na navegação adulta, progresso coletivo diário e consulta por carrossel: RN60, RF60 e UC11. Design em elaboração na versão 1.0. |
+| 1.1 | 2026-10-01 | Recuperação do mesmo perfil por novo convite e renovação sem expiração temporal, com revogação preservada: RN47, RF41, RF46, RF54, RNF22, UC02 e UC09. |
 | 1.0 | 2026-10-01 | Primeira versão consolidada, incluindo todas as decisões registradas até esta publicação e links para a visão e a apresentação do projeto. |
 
 Complemento visual de 2026-10-01: adicionadas referências aos diagramas de UC01–UC17, mantendo a base funcional 1.0.

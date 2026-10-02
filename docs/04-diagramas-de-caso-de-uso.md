@@ -1,13 +1,13 @@
 # Diagramas de caso de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão de referência:** 1.0  
+**Versão de referência:** 1.2  
 **Data:** 2026-10-01  
 **Situação:** complemento visual da base documental
 
-[Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice documental](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Especificação dos casos de uso](03-casos-de-uso.md)
+[Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice documental](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Especificação dos casos de uso](03-casos-de-uso.md) · [Screen map](design/screen-map.md)
 
-Os cinco diagramas representam os 17 casos de uso da versão 1.0. Os códigos, nomes e permissões seguem a especificação textual, que continua sendo a referência para pré-condições, fluxos, exceções e resultados. A visão geral reúne todo o escopo; os recortes permitem ler cada área em maior detalhe. Casos repetidos em mais de um desenho têm o mesmo significado.
+Os cinco diagramas representam os 17 casos de uso da versão 1.2. Os códigos, nomes e permissões seguem a especificação textual, que continua sendo a referência para pré-condições, fluxos, exceções e resultados. A visão geral reúne todo o escopo; os recortes permitem ler cada área em maior detalhe. Casos repetidos em mais de um desenho têm o mesmo significado.
 
 ## Como ler
 
@@ -146,4 +146,9 @@ Ao alterar um UC, confira sua presença na visão geral e em todos os recortes l
 
 | Versão de referência | Data | Alteração |
 |---|---|---|
+| 1.2 | 2026-10-01 | Área Família na navegação adulta, progresso coletivo diário e consulta por carrossel: RN60, RF60 e UC11. Design em elaboração na versão 1.0. |
+| 1.1 | 2026-10-01 | Recuperação do mesmo perfil por novo convite e renovação sem expiração temporal, com revogação preservada: RN47, RF41, RF46, RF54, RNF22, UC02 e UC09. |
 | 1.0 | 2026-10-01 | Complemento visual: visão geral e quatro recortes dos 17 UCs, sem alteração de escopo ou comportamento. |
+
+
+UC11 abrange a consulta diária pessoal e a área Família para adultos, conforme a especificação textual. A separação de telas por perfil está no screen map.

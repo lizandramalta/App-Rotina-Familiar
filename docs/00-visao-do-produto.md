@@ -1,11 +1,11 @@
 # Documento de visão — MVP
 
 **Projeto:** App de Organização Familiar  
-**Versão:** 1.0  
+**Versão:** 1.2  
 **Data:** 2026-10-01  
 **Situação:** visão consolidada do produto
 
-[Projeto](../README.md) · [Índice documental](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md)
+[Projeto](../README.md) · [Índice documental](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md)
 
 ## 1. Contexto e problema
 
@@ -70,7 +70,7 @@ Os fluxos completos estão na [especificação dos casos de uso](03-casos-de-uso
 
 ## 7. Regras centrais da experiência
 
-| Tema | Comportamento da versão 1.0 | Referências |
+| Tema | Comportamento da versão 1.2 | Referências |
 |---|---|---|
 | Acesso e vínculo | Apple exclusivo do Criador; demais perfis ingressam com link e senha de uso único. Remover um membro revoga o acesso, inclusive por sessões abertas. | [RN10](01-regras-de-negocio.md#rn10), [RN44](01-regras-de-negocio.md#rn44), [RN46](01-regras-de-negocio.md#rn46), [UC09](03-casos-de-uso.md#uc09) |
 | Tarefas e rotinas | Tarefa única ou rotina diária ou a cada 7, 14, 21 ou 28 dias. Não existe frequência mensal. Cada ocorrência possui identificação e estado próprios. | [RN14](01-regras-de-negocio.md#rn14), [RN16](01-regras-de-negocio.md#rn16), [UC08](03-casos-de-uso.md#uc08) |
@@ -86,7 +86,7 @@ Os fluxos completos estão na [especificação dos casos de uso](03-casos-de-uso
 
 ## 8. Escopo do MVP
 
-O escopo vigente corresponde ao conjunto consolidado de regras, requisitos e casos de uso da versão 1.0. A priorização inicial foi ajustada para incorporar as decisões posteriores; assumir tarefas e atribuir vários responsáveis já fazem parte do MVP.
+O escopo vigente corresponde ao conjunto consolidado de regras, requisitos e casos de uso da versão 1.2. A priorização inicial foi ajustada para incorporar as decisões posteriores; assumir tarefas e atribuir vários responsáveis já fazem parte do MVP.
 
 | Capacidade incluída | Casos de uso |
 |---|---|
@@ -147,8 +147,18 @@ Esta versão preserva o contexto, o problema, os objetivos e os princípios do a
 
 Os comportamentos são detalhados nas [regras de negócio](01-regras-de-negocio.md), nos [requisitos funcionais e não funcionais](02-requisitos.md) e nos [casos de uso](03-casos-de-uso.md). As tabelas das seções 7 e 8 conectam a visão a esses documentos. Mudanças futuras de escopo devem ser refletidas no conjunto, conforme o [controle de versões](DOCUMENTACAO.md).
 
+## Área Família
+
+Família é uma área da navegação principal adulta. Administradores e Membros acompanham o progresso coletivo diário, consultam tarefas da família pelo mesmo carrossel de dias e acessam a carga semanal. O progresso conta tarefas concluídas sobre o total do dia, uma vez por tarefa, inclusive compartilhadas ou sem responsável. Somente Administradores gerenciam membros e confirmam sinalizações Kids. Sem tarefas no dia, o aplicativo informa essa condição.
+
+## Continuidade e recuperação de acesso
+
+A sessão dos convidados é mantida por refresh token sem expiração temporal, sujeito à revogação de acesso. Se a sessão for perdida, um Administrador gera novo link e senha de uso único para o mesmo perfil ativo, preservando histórico e vínculos. O Criador retorna pelo Sign in with Apple.
+
 ## Histórico de versões
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.2 | 2026-10-01 | Área Família na navegação adulta, progresso coletivo diário e consulta por carrossel: RN60, RF60 e UC11. Design em elaboração na versão 1.0. |
+| 1.1 | 2026-10-01 | Recuperação do mesmo perfil por novo convite e renovação sem expiração temporal, com revogação preservada: RN47, RF41, RF46, RF54, RNF22, UC02 e UC09. |
 | 1.0 | 2026-10-01 | Primeira visão consolidada em Markdown. Alinhamento de perfis e permissões, acesso por convite e senha, frequências de rotina, tarefas compartilhadas, foto opcional, carga, navegação, missões sem prazo, recompensas e preservação de conquistas. Atualização do escopo e das exclusões. |

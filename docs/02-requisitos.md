@@ -1,11 +1,11 @@
 # Requisitos funcionais e não funcionais
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.0  
+**Versão:** 1.2  
 **Data:** 2026-10-01  
 **Situação:** base documental consolidada
 
-[Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md)
+[Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md)
 
 RF descreve o comportamento que o sistema deve oferecer. RNF define condições de qualidade, segurança e integridade. As regras de negócio ficam no documento próprio; não é necessário consultar versões anteriores para interpretar esta base.
 
@@ -300,9 +300,9 @@ O sistema deve permitir somente a Administradores criar os perfis dos demais mem
 
 ### RF41
 
-O sistema deve permitir ao Administrador gerar um link e uma senha de ingresso correspondentes a uma única família e a um único perfil previamente criado. Deve disponibilizá-los para envio conjunto e permitir somente um ingresso bem-sucedido.
+O sistema deve permitir ao Administrador gerar um link e uma senha de ingresso correspondentes a uma única família e a um único perfil previamente criado. Deve disponibilizá-los para envio conjunto e permitir somente um ingresso bem-sucedido. Em caso de perda da sessão, deve permitir gerar novo convite para o mesmo perfil ativo, preservando sua identidade, seu histórico e seus vínculos.
 
-**Regras de negócio:** [RN45](01-regras-de-negocio.md#rn45), [RN46](01-regras-de-negocio.md#rn46)  
+**Regras de negócio:** [RN45](01-regras-de-negocio.md#rn45), [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47)  
 **Casos de uso:** [UC02](03-casos-de-uso.md#uc02)
 
 ### RF42
@@ -335,7 +335,7 @@ O sistema deve associar a sessão criada após o ingresso à família e ao perfi
 
 ### RF46
 
-O sistema deve manter a sessão válida do membro após o ingresso, permitindo os acessos seguintes sem exigir novamente o link ou a senha de ingresso enquanto a sessão permanecer válida.
+O sistema deve manter a sessão válida do membro após o ingresso, permitindo os acessos seguintes sem exigir novamente o link ou a senha de ingresso por renovação com refresh token sem expiração temporal, enquanto o perfil e o acesso permanecerem válidos. Se a sessão for perdida, deve orientar a obtenção de novo convite com um Administrador e permitir recuperar o mesmo perfil pelo ingresso com esse novo link e sua senha.
 
 **Regras de negócio:** [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47)  
 **Casos de uso:** [UC09](03-casos-de-uso.md#uc09)
@@ -391,7 +391,7 @@ O sistema deve encerrar o resgate da missão para toda a família após a aceita
 
 ### RF54
 
-O sistema deve gerar a senha de ingresso com o convite, disponibilizar seu envio junto ao link e solicitá-la antes de efetivar o vínculo. A senha serve apenas ao primeiro ingresso e não deve ser exigida nos acessos posteriores com sessão válida.
+O sistema deve gerar a senha de ingresso com o convite, disponibilizar seu envio junto ao link e solicitá-la antes de efetivar o vínculo. A senha serve apenas ao ingresso com o respectivo convite e não deve ser exigida nos acessos posteriores com sessão válida. Um novo convite de recuperação exige sua própria senha e também admite um único uso bem-sucedido.
 
 **Regras de negócio:** [RN45](01-regras-de-negocio.md#rn45), [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47)  
 **Casos de uso:** [UC02](03-casos-de-uso.md#uc02), [UC09](03-casos-de-uso.md#uc09)
@@ -430,6 +430,17 @@ Ao excluir uma tarefa não concluída, o sistema deve remover seus vínculos de 
 
 **Regras de negócio:** [RN50](01-regras-de-negocio.md#rn50), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59)  
 **Casos de uso:** [UC07](03-casos-de-uso.md#uc07), [UC17](03-casos-de-uso.md#uc17)
+
+### RF60
+
+O sistema deve oferecer a Administradores e Membros uma área Família na navegação principal, com consulta do progresso total diário e acesso às tarefas de outras pessoas e sem responsável. Deve abrir no dia atual, aplicar o intervalo de RN49 e preservar a data selecionada ao abrir a subtela de tarefas da família.
+
+Deve apresentar o progresso como tarefas concluídas divididas pelo total de tarefas da data selecionada, contando cada tarefa uma vez, sem ponderar peso nem multiplicar por responsáveis. Sem tarefas, deve informar essa condição. Tarefas Aguardando confirmação não contam como concluídas. Alterações válidas de estado ou exclusões devem atualizar o indicador.
+
+A área deve oferecer acesso à carga semanal para ambos os perfis, mantendo o período de segunda a domingo. O gerenciamento de membros e a fila de confirmações Kids devem ser oferecidos somente ao Administrador, seguindo as permissões já definidas. A área Família não concede novas permissões a Kids.
+
+**Regras de negócio:** [RN60](01-regras-de-negocio.md#rn60)  
+**Casos de uso:** [UC11](03-casos-de-uso.md#uc11)
 
 <a id="requisitos-nao-funcionais"></a>
 
@@ -630,7 +641,7 @@ O consumo do convite e da senha e a efetivação do ingresso devem permanecer co
 
 **Categoria:** Sessões e revogação
 
-As sessões devem proteger seus identificadores e ter sua validade e associação ao perfil ativo e à família verificadas nas operações protegidas. A remoção de um perfil deve revogar seu acesso, inclusive por sessões abertas antes da remoção.
+As sessões devem proteger seus identificadores e ter sua validade e associação ao perfil ativo e à família verificadas nas operações protegidas. A renovação utiliza refresh token sem expiração temporal. A remoção de um perfil deve revogar seu acesso, inclusive por sessões abertas antes da remoção e por tentativas de renovação com refresh tokens anteriores. Ausência de expiração temporal não equivale a ausência de revogação.
 
 **Regras relacionadas:** [RN10](01-regras-de-negocio.md#rn10), [RN47](01-regras-de-negocio.md#rn47)  
 **Aplicação nos casos de uso:** [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17)
@@ -667,4 +678,6 @@ Reabertura, atualização da carga, atualização de progresso e verificação d
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.2 | 2026-10-01 | Área Família na navegação adulta, progresso coletivo diário e consulta por carrossel: RN60, RF60 e UC11. Design em elaboração na versão 1.0. |
+| 1.1 | 2026-10-01 | Recuperação do mesmo perfil por novo convite e renovação sem expiração temporal, com revogação preservada: RN47, RF41, RF46, RF54, RNF22, UC02 e UC09. |
 | 1.0 | 2026-10-01 | Primeira versão consolidada, incluindo todas as decisões registradas até esta publicação e links para a visão e a apresentação do projeto. |
