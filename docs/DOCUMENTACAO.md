@@ -18,8 +18,8 @@
 | [Requisitos](02-requisitos.md) | 60 requisitos funcionais e 25 não funcionais, com vínculos às regras e aos casos de uso. |
 | [Especificação dos casos de uso](03-casos-de-uso.md) | 17 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições. |
 | [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) | Visão geral e quatro recortes UML, com fontes PlantUML e imagens SVG. |
-
 | [Screen map](design/screen-map.md) | Mapa 1.0: navegação, catálogo de telas, modais, estados e cobertura de UC01–UC17; base funcional 1.2. |
+| [User flows](design/user-flows.md) | Fluxos 1.0 para revisão: 13 percursos que cobrem UC01–UC17, com decisões, alternativas e retornos; base funcional 1.2 e screen map 1.0. |
 
 ## Como usar
 
@@ -31,7 +31,7 @@ Esta é uma base completa e consolidada. Não é uma lista de correções e não
 
 - `docs/`: visão, regras, requisitos, casos de uso e índice documental.
 - `docs/diagramas/casos-de-uso/`: fontes PlantUML e imagens dos diagramas de casos de uso.
-- `docs/design/`: screen map e futuros user flows, com referências à base funcional.
+- `docs/design/`: screen map e user flows, com referências à base funcional.
 
 ## Rastreabilidade
 
@@ -73,7 +73,7 @@ A área Família reúne progresso coletivo diário, tarefas por data e carga sem
 ## Política de versionamento
 
 1. A base funcional vigente está na versão **1.2**. Os documentos de design em `docs/design/` permanecem na versão **1.0** durante sua elaboração inicial, referenciando a base funcional vigente.
-2. Preserve os identificadores RN, RF, RNF, UC, TEL e MOD. Novos itens recebem novos códigos; códigos retirados não são reutilizados.
+2. Preserve os identificadores RN, RF, RNF, UC, TEL, MOD e UF. Novos itens recebem novos códigos; códigos retirados não são reutilizados.
 3. A edição vigente fica na raiz e em `docs/`. O Git mantém o histórico e permite comparar ou recuperar versões anteriores por commits e, quando adotadas, tags. Não mantenha cópias da documentação em pastas de versões.
 4. Alterações funcionais e suas referências devem evoluir juntas, com versão, data e histórico dos códigos e comportamentos afetados. Use 1.1, 1.2... para revisões incrementais e 2.0 para mudanças substanciais da base funcional.
 5. Preserve os IDs para design e user flows e registre as alterações no Git. Ajustes do screen map e dos user flows durante esta elaboração integram o design 1.0, sem incremento automático. Se alterarem comportamento, atualize e versione a base funcional correspondente; a versão de design é independente.
@@ -87,3 +87,5 @@ A área Família reúne progresso coletivo diário, tarefas por data e carga sem
 | 1.0 | 2026-10-01 | Primeira versão consolidada, incluindo a visão alinhada ao MVP, a apresentação global do projeto e todas as decisões registradas até esta publicação. |
 
 Complemento visual de 2026-10-01: adicionados cinco diagramas de UC01–UC17 e referências de navegação; mantida a base funcional 1.0.
+
+Complemento de design de 2026-10-01: adicionados user flows 1.0 para revisão, referenciando a base funcional estável 1.2 e o screen map estável 1.0, sem alteração de comportamento.

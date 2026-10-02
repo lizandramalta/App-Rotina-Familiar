@@ -82,6 +82,7 @@ As possibilidades de evolução estão no [documento de visão](docs/00-visao-do
 | [Casos de uso](docs/03-casos-de-uso.md) | Os 17 fluxos, com atores, pré-condições, alternativas e resultados. |
 | [Diagramas de caso de uso](docs/04-diagramas-de-caso-de-uso.md) | Visão geral e quatro diagramas UML por área, com fontes editáveis. |
 | [Screen map](docs/design/screen-map.md) | Estrutura de navegação, telas, modais, estados e permissões para apoiar o design. |
+| [User flows](docs/design/user-flows.md) | Caminhos por objetivo, decisões, cancelamentos e erros, ligados às telas e aos casos de uso. |
 | [Índice e controle documental](docs/DOCUMENTACAO.md) | Rastreabilidade e convenções para manter a documentação consistente. |
 
 A versão 1.2 identifica a base de definição do MVP. Não representa, por si só, uma declaração de que o aplicativo foi implementado ou publicado.
