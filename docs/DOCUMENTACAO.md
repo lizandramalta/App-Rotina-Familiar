@@ -5,7 +5,7 @@
 **Data:** 2026-10-02  
 **Situação:** base documental consolidada
 
-[Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md)
+[Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Modelo de dados](05-modelo-de-dados.md)
 
 ## Documentos
 
@@ -20,6 +20,7 @@
 | [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) | Visão geral e cinco recortes UML, com fontes PlantUML e imagens SVG. |
 | [Screen map](design/screen-map.md) | Mapa 1.0: navegação, catálogo de telas, modais, estados e cobertura de UC01–UC19; base funcional 1.3. |
 | [User flows](design/user-flows.md) | Fluxos 1.0 para revisão: 15 percursos que cobrem UC01–UC19, com decisões, alternativas e retornos; base funcional 1.3 e screen map 1.0. |
+| [Modelo de dados (DER)](05-modelo-de-dados.md) | Diagrama entidade-relacionamento em Mermaid: entidades, atributos, chaves e cardinalidades; base funcional 1.3. |
 
 ## Como usar
 
@@ -29,7 +30,7 @@ Esta é uma base completa e consolidada. Não é uma lista de correções e não
 
 ## Organização dos arquivos
 
-- `docs/`: visão, regras, requisitos, casos de uso e índice documental.
+- `docs/`: visão, regras, requisitos, casos de uso, modelo de dados e índice documental.
 - `docs/diagramas/casos-de-uso/`: fontes PlantUML e imagens dos diagramas de casos de uso.
 - `docs/design/`: screen map e user flows, com referências à base funcional.
 
