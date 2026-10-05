@@ -1,15 +1,15 @@
 # Requisitos funcionais e não funcionais
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.4  
-**Data:** 2026-10-02  
+**Versão:** 1.5\
+**Data:** 2026-10-05\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
 
 RF descreve o comportamento que o sistema deve oferecer. RNF define condições de qualidade, segurança e integridade. As regras de negócio ficam no documento próprio; não é necessário consultar versões anteriores para interpretar esta base.
 
-**Conteúdo:** 66 requisitos funcionais e 27 requisitos não funcionais.
+**Conteúdo:** 68 requisitos funcionais e 27 requisitos não funcionais.
 
 ## Índice
 
@@ -41,7 +41,7 @@ O sistema deve permitir somente a Administradores editar os dados e o perfil de 
 
 ### RF04
 
-O sistema deve permitir somente a Administradores remover membros, exceto o Criador. Deve revogar o acesso do removido, inclusive por sessões existentes, deixar suas tarefas futuras sem responsável e preservar o histórico concluído.
+O sistema deve permitir somente a Administradores remover membros, exceto o Criador. Revogar o acesso e retirar somente o removido dos responsáveis de tarefas futuras não concluídas/não protegidas, preservando os demais. Não alterar automaticamente pendências antigas nem tarefas concluídas/protegidas; preservar histórico, conforme RN10.
 
 **Regras de negócio:** [RN05](01-regras-de-negocio.md#rn05), [RN07](01-regras-de-negocio.md#rn07), [RN10](01-regras-de-negocio.md#rn10)  
 **Casos de uso:** [UC02](03-casos-de-uso.md#uc02)
@@ -62,14 +62,14 @@ O sistema deve permitir somente a Administradores ativar ou desativar o Modo Kid
 
 ### RF07
 
-O sistema deve permitir a Administradores e Membros criar tarefas com título e peso obrigatórios e responsável opcional. A criação deve oferecer tarefa única, sem repetição, ou a configuração de uma rotina que gere tarefas individuais.
+O sistema deve permitir a adultos criar tarefas com título, peso e data prevista, responsáveis opcionais e repetição opcional. A data começa hoje no fuso da família; DatePicker permite qualquer data passada ou futura, inclusive antes da criação da família e fora do mês atual.
 
 **Regras de negócio:** [RN11](01-regras-de-negocio.md#rn11), [RN19](01-regras-de-negocio.md#rn19), [RN20](01-regras-de-negocio.md#rn20)  
 **Casos de uso:** [UC07](03-casos-de-uso.md#uc07)
 
 ### RF08
 
-O sistema deve permitir a Administradores e Membros editar uma tarefa individual ou sua rotina, respeitando o alcance da alteração e preservando dados passados. Deve impedir mudanças que modifiquem registros preservados de missões concluídas.
+O sistema deve permitir a adultos editar tarefa individual ou rotina no alcance autorizado. Concluída sem proteção de missão concluída admite título, peso, data prevista e responsáveis, com atualização do crédito/progresso e auditoria conforme RN17. Edição futura de rotina preserva passado e ocorrências concluídas/protegidas. A última gravação válida no servidor prevalece sem controle de versão otimista.
 
 **Regras de negócio:** [RN17](01-regras-de-negocio.md#rn17), [RN19](01-regras-de-negocio.md#rn19), [RN20](01-regras-de-negocio.md#rn20), [RN58](01-regras-de-negocio.md#rn58)  
 **Casos de uso:** [UC07](03-casos-de-uso.md#uc07)
@@ -83,7 +83,7 @@ O sistema deve permitir excluir tarefas não concluídas e, em rotinas, selecion
 
 ### RF10
 
-O sistema deve permitir a Administradores e Membros atribuir ou reatribuir tarefas a um ou mais responsáveis ou deixá-las sem responsável. Deve impedir reatribuições que alterem dados preservados de missões concluídas.
+O sistema permite a adultos atribuir, reatribuir ou remover responsáveis. Em concluída não protegida, atualizar créditos vigentes conforme RN17, preservando auditoria; sem responsáveis, não há crédito individual. Bloquear alterações em conquistas preservadas.
 
 **Regras de negócio:** [RN11](01-regras-de-negocio.md#rn11), [RN12](01-regras-de-negocio.md#rn12), [RN20](01-regras-de-negocio.md#rn20), [RN58](01-regras-de-negocio.md#rn58)  
 **Casos de uso:** [UC07](03-casos-de-uso.md#uc07)
@@ -104,7 +104,7 @@ O sistema deve permitir a Administradores e Membros concluir tarefas Pendentes o
 
 ### RF13
 
-O sistema deve permitir configurar a recorrência de uma rotina para gerar tarefas individuais. Cada tarefa gerada deve possuir identificação e status próprios, e a conclusão de uma delas não deve alterar as demais.
+O sistema deve configurar início por DatePicker sem limites de produto e frequência da rotina, gerando ocorrências independentes sem duplicação. Materializar até o fim do mês seguinte, repor diariamente e completar em consulta se necessário; início além do horizonte permanece programado. Concluir uma ocorrência não altera outras.
 
 **Regras de negócio:** [RN11](01-regras-de-negocio.md#rn11), [RN14](01-regras-de-negocio.md#rn14), [RN16](01-regras-de-negocio.md#rn16), [RN17](01-regras-de-negocio.md#rn17)  
 **Casos de uso:** [UC08](03-casos-de-uso.md#uc08)
@@ -237,7 +237,7 @@ O sistema deve concluir a missão quando todas as tarefas vinculadas estiverem c
 
 ### RF32
 
-O sistema deve permitir que a missão tenha um selo opcional e concedê-lo coletivamente aos perfis da família quando ela for concluída, exibindo-o nos perfis conforme RN64. A concessão do selo não deve depender do sorteio ou da aceitação da recompensa.
+Ao concluir uma missão, o sistema deve registrar uma participação por responsável creditado em pelo menos uma tarefa vinculada e conceder badges cumulativos nos marcos 5/10/25/50, conforme RN64. Não oferecer selo opcional por missão e não conceder a todos os membros indistintamente.
 
 **Regras de negócio:** [RN36](01-regras-de-negocio.md#rn36), [RN38](01-regras-de-negocio.md#rn38), [RN64](01-regras-de-negocio.md#rn64)  
 **Casos de uso:** [UC05](03-casos-de-uso.md#uc05)
@@ -300,7 +300,7 @@ O sistema deve permitir somente a Administradores criar os perfis dos demais mem
 
 ### RF41
 
-O sistema deve permitir ao Administrador gerar um link e uma senha de ingresso correspondentes a uma única família e a um único perfil previamente criado. Deve disponibilizá-los para envio conjunto e permitir somente um ingresso bem-sucedido. Em caso de perda da sessão, deve permitir gerar novo convite para o mesmo perfil ativo, preservando sua identidade, seu histórico e seus vínculos.
+O Administrador pode gerar ou reenviar convite para perfil ativo existente. Cada emissão gera novo link e senha, invalida convites anteriores e revoga a sessão anterior atomicamente. Mostrar os efeitos para confirmação; preservar perfil, histórico e vínculos e disponibilizar novas credenciais para envio conjunto.
 
 **Regras de negócio:** [RN45](01-regras-de-negocio.md#rn45), [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47)  
 **Casos de uso:** [UC02](03-casos-de-uso.md#uc02)
@@ -335,7 +335,7 @@ O sistema deve associar a sessão criada após o ingresso à família e ao perfi
 
 ### RF46
 
-O sistema deve manter a sessão válida do membro após o ingresso, permitindo os acessos seguintes sem exigir novamente o link ou a senha de ingresso por renovação com refresh token sem expiração temporal, enquanto o perfil e o acesso permanecerem válidos. Se a sessão for perdida, deve orientar a obtenção de novo convite com um Administrador e permitir recuperar o mesmo perfil pelo ingresso com esse novo link e sua senha.
+O sistema deve manter uma sessão ativa por perfil/aparelho, renovável por refresh token sem expiração temporal e revogável. Token de acesso dura 15 minutos e operações verificam a sessão ativa. Novo convite revoga a sessão anterior; recuperação preserva o mesmo perfil. Resposta perdida no ingresso admite recuperação comprovada da mesma tentativa por dez minutos, sem novo consumo; depois, novo convite.
 
 **Regras de negócio:** [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47)  
 **Casos de uso:** [UC09](03-casos-de-uso.md#uc09)
@@ -349,7 +349,7 @@ Ao concluir tarefa sem responsável, o sistema deve atribuí-la ao adulto que co
 
 ### RF48
 
-O sistema deve permitir a Administradores, Membros e Kids editar os dados permitidos do próprio perfil, adicionar, substituir ou remover foto opcional e configurar etiqueta/apelido. Deve impedir acesso de terceiros à configuração de apelido, inclusive por operação administrativa. A edição não altera papel, família nem modo Kids.
+O sistema deve permitir a Administradores, Membros e Kids editar os dados permitidos do próprio perfil, adicionar, substituir ou remover foto opcional por câmera ou galeria e configurar etiqueta/apelido. Deve impedir acesso de terceiros à configuração de apelido, inclusive por operação administrativa. A edição não altera papel, família nem modo Kids.
 
 **Regras de negócio:** [RN63](01-regras-de-negocio.md#rn63).  
 **Casos de uso:** [UC10](03-casos-de-uso.md#uc10)
@@ -370,7 +370,7 @@ O sistema deve permitir selecionar cada tarefa individual da missão separadamen
 
 ### RF51
 
-O sistema deve permitir somente a Administradores abrir a roleta de uma missão concluída e ainda sem resgate e sortear uma recompensa entre os itens predefinidos pelo aplicativo e os itens personalizados adicionados.
+O sistema deve permitir somente a Administradores abrir a roleta de missão concluída sem resgate, obter catálogo elegível e sortear/animar no aplicativo. Servidor valida e registra apenas a recompensa aceita, respeitando resgate único.
 
 **Regras de negócio:** [RN38](01-regras-de-negocio.md#rn38), [RN42](01-regras-de-negocio.md#rn42), [RN43](01-regras-de-negocio.md#rn43), [RN52](01-regras-de-negocio.md#rn52)  
 **Casos de uso:** [UC16](03-casos-de-uso.md#uc16)
@@ -391,7 +391,7 @@ O sistema deve encerrar o resgate da missão para toda a família após a aceita
 
 ### RF54
 
-O sistema deve gerar a senha de ingresso com o convite, disponibilizar seu envio junto ao link e solicitá-la antes de efetivar o vínculo. A senha serve apenas ao ingresso com o respectivo convite e não deve ser exigida nos acessos posteriores com sessão válida. Um novo convite de recuperação exige sua própria senha e também admite um único uso bem-sucedido.
+A emissão, inclusive reenvio, deve gerar novo link e senha sem expiração temporal, revogar convites e sessão anteriores e exigir a nova senha no ingresso único. Exibir credenciais somente para compartilhamento explícito, sem recuperação de senha a partir de hash. A senha não é login permanente.
 
 **Regras de negócio:** [RN45](01-regras-de-negocio.md#rn45), [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47)  
 **Casos de uso:** [UC02](03-casos-de-uso.md#uc02), [UC09](03-casos-de-uso.md#uc09)
@@ -451,14 +451,14 @@ O sistema deve oferecer Gerar relatório PDF na própria tela Família e permiti
 
 ### RF62
 
-O sistema deve exibir no perfil, inclusive Kids, os badges recebidos coletivamente pela conclusão de missões com selo, com acesso ao detalhe da missão e estado vazio quando não houver badges. Deve concedê-los uma única vez por pessoa/missão, sem depender de resgate.
+O sistema deve exibir badges cumulativos bronze/prata/ouro/diamante e total de missões com participação no perfil, inclusive Kids. Selecionar um marco abre suas missões contribuintes e permite abrir o detalhe de cada missão. Sem participação ou badges, mostrar estado apropriado. Não há concessão retroativa a novos membros.
 
 **Regras de negócio:** [RN64](01-regras-de-negocio.md#rn64)  
 **Casos de uso:** [UC10](03-casos-de-uso.md#uc10), [UC14](03-casos-de-uso.md#uc14)
 
 ### RF63
 
-O sistema deve executar a apuração semanal automaticamente na segunda-feira para a semana anterior, registrar o primeiro lugar por pontos conforme RN65, notificar a pessoa reconhecida e disponibilizar o resultado em uma tela interna acessível pela notificação ou por Minhas tarefas. Retentativas não podem duplicar resultado ou notificações.
+O servidor deve apurar a semana encerrada às 00:00 de segunda-feira no fuso da família, conforme seus ciclos, sem depender do app. Todos os perfis ativos, inclusive Kids, são elegíveis; empate reconhece todos e ausência de pontos positivos não tem vencedor. Processamento é recuperável e não duplica resultado/intenção de notificação. Resultado final não é revisado por edições ou reaberturas tardias.
 
 **Regras de negócio:** [RN28](01-regras-de-negocio.md#rn28), [RN30](01-regras-de-negocio.md#rn30), [RN65](01-regras-de-negocio.md#rn65)  
 **Casos de uso:** [UC19](03-casos-de-uso.md#uc19)
@@ -484,6 +484,20 @@ O sistema deve oferecer o seletor Dia/Semana em Minhas tarefas, nos indicadores 
 **Regras de negócio:** [RN28](01-regras-de-negocio.md#rn28), [RN33](01-regras-de-negocio.md#rn33), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61)  
 **Casos de uso:** [UC11](03-casos-de-uso.md#uc11), [UC13](03-casos-de-uso.md#uc13)
 
+### RF67
+
+O sistema deve oferecer seleção do fuso na criação da família, com padrão `America/Sao_Paulo`, e Configurações da família para Administradores. Ao alterar, informar efeitos e escolher aplicação imediata ou no próximo ciclo; cancelar não salva. Mostrar fuso vigente e alteração programada. Consultas, relatório e apuração compartilham os limites de RN28.
+
+**Regras de negócio:** [RN28](01-regras-de-negocio.md#rn28), [RN65](01-regras-de-negocio.md#rn65).\
+**Casos de uso:** [UC01](03-casos-de-uso.md#uc01).
+
+### RF68
+
+Ao abrir convite com sessão ativa, o sistema deve solicitar confirmação da troca de acesso; cancelar mantém a sessão. Só substituir o acesso após validar o novo ingresso, limpando os dados locais anteriores. Não migrar histórico nem remover o perfil da família anterior. Sem app instalado, direcionar à loja e orientar reabrir o link após instalar.
+
+**Regras de negócio:** [RN09](01-regras-de-negocio.md#rn09), [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47).\
+**Casos de uso:** [UC09](03-casos-de-uso.md#uc09).
+
 <a id="requisitos-nao-funcionais"></a>
 
 ## Requisitos não funcionais
@@ -496,7 +510,7 @@ Os requisitos transversais aplicam-se conforme a operação: por exemplo, persis
 
 A interface deve apresentar as ações e informações necessárias às atividades de organização familiar com linguagem simples e navegação compreensível, evitando complexidade desnecessária para executar as tarefas previstas.
 
-**Regras relacionadas:** Requisito transversal de qualidade; sem RN específica.  
+**Regras relacionadas:** [RN60](01-regras-de-negocio.md#rn60)\
 **Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC04](03-casos-de-uso.md#uc04), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19)
 
 ### RNF02
@@ -523,7 +537,7 @@ A apresentação da carga deve facilitar a compreensão da distribuição e da p
 
 A interface destinada ao perfil Kids deve usar linguagem e elementos visuais adequados a esse perfil, priorizar suas próprias tarefas e seu progresso diário ou semanal e respeitar as restrições de acesso às demais funcionalidades.
 
-**Regras relacionadas:** [RN19](01-regras-de-negocio.md#rn19), [RN33](01-regras-de-negocio.md#rn33)  
+**Regras relacionadas:** [RN19](01-regras-de-negocio.md#rn19), [RN33](01-regras-de-negocio.md#rn33), [RN65](01-regras-de-negocio.md#rn65)\
 **Aplicação nos casos de uso:** [UC03](03-casos-de-uso.md#uc03), [UC09](03-casos-de-uso.md#uc09), [UC11](03-casos-de-uso.md#uc11), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15)
 
 ### RNF05
@@ -532,7 +546,7 @@ A interface destinada ao perfil Kids deve usar linguagem e elementos visuais ade
 
 A interface não deve depender exclusivamente de cores para comunicar status, mensagens ou ações. Deve complementar as cores com texto, ícones identificáveis ou outro indicador que permita compreender a informação.
 
-**Regras relacionadas:** Requisito transversal de qualidade; sem RN específica.  
+**Regras relacionadas:** [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61), [RN62](01-regras-de-negocio.md#rn62)\
 **Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC04](03-casos-de-uso.md#uc04), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19)
 
 ### RNF06
@@ -541,7 +555,7 @@ A interface não deve depender exclusivamente de cores para comunicar status, me
 
 O sistema deve restringir o acesso aos dados à família associada ao usuário e às permissões de seu perfil, impedindo a consulta ou alteração de informações de outras famílias e de informações não autorizadas.
 
-**Regras relacionadas:** [RN09](01-regras-de-negocio.md#rn09), [RN10](01-regras-de-negocio.md#rn10), [RN33](01-regras-de-negocio.md#rn33)  
+**Regras relacionadas:** [RN09](01-regras-de-negocio.md#rn09), [RN10](01-regras-de-negocio.md#rn10), [RN33](01-regras-de-negocio.md#rn33), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61), [RN62](01-regras-de-negocio.md#rn62), [RN63](01-regras-de-negocio.md#rn63), [RN64](01-regras-de-negocio.md#rn64), [RN65](01-regras-de-negocio.md#rn65)\
 **Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC04](03-casos-de-uso.md#uc04), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19)
 
 ### RNF07
@@ -550,7 +564,7 @@ O sistema deve restringir o acesso aos dados à família associada ao usuário e
 
 O sistema deve validar as permissões de perfil em cada operação protegida, sem depender apenas da visibilidade dos controles da interface. Isso inclui gerenciamento de membros, missões e tarefas, reabertura, adição de itens à roleta, sorteio e aceitação de recompensa.
 
-**Regras relacionadas:** [RN02](01-regras-de-negocio.md#rn02), [RN03](01-regras-de-negocio.md#rn03), [RN04](01-regras-de-negocio.md#rn04), [RN05](01-regras-de-negocio.md#rn05), [RN07](01-regras-de-negocio.md#rn07), [RN08](01-regras-de-negocio.md#rn08), [RN19](01-regras-de-negocio.md#rn19), [RN20](01-regras-de-negocio.md#rn20), [RN21](01-regras-de-negocio.md#rn21), [RN24](01-regras-de-negocio.md#rn24), [RN37](01-regras-de-negocio.md#rn37), [RN42](01-regras-de-negocio.md#rn42), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58)  
+**Regras relacionadas:** [RN02](01-regras-de-negocio.md#rn02), [RN03](01-regras-de-negocio.md#rn03), [RN04](01-regras-de-negocio.md#rn04), [RN05](01-regras-de-negocio.md#rn05), [RN07](01-regras-de-negocio.md#rn07), [RN08](01-regras-de-negocio.md#rn08), [RN19](01-regras-de-negocio.md#rn19), [RN20](01-regras-de-negocio.md#rn20), [RN21](01-regras-de-negocio.md#rn21), [RN24](01-regras-de-negocio.md#rn24), [RN37](01-regras-de-negocio.md#rn37), [RN42](01-regras-de-negocio.md#rn42), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN63](01-regras-de-negocio.md#rn63)\
 **Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC04](03-casos-de-uso.md#uc04), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19)
 
 ### RNF08
@@ -568,7 +582,7 @@ As comunicações que transportem dados de usuários, famílias, tarefas, missõ
 
 O sistema deve manter consistentes os estados, responsáveis, conclusões e vínculos de cada tarefa individual. Deve preservar o histórico das operações, respeitar os alcances de edição, exclusão e reabertura e impedir alterações nos dados preservados de missões concluídas.
 
-**Regras relacionadas:** [RN10](01-regras-de-negocio.md#rn10), [RN16](01-regras-de-negocio.md#rn16), [RN17](01-regras-de-negocio.md#rn17), [RN18](01-regras-de-negocio.md#rn18), [RN48](01-regras-de-negocio.md#rn48), [RN55](01-regras-de-negocio.md#rn55), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59)  
+**Regras relacionadas:** [RN10](01-regras-de-negocio.md#rn10), [RN16](01-regras-de-negocio.md#rn16), [RN17](01-regras-de-negocio.md#rn17), [RN18](01-regras-de-negocio.md#rn18), [RN48](01-regras-de-negocio.md#rn48), [RN55](01-regras-de-negocio.md#rn55), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61), [RN64](01-regras-de-negocio.md#rn64)\
 **Aplicação nos casos de uso:** [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC05](03-casos-de-uso.md#uc05), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC17](03-casos-de-uso.md#uc17)
 
 ### RNF10
@@ -577,7 +591,7 @@ O sistema deve manter consistentes os estados, responsáveis, conclusões e vín
 
 O cálculo deve refletir as conclusões válidas, creditando o peso integral a cada responsável da conclusão. Deve distinguir o autor da ação dos beneficiários do crédito, excluir tarefas pendentes ou aguardando confirmação e desfazer o crédito anterior exatamente uma vez em reabertura autorizada.
 
-**Regras relacionadas:** [RN26](01-regras-de-negocio.md#rn26), [RN28](01-regras-de-negocio.md#rn28), [RN30](01-regras-de-negocio.md#rn30), [RN31](01-regras-de-negocio.md#rn31), [RN55](01-regras-de-negocio.md#rn55), [RN56](01-regras-de-negocio.md#rn56), [RN57](01-regras-de-negocio.md#rn57)  
+**Regras relacionadas:** [RN26](01-regras-de-negocio.md#rn26), [RN28](01-regras-de-negocio.md#rn28), [RN30](01-regras-de-negocio.md#rn30), [RN31](01-regras-de-negocio.md#rn31), [RN55](01-regras-de-negocio.md#rn55), [RN56](01-regras-de-negocio.md#rn56), [RN57](01-regras-de-negocio.md#rn57), [RN61](01-regras-de-negocio.md#rn61), [RN62](01-regras-de-negocio.md#rn62), [RN65](01-regras-de-negocio.md#rn65)\
 **Aplicação nos casos de uso:** [UC03](03-casos-de-uso.md#uc03), [UC07](03-casos-de-uso.md#uc07), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19)
 
 ### RNF11
@@ -586,16 +600,16 @@ O cálculo deve refletir as conclusões válidas, creditando o peso integral a c
 
 Confirmação, recusa, conclusão manual e reabertura devem respeitar o estado corrente e ser consistentes sob concorrência. Não podem gerar conclusões, créditos ou decisões duplicadas. A sinalização Kids, com ou sem foto, não deve gerar conclusão parcial.
 
-**Regras relacionadas:** [RN22](01-regras-de-negocio.md#rn22), [RN23](01-regras-de-negocio.md#rn23), [RN24](01-regras-de-negocio.md#rn24), [RN26](01-regras-de-negocio.md#rn26), [RN55](01-regras-de-negocio.md#rn55), [RN57](01-regras-de-negocio.md#rn57)  
+**Regras relacionadas:** [RN22](01-regras-de-negocio.md#rn22), [RN23](01-regras-de-negocio.md#rn23), [RN24](01-regras-de-negocio.md#rn24), [RN26](01-regras-de-negocio.md#rn26), [RN55](01-regras-de-negocio.md#rn55), [RN57](01-regras-de-negocio.md#rn57), [RN64](01-regras-de-negocio.md#rn64)\
 **Aplicação nos casos de uso:** [UC03](03-casos-de-uso.md#uc03), [UC05](03-casos-de-uso.md#uc05), [UC07](03-casos-de-uso.md#uc07), [UC12](03-casos-de-uso.md#uc12), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC17](03-casos-de-uso.md#uc17)
 
 ### RNF12
 
 **Categoria:** Confiabilidade
 
-O sistema não deve apresentar uma alteração como salva quando sua persistência falhar. Deve informar a falha ao usuário, evitando que a perda de dados ocorra sem indicação perceptível.
+O sistema não deve apresentar uma alteração como salva quando sua persistência falhar. Deve informar a falha ao usuário, evitando que a perda de dados ocorra sem indicação perceptível. Em resposta perdida, consultar estado antes de oferecer nova tentativa, sem retentativa automática de gravações nem recuperação geral por chave de operação. Em criação, informar quando não for possível determinar se a tentativa foi salva.
 
-**Regras relacionadas:** Requisito transversal de qualidade; sem RN específica.  
+**Regras relacionadas:** [RN62](01-regras-de-negocio.md#rn62), [RN63](01-regras-de-negocio.md#rn63), [RN65](01-regras-de-negocio.md#rn65)\
 **Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC04](03-casos-de-uso.md#uc04), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19)
 
 ### RNF13
@@ -604,7 +618,7 @@ O sistema não deve apresentar uma alteração como salva quando sua persistênc
 
 As operações de rede não devem bloquear a interface. Durante o processamento, a interface deve permanecer responsiva e apresentar o estado da operação para que o usuário compreenda seu andamento ou eventual falha.
 
-**Regras relacionadas:** Requisito transversal de qualidade; sem RN específica.  
+**Regras relacionadas:** [RN62](01-regras-de-negocio.md#rn62)\
 **Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC04](03-casos-de-uso.md#uc04), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19)
 
 ### RNF14
@@ -683,7 +697,7 @@ O consumo do convite e da senha e a efetivação do ingresso devem permanecer co
 
 **Categoria:** Sessões e revogação
 
-As sessões devem proteger seus identificadores e ter sua validade e associação ao perfil ativo e à família verificadas nas operações protegidas. A renovação utiliza refresh token sem expiração temporal. A remoção de um perfil deve revogar seu acesso, inclusive por sessões abertas antes da remoção e por tentativas de renovação com refresh tokens anteriores. Ausência de expiração temporal não equivale a ausência de revogação.
+Credenciais são protegidas e a sessão ativa é conferida em toda operação. Cada perfil possui uma sessão ativa vinculada à instalação; refresh token não expira por tempo, permanece estável durante a sessão e é revogável. Access token dura 15 minutos, sem postergar revogação até seu vencimento. Remoção e emissão/reenvio de convite revogam a sessão anterior. Novo acesso Apple substitui a sessão do Criador. Recuperação de ingresso com resposta perdida exige prova da instalação/tentativa original, jamais apenas um identificador público.
 
 **Regras relacionadas:** [RN10](01-regras-de-negocio.md#rn10), [RN47](01-regras-de-negocio.md#rn47)  
 **Aplicação nos casos de uso:** [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19)
@@ -712,7 +726,7 @@ O armazenamento e a consulta de fotos devem respeitar a associação à família
 
 Reabertura, atualização da carga, atualização de progresso e verificação de proteção por missão concluída devem ser processadas de forma consistente, inclusive sob concorrência, sem permitir estados parciais ou alteração de conquista preservada.
 
-**Regras relacionadas:** [RN55](01-regras-de-negocio.md#rn55), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59)  
+**Regras relacionadas:** [RN55](01-regras-de-negocio.md#rn55), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59), [RN64](01-regras-de-negocio.md#rn64)\
 **Aplicação nos casos de uso:** [UC03](03-casos-de-uso.md#uc03), [UC05](03-casos-de-uso.md#uc05), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17)
 
 
@@ -720,7 +734,7 @@ Reabertura, atualização da carga, atualização de progresso e verificação d
 
 **Categoria:** Integridade de relatórios e reconhecimento
 
-Relatórios devem usar uma leitura consistente dos dados, identificar período e geração e manter gráficos e tabelas conciliados. A apuração deve ser recuperável após falha e idempotente por família/semana, com registro de processamento e controle de notificações duplicadas. Não apresentar um resultado incompleto como apurado.
+O backend fornece um snapshot consistente para o PDF gerado no aplicativo. Gráficos e tabelas usam esse snapshot. Apuração é recuperável, única por família/ciclo, finalizada antes da publicação e imutável após encerramento; alterações posteriores não reapuram o destaque. Uma fila persistente registra uma intenção de notificar por reconhecido; distinguir tentativa, aceitação pelo APNs e abertura, sem prometer entrega/leitura. Transições de fuso não podem duplicar ou deixar lacunas entre períodos de apuração.
 
 **Regras relacionadas:** [RN62](01-regras-de-negocio.md#rn62), [RN65](01-regras-de-negocio.md#rn65).  
 **Aplicação nos casos de uso:** [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19).
@@ -738,6 +752,7 @@ A configuração de apelido deve ser protegida por titularidade no backend, incl
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.5 | 2026-10-05 | Pendências consolidadas: fuso, datas livres, edição de concluídas, participações/badges, convites e sessão única; RF67/68; arquitetura, modelo e design 1.1. |
 | 1.4 | 2026-10-02 | Família concentra indicadores, lista, inclusão de membros e PDF; detalhe do membro reúne tarefas Dia/Semana, edição e reenvio quando permitidos. RN60–61, RF60–61/RF66 e UC02/11/13/18 revisados. |
 | 1.3 | 2026-10-02 | Duas abas Kids, câmera direta, foto/apelido e badges, progresso/carga Dia/Semana, PDF semanal e reconhecimento com WhatsApp; RN61–65, RF61–66, RNF26–27 e UC18–19. Empates e visibilidade do apelido confirmados. |
 | 1.2 | 2026-10-01 | Área Família na navegação adulta, progresso coletivo diário e consulta por carrossel: RN60, RF60 e UC11. Design em elaboração na versão 1.0. |

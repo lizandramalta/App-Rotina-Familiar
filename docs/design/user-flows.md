@@ -1,15 +1,17 @@
-# User flows — versão 1.0
+# User flows — versão 1.1
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão dos fluxos:** 1.0  
-**Base funcional:** 1.4  
-**Screen map:** 1.0 — revisão de 2026-10-02  
-**Data:** 2026-10-02  
+**Versão dos fluxos:** 1.1\
+**Base funcional:** 1.5\
+**Screen map:** 1.1 — revisão de 2026-10-05\
+**Data:** 2026-10-05\
 **Situação:** primeira versão para revisão de design
 
 [Projeto](../../README.md) · [Índice documental](../DOCUMENTACAO.md) · [Screen map](screen-map.md) · [Regras](../01-regras-de-negocio.md) · [Requisitos](../02-requisitos.md) · [Casos de uso](../03-casos-de-uso.md) · [Diagrama de classes](../06-diagrama-de-classes.md)
 
 ## Como ler
+
+A implementação futura destes percursos é detalhada na [arquitetura mobile](../architecture/mobile-architecture.md), com [rastreabilidade UC–TEL/MOD–UF](../architecture/mobile-feature-catalog.md#4-casos-de-uso-mobile-e-rastreabilidade-funcional), contratos e tratamento de falhas. Os fluxos abaixo continuam como referência da experiência.
 
 Cada fluxo representa um objetivo do usuário e usa as telas `TEL` e os modais `MOD` do screen map. `UF` identifica o fluxo e deve ser preservado nas próximas revisões. Os códigos RN e RF citados remetem à base funcional; os links de UC levam à especificação completa.
 
@@ -17,7 +19,7 @@ Nos diagramas, retângulos representam telas ou ações, losangos representam de
 
 **Minhas tarefas, Meu perfil, Missões e conquistas e Família são destinos independentes da navegação principal adulta.** Minhas tarefas é o destino inicial após acesso. Os fluxos iniciados em Família, Meu perfil ou Missões não passam por Minhas tarefas. Kids possuem duas abas independentes: Minhas tarefas e Missões e conquistas; Meu perfil é acessado pelo avatar/cabeçalho.
 
-O detalhamento traduz a base 1.4 em caminhos para design; premissas pendentes estão identificadas nas regras e no índice documental. Falhas e retornos comuns são definidos abaixo e se aplicam a todos os diagramas, mesmo quando não repetidos em cada desenho.
+O detalhamento traduz a base 1.5 em caminhos para design; as decisões de 2026-10-05 estão consolidadas nas regras e no registro de arquitetura. Falhas e retornos comuns são definidos abaixo e se aplicam a todos os diagramas, mesmo quando não repetidos em cada desenho.
 
 ## Condições comuns
 
@@ -25,13 +27,13 @@ O detalhamento traduz a base 1.4 em caminhos para design; premissas pendentes es
 |---|---|
 | Operação em andamento | Exibir processamento sem bloquear toda a interface e sem indicar sucesso antes da confirmação. |
 | Falha de consulta | Informar que os dados não puderam ser carregados e oferecer nova tentativa na mesma tela; não confundir falha com lista vazia. |
-| Falha de gravação | Informar que a operação não foi confirmada; permanecer na tela de origem da operação e permitir nova tentativa. Não atualizar progresso como se houvesse sucesso. |
+| Falha de gravação | Consultar estado após resposta perdida, sem repetição automática ou chave geral de operação; informar quando não for possível determinar se uma criação foi salva; permanecer na tela de origem da operação e permitir nova tentativa. Não atualizar progresso como se houvesse sucesso. |
 | Cancelar formulário ou modal | Retornar à origem sem gravar a alteração cancelada. Fechar um seletor interno retorna ao formulário que o abriu. |
 | Voltar após consulta | Retornar à tela que abriu o detalhe, mantendo o contexto de data quando aplicável. |
 | Sessão renovável | Renovação transparente; refresh token sem expiração temporal continua sujeito à revogação. |
 | Sessão perdida | Entrada TEL-001 e recuperação UF-03; o Criador usa Apple. Perfil removido não recupera acesso por convite nem renovação. |
 | Permissão ou estado mudou | Revalidar antes da operação, informar a indisponibilidade e apresentar o estado atual sem concluir a ação proibida. |
-| Ações simultâneas | Considerar o registro já confirmado; não duplicar conclusão, crédito, ingresso ou resgate. |
+| Ações simultâneas | Última edição válida persistida prevalece, com risco de sobrescrita aceito; não duplicar conclusão, crédito, ingresso ou resgate. |
 
 Referências transversais: RNF01, RNF05–13 e RNF17–25, conforme a operação. Textos e ícones complementam as cores. Controles não visíveis não substituem verificação de permissão.
 
@@ -54,6 +56,7 @@ Referências transversais: RNF01, RNF05–13 e RNF17–25, conforme a operação
 | [UF-13](#uf-13) | Editar o próprio perfil e consultar badges | Todos | UC10 |
 | [UF-14](#uf-14) | Gerar relatório semanal PDF | Administrador, Membro | UC18 |
 | [UF-15](#uf-15) | Receber e compartilhar destaque semanal | Sistema e reconhecido, inclusive Kids | UC19 |
+| [UF-16](#uf-16) | Configurar fuso da família | Administrador | UC01 |
 
 <a id="uf-01"></a>
 
@@ -61,7 +64,7 @@ Referências transversais: RNF01, RNF05–13 e RNF17–25, conforme a operação
 
 **Objetivo:** acessar a família do Criador, criando-a somente quando ainda não existir.  
 **Entrada:** TEL-001, sem sessão válida.  
-**Referências:** [UC01](../03-casos-de-uso.md#uc01), [UC04](../03-casos-de-uso.md#uc04); RN44; RF01, RF37–39.
+**Referências:** [UC01](../03-casos-de-uso.md#uc01), [UC04](../03-casos-de-uso.md#uc04); RN28, RN44; RF01, RF37–39, RF67.
 
 ```mermaid
 flowchart TD
@@ -70,7 +73,7 @@ flowchart TD
     C -->|Cancelada ou falhou| A
     C -->|Sim| D{"Família já vinculada?"}
     D -->|Sim| H["TEL-010 · Minhas tarefas"]
-    D -->|Não| E["TEL-002 · Informar dados da família"]
+    D -->|Não| E["TEL-002 · Nome e fuso / padrão America/Sao_Paulo"]
     E --> F{"Dados válidos?"}
     F -->|Não · corrigir| E
     F -->|Sim| G["Confirmar criação"]
@@ -87,7 +90,7 @@ flowchart TD
 
 **Objetivo:** criar o perfil e permitir um único ingresso pelo convite correspondente.  
 **Entrada:** Administrador acessa Família diretamente pela navegação principal.  
-**Referências:** [UC02](../03-casos-de-uso.md#uc02), [UC09](../03-casos-de-uso.md#uc09); RN45–47; RF40–46, RF54.
+**Referências:** [UC02](../03-casos-de-uso.md#uc02), [UC09](../03-casos-de-uso.md#uc09); RN09, RN45–47; RF40–46, RF54, RF68.
 
 ```mermaid
 flowchart TD
@@ -96,18 +99,22 @@ flowchart TD
       C --> D{"Dados e perfil válidos?"}
       D -->|Não · corrigir| C
       D -->|Sim · salvar| E["TEL-032 · Perfil salvo"]
-      E --> F["Gerar convite"]
+      E --> F["Confirmar emissão: revogar convites e sessão anteriores"]
       F --> G["TEL-034 · Link e senha disponíveis"]
       G --> H["Compartilhar link e senha juntos"]
     end
     subgraph Convidado["Pessoa convidada"]
-      H --> I["Abrir link · TEL-003"]
-      I --> J{"Convite disponível e perfil ativo?"}
+      H --> I["Abrir link"]
+      I --> ACTIVE{"Sessão ativa?"}
+      ACTIVE -->|Não| J
+      ACTIVE -->|Sim| SWITCH["MOD-013 · Confirmar troca"]
+      SWITCH -->|Cancelar| KEEP(["Manter acesso atual"])
+      SWITCH -->|Confirmar| J{"Convite disponível e perfil ativo?"}
       J -->|Não| K["Informar impedimento · TEL-004"]
       J -->|Sim| L["Informar senha"]
       L --> M{"Senha válida?"}
       M -->|Não · corrigir| L
-      M -->|Sim| N["Validar novamente, vincular e consumir convite"]
+      M -->|Sim| N["Validar, consumir uma vez e substituir acesso local após sucesso"]
       N --> O{"Ingresso confirmado?"}
       O -->|Não| P["Informar falha ou convite já consumido"]
       O -->|Sim| Q{"Perfil Kids?"}
@@ -118,7 +125,7 @@ flowchart TD
 
 **Exceções e retornos:** falha ao salvar perfil permanece em TEL-033; falha ao gerar convite retorna à ação em TEL-032 sem exibir credenciais fictícias. Perfil já salvo não é recriado para tentar gerar o convite novamente. Cancelar o compartilhamento mantém o perfil criado. Senha incorreta não consome o convite; controles de tentativas abusivas continuam aplicáveis. Convite consumido não permite outro ingresso; recuperação segue UF-03. Falha de rede no ingresso exige conferir o estado corrente antes de repetir.
 
-**Resultado:** acesso ao perfil correto e convite consumido uma única vez. Compartilhar o convite, sozinho, não significa que o convidado ingressou.
+**Resultado:** acesso ao perfil correto em sessão única e convite consumido uma vez. Troca não remove o perfil da família anterior nem migra histórico. Sem app, direcionar à loja e reabrir convite depois de instalar. Resposta perdida no ingresso tem recuperação específica comprovada por dez minutos; depois exige novo convite. Compartilhar o convite, sozinho, não significa que o convidado ingressou.
 
 <a id="uf-03"></a>
 
@@ -137,7 +144,7 @@ flowchart TD
     E --> F["Admin: TEL-050 → selecionar membro → TEL-032"]
     F --> G{"Mesmo perfil ainda ativo?"}
     G -->|Não| H(["Recuperação indisponível para perfil removido"])
-    G -->|Sim| I["Gerar novo convite · TEL-034"]
+    G -->|Sim| I["Confirmar novo convite · revogar convites e sessão anteriores · TEL-034"]
     I --> J["Compartilhar novo link e senha"]
     J --> K(["UF-02 · Retomar a partir de TEL-003"])
 ```
@@ -194,9 +201,9 @@ TEL-032 mantém o membro selecionado ao alternar Dia/Semana e abre TEL-012 para 
 
 ```mermaid
 flowchart TD
-    A(["Criar ou editar tarefa"]) --> B["TEL-013 · Preencher título e peso de 1 a 3"]
+    A(["Criar ou editar tarefa"]) --> B["TEL-013 · Título, peso 1 a 3 e data livre / padrão hoje"]
     B --> C["MOD-001 · Definir nenhum, um ou vários responsáveis"]
-    C --> D["MOD-002 · Definir repetição"]
+    C --> D["MOD-002 · DatePicker inicial livre e frequência"]
     D --> E{"Editando tarefa de rotina?"}
     E -->|Sim| F["MOD-003 · Escolher edição individual ou rotina futura"]
     E -->|Não| G["Conferir e salvar"]
@@ -210,9 +217,9 @@ flowchart TD
     K -->|Sim| L(["Retornar à origem com dados atualizados"])
 ```
 
-Responsáveis e repetição são escolhas do formulário; não é obrigatório abrir os seletores quando a configuração desejada já estiver definida. Repetição oferece sem repetição, diária ou a cada 7, 14, 21 ou 28 dias. Não há mensal. Cada ocorrência possui estado próprio; escolher uma tarefa não altera automaticamente outras ocorrências.
+Responsáveis e repetição são escolhas do formulário; não é obrigatório abrir os seletores quando a configuração desejada já estiver definida. Repetição oferece sem repetição, diária ou a cada 7, 14, 21 ou 28 dias. Não há mensal. Datas de cadastro/início são livres, inclusive antes da criação da família e em meses futuros. Backend mantém geração até fim do mês seguinte, com reposição diária e complemento em consulta. Cada ocorrência possui estado próprio; escolher uma tarefa não altera automaticamente outras ocorrências.
 
-**Proteções:** edição individual afeta somente a selecionada; alteração de rotina alcança apenas futuras abrangidas e preserva passado e conquistas concluídas. O limite de consulta do carrossel não interrompe a geração futura. Cancelar antes de salvar não grava as mudanças e retorna à lista ou ao detalhe de origem.
+**Proteções:** edição individual afeta somente a selecionada; alteração de rotina alcança apenas futuras abrangidas e preserva passado e conquistas concluídas. O limite de consulta do carrossel não interrompe a geração futura. Concluída não protegida pode ser editada individualmente: peso/responsáveis ajustam crédito, data prevista ajusta progresso, sem mudar instante de conclusão ou destaque já finalizado; manter auditoria. Sem responsáveis, não há crédito individual. Última edição válida persistida vence. Cancelar antes de salvar não grava as mudanças e retorna à lista ou ao detalhe de origem.
 
 <a id="uf-06"></a>
 
@@ -363,18 +370,18 @@ Cada responsável recebe o peso integral; o total soma cargas individuais. Pende
 ```mermaid
 flowchart TD
     A["TEL-020 · Missões e conquistas"] --> B{"Ação permitida escolhida"}
-    B -->|Criar · Admin| C["TEL-022 · Dados e selo opcional"]
+    B -->|Criar · Admin| C["TEL-022 · Dados da missão"]
     B -->|Consultar| D["TEL-021 · Detalhe da missão"]
     D --> E{"Editar · Admin e missão em andamento?"}
     E -->|Sim| C
-    E -->|Não| F(["Consultar progresso, tarefas, selo e recompensa"])
+    E -->|Não| F(["Consultar progresso, tarefas, participações e recompensa"])
     C --> G["MOD-007 · Selecionar tarefas individuais"]
     G --> H{"Ao menos uma tarefa e alterações permitidas?"}
     H -->|Não · corrigir| G
     H -->|Sim| I["Salvar missão e vínculos"]
     I --> J{"Todas as tarefas vinculadas concluídas?"}
     J -->|Não| K["Missão em andamento"]
-    J -->|Sim| L["Missão concluída · preservar conquista e habilitar resgate"]
+    J -->|Sim| L["Missão concluída · participações e marcos · habilitar resgate"]
     K --> R{"Origem do formulário?"}
     L --> R
     R -->|Criação| A
@@ -384,7 +391,7 @@ flowchart TD
     M -->|Não| O(["Permanecer na consulta ou voltar à lista"])
 ```
 
-Salvar retorna à origem que abriu o formulário: à lista em criação e ao detalhe em edição. Sem missões, TEL-020 mostra o estado vazio; somente Administradores têm ação de criação. Sem tarefas disponíveis, o Administrador precisa criar tarefas por UF-05 antes de salvar uma missão.
+Salvar retorna à origem que abriu o formulário: à lista em criação e ao detalhe em edição. Missão encerrada conta uma vez para cada responsável creditado em uma ou mais tarefas vinculadas; marcos 5/10/25/50 concedem badges cumulativos. Sem missões, TEL-020 mostra o estado vazio; somente Administradores têm ação de criação. Sem tarefas disponíveis, o Administrador precisa criar tarefas por UF-05 antes de salvar uma missão.
 
 Cada tarefa vinculada conta uma vez, sem incluir a rotina inteira implicitamente. Remover vínculos de missão em andamento pode concluí-la se todas as restantes estiverem concluídas. Progresso também é recalculado por conclusões e reaberturas autorizadas fora deste fluxo. Missão concluída não aceita edição; o resgate disponível é a única adição prevista à conquista. Não existe expiração por tempo.
 
@@ -410,11 +417,11 @@ flowchart TD
     F -->|Sim| H["TEL-024 · Roleta da missão"]
     H -->|Consultar itens| B
     B -->|Voltar à roleta quando for a origem| H
-    H --> I["Sortear e mostrar resultado"]
+    H --> I["Sortear e animar no app / resultado ainda não salvo"]
     I --> J{"Decisão do Administrador"}
     J -->|Sortear novamente| I
     J -->|Sair sem aceitar| K(["TEL-021 · Resgate continua disponível"])
-    J -->|Aceitar| L["Revalidar disponibilidade e registrar recompensa"]
+    J -->|Aceitar| L["Servidor valida item/disponibilidade e registra aceite único"]
     L --> M{"Aceitação confirmada?"}
     M -->|Sim| N(["TEL-021 · Recompensa aceita e resgate encerrado"])
     M -->|Outro Admin já aceitou| G
@@ -424,7 +431,7 @@ flowchart TD
 
 Cadastrar um item é opcional e independente: a roleta já dispõe dos itens predefinidos. Salvar um item o inclui em próximos sorteios, sem vinculá-lo a missão. Cancelar MOD-008 volta a TEL-023 sem adicionar. A origem de TEL-023 determina o retorno: lista de missões ou roleta.
 
-**Resultado:** aceitação salva encerra o resgate para toda a família e acrescenta a recompensa à conquista sem alterar suas tarefas, progresso ou selo. Consultar itens, sortear ou sair sem aceitar não consome o resgate. Após falha ou concorrência, consultar a situação corrente antes de tentar aceitar novamente.
+**Resultado:** aceitação salva encerra o resgate para toda a família e acrescenta a recompensa à conquista sem alterar suas tarefas, progresso ou participações. Consultar itens, sortear ou sair sem aceitar não consome o resgate. Após falha ou concorrência, consultar a situação corrente antes de tentar aceitar novamente.
 
 <a id="uf-12"></a>
 
@@ -455,11 +462,11 @@ flowchart TD
     D -->|Gerar ou reenviar convite| O(["TEL-034 · UF-02 ou UF-03"])
 ```
 
-Administradores e Membros podem consultar as tarefas em TEL-032; somente Administradores acessam ações de gestão quando permitidas. Reenviar abre TEL-034 para compartilhar link e senha ainda disponíveis; convite consumido ou recuperação exige novo convite para o mesmo perfil ativo. Cancelar volta ao detalhe preservando membro/período; falha não cria membro duplicado. O Criador recupera acesso por Apple.
+Administradores e Membros podem consultar as tarefas em TEL-032; somente Administradores acessam ações de gestão quando permitidas. Reenviar abre TEL-034 para confirmar emissão de novo link e senha, invalidando convites anteriores e revogando a sessão anterior do mesmo perfil. Cancelar volta ao detalhe preservando membro/período; falha não cria membro duplicado. O Criador recupera acesso por Apple.
 
 **Restrições:** o Criador não pode ser removido, rebaixado nem sair. Um Administrador não pode permanecer em modo Kids; Kids devem sair desse modo antes da promoção. Alterações obedecem à permissão corrente de quem executa.
 
-A remoção revoga também sessões e renovação de acesso, deixa tarefas futuras sem responsável conforme a base e preserva histórico concluído. Falha não deve apresentar o membro como removido. Um Administrador que não é Criador também pode deixar seu próprio papel por TEL-030 → MOD-010; após salvar, seus acessos passam a seguir o papel atual. Não é um fluxo de saída da família.
+A remoção revoga também sessões e renovação de acesso, retira somente o removido das tarefas futuras não concluídas/não protegidas e preserva histórico concluído. Falha não deve apresentar o membro como removido. Um Administrador que não é Criador também pode deixar seu próprio papel por TEL-030 → MOD-010; após salvar, seus acessos passam a seguir o papel atual. Não é um fluxo de saída da família.
 
 <a id="uf-13"></a>
 
@@ -471,7 +478,7 @@ A remoção revoga também sessões e renovação de acesso, deixa tarefas futur
 
 ```mermaid
 flowchart TD
-    A["TEL-030 · Meu perfil"] --> B["MOD-009 · Editar foto opcional e apelido próprios"]
+    A["TEL-030 · Meu perfil"] --> B["MOD-009 · Editar foto opcional por câmera/galeria e apelido próprios"]
     B -->|Cancelar| A
     B -->|Salvar| C{"Dados válidos e permitidos?"}
     C -->|Não · corrigir| B
@@ -479,11 +486,13 @@ flowchart TD
     D --> E{"Gravação confirmada?"}
     E -->|Não · informar falha| B
     E -->|Sim| F(["TEL-030 · Dados atualizados"])
-    A -->|Consultar badge| G["TEL-021 · Missão da conquista"]
+    A -->|Consultar marco| G["TEL-054 · Missões contribuintes"]
+    G -->|Abrir missão| M["TEL-021 · Missão"]
+    M -->|Voltar| G
     G -->|Voltar| A
 ```
 
-O formulário permite adicionar/substituir/remover foto opcional e configurar etiqueta/apelido. Só o titular acessa a configuração de apelido, inclusive para Kids; a gestão administrativa de UF-12 não concede esse acesso. Cancelar ou falhar mantém os dados salvos anteriores. Foto ausente usa identificação padrão. Meu perfil também lista badges coletivos e permite abrir TEL-021; sem badges, apresenta estado vazio. Não altera papel, família ou modo Kids. O apelido é visível à família; ver RN64 para a premissa de concessão dos badges.
+O formulário permite adicionar/substituir/remover foto opcional e configurar etiqueta/apelido. Só o titular acessa a configuração de apelido, inclusive para Kids; a gestão administrativa de UF-12 não concede esse acesso. Cancelar ou falhar mantém os dados salvos anteriores. Foto ausente usa identificação padrão. Meu perfil também lista badges por participação e abre TEL-054 com as missões contribuintes, de onde se acessa TEL-021; sem badges, mostra total de participações e próximo marco. Não altera papel, família ou modo Kids. O apelido é visível à família; badges seguem os marcos cumulativos de RN64, sem concessão retroativa.
 
 <a id="uf-14"></a>
 
@@ -498,7 +507,7 @@ flowchart TD
     A["TEL-050 · Gerar relatório PDF"] --> B["TEL-051 · Selecionar semana segunda–domingo"]
     B --> C{"Semana atual ou passada válida?"}
     C -->|Não| B
-    C -->|Sim| D["Gerar PDF · atual identificada como parcial"]
+    C -->|Sim| D["Backend fornece snapshot / app gera PDF · atual parcial"]
     D --> E{"Arquivo gerado?"}
     E -->|Falha · informar e tentar novamente| B
     E -->|Sim| F["Visualizar gráficos, progresso e tabela por membro"]
@@ -521,11 +530,11 @@ O PDF contém gráficos de carga semanal e progresso total da família e, por me
 
 ```mermaid
 flowchart TD
-    A["Sistema · virada para segunda-feira"] --> B["Apurar pontos da semana anterior encerrada"]
+    A["Sistema · segunda-feira 00:00 no fuso da família"] --> B["Apurar pontos da semana anterior encerrada"]
     B --> C{"Pontuação positiva?"}
-    C -->|Não| D(["Registrar semana sem vencedor · premissa RN65"])
+    C -->|Não| D(["Registrar semana sem vencedor · RN65"])
     C -->|Sim| E["Registrar primeiro lugar sem duplicar · empate conforme RN65"]
-    E --> F["Notificar reconhecido e disponibilizar destaque no app"]
+    E --> F["Enfileirar notificação e disponibilizar destaque no app"]
     F --> G["Pessoa abre notificação ou Minhas tarefas"]
     G --> H{"Sessão válida e pessoa autorizada?"}
     H -->|Não| I["Acesso/recuperação ou informar acesso negado"]
@@ -540,7 +549,33 @@ flowchart TD
     O -->|Retornar ou cancelar| J
 ```
 
-Texto do convite: “Mande para sua família e sugira algo para vocês fazerem juntos.” Sugestão editável: “Fiquei em primeiro em pontos nas tarefas desta semana! Que tal fazermos algo juntos para celebrar? Minha sugestão é: ____.” Em empate, adaptar para “Fiquei entre os primeiros…”. Nada é enviado automaticamente. Sem notificação externa, o resultado continua disponível no app. Kids reconhecidos usam a mesma tela em variante adequada, sem acesso à carga familiar. Falha de apuração exige retentativa idempotente, sem publicar resultado parcial. Empate reconhece todos os primeiros colocados; elegibilidade e ausência de pontos seguem as premissas explicitadas em RN65; horário/fuso e revisão após reabertura ainda exigem definição.
+Texto do convite: “Mande para sua família e sugira algo para vocês fazerem juntos.” Sugestão editável: “Fiquei em primeiro em pontos nas tarefas desta semana! Que tal fazermos algo juntos para celebrar? Minha sugestão é: ____.” Em empate, adaptar para “Fiquei entre os primeiros…”. Nada é enviado automaticamente. Sem notificação externa, o resultado continua disponível no app. Kids reconhecidos usam a mesma tela em variante adequada, sem acesso à carga familiar. Falha de apuração exige retentativa idempotente, sem publicar resultado parcial. Empate reconhece todos os primeiros colocados; todos os perfis ativos são elegíveis e sem pontos positivos não há vencedor; a apuração ocorre às 00:00 de segunda-feira no fuso vigente; resultados finalizados permanecem preservados após correções.
+
+<a id="uf-16"></a>
+
+## UF-16 — Configurar fuso da família
+
+**Objetivo:** alterar o calendário comum com efeito imediato ou no próximo ciclo.\
+**Entrada:** Família → Configurações da família (TEL-053), somente Administrador.\
+**Referências:** [UC01](../03-casos-de-uso.md#uc01); RF67; RN28/RN65.
+
+```mermaid
+flowchart TD
+    A["TEL-050 · Família"] --> B["TEL-053 · Fuso vigente e alteração programada"]
+    B --> C["Selecionar novo fuso"]
+    C --> D["MOD-012 · Informativo dos efeitos"]
+    D -->|Cancelar| B
+    D -->|Aplicar imediatamente| E["Confirmar efeito imediato"]
+    D -->|Próximo ciclo| F["Confirmar programação"]
+    E --> G["Salvar configuração no servidor"]
+    F --> G
+    G --> H{"Confirmado?"}
+    H -->|Sim| B
+    H -->|Falha ou resposta perdida| I["Consultar configuração atual / informar resultado"]
+    I --> B
+```
+
+Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imediata afeta limites do ciclo aberto; programada mantém o atual até encerrar. Mostrar data de vigência, fuso e identificação de período de transição, sem deslocar datas civis das tarefas. Apurações finalizadas não mudam; ciclos não podem sobrepor-se ou deixar lacunas. Falha não é mostrada como alteração salva.
 
 ## Critérios de revisão
 
@@ -549,12 +584,13 @@ Texto do convite: “Mande para sua família e sugira algo para vocês fazerem j
 - As quatro telas principais adultas são entradas independentes; Minhas tarefas continua como inicial.
 - Fluxos Kids não concedem carga, relatório familiar, gestão ou conclusão direta. Perfil próprio e reconhecimento recebido são permitidos.
 - Toda alteração só é apresentada como concluída após confirmação da gravação.
-- TEL/MOD preservam o screen map 1.0; UF-01–UF-15 cobrem UC01–UC19, incluindo TEL-051/052.
+- TEL/MOD preservam o screen map 1.0; UF-01–UF-16 cobrem UC01–UC19, incluindo TEL-051/052/053/054 e MOD-012/013.
 
 ## Histórico
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.1 | 1.5 | 1.1 | 2026-10-05 | 16 fluxos; UF-16 configura fuso; demais fluxos incorporam decisões de acesso, datas, badges, PDF e sorteio local. |
 | 1.0 | 1.4 | 1.0 | 2026-10-02 | UF-02/03/04/09/12/14 alinhados à lista integrada em Família e ao detalhe com tarefas do membro; mantido Dia/Semana. |
 | 1.0 | 1.3 | 1.0 | 2026-10-02 | Revisão dos fluxos Kids, câmera, perfil, períodos e badges; novos UF-14/15 para PDF e destaque semanal. |
 | 1.0 | 1.2 | 1.0 | 2026-10-01 | Primeira elaboração: 13 fluxos com Mermaid, decisões, alternativas, retornos e cobertura dos 17 casos de uso. |

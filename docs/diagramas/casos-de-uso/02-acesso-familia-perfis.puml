@@ -14,7 +14,7 @@ skinparam rectangleBorderColor #64748B
 skinparam packageStyle rectangle
 skinparam nodesep 32
 skinparam ranksep 55
-title Acesso, família e perfis\nApp de Organização Familiar · MVP 1.4
+title Acesso, família e perfis\nApp de Organização Familiar · MVP 1.5
 
 actor "Administrador" as Admin
 actor "Membro" as Membro
@@ -31,6 +31,7 @@ rectangle "App de Organização Familiar" {
   usecase "UC10\nEditar perfil" as UC10
 }
 
+Admin -- UC01
 Admin -- UC02
 Admin -- UC10
 Membro -- UC10
@@ -46,11 +47,14 @@ note bottom of Criador
   que ainda irá criá-la.
 end note
 note right of UC01
-  Pré-condição: autenticação Apple válida.
+  Criação: autenticação Apple válida.
+  Configurar fuso: sessão de Administrador.
+  Aplicar agora ou no próximo ciclo.
 end note
 note right of UC09
   Link e senha permitem um único ingresso.
-  Depois, o acesso usa a sessão válida.
+  Sem expiração temporal; reemissão revoga o anterior.
+  Um aparelho por perfil; confirmar troca de acesso.
 end note
 
 @enduml

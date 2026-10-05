@@ -1,8 +1,8 @@
-# Documentação do projeto — versão 1.4
+# Documentação do projeto — versão 1.5
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.4  
-**Data:** 2026-10-02  
+**Versão:** 1.5\
+**Data:** 2026-10-05\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Modelo de dados](05-modelo-de-dados.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -15,13 +15,16 @@
 | [Visão do produto](00-visao-do-produto.md)                 | Contexto, objetivos, princípios, escopo e critérios de sucesso.                                                                         |
 | [Índice e versões](DOCUMENTACAO.md)                        | Organização documental, rastreabilidade e política de versões.                                                                          |
 | [Regras de negócio](01-regras-de-negocio.md)               | 62 regras vigentes e suas relações com RF, RNF e UC.                                                                                    |
-| [Requisitos](02-requisitos.md)                             | 66 requisitos funcionais e 27 não funcionais, com vínculos às regras e aos casos de uso.                                                |
+| [Requisitos](02-requisitos.md)                             | 68 requisitos funcionais e 27 não funcionais, com vínculos às regras e aos casos de uso.                                                |
 | [Especificação dos casos de uso](03-casos-de-uso.md)       | 19 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições.                                             |
 | [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) | Visão geral e cinco recortes UML, com fontes PlantUML e imagens SVG.                                                                    |
-| [Screen map](design/screen-map.md)                         | Mapa 1.0: navegação, catálogo de telas, modais, estados e cobertura de UC01–UC19; base funcional 1.4.                                   |
-| [User flows](design/user-flows.md)                         | Fluxos 1.0 para revisão: 15 percursos que cobrem UC01–UC19, com decisões, alternativas e retornos; base funcional 1.4 e screen map 1.0. |
-| [Modelo de dados (DER)](05-modelo-de-dados.md)             | Diagrama entidade-relacionamento em Mermaid: entidades, atributos, chaves e cardinalidades; base funcional 1.3.                         |
-| [Diagrama de classes](06-diagrama-de-classes.md) | Modelo de classes 1.0: contratos, diagramas por domínio e rastreabilidade UC–RF–RN/RNF–tipos; base funcional 1.4. |
+| [Screen map](design/screen-map.md)                         | Mapa 1.1: navegação, catálogo de telas, modais, estados e cobertura de UC01–UC19; base funcional 1.5.                                   |
+| [User flows](design/user-flows.md)                         | Fluxos 1.1: 16 percursos que cobrem UC01–UC19, com decisões, alternativas e retornos; base funcional 1.5 e screen map 1.1. |
+| [Modelo de dados (DER)](05-modelo-de-dados.md)             | Diagrama entidade-relacionamento em Mermaid: entidades, atributos, chaves e cardinalidades; base funcional 1.5.                         |
+| [Diagrama de classes](06-diagrama-de-classes.md) | Modelo de classes 1.1: contratos, diagramas por domínio e rastreabilidade UC–RF–RN/RNF–tipos; base funcional 1.5. |
+| [Arquitetura mobile](architecture/mobile-architecture.md) | Arquitetura 1.1: Swift + SwiftUI, View + ViewModel e Clean Architecture; estrutura, dependências, estado, sessão, navegação, integrações e verificação. |
+| [Catálogo mobile](architecture/mobile-feature-catalog.md) | Fronteiras de funcionalidades, nomes técnicos em inglês e rastreabilidade das 26 telas, 13 modais, UC01–UC19, UF-01–UF-16 e RNF01–27. |
+| [Decisões da arquitetura mobile](architecture/mobile-decisions.md) | MA-01–MA-17 e P-01–P-09 consolidadas, ajustes de modelagem e temas fora desta etapa. |
 
 ## Como usar
 
@@ -29,13 +32,18 @@ Mantenha o `README.md` na raiz e preserve a pasta `docs/`, incluindo `diagramas/
 
 Esta é uma base completa e consolidada. Não é uma lista de correções e não depende do PDF original ou do documento intermediário de revisão para descrever o comportamento vigente. Os documentos anteriores servem apenas como referência histórica.
 
+Os PDFs existentes em `output/pdf/` são exportações de versões anteriores. Nesta revisão, a fonte vigente é a documentação Markdown e seus diagramas atualizados.
+
 ## Organização dos arquivos
 
 - `docs/`: visão, regras, requisitos, casos de uso, modelo de dados, diagrama de classes e índice documental.
 - `docs/diagramas/casos-de-uso/`: fontes PlantUML e imagens dos diagramas de casos de uso.
 - `docs/design/`: screen map e user flows, com referências à base funcional.
+- `docs/architecture/`: arquitetura mobile, catálogo de funcionalidades e registro de decisões; especificação anterior à implementação.
 
 ## Rastreabilidade
+
+- **UC/RNF ↔ arquitetura ↔ TEL/MOD/UF:** o [catálogo mobile](architecture/mobile-feature-catalog.md) relaciona os objetivos funcionais a funcionalidades, Views, ViewModels, casos de uso e portas. A [arquitetura](architecture/mobile-architecture.md) define a separação entre mobile e backend; o [registro de decisões](architecture/mobile-decisions.md) consolida as escolhas e os temas fora desta etapa.
 
 - **UC ↔ tipos → DER:** o [diagrama de classes](06-diagrama-de-classes.md#rastreabilidade-por-caso-de-uso) relaciona os 19 casos de uso aos tipos do modelo, RF e RN, com RNF e correspondência ao modelo de dados. Cada UC possui link de retorno. Esses vínculos documentam responsabilidades, não implementação concluída.
 
@@ -48,7 +56,7 @@ Esta é uma base completa e consolidada. Não é uma lista de correções e não
 
 As relações RN–UC são derivadas de RN–RF–UC. As relações de RNF representam aplicabilidade e não criam novos passos no fluxo. A ausência de RNF específico em uma regra não dispensa requisitos transversais de segurança, acessibilidade e confiabilidade.
 
-## Decisões vigentes na versão 1.4
+## Decisões vigentes na versão 1.5
 
 - A sessão usa refresh token sem expiração temporal, sujeito à revogação. Perda da sessão exige novo convite de um Administrador para recuperar o mesmo perfil ativo.
 - Criador com família existente é redirecionado para ela; membro removido perde o acesso, inclusive por sessões existentes.
@@ -66,30 +74,31 @@ As relações RN–UC são derivadas de RN–RF–UC. As relações de RNF repre
 
 A tela Família apresenta diretamente carga e progresso por dia/semana, lista de membros, botão Gerar relatório PDF e, para Administradores, Adicionar membro. Selecionar uma pessoa abre seu detalhe com tarefas por dia/semana; edição de perfil e reenvio de convite ficam nesse detalhe, quando permitidos. A consulta da lista e das tarefas é adulta; a gestão continua exclusiva dos Administradores. O relatório permanece semanal. Referências: RN60–61, RF60–61/RF66, UC02/11/13/18.
 
-## Decisões de 2026-10-02
+## Decisões de produto consolidadas em 2026-10-05
 
 - **Kids:** tab bar com duas abas independentes, “Minhas tarefas” e “Missões e conquistas”. Meu perfil abre pelo avatar/cabeçalho, sem terceira aba. Adicionar foto à sinalização abre diretamente a câmera, com foto ainda opcional.
-- **Perfil:** foto opcional e etiqueta/apelido para todos, inclusive Kids. O apelido é visível à família, mas só o titular acessa sua configuração e edição. O perfil mostra os badges recebidos coletivamente ao concluir missões com selo.
+- **Perfil:** foto opcional e etiqueta/apelido para todos, inclusive Kids. O apelido é visível à família, mas só o titular acessa sua configuração e edição. O perfil mostra os badges recebidos pelos marcos de 5, 10, 25 e 50 missões com participação.
 - **Períodos:** progresso pessoal e familiar e carga/sobrecarga alternam entre dia e semana. Kids continuam sem acesso à distribuição de carga familiar. Progresso e carga usam métricas distintas, detalhadas em RN61.
 - **PDF semanal:** adultos geram relatório de segunda a domingo com gráficos de carga e progresso total da família, peso creditado e número de tarefas realizadas por membro. O relatório identifica período e geração; a semana atual é parcial.
 - **Destaque semanal:** na segunda-feira, apurar o primeiro lugar em pontos da semana encerrada, notificar a pessoa e mostrar o resultado no app. Pontos correspondem aos pesos creditados; todos os empatados em primeiro são reconhecidos. Compartilhar via WhatsApp é opcional e convida a sugerir uma atividade em família.
 
 Referências: RN61–65; RF61–66; UC18–19; TEL-051/052; UF-14/15. RF48, RF55, RN34 e os fluxos existentes também foram revisados.
 
-## Premissas e pendências de detalhamento
+## Consolidação de 2026-10-05
 
-As decisões do usuário estão registradas acima. Os itens abaixo complementam os fluxos como premissas de trabalho ou pontos ainda não decididos; não devem ser tratados como decisões já confirmadas:
+As pendências P-01–P-09 estão resolvidas no [registro de decisões](architecture/mobile-decisions.md). A arquitetura mobile e a base funcional incorporam:
 
-| Tema                      | Premissa ou pendência                                                                                                                  | Referência |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| Relatório                 | Acesso adulto preserva a restrição Kids à carga familiar; semana atual pode ser exportada como parcial                                 | RN62       |
-| Entrada de perfil Kids    | Avatar/cabeçalho nas duas abas, mantendo somente duas abas                                                                             | RF65       |
-| Badges                    | Conceder aos perfis ativos na conclusão; concessão retroativa a novos membros ainda pendente                                           | RN64       |
-| Elegibilidade do destaque | Considerar todos os perfis ativos, inclusive Kids; semana sem pontos positivos não tem vencedor                                        | RN65       |
-| Calendário                | Mesmo fuso de referência da família para consultas, PDF e apuração; definir fuso e horário operacional antes de implementar            | RN28, RN65 |
-| Correções posteriores     | Definir se reabertura após a apuração revisa o reconhecimento e a notificação; a carga e novos PDFs sempre refletem conclusões válidas | RN65       |
+- iOS/iPadOS 26, Swift/SwiftUI, View + ViewModel e Clean Architecture; código e arquivos de código em inglês.
+- Backend único, banco Supabase e fotos privadas no Cloudflare R2, com URL estável no banco. Mobile acessa o backend.
+- Última edição válida persistida prevalece; falhas exigem consulta ao estado. Conclusões, convites e resgates mantêm garantias transacionais.
+- Fuso escolhido na criação, padrão `America/Sao_Paulo`, alterável só por Admin, imediatamente ou no próximo ciclo. Destaque à meia-noite de segunda; resultado finalizado preservado.
+- Datas de cadastro/edição livres, inclusive antes da família e em qualquer mês futuro; carrossel de consulta mantém seu intervalo próprio. Concluídas não protegidas admitem edição com ajuste de indicadores e auditoria.
+- Badges cumulativos por participação em 5/10/25/50 missões, sem retroatividade a quem entrou depois. Destaque inclui perfis ativos Kids e exige pontos positivos.
+- Convites sem expiração temporal, de uso único; reemissão gera novo link/senha e revoga credenciais/sessão anteriores. Um aparelho por perfil; confirmação de troca sem remoção automática da família anterior.
+- Câmera/galeria no perfil para todos; câmera direta na sinalização Kids. PDF e sorteio no aplicativo, snapshot e aceite no servidor.
+- Apenas desenvolvimento e produção; sem rotina própria de backup. Linguagem/framework do backend, retenção das fotos vinculadas, volumes de teste e distribuição ficam fora desta etapa.
 
-Empate com reconhecimento de todos e apelido visível à família com edição exclusiva do titular foram confirmados pelo usuário nesta revisão.
+Novas superfícies: TEL-053 (Configurações da família), TEL-054 (Detalhe do badge), MOD-012 (aplicação do fuso), MOD-013 (troca de acesso) e UF-16 (configurar fuso). Novos requisitos: RF67 e RF68; os 19 UC foram preservados.
 
 ## Revisão da navegação da Família
 
@@ -101,22 +110,25 @@ TEL-014 e TEL-031 foram incorporadas à TEL-050 e retiradas da navegação; os i
 
 - RN = regra de negócio; RF = requisito funcional; RNF = requisito não funcional; UC = caso de uso.
 - “Adulto”, nos fluxos, designa os perfis Administrador e Membro, sem criar um novo perfil.
-- “Responsáveis finais” são os responsáveis registrados na conclusão, após eventual substituição. O usuário que executa a ação pode ser outra pessoa.
+- “Responsáveis finais” são os responsáveis creditados na conclusão válida, após eventual substituição ou correção autorizada. O evento original permanece na auditoria; o usuário que executa a ação pode ser outra pessoa.
 - “Pendente”, “Aguardando confirmação” e “Concluída” são estados de tarefa. Missões ficam em andamento ou concluídas, sem estado de expiração temporal.
 - A numeração foi preservada. RN15, RN29 e RN32 não estavam definidos e não são reutilizados nesta versão.
+- Código futuro, nomes de arquivos de código, tipos, membros, testes e recursos usam inglês. A documentação explicativa permanece em português e os textos de UI ficam em recursos localizáveis.
 
 ## Política de versionamento
 
-1. A base funcional vigente está na versão **1.4**. Os documentos de design em `docs/design/` permanecem na versão **1.0** durante sua elaboração inicial, referenciando a base funcional vigente.
+1. A base funcional vigente está na versão **1.5**. Design, modelo e arquitetura estão na versão **1.1**, referenciando a base funcional vigente.
 2. Preserve os identificadores RN, RF, RNF, UC, TEL, MOD e UF. Novos itens recebem novos códigos; códigos retirados não são reutilizados.
 3. A edição vigente fica na raiz e em `docs/`. O Git mantém o histórico e permite comparar ou recuperar versões anteriores por commits e, quando adotadas, tags. Não mantenha cópias da documentação em pastas de versões.
 4. Alterações funcionais e suas referências devem evoluir juntas, com versão, data e histórico dos códigos e comportamentos afetados. Use 1.1, 1.2... para revisões incrementais e 2.0 para mudanças substanciais da base funcional.
-5. Preserve os IDs para design e user flows e registre as alterações no Git. Ajustes do screen map e dos user flows durante esta elaboração integram o design 1.0, sem incremento automático. Se alterarem comportamento, atualize e versione a base funcional correspondente; a versão de design é independente.
+5. Preserve os IDs para design e user flows e registre as alterações no Git. Revisões do screen map e dos user flows são versionadas em conjunto. Se alterarem comportamento, atualize e versione a base funcional correspondente; a versão de design é independente.
+6. A arquitetura mobile em `docs/architecture/` tem versão independente, atualmente **1.1**, referenciando a base funcional **1.5**. Decisões técnicas não alteram requisitos implicitamente; mudanças funcionais exigem revisão da base e das referências afetadas. A presença de exemplos e árvores de arquivos não indica implementação.
 
 ## Histórico de versões
 
 | Versão | Data       | Alteração                                                                                                                                                                                                         |
 | ------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.5 | 2026-10-05 | Pendências consolidadas: fuso, datas livres, edição de concluídas, participações/badges, convites e sessão única; RF67/68; arquitetura, modelo e design 1.1. |
 | 1.4    | 2026-10-02 | Família concentra indicadores, lista, inclusão de membros e PDF; detalhe do membro reúne tarefas Dia/Semana, edição e reenvio quando permitidos. RN60–61, RF60–61/RF66 e UC02/11/13/18 revisados.                 |
 | 1.3    | 2026-10-02 | Duas abas Kids, câmera direta, foto/apelido e badges, progresso/carga Dia/Semana, PDF semanal e reconhecimento com WhatsApp; RN61–65, RF61–66, RNF26–27 e UC18–19. Empates e visibilidade do apelido confirmados. |
 | 1.2    | 2026-10-01 | Área Família na navegação adulta, progresso coletivo diário e consulta por carrossel: RN60, RF60 e UC11. Design em elaboração na versão 1.0.                                                                      |
@@ -128,3 +140,5 @@ Complemento visual de 2026-10-01: adicionados cinco diagramas de UC01–UC17 e r
 Complemento de design de 2026-10-01: adicionados user flows 1.0 para revisão, referenciando a base funcional estável 1.2 e o screen map estável 1.0, sem alteração de comportamento.
 
 Complemento de modelagem de 2026-10-05: primeira versão (1.0) do diagrama de classes, alinhada à base funcional 1.4, com contratos, diagramas por domínio, rastreabilidade bidirecional e correspondência ao DER. Mantidas as premissas e definições pendentes da base funcional.
+
+Complemento de arquitetura de 2026-10-05: proposta mobile 1.0 em Swift/SwiftUI com View + ViewModel e Clean Architecture, catálogo completo de apresentação e casos de uso, decisões e pendências. Base funcional preservada em 1.4; nenhuma implementação adicionada.

@@ -14,7 +14,7 @@ skinparam rectangleBorderColor #64748B
 skinparam packageStyle rectangle
 skinparam nodesep 32
 skinparam ranksep 55
-title Missões e recompensas\nApp de Organização Familiar · MVP 1.4
+title Missões e recompensas\nApp de Organização Familiar · MVP 1.5
 
 actor "Administrador" as Admin
 actor "Membro" as Membro
@@ -35,7 +35,13 @@ Membro -- UC14
 Kids -- UC14
 note right of UC16
   Exige missão concluída e nenhum resgate aceito.
-  Somente Administrador sorteia e aceita.
+  Somente Administrador sorteia no app e aceita.
+  O servidor registra um único aceite.
+end note
+
+note right of UC05
+  Badges cumulativos por participação em missões.
+  Bronze 5, prata 10, ouro 25 e diamante 50.
 end note
 
 @enduml

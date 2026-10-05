@@ -1,16 +1,18 @@
-# Screen map — versão 1.0
+# Screen map — versão 1.1
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do mapa:** 1.0  
-**Base funcional:** 1.4  
-**Data:** 2026-10-02  
+**Versão do mapa:** 1.1\
+**Base funcional:** 1.5\
+**Data:** 2026-10-05\
 **Situação:** referência inicial para design; organização de navegação proposta
 
 [Projeto](../../README.md) · [Índice e versões](../DOCUMENTACAO.md) · [Visão](../00-visao-do-produto.md) · [Regras](../01-regras-de-negocio.md) · [Requisitos](../02-requisitos.md) · [Casos de uso](../03-casos-de-uso.md) · [Diagrama de classes](../06-diagrama-de-classes.md)
 
 ## Escopo e leitura
 
-Este mapa organiza o MVP em telas e superfícies de interação. As permissões e comportamentos derivam da base funcional; os agrupamentos, nomes de telas e escolha entre tela e modal são decisões de design desta v1. As quatro telas principais adultas são destinos independentes: Minhas tarefas, Meu perfil, Missões e conquistas e Família. Minhas tarefas é o destino inicial. Cada uma é acessada diretamente pela navegação principal, sem passar por Minhas tarefas. Kids usam duas abas independentes, Minhas tarefas e Missões e conquistas. O mapa usa os nomes das telas; o layout, os campos ainda não especificados e a sequência completa dos user flows permanecem para detalhamento.
+O [catálogo mobile](../architecture/mobile-feature-catalog.md#2-telas-e-arquivos-de-apresentação) mapeia estes IDs para Views, ViewModels e arquivos futuros em inglês, conforme a [arquitetura mobile](../architecture/mobile-architecture.md). Esse mapeamento técnico não modifica os destinos e as permissões definidos neste mapa.
+
+Este mapa organiza o MVP em telas e superfícies de interação. As permissões e comportamentos derivam da base funcional; os agrupamentos, nomes de telas e escolha entre tela e modal são decisões de design desta versão. As quatro telas principais adultas são destinos independentes: Minhas tarefas, Meu perfil, Missões e conquistas e Família. Minhas tarefas é o destino inicial. Cada uma é acessada diretamente pela navegação principal, sem passar por Minhas tarefas. Kids usam duas abas independentes, Minhas tarefas e Missões e conquistas. O mapa usa os nomes das telas; o layout, os campos ainda não especificados seguem para detalhamento visual; os user flows estão consolidados em documento próprio.
 
 - `TEL-xxx`: tela com identidade estável; criar e editar podem ser modos da mesma tela.
 - `MOD-xxx`: modal ou painel sobre a tela de origem, com retorno ao fechá-lo.
@@ -45,7 +47,10 @@ flowchart TD
     Apple -->|Sem família| T002
     Apple -.->|Família existente| T010
     T002 --> T010
-    Link -.-> T003
+    Link -.->|Sem sessão| T003
+    Link -.->|Com sessão| M013("MOD-013 · Confirmar troca")
+    M013 -->|Confirmar| T003
+    M013 -->|Cancelar| Current(["Manter acesso atual"])
     T003 -.->|Adulto| T010
     T003 -.->|Kids| T040
     T001 --> T004
@@ -87,6 +92,8 @@ flowchart TD
     T033 -->|Perfil salvo| T032
     T050 -->|Todas as tarefas / inclusive sem responsável| T011
     T050 -->|Gerar relatório PDF| T051
+    T050 -->|Configurações / Admin| T053["TEL-053 · Configurações da família"]
+    T053 --> M012("MOD-012 · Aplicar fuso agora ou no próximo ciclo")
     T050 -->|Admin| T015
     T010 --> T012
     T010 --> T013
@@ -139,7 +146,7 @@ flowchart TD
     T021 -->|Kids / somente tarefa própria| T041
 ```
 
-Missões em andamento e concluídas são grupos da mesma lista. Selo opcional, progresso e recompensa aceita aparecem no detalhe. Kids consultam o progresso coletivo e as tarefas vinculadas, mas só abrem o detalhe operacional de tarefas das quais são responsáveis. A roleta apresenta o resultado na própria tela e permite aceitar, sortear novamente ou sair sem aceitar. Não existe tela de recompensa resgatável antes da conclusão da missão.
+Missões em andamento e concluídas são grupos da mesma lista. Participações, progresso e recompensa aceita aparecem no detalhe. Kids consultam o progresso coletivo e as tarefas vinculadas, mas só abrem o detalhe operacional de tarefas das quais são responsáveis. A roleta apresenta o resultado na própria tela e permite aceitar, sortear novamente ou sair sem aceitar. Não existe tela de recompensa resgatável antes da conclusão da missão.
 
 ## 4. Família, perfil, membros e convites
 
@@ -153,7 +160,8 @@ flowchart TD
     M009("MOD-009 · Editar meu perfil")
     M010("MOD-010 · Confirmar remoção ou alteração de papel")
     T030 --> M009
-    T030 -->|Badge| T021["TEL-021 · Detalhe da missão"]
+    T030 -->|Marco| T054["TEL-054 · Detalhe do marco"]
+    T054 -->|Missão contribuinte| T021["TEL-021 · Detalhe da missão"]
     T050 -->|Selecionar membro| T032
     T050 -->|Adicionar membro / Admin| T033
     T033 -->|Perfil salvo| T032
@@ -164,7 +172,7 @@ flowchart TD
     T030 -->|Deixar papel Admin / exceto Criador| M010
 ```
 
-TEL-034 disponibiliza link e senha juntos para compartilhamento, a partir do detalhe do membro. Reenviar permite compartilhar convite ainda disponível; se já consumido ou em recuperação de acesso, gerar novo convite de uso único para o mesmo perfil ativo. Não reutilizar credenciais consumidas. Na recuperação, parte do perfil existente, sem novo cadastro de membro. Não há seletor de família, troca livre de identidade ou modo Kids ativado pela criança. Um Administrador altera o perfil Kids em TEL-033, respeitando as restrições de promoção. A proteção do Criador vale também no próprio perfil; não é adicionada uma operação de saída de família sem caso de uso definido.
+TEL-034 disponibiliza link e senha juntos para compartilhamento, a partir do detalhe do membro. Gerar ou reenviar exige confirmação dos efeitos, produz novo link e senha e revoga convites e sessão anteriores do mesmo perfil. Não reutilizar credenciais consumidas. Na recuperação, parte do perfil existente, sem novo cadastro de membro. A troca de acesso ocorre por convite confirmado e validado, sem migração de histórico ou remoção automática do perfil anterior. Não há seletor livre de identidades nem modo Kids ativado pela criança. Um Administrador altera o perfil Kids em TEL-033, respeitando as restrições de promoção. A proteção do Criador vale também no próprio perfil; não é adicionada uma operação de saída de família sem caso de uso definido.
 
 ## 5. Experiência Kids
 
@@ -181,7 +189,8 @@ flowchart TD
     T040 -->|Avatar| T030["TEL-030 · Meu perfil Kids"]
     T020 -->|Avatar| T030
     T030 --> M009("MOD-009 · Foto e apelido próprios")
-    T030 -->|Badge| T021
+    T030 -->|Marco| T054["TEL-054 · Detalhe do marco"]
+    T054 -->|Missão contribuinte| T021
     T040 --> T041
     T041 -->|Pendente e responsável| M011
     M011 -->|Adicionar foto / solicitar permissão| Foto
@@ -208,7 +217,17 @@ flowchart TD
     W -->|Retornar ou cancelar| T052
 ```
 
-TEL-051 mantém a semana selecionada em geração, falha ou retorno; vindo de Dia, propõe a semana que contém a data e explicita o intervalo. TEL-052 pertence à pessoa reconhecida, inclui semana, pontos, tarefas realizadas e convite para fazer algo em família. Não é terceira aba Kids. Notificação sem sessão válida passa pelo acesso e só depois abre o resultado se a pessoa continuar autorizada. Há entrada interna mesmo sem notificação externa. Detalhes pendentes da apuração estão em RN65.
+TEL-051 mantém a semana selecionada em geração, falha ou retorno; vindo de Dia, propõe a semana que contém a data e explicita o intervalo. TEL-052 pertence à pessoa reconhecida, inclui semana, pontos, tarefas realizadas e convite para fazer algo em família. Não é terceira aba Kids. Notificação sem sessão válida passa pelo acesso e só depois abre o resultado se a pessoa continuar autorizada. Há entrada interna mesmo sem notificação externa. Apuração ocorre às 00:00 de segunda-feira no fuso da família e preserva resultados já finalizados (RN28/RN65).
+
+## 5.2. Configuração, marcos e datas
+
+Família oferece Configurações da família somente a Administradores (TEL-053). Selecionar fuso abre MOD-012 com efeitos e alternativas imediata/próximo ciclo. Exibir fuso vigente e mudança programada; cancelar/falhar mantém estado confirmado. Criação (TEL-002) já permite escolher fuso, padrão `America/Sao_Paulo`.
+
+Meu perfil lista total de missões com participação e badges cumulativos. Marco conquistado abre TEL-054, cuja lista contém as missões que contribuíram para a concessão; selecionar uma abre TEL-021. Sem badge, informar total/próximo marco. Não existe selo configurável em TEL-022.
+
+Os DatePickers de tarefa e início de rotina começam hoje e aceitam datas passadas/futuras sem limites de produto, inclusive antes da criação da família. O carrossel continua com RN49; confirmar a data salva mesmo quando ela não aparece nessa consulta. Edição individual de concluída não protegida explica ajuste de crédito/progresso e preservação do destaque finalizado.
+
+Sem app instalado, link direciona à loja e orienta reabrir após instalar. Com outra sessão ativa, MOD-013 confirma troca de acesso. Não transfere histórico ou remove perfil antigo. A substituição local acontece somente após ingresso validado.
 
 ## 6. Catálogo de telas
 
@@ -217,31 +236,33 @@ A = Administrador (inclui Criador); M = Membro; K = Kids. Códigos RF e RNF são
 | ID | Tela e objetivo | Acesso | Conteúdo e ações principais | Rastreabilidade |
 |---|---|---|---|---|
 | TEL-001 | Entrada | Sem sessão | Entrada Apple para Criador; orientação para quem recebeu convite ou perdeu acesso | [UC04](../03-casos-de-uso.md#uc04), [UC09](../03-casos-de-uso.md#uc09); RF37, RF46 |
-| TEL-002 | Criar família | Criador autenticado sem família | Informar dados solicitados e criar família; vínculo existente redireciona | [UC01](../03-casos-de-uso.md#uc01); RF01, RF38–39 |
+| TEL-002 | Criar família | Criador autenticado sem família | Informar nome e fuso (padrão America/Sao_Paulo); vínculo existente redireciona | [UC01](../03-casos-de-uso.md#uc01); RF01, RF38–39 |
 | TEL-003 | Entrar por convite | Pessoa com link | Validar convite, informar senha e acessar perfil novo ou recuperado | [UC09](../03-casos-de-uso.md#uc09); RF42–46, RF54 |
 | TEL-004 | Recuperar acesso | Sem sessão | Orientar novo convite com Administrador; retorno Apple do Criador | [UC02](../03-casos-de-uso.md#uc02), [UC09](../03-casos-de-uso.md#uc09); RF41, RF46 |
 | TEL-010 | Minhas tarefas | A, M | Tela principal e inicial; checklist por data, estado e progresso diário ou semanal; abrir tarefa e criar | [UC11](../03-casos-de-uso.md#uc11); RF11, RF17, RF22, RF49 |
 | TEL-011 | Tarefas da família | A, M | Consultar tarefas de outros e sem responsável por data, com o mesmo carrossel de dias; abrir e criar | [UC07](../03-casos-de-uso.md#uc07), [UC12](../03-casos-de-uso.md#uc12); RF07–12 |
 | TEL-012 | Detalhe da tarefa | A, M | Título, peso, responsáveis, estado, origem em rotina; concluir, editar, excluir ou reabrir conforme regra | [UC07](../03-casos-de-uso.md#uc07), [UC12](../03-casos-de-uso.md#uc12), [UC17](../03-casos-de-uso.md#uc17); RF08–12, RF47, RF56–59 |
-| TEL-013 | Criar/editar tarefa ou rotina | A, M | Título, peso 1–3, responsáveis opcionais e repetição; identificar alcance da edição | [UC07](../03-casos-de-uso.md#uc07), [UC08](../03-casos-de-uso.md#uc08); RF07–10, RF13–16 |
+| TEL-013 | Criar/editar tarefa ou rotina | A, M | Título, peso 1–3, data livre (padrão hoje), responsáveis e repetição com DatePicker inicial livre; identificar alcance e efeitos em concluídas | [UC07](../03-casos-de-uso.md#uc07), [UC08](../03-casos-de-uso.md#uc08); RF07–10, RF13–16 |
 | TEL-014 | Retirada — carga incorporada à Família | — | Conteúdo incorporado à TEL-050; ID preservado, sem destino navegável | [UC13](../03-casos-de-uso.md#uc13); RF18–21, RF56–57 |
 | TEL-015 | Confirmações Kids | A | Fila de tarefas aguardando avaliação | [UC03](../03-casos-de-uso.md#uc03); RF25–26 |
 | TEL-016 | Avaliar sinalização | A | Responsáveis, criança que sinalizou, foto opcional; confirmar ou recusar | [UC03](../03-casos-de-uso.md#uc03); RF25–26, RF55–56 |
 | TEL-020 | Missões e conquistas | A, M, K | Aba independente para adultos e Kids; listas em andamento/concluídas; abrir detalhe; criar e gerenciar itens somente A | [UC05](../03-casos-de-uso.md#uc05), [UC14](../03-casos-de-uso.md#uc14); RF28–32, RF36 |
-| TEL-021 | Detalhe da missão | A, M, K | Tarefas, progresso, selo e recompensa; edição/resgate somente A e conforme estado | [UC05](../03-casos-de-uso.md#uc05), [UC14](../03-casos-de-uso.md#uc14); RF29–32, RF36, RF50, RF58 |
-| TEL-022 | Criar/editar missão | A | Dados da missão, tarefas individuais e selo opcional; sem prazo | [UC05](../03-casos-de-uso.md#uc05); RF28–29, RF31–32, RF50, RF58 |
+| TEL-021 | Detalhe da missão | A, M, K | Tarefas, progresso, participações e recompensa; edição/resgate somente A e conforme estado | [UC05](../03-casos-de-uso.md#uc05), [UC14](../03-casos-de-uso.md#uc14); RF29–32, RF36, RF50, RF58 |
+| TEL-022 | Criar/editar missão | A | Dados da missão e tarefas individuais; sem prazo | [UC05](../03-casos-de-uso.md#uc05); RF28–29, RF31–32, RF50, RF58 |
 | TEL-023 | Itens de recompensa | A | Consultar predefinidos e personalizados; adicionar item | [UC06](../03-casos-de-uso.md#uc06); RF33–34 |
 | TEL-024 | Roleta da missão | A | Sortear, ver resultado, aceitar ou sortear novamente; sair sem consumir resgate | [UC16](../03-casos-de-uso.md#uc16); RF35, RF51–53 |
-| TEL-030 | Meu perfil | A, M, K | Principal adulta; avatar/cabeçalho para Kids; foto opcional, apelido editável só pelo titular, badges e detalhe da missão; deixar papel Admin quando permitido | [UC10](../03-casos-de-uso.md#uc10), [UC02](../03-casos-de-uso.md#uc02); RF48, RF62, RF65, RF03, RF05 |
+| TEL-030 | Meu perfil | A, M, K | Principal adulta; avatar/cabeçalho para Kids; foto por câmera/galeria, apelido só do titular, badges cumulativos e detalhe dos marcos; deixar papel Admin quando permitido | [UC10](../03-casos-de-uso.md#uc10), [UC02](../03-casos-de-uso.md#uc02); RF48, RF62, RF65, RF03, RF05 |
 | TEL-031 | Retirada — lista incorporada à Família | — | Lista e botão Adicionar membro incorporados à TEL-050; ID preservado, sem destino navegável | [UC02](../03-casos-de-uso.md#uc02); RF02–06, RF40 |
 | TEL-032 | Detalhe e tarefas do membro | A, M; gestão somente A | Identificação e tarefas do membro por dia/semana; abrir tarefa; editar perfil, remover e gerar/reenviar convite quando permitido, sem acesso ao apelido de terceiros | [UC11](../03-casos-de-uso.md#uc11), [UC02](../03-casos-de-uso.md#uc02); RF60, RF66, RF03–06, RF41 |
 | TEL-033 | Criar/editar membro | A | Dados permitidos e configuração Kids/papel, respeitando restrições | [UC02](../03-casos-de-uso.md#uc02); RF02–06, RF40 |
-| TEL-034 | Convite do membro | A | Disponibilizar link e senha gerados, inclusive recuperação do mesmo perfil | [UC02](../03-casos-de-uso.md#uc02); RF41, RF54 |
+| TEL-034 | Convite do membro | A | Confirmar emissão/reenvio com revogação de convites e sessão anteriores; exibir novo link e senha do mesmo perfil | [UC02](../03-casos-de-uso.md#uc02); RF41, RF54 |
 | TEL-040 | Minhas tarefas Kids | K | Aba inicial; próprias tarefas e progresso por dia/semana; abrir tarefa, perfil ou destaque recebido | [UC11](../03-casos-de-uso.md#uc11); RF11, RF17, RF22, RF49 |
 | TEL-041 | Detalhe da minha tarefa | K responsável | Informações da tarefa e estado; sinalizar se pendente | [UC15](../03-casos-de-uso.md#uc15); RF23–24, RF55–56 |
 | TEL-050 | Família | A, M | Tela principal; carga e progresso total por dia/semana, lista de membros com acesso ao detalhe, Gerar relatório PDF e Todas as tarefas; Adicionar membro e confirmações Kids somente A | [UC02](../03-casos-de-uso.md#uc02), [UC03](../03-casos-de-uso.md#uc03), [UC13](../03-casos-de-uso.md#uc13); [UC11](../03-casos-de-uso.md#uc11); RF60, RN60 |
 | TEL-051 | Relatório semanal PDF | A, M | Selecionar semana, gerar gráficos e tabela, visualizar/salvar/compartilhar; semana atual parcial | [UC18](../03-casos-de-uso.md#uc18); RF61, RN62 |
 | TEL-052 | Meu destaque semanal | A, M, K reconhecido | Semana encerrada, pontos, tarefas realizadas, convite e compartilhar no WhatsApp ou copiar mensagem | [UC19](../03-casos-de-uso.md#uc19); RF63–64, RN65 |
+| TEL-053 | Configurações da família | A | Fuso vigente/programado; selecionar novo fuso e confirmar aplicação imediata ou próximo ciclo em MOD-012 | [UC01](../03-casos-de-uso.md#uc01); RF67, RN28 |
+| TEL-054 | Detalhe do marco de participação | A, M, K titular | Bronze 5, prata 10, ouro 25, diamante 50; missões contribuintes do marco conquistado com acesso a TEL-021 | [UC10](../03-casos-de-uso.md#uc10); RF62, RN64 |
 
 ## 7. Modais e painéis
 
@@ -258,6 +279,8 @@ A = Administrador (inclui Criador); M = Membro; K = Kids. Códigos RF e RNF são
 | MOD-009 | Editar meu perfil | TEL-030 | Foto opcional e etiqueta/apelido do titular; nenhum terceiro acessa a configuração; não muda permissões (UC10) |
 | MOD-010 | Confirmar alteração de membro | TEL-030/032/033 | Remoção, promoção/rebaixamento ou alteração de modo; impedir operações protegidas do Criador e Admin em Kids (UC02) |
 | MOD-011 | Sinalizar realização | TEL-041 | Adicionar foto abre câmera; revisar/refazer/descartar; enviar ou cancelar; falha ou permissão negada permite seguir sem foto (UC15) |
+| MOD-012 | Confirmar aplicação do fuso | TEL-053 | Informativo de efeitos; aplicar imediatamente ou próximo ciclo, confirmar/cancelar; só Admin |
+| MOD-013 | Confirmar troca de acesso | Link de convite com sessão ativa | Confirmar segue ingresso; cancelar mantém acesso. Só substituir sessão local após ingresso válido, sem remover membro anterior |
 
 ## 8. Estados que o design deve contemplar
 
@@ -271,28 +294,32 @@ A = Administrador (inclui Criador); M = Membro; K = Kids. Códigos RF e RNF são
 | TEL-011/012/013/032 | Lista vazia, inclusive membro sem tarefas no período; preservar filtro do membro e período no retorno; dados inválidos; sem responsáveis; compartilhada; origem em rotina; operação bloqueada por conquista ou vínculo com missão. |
 | TEL-015/016 | Fila vazia, sinalização sem foto, foto indisponível e tarefa já decidida por outro adulto; atualizar estado e impedir decisão duplicada. |
 | TEL-050 | Dia/semana sem conclusões: informar ausência de carga, sem divisão por zero; distribuição sem ranking. |
-| TEL-020/021/022 | Sem missões; em andamento; concluída sem resgate; concluída com recompensa; selo ausente; seleção sem tarefas impede salvar. Conquista concluída não editável. |
+| TEL-020/021/022 | Sem missões; em andamento; concluída sem resgate; concluída com recompensa; seleção sem tarefas impede salvar. Conquista concluída não editável. |
 | TEL-023/024 | Itens carregando; cadastro inválido; pronta para sortear; resultado aguardando aceitação; recompensa aceita; resgate já realizado por outro Admin; falha ao salvar mantém informação verdadeira. |
 | TEL-030/032–034 | Campos inválidos, acesso de gestão negado, Criador protegido, membro removido enquanto tela aberta; somente perfis ativos recebem recuperação. |
 | TEL-041/MOD-011 | Foto ausente; permissão da câmera negada, câmera indisponível, captura cancelada, revisão/refazer; envio em andamento/com falha; Aguardando confirmação; recusa retorna a Pendente; conclusão por adulto. Não sinalizar novamente enquanto aguarda ou após concluir. |
 | TEL-030/MOD-009 | Foto ausente/padrão, substituição/remoção, falha de upload sem perda da anterior; apelido editável só pelo titular; badges vazios ou conquistados. |
 | TEL-051 | Seleção de semana, atual parcial, sem dados, gerando, PDF disponível, falha com nova tentativa; cancelar compartilhamento preserva relatório. |
+| TEL-053/MOD-012 | Fuso vigente, mudança programada, aplicação imediata, falha sem alteração, cancelamento e período de transição identificado. |
+| TEL-054 | Marco e missões contribuintes; sem acesso a configurações alheias; retorno ao perfil preservado. |
+| TEL-003/MOD-013 | Confirmação da troca, cancelamento, convite inválido e resposta perdida; não limpar a sessão anterior antes de novo ingresso válido. |
 | TEL-052 | Resultado disponível ou acesso negado; notificação externa indisponível; WhatsApp ausente permite copiar; cancelamento retorna ao resultado. Não afirmar envio ao abrir app externo. |
 
 Estados e permissões precisam de texto ou ícone além de cores. Aplicam-se RNF01–07, RNF11–13, RNF22–25 conforme a operação. Mensagens ao usuário explicam a ação possível; detalhes como refresh token ficam na especificação técnica.
 
 ## 9. Cobertura e continuidade
 
-Os 19 casos de uso estão cobertos no catálogo: UC01 em TEL-002; UC02 em TEL-050 e TEL-030/032–034; UC03 em TEL-015/016; UC04 em TEL-001; UC05 em TEL-020–022; UC06 em TEL-023; UC07/08 em TEL-011–013; UC09 em TEL-003/004; UC10 em TEL-030; UC11 em TEL-010/040/050, tarefas por membro em TEL-032 e consulta familiar em TEL-011; UC12 em TEL-012; UC13 em TEL-050; UC14 em TEL-020/021; UC15 em TEL-041; UC16 em TEL-024; UC17 em TEL-012/MOD-006; UC18 em TEL-051; UC19 em TEL-052.
+Os 19 casos de uso estão cobertos no catálogo: UC01 em TEL-002/053; UC02 em TEL-050 e TEL-030/032–034; UC03 em TEL-015/016; UC04 em TEL-001; UC05 em TEL-020–022; UC06 em TEL-023; UC07/08 em TEL-011–013; UC09 em TEL-003/004 e MOD-013; UC10 em TEL-030/054; UC11 em TEL-010/040/050, tarefas por membro em TEL-032 e consulta familiar em TEL-011; UC12 em TEL-012; UC13 em TEL-050; UC14 em TEL-020/021; UC15 em TEL-041; UC16 em TEL-024; UC17 em TEL-012/MOD-006; UC18 em TEL-051; UC19 em TEL-052.
 
-Os próximos user flows devem referenciar estes IDs e detalhar decisões, cancelamentos, falhas e retornos por tarefa. Prioridades: criar família; convidar e recuperar acesso; criar tarefa/rotina; concluir mantendo ou assumindo responsáveis; sinalizar e validar Kids; criar missão e resgatar recompensa; reabrir tarefa elegível.
+Os user flows UF-01–UF-16 referenciam estes IDs, incluindo configuração do fuso e troca confirmada de acesso. Prioridades: criar família; convidar e recuperar acesso; criar tarefa/rotina; concluir mantendo ou assumindo responsáveis; sinalizar e validar Kids; criar missão e resgatar recompensa; reabrir tarefa elegível.
 
-A apresentação dos formulários e os campos descritos genericamente nas docs continuam decisões para o design. A notificação do destaque semanal e o compartilhamento WhatsApp estão previstos. Não há chat interno, login por senha permanente, ranking completo ou troca de família.
+Campos funcionais de data/fuso e seleção de foto estão definidos; o layout visual final segue o trabalho de design. A notificação do destaque semanal e o compartilhamento WhatsApp estão previstos. Não há chat interno, login por senha permanente ou ranking completo. Troca de acesso por convite segue confirmação e preserva o perfil anterior.
 
 ## Histórico
 
 | Versão do mapa | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.1 | 1.5 | 2026-10-05 | TEL-053/054 e MOD-012/013; 26 telas ativas, 13 modais, fuso, badges, datas livres e acesso único. |
 | 1.0 | 1.4 | 2026-10-02 | Família concentra carga/progresso, lista e inclusão de membros e PDF; detalhe do membro com tarefas e ações permitidas. TEL-014/031 retiradas da navegação; 24 telas ativas, 2 IDs reservados e 11 modais. |
 | 1.0 | 1.3 | 2026-10-02 | Revisão durante elaboração: duas abas Kids, câmera direta, perfil para todos, períodos Dia/Semana, TEL-051/052; 26 telas e 11 modais. |
 | 1.0 | 1.2 | 2026-10-01 | Primeiro mapa: 24 telas, 11 modais/painéis, cinco diagramas Mermaid, permissões e estados; inclui a tela Família com progresso coletivo diário e recuperação de acesso por novo convite do mesmo perfil. |

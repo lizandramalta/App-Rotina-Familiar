@@ -1,13 +1,13 @@
 # Diagramas de caso de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão de referência:** 1.4  
-**Data:** 2026-10-02  
+**Versão de referência:** 1.5\
+**Data:** 2026-10-05\
 **Situação:** complemento visual da base documental
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice documental](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Especificação dos casos de uso](03-casos-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
 
-Os seis diagramas representam os 19 casos de uso da versão 1.4. Os códigos, nomes e permissões seguem a especificação textual, que continua sendo a referência para pré-condições, fluxos, exceções e resultados. A visão geral reúne todo o escopo; os recortes permitem ler cada área em maior detalhe. Casos repetidos em mais de um desenho têm o mesmo significado.
+Os seis diagramas representam os 19 casos de uso da versão 1.5. Os códigos, nomes e permissões seguem a especificação textual, que continua sendo a referência para pré-condições, fluxos, exceções e resultados. A visão geral reúne todo o escopo; os recortes permitem ler cada área em maior detalhe. Casos repetidos em mais de um desenho têm o mesmo significado.
 
 ## Como ler
 
@@ -19,7 +19,7 @@ Os seis diagramas representam os 19 casos de uso da versão 1.4. Os códigos, no
 - **Seta tracejada `«extend»`:** comportamento opcional que aponta para o caso base. UC08 estende UC07 no ponto “configuração de repetição”, quando o usuário decide configurá-la.
 - **Nota:** condição relevante para interpretar o desenho; as regras completas continuam nos documentos vinculados.
 
-Não há relação `«include»` nesta representação: autenticação válida é pré-condição de UC01, sem exigir nova autenticação em cada execução. Sinalizar, validar e concluir manualmente são objetivos separados, executados em momentos diferentes. O resgate também tem sua própria pré-condição, sem ser uma etapa obrigatória da consulta de missões. A ausência de setas entre esses casos não elimina suas dependências de estado.
+Não há relação `«include»` nesta representação: autenticação válida é pré-condição da criação em UC01; a configuração do fuso exige sessão de Administrador, sem exigir nova autenticação em cada execução. Sinalizar, validar e concluir manualmente são objetivos separados, executados em momentos diferentes. O resgate também tem sua própria pré-condição, sem ser uma etapa obrigatória da consulta de missões. A ausência de setas entre esses casos não elimina suas dependências de estado.
 
 Administrador e Membro têm associações explícitas; não foi criada uma herança entre esses perfis. “Adulto” permanece apenas o termo coletivo usado na especificação. O Criador está explícito nas visões geral e de acesso; nos demais recortes, suas participações são cobertas pelo papel Administrador.
 
@@ -68,7 +68,7 @@ Mapa completo dos 19 casos de uso, agrupados por área. Por ser maior, abra o SV
 
 ## Acesso, família e perfis
 
-Distingue a entrada do Criador via Apple, o ingresso da pessoa convidada e a administração dos perfis. O serviço Apple participa somente da autenticação. Editar o próprio perfil (UC10) inclui Kids, foto opcional e apelido exclusivo do titular e difere de gerenciar membros (UC02).
+Distingue a entrada do Criador via Apple, o ingresso da pessoa convidada e a administração dos perfis. O serviço Apple participa somente da autenticação. Qualquer Administrador configura o fuso em UC01; criação/retorno pelo Apple continua exclusiva do Criador. Editar o próprio perfil (UC10) inclui Kids, foto opcional e apelido exclusivo do titular e difere de gerenciar membros (UC02).
 
 ![Diagrama UML — Acesso, família e perfis](diagramas/casos-de-uso/02-acesso-familia-perfis.svg)
 
@@ -160,6 +160,7 @@ Ao alterar um UC, confira sua presença na visão geral e em todos os recortes l
 
 | Versão de referência | Data | Alteração |
 |---|---|---|
+| 1.5 | 2026-10-05 | Pendências consolidadas: fuso, datas livres, edição de concluídas, participações/badges, convites e sessão única; RF67/68; arquitetura, modelo e design 1.1. |
 | 1.4 | 2026-10-02 | Família concentra indicadores, lista, inclusão de membros e PDF; detalhe do membro reúne tarefas Dia/Semana, edição e reenvio quando permitidos. RN60–61, RF60–61/RF66 e UC02/11/13/18 revisados. |
 | 1.3 | 2026-10-02 | Duas abas Kids, câmera direta, foto/apelido e badges, progresso/carga Dia/Semana, PDF semanal e reconhecimento com WhatsApp; RN61–65, RF61–66, RNF26–27 e UC18–19. Empates e visibilidade do apelido confirmados. |
 | 1.2 | 2026-10-01 | Área Família na navegação adulta, progresso coletivo diário e consulta por carrossel: RN60, RF60 e UC11. Design em elaboração na versão 1.0. |

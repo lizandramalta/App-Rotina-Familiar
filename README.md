@@ -3,8 +3,8 @@
 Organização colaborativa das responsabilidades domésticas, com tarefas compartilhadas, participação infantil e conquistas coletivas.
 
 **Escopo:** MVP  
-**Versão da base do projeto:** 1.4  
-**Data:** 2026-10-02
+**Versão da base do projeto:** 1.5\
+**Data:** 2026-10-05
 
 ## Por que este projeto existe
 
@@ -23,7 +23,7 @@ Famílias que compartilham a rotina doméstica e desejam organizar melhor suas r
 3. Administradores e Membros criam tarefas únicas ou rotinas, definem o esforço e escolhem nenhum, um ou vários responsáveis.
 4. Todos acompanham suas tarefas e seu progresso diário ou semanal. Kids sinalizam a realização com foto opcional; um Administrador confirma ou recusa, ou um adulto conclui manualmente.
 5. A conclusão vale para todos os responsáveis finais. Adultos acompanham a distribuição da carga diária ou semanal, sem ranking.
-6. A família realiza missões coletivas sem prazo. Ao concluir todas as tarefas vinculadas, recebe o selo opcional e um Administrador pode sortear e aceitar uma recompensa coletiva.
+6. A família realiza missões coletivas sem prazo. Ao concluir todas as tarefas vinculadas, registra participações e concede badges nos marcos atingidos e um Administrador pode sortear e aceitar uma recompensa coletiva.
 
 ## O que o MVP oferece
 
@@ -34,9 +34,9 @@ Famílias que compartilham a rotina doméstica e desejam organizar melhor suas r
 - Checklist da criação da família até o último dia do mês corrente e progresso diário ou semanal para todos.
 - Modo Kids com sinalização, foto opcional e avaliação pelo Administrador.
 - Carga por dia ou semana para adultos; a semana vai de segunda-feira a domingo.
-- Missões coletivas sem prazo, selos opcionais e conquistas preservadas.
+- Missões coletivas sem prazo, badges por marcos de participação e conquistas preservadas.
 - Roleta com itens predefinidos e personalizados por Administradores, com um resgate aceito por missão.
-- Foto opcional, apelido próprio e badges coletivos no perfil de adultos e Kids.
+- Foto opcional, apelido próprio e badges por participação no perfil de adultos e Kids.
 - Relatório semanal em PDF com gráficos e indicadores da família.
 - Reconhecimento semanal por pontos, com notificação e compartilhamento opcional pelo WhatsApp.
 - Reabertura de tarefas pelo Administrador nas condições previstas.
@@ -87,10 +87,15 @@ As possibilidades de evolução estão no [documento de visão](docs/00-visao-do
 | [Screen map](docs/design/screen-map.md) | Estrutura de navegação, telas, modais, estados e permissões para apoiar o design. |
 | [User flows](docs/design/user-flows.md) | Caminhos por objetivo, decisões, cancelamentos e erros, ligados às telas e aos casos de uso. |
 | [Modelo de dados (DER)](docs/05-modelo-de-dados.md) | Entidades, atributos, chaves e relacionamentos do banco de dados. |
-| [Diagrama de classes](docs/06-diagrama-de-classes.md) | Modelo de classes 1.0: contratos, diagramas por domínio e rastreabilidade UC–RF–RN/RNF–tipos; base funcional 1.4. |
+| [Diagrama de classes](docs/06-diagrama-de-classes.md) | Modelo de classes 1.1: contratos, diagramas por domínio e rastreabilidade UC–RF–RN/RNF–tipos; base funcional 1.5. |
+| [Arquitetura mobile](docs/architecture/mobile-architecture.md) | Arquitetura 1.1 em Swift e SwiftUI: View + ViewModel com Clean Architecture, dependências, navegação, sessão, consistência e integrações. |
+| [Catálogo mobile](docs/architecture/mobile-feature-catalog.md) | Funcionalidades, nomes de arquivos em inglês e cobertura das 26 telas, 13 modais, 19 casos de uso e 16 fluxos. |
+| [Decisões da arquitetura mobile](docs/architecture/mobile-decisions.md) | Escolhas técnicas consolidadas, pendências resolvidas e temas fora desta etapa. |
 | [Índice e controle documental](docs/DOCUMENTACAO.md) | Rastreabilidade e convenções para manter a documentação consistente. |
 
-A versão 1.4 identifica a base de definição do MVP. Não representa, por si só, uma declaração de que o aplicativo foi implementado ou publicado.
+A versão 1.5 identifica a base de definição do MVP. Não representa, por si só, uma declaração de que o aplicativo foi implementado ou publicado.
+
+A arquitetura mobile 1.1, documentada em 2026-10-05, consolida as decisões para implementação futura. O código e os nomes dos arquivos de código serão em inglês; os textos da experiência serão localizados. As estruturas e os exemplos nas docs não representam arquivos Swift já implementados.
 
 ## Área Família
 
@@ -100,20 +105,31 @@ A tela Família apresenta diretamente carga e progresso por dia/semana, lista de
 
 A sessão dos convidados é mantida por refresh token sem expiração temporal, sujeito à revogação de acesso. Se a sessão for perdida, um Administrador gera novo link e senha de uso único para o mesmo perfil ativo, preservando histórico e vínculos. O Criador retorna pelo Sign in with Apple.
 
-## Decisões de 2026-10-02
+## Decisões de produto consolidadas em 2026-10-05
 
 - **Kids:** tab bar com duas abas independentes, “Minhas tarefas” e “Missões e conquistas”. Meu perfil abre pelo avatar/cabeçalho, sem terceira aba. Adicionar foto à sinalização abre diretamente a câmera, com foto ainda opcional.
-- **Perfil:** foto opcional e etiqueta/apelido para todos, inclusive Kids. O apelido é visível à família, mas só o titular acessa sua configuração e edição. O perfil mostra os badges recebidos coletivamente ao concluir missões com selo.
+- **Perfil:** foto opcional e etiqueta/apelido para todos, inclusive Kids. O apelido é visível à família, mas só o titular acessa sua configuração e edição. O perfil mostra os badges recebidos pelos marcos de 5, 10, 25 e 50 missões com participação.
 - **Períodos:** progresso pessoal e familiar e carga/sobrecarga alternam entre dia e semana. Kids continuam sem acesso à distribuição de carga familiar. Progresso e carga usam métricas distintas, detalhadas em RN61.
 - **PDF semanal:** adultos geram relatório de segunda a domingo com gráficos de carga e progresso total da família, peso creditado e número de tarefas realizadas por membro. O relatório identifica período e geração; a semana atual é parcial.
 - **Destaque semanal:** na segunda-feira, apurar o primeiro lugar em pontos da semana encerrada, notificar a pessoa e mostrar o resultado no app. Pontos correspondem aos pesos creditados; todos os empatados em primeiro são reconhecidos. Compartilhar via WhatsApp é opcional e convida a sugerir uma atividade em família.
 
 Referências: RN61–65; RF61–66; UC18–19; TEL-051/052; UF-14/15. RF48, RF55, RN34 e os fluxos existentes também foram revisados.
 
+## Arquitetura e decisões de 2026-10-05
+
+O aplicativo terá iOS/iPadOS 26, Swift/SwiftUI e View + ViewModel com Clean Architecture. Um backend único atende o mobile, com banco Supabase e fotos privadas no Cloudflare R2. PDF e sorteio são locais; o servidor fornece o snapshot e registra o aceite. Código e arquivos de código serão em inglês.
+
+O fuso é escolhido na criação (padrão `America/Sao_Paulo`) e alterado só por Administradores, imediatamente ou no próximo ciclo. O destaque é apurado à meia-noite de segunda e preservado após correções. Badges são cumulativos por participação em 5, 10, 25 e 50 missões; perfis sem participação não recebem a conquista.
+
+Tarefas e início de rotina aceitam qualquer data passada ou futura, inclusive anterior à criação da família. Edições válidas de tarefas concluídas não protegidas ajustam indicadores e mantêm auditoria. Um perfil usa um aparelho; reenvio de convite emite novo link/senha e revoga os anteriores. Trocar de acesso pede confirmação e não remove o membro da família anterior.
+
+Apenas desenvolvimento e produção estão previstos. Linguagem/framework do backend, retenção de fotos vinculadas, volumes de teste e distribuição ficam fora desta etapa. As decisões completas estão no registro da arquitetura.
+
 ## Histórico
 
 | Versão | Data | Marco |
 |---|---|---|
+| 1.5 | 2026-10-05 | Pendências consolidadas: fuso, datas livres, edição de concluídas, participações/badges, convites e sessão única; RF67/68; arquitetura, modelo e design 1.1. |
 | 1.4 | 2026-10-02 | Família concentra indicadores, lista, inclusão de membros e PDF; detalhe do membro reúne tarefas Dia/Semana, edição e reenvio quando permitidos. RN60–61, RF60–61/RF66 e UC02/11/13/18 revisados. |
 | 1.3 | 2026-10-02 | Duas abas Kids, câmera direta, foto/apelido e badges, progresso/carga Dia/Semana, PDF semanal e reconhecimento com WhatsApp; RN61–65, RF61–66, RNF26–27 e UC18–19. Empates e visibilidade do apelido confirmados. |
 | 1.2 | 2026-10-01 | Área Família na navegação adulta, progresso coletivo diário e consulta por carrossel: RN60, RF60 e UC11. Design em elaboração na versão 1.0. |

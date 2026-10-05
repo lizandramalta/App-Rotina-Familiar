@@ -1,71 +1,100 @@
 # Modelo de dados (DER)
 
 **Projeto:** App de Organização Familiar — MVP  
-**Base funcional:** 1.3  
-**Data:** 2026-10-02  
-**Situação:** primeira versão para revisão; contém pendências de esclarecimento
+**Versão do modelo:** 1.1 · **Base funcional:** 1.5\
+**Data:** 2026-10-05\
+**Situação:** modelo conceitual atualizado; sem migrações implementadas
 
-[Projeto](../README.md) · [Índice documental](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagrama de classes](06-diagrama-de-classes.md)
+[Projeto](../README.md) · [Índice](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Classes](06-diagrama-de-classes.md) · [Arquitetura mobile](architecture/mobile-architecture.md)
 
-Diagrama entidade-relacionamento em Mermaid (renderizado nativamente pelo GitHub). O DER foi auditado contra RN01–RN65, RF01–RF66, RNF01–RNF27 e UC01–UC19.
-
-A relação entre entidades persistidas e tipos Swift propostos está na [correspondência com o diagrama de classes](06-diagrama-de-classes.md#correspondencia-com-o-der), incluindo diferenças e pendências entre os modelos.
+Backend único com PostgreSQL no Supabase. Fotos ficam no R2; o banco armazena sua URL estável privada. O mobile usa a API, sem receber segredos do banco/armazenamento. O diagrama é conceitual, não escolhe linguagem/framework do backend. Os nomes portugueses preservam a terminologia documental; SQL, código e arquivos futuros usam inglês conforme o glossário ao final.
 
 ## Convenções de modelagem
 
-- **Tarefa individual** (RN16, RN35) = `OCORRENCIA_TAREFA`. `TAREFA` é o modelo que a documentação chama de rotina; tarefa única tem uma `TAREFA` e uma ocorrência.
-- Carga, progresso e pontos **não são armazenados**: derivam de `concluida_em` e dos responsáveis da ocorrência (RN30, RN57, RNF10). A reabertura desfaz o crédito sem sincronização.
-- Faixas e enums viram `CHECK`. Os `familia_id` desnormalizados exigem FK composta `(familia_id, id)` para isolar famílias (RNF06). Sem `ON DELETE CASCADE` em tarefa e ocorrência.
+- `OCORRENCIA_TAREFA` é a tarefa individual (`FamilyTask`). `TAREFA` é o template; configuração recorrente fica em `RECORRENCIA`. Tarefa única tem template e ocorrência, sem rotina.
+- Datas previstas/início são datas civis livres, inclusive antes da criação da família; datas de evento/conclusão são instantes UTC. O carrossel limita consulta, não persistência de datas.
+- Carga e progresso são projeções derivadas do estado/crédito vigente. Destaque final é snapshot imutável; badges e participações são concessões persistidas.
+- Edições usam última gravação válida, sem precondição de versão do cliente. Transações e unicidade preservam invariantes. Não há tabela geral de idempotência; recuperação de ingresso é um protocolo específico e restrito.
+- FKs compostas por família isolam relações. Sem exclusão em cascata que apague histórico ou conquistas. Omissões de índices físicos não dispensam as restrições abaixo.
 
 ## Diagrama
 
 ```mermaid
 erDiagram
     FAMILIA ||--|{ MEMBRO : possui
+    FAMILIA ||--o{ ALTERACAO_FUSO : configura
+    FAMILIA ||--o{ CICLO_SEMANAL : delimita
     MEMBRO ||--o{ CONVITE : recebe
-    MEMBRO ||--o{ SESSAO : abre
+    MEMBRO ||--o{ SESSAO : acessa
+    SESSAO ||--o{ DISPOSITIVO_PUSH : registra
     FAMILIA ||--o{ TAREFA : possui
-    TAREFA ||--o{ TAREFA_RESPONSAVEL : "responsaveis padrao"
-    MEMBRO ||--o{ TAREFA_RESPONSAVEL : "e responsavel"
-    TAREFA ||--o{ RECORRENCIA : "versoes da regra"
-    TAREFA ||--|{ OCORRENCIA_TAREFA : materializa
+    TAREFA ||--o{ TAREFA_RESPONSAVEL : atribui
+    MEMBRO ||--o{ TAREFA_RESPONSAVEL : participa
+    TAREFA ||--o{ RECORRENCIA : configura
+    TAREFA ||--o{ OCORRENCIA_TAREFA : materializa
     RECORRENCIA |o--o{ OCORRENCIA_TAREFA : origina
-    OCORRENCIA_TAREFA ||--o{ OCORRENCIA_RESPONSAVEL : responsaveis
-    MEMBRO ||--o{ OCORRENCIA_RESPONSAVEL : "e responsavel"
-    MEMBRO |o--o{ OCORRENCIA_TAREFA : "conclui"
-    OCORRENCIA_TAREFA ||--o{ OCORRENCIA_EVENTO : historico
-    MEMBRO ||--o{ OCORRENCIA_EVENTO : "e autor"
+    OCORRENCIA_TAREFA ||--o{ OCORRENCIA_RESPONSAVEL : atribui
+    MEMBRO ||--o{ OCORRENCIA_RESPONSAVEL : executa
+    OCORRENCIA_TAREFA ||--o{ CONCLUSAO : registra
+    CONCLUSAO ||--o{ CREDITO_CONCLUSAO : credita
+    MEMBRO ||--o{ CREDITO_CONCLUSAO : recebe
+    OCORRENCIA_TAREFA ||--o{ OCORRENCIA_EVENTO : audita
+    FAMILIA ||--o{ MIDIA : armazena_referencia
     FAMILIA ||--o{ MISSAO : define
     MISSAO ||--|{ MISSAO_OCORRENCIA : vincula
-    OCORRENCIA_TAREFA ||--o{ MISSAO_OCORRENCIA : "vinculada a"
-    SELO |o--o{ MISSAO : concede
-    MISSAO ||--o{ MEMBRO_BADGE : "badge coletivo"
+    OCORRENCIA_TAREFA ||--o{ MISSAO_OCORRENCIA : integra
+    MISSAO ||--o{ PARTICIPACAO_MISSAO : reconhece
+    MEMBRO ||--o{ PARTICIPACAO_MISSAO : conquista
     MEMBRO ||--o{ MEMBRO_BADGE : recebe
-    RECOMPENSA |o--o{ MISSAO : "aceita em"
+    BADGE ||--o{ MEMBRO_BADGE : define_marco
+    MEMBRO_BADGE ||--|{ BADGE_PARTICIPACAO : fundamenta
+    PARTICIPACAO_MISSAO ||--o{ BADGE_PARTICIPACAO : contribui
+    RECOMPENSA |o--o{ MISSAO : aceita_em
     FAMILIA |o--o{ RECOMPENSA : personaliza
-    FAMILIA ||--o{ APURACAO_SEMANAL : apura
+    CICLO_SEMANAL ||--o| APURACAO_SEMANAL : apura
     APURACAO_SEMANAL ||--o{ DESTAQUE_SEMANAL : reconhece
-    MEMBRO ||--o{ DESTAQUE_SEMANAL : "e reconhecido"
+    MEMBRO ||--o{ DESTAQUE_SEMANAL : recebe
+    DESTAQUE_SEMANAL ||--o| NOTIFICACAO : enfileira
 
     FAMILIA {
         uuid id PK
         varchar nome
-        varchar fuso_horario "pendente RN28"
+        varchar fuso_horario "default America/Sao_Paulo"
         timestamptz criado_em
         timestamptz atualizado_em
+    }
+    ALTERACAO_FUSO {
+        uuid id PK
+        uuid familia_id FK
+        uuid administrador_id FK
+        varchar fuso_anterior
+        varchar novo_fuso
+        enum aplicacao "IMMEDIATE, NEXT_CYCLE"
+        timestamptz solicitada_em
+        timestamptz efetiva_em
+        timestamptz aplicada_em "nulo se programada"
+        timestamptz substituida_em "historico preservado"
+    }
+    CICLO_SEMANAL {
+        uuid id PK
+        uuid familia_id FK
+        timestamptz inicio "UK com familia_id"
+        timestamptz fim
+        varchar fuso_horario
+        boolean em_transicao
+        date semana_referencia
     }
     MEMBRO {
         uuid id PK
         uuid familia_id FK
         varchar nome
-        varchar apelido "so o titular edita"
-        varchar foto_chave "opcional"
-        enum perfil "ADMINISTRADOR, MEMBRO, KIDS"
-        boolean is_family_creator "UK parcial por familia"
-        varchar apple_user_id UK "so o Criador"
-        timestamptz removido_em "exclusao logica"
+        varchar apelido "edicao pelo titular"
+        uuid foto_id FK "MIDIA opcional"
+        enum perfil "ADMINISTRATOR, MEMBER, KIDS"
+        boolean is_family_creator
+        varchar apple_user_id UK "somente Criador"
+        timestamptz removido_em
         timestamptz criado_em
-        timestamptz atualizado_em
     }
     CONVITE {
         uuid id PK
@@ -78,19 +107,29 @@ erDiagram
     }
     SESSAO {
         uuid id PK
-        uuid membro_id FK
+        uuid membro_id FK "UK parcial se ativa"
+        uuid instalacao_id
+        bytea comprovante_instalacao "verificador ou chave publica"
         char refresh_token_hash UK
-        timestamptz criado_em
+        char access_token_hash UK
+        timestamptz access_token_expira_em
+        timestamptz criada_em
         timestamptz revogada_em
+    }
+    DISPOSITIVO_PUSH {
+        uuid id PK
+        uuid sessao_id FK
+        varchar token_protegido
+        enum ambiente "DEVELOPMENT, PRODUCTION"
+        timestamptz atualizado_em
+        timestamptz invalidado_em
     }
     TAREFA {
         uuid id PK
         uuid familia_id FK
         varchar titulo
-        smallint peso "CHECK 1 a 3"
+        smallint peso "1 a 3"
         timestamptz excluida_em
-        timestamptz criado_em
-        timestamptz atualizado_em
     }
     TAREFA_RESPONSAVEL {
         uuid tarefa_id PK, FK
@@ -100,86 +139,131 @@ erDiagram
     RECORRENCIA {
         uuid id PK
         uuid tarefa_id FK
-        smallint intervalo_dias "CHECK 1, 7, 14, 21, 28"
+        smallint intervalo_dias "1, 7, 14, 21, 28"
         date data_inicio
-        boolean ativa "UK parcial por tarefa"
+        boolean ativa
         date gerada_ate
-        timestamptz criado_em
         timestamptz desativada_em
     }
     OCORRENCIA_TAREFA {
         uuid id PK
         uuid familia_id FK
         uuid tarefa_id FK
-        uuid recorrencia_id FK "nulo se sem recorrencia"
-        date data_prevista "UK com tarefa_id"
+        uuid recorrencia_id FK "opcional"
+        varchar chave_origem "UK com tarefa_id; imutavel"
+        date data_prevista "editavel; sem limite de cadastro"
         varchar titulo
-        smallint peso "CHECK 1 a 3"
-        enum status "PENDENTE, AGUARDANDO_CONFIRMACAO, CONCLUIDA"
-        uuid concluida_por_id FK "quem executou a acao"
-        timestamptz concluida_em "base da carga"
+        smallint peso
+        enum status "PENDING, AWAITING_CONFIRMATION, COMPLETED"
         timestamptz cancelada_em
-        timestamptz criado_em
-        timestamptz atualizado_em
     }
     OCORRENCIA_RESPONSAVEL {
         uuid ocorrencia_id PK, FK
         uuid membro_id PK, FK
         uuid familia_id FK
     }
+    CONCLUSAO {
+        uuid id PK
+        uuid ocorrencia_id FK
+        uuid familia_id FK
+        uuid autor_id FK
+        enum origem "MANUAL, KIDS_CONFIRMATION"
+        uuid confirmada_por_id FK "opcional"
+        timestamptz concluida_em
+        timestamptz desfeita_em
+        uuid desfeita_por_id FK "opcional"
+    }
+    CREDITO_CONCLUSAO {
+        uuid conclusao_id PK, FK
+        uuid membro_id PK, FK
+        uuid familia_id FK
+        smallint peso_vigente
+    }
     OCORRENCIA_EVENTO {
         uuid id PK
         uuid ocorrencia_id FK
         uuid familia_id FK
-        enum tipo "SINALIZADA, CONFIRMADA, RECUSADA, CONCLUIDA, REABERTA"
         uuid ator_id FK
-        varchar foto_chave "so SINALIZADA"
+        enum tipo "SIGNALED, CONFIRMED, REJECTED, COMPLETED, REOPENED, EDITED"
+        uuid sinalizacao_id "correlacao da decisao"
+        uuid foto_id FK "MIDIA opcional"
+        jsonb dados_anteriores "inclui credito anterior"
+        jsonb dados_novos "inclui credito corrigido"
         timestamptz criado_em
+    }
+    MIDIA {
+        uuid id PK
+        uuid familia_id FK
+        uuid titular_id FK
+        varchar url_objeto "URL estavel privada R2; sem segredo"
+        enum finalidade "PROFILE_PHOTO, TASK_SIGNAL"
+        timestamptz criado_em
+        timestamptz vinculado_em
     }
     MISSAO {
         uuid id PK
         uuid familia_id FK
         varchar titulo
-        uuid selo_id FK "opcional"
         timestamptz cumprida_em
         uuid recompensa_aceita_id FK
+        varchar recompensa_titulo "snapshot do aceite"
+        uuid aceita_por_id FK
         timestamptz aceita_em
-        timestamptz criado_em
     }
     MISSAO_OCORRENCIA {
         uuid missao_id PK, FK
         uuid ocorrencia_id PK, FK
         uuid familia_id FK
     }
-    MEMBRO_BADGE {
+    PARTICIPACAO_MISSAO {
         uuid missao_id PK, FK
         uuid membro_id PK, FK
+        uuid familia_id FK
+        timestamptz registrada_em
+    }
+    BADGE {
+        varchar codigo PK "bronze, silver, gold, diamond"
+        int minimo_missoes UK "5, 10, 25, 50"
+        varchar icone
+    }
+    MEMBRO_BADGE {
+        uuid id PK
+        uuid membro_id FK "UK com badge_codigo"
+        varchar badge_codigo FK
         timestamptz concedido_em
+    }
+    BADGE_PARTICIPACAO {
+        uuid membro_badge_id PK, FK
+        uuid missao_id PK, FK
+        uuid membro_id FK "participacao do mesmo titular"
     }
     RECOMPENSA {
         uuid id PK
-        uuid familia_id FK "nulo = catalogo"
+        uuid familia_id FK "nulo para catalogo"
         varchar titulo
         timestamptz criado_em
     }
-    SELO {
-        uuid id PK
-        varchar nome UK
-        varchar icone
-    }
     APURACAO_SEMANAL {
         uuid id PK
-        uuid familia_id FK
-        date semana_inicio "UK com familia_id"
-        timestamptz processada_em "nulo = incompleta"
-        timestamptz criado_em
+        uuid ciclo_id FK, UK
+        timestamptz iniciada_em
+        timestamptz processada_em
     }
     DESTAQUE_SEMANAL {
         uuid apuracao_id PK, FK
         uuid membro_id PK, FK
-        smallint pontos
-        smallint tarefas_realizadas
-        timestamptz notificado_em
+        int pontos
+        int tarefas_realizadas
+    }
+    NOTIFICACAO {
+        uuid id PK
+        uuid apuracao_id FK "UK com membro_id"
+        uuid membro_id FK
+        enum estado "PENDING, ACCEPTED_BY_PROVIDER, FAILED"
+        int tentativas
+        timestamptz proxima_tentativa_em
+        timestamptz aceita_pelo_provedor_em
+        timestamptz aberta_em "evento separado; opcional"
     }
 ```
 
@@ -187,32 +271,45 @@ erDiagram
 
 | Restrição | Base |
 |---|---|
-| Um Criador por família (índice único parcial); `apple_user_id` preenchido se e somente se `is_family_creator`; Criador sempre ADMINISTRADOR | RN01, RN05, RN06, RN44 |
-| Uma recorrência ativa por tarefa (índice único parcial) | RN17 |
-| `status = CONCLUIDA` exige `concluida_por_id` e `concluida_em` | RN22, RNF11 |
-| Missão com ao menos uma ocorrência vinculada (transação ou trigger diferido) | RN36, RN50 |
-| Missão concluída: vínculos, tarefas vinculadas e dados imutáveis, exceto o registro do resgate | RN58, RNF25 |
-| Resgate único: gravar `recompensa_aceita_id` somente `WHERE recompensa_aceita_id IS NULL` | RN53, RNF23 |
-| `recompensa_aceita_id` aponta para item do catálogo ou da mesma família | RN42 |
-| Badge único por missão e membro (PK de `MEMBRO_BADGE`) | RN64 |
-| Um resultado por família e semana (`UK` de `APURACAO_SEMANAL`); resultado só visível com `processada_em` preenchido | RN65, RNF26 |
-| Sessão e renovação validam `MEMBRO.removido_em` | RN10, RNF22 |
+| Um Criador por família, sempre Administrador; membro pertence a uma família. Troca de acesso não transfere nem remove perfil anterior | RN01, RN05, RN09, RF68 |
+| Uma sessão ativa por perfil, comprovada pela instalação; checar revogação em toda operação. Refresh sem vencimento temporal | RN47, RNF22 |
+| Emitir/reenviar convite invalida anteriores e revoga sessão antes de disponibilizar nova credencial; sem prazo temporal de convite | RN46, RF41/54 |
+| Uma recorrência ativa por template; origem imutável identifica ocorrência mesmo quando data prevista muda | RN14, RN16/17 |
+| No máximo uma conclusão vigente por ocorrência; estado concluído exige conclusão vigente. Zero responsáveis/zero créditos é permitido após edição autorizada | RN17, RN22, RNF11 |
+| Correção de concluída atualiza crédito vigente e audita valores antigos na mesma transação; mantém instante de conclusão | RN17, RN30 |
+| Reabertura invalida conclusão/créditos uma vez e preserva histórico; exclusão posterior não subtrai novamente | RN57/59 |
+| Missão mantém ao menos uma ocorrência, sem selo configurável. Conquista encerrada protege dados/vínculos/tarefas | RN36, RN50, RN58 |
+| Participação única por membro/missão: exige ao menos um crédito válido em tarefa vinculada no encerramento. Não duplicar por várias tarefas | RN64 |
+| Badge único por membro/marco; quatro marcos fixos e cumulativos. Snapshot das participações contribuintes tem o mesmo titular | RN64 |
+| Resgate único e item de catálogo ou da mesma família; preservar título/autor do aceite | RN53, RNF23 |
+| Ciclos contíguos, não sobrepostos; transição de fuso não reapura intervalos encerrados. Uma mudança programada vigente por família | RN28, RN65 |
+| Uma apuração por ciclo; resultado final imutável. Fila de notificação gravada com resultado, sem confundir aceitação APNs com leitura | RN65, RNF26 |
+| Família do recurso, titularidade e estado ativo conferidos no backend; URL de mídia não é permissão de leitura | RNF06/07/24/27 |
 
-## Alterações em relação ao DER inicial
+A recuperação de ingresso perdido é uma troca de credenciais específica, vinculada à tentativa e prova da instalação original por dez minutos. Seu estado protegido não é histórico de negócio nem tabela geral de idempotência. Não devolver tokens com base apenas em ID público ou permitir reconsumo do convite. Não persistir senha legível permanente para essa recuperação.
 
-- **Incluídos:** `MISSAO_OCORRENCIA`, `MEMBRO_BADGE`, `APURACAO_SEMANAL`, `DESTAQUE_SEMANAL`, `OCORRENCIA_EVENTO`; `CONVITE.senha_hash`; `MEMBRO.apelido` e `MEMBRO.foto_chave`.
-- **Corrigidos:** recorrência por `intervalo_dias` (RN14); `concluida_por_id` e `concluida_em` no lugar de `realizada_*` e `validada_*`; `recompensa_aceita_id` e `aceita_em` no lugar de `recompensa_sorteada_id` e `sorteada_em`; relação errada "realizada por" removida.
-- **Removidos:** `RECORRENCIA_DIA_SEMANA`, `RECORRENCIA.frequencia` e `data_fim`, `MISSAO.data_inicio` e `data_fim` (missão sem prazo, RN36), `SESSAO.expira_em` (RN47), `CONVITE.expira_em` (documentação não prevê expiração), `FAMILIA_RECOMPENSA` (redundante com `RECOMPENSA.familia_id`).
+Consultas/PDF usam snapshot consistente. Última gravação vence somente entre alterações autorizadas; restrições transacionais não são removidas. A política não depende de campo de versão esperado do cliente.
 
-## Pendências de esclarecimento
+## Glossário para a implementação em inglês
 
-1. **Data da tarefa:** o RF07 não diz como se define a data de uma tarefa única nem o início da rotina; o DER assume `data_prevista` e `data_inicio`.
-2. **Horizonte de geração:** o UC08 não define até quando as ocorrências são geradas (`gerada_ate`).
-3. **Expiração de convite:** não prevista; `CONVITE.expira_em` foi removido. Confirmar.
-4. **Reatribuição de tarefa concluída:** alteraria a carga histórica e não é proibida expressamente.
-5. **Selos:** definir se são apenas do catálogo do app ou criados pelo Administrador.
-6. **Notificação do destaque (UC19):** se for push externo, falta tabela de token de dispositivo.
-7. **Fuso horário (RN28) e revisão pós-reabertura (RN65):** pendentes; afetam `FAMILIA.fuso_horario` e o snapshot de `DESTAQUE_SEMANAL`.
-8. **Terminologia:** "tarefa" na documentação é a ocorrência do DER e a `TAREFA` do DER é a rotina; a visão e o screen map usam "ocorrência". Falta um glossário.
-9. **Badge retroativo:** a RN64 deixa pendente a concessão a membros que entram depois da conclusão.
-10. **Convite ativo:** definir se um novo convite invalida o anterior do mesmo membro.
+| Modelo documental | Nome técnico |
+|---|---|
+| FAMILIA / MEMBRO | `Family` / `Member` |
+| TAREFA / RECORRENCIA / OCORRENCIA_TAREFA | `TaskTemplate` / `Routine` / `FamilyTask` |
+| CONCLUSAO / CREDITO_CONCLUSAO / OCORRENCIA_EVENTO | `Completion` / `CompletionCredit` / `TaskEvent` |
+| ALTERACAO_FUSO / CICLO_SEMANAL | `TimeZoneChange` / `WeeklyCycle` |
+| MISSAO / PARTICIPACAO_MISSAO | `Mission` / `MissionParticipation` |
+| BADGE / MEMBRO_BADGE / BADGE_PARTICIPACAO | `Badge` / `BadgeAward` / `BadgeContribution` |
+| MIDIA / DISPOSITIVO_PUSH / NOTIFICACAO | `MediaAsset` / `PushDevice` / `NotificationDelivery` |
+| APURACAO_SEMANAL / DESTAQUE_SEMANAL | `WeeklyHighlight` / `WeeklyRecognition` |
+
+## Decisões incorporadas
+
+As pendências anteriores foram resolvidas: datas livres, horizonte de geração, ausência de expiração temporal de convite, reemissão com revogação, edição de concluída com auditoria, fuso configurável, destaque preservado, participação por crédito, badges cumulativos e sessão única. Não há `SELO` ou `selo_id` na missão; `notificado_em` foi substituído por estados explícitos de notificação. Data prevista editável não é chave de geração. O projeto não implementará rotina própria de backup. Retenção de fotos vinculadas, volumes de teste, distribuição e escolha de linguagem/framework do backend estão fora desta etapa.
+
+## Histórico
+
+| Versão | Base | Data | Alteração |
+|---|---|---|---|
+| 1.1 | 1.5 | 2026-10-05 | Modelo alinhado às decisões consolidadas: Supabase/R2, ciclos/fuso, sessão única, créditos/auditoria, participações/marcos e fila de notificações. |
+| 1.0 | 1.3 | 2026-10-02 | Primeiro DER, anterior à consolidação das decisões de arquitetura. |

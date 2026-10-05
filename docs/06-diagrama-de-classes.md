@@ -1,14 +1,16 @@
-# Diagrama de classes — versão 1.0
+# Diagrama de classes — versão 1.1
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.0  
-**Base funcional:** 1.4  
+**Versão:** 1.1\
+**Base funcional:** 1.5\
 **Data:** 2026-10-05  
 **Situação:** referência de modelagem da base funcional
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Modelo de dados](05-modelo-de-dados.md)
 
 ## Como ler
+
+A tradução deste modelo do sistema para o aplicativo está na [arquitetura mobile](architecture/mobile-architecture.md#7-tradução-do-modelo-de-classes-para-o-mobile). Ela distingue valores e casos de uso do cliente das operações autoritativas do backend. Os [ajustes de modelagem aplicados](architecture/mobile-decisions.md#4-ajustes-de-modelagem-aplicados) consolidam as decisões desta revisão.
 
 - Os diagramas Mermaid mostram os tipos e relacionamentos de cada domínio. O catálogo detalha atributos e operações; os identificadores em inglês são preservados para uso em Swift.
 - `class`, `struct`, `enum` e `protocol` indicam o tipo do modelo. Nos diagramas, classes usam a declaração padrão, sem estereótipo; os demais tipos são identificados por estereótipos. `+` significa público e `-`, privado. Os blocos são pseudocódigo com notação UML e tipos Swift, não código compilável.
@@ -31,7 +33,7 @@
 - [Relacionamentos](#relacionamentos)
 - [Regras centrais do modelo](#regras-centrais-do-modelo)
 - [Correspondência com o DER](#correspondencia-com-o-der)
-- [Definições pendentes na base funcional](#definicoes-pendentes-na-base-funcional)
+- [Definições consolidadas na base funcional](#definicoes-pendentes-na-base-funcional)
 - [Histórico](#historico)
 
 ## Rastreabilidade por caso de uso
@@ -40,25 +42,25 @@ Os RF e RN são os vínculos declarados em cada UC na base funcional. A lista de
 
 | Caso de uso | Tipos responsáveis ou de apoio | Requisitos funcionais | Regras de negócio |
 |---|---|---|---|
-| <a id="rastreio-uc01"></a>[UC01](03-casos-de-uso.md#uc01) — Gerenciar família | [Family](#classe-family), [Member](#classe-member), [AccessService](#classe-accessservice), [AppleAuthenticating](#classe-appleauthenticating) | [RF01](02-requisitos.md#rf01), [RF38](02-requisitos.md#rf38), [RF39](02-requisitos.md#rf39) | [RN01](01-regras-de-negocio.md#rn01), [RN09](01-regras-de-negocio.md#rn09), [RN44](01-regras-de-negocio.md#rn44) |
+| <a id="rastreio-uc01"></a>[UC01](03-casos-de-uso.md#uc01) — Gerenciar família | [Family](#classe-family), [Member](#classe-member), [AccessService](#classe-accessservice), [AppleAuthenticating](#classe-appleauthenticating) , [TimeZoneChange](#classe-timezonechange) | [RF01](02-requisitos.md#rf01), [RF38](02-requisitos.md#rf38), [RF39](02-requisitos.md#rf39), [RF67](02-requisitos.md#rf67) | [RN01](01-regras-de-negocio.md#rn01), [RN09](01-regras-de-negocio.md#rn09), [RN28](01-regras-de-negocio.md#rn28), [RN44](01-regras-de-negocio.md#rn44), [RN65](01-regras-de-negocio.md#rn65) |
 | <a id="rastreio-uc02"></a>[UC02](03-casos-de-uso.md#uc02) — Gerenciar membros | [Family](#classe-family), [Member](#classe-member), [MemberRole](#classe-memberrole), [Invite](#classe-invite), [InviteStatus](#classe-invitestatus), [Session](#classe-session), [AccessService](#classe-accessservice), [AccessControl](#classe-accesscontrol), [MemberService](#classe-memberservice), [InviteCredentials](#classe-invitecredentials) | [RF02](02-requisitos.md#rf02), [RF03](02-requisitos.md#rf03), [RF04](02-requisitos.md#rf04), [RF05](02-requisitos.md#rf05), [RF06](02-requisitos.md#rf06), [RF40](02-requisitos.md#rf40), [RF41](02-requisitos.md#rf41), [RF54](02-requisitos.md#rf54) | [RN01](01-regras-de-negocio.md#rn01), [RN02](01-regras-de-negocio.md#rn02), [RN03](01-regras-de-negocio.md#rn03), [RN04](01-regras-de-negocio.md#rn04), [RN05](01-regras-de-negocio.md#rn05), [RN06](01-regras-de-negocio.md#rn06), [RN07](01-regras-de-negocio.md#rn07), [RN08](01-regras-de-negocio.md#rn08), [RN10](01-regras-de-negocio.md#rn10), [RN45](01-regras-de-negocio.md#rn45), [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47) |
 | <a id="rastreio-uc03"></a>[UC03](03-casos-de-uso.md#uc03) — Validar conclusão de tarefa Kids | [FamilyTask](#classe-familytask), [KidsSignal](#classe-kidssignal), [ValidationDecision](#classe-validationdecision), [Completion](#classe-completion), [TaskService](#classe-taskservice), [MissionService](#classe-missionservice) | [RF25](02-requisitos.md#rf25), [RF26](02-requisitos.md#rf26), [RF55](02-requisitos.md#rf55), [RF56](02-requisitos.md#rf56) | [RN22](01-regras-de-negocio.md#rn22), [RN23](01-regras-de-negocio.md#rn23), [RN24](01-regras-de-negocio.md#rn24), [RN25](01-regras-de-negocio.md#rn25), [RN26](01-regras-de-negocio.md#rn26), [RN30](01-regras-de-negocio.md#rn30), [RN35](01-regras-de-negocio.md#rn35), [RN54](01-regras-de-negocio.md#rn54), [RN55](01-regras-de-negocio.md#rn55), [RN56](01-regras-de-negocio.md#rn56) |
-| <a id="rastreio-uc04"></a>[UC04](03-casos-de-uso.md#uc04) — Autenticar com Apple | [AppleAuthenticating](#classe-appleauthenticating), [AccessService](#classe-accessservice), [Family](#classe-family), [Member](#classe-member) | [RF37](02-requisitos.md#rf37), [RF39](02-requisitos.md#rf39) | [RN44](01-regras-de-negocio.md#rn44) |
-| <a id="rastreio-uc05"></a>[UC05](03-casos-de-uso.md#uc05) — Gerenciar missões | [Mission](#classe-mission), [MissionStatus](#classe-missionstatus), [FamilyTask](#classe-familytask), [Badge](#classe-badge), [BadgeAward](#classe-badgeaward), [MissionService](#classe-missionservice) | [RF28](02-requisitos.md#rf28), [RF29](02-requisitos.md#rf29), [RF31](02-requisitos.md#rf31), [RF32](02-requisitos.md#rf32), [RF50](02-requisitos.md#rf50), [RF58](02-requisitos.md#rf58) | [RN16](01-regras-de-negocio.md#rn16), [RN35](01-regras-de-negocio.md#rn35), [RN36](01-regras-de-negocio.md#rn36), [RN37](01-regras-de-negocio.md#rn37), [RN38](01-regras-de-negocio.md#rn38), [RN39](01-regras-de-negocio.md#rn39), [RN40](01-regras-de-negocio.md#rn40), [RN50](01-regras-de-negocio.md#rn50), [RN51](01-regras-de-negocio.md#rn51), [RN53](01-regras-de-negocio.md#rn53), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59), [RN64](01-regras-de-negocio.md#rn64) |
+| <a id="rastreio-uc04"></a>[UC04](03-casos-de-uso.md#uc04) — Autenticar com Apple | [AppleAuthenticating](#classe-appleauthenticating), [AccessService](#classe-accessservice), [Family](#classe-family), [Member](#classe-member) , [AppleAuthorizationProof](#classe-appleauthorizationproof) | [RF37](02-requisitos.md#rf37), [RF39](02-requisitos.md#rf39) | [RN44](01-regras-de-negocio.md#rn44) |
+| <a id="rastreio-uc05"></a>[UC05](03-casos-de-uso.md#uc05) — Gerenciar missões | [Mission](#classe-mission), [MissionStatus](#classe-missionstatus), [FamilyTask](#classe-familytask), [Badge](#classe-badge), [BadgeAward](#classe-badgeaward), [MissionService](#classe-missionservice) , [MissionParticipation](#classe-missionparticipation) | [RF28](02-requisitos.md#rf28), [RF29](02-requisitos.md#rf29), [RF31](02-requisitos.md#rf31), [RF32](02-requisitos.md#rf32), [RF50](02-requisitos.md#rf50), [RF58](02-requisitos.md#rf58) | [RN16](01-regras-de-negocio.md#rn16), [RN35](01-regras-de-negocio.md#rn35), [RN36](01-regras-de-negocio.md#rn36), [RN37](01-regras-de-negocio.md#rn37), [RN38](01-regras-de-negocio.md#rn38), [RN39](01-regras-de-negocio.md#rn39), [RN40](01-regras-de-negocio.md#rn40), [RN50](01-regras-de-negocio.md#rn50), [RN51](01-regras-de-negocio.md#rn51), [RN53](01-regras-de-negocio.md#rn53), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59), [RN64](01-regras-de-negocio.md#rn64) |
 | <a id="rastreio-uc06"></a>[UC06](03-casos-de-uso.md#uc06) — Gerenciar itens de recompensas coletivas | [RewardItem](#classe-rewarditem), [RewardItemSource](#classe-rewarditemsource) | [RF33](02-requisitos.md#rf33), [RF34](02-requisitos.md#rf34) | [RN41](01-regras-de-negocio.md#rn41), [RN42](01-regras-de-negocio.md#rn42) |
 | <a id="rastreio-uc07"></a>[UC07](03-casos-de-uso.md#uc07) — Gerenciar tarefas | [FamilyTask](#classe-familytask), [EffortWeight](#classe-effortweight), [TaskStatus](#classe-taskstatus), [TaskService](#classe-taskservice), [ChangeScope](#classe-changescope), [Routine](#classe-routine) | [RF07](02-requisitos.md#rf07), [RF08](02-requisitos.md#rf08), [RF09](02-requisitos.md#rf09), [RF10](02-requisitos.md#rf10), [RF15](02-requisitos.md#rf15), [RF16](02-requisitos.md#rf16), [RF27](02-requisitos.md#rf27), [RF58](02-requisitos.md#rf58), [RF59](02-requisitos.md#rf59) | [RN11](01-regras-de-negocio.md#rn11), [RN12](01-regras-de-negocio.md#rn12), [RN13](01-regras-de-negocio.md#rn13), [RN17](01-regras-de-negocio.md#rn17), [RN18](01-regras-de-negocio.md#rn18), [RN19](01-regras-de-negocio.md#rn19), [RN20](01-regras-de-negocio.md#rn20), [RN30](01-regras-de-negocio.md#rn30), [RN38](01-regras-de-negocio.md#rn38), [RN50](01-regras-de-negocio.md#rn50), [RN53](01-regras-de-negocio.md#rn53), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59) |
 | <a id="rastreio-uc08"></a>[UC08](03-casos-de-uso.md#uc08) — Definir recorrência de rotina | [Routine](#classe-routine), [RoutineFrequency](#classe-routinefrequency), [FamilyTask](#classe-familytask), [TaskService](#classe-taskservice), [ChangeScope](#classe-changescope) | [RF13](02-requisitos.md#rf13), [RF14](02-requisitos.md#rf14) | [RN11](01-regras-de-negocio.md#rn11), [RN14](01-regras-de-negocio.md#rn14), [RN16](01-regras-de-negocio.md#rn16), [RN17](01-regras-de-negocio.md#rn17) |
-| <a id="rastreio-uc09"></a>[UC09](03-casos-de-uso.md#uc09) — Ingressar por convite | [Invite](#classe-invite), [InviteStatus](#classe-invitestatus), [Session](#classe-session), [AccessService](#classe-accessservice), [InviteCredentials](#classe-invitecredentials) | [RF42](02-requisitos.md#rf42), [RF43](02-requisitos.md#rf43), [RF44](02-requisitos.md#rf44), [RF45](02-requisitos.md#rf45), [RF46](02-requisitos.md#rf46), [RF54](02-requisitos.md#rf54) | [RN10](01-regras-de-negocio.md#rn10), [RN45](01-regras-de-negocio.md#rn45), [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47) |
-| <a id="rastreio-uc10"></a>[UC10](03-casos-de-uso.md#uc10) — Editar perfil | [Member](#classe-member), [BadgeAward](#classe-badgeaward), [Badge](#classe-badge), [MemberService](#classe-memberservice), [MissionService](#classe-missionservice) | [RF48](02-requisitos.md#rf48), [RF62](02-requisitos.md#rf62), [RF65](02-requisitos.md#rf65) | [RN63](01-regras-de-negocio.md#rn63), [RN64](01-regras-de-negocio.md#rn64), [RN33](01-regras-de-negocio.md#rn33) |
-| <a id="rastreio-uc11"></a>[UC11](03-casos-de-uso.md#uc11) — Visualizar minhas tarefas | [FamilyArea](#classe-familyarea), [FamilyTask](#classe-familytask), [CarouselRange](#classe-carouselrange), [ViewPeriod](#classe-viewperiod), [PeriodProgress](#classe-periodprogress), [Member](#classe-member), [PersonalTasks](#classe-personaltasks), [WeeklyRecognition](#classe-weeklyrecognition), [PeriodCalculator](#classe-periodcalculator) | [RF60](02-requisitos.md#rf60), [RF11](02-requisitos.md#rf11), [RF17](02-requisitos.md#rf17), [RF22](02-requisitos.md#rf22), [RF49](02-requisitos.md#rf49), [RF65](02-requisitos.md#rf65), [RF66](02-requisitos.md#rf66) | [RN60](01-regras-de-negocio.md#rn60), [RN16](01-regras-de-negocio.md#rn16), [RN22](01-regras-de-negocio.md#rn22), [RN26](01-regras-de-negocio.md#rn26), [RN27](01-regras-de-negocio.md#rn27), [RN33](01-regras-de-negocio.md#rn33), [RN49](01-regras-de-negocio.md#rn49), [RN55](01-regras-de-negocio.md#rn55), [RN28](01-regras-de-negocio.md#rn28), [RN61](01-regras-de-negocio.md#rn61), [RN63](01-regras-de-negocio.md#rn63) |
+| <a id="rastreio-uc09"></a>[UC09](03-casos-de-uso.md#uc09) — Ingressar por convite | [Invite](#classe-invite), [InviteStatus](#classe-invitestatus), [Session](#classe-session), [AccessService](#classe-accessservice), [InviteCredentials](#classe-invitecredentials) | [RF42](02-requisitos.md#rf42), [RF43](02-requisitos.md#rf43), [RF44](02-requisitos.md#rf44), [RF45](02-requisitos.md#rf45), [RF46](02-requisitos.md#rf46), [RF54](02-requisitos.md#rf54), [RF68](02-requisitos.md#rf68) | [RN09](01-regras-de-negocio.md#rn09), [RN10](01-regras-de-negocio.md#rn10), [RN45](01-regras-de-negocio.md#rn45), [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47) |
+| <a id="rastreio-uc10"></a>[UC10](03-casos-de-uso.md#uc10) — Editar perfil | [Member](#classe-member), [BadgeAward](#classe-badgeaward), [Badge](#classe-badge), [MemberService](#classe-memberservice), [MissionService](#classe-missionservice) , [BadgeTier](#classe-badgetier) | [RF48](02-requisitos.md#rf48), [RF62](02-requisitos.md#rf62), [RF65](02-requisitos.md#rf65) | [RN33](01-regras-de-negocio.md#rn33), [RN63](01-regras-de-negocio.md#rn63), [RN64](01-regras-de-negocio.md#rn64) |
+| <a id="rastreio-uc11"></a>[UC11](03-casos-de-uso.md#uc11) — Visualizar minhas tarefas | [FamilyArea](#classe-familyarea), [FamilyTask](#classe-familytask), [CarouselRange](#classe-carouselrange), [ViewPeriod](#classe-viewperiod), [PeriodProgress](#classe-periodprogress), [Member](#classe-member), [PersonalTasks](#classe-personaltasks), [WeeklyRecognition](#classe-weeklyrecognition), [PeriodCalculator](#classe-periodcalculator) | [RF11](02-requisitos.md#rf11), [RF17](02-requisitos.md#rf17), [RF22](02-requisitos.md#rf22), [RF49](02-requisitos.md#rf49), [RF60](02-requisitos.md#rf60), [RF65](02-requisitos.md#rf65), [RF66](02-requisitos.md#rf66) | [RN16](01-regras-de-negocio.md#rn16), [RN22](01-regras-de-negocio.md#rn22), [RN26](01-regras-de-negocio.md#rn26), [RN27](01-regras-de-negocio.md#rn27), [RN28](01-regras-de-negocio.md#rn28), [RN33](01-regras-de-negocio.md#rn33), [RN49](01-regras-de-negocio.md#rn49), [RN55](01-regras-de-negocio.md#rn55), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61), [RN63](01-regras-de-negocio.md#rn63) |
 | <a id="rastreio-uc12"></a>[UC12](03-casos-de-uso.md#uc12) — Concluir tarefa | [FamilyTask](#classe-familytask), [Completion](#classe-completion), [CompletionSource](#classe-completionsource), [TaskService](#classe-taskservice), [MissionService](#classe-missionservice) | [RF12](02-requisitos.md#rf12), [RF47](02-requisitos.md#rf47), [RF56](02-requisitos.md#rf56) | [RN21](01-regras-de-negocio.md#rn21), [RN22](01-regras-de-negocio.md#rn22), [RN30](01-regras-de-negocio.md#rn30), [RN35](01-regras-de-negocio.md#rn35), [RN48](01-regras-de-negocio.md#rn48), [RN55](01-regras-de-negocio.md#rn55), [RN56](01-regras-de-negocio.md#rn56) |
 | <a id="rastreio-uc13"></a>[UC13](03-casos-de-uso.md#uc13) — Visualizar carga diária ou semanal | [FamilyArea](#classe-familyarea), [PeriodCalculator](#classe-periodcalculator), [PeriodLoad](#classe-periodload), [Completion](#classe-completion), [ViewPeriod](#classe-viewperiod) | [RF18](02-requisitos.md#rf18), [RF19](02-requisitos.md#rf19), [RF20](02-requisitos.md#rf20), [RF21](02-requisitos.md#rf21), [RF56](02-requisitos.md#rf56), [RF57](02-requisitos.md#rf57), [RF66](02-requisitos.md#rf66) | [RN26](01-regras-de-negocio.md#rn26), [RN28](01-regras-de-negocio.md#rn28), [RN30](01-regras-de-negocio.md#rn30), [RN31](01-regras-de-negocio.md#rn31), [RN33](01-regras-de-negocio.md#rn33), [RN34](01-regras-de-negocio.md#rn34), [RN35](01-regras-de-negocio.md#rn35), [RN55](01-regras-de-negocio.md#rn55), [RN56](01-regras-de-negocio.md#rn56), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61) |
-| <a id="rastreio-uc14"></a>[UC14](03-casos-de-uso.md#uc14) — Acompanhar missões e recompensas | [Mission](#classe-mission), [MissionStatus](#classe-missionstatus), [BadgeAward](#classe-badgeaward), [Badge](#classe-badge), [RedeemedReward](#classe-redeemedreward), [MissionService](#classe-missionservice) | [RF30](02-requisitos.md#rf30), [RF31](02-requisitos.md#rf31), [RF36](02-requisitos.md#rf36), [RF58](02-requisitos.md#rf58), [RF62](02-requisitos.md#rf62), [RF65](02-requisitos.md#rf65) | [RN26](01-regras-de-negocio.md#rn26), [RN35](01-regras-de-negocio.md#rn35), [RN36](01-regras-de-negocio.md#rn36), [RN38](01-regras-de-negocio.md#rn38), [RN39](01-regras-de-negocio.md#rn39), [RN43](01-regras-de-negocio.md#rn43), [RN51](01-regras-de-negocio.md#rn51), [RN52](01-regras-de-negocio.md#rn52), [RN53](01-regras-de-negocio.md#rn53), [RN55](01-regras-de-negocio.md#rn55), [RN58](01-regras-de-negocio.md#rn58), [RN33](01-regras-de-negocio.md#rn33), [RN63](01-regras-de-negocio.md#rn63), [RN64](01-regras-de-negocio.md#rn64) |
+| <a id="rastreio-uc14"></a>[UC14](03-casos-de-uso.md#uc14) — Acompanhar missões e recompensas | [Mission](#classe-mission), [MissionStatus](#classe-missionstatus), [BadgeAward](#classe-badgeaward), [Badge](#classe-badge), [RedeemedReward](#classe-redeemedreward), [MissionService](#classe-missionservice) | [RF30](02-requisitos.md#rf30), [RF31](02-requisitos.md#rf31), [RF36](02-requisitos.md#rf36), [RF58](02-requisitos.md#rf58), [RF62](02-requisitos.md#rf62), [RF65](02-requisitos.md#rf65) | [RN26](01-regras-de-negocio.md#rn26), [RN33](01-regras-de-negocio.md#rn33), [RN35](01-regras-de-negocio.md#rn35), [RN36](01-regras-de-negocio.md#rn36), [RN38](01-regras-de-negocio.md#rn38), [RN39](01-regras-de-negocio.md#rn39), [RN43](01-regras-de-negocio.md#rn43), [RN51](01-regras-de-negocio.md#rn51), [RN52](01-regras-de-negocio.md#rn52), [RN53](01-regras-de-negocio.md#rn53), [RN55](01-regras-de-negocio.md#rn55), [RN58](01-regras-de-negocio.md#rn58), [RN63](01-regras-de-negocio.md#rn63), [RN64](01-regras-de-negocio.md#rn64) |
 | <a id="rastreio-uc15"></a>[UC15](03-casos-de-uso.md#uc15) — Sinalizar tarefa como realizada | [FamilyTask](#classe-familytask), [KidsSignal](#classe-kidssignal), [TaskStatus](#classe-taskstatus), [TaskService](#classe-taskservice), [PersonalTasks](#classe-personaltasks) | [RF23](02-requisitos.md#rf23), [RF24](02-requisitos.md#rf24), [RF55](02-requisitos.md#rf55), [RF56](02-requisitos.md#rf56) | [RN21](01-regras-de-negocio.md#rn21), [RN22](01-regras-de-negocio.md#rn22), [RN23](01-regras-de-negocio.md#rn23), [RN24](01-regras-de-negocio.md#rn24), [RN30](01-regras-de-negocio.md#rn30), [RN35](01-regras-de-negocio.md#rn35), [RN54](01-regras-de-negocio.md#rn54), [RN55](01-regras-de-negocio.md#rn55), [RN56](01-regras-de-negocio.md#rn56) |
 | <a id="rastreio-uc16"></a>[UC16](03-casos-de-uso.md#uc16) — Resgatar recompensa da missão | [RewardWheel](#classe-rewardwheel), [RewardItem](#classe-rewarditem), [RedeemedReward](#classe-redeemedreward), [Mission](#classe-mission), [MissionService](#classe-missionservice) | [RF35](02-requisitos.md#rf35), [RF51](02-requisitos.md#rf51), [RF52](02-requisitos.md#rf52), [RF53](02-requisitos.md#rf53) | [RN36](01-regras-de-negocio.md#rn36), [RN38](01-regras-de-negocio.md#rn38), [RN42](01-regras-de-negocio.md#rn42), [RN43](01-regras-de-negocio.md#rn43), [RN52](01-regras-de-negocio.md#rn52), [RN53](01-regras-de-negocio.md#rn53) |
 | <a id="rastreio-uc17"></a>[UC17](03-casos-de-uso.md#uc17) — Retornar tarefa concluída para Pendente | [FamilyTask](#classe-familytask), [Completion](#classe-completion), [TaskService](#classe-taskservice), [Mission](#classe-mission), [MissionService](#classe-missionservice) | [RF57](02-requisitos.md#rf57), [RF58](02-requisitos.md#rf58), [RF59](02-requisitos.md#rf59) | [RN38](01-regras-de-negocio.md#rn38), [RN50](01-regras-de-negocio.md#rn50), [RN53](01-regras-de-negocio.md#rn53), [RN55](01-regras-de-negocio.md#rn55), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59) |
 | <a id="rastreio-uc18"></a>[UC18](03-casos-de-uso.md#uc18) — Gerar relatório semanal em PDF | [WeeklyReport](#classe-weeklyreport), [WeeklyReportService](#classe-weeklyreportservice), [MemberReportLine](#classe-memberreportline), [PDFRendering](#classe-pdfrendering), [FamilyArea](#classe-familyarea), [PeriodCalculator](#classe-periodcalculator), [PeriodLoad](#classe-periodload), [PeriodProgress](#classe-periodprogress) | [RF61](02-requisitos.md#rf61) | [RN62](01-regras-de-negocio.md#rn62) |
-| <a id="rastreio-uc19"></a>[UC19](03-casos-de-uso.md#uc19) — Apurar e compartilhar destaque semanal | [WeeklyHighlight](#classe-weeklyhighlight), [WeeklyHighlightService](#classe-weeklyhighlightservice), [HighlightNotifying](#classe-highlightnotifying), [PeriodLoad](#classe-periodload), [WeeklyRecognition](#classe-weeklyrecognition), [WeeklyHighlightScheduling](#classe-weeklyhighlightscheduling), [HighlightSharing](#classe-highlightsharing), [PeriodCalculator](#classe-periodcalculator) | [RF63](02-requisitos.md#rf63), [RF64](02-requisitos.md#rf64) | [RN28](01-regras-de-negocio.md#rn28), [RN30](01-regras-de-negocio.md#rn30), [RN65](01-regras-de-negocio.md#rn65) |
+| <a id="rastreio-uc19"></a>[UC19](03-casos-de-uso.md#uc19) — Apurar e compartilhar destaque semanal | [WeeklyHighlight](#classe-weeklyhighlight), [WeeklyHighlightService](#classe-weeklyhighlightservice), [HighlightNotifying](#classe-highlightnotifying), [PeriodLoad](#classe-periodload), [WeeklyRecognition](#classe-weeklyrecognition), [WeeklyHighlightScheduling](#classe-weeklyhighlightscheduling), [HighlightSharing](#classe-highlightsharing), [PeriodCalculator](#classe-periodcalculator) , [WeeklyCycle](#classe-weeklycycle) , [NotificationDelivery](#classe-notificationdelivery) | [RF63](02-requisitos.md#rf63), [RF64](02-requisitos.md#rf64) | [RN28](01-regras-de-negocio.md#rn28), [RN30](01-regras-de-negocio.md#rn30), [RN65](01-regras-de-negocio.md#rn65) |
 
 <a id="restricoes-nao-funcionais"></a>
 ## Restrições não funcionais
@@ -113,6 +115,12 @@ classDiagram
     MemberService ..> AccessService : revoke
     AccessService ..> InviteCredentials : provide
     AccessControl ..> Session : validate
+    class TimeZoneChange
+    <<struct>> TimeZoneChange
+    Family --> TimeZoneChange : scheduledChange
+    class AppleAuthorizationProof
+    <<struct>> AppleAuthorizationProof
+    AppleAuthenticating --> AppleAuthorizationProof : proof
 ```
 
 O recorte mostra as relações internas deste domínio; as relações entre domínios estão na [tabela de relacionamentos](#relacionamentos).
@@ -130,10 +138,12 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 + members: [Member]
 + administrators: [Member] { get }
 + creator: Member { get }
++ timeZoneID: String
++ scheduledTimeZoneChange: TimeZoneChange?
 + carouselRange(today: Date, calendar: Calendar) -> CarouselRange
 ```
 
-**Restrições:** Um único Criador, sempre Administrador; a família tem ao menos esse perfil. O retorno autenticado à família existente não cria nova família ([RN01](01-regras-de-negocio.md#rn01), [RN05](01-regras-de-negocio.md#rn05), [RN09](01-regras-de-negocio.md#rn09)).
+**Restrições:** Um Criador protegido por família. Fuso padrão `America/Sao_Paulo`, selecionável na criação e editável somente por Administradores, imediatamente ou no próximo ciclo após informativo. Configuração e ciclos seguem RN28/RF67; troca de acesso por convite não remove o perfil anterior (RN09/RF68).
 
 <a id="classe-member"></a>
 ### Member «class»
@@ -148,7 +158,7 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 + photoURL: URL?
 + role: MemberRole
 + isFamilyCreator: Bool
-- appleUserID: String?  // somente o Criador
+- appleUserID: String?  // creator only
 + removedAt: Date?
 + isActive: Bool { get }  // removedAt == nil
 + isAdministrator: Bool { get }
@@ -194,7 +204,7 @@ case kids
 + validate(token: String, password: String, member: Member) throws
 ```
 
-**Restrições:** Vinculado à família e ao perfil ativo; link e senha admitem um único ingresso. Validação sem sucesso não consome o convite. Não há expiração temporal especificada. A proteção das credenciais não permite senha legível persistida; sua disponibilização para reenvio é responsabilidade do serviço de acesso, sem impor rotação de link/senha ([RN45](01-regras-de-negocio.md#rn45), [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47), [RNF17](02-requisitos.md#rnf17), [RNF18](02-requisitos.md#rnf18), [RNF19](02-requisitos.md#rnf19), [RNF20](02-requisitos.md#rnf20), [RNF21](02-requisitos.md#rnf21)).
+**Restrições:** Sem expiração temporal; um ingresso. Gerar/reenviar sempre substitui link/senha, invalida anteriores e revoga sessão anterior do perfil na mesma operação. Hashes não permitem recuperar senha; credenciais são transitórias. RN46/RN47 e RNF17–22.
 
 <a id="classe-invitestatus"></a>
 ### InviteStatus: String, Codable «enum»
@@ -216,15 +226,18 @@ case invalidated
 + id: UUID
 + memberID: UUID
 + familyID: UUID
++ installationID: UUID
+- installationVerifier: Data
 - refreshTokenVerifier: Data
++ accessTokenExpiresAt: Date
 + createdAt: Date
 + revokedAt: Date?
-+ validate(member: Member, familyID: UUID) throws
-+ refresh(refreshToken: String, member: Member) throws -> Session
++ validate(member: Member, installationProof: Data) throws
++ refresh(refreshToken: String, installationProof: Data) async throws -> Session
 + revoke()
 ```
 
-**Restrições:** Validação e renovação conferem revogação, perfil ativo e vínculo à família. Refresh token não expira por tempo. Remoção revoga sessões existentes e renovações ([RN10](01-regras-de-negocio.md#rn10), [RN47](01-regras-de-negocio.md#rn47), [RNF22](02-requisitos.md#rnf22)).
+**Restrições:** Uma sessão ativa por perfil/instalação. Refresh estável, sem vencimento temporal; access token de 15 minutos. Operações verificam sessão vigente para revogação imediata no servidor. Remoção, emissão/reenvio de convite e novo acesso Apple revogam sessão anterior. ID de instalação sozinho não comprova identidade. RN47/RNF22.
 
 <a id="classe-appleauthenticating"></a>
 ### AppleAuthenticating «protocol»
@@ -232,8 +245,10 @@ case invalidated
 **Rastreabilidade:** [UC01](#rastreio-uc01), [UC04](#rastreio-uc04).
 
 ```swift
-+ authenticate() async throws -> String  // appleUserID
++ authenticate() async throws -> AppleAuthorizationProof
 ```
+
+**Restrições:** Retorna prova com authorizationCode, identityToken e contexto nonce/state da tentativa. Backend valida a prova antes de identificar Criador/família; Apple ID isolado não autentica. RN44/RNF15.
 
 <a id="classe-accessservice"></a>
 ### AccessService «class»
@@ -243,17 +258,19 @@ case invalidated
 ```swift
 - apple: AppleAuthenticating
 + signInWithApple() async throws -> Family?
-+ createFamily(name: String) async throws -> Family
++ createFamily(name: String, timeZoneID: String) async throws -> Family
++ changeFamilyTimeZone(_ familyID: UUID, to timeZoneID: String,
+      application: TimeZoneChangeApplication, by admin: Member) async throws
 + generateInvite(for memberID: UUID, by admin: Member) async throws
       -> InviteCredentials
 + resendInvite(_ inviteID: UUID, by admin: Member) async throws
       -> InviteCredentials
-+ join(token: String, password: String) async throws -> Session
++ join(token: String, password: String, installationProof: Data) async throws -> Session
 + refreshSession(_ sessionID: UUID, refreshToken: String) async throws -> Session
 + revokeAccess(of memberID: UUID, by admin: Member) async throws
 ```
 
-**Restrições:** Apple autentica exclusivamente o Criador e recupera sua família existente. Gerar convite usa perfil já criado; reenviar apenas disponibiliza o convite ainda disponível para envio conjunto de link e senha, sem mudar seu estado ou presumir rotação. Convite consumido ou recuperação exigem novo convite para o mesmo perfil ativo. Ingresso valida e consome o conjunto junto à criação da sessão em operação atômica, com proteção contra tentativas abusivas. Credenciais transitórias não são registradas em logs ([UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC04](03-casos-de-uso.md#uc04), [UC09](03-casos-de-uso.md#uc09), [RNF15](02-requisitos.md#rnf15), [RNF16](02-requisitos.md#rnf16), [RNF17](02-requisitos.md#rnf17), [RNF18](02-requisitos.md#rnf18), [RNF19](02-requisitos.md#rnf19), [RNF20](02-requisitos.md#rnf20), [RNF21](02-requisitos.md#rnf21), [RNF22](02-requisitos.md#rnf22)).
+**Restrições:** Apple exclusivo do Criador. Gerar/reenviar convite revoga convites e sessão anteriores e retorna novas credenciais transitórias. Ingresso consome convite e cria sessão única atomicamente; recuperação de resposta perdida por dez minutos exige prova da mesma instalação/tentativa. Troca confirmada só substitui acesso local após sucesso, sem remover perfil anterior. Não há recuperação geral de comandos por operationID. UC01/02/04/09, RN46/47, RF68.
 
 <a id="classe-invitecredentials"></a>
 ### InviteCredentials «struct»
@@ -266,7 +283,7 @@ case invalidated
 + password: String
 ```
 
-**Restrições:** Dados transitórios para disponibilizar link e senha juntos. Não são a representação persistida do convite ([RN45](01-regras-de-negocio.md#rn45), [RNF17](02-requisitos.md#rnf17)).
+**Restrições:** Novo link/senha a cada emissão, inclusive reenvio. Dados transitórios para compartilhamento conjunto explícito, sem logs/persistência legível; convite anterior e sessão foram revogados na emissão. RN46/RNF17.
 
 <a id="classe-memberservice"></a>
 ### MemberService «class»
@@ -281,7 +298,7 @@ case invalidated
 + editOwnProfile(nickname: String?, photoURL: URL?, by holder: Member) async throws
 ```
 
-**Restrições:** Gestão valida mesma família e privilégio administrativo. Remoção aplica de forma consistente suas alterações e protege o Criador, revoga acesso inclusive a fotos/sessões, deixa as tarefas futuras afetadas sem responsável e preserva o histórico concluído. Alterar foto/apelido só é efetivado após sucesso da persistência; falha mantém os dados anteriores ([RN07](01-regras-de-negocio.md#rn07), [RN10](01-regras-de-negocio.md#rn10), [RN63](01-regras-de-negocio.md#rn63), [RNF12](02-requisitos.md#rnf12), [RNF24](02-requisitos.md#rnf24), [RNF27](02-requisitos.md#rnf27)).
+**Restrições:** Gestão valida família, papel e proteção do Criador. Remoção retira apenas o membro das tarefas futuras não concluídas/não protegidas, mantém demais responsáveis e não altera pendências antigas ou concluídas. Revoga acesso e preserva histórico. Foto de perfil por câmera/galeria para todos; backend salva arquivo R2 e URL privada no Supabase. RN10/RN63.
 
 <a id="classe-accesscontrol"></a>
 ### AccessControl «struct»
@@ -309,7 +326,7 @@ case manageMissions, manageRewardItems, redeemReward
 case viewOwnTasks, viewOwnProgress, viewMissions
 case viewLoad, accessFamilyArea, generateWeeklyReport
 case viewOwnWeeklyHighlight, shareOwnWeeklyHighlight
-case editOwnProfile
+case editOwnProfile, configureFamilyTimeZone, switchAccessByInvite
 ```
 
 <a id="classe-domainerror"></a>
@@ -328,7 +345,7 @@ case missionWithoutTasks
 case invalidInvite, inviteConsumed
 case sessionRevoked
 case redemptionUnavailable
-case staleState
+case invalidCurrentState
 case dateOutOfRange
 case notProfileHolder, inviteNotResendable
 ```
@@ -382,7 +399,8 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 + routineID: UUID?
 + title: String
 + weight: EffortWeight
-+ date: Date
++ date: LocalDate
++ originKey: String
 + assigneeIDs: Set<UUID>
 + status: TaskStatus
 + completions: [Completion]
@@ -390,7 +408,7 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 + isUnassigned: Bool { get }
 + currentCompletion: Completion? { get }
 + pendingSignal: KidsSignal? { get }
-+ edit(title: String, weight: EffortWeight, by actor: Member,
++ edit(title: String, weight: EffortWeight, date: LocalDate, by actor: Member,
       missions: [Mission]) throws
 + assign(_ ids: Set<UUID>, by actor: Member, missions: [Mission]) throws
 + complete(by actor: Member, takeOver: Bool) throws -> Completion
@@ -401,7 +419,7 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 + canDelete(missions: [Mission]) -> Bool
 ```
 
-**Restrições:** Toda tarefa tem título, peso 1–3 e estado único. Só adultos concluem, e apenas nos estados Pendente ou Aguardando confirmação. Só Kids responsáveis sinalizam tarefa pendente. Confirmação, recusa e conclusão manual disputam o mesmo estado; prevalece a primeira válida. A conclusão manual encerra a sinalização pendente; recusa retorna a Pendente. Há no máximo uma conclusão válida e uma sinalização pendente. Histórico preserva as anteriores. Reabrir exige Administrador, missão em andamento e nenhum vínculo com missão concluída, mantém responsáveis e invalida o crédito anterior. Edição e atribuição respeitam proteção das conquistas ([RN11](01-regras-de-negocio.md#rn11), [RN12](01-regras-de-negocio.md#rn12), [RN13](01-regras-de-negocio.md#rn13), [RN14](01-regras-de-negocio.md#rn14), [RN16](01-regras-de-negocio.md#rn16), [RN17](01-regras-de-negocio.md#rn17), [RN18](01-regras-de-negocio.md#rn18), [RN19](01-regras-de-negocio.md#rn19), [RN20](01-regras-de-negocio.md#rn20), [RN21](01-regras-de-negocio.md#rn21), [RN22](01-regras-de-negocio.md#rn22), [RN23](01-regras-de-negocio.md#rn23), [RN24](01-regras-de-negocio.md#rn24), [RN25](01-regras-de-negocio.md#rn25), [RN26](01-regras-de-negocio.md#rn26), [RN48](01-regras-de-negocio.md#rn48), [RN54](01-regras-de-negocio.md#rn54), [RN55](01-regras-de-negocio.md#rn55), [RN56](01-regras-de-negocio.md#rn56), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59)).
+**Restrições:** Estado único e peso 1–3. DatePicker de cadastro/edição sem limites de produto, inclusive antes da criação da família. Adultos concluem; Kids responsáveis sinalizam pendente. Decisões disputam estado atual sem duplicação. Concluída sem missão concluída pode ser editada: crédito/progresso se adaptam e auditoria é preservada; data prevista não muda instante de conclusão. Sem responsáveis, continua concluída sem crédito individual. Última edição válida no servidor prevalece. Reabertura só Admin com missão em andamento e nenhuma concluída, desfazendo crédito uma vez. RN11/17/23/24/55/57/58.
 
 <a id="classe-taskstatus"></a>
 ### TaskStatus: String, Codable «enum»
@@ -433,20 +451,11 @@ case high = 3
 **Rastreabilidade:** [UC03](#rastreio-uc03), [UC12](#rastreio-uc12), [UC13](#rastreio-uc13), [UC17](#rastreio-uc17).
 
 ```swift
-+ id: UUID
-+ taskID: UUID
-+ performedBy: UUID
-+ creditedAssignees: Set<UUID>
-+ creditedWeight: EffortWeight
-+ completedAt: Date
-+ source: CompletionSource
-+ confirmedBy: UUID?
-+ undoneAt: Date?
-+ undoneBy: UUID?
-+ isValid: Bool { get }  // undoneAt == nil
+case manual
+case kidsConfirmation
 ```
 
-**Restrições:** Responsáveis finais e peso são o registro do crédito daquela conclusão. Cada responsável recebe o peso integral; autor da ação só recebe crédito se for responsável. Confirmação identifica o Administrador; reabertura registra autor e momento, sem apagar o histórico. Progresso usa a data prevista e o estado atual de `FamilyTask`, não o histórico de créditos ([RN25](01-regras-de-negocio.md#rn25), [RN30](01-regras-de-negocio.md#rn30), [RN55](01-regras-de-negocio.md#rn55), [RN56](01-regras-de-negocio.md#rn56), [RN57](01-regras-de-negocio.md#rn57), [RN61](01-regras-de-negocio.md#rn61)).
+**Restrições:** Distingue ação manual e confirmação Kids; não confunde autor da ação com beneficiários do crédito. UC03/12.
 
 <a id="classe-kidssignal"></a>
 ### KidsSignal «struct»
@@ -486,13 +495,15 @@ case closedByManualCompletion
 + creditedAssignees: Set<UUID>
 + creditedWeight: EffortWeight
 + completedAt: Date
-+ scheduledDate: Date  // data prevista (RN61)
++ scheduledDate: LocalDate
 + source: CompletionSource
 + confirmedBy: UUID?
-+ undoneAt: Date?  // reabertura; registro preservado (UC17)
-// ---
-+ isValid: Bool { get }  // undoneAt == nil
++ undoneAt: Date?
++ undoneBy: UUID?
++ isValid: Bool { get }
 ```
+
+**Restrições:** Projeção do crédito vigente. Edição autorizada pode corrigir peso/responsáveis/data prevista, registrando antes/depois em TaskEvent. completedAt e autor da conclusão original permanecem. Reabrir registra quem/quando e invalida crédito, sem apagar auditoria. Destaque final não muda; novos PDFs refletem correção. RN17/RN30/RN57/RN61/RN65.
 
 <a id="classe-routine"></a>
 ### Routine «class»
@@ -506,17 +517,17 @@ case closedByManualCompletion
 + weight: EffortWeight
 + assigneeIDs: Set<UUID>
 + frequency: RoutineFrequency
-+ startDate: Date
++ startDate: LocalDate
 + isActive: Bool
-+ upcomingDates(until: Date, calendar: Calendar) -> [Date]
-+ generateTasks(until: Date, calendar: Calendar) throws -> [FamilyTask]
++ upcomingDates(until: LocalDate, calendar: Calendar) -> [LocalDate]
++ generateTasks(until: LocalDate, calendar: Calendar) throws -> [FamilyTask]
 + update(title: String, weight: EffortWeight, assignees: Set<UUID>,
-      frequency: RoutineFrequency, from: Date, by actor: Member,
+      frequency: RoutineFrequency, from: LocalDate, by actor: Member,
       missions: [Mission]) throws
-+ end(from: Date, by actor: Member, missions: [Mission]) throws
++ end(from: LocalDate, by actor: Member, missions: [Mission]) throws
 ```
 
-**Restrições:** Gera ocorrências com IDs e estados próprios, sem duplicar uma ocorrência em retentativa. Alterações afetam somente tarefas futuras abrangidas e preservam dados passados, concluídos e protegidos. Não propagam conclusão, assunção individual ou vínculo com missão para outras ocorrências. `until` é limite técnico de geração, não prazo da rotina; nenhum horizonte fixo é imposto ([RN14](01-regras-de-negocio.md#rn14), [RN16](01-regras-de-negocio.md#rn16), [RN17](01-regras-de-negocio.md#rn17), [RN18](01-regras-de-negocio.md#rn18), [RN48](01-regras-de-negocio.md#rn48), [RN51](01-regras-de-negocio.md#rn51)).
+**Restrições:** Início escolhido em DatePicker sem limites de produto; diário ou 1/2/3/4 semanas. Backend gera até fim do mês seguinte, repõe diariamente/completa consulta. Início além do horizonte fica programado; passado é materializado em lotes sem truncamento silencioso. Chave de origem imutável impede duplicação mesmo após editar data da ocorrência. Alteração futura preserva passado e concluídas/protegidas. RN14/16/17/18/48/51.
 
 <a id="classe-routinefrequency"></a>
 ### RoutineFrequency: Int, Codable «enum»
@@ -529,7 +540,7 @@ case every7Days = 7
 case every14Days = 14
 case every21Days = 21
 case every28Days = 28
-// sem frequência mensal
+// No monthly frequency
 ```
 
 <a id="classe-changescope"></a>
@@ -549,10 +560,10 @@ case thisAndFuture
 
 ```swift
 + create(title: String, weight: EffortWeight, assignees: Set<UUID>,
-      date: Date, frequency: RoutineFrequency?, by actor: Member) async throws
+      date: LocalDate, frequency: RoutineFrequency?, by actor: Member) async throws
       -> [FamilyTask]
 + edit(_ taskID: UUID, title: String, weight: EffortWeight,
-      assignees: Set<UUID>, scope: ChangeScope, by actor: Member) async throws
+      date: LocalDate, assignees: Set<UUID>, scope: ChangeScope, by actor: Member) async throws
 + delete(_ taskID: UUID, scope: ChangeScope, by actor: Member) async throws
 + complete(_ taskID: UUID, takeOver: Bool, by actor: Member) async throws
 + signal(_ taskID: UUID, photo: URL?, by kid: Member) async throws
@@ -562,7 +573,7 @@ case thisAndFuture
 + kidsConfirmationQueue(by admin: Member) async throws -> [FamilyTask]
 ```
 
-**Restrições:** Serviço carrega estado e vínculos atuais no backend. Troca de responsáveis só é efetivada com conclusão confirmada; tarefa sem responsável fica atribuída ao adulto que conclui. Conclusão, créditos, atualização das missões e concessão de badges são consistentes; reabertura atualiza créditos/progressos sem alterar conquista preservada. Exclusão bloqueia concluídas e operações que deixem missão vazia; exclusão após reabertura não subtrai crédito outra vez. Alterações de rotina preservam ocorrências protegidas ([RN48](01-regras-de-negocio.md#rn48), [RN50](01-regras-de-negocio.md#rn50), [RN53](01-regras-de-negocio.md#rn53), [RN55](01-regras-de-negocio.md#rn55), [RN56](01-regras-de-negocio.md#rn56), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59), [RNF11](02-requisitos.md#rnf11), [RNF25](02-requisitos.md#rnf25)).
+**Restrições:** Carrega estado atual e executa transações no servidor. Última edição válida prevalece, sem precondição de versão antiga. Conclusão/crédito/missões/participações/badges são consistentes; reabertura retira crédito uma vez e preserva conquista; exclusão não deixa missão vazia. Resposta perdida leva a consulta do estado, sem replay geral automático. RN17/48/50/55–59, RNF09–12/25.
 
 <a id="dominio-indicadores"></a>
 ## Área Família, progresso e carga
@@ -648,8 +659,8 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 **Rastreabilidade:** [UC11](#rastreio-uc11).
 
 ```swift
-+ start: Date  // data de criação da família
-+ end: Date    // último dia do mês corrente
++ start: Date  // Family creation date
++ end: Date    // Last day of the current month
 // ---
 + init(familyCreatedAt: Date, today: Date, calendar: Calendar)
 + contains(_ date: Date) -> Bool
@@ -673,15 +684,15 @@ case week
 ```swift
 + interval: DateInterval
 + period: ViewPeriod
-+ memberID: UUID?  // nil = família
++ memberID: UUID?  // nil = family
 + completed: Int
 + total: Int
 // ---
-+ percentage: Double? { get }  // nil = "Sem tarefas"
++ percentage: Double? { get }  // nil = no tasks
 + static personal(of m: Member, tasks: [FamilyTask],
       in interval: DateInterval) -> Self
 + static family(tasks: [FamilyTask], in interval: DateInterval) -> Self
-  // tarefas contadas pela data prevista (FamilyTask.date)
+  // Tasks counted by scheduled date (FamilyTask.date)
 ```
 
 <a id="classe-periodload"></a>
@@ -709,14 +720,15 @@ case week
 **Rastreabilidade:** [UC11](#rastreio-uc11), [UC13](#rastreio-uc13), [UC18](#rastreio-uc18), [UC19](#rastreio-uc19).
 
 ```swift
-+ calendar: Calendar  // mesmo fuso de referência da família
++ calendar: Calendar
++ cycle: WeeklyCycle?
 + interval(_ period: ViewPeriod, containing date: Date) -> DateInterval
 + availableTaskInterval(_ interval: DateInterval, range: CarouselRange) -> DateInterval?
 + load(_ period: ViewPeriod, containing date: Date,
       completions: [Completion]) -> PeriodLoad
 ```
 
-**Restrições:** Semana de segunda a domingo no fuso comum, sem depender do dispositivo. Progresso semanal usa totais, nunca média dos percentuais diários. Carga usa `completedAt` de conclusões válidas; progresso usa data prevista/estado atual. Fuso concreto e horário operacional seguem a definição pendente da [RN28](01-regras-de-negocio.md#rn28), sem configuração pelo usuário ([RN28](01-regras-de-negocio.md#rn28), [RN61](01-regras-de-negocio.md#rn61)).
+**Restrições:** Fuso IANA da família, padrão America/Sao_Paulo; Admin altera imediatamente ou no próximo ciclo. Usa limites explícitos de WeeklyCycle para transições contíguas, sem sobreposição/lacunas. Progresso usa data prevista e carga a conclusão/crédito vigente. Não usar limites do carrossel para validar cadastro. RN28/49/61/65.
 
 <a id="dominio-missoes"></a>
 ## Missões e recompensas
@@ -729,6 +741,8 @@ classDiagram
     <<enum>> MissionStatus
     class Badge
     <<struct>> Badge
+    class MissionParticipation
+    <<struct>> MissionParticipation
     class BadgeAward
     <<struct>> BadgeAward
     class RewardWheel
@@ -739,17 +753,22 @@ classDiagram
     <<enum>> RewardItemSource
     Mission --> MissionStatus : status
     Mission "1" *-- "0..1" RedeemedReward : reward
-    Mission "0..*" --> "0..1" Badge : badge
     RewardWheel --> Mission : mission
     RewardWheel --> RewardItem : items
     RewardWheel ..> RedeemedReward : create
     RedeemedReward --> RewardItem : item
     RewardItem --> RewardItemSource : source
-    Mission "1" *-- "0..*" BadgeAward : awards
+    Mission "1" *-- "0..*" MissionParticipation : participations
+    MissionParticipation --> Member : member
+    BadgeAward --> Badge : tier
+    BadgeAward ..> MissionParticipation : contributions
     BadgeAward --> Badge : badge
     MissionService ..> Mission : manage
     MissionService ..> BadgeAward : award
     RewardWheel ..> MissionService : accept
+    class BadgeTier
+    <<enum>> BadgeTier
+    Badge --> BadgeTier : tier
 ```
 
 O recorte mostra as relações internas deste domínio; as relações entre domínios estão na [tabela de relacionamentos](#relacionamentos).
@@ -766,20 +785,19 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 + title: String
 + createdBy: UUID
 + taskIDs: Set<UUID>
-+ badge: Badge?
 + status: MissionStatus
 + completedAt: Date?
 + reward: RedeemedReward?
-+ awards: [BadgeAward]
++ participations: [MissionParticipation]
 + isRedemptionAvailable: Bool { get }
 + progress(tasks: [FamilyTask]) -> Double
-+ edit(title: String, badge: Badge?, by admin: Member) throws
++ edit(title: String, by admin: Member) throws
 + link(_ task: FamilyTask, by admin: Member) throws
 + unlink(_ taskID: UUID, replacement: FamilyTask?, by admin: Member) throws
 + recordReward(_ reward: RedeemedReward, by admin: Member) throws
 ```
 
-**Restrições:** Ao menos uma tarefa individual da mesma família; cada tarefa conta uma vez no percentual. Missão não tem prazo. Dados e vínculos de missão concluída são imutáveis, exceto registro único da recompensa aceita. Remover a última tarefa exige substituição na mesma operação. Estado e badges são atualizados pelo serviço ao concluir tarefas, sem atribuição manual pelo usuário ([RN35](01-regras-de-negocio.md#rn35), [RN36](01-regras-de-negocio.md#rn36), [RN37](01-regras-de-negocio.md#rn37), [RN38](01-regras-de-negocio.md#rn38), [RN39](01-regras-de-negocio.md#rn39), [RN40](01-regras-de-negocio.md#rn40), [RN50](01-regras-de-negocio.md#rn50), [RN51](01-regras-de-negocio.md#rn51), [RN52](01-regras-de-negocio.md#rn52), [RN53](01-regras-de-negocio.md#rn53), [RN58](01-regras-de-negocio.md#rn58), [RN64](01-regras-de-negocio.md#rn64)).
+**Restrições:** Ao menos uma tarefa individual, sem prazo nem selo configurável. Encerramento registra participação dos responsáveis creditados em tarefas vinculadas e avalia marcos de badges. Conquista protege dados/vínculos/tarefas; apenas resgate único pode acrescentar recompensa. RN36/38/50/58/64.
 
 <a id="classe-missionservice"></a>
 ### MissionService «class»
@@ -787,18 +805,16 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 **Rastreabilidade:** [UC03](#rastreio-uc03), [UC05](#rastreio-uc05), [UC10](#rastreio-uc10), [UC12](#rastreio-uc12), [UC14](#rastreio-uc14), [UC16](#rastreio-uc16), [UC17](#rastreio-uc17).
 
 ```swift
-+ create(title: String, taskIDs: Set<UUID>, badge: Badge?,
-      by admin: Member) async throws -> Mission
-+ edit(_ missionID: UUID, title: String, taskIDs: Set<UUID>,
-      badge: Badge?, by admin: Member) async throws
++ create(title: String, taskIDs: Set<UUID>, by admin: Member) async throws -> Mission
++ edit(_ missionID: UUID, title: String, taskIDs: Set<UUID>, by admin: Member) async throws
 + updateAfterTaskChange(_ taskID: UUID) async throws
-+ acceptReward(_ item: RewardItem, for missionID: UUID,
-      by admin: Member) async throws -> RedeemedReward
++ acceptReward(_ item: RewardItem, for missionID: UUID, by admin: Member) async throws -> RedeemedReward
 + list(by actor: Member) async throws -> [Mission]
 + badges(of memberID: UUID, by actor: Member) async throws -> [BadgeAward]
++ badgeContributions(_ awardID: UUID, by holder: Member) async throws -> [MissionParticipation]
 ```
 
-**Restrições:** Criar ou editar missão também recalcula seu estado: se todas as tarefas vinculadas já estiverem concluídas, conclui e concede o selo nessa operação. Atualização participa da operação consistente de tarefa: todas concluídas encerram a missão, concedem selo coletivo quando houver e liberam resgate. Concessão é única por missão/membro, independente de responsáveis e resgate; adota perfis ativos conforme premissa [RN64](01-regras-de-negocio.md#rn64). Aceitação valida item, permissão e disponibilidade, grava recompensa e encerra resgate atomicamente. Todos os perfis consultam missões/conquistas da família ([RN38](01-regras-de-negocio.md#rn38), [RN53](01-regras-de-negocio.md#rn53), [RN64](01-regras-de-negocio.md#rn64), [RNF23](02-requisitos.md#rnf23), [RNF25](02-requisitos.md#rnf25)).
+**Restrições:** Criação/edição também pode encerrar missão se todas as tarefas já estiverem concluídas. Registrar uma participação por responsável creditado em ao menos uma tarefa e conceder marcos atingidos uma vez, na mesma operação consistente. Sem retroatividade a novos membros; sem relação com clique de confirmação/resgate. Sorteio é local; aceite remoto valida item e resgate único. RN38/53/64, RNF23/25.
 
 <a id="classe-missionstatus"></a>
 ### MissionStatus: String, Codable «enum»
@@ -816,10 +832,12 @@ case completed
 **Rastreabilidade:** [UC05](#rastreio-uc05), [UC10](#rastreio-uc10), [UC14](#rastreio-uc14).
 
 ```swift
-+ id: UUID
-+ name: String
-+ icon: String  // SF Symbol
++ code: BadgeTier
++ requiredMissionCount: Int
++ icon: String
 ```
+
+**Restrições:** Catálogo fixo e cumulativo: bronze 5, silver 10, gold 25, diamond 50. Sem selo opcional/administrável por missão. RN64.
 
 <a id="classe-badgeaward"></a>
 ### BadgeAward «struct»
@@ -827,13 +845,14 @@ case completed
 **Rastreabilidade:** [UC05](#rastreio-uc05), [UC10](#rastreio-uc10), [UC14](#rastreio-uc14).
 
 ```swift
++ id: UUID
 + memberID: UUID
-+ missionID: UUID
-+ badgeID: UUID
++ tier: BadgeTier
 + awardedAt: Date
++ contributingMissionIDs: Set<UUID>
 ```
 
-**Restrições:** Identidade composta por membro e missão. Não duplica concessão; missão sem selo não gera badge. Remoção de membro não apaga conquista histórica; tocar no badge abre a missão e voltar retorna ao perfil ([RN64](01-regras-de-negocio.md#rn64), [UC10](03-casos-de-uso.md#uc10)).
+**Restrições:** Único por membro/marco. Participações que fundamentam o marco são preservadas; uma missão conta uma vez por pessoa. Manter badges anteriores, sem retroatividade ao ingresso. Detalhe mostra missões contribuintes, não uma missão única. RN64/UC10.
 
 <a id="classe-rewardwheel"></a>
 ### RewardWheel «class»
@@ -851,7 +870,7 @@ case completed
 + close()
 ```
 
-**Restrições:** Só Administradores abrem, sorteiam ou aceitam, em missão concluída e sem resgate. Itens incluem catálogo e personalizados da família. Recusar permite novo sorteio; fechar sem aceitar preserva conquista e disponibilidade. Aceitar usa `MissionService.acceptReward`, revalidando estado concorrente; resultado em memória não garante resgate ([RN42](01-regras-de-negocio.md#rn42), [RN43](01-regras-de-negocio.md#rn43), [RN52](01-regras-de-negocio.md#rn52), [RN53](01-regras-de-negocio.md#rn53)).
+**Restrições:** Sorteio e animação locais com catálogo remoto; resultados recusados não são persistidos. Só Admin em missão concluída sem resgate. Aceite chama servidor, que valida permissão/item e unicidade, sem comprovar aleatoriedade local. Consulta após falha de aceite mostra registro atual antes de nova tentativa. RN43/52/53.
 
 <a id="classe-redeemedreward"></a>
 ### RedeemedReward «struct»
@@ -872,7 +891,7 @@ case completed
 
 ```swift
 + id: UUID
-+ familyID: UUID?  // nil = predefinida
++ familyID: UUID?  // nil = predefined
 + title: String
 + details: String?
 + source: RewardItemSource
@@ -921,7 +940,9 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 + id: UUID
 + familyID: UUID
 + familyName: String
-+ week: DateInterval  // cabeçalho segunda a domingo
++ week: DateInterval
++ timeZoneID: String
++ isTransitionPeriod: Bool
 + generatedAt: Date
 + generatedBy: UUID
 + isPartial: Bool
@@ -934,7 +955,7 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 + metricExplanation: String
 ```
 
-**Restrições:** Semana atual é parcial até a geração; semana de criação informa ausência anterior. Progresso considera tarefas previstas na semana e estado atual, inclusive tarefas futuras dentro dessa semana. Carga e realizadas consideram conclusões válidas até a geração. Total familiar realizado conta tarefas distintas; contagens individuais de tarefa compartilhada não devem ser somadas como total familiar. Sem dados, zeros e “Sem tarefas”. Não inclui fotos de validação, credenciais ou configuração privada ([RN62](01-regras-de-negocio.md#rn62)).
+**Restrições:** Semana atual é parcial até a geração; semana de criação considera tarefas retroativas existentes. Progresso considera tarefas previstas na semana e estado atual, inclusive tarefas futuras dentro dessa semana. Carga e realizadas consideram conclusões válidas até a geração. Total familiar realizado conta tarefas distintas; contagens individuais de tarefa compartilhada não devem ser somadas como total familiar. Sem dados, zeros e “Sem tarefas”. Não inclui fotos de validação, credenciais ou configuração privada ([RN62](01-regras-de-negocio.md#rn62)).
 
 <a id="classe-weeklyreportservice"></a>
 ### WeeklyReportService «class»
@@ -948,7 +969,7 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 + exportPDF(_ report: WeeklyReport, by actor: Member) async throws -> URL
 ```
 
-**Restrições:** Autoriza adulto da família e obtém leitura consistente de tarefas/conclusões no backend. Aceita somente semana atual ou passada que intercepte a existência da família; bloqueia semana futura. `isPartial`, limites de dados e geração são calculados nessa leitura. Gráficos e tabela usam os mesmos valores. Falha não disponibiliza arquivo incompleto; seleção é preservada para retentar. PDF exportado não muda com alterações posteriores; visualizar, salvar e compartilhar dependem da pessoa ([RN62](01-regras-de-negocio.md#rn62), [RNF26](02-requisitos.md#rnf26), [RNF27](02-requisitos.md#rnf27), [UC18](03-casos-de-uso.md#uc18)).
+**Restrições:** Backend autoriza e fornece snapshot único de tarefas/créditos vigentes e membros; PDFRendering executa no aplicativo, sem consultas durante renderização. Semana atual/passada e transição usam limites/fuso explícitos. Arquivo identifica parcialidade e não muda após exportar; nova geração usa correções vigentes. Falha não disponibiliza arquivo parcial. RN62/RNF26/27.
 
 <a id="classe-memberreportline"></a>
 ### MemberReportLine «struct»
@@ -996,6 +1017,12 @@ classDiagram
     WeeklyHighlightScheduling ..> WeeklyHighlightService : trigger
     WeeklyHighlightService ..> HighlightSharing : share
     HighlightNotifying ..> WeeklyRecognition : notify
+    class WeeklyCycle
+    <<struct>> WeeklyCycle
+    WeeklyHighlight --> WeeklyCycle : cycle
+    class NotificationDelivery
+    <<struct>> NotificationDelivery
+    WeeklyRecognition --> NotificationDelivery : notification
 ```
 
 O recorte mostra as relações internas deste domínio; as relações entre domínios estão na [tabela de relacionamentos](#relacionamentos).
@@ -1010,6 +1037,8 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 + id: UUID
 + familyID: UUID
 + week: DateInterval
++ cycleID: UUID
++ timeZoneID: String
 + startedAt: Date
 + processedAt: Date?
 + recognitions: [WeeklyRecognition]
@@ -1018,7 +1047,7 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 + isTie: Bool { get }
 ```
 
-**Restrições:** Único por família/semana. Resultado fica visível somente após processamento completo. `processedAt` preenchido com lista vazia representa ausência de vencedor; `nil` representa processamento incompleto recuperável. Empate produz um reconhecimento por pessoa, todos com a maior pontuação positiva. Revisão após reabertura tardia permanece a decisão pendente de [RN65](01-regras-de-negocio.md#rn65).
+**Restrições:** Uma apuração por ciclo da família. processedAt nulo é processamento incompleto; finalizado com lista vazia é ausência de vencedor. Todos os primeiros empatados com pontos positivos são reconhecidos. Resultado final é preservado após edição/reabertura ou troca de fuso. RN28/RN65.
 
 <a id="classe-weeklyrecognition"></a>
 ### WeeklyRecognition «struct»
@@ -1031,11 +1060,12 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 + week: DateInterval
 + points: Int
 + completedCount: Int
-+ notifiedAt: Date?
++ notificationState: NotificationState
++ acceptedByProviderAt: Date?
 + notificationKey: String { get }
 ```
 
-**Restrições:** Identidade e chave de notificação por apuração/membro. Guarda pontos e quantidade realizada da semana encerrada; `notifiedAt` é individual, registrado após entrega confirmada. Consulta exige sessão válida do próprio reconhecido, inclusive Kids; perfil removido não acessa. Não expõe carga nem dados dos demais membros ([RN33](01-regras-de-negocio.md#rn33), [RN65](01-regras-de-negocio.md#rn65), [RNF26](02-requisitos.md#rnf26), [RNF27](02-requisitos.md#rnf27)).
+**Restrições:** Snapshot final por apuração/membro, com pontos e contagem. Consulta só do titular com sessão ativa, inclusive Kids. Intenção de notificar é única; aceitação APNs não comprova entrega ou leitura. Correções posteriores não alteram resultado nem geram nova notificação. RN65/RNF26/27.
 
 <a id="classe-weeklyhighlightservice"></a>
 ### WeeklyHighlightService «class»
@@ -1054,7 +1084,7 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
       by holder: Member) async throws
 ```
 
-**Restrições:** Apura semana anterior encerrada usando conclusões válidas e a mesma métrica da carga, sem segunda moeda ou penalidades. Considera perfis ativos inclusive Kids e registra ausência de vencedor sem pontos positivos, conforme premissas [RN65](01-regras-de-negocio.md#rn65). Retentativa recupera processamento incompleto; resultado já finalizado é reutilizado, sem duplicar reconhecimentos. Notifica cada destinatário pendente com chave estável, sem publicar resultados parciais. Consulta/compartilhamento revalidam titularidade. Mensagem editável contém apenas o reconhecimento próprio e convite à atividade em família; envio é opcional ([RN65](01-regras-de-negocio.md#rn65), [RNF26](02-requisitos.md#rnf26), [RNF27](02-requisitos.md#rnf27)).
+**Restrições:** Servidor apura ciclo encerrado às 00:00 de segunda-feira local, recupera atrasos e publica somente resultado completo. Todos os perfis ativos inclusive Kids são elegíveis; sem pontos positivos não há vencedor. Finalizado não reapura. Resultado e intenção única de notificação são persistidos juntos; envio usa worker. Preparação/abertura WhatsApp é adaptador do cliente. RN28/30/65.
 
 <a id="classe-highlightnotifying"></a>
 ### HighlightNotifying «protocol»
@@ -1062,10 +1092,10 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 **Rastreabilidade:** [UC19](#rastreio-uc19).
 
 ```swift
-+ notify(_ recognition: WeeklyRecognition, idempotencyKey: String) async throws -> Date
++ enqueue(_ recognition: WeeklyRecognition) async throws -> NotificationDelivery
 ```
 
-**Restrições:** Entrega no máximo uma notificação por chave apuração/membro e retorna confirmação de entrega. Repetição da mesma chave recupera a confirmação anterior, inclusive após falha entre entrega e persistência local. Falha ou falta de permissão externa não remove o resultado acessível no app ([RN65](01-regras-de-negocio.md#rn65), [RNF26](02-requisitos.md#rnf26)).
+**Restrições:** Intenção persistente única por apuração/membro. Worker envia via APNs e recupera falhas; distinguir pending, acceptedByProvider e failed. Aceitação não comprova entrega/leitura. Abertura é evento separado. Sem permissão externa, consulta interna permanece. Não prometer entrega externa exatamente uma vez. RNF26/UC19.
 
 <a id="classe-weeklyhighlightscheduling"></a>
 ### WeeklyHighlightScheduling «protocol»
@@ -1077,7 +1107,7 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 + retryIncompleteComputation(familyID: UUID, week: DateInterval) async throws
 ```
 
-**Restrições:** Aciona `WeeklyHighlightService` na segunda-feira para a semana encerrada, independentemente de app aberto ou sessão humana. Executa em contexto autorizado do sistema para a família; fuso e horário operacional serão os definidos pela base funcional ([RN28](01-regras-de-negocio.md#rn28), [RN65](01-regras-de-negocio.md#rn65), [UC19](03-casos-de-uso.md#uc19)).
+**Restrições:** Aciona no servidor às 00:00 de segunda-feira no fuso configurado (primeiro instante válido da data), sem app aberto. Usa ciclos com início/fim/fuso e transições imediatas/programadas, evitando apuração duplicada ou lacunas. Recupera incompletos, preserva finalizados. RN28/RN65.
 
 <a id="classe-highlightsharing"></a>
 ### HighlightSharing «protocol»
@@ -1091,6 +1121,92 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 ```
 
 **Restrições:** Acionado somente pela pessoa reconhecida. Ela escolhe destinatário, revisa e confirma no WhatsApp; abrir aplicativo externo não registra envio. Se indisponível, oferece copiar; cancelamento ou falha mantém reconhecimento. Texto convida: “Mande para sua família e sugira algo para vocês fazerem juntos.” ([RN65](01-regras-de-negocio.md#rn65), [UC19](03-casos-de-uso.md#uc19)).
+
+<a id="classe-missionparticipation"></a>
+### MissionParticipation «struct»
+
+**Rastreabilidade:** [UC05](#rastreio-uc05).
+
+```swift
++ missionID: UUID
++ memberID: UUID
++ recordedAt: Date
+```
+
+Única por missão/membro: pelo menos um crédito válido em tarefa vinculada no encerramento. Preservada com a conquista; sem retroatividade (RN64).
+
+<a id="classe-badgetier"></a>
+### BadgeTier «enum»
+
+**Rastreabilidade:** [UC10](#rastreio-uc10).
+
+```swift
+case bronze, silver, gold, diamond
+```
+
+Marcos 5, 10, 25 e 50, cumulativos. Rótulos traduzidos ficam em Presentation.
+
+<a id="classe-weeklycycle"></a>
+### WeeklyCycle «struct»
+
+**Rastreabilidade:** [UC19](#rastreio-uc19).
+
+```swift
++ id: UUID
++ familyID: UUID
++ start: Date
++ end: Date
++ timeZoneID: String
++ isTransition: Bool
+```
+
+Início inclusivo/fim exclusivo; intervalos contíguos. Transição de fuso não reapura ciclos encerrados (RN28/RN65).
+
+<a id="classe-timezonechange"></a>
+### TimeZoneChange «struct»
+
+**Rastreabilidade:** [UC01](#rastreio-uc01).
+
+```swift
++ id: UUID
++ familyID: UUID
++ timeZoneID: String
++ application: TimeZoneChangeApplication
++ effectiveAt: Date
++ appliedAt: Date?
+```
+
+`TimeZoneChangeApplication` oferece `immediate` e `nextCycle`; somente Admin confirma (RF67).
+
+<a id="classe-appleauthorizationproof"></a>
+### AppleAuthorizationProof «struct»
+
+**Rastreabilidade:** [UC04](#rastreio-uc04).
+
+```swift
++ authorizationCode: Data
++ identityToken: Data
++ nonce: String
++ state: String
+```
+
+Prova transitória da tentativa, validada pelo backend, sem logs (RNF15).
+
+<a id="classe-notificationdelivery"></a>
+### NotificationDelivery «struct»
+
+**Rastreabilidade:** [UC19](#rastreio-uc19).
+
+```swift
++ id: UUID
++ recognitionID: UUID
++ memberID: UUID
++ state: NotificationState
++ acceptedByProviderAt: Date?
++ openedAt: Date?
+```
+
+`NotificationState`: `pending`, `acceptedByProvider`, `failed`. Evento de abertura não representa leitura garantida (RNF26).
 
 ## Relacionamentos
 
@@ -1122,14 +1238,13 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 | Mission | associação → | FamilyTask | links | 0..* → 1..* |
 | Mission | associação → | MissionStatus | status | – → 1 |
 | Mission | composição ◆ | RedeemedReward | reward | 1 → 0..1 |
-| Mission | associação → | Badge | badge | 0..* → 0..1 |
 | RewardWheel | associação → | Mission | mission | – → 1 |
 | RewardWheel | associação → | RewardItem | items | – → 1..* |
 | RewardWheel | dependência ⇢ | RedeemedReward | «create» | – → – |
 | RedeemedReward | associação → | RewardItem | item | – → 1 |
 | RewardItem | associação → | RewardItemSource | source | – → 1 |
 | FamilyArea | associação → | ViewPeriod | period | – → 1 |
-| Mission | composição ◆ | BadgeAward | awards | 1 → 0..* |
+| Mission | composição ◆ | MissionParticipation | participations | 1 → 0..* |
 | BadgeAward | associação → | Badge | badge | – → 1 |
 | WeeklyReport | composição ◆ | MemberReportLine | members | 1 → 1..* |
 | WeeklyReportService | dependência ⇢ | WeeklyReport | «create» | – → – |
@@ -1155,6 +1270,7 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 | MissionService | dependência ⇢ | BadgeAward | award | – → – |
 | RewardWheel | dependência ⇢ | MissionService | accept | – → – |
 | BadgeAward | associação → | Member | holder | 0..* → 1 |
+| BadgeAward | dependência ⇢ | MissionParticipation | contributions | – → – |
 | WeeklyReport | associação → | PeriodLoad | load | – → 1 |
 | WeeklyReport | associação → | PeriodProgress | progress | – → 1 |
 | WeeklyHighlight | composição ◆ | WeeklyRecognition | recognitions | 1 → 0..* |
@@ -1163,6 +1279,11 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 | WeeklyHighlightService | dependência ⇢ | PeriodCalculator | calculate | – → – |
 | WeeklyHighlightService | dependência ⇢ | HighlightSharing | share | – → – |
 | HighlightNotifying | dependência ⇢ | WeeklyRecognition | notify | – → – |
+| Family | associação → | TimeZoneChange | scheduledChange | 1 → 0..1 |
+| AppleAuthenticating | dependência ⇢ | AppleAuthorizationProof | proof | – → – |
+| Badge | associação → | BadgeTier | tier | – → 1 |
+| WeeklyHighlight | associação → | WeeklyCycle | cycle | 0..1 → 1 |
+| WeeklyRecognition | associação → | NotificationDelivery | notification | 1 → 0..1 |
 
 ## Regras centrais do modelo
 
@@ -1173,7 +1294,7 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 | `PeriodProgress`, `PeriodLoad`, `PeriodCalculator` | Progresso conta tarefas distintas pela data prevista; carga soma créditos válidos pela data de conclusão, nos períodos Dia/Semana. Total de carga é a soma das cargas individuais; ausência de dados não permite divisão por zero. | [RN28](01-regras-de-negocio.md#rn28), [RN30](01-regras-de-negocio.md#rn30), [RN31](01-regras-de-negocio.md#rn31), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61) |
 | `FamilyArea`, `CarouselRange` | Carrossel vai da criação da família ao fim do mês corrente; contexto é preservado no retorno. Kids consultam o próprio progresso, mas não acessam a área Família ou a carga familiar. | [RN33](01-regras-de-negocio.md#rn33), [RN49](01-regras-de-negocio.md#rn49), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61) |
 | `Mission`, `FamilyTask`, `Completion` | Missões não expiram e têm ao menos uma tarefa individual vinculada. Missão concluída preserva dados e vínculos. Reabrir exige Administrador, missão em andamento e ausência de missão concluída vinculada; desfaz o crédito anterior, sem apagar o histórico ou descontá-lo outra vez na exclusão posterior. | [RN36](01-regras-de-negocio.md#rn36), [RN50](01-regras-de-negocio.md#rn50), [RN51](01-regras-de-negocio.md#rn51), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59) |
-| `RewardWheel`, `RedeemedReward`, `BadgeAward` | Recompensa só é vinculada após sorteio e aceitação, em resgate único. Badge de missão é coletivo, sem duplicação por membro/missão e independente do resgate. | [RN52](01-regras-de-negocio.md#rn52), [RN53](01-regras-de-negocio.md#rn53), [RN64](01-regras-de-negocio.md#rn64) |
+| `RewardWheel`, `RedeemedReward`, `BadgeAward` | Recompensa só é vinculada após sorteio e aceitação, em resgate único. Participação é única por membro/missão; badge cumulativo é único por membro/marco e independe do resgate. | [RN52](01-regras-de-negocio.md#rn52), [RN53](01-regras-de-negocio.md#rn53), [RN64](01-regras-de-negocio.md#rn64) |
 | `Invite`, `Session`, `Member` | Link e senha permitem um ingresso. Sessão usa refresh token sem expiração temporal, com revogação; recuperação preserva o mesmo perfil ativo. Apelido é visível à família e editável só pelo titular. | [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47), [RN63](01-regras-de-negocio.md#rn63) |
 | `WeeklyReport`, `WeeklyHighlight` | PDF é semanal e exclusivo de adultos. Apuração reconhece todos os empatados em primeiro; envio externo depende da pessoa. PDF identifica parcialidade; apuração registra processamento recuperável e notificação por pessoa. | [RN62](01-regras-de-negocio.md#rn62), [RN65](01-regras-de-negocio.md#rn65) |
 
@@ -1188,29 +1309,26 @@ O quadro relaciona conceitos com o [modelo de dados](05-modelo-de-dados.md#diagr
 | `Invite`, `InviteStatus`, `Session` | `CONVITE`, `SESSAO` | Vínculos, credenciais protegidas, consumo e revogação. `InviteCredentials` é transitório. |
 | `Routine`, `RoutineFrequency` | `TAREFA`, `RECORRENCIA`, `TAREFA_RESPONSAVEL` | Configuração recorrente e responsáveis padrão; ocorrências passadas preservam seus dados. Versões de recorrência são um mecanismo de persistência do DER. |
 | `FamilyTask`, `TaskStatus`, `EffortWeight` | `OCORRENCIA_TAREFA`, `OCORRENCIA_RESPONSAVEL` | Tarefa individual prevista e responsáveis. Tarefa única também tem `TAREFA` no DER, sem `Routine` no modelo de domínio. |
-| `Completion`, `KidsSignal`, `CompletionSource`, `ValidationDecision` | Estado da ocorrência e `OCORRENCIA_EVENTO` | Conclusão, responsáveis/peso creditados, sinalização, decisão e reabertura. O mapeamento de persistência deve conservar esses dados do contrato; o DER não discrimina todos os campos do histórico. |
+| `Completion`, `KidsSignal`, `CompletionSource`, `ValidationDecision` | `CONCLUSAO`, `CREDITO_CONCLUSAO` e `OCORRENCIA_EVENTO` | Conclusão, responsáveis/peso creditados, sinalização, decisão e reabertura. O mapeamento de persistência deve conservar esses dados do contrato; o DER distingue crédito vigente e auditoria das correções. |
 | `Mission`, `MissionStatus` | `MISSAO`, `MISSAO_OCORRENCIA` | Missão e vínculos individuais; estado decorrente das tarefas. |
-| `Badge`, `BadgeAward` | `SELO`, `MEMBRO_BADGE` | Selo opcional por associação e concessão identificada por missão/membro, sem propriedade exclusiva do selo. |
+| `Badge`, `BadgeAward`, `MissionParticipation` | `BADGE`, `MEMBRO_BADGE`, `PARTICIPACAO_MISSAO`, `BADGE_PARTICIPACAO` | Catálogo fixo, concessão por membro/marco e participações únicas, com missões contribuintes preservadas. |
 | `RewardItem`, `RewardItemSource`, `RedeemedReward` | `RECOMPENSA`, aceitação em `MISSAO` | Item elegível e registro da aceitação única. Título/autor da aceitação são dados do contrato cuja persistência deve preservar a conquista. |
 | `WeeklyHighlight`, `WeeklyRecognition` | `APURACAO_SEMANAL`, `DESTAQUE_SEMANAL` | Processamento por família/semana, com resultado e notificação por reconhecido. |
 | `PeriodProgress`, `PeriodLoad`, `WeeklyReport`, `MemberReportLine` | Tarefas, conclusões e membros | Cálculos derivados e projeção consistente para PDF, sem duplicação de créditos. |
+| `WeeklyCycle`, `TimeZoneChange`, `NotificationDelivery` | `CICLO_SEMANAL`, `ALTERACAO_FUSO`, `NOTIFICACAO` | Limites de apuração, alterações de fuso e estado de envio externo. |
 | Coordenadores, serviços, protocolos e demais tipos de apoio | Sem tabela própria | Navegação, calendário, autorização, orquestração e integrações. |
 
 <a id="definicoes-pendentes-na-base-funcional"></a>
-## Definições pendentes na base funcional
+## Definições consolidadas na base funcional
 
-O modelo mantém somente as indefinições e premissas registradas na documentação funcional vigente; não estabelece respostas adicionais.
+As pendências funcionais anteriores foram resolvidas em 2026-10-05: fuso selecionável com aplicação imediata/próximo ciclo; destaque preservado após correções; badges por marcos de participação; sessões únicas e reemissão de convites; datas livres; edição de concluída com ajuste de indicadores e auditoria. Ver [registro de decisões](architecture/mobile-decisions.md).
 
-| Referência | Definição vigente |
-|---|---|
-| [RN28](01-regras-de-negocio.md#rn28), [RN65](01-regras-de-negocio.md#rn65) | Mesmo fuso da família em consultas, PDF e apuração; fuso concreto e horário operacional ainda pendentes, sem configuração de fuso pelo usuário. |
-| [RN64](01-regras-de-negocio.md#rn64) | Conceder badge aos perfis ativos na conclusão é premissa; concessão retroativa a quem entra depois permanece pendente. |
-| [RN65](01-regras-de-negocio.md#rn65) | Elegibilidade de todos os perfis ativos, inclusive Kids, e ausência de vencedor sem pontos positivos são premissas. Empates reconhecem todos os primeiros colocados. |
-| [RN65](01-regras-de-negocio.md#rn65) | Política de revisão do destaque após reabertura tardia permanece pendente. Carga e novos PDFs refletem as conclusões válidas. |
+A âncora anterior desta seção foi preservada para compatibilidade. Linguagem/framework do backend, retenção de fotos vinculadas, volumes de teste e distribuição estão fora desta etapa e não bloqueiam o modelo mobile.
 
 <a id="historico"></a>
 ## Histórico
 
 | Versão | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.1 | 1.5 | 2026-10-05 | Contratos de sessão única, edições com auditoria, ciclos/fuso, participação, badges por marcos e notificações persistentes. |
 | 1.0 | 1.4 | 2026-10-05 | Primeira versão do diagrama de classes: tipos, contratos, relacionamentos e rastreabilidade com UC01–UC19, RF, RN e RNF da base funcional vigente. |

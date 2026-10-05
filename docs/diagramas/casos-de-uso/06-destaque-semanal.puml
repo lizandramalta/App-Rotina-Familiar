@@ -14,7 +14,7 @@ skinparam rectangleBorderColor #64748B
 skinparam packageStyle rectangle
 skinparam nodesep 32
 skinparam ranksep 55
-title Destaque semanal\nApp de Organização Familiar · MVP 1.4
+title Destaque semanal\nApp de Organização Familiar · MVP 1.5
 actor "Agendador" as Agendador
 actor "Administrador" as Admin
 actor "Membro" as Membro
@@ -29,7 +29,9 @@ Membro -- UC19
 Kids -- UC19
 UC19 -- WhatsApp
 note right of UC19
-  Segunda-feira: apurar semana anterior por pontos.
+  Segunda-feira 00:00 no fuso da família.
+  Apurar semana anterior por pontos positivos.
+  Resultado finalizado permanece preservado.
   Todos os empatados em primeiro são reconhecidos.
   Consulta e compartilhamento pelo reconhecido.
   Envio opcional, confirmado no WhatsApp.

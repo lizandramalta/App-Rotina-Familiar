@@ -14,7 +14,7 @@ skinparam rectangleBorderColor #64748B
 skinparam packageStyle rectangle
 skinparam nodesep 32
 skinparam ranksep 55
-title Participação Kids\nApp de Organização Familiar · MVP 1.4
+title Participação Kids\nApp de Organização Familiar · MVP 1.5
 
 actor "Administrador" as Admin
 actor "Membro" as Membro

@@ -1,8 +1,8 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.4  
-**Data:** 2026-10-02  
+**Versão:** 1.5\
+**Data:** 2026-10-05\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -32,7 +32,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 | Caso de uso | Objetivo | Requisitos funcionais |
 |---|---|---|
-| [UC01](#uc01) | Gerenciar família | [RF01](02-requisitos.md#rf01), [RF38](02-requisitos.md#rf38), [RF39](02-requisitos.md#rf39) |
+| [UC01](#uc01) | Gerenciar família | [RF01](02-requisitos.md#rf01), [RF38](02-requisitos.md#rf38), [RF39](02-requisitos.md#rf39), [RF67](02-requisitos.md#rf67) |
 | [UC02](#uc02) | Gerenciar membros | [RF02](02-requisitos.md#rf02), [RF03](02-requisitos.md#rf03), [RF04](02-requisitos.md#rf04), [RF05](02-requisitos.md#rf05), [RF06](02-requisitos.md#rf06), [RF40](02-requisitos.md#rf40), [RF41](02-requisitos.md#rf41), [RF54](02-requisitos.md#rf54) |
 | [UC03](#uc03) | Validar conclusão de tarefa Kids | [RF25](02-requisitos.md#rf25), [RF26](02-requisitos.md#rf26), [RF55](02-requisitos.md#rf55), [RF56](02-requisitos.md#rf56) |
 | [UC04](#uc04) | Autenticar com Apple | [RF37](02-requisitos.md#rf37), [RF39](02-requisitos.md#rf39) |
@@ -40,9 +40,9 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 | [UC06](#uc06) | Gerenciar itens de recompensas coletivas | [RF33](02-requisitos.md#rf33), [RF34](02-requisitos.md#rf34) |
 | [UC07](#uc07) | Gerenciar tarefas | [RF07](02-requisitos.md#rf07), [RF08](02-requisitos.md#rf08), [RF09](02-requisitos.md#rf09), [RF10](02-requisitos.md#rf10), [RF15](02-requisitos.md#rf15), [RF16](02-requisitos.md#rf16), [RF27](02-requisitos.md#rf27), [RF58](02-requisitos.md#rf58), [RF59](02-requisitos.md#rf59) |
 | [UC08](#uc08) | Definir recorrência de rotina | [RF13](02-requisitos.md#rf13), [RF14](02-requisitos.md#rf14) |
-| [UC09](#uc09) | Ingressar por convite | [RF42](02-requisitos.md#rf42), [RF43](02-requisitos.md#rf43), [RF44](02-requisitos.md#rf44), [RF45](02-requisitos.md#rf45), [RF46](02-requisitos.md#rf46), [RF54](02-requisitos.md#rf54) |
+| [UC09](#uc09) | Ingressar por convite | [RF42](02-requisitos.md#rf42), [RF43](02-requisitos.md#rf43), [RF44](02-requisitos.md#rf44), [RF45](02-requisitos.md#rf45), [RF46](02-requisitos.md#rf46), [RF54](02-requisitos.md#rf54), [RF68](02-requisitos.md#rf68) |
 | [UC10](#uc10) | Editar perfil | [RF48](02-requisitos.md#rf48), [RF62](02-requisitos.md#rf62), [RF65](02-requisitos.md#rf65) |
-| [UC11](#uc11) | Visualizar minhas tarefas | [RF60](02-requisitos.md#rf60), [RF11](02-requisitos.md#rf11), [RF17](02-requisitos.md#rf17), [RF22](02-requisitos.md#rf22), [RF49](02-requisitos.md#rf49), [RF65](02-requisitos.md#rf65), [RF66](02-requisitos.md#rf66) |
+| [UC11](#uc11) | Visualizar minhas tarefas | [RF11](02-requisitos.md#rf11), [RF17](02-requisitos.md#rf17), [RF22](02-requisitos.md#rf22), [RF49](02-requisitos.md#rf49), [RF60](02-requisitos.md#rf60), [RF65](02-requisitos.md#rf65), [RF66](02-requisitos.md#rf66) |
 | [UC12](#uc12) | Concluir tarefa | [RF12](02-requisitos.md#rf12), [RF47](02-requisitos.md#rf47), [RF56](02-requisitos.md#rf56) |
 | [UC13](#uc13) | Visualizar carga diária ou semanal | [RF18](02-requisitos.md#rf18), [RF19](02-requisitos.md#rf19), [RF20](02-requisitos.md#rf20), [RF21](02-requisitos.md#rf21), [RF56](02-requisitos.md#rf56), [RF57](02-requisitos.md#rf57), [RF66](02-requisitos.md#rf66) |
 | [UC14](#uc14) | Acompanhar missões e recompensas | [RF30](02-requisitos.md#rf30), [RF31](02-requisitos.md#rf31), [RF36](02-requisitos.md#rf36), [RF58](02-requisitos.md#rf58), [RF62](02-requisitos.md#rf62), [RF65](02-requisitos.md#rf65) |
@@ -60,22 +60,22 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Acesso, família e perfis](04-diagramas-de-caso-de-uso.md#02-acesso-familia-perfis)
 
-**Requisitos funcionais:** [RF01](02-requisitos.md#rf01), [RF38](02-requisitos.md#rf38), [RF39](02-requisitos.md#rf39)  
-**Regras relacionadas:** [RN01](01-regras-de-negocio.md#rn01), [RN09](01-regras-de-negocio.md#rn09), [RN44](01-regras-de-negocio.md#rn44)  
+**Requisitos funcionais:** [RF01](02-requisitos.md#rf01), [RF38](02-requisitos.md#rf38), [RF39](02-requisitos.md#rf39), [RF67](02-requisitos.md#rf67)\
+**Regras relacionadas:** [RN01](01-regras-de-negocio.md#rn01), [RN09](01-regras-de-negocio.md#rn09), [RN28](01-regras-de-negocio.md#rn28), [RN44](01-regras-de-negocio.md#rn44), [RN65](01-regras-de-negocio.md#rn65)\
 **Requisitos não funcionais:** [RNF01](02-requisitos.md#rnf01), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF08](02-requisitos.md#rnf08), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF14](02-requisitos.md#rnf14), [RNF15](02-requisitos.md#rnf15), [RNF16](02-requisitos.md#rnf16)
 
-**Objetivo:** criar uma família ou acessar a família já vinculada ao Criador.
+**Objetivo:** criar/acessar a família e permitir aos Administradores configurar seu fuso.
 
-**Ator:** usuário criador, identificado como Administrador após a criação.
+**Atores:** Criador na criação/retorno; qualquer Administrador na configuração do fuso.
 
 
-**Pré-condição:** autenticação válida pelo Sign in with Apple.
+**Pré-condição:** na criação/retorno, autenticação válida pelo Sign in with Apple; na configuração do fuso, sessão ativa de Administrador da família.
 
 **Fluxo principal:**
 
 1. O usuário conclui a autenticação.
 2. O sistema verifica se há uma família vinculada ao seu identificador Apple.
-3. Não havendo vínculo, o usuário seleciona criar família e informa os dados solicitados.
+3. Não havendo vínculo, o usuário informa o nome e escolhe o fuso da família, inicialmente `America/Sao_Paulo`.
 4. O sistema valida os dados e cria a família.
 5. O sistema associa o usuário à família como Administrador, com a identificação de Criador da Família.
 6. O sistema registra a data de criação da família e apresenta sua área inicial.
@@ -85,7 +85,9 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 - Se já existir uma família vinculada, o sistema redireciona o usuário para ela, sem criar outra família.
 - Dados obrigatórios inválidos devem ser corrigidos antes da criação.
 
-**Pós-condição:** o usuário acessa sua família; se recém-criada, ela possui um Criador com perfil Administrador.
+**Fluxo complementar — Configurar fuso:** Administrador abre Família → Configurações da família (TEL-053), escolhe o fuso e lê o informativo (MOD-012). Escolhe aplicação imediata ou no próximo ciclo, confirma e aguarda persistência. A tela informa fuso vigente e eventual alteração programada. Cancelamento não salva; falha preserva a configuração anterior. Transições e apuração seguem RN28 e RF67.
+
+**Pós-condição:** família criada/acessível ou configuração de fuso autorizada salva.
 
 ## UC02
 
@@ -106,7 +108,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Pré-condição:** família existente e permissão de Administrador.
 
-**Entrada de edição/convite:** Família → selecionar item da lista → TEL-032. Consultar o detalhe e suas tarefas é permitido aos adultos por UC11; as ações administrativas seguem este caso de uso. Reenviar permite compartilhar convite ainda disponível; se consumido ou para recuperar acesso, gerar novo convite para o mesmo perfil ativo, sem recriar o membro. O Criador retorna por Apple; a configuração de apelido só pode ser alterada pelo titular em UC10.
+**Entrada de edição/convite:** Família → selecionar item da lista → TEL-032. Consultar o detalhe e suas tarefas é permitido aos adultos por UC11; as ações administrativas seguem este caso de uso. Reenviar exige confirmação, emite novo link e senha, invalida os convites anteriores e revoga a sessão anterior do mesmo perfil, sem recriar o membro. O Criador retorna por Apple; a configuração de apelido só pode ser alterada pelo titular em UC10.
 
 **Fluxo principal — Adicionar membro:**
 
@@ -114,7 +116,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 2. Informa os dados do perfil e define sua configuração, incluindo o Modo Kids quando aplicável.
 3. O sistema valida e salva o perfil na família.
 4. O Administrador solicita o convite.
-5. O sistema gera um link e uma senha de ingresso vinculados àquela família e àquele perfil.
+5. Após confirmação dos efeitos, o sistema gera novo link e senha e invalida convites e sessão anteriores daquele perfil, em operação consistente.
 6. O sistema disponibiliza o link e a senha para envio conjunto à pessoa convidada.
 
 **Alternativas e exceções:**
@@ -124,7 +126,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 - Pode promover um Membro adulto a Administrador; perfis Kids devem sair desse modo antes da promoção.
 - Pode rebaixar outro Administrador, exceto o Criador. Um Administrador também pode deixar seu próprio papel, exceto o Criador.
 - Pode ativar ou desativar o Modo Kids; um Administrador não pode permanecer nesse modo.
-- Ao remover um membro, o sistema revoga seu acesso à família, inclusive pelas sessões existentes; suas tarefas futuras ficam sem responsável e o histórico concluído é preservado.
+- Ao remover um membro, o sistema revoga seu acesso à família, inclusive pelas sessões existentes; somente ele é retirado das tarefas futuras não concluídas/não protegidas, preservando os demais responsáveis e o histórico.
 - O sistema impede remoção, rebaixamento e saída do Criador.
 
 **Pós-condição:** a alteração autorizada está salva. Um perfil removido não pode mais consultar nem alterar os dados da família.
@@ -226,11 +228,11 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 1. O Administrador seleciona criar missão e informa seus dados.
 2. Seleciona individualmente uma ou mais tarefas, mesmo quando pertencem à mesma rotina.
-3. Define um selo opcional.
+3. Confere as tarefas; não há campo de selo por missão. Os badges seguem os marcos fixos de participação em RN64.
 4. O sistema estabelece como objetivo concluir todas as tarefas vinculadas, sem período de vigência ou prazo.
 5. O Administrador confirma e o sistema salva a missão.
 6. A missão permanece em andamento enquanto existir tarefa vinculada não concluída.
-7. Quando todas estiverem concluídas, o sistema conclui a missão, concede o selo opcional e habilita o resgate da recompensa.
+7. Quando todas estiverem concluídas, o sistema conclui a missão, registra participações e concede badges nos marcos atingidos e habilita o resgate da recompensa.
 
 **Alternativas e exceções:**
 
@@ -300,7 +302,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 1. O usuário seleciona criar tarefa.
 2. Informa o título e o peso: 1 para pouco esforço, 2 para médio e 3 para alto.
-3. Opcionalmente, seleciona um ou mais responsáveis.
+3. Escolhe a data prevista, inicialmente hoje, sem restrição de passado/futuro ou criação da família, e opcionalmente seleciona responsáveis.
 4. Escolhe tarefa única ou configura uma rotina pelo [UC08](03-casos-de-uso.md#uc08).
 5. Confirma o cadastro.
 6. O sistema valida os dados e salva a tarefa ou a rotina.
@@ -314,6 +316,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 - Ao excluir tarefa não concluída vinculada a missão em andamento, o sistema remove o vínculo e recalcula o progresso. Se ela for a única tarefa da missão, bloqueia a exclusão até que outra tarefa seja vinculada.
 - O sistema impede excluir ou alterar uma tarefa quando isso modificar dados preservados de uma missão concluída.
 - Título ausente, peso fora de 1 a 3 e operações de gerenciamento por Kids são rejeitados.
+- Concluída sem proteção admite edição individual de título, peso, data e responsáveis. Informar os efeitos: créditos e progresso são recalculados, instante original da conclusão e auditoria são preservados. Sem responsáveis, não há crédito individual. Última edição válida efetivada no servidor prevalece, sem comparação de versão antiga (RN17).
 
 **Pós-condição:** a alteração permitida foi salva, sem exclusão direta de tarefas concluídas nem modificação de conquistas preservadas.
 
@@ -338,10 +341,10 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Fluxo principal:**
 
-1. O usuário acessa a configuração de repetição.
+1. O usuário escolhe a data inicial em DatePicker, inicialmente hoje e sem limites de produto, e acessa a repetição.
 2. O sistema oferece: sem repetição, diária ou a cada 7, 14, 21 ou 28 dias.
 3. O usuário escolhe a frequência e confirma.
-4. O sistema salva a configuração e gera tarefas conforme o intervalo.
+4. O sistema salva a configuração e gera tarefas até o fim do mês seguinte, repondo o horizonte diariamente e em consulta quando necessário. Início além desse horizonte fica programado; datas passadas são respeitadas sem truncamento silencioso.
 5. Cada tarefa recebe identificação e status próprios.
 
 **Alternativas e exceções:**
@@ -361,8 +364,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Acesso, família e perfis](04-diagramas-de-caso-de-uso.md#02-acesso-familia-perfis)
 
-**Requisitos funcionais:** [RF42](02-requisitos.md#rf42), [RF43](02-requisitos.md#rf43), [RF44](02-requisitos.md#rf44), [RF45](02-requisitos.md#rf45), [RF46](02-requisitos.md#rf46), [RF54](02-requisitos.md#rf54)  
-**Regras relacionadas:** [RN10](01-regras-de-negocio.md#rn10), [RN45](01-regras-de-negocio.md#rn45), [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47)  
+**Requisitos funcionais:** [RF42](02-requisitos.md#rf42), [RF43](02-requisitos.md#rf43), [RF44](02-requisitos.md#rf44), [RF45](02-requisitos.md#rf45), [RF46](02-requisitos.md#rf46), [RF54](02-requisitos.md#rf54), [RF68](02-requisitos.md#rf68)\
+**Regras relacionadas:** [RN09](01-regras-de-negocio.md#rn09), [RN10](01-regras-de-negocio.md#rn10), [RN45](01-regras-de-negocio.md#rn45), [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47)\
 **Requisitos não funcionais:** [RNF01](02-requisitos.md#rnf01), [RNF04](02-requisitos.md#rnf04), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF08](02-requisitos.md#rnf08), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF14](02-requisitos.md#rnf14), [RNF17](02-requisitos.md#rnf17), [RNF18](02-requisitos.md#rnf18), [RNF19](02-requisitos.md#rnf19), [RNF20](02-requisitos.md#rnf20), [RNF21](02-requisitos.md#rnf21), [RNF22](02-requisitos.md#rnf22)
 
 **Objetivo:** efetivar o vínculo ou recuperar o acesso ao mesmo perfil ativo mediante novo link e senha de ingresso.
@@ -374,11 +377,11 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Fluxo principal:**
 
-1. A pessoa abre o link recebido junto com a senha.
+1. A pessoa abre o link. Sem app, é direcionada à loja e orientada a reabrir o link após instalar. Com sessão ativa, MOD-013 solicita confirmação da troca de acesso; cancelar mantém a sessão.
 2. O sistema verifica o convite e solicita a senha de ingresso.
 3. A pessoa informa a senha.
 4. O sistema valida o link, a senha correspondente, o perfil, a família e a disponibilidade do convite.
-5. O sistema efetiva o vínculo ao perfil indicado e cria sua sessão.
+5. O sistema efetiva o ingresso no perfil indicado, estabelece uma sessão ativa vinculada à instalação e só então substitui o acesso local, limpando dados anteriores. O membro anterior não é removido da sua família e nenhum histórico é migrado.
 6. O sistema consome o convite e sua senha, impedindo outro ingresso com o mesmo conjunto.
 7. O usuário acessa as funcionalidades permitidas para seu perfil.
 
@@ -391,7 +394,9 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 - Se perder a sessão, a pessoa solicita um novo convite a um Administrador. O mesmo fluxo de link e senha recupera o acesso ao perfil ativo existente, preservando histórico, tarefas e vínculos.
 - Perfil removido não pode recuperar acesso nem renovar sessão. O Criador retorna pelo Sign in with Apple (UC04), com redirecionamento à família existente (UC01).
 
-**Pós-condição:** perfil vinculado, sessão criada e convite consumido. A senha serve exclusivamente para o ingresso, não como senha de login posterior.
+**Recuperação de resposta perdida:** comprovar a tentativa e a instalação original permite recuperar o ingresso por dez minutos sem consumir novamente; depois é necessário novo convite. Consulta geral de estado não substitui essa recuperação de credenciais.
+
+**Pós-condição:** perfil vinculado, sessão única criada e convite consumido. A senha serve exclusivamente para o ingresso, não como senha de login posterior.
 
 ## UC10
 
@@ -402,7 +407,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Acesso, família e perfis](04-diagramas-de-caso-de-uso.md#02-acesso-familia-perfis)
 
 **Requisitos funcionais:** [RF48](02-requisitos.md#rf48), [RF62](02-requisitos.md#rf62), [RF65](02-requisitos.md#rf65)  
-**Regras relacionadas:** [RN63](01-regras-de-negocio.md#rn63), [RN64](01-regras-de-negocio.md#rn64), [RN33](01-regras-de-negocio.md#rn33)  
+**Regras relacionadas:** [RN33](01-regras-de-negocio.md#rn33), [RN63](01-regras-de-negocio.md#rn63), [RN64](01-regras-de-negocio.md#rn64)\
 **Requisitos não funcionais:** [RNF01](02-requisitos.md#rnf01), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF08](02-requisitos.md#rnf08), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF14](02-requisitos.md#rnf14), [RNF22](02-requisitos.md#rnf22), [RNF24](02-requisitos.md#rnf24), [RNF27](02-requisitos.md#rnf27)
 
 **Objetivo:** alterar os dados editáveis do próprio perfil.
@@ -414,8 +419,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Fluxo principal:**
 
-1. O usuário acessa Meu perfil pela navegação adulta ou pelo avatar/cabeçalho Kids; consulta foto, apelido e badges coletivos.
-2. Ao selecionar editar, o sistema apresenta foto opcional e etiqueta/apelido próprios.
+1. O usuário acessa Meu perfil pela navegação adulta ou pelo avatar/cabeçalho Kids; consulta foto, apelido, total de missões com participação e badges cumulativos.
+2. Ao selecionar editar, o sistema apresenta foto opcional por câmera ou galeria e etiqueta/apelido próprios.
 3. O usuário adiciona, substitui ou remove a foto e/ou altera o apelido e confirma.
 4. O sistema valida e salva as alterações.
 
@@ -423,7 +428,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 - Somente o titular acessa a configuração do apelido; outros membros, inclusive Administradores, podem vê-lo, mas não editá-lo.
 - Sem foto, apresentar identificação padrão. Falha de upload mantém a foto anterior e oferece nova tentativa; cancelar não salva.
-- Os badges são atribuídos coletivamente pela conclusão de missão com selo (RN64), sem edição manual. Selecionar um badge abre a missão; voltar retorna ao perfil. Sem badges, apresentar estado vazio.
+- Cada missão encerrada com participação creditada conta uma vez para os marcos cumulativos bronze 5, prata 10, ouro 25 e diamante 50. Selecionar um marco abre TEL-054 com as missões contribuintes e permite abrir TEL-021; voltar restaura a origem. Sem badges, mostrar total e próximo marco, sem simular conquista. Não há concessão retroativa.
 - Dados inválidos exigem correção; alterações de permissões são impedidas. Kids não podem ativar/desativar seu modo por este fluxo.
 
 **Pós-condição:** os dados permitidos estão atualizados, sem alteração indevida de permissões.
@@ -436,8 +441,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Tarefas e rotina](04-diagramas-de-caso-de-uso.md#03-tarefas-rotina) · [Participação Kids](04-diagramas-de-caso-de-uso.md#04-participacao-kids)
 
-**Requisitos funcionais:** [RF60](02-requisitos.md#rf60), [RF11](02-requisitos.md#rf11), [RF17](02-requisitos.md#rf17), [RF22](02-requisitos.md#rf22), [RF49](02-requisitos.md#rf49), [RF65](02-requisitos.md#rf65), [RF66](02-requisitos.md#rf66)  
-**Regras relacionadas:** [RN60](01-regras-de-negocio.md#rn60), [RN16](01-regras-de-negocio.md#rn16), [RN22](01-regras-de-negocio.md#rn22), [RN26](01-regras-de-negocio.md#rn26), [RN27](01-regras-de-negocio.md#rn27), [RN33](01-regras-de-negocio.md#rn33), [RN49](01-regras-de-negocio.md#rn49), [RN55](01-regras-de-negocio.md#rn55), [RN28](01-regras-de-negocio.md#rn28), [RN61](01-regras-de-negocio.md#rn61), [RN63](01-regras-de-negocio.md#rn63)  
+**Requisitos funcionais:** [RF11](02-requisitos.md#rf11), [RF17](02-requisitos.md#rf17), [RF22](02-requisitos.md#rf22), [RF49](02-requisitos.md#rf49), [RF60](02-requisitos.md#rf60), [RF65](02-requisitos.md#rf65), [RF66](02-requisitos.md#rf66)\
+**Regras relacionadas:** [RN16](01-regras-de-negocio.md#rn16), [RN22](01-regras-de-negocio.md#rn22), [RN26](01-regras-de-negocio.md#rn26), [RN27](01-regras-de-negocio.md#rn27), [RN28](01-regras-de-negocio.md#rn28), [RN33](01-regras-de-negocio.md#rn33), [RN49](01-regras-de-negocio.md#rn49), [RN55](01-regras-de-negocio.md#rn55), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61), [RN63](01-regras-de-negocio.md#rn63)\
 **Requisitos não funcionais:** [RNF01](02-requisitos.md#rnf01), [RNF02](02-requisitos.md#rnf02), [RNF04](02-requisitos.md#rnf04), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF08](02-requisitos.md#rnf08), [RNF09](02-requisitos.md#rnf09), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF14](02-requisitos.md#rnf14), [RNF22](02-requisitos.md#rnf22)
 
 **Objetivo:** consultar as próprias tarefas e o próprio progresso diário ou semanal; para adultos, também consultar as tarefas e o progresso coletivo pela área Família.
@@ -567,7 +572,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Missões e recompensas](04-diagramas-de-caso-de-uso.md#05-missoes-recompensas)
 
 **Requisitos funcionais:** [RF30](02-requisitos.md#rf30), [RF31](02-requisitos.md#rf31), [RF36](02-requisitos.md#rf36), [RF58](02-requisitos.md#rf58), [RF62](02-requisitos.md#rf62), [RF65](02-requisitos.md#rf65)  
-**Regras relacionadas:** [RN26](01-regras-de-negocio.md#rn26), [RN35](01-regras-de-negocio.md#rn35), [RN36](01-regras-de-negocio.md#rn36), [RN38](01-regras-de-negocio.md#rn38), [RN39](01-regras-de-negocio.md#rn39), [RN43](01-regras-de-negocio.md#rn43), [RN51](01-regras-de-negocio.md#rn51), [RN52](01-regras-de-negocio.md#rn52), [RN53](01-regras-de-negocio.md#rn53), [RN55](01-regras-de-negocio.md#rn55), [RN58](01-regras-de-negocio.md#rn58), [RN33](01-regras-de-negocio.md#rn33), [RN63](01-regras-de-negocio.md#rn63), [RN64](01-regras-de-negocio.md#rn64)  
+**Regras relacionadas:** [RN26](01-regras-de-negocio.md#rn26), [RN33](01-regras-de-negocio.md#rn33), [RN35](01-regras-de-negocio.md#rn35), [RN36](01-regras-de-negocio.md#rn36), [RN38](01-regras-de-negocio.md#rn38), [RN39](01-regras-de-negocio.md#rn39), [RN43](01-regras-de-negocio.md#rn43), [RN51](01-regras-de-negocio.md#rn51), [RN52](01-regras-de-negocio.md#rn52), [RN53](01-regras-de-negocio.md#rn53), [RN55](01-regras-de-negocio.md#rn55), [RN58](01-regras-de-negocio.md#rn58), [RN63](01-regras-de-negocio.md#rn63), [RN64](01-regras-de-negocio.md#rn64)\
 **Requisitos não funcionais:** [RNF01](02-requisitos.md#rnf01), [RNF04](02-requisitos.md#rnf04), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF08](02-requisitos.md#rnf08), [RNF09](02-requisitos.md#rnf09), [RNF11](02-requisitos.md#rnf11), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF14](02-requisitos.md#rnf14), [RNF22](02-requisitos.md#rnf22), [RNF23](02-requisitos.md#rnf23), [RNF25](02-requisitos.md#rnf25)
 
 **Objetivo:** consultar o progresso das missões coletivas e suas recompensas.
@@ -580,10 +585,10 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 **Fluxo principal:**
 
 1. O usuário acessa Missões e conquistas diretamente na navegação principal adulta ou no tab bar Kids e seleciona uma missão.
-2. O sistema apresenta seus dados, tarefas vinculadas e estado, sem prazo ou data de expiração.
+2. O sistema apresenta seus dados, tarefas vinculadas, participações e estado, sem prazo ou data de expiração.
 3. Calcula o progresso dividindo a quantidade de tarefas vinculadas concluídas pelo total de tarefas vinculadas e multiplicando por 100.
 4. Apresenta a missão em andamento enquanto houver tarefas não concluídas.
-5. Quando todas estão concluídas, apresenta a missão concluída, a situação do resgate e concede o selo opcional coletivamente aos perfis, exibindo o badge em Meu perfil conforme RN64.
+5. Quando todas estão concluídas, apresenta a missão concluída, a situação do resgate e as participações registradas; badges dos marcos atingidos aparecem em Meu perfil conforme RN64.
 6. Se a recompensa já tiver sido aceita, apresenta o item registrado.
 
 **Alternativas e exceções:**
@@ -658,7 +663,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 1. O Administrador acessa a missão e seleciona resgatar recompensa.
 2. O sistema verifica a disponibilidade do resgate.
 3. Apresenta a roleta com itens predefinidos e personalizados adicionados pelo Administrador.
-4. O Administrador realiza o sorteio.
+4. O aplicativo sorteia localmente um item do catálogo elegível e apresenta a animação; o resultado ainda não está resgatado.
 5. O sistema apresenta o resultado e o Administrador o aceita.
 6. O sistema verifica novamente a disponibilidade, registra a recompensa e encerra o resgate para toda a família.
 
@@ -669,7 +674,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 - Se outro Administrador já tiver aceitado uma recompensa, o sistema apresenta o registro existente e impede outro resgate.
 - Falha de gravação não é apresentada como aceitação concluída.
 
-**Pós-condição:** uma única recompensa foi registrada. O resgate acrescenta esse registro sem modificar tarefas, progresso, selo ou demais dados preservados da missão concluída.
+**Pós-condição:** uma única recompensa foi registrada. O resgate acrescenta esse registro sem modificar tarefas, progresso, participações ou demais dados preservados da missão concluída.
 
 ## UC17
 
@@ -734,14 +739,14 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 1. O adulto aciona Gerar relatório PDF na própria tela Minha família (TEL-050) e abre TEL-051.
 2. Seleciona uma semana de segunda a domingo; a data da origem sugere a semana correspondente.
 3. O sistema identifica o período e, se atual, indica que o relatório é parcial até o momento da geração.
-4. O adulto confirma gerar. O sistema obtém os dados de forma consistente e monta gráficos de carga semanal por membro e progresso total da família, com concluídas/total e percentual.
+4. O adulto confirma gerar. O backend fornece um snapshot consistente; o aplicativo gera o PDF e monta gráficos de carga semanal por membro e progresso total da família, com concluídas/total e percentual.
 5. Inclui tabela com o peso total creditado e o número de tarefas realizadas por membro, período, família, geração e explicação das métricas e do crédito compartilhado (RN62).
 6. Disponibiliza o PDF para visualizar, salvar ou compartilhar por ação do usuário.
 
 **Alternativas e exceções:**
 
 - Sem dados, gerar com zeros e indicação “Sem tarefas”, sem divisão por zero.
-- Semana futura é impedida. Semana da criação informa a ausência de registros anteriores à criação.
+- Semana futura é impedida. Semana da criação inclui tarefas retroativas existentes no período; não pressupõe ausência de dados anteriores à criação.
 - Falha de geração informa erro e permite tentar de novo, preservando seleção; não apresentar arquivo incompleto.
 - Cancelar geração ou compartilhamento retorna à origem sem alterar tarefas; abrir interface externa não confirma envio.
 - Kids e usuários sem acesso à família não podem gerar o relatório.
@@ -769,23 +774,23 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 **Fluxo principal:**
 
-1. Na virada para segunda-feira, o Agendador inicia a apuração da semana anterior de segunda a domingo.
+1. Às 00:00 de segunda-feira no fuso da família, o Agendador inicia a apuração do ciclo encerrado. Recupera atrasos/falhas sem depender do app e respeita as transições de RN28.
 2. O sistema soma os pesos de conclusões válidas por responsável final, segundo RN30 e RN65.
 3. Identifica a maior pontuação positiva. Em empate, reconhece todos os empatados no primeiro lugar.
-4. Registra o resultado e notifica cada pessoa reconhecida sem duplicar processamento ou notificação em retentativas.
+4. Registra o resultado final e uma intenção única de notificar cada pessoa reconhecida. A fila persistente recupera falhas de envio; aceitação pelo provedor não comprova entrega ou leitura.
 5. A pessoa abre a notificação ou o acesso ao destaque em Minhas tarefas; TEL-052 apresenta período, pontos e tarefas realizadas.
 6. A tela convida: “Mande para sua família e sugira algo para vocês fazerem juntos.”
 7. Se escolher compartilhar, o sistema prepara mensagem editável e abre o WhatsApp para a pessoa escolher o destinatário, revisar e confirmar o envio.
 
 **Alternativas e exceções:**
 
-- Sem pontos positivos, registrar ausência de vencedor, conforme premissa RN65.
+- Sem pontos positivos, registrar ausência de vencedor, conforme RN65.
 - Falha na apuração permite retentativa idempotente; não publicar resultado incompleto.
 - Sem permissão de notificação externa ou falha de entrega, o destaque continua disponível no app.
 - Sem sessão, concluir o acesso e revalidar a titularidade antes de mostrar o resultado; usuário removido não acessa.
 - Sem WhatsApp, oferecer copiar mensagem. Cancelar ou voltar não desfaz o reconhecimento e não indica envio.
 - Kids reconhecidos acessam a variante apropriada sem ganhar acesso à carga ou ao relatório familiar.
-- Fuso/horário operacional e revisão após reabertura posterior seguem as pendências de RN65.
+- Fuso configurável segue RN28. Edições e reaberturas posteriores não revisam o destaque finalizado nem emitem outra notificação; carga e novos PDFs usam os dados corrigidos.
 
 **Pós-condição:** resultado semanal registrado e acessível ao reconhecido; compartilhamento é opcional e o envio é controlado pelo usuário no aplicativo externo.
 
@@ -793,6 +798,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.5 | 2026-10-05 | Pendências consolidadas: fuso, datas livres, edição de concluídas, participações/badges, convites e sessão única; RF67/68; arquitetura, modelo e design 1.1. |
 | 1.4 | 2026-10-02 | Família concentra indicadores, lista, inclusão de membros e PDF; detalhe do membro reúne tarefas Dia/Semana, edição e reenvio quando permitidos. RN60–61, RF60–61/RF66 e UC02/11/13/18 revisados. |
 | 1.3 | 2026-10-02 | Duas abas Kids, câmera direta, foto/apelido e badges, progresso/carga Dia/Semana, PDF semanal e reconhecimento com WhatsApp; RN61–65, RF61–66, RNF26–27 e UC18–19. Empates e visibilidade do apelido confirmados. |
 | 1.2 | 2026-10-01 | Área Família na navegação adulta, progresso coletivo diário e consulta por carrossel: RN60, RF60 e UC11. Design em elaboração na versão 1.0. |
