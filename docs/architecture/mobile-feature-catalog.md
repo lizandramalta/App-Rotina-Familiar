@@ -1,6 +1,6 @@
 # Catálogo de funcionalidades e rastreabilidade mobile
 
-**Versão:** 1.1 · **Base funcional:** 1.5 · **Design:** 1.1\
+**Versão:** 1.2 · **Base funcional:** 1.5 · **Design:** 1.1\
 **Data:** 2026-10-05 · **Situação:** especificação para implementação futura
 
 [Arquitetura mobile](mobile-architecture.md) · [Decisões](mobile-decisions.md) · [Índice documental](../DOCUMENTACAO.md) · [Screen map](../design/screen-map.md) · [User flows](../design/user-flows.md)
@@ -116,6 +116,8 @@ Modais não se tornam automaticamente novos casos de uso ou novas ViewModels. Se
 
 `RestoreSessionUseCase` é interno ao ciclo de vida, não uma nova tela. Compartilhamento de arquivo e abertura de câmera são integrações de apresentação por adaptadores; não precisam de um UC funcional novo. “Gerenciar” não autoriza operações adicionais: o catálogo de recompensas tem consulta/adição, e não CRUD completo inventado.
 
+Os contratos remotos e sua cobertura por UC estão no [catálogo backend](backend-contracts.md). Nomes de casos de uso mobile e servidor podem diferir porque representam papéis distintos; o mapeamento é pelo objetivo UC e pelo contrato HTTP, não pelo nome de uma classe.
+
 ## 5. Responsabilidades que exigem backend
 
 | Operação | Mobile | Garantia exigida do servidor |
@@ -163,5 +165,6 @@ Modais não se tornam automaticamente novos casos de uso ou novas ViewModels. Se
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.2 | 2026-10-05 | Integração com arquitetura backend 1.0 em Node.js, contratos `/v1`, bootstrap, preparação de rotinas e referências; base funcional 1.5 preservada. |
 | 1.1 | 2026-10-05 | Base 1.5; 26 telas, 13 modais, 16 fluxos; configurações de fuso, detalhe de badge, troca de acesso e responsabilidades atualizadas. |
 | 1.0 | 2026-10-05 | Fronteiras de 11 funcionalidades, catálogo de 24 telas e 11 modais, cobertura UC01–UC19/UF-01–UF-15 e RNF01–27, com nomes técnicos em inglês. |

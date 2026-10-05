@@ -87,15 +87,18 @@ As possibilidades de evolução estão no [documento de visão](docs/00-visao-do
 | [Screen map](docs/design/screen-map.md) | Estrutura de navegação, telas, modais, estados e permissões para apoiar o design. |
 | [User flows](docs/design/user-flows.md) | Caminhos por objetivo, decisões, cancelamentos e erros, ligados às telas e aos casos de uso. |
 | [Modelo de dados (DER)](docs/05-modelo-de-dados.md) | Entidades, atributos, chaves e relacionamentos do banco de dados. |
-| [Diagrama de classes](docs/06-diagrama-de-classes.md) | Modelo de classes 1.1: contratos, diagramas por domínio e rastreabilidade UC–RF–RN/RNF–tipos; base funcional 1.5. |
-| [Arquitetura mobile](docs/architecture/mobile-architecture.md) | Arquitetura 1.1 em Swift e SwiftUI: View + ViewModel com Clean Architecture, dependências, navegação, sessão, consistência e integrações. |
+| [Diagrama de classes](docs/06-diagrama-de-classes.md) | Modelo de classes 1.2: contratos, diagramas por domínio e rastreabilidade UC–RF–RN/RNF–tipos; base funcional 1.5. |
+| [Arquitetura mobile](docs/architecture/mobile-architecture.md) | Arquitetura 1.2 em Swift e SwiftUI: View + ViewModel com Clean Architecture, dependências, navegação, sessão, consistência e integrações. |
 | [Catálogo mobile](docs/architecture/mobile-feature-catalog.md) | Funcionalidades, nomes de arquivos em inglês e cobertura das 26 telas, 13 modais, 19 casos de uso e 16 fluxos. |
 | [Decisões da arquitetura mobile](docs/architecture/mobile-decisions.md) | Escolhas técnicas consolidadas, pendências resolvidas e temas fora desta etapa. |
+| [Arquitetura backend](docs/architecture/backend-architecture.md) | Backend 1.0: Node.js, Clean Architecture, monólito modular, Supabase/R2, transações, acesso e jobs. |
+| [Contratos backend](docs/architecture/backend-contracts.md) | API `/v1`, permissões, erros, projeções e cobertura dos 19 UC e 27 RNF. |
+| [Decisões backend](docs/architecture/backend-decisions.md) | BA-01–BA-20: escolhas confirmadas, propostas técnicas, alternativas e limites. |
 | [Índice e controle documental](docs/DOCUMENTACAO.md) | Rastreabilidade e convenções para manter a documentação consistente. |
 
 A versão 1.5 identifica a base de definição do MVP. Não representa, por si só, uma declaração de que o aplicativo foi implementado ou publicado.
 
-A arquitetura mobile 1.1, documentada em 2026-10-05, consolida as decisões para implementação futura. O código e os nomes dos arquivos de código serão em inglês; os textos da experiência serão localizados. As estruturas e os exemplos nas docs não representam arquivos Swift já implementados.
+A arquitetura mobile 1.2, documentada em 2026-10-05, consolida as decisões para implementação futura. O código e os nomes dos arquivos de código serão em inglês; os textos da experiência serão localizados. As estruturas e os exemplos nas docs não representam arquivos Swift já implementados.
 
 ## Área Família
 
@@ -123,7 +126,9 @@ O fuso é escolhido na criação (padrão `America/Sao_Paulo`) e alterado só po
 
 Tarefas e início de rotina aceitam qualquer data passada ou futura, inclusive anterior à criação da família. Edições válidas de tarefas concluídas não protegidas ajustam indicadores e mantêm auditoria. Um perfil usa um aparelho; reenvio de convite emite novo link/senha e revoga os anteriores. Trocar de acesso pede confirmação e não remove o membro da família anterior.
 
-Apenas desenvolvimento e produção estão previstos. Linguagem/framework do backend, retenção de fotos vinculadas, volumes de teste e distribuição ficam fora desta etapa. As decisões completas estão no registro da arquitetura.
+Apenas desenvolvimento e produção estão previstos. Backend Node.js/Clean Architecture passa a estar definido na arquitetura backend, com TypeScript/Fastify como propostas técnicas. Retenção de fotos vinculadas, volumes de teste, hospedagem e distribuição continuam fora desta etapa. As decisões completas estão no registro da arquitetura.
+
+A arquitetura backend 1.0 está em [backend-architecture.md](docs/architecture/backend-architecture.md), com contratos e rastreabilidade separados. Esta revisão mantém a base funcional 1.5 e acrescenta o desenho técnico do servidor.
 
 ## Histórico
 
@@ -135,3 +140,5 @@ Apenas desenvolvimento e produção estão previstos. Linguagem/framework do bac
 | 1.2 | 2026-10-01 | Área Família na navegação adulta, progresso coletivo diário e consulta por carrossel: RN60, RF60 e UC11. Design em elaboração na versão 1.0. |
 | 1.1 | 2026-10-01 | Recuperação do mesmo perfil por novo convite e renovação sem expiração temporal, com revogação preservada: RN47, RF41, RF46, RF54, RNF22, UC02 e UC09. |
 | 1.0 | 2026-10-01 | Consolidação da visão, do escopo e dos comportamentos do MVP, com regras, requisitos e casos de uso rastreáveis. |
+
+Complemento de backend de 2026-10-05: arquitetura backend 1.0, contratos e decisões BA-01–BA-20; mobile/modelos 1.2 alinhados, design 1.1 e base funcional 1.5 preservados.

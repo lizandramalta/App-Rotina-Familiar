@@ -1,8 +1,8 @@
 # Arquitetura mobile — Swift, SwiftUI e Clean Architecture
 
 **Projeto:** App de Organização Familiar — MVP\
-**Versão da arquitetura:** 1.1\
-**Base funcional:** 1.5 · Design: 1.1 · Modelo de classes: 1.1\
+**Versão da arquitetura:** 1.2\
+**Base funcional:** 1.5 · Design: 1.1 · Modelo de classes: 1.2\
 **Data:** 2026-10-05\
 **Situação:** decisões consolidadas antes da implementação
 
@@ -16,7 +16,7 @@ Esta arquitetura incorpora as decisões do usuário sobre datas, fuso, créditos
 
 Fontes: [visão](../00-visao-do-produto.md), [RN](../01-regras-de-negocio.md), [RF/RNF](../02-requisitos.md), [UC01–UC19](../03-casos-de-uso.md), [diagramas UML](../04-diagramas-de-caso-de-uso.md), [DER](../05-modelo-de-dados.md), [classes](../06-diagrama-de-classes.md), [screen map](../design/screen-map.md) e [user flows](../design/user-flows.md). A base Markdown vigente é a referência; PDFs exportados anteriormente não são automaticamente atualizados.
 
-A linguagem/framework do backend, retenção de fotos, volumes de teste e distribuição não fazem parte das definições exigidas nesta etapa. Layouts visuais finais podem evoluir sem reabrir as regras aqui consolidadas.
+O backend está definido em Node.js com Clean Architecture na [arquitetura backend](backend-architecture.md), com TypeScript/Fastify como propostas técnicas. Retenção de fotos vinculadas, volumes de teste e distribuição permanecem fora desta etapa. Layouts visuais finais podem evoluir sem reabrir as regras aqui consolidadas.
 
 ## 2. Estrutura escolhida
 
@@ -366,11 +366,17 @@ Esta revisão executa verificação documental, não testes do aplicativo inexis
 
 Doubles de repositório, relógio e aleatoriedade tornam testes determinísticos. Não há volume de teste obrigatório definido nesta etapa. Meta inicial aceita de resposta: 95% das consultas comuns no servidor em até um segundo, a aferir sob carga definida posteriormente, sem alegação de desempenho já medido.
 
-## 16. Ambientes e continuidade
+## 16. Integração com os contratos do backend
+
+A API `/v1` é descrita em [backend-contracts.md](backend-contracts.md). Cada repository mobile adapta esses DTOs e erros, sem importar detalhes de PostgreSQL/R2. `creationGrant` representa Criador validado ainda sem família; não abre o shell de um membro. Access tokens são opacos e subordinados à sessão única. A prova secreta da instalação acompanha chamadas protegidas; credenciais anteriores são descartadas somente após ingresso confirmado/recuperado.
+
+`202 preparing` em consultas identifica materialização incompleta: apresentar carregamento/preparação e repetir a consulta, sem percentuais falsos. Rotina criada com `materializationState: pending` já teve sua configuração salva, mas não promete todas as ocorrências imediatamente. IDs de sinalização identificam a decisão Kids; preview de fuso não reserva configuração. `TaskMutationResult` conduz invalidações sem substituir autorização de cada consulta.
+
+## 17. Ambientes e continuidade
 
 Somente desenvolvimento e produção, separados por URL de API, identificadores/configuração do app, banco, bucket e credenciais. Segredos de servidor, chaves R2/Supabase/Apple/APNs não entram no app ou em `.xcconfig` versionado. Capabilities previstos: Apple, Associated Domains e Push Notifications; câmera/galeria conforme integrações nativas escolhidas.
 
-O projeto não implementará rotina de backup do banco. Backups automáticos eventualmente fornecidos pelo plano Supabase são independentes dessa decisão. Linguagem/framework/hospedagem do backend, distribuição, retenção de fotos vinculadas e volumes de teste ficam fora desta etapa, sem bloquear a documentação mobile.
+O projeto não implementará rotina de backup do banco. Backups automáticos eventualmente fornecidos pelo plano Supabase são independentes dessa decisão. Hospedagem do backend, distribuição, retenção de fotos vinculadas e volumes de teste ficam fora desta etapa, sem bloquear a documentação mobile.
 
 A sequência futura permanece: composição/acesso → família/membros → tarefas/rotinas/indicadores → Kids/mídia → missões/participações/badges/resgate → PDF/reconhecimento. As decisões confirmadas e substituições da versão anterior estão no [registro](mobile-decisions.md).
 
@@ -378,5 +384,6 @@ A sequência futura permanece: composição/acesso → família/membros → tare
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.2 | 2026-10-05 | Integração com arquitetura backend 1.0 em Node.js, contratos `/v1`, bootstrap, preparação de rotinas e referências; base funcional 1.5 preservada. |
 | 1.1 | 2026-10-05 | Consolidação das decisões: mínimo 26/iPad, fuso configurável, datas livres, badges por participação, sessão única, reemissão de convites, Supabase/R2, última gravação e consulta após falha, PDF/sorteio locais, dois ambientes e sem rotina própria de backup. |
 | 1.0 | 2026-10-05 | Primeira proposta mobile, anterior às decisões consolidadas na versão 1.1. |

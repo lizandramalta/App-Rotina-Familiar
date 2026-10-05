@@ -1,7 +1,7 @@
-# Diagrama de classes — versão 1.1
+# Diagrama de classes — versão 1.2
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.1\
+**Versão:** 1.2\
 **Base funcional:** 1.5\
 **Data:** 2026-10-05  
 **Situação:** referência de modelagem da base funcional
@@ -9,6 +9,8 @@
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Modelo de dados](05-modelo-de-dados.md)
 
 ## Como ler
+
+A [arquitetura backend](architecture/backend-architecture.md) traduz estes conceitos para módulos e casos de uso Node.js/TypeScript. A notação Swift abaixo continua apoiando a leitura mobile; o backend usa nomes de domínio equivalentes, sem compartilhar arquivos/classes executáveis entre linguagens. As transações e restrições são implementadas no servidor conforme os [contratos backend](architecture/backend-contracts.md).
 
 A tradução deste modelo do sistema para o aplicativo está na [arquitetura mobile](architecture/mobile-architecture.md#7-tradução-do-modelo-de-classes-para-o-mobile). Ela distingue valores e casos de uso do cliente das operações autoritativas do backend. Os [ajustes de modelagem aplicados](architecture/mobile-decisions.md#4-ajustes-de-modelagem-aplicados) consolidam as decisões desta revisão.
 
@@ -237,7 +239,7 @@ case invalidated
 + revoke()
 ```
 
-**Restrições:** Uma sessão ativa por perfil/instalação. Refresh estável, sem vencimento temporal; access token de 15 minutos. Operações verificam sessão vigente para revogação imediata no servidor. Remoção, emissão/reenvio de convite e novo acesso Apple revogam sessão anterior. ID de instalação sozinho não comprova identidade. RN47/RNF22.
+**Restrições:** O vencimento indicado é do token da projeção corrente; outros access tokens ainda válidos podem pertencer à mesma sessão, conforme DER 1.2. Uma sessão ativa por perfil/instalação. Refresh estável, sem vencimento temporal; access token de 15 minutos. Operações verificam sessão vigente para revogação imediata no servidor. Remoção, emissão/reenvio de convite e novo acesso Apple revogam sessão anterior. ID de instalação sozinho não comprova identidade. RN47/RNF22.
 
 <a id="classe-appleauthenticating"></a>
 ### AppleAuthenticating «protocol»
@@ -1305,8 +1307,8 @@ O quadro relaciona conceitos com o [modelo de dados](05-modelo-de-dados.md#diagr
 
 | Tipos | Entidades ou origem dos dados | Correspondência |
 |---|---|---|
-| `Family`, `Member`, `MemberRole` | `FAMILIA`, `MEMBRO` | Família, perfil, papel e identificação Apple restrita ao Criador em `Member`. |
-| `Invite`, `InviteStatus`, `Session` | `CONVITE`, `SESSAO` | Vínculos, credenciais protegidas, consumo e revogação. `InviteCredentials` é transitório. |
+| `Family`, `Member`, `MemberRole` | `FAMILIA`, `MEMBRO` | Família, perfil, papel e identificação Apple projetada apenas para o Criador, persistida em `IDENTIDADE_CRIADOR`; grant de criação precede a família. |
+| `Invite`, `InviteStatus`, `Session` | `CONVITE`, `SESSAO`, `TOKEN_ACESSO` | Vínculos, credenciais protegidas, consumo e revogação. `InviteCredentials` é transitório. |
 | `Routine`, `RoutineFrequency` | `TAREFA`, `RECORRENCIA`, `TAREFA_RESPONSAVEL` | Configuração recorrente e responsáveis padrão; ocorrências passadas preservam seus dados. Versões de recorrência são um mecanismo de persistência do DER. |
 | `FamilyTask`, `TaskStatus`, `EffortWeight` | `OCORRENCIA_TAREFA`, `OCORRENCIA_RESPONSAVEL` | Tarefa individual prevista e responsáveis. Tarefa única também tem `TAREFA` no DER, sem `Routine` no modelo de domínio. |
 | `Completion`, `KidsSignal`, `CompletionSource`, `ValidationDecision` | `CONCLUSAO`, `CREDITO_CONCLUSAO` e `OCORRENCIA_EVENTO` | Conclusão, responsáveis/peso creditados, sinalização, decisão e reabertura. O mapeamento de persistência deve conservar esses dados do contrato; o DER distingue crédito vigente e auditoria das correções. |
@@ -1323,12 +1325,13 @@ O quadro relaciona conceitos com o [modelo de dados](05-modelo-de-dados.md#diagr
 
 As pendências funcionais anteriores foram resolvidas em 2026-10-05: fuso selecionável com aplicação imediata/próximo ciclo; destaque preservado após correções; badges por marcos de participação; sessões únicas e reemissão de convites; datas livres; edição de concluída com ajuste de indicadores e auditoria. Ver [registro de decisões](architecture/mobile-decisions.md).
 
-A âncora anterior desta seção foi preservada para compatibilidade. Linguagem/framework do backend, retenção de fotos vinculadas, volumes de teste e distribuição estão fora desta etapa e não bloqueiam o modelo mobile.
+A âncora anterior desta seção foi preservada para compatibilidade. O backend agora usa Node.js/Clean Architecture, com recomendações TypeScript/Fastify no documento próprio. Retenção de fotos vinculadas, volumes de teste, hospedagem e distribuição permanecem fora desta etapa.
 
 <a id="historico"></a>
 ## Histórico
 
 | Versão | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.2 | 1.5 | 2026-10-05 | Tradução para backend Node.js, identidade de bootstrap e tokens subordinados à sessão; contratos e correspondência ao DER 1.2. |
 | 1.1 | 1.5 | 2026-10-05 | Contratos de sessão única, edições com auditoria, ciclos/fuso, participação, badges por marcos e notificações persistentes. |
 | 1.0 | 1.4 | 2026-10-05 | Primeira versão do diagrama de classes: tipos, contratos, relacionamentos e rastreabilidade com UC01–UC19, RF, RN e RNF da base funcional vigente. |

@@ -175,7 +175,9 @@ O fuso é escolhido na criação (padrão `America/Sao_Paulo`) e alterado só po
 
 Tarefas e início de rotina aceitam qualquer data passada ou futura, inclusive anterior à criação da família. Edições válidas de tarefas concluídas não protegidas ajustam indicadores e mantêm auditoria. Um perfil usa um aparelho; reenvio de convite emite novo link/senha e revoga os anteriores. Trocar de acesso pede confirmação e não remove o membro da família anterior.
 
-Apenas desenvolvimento e produção estão previstos. Linguagem/framework do backend, retenção de fotos vinculadas, volumes de teste e distribuição ficam fora desta etapa. As decisões completas estão no registro da arquitetura.
+Apenas desenvolvimento e produção estão previstos. Backend Node.js/Clean Architecture passa a estar definido na arquitetura backend, com TypeScript/Fastify como propostas técnicas. Retenção de fotos vinculadas, volumes de teste, hospedagem e distribuição continuam fora desta etapa. As decisões completas estão no registro da arquitetura.
+
+A arquitetura backend 1.0 está em [backend-architecture.md](architecture/backend-architecture.md), com contratos e rastreabilidade separados. Esta revisão mantém a base funcional 1.5 e acrescenta o desenho técnico do servidor.
 
 ## Histórico de versões
 
@@ -187,3 +189,5 @@ Apenas desenvolvimento e produção estão previstos. Linguagem/framework do bac
 | 1.2 | 2026-10-01 | Área Família na navegação adulta, progresso coletivo diário e consulta por carrossel: RN60, RF60 e UC11. Design em elaboração na versão 1.0. |
 | 1.1 | 2026-10-01 | Recuperação do mesmo perfil por novo convite e renovação sem expiração temporal, com revogação preservada: RN47, RF41, RF46, RF54, RNF22, UC02 e UC09. |
 | 1.0 | 2026-10-01 | Primeira visão consolidada em Markdown. Alinhamento de perfis e permissões, acesso por convite e senha, frequências de rotina, tarefas compartilhadas, foto opcional, carga, navegação, missões sem prazo, recompensas e preservação de conquistas. Atualização do escopo e das exclusões. |
+
+Complemento de backend de 2026-10-05: arquitetura backend 1.0, contratos e decisões BA-01–BA-20; mobile/modelos 1.2 alinhados, design 1.1 e base funcional 1.5 preservados.

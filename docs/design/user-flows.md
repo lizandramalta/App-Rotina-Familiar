@@ -584,7 +584,7 @@ Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imedi
 - As quatro telas principais adultas são entradas independentes; Minhas tarefas continua como inicial.
 - Fluxos Kids não concedem carga, relatório familiar, gestão ou conclusão direta. Perfil próprio e reconhecimento recebido são permitidos.
 - Toda alteração só é apresentada como concluída após confirmação da gravação.
-- TEL/MOD preservam o screen map 1.0; UF-01–UF-16 cobrem UC01–UC19, incluindo TEL-051/052/053/054 e MOD-012/013.
+- TEL/MOD preservam o screen map 1.1; UF-01–UF-16 cobrem UC01–UC19, incluindo TEL-051/052/053/054 e MOD-012/013.
 
 ## Histórico
 

@@ -21,10 +21,13 @@
 | [Screen map](design/screen-map.md)                         | Mapa 1.1: navegação, catálogo de telas, modais, estados e cobertura de UC01–UC19; base funcional 1.5.                                   |
 | [User flows](design/user-flows.md)                         | Fluxos 1.1: 16 percursos que cobrem UC01–UC19, com decisões, alternativas e retornos; base funcional 1.5 e screen map 1.1. |
 | [Modelo de dados (DER)](05-modelo-de-dados.md)             | Diagrama entidade-relacionamento em Mermaid: entidades, atributos, chaves e cardinalidades; base funcional 1.5.                         |
-| [Diagrama de classes](06-diagrama-de-classes.md) | Modelo de classes 1.1: contratos, diagramas por domínio e rastreabilidade UC–RF–RN/RNF–tipos; base funcional 1.5. |
-| [Arquitetura mobile](architecture/mobile-architecture.md) | Arquitetura 1.1: Swift + SwiftUI, View + ViewModel e Clean Architecture; estrutura, dependências, estado, sessão, navegação, integrações e verificação. |
+| [Diagrama de classes](06-diagrama-de-classes.md) | Modelo de classes 1.2: contratos, diagramas por domínio e rastreabilidade UC–RF–RN/RNF–tipos; base funcional 1.5. |
+| [Arquitetura mobile](architecture/mobile-architecture.md) | Arquitetura 1.2: Swift + SwiftUI, View + ViewModel e Clean Architecture; estrutura, dependências, estado, sessão, navegação, integrações e verificação. |
 | [Catálogo mobile](architecture/mobile-feature-catalog.md) | Fronteiras de funcionalidades, nomes técnicos em inglês e rastreabilidade das 26 telas, 13 modais, UC01–UC19, UF-01–UF-16 e RNF01–27. |
 | [Decisões da arquitetura mobile](architecture/mobile-decisions.md) | MA-01–MA-17 e P-01–P-09 consolidadas, ajustes de modelagem e temas fora desta etapa. |
+| [Arquitetura backend](architecture/backend-architecture.md) | Backend 1.0: Node.js, Clean Architecture, monólito modular, Supabase/R2, transações, acesso e jobs. |
+| [Contratos backend](architecture/backend-contracts.md) | API `/v1`, permissões, erros, projeções e cobertura dos 19 UC e 27 RNF. |
+| [Decisões backend](architecture/backend-decisions.md) | BA-01–BA-20: escolhas confirmadas, propostas técnicas, alternativas e limites. |
 
 ## Como usar
 
@@ -39,9 +42,12 @@ Os PDFs existentes em `output/pdf/` são exportações de versões anteriores. N
 - `docs/`: visão, regras, requisitos, casos de uso, modelo de dados, diagrama de classes e índice documental.
 - `docs/diagramas/casos-de-uso/`: fontes PlantUML e imagens dos diagramas de casos de uso.
 - `docs/design/`: screen map e user flows, com referências à base funcional.
-- `docs/architecture/`: arquitetura mobile, catálogo de funcionalidades e registro de decisões; especificação anterior à implementação.
+- `docs/architecture/`: arquiteturas mobile/backend, catálogos de funcionalidades/contratos e registros de decisões; especificação anterior à implementação.
 
 ## Rastreabilidade
+
+- **UC/RNF ↔ backend ↔ mobile:** os [contratos backend](architecture/backend-contracts.md#7-rastreabilidade-uc-para-backend) cobrem todos os objetivos e delimitam responsabilidades remotas/locais. Cada UC tem retorno para sua linha no catálogo backend.
+
 
 - **UC/RNF ↔ arquitetura ↔ TEL/MOD/UF:** o [catálogo mobile](architecture/mobile-feature-catalog.md) relaciona os objetivos funcionais a funcionalidades, Views, ViewModels, casos de uso e portas. A [arquitetura](architecture/mobile-architecture.md) define a separação entre mobile e backend; o [registro de decisões](architecture/mobile-decisions.md) consolida as escolhas e os temas fora desta etapa.
 
@@ -96,7 +102,7 @@ As pendências P-01–P-09 estão resolvidas no [registro de decisões](architec
 - Badges cumulativos por participação em 5/10/25/50 missões, sem retroatividade a quem entrou depois. Destaque inclui perfis ativos Kids e exige pontos positivos.
 - Convites sem expiração temporal, de uso único; reemissão gera novo link/senha e revoga credenciais/sessão anteriores. Um aparelho por perfil; confirmação de troca sem remoção automática da família anterior.
 - Câmera/galeria no perfil para todos; câmera direta na sinalização Kids. PDF e sorteio no aplicativo, snapshot e aceite no servidor.
-- Apenas desenvolvimento e produção; sem rotina própria de backup. Linguagem/framework do backend, retenção das fotos vinculadas, volumes de teste e distribuição ficam fora desta etapa.
+- Apenas desenvolvimento e produção; sem rotina própria de backup. Backend Node.js/Clean Architecture está definido; TypeScript/Fastify são propostas técnicas. Retenção das fotos vinculadas, volumes de teste, hospedagem e distribuição continuam fora desta etapa.
 
 Novas superfícies: TEL-053 (Configurações da família), TEL-054 (Detalhe do badge), MOD-012 (aplicação do fuso), MOD-013 (troca de acesso) e UF-16 (configurar fuso). Novos requisitos: RF67 e RF68; os 19 UC foram preservados.
 
@@ -117,12 +123,14 @@ TEL-014 e TEL-031 foram incorporadas à TEL-050 e retiradas da navegação; os i
 
 ## Política de versionamento
 
-1. A base funcional vigente está na versão **1.5**. Design, modelo e arquitetura estão na versão **1.1**, referenciando a base funcional vigente.
+1. A base funcional vigente está na versão **1.5**. Design está na versão **1.1**, mobile/modelos na **1.2** e backend na **1.0**, referenciando a base funcional vigente.
 2. Preserve os identificadores RN, RF, RNF, UC, TEL, MOD e UF. Novos itens recebem novos códigos; códigos retirados não são reutilizados.
 3. A edição vigente fica na raiz e em `docs/`. O Git mantém o histórico e permite comparar ou recuperar versões anteriores por commits e, quando adotadas, tags. Não mantenha cópias da documentação em pastas de versões.
 4. Alterações funcionais e suas referências devem evoluir juntas, com versão, data e histórico dos códigos e comportamentos afetados. Use 1.1, 1.2... para revisões incrementais e 2.0 para mudanças substanciais da base funcional.
 5. Preserve os IDs para design e user flows e registre as alterações no Git. Revisões do screen map e dos user flows são versionadas em conjunto. Se alterarem comportamento, atualize e versione a base funcional correspondente; a versão de design é independente.
-6. A arquitetura mobile em `docs/architecture/` tem versão independente, atualmente **1.1**, referenciando a base funcional **1.5**. Decisões técnicas não alteram requisitos implicitamente; mudanças funcionais exigem revisão da base e das referências afetadas. A presença de exemplos e árvores de arquivos não indica implementação.
+6. A arquitetura mobile em `docs/architecture/` tem versão independente, atualmente **1.2**, referenciando a base funcional **1.5**. Decisões técnicas não alteram requisitos implicitamente; mudanças funcionais exigem revisão da base e das referências afetadas. A presença de exemplos e árvores de arquivos não indica implementação.
+
+A arquitetura backend 1.0 possui versionamento independente da base funcional. Node.js foi definido pelo usuário; TypeScript, Fastify, `pg` e execução API/worker são recomendações documentadas, sem implementação.
 
 ## Histórico de versões
 
@@ -142,3 +150,5 @@ Complemento de design de 2026-10-01: adicionados user flows 1.0 para revisão, r
 Complemento de modelagem de 2026-10-05: primeira versão (1.0) do diagrama de classes, alinhada à base funcional 1.4, com contratos, diagramas por domínio, rastreabilidade bidirecional e correspondência ao DER. Mantidas as premissas e definições pendentes da base funcional.
 
 Complemento de arquitetura de 2026-10-05: proposta mobile 1.0 em Swift/SwiftUI com View + ViewModel e Clean Architecture, catálogo completo de apresentação e casos de uso, decisões e pendências. Base funcional preservada em 1.4; nenhuma implementação adicionada.
+
+Complemento de backend de 2026-10-05: arquitetura backend 1.0, contratos e decisões BA-01–BA-20; mobile/modelos 1.2 alinhados, design 1.1 e base funcional 1.5 preservados.

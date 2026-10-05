@@ -1,6 +1,6 @@
 # Decisões consolidadas da arquitetura mobile
 
-**Versão:** 1.1 · **Base funcional:** 1.5\
+**Versão:** 1.2 · **Base funcional:** 1.5\
 **Data:** 2026-10-05 · **Situação:** decisões do usuário incorporadas; sem implementação
 
 [Arquitetura](mobile-architecture.md) · [Catálogo](mobile-feature-catalog.md) · [Índice](../DOCUMENTACAO.md)
@@ -96,9 +96,9 @@ Mínimo 26, iPhone/iPad com layout adaptativo. Fixar toolchain estável ao imple
 - Família possui fuso vigente/programado e ciclos; sessão possui vínculo à instalação; notificações possuem registro de dispositivo e fila.
 - Tela Família agrega consultas, com casos de uso separados. Novos destinos detalham configurações e marcos.
 
-## 5. Fora do escopo desta revisão
+## 5. Continuidade com o backend e temas fora do escopo
 
-Linguagem/framework e hospedagem do backend, retenção das fotos vinculadas, volumes de teste e distribuição foram explicitamente adiados. O projeto não implementará rotina própria de backup; backups do provedor, se houver, são independentes. Não existe etapa de homologação separada: ambientes são desenvolvimento e produção.
+A plataforma Node.js e a arquitetura backend passam a ser definidas em [backend-architecture.md](backend-architecture.md). Hospedagem do backend, retenção das fotos vinculadas, volumes de teste e distribuição foram explicitamente adiados. O projeto não implementará rotina própria de backup; backups do provedor, se houver, são independentes. Não existe etapa de homologação separada: ambientes são desenvolvimento e produção.
 
 As propostas substituídas (iOS 17, sorteio remoto, controle de versão otimista, operationID geral, badge coletivo por selo e reenvio do mesmo segredo) não devem orientar a implementação.
 
@@ -106,5 +106,6 @@ As propostas substituídas (iOS 17, sorteio remoto, controle de versão otimista
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.2 | 2026-10-05 | Integração com arquitetura backend 1.0 em Node.js, contratos `/v1`, bootstrap, preparação de rotinas e referências; base funcional 1.5 preservada. |
 | 1.1 | 2026-10-05 | Consolidação das respostas do usuário, fechamento de P-01–P-09 e registro de MA-16/17; propostas anteriores substituídas. |
 | 1.0 | 2026-10-05 | Propostas e pendências iniciais, anteriores às decisões desta revisão. |

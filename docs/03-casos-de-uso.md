@@ -56,6 +56,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Modelo de classes:** [Tipos e rastreabilidade de UC01](06-diagrama-de-classes.md#rastreio-uc01).
 
+**Backend:** [Contratos e garantias de UC01](architecture/backend-contracts.md#backend-uc01).
+
 **Nome:** Gerenciar família
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Acesso, família e perfis](04-diagramas-de-caso-de-uso.md#02-acesso-familia-perfis)
@@ -92,6 +94,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 ## UC02
 
 **Modelo de classes:** [Tipos e rastreabilidade de UC02](06-diagrama-de-classes.md#rastreio-uc02).
+
+**Backend:** [Contratos e garantias de UC02](architecture/backend-contracts.md#backend-uc02).
 
 **Nome:** Gerenciar membros
 
@@ -135,6 +139,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Modelo de classes:** [Tipos e rastreabilidade de UC03](06-diagrama-de-classes.md#rastreio-uc03).
 
+**Backend:** [Contratos e garantias de UC03](architecture/backend-contracts.md#backend-uc03).
+
 **Nome:** Validar conclusão de tarefa Kids
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Participação Kids](04-diagramas-de-caso-de-uso.md#04-participacao-kids)
@@ -172,6 +178,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Modelo de classes:** [Tipos e rastreabilidade de UC04](06-diagrama-de-classes.md#rastreio-uc04).
 
+**Backend:** [Contratos e garantias de UC04](architecture/backend-contracts.md#backend-uc04).
+
 **Nome:** Autenticar com Apple
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Acesso, família e perfis](04-diagramas-de-caso-de-uso.md#02-acesso-familia-perfis)
@@ -208,6 +216,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 ## UC05
 
 **Modelo de classes:** [Tipos e rastreabilidade de UC05](06-diagrama-de-classes.md#rastreio-uc05).
+
+**Backend:** [Contratos e garantias de UC05](architecture/backend-contracts.md#backend-uc05).
 
 **Nome:** Gerenciar missões
 
@@ -248,6 +258,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Modelo de classes:** [Tipos e rastreabilidade de UC06](06-diagrama-de-classes.md#rastreio-uc06).
 
+**Backend:** [Contratos e garantias de UC06](architecture/backend-contracts.md#backend-uc06).
+
 **Nome:** Gerenciar itens de recompensas coletivas
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Missões e recompensas](04-diagramas-de-caso-de-uso.md#05-missoes-recompensas)
@@ -282,6 +294,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 ## UC07
 
 **Modelo de classes:** [Tipos e rastreabilidade de UC07](06-diagrama-de-classes.md#rastreio-uc07).
+
+**Backend:** [Contratos e garantias de UC07](architecture/backend-contracts.md#backend-uc07).
 
 **Nome:** Gerenciar tarefas
 
@@ -324,6 +338,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Modelo de classes:** [Tipos e rastreabilidade de UC08](06-diagrama-de-classes.md#rastreio-uc08).
 
+**Backend:** [Contratos e garantias de UC08](architecture/backend-contracts.md#backend-uc08).
+
 **Nome:** Definir recorrência de rotina
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Tarefas e rotina](04-diagramas-de-caso-de-uso.md#03-tarefas-rotina)
@@ -359,6 +375,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 ## UC09
 
 **Modelo de classes:** [Tipos e rastreabilidade de UC09](06-diagrama-de-classes.md#rastreio-uc09).
+
+**Backend:** [Contratos e garantias de UC09](architecture/backend-contracts.md#backend-uc09).
 
 **Nome:** Ingressar por convite
 
@@ -402,6 +420,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Modelo de classes:** [Tipos e rastreabilidade de UC10](06-diagrama-de-classes.md#rastreio-uc10).
 
+**Backend:** [Contratos e garantias de UC10](architecture/backend-contracts.md#backend-uc10).
+
 **Nome:** Editar perfil
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Acesso, família e perfis](04-diagramas-de-caso-de-uso.md#02-acesso-familia-perfis)
@@ -436,6 +456,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 ## UC11
 
 **Modelo de classes:** [Tipos e rastreabilidade de UC11](06-diagrama-de-classes.md#rastreio-uc11).
+
+**Backend:** [Contratos e garantias de UC11](architecture/backend-contracts.md#backend-uc11).
 
 **Nome:** Visualizar minhas tarefas
 
@@ -487,6 +509,8 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 **Modelo de classes:** [Tipos e rastreabilidade de UC12](06-diagrama-de-classes.md#rastreio-uc12).
 
+**Backend:** [Contratos e garantias de UC12](architecture/backend-contracts.md#backend-uc12).
+
 **Nome:** Concluir tarefa
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Tarefas e rotina](04-diagramas-de-caso-de-uso.md#03-tarefas-rotina) · [Participação Kids](04-diagramas-de-caso-de-uso.md#04-participacao-kids)
@@ -525,6 +549,8 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 ## UC13
 
 **Modelo de classes:** [Tipos e rastreabilidade de UC13](06-diagrama-de-classes.md#rastreio-uc13).
+
+**Backend:** [Contratos e garantias de UC13](architecture/backend-contracts.md#backend-uc13).
 
 **Nome:** Visualizar carga diária ou semanal
 
@@ -567,6 +593,8 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 **Modelo de classes:** [Tipos e rastreabilidade de UC14](06-diagrama-de-classes.md#rastreio-uc14).
 
+**Backend:** [Contratos e garantias de UC14](architecture/backend-contracts.md#backend-uc14).
+
 **Nome:** Acompanhar missões e recompensas
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Missões e recompensas](04-diagramas-de-caso-de-uso.md#05-missoes-recompensas)
@@ -606,6 +634,8 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 **Modelo de classes:** [Tipos e rastreabilidade de UC15](06-diagrama-de-classes.md#rastreio-uc15).
 
+**Backend:** [Contratos e garantias de UC15](architecture/backend-contracts.md#backend-uc15).
+
 **Nome:** Sinalizar tarefa como realizada
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Participação Kids](04-diagramas-de-caso-de-uso.md#04-participacao-kids)
@@ -643,6 +673,8 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 **Modelo de classes:** [Tipos e rastreabilidade de UC16](06-diagrama-de-classes.md#rastreio-uc16).
 
+**Backend:** [Contratos e garantias de UC16](architecture/backend-contracts.md#backend-uc16).
+
 **Nome:** Resgatar recompensa da missão
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Missões e recompensas](04-diagramas-de-caso-de-uso.md#05-missoes-recompensas)
@@ -679,6 +711,8 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 ## UC17
 
 **Modelo de classes:** [Tipos e rastreabilidade de UC17](06-diagrama-de-classes.md#rastreio-uc17).
+
+**Backend:** [Contratos e garantias de UC17](architecture/backend-contracts.md#backend-uc17).
 
 **Nome:** Retornar tarefa concluída para Pendente
 
@@ -720,6 +754,8 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 **Modelo de classes:** [Tipos e rastreabilidade de UC18](06-diagrama-de-classes.md#rastreio-uc18).
 
+**Backend:** [Contratos e garantias de UC18](architecture/backend-contracts.md#backend-uc18).
+
 **Nome:** Gerar relatório semanal em PDF
 
 **Diagramas:** [Visão geral](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Tarefas e rotina](04-diagramas-de-caso-de-uso.md#03-tarefas-rotina)
@@ -757,6 +793,8 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 ## UC19
 
 **Modelo de classes:** [Tipos e rastreabilidade de UC19](06-diagrama-de-classes.md#rastreio-uc19).
+
+**Backend:** [Contratos e garantias de UC19](architecture/backend-contracts.md#backend-uc19).
 
 **Nome:** Apurar e compartilhar destaque semanal
 
