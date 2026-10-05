@@ -28,6 +28,7 @@
 | [Arquitetura backend](architecture/backend-architecture.md) | Backend 1.0: Node.js, Clean Architecture, monólito modular, Supabase/R2, transações, acesso e jobs. |
 | [Contratos backend](architecture/backend-contracts.md) | API `/v1`, permissões, erros, projeções e cobertura dos 19 UC e 27 RNF. |
 | [Decisões backend](architecture/backend-decisions.md) | BA-01–BA-20: escolhas confirmadas, propostas técnicas, alternativas e limites. |
+| [Specs de entrega](../specs/README.md) | Recortes aprovados de implementação compartilhados entre mobile e backend. |
 
 ## Como usar
 
@@ -37,12 +38,19 @@ Esta é uma base completa e consolidada. Não é uma lista de correções e não
 
 Os PDFs existentes em `output/pdf/` são exportações de versões anteriores. Nesta revisão, a fonte vigente é a documentação Markdown e seus diagramas atualizados.
 
+Para implementar, comece pela spec aprovada em `../specs/`. Ela delimita a entrega e
+aponta os códigos e documentos a consultar. Não use a documentação inteira como
+contexto fixo: leia somente a fatia indicada pela rastreabilidade. As regras de uso por
+agentes e a ordem das fontes de verdade estão em [`AGENTS.md`](../AGENTS.md).
+
 ## Organização dos arquivos
 
 - `docs/`: visão, regras, requisitos, casos de uso, modelo de dados, diagrama de classes e índice documental.
 - `docs/diagramas/casos-de-uso/`: fontes PlantUML e imagens dos diagramas de casos de uso.
 - `docs/design/`: screen map e user flows, com referências à base funcional.
 - `docs/architecture/`: arquiteturas mobile/backend, catálogos de funcionalidades/contratos e registros de decisões; especificação anterior à implementação.
+- `../specs/`: specs aprovadas e o template para cada entrega vertical entre mobile e backend.
+- `../mobile/` e `../backend/`: raízes reservadas para os projetos de implementação.
 
 ## Rastreabilidade
 

@@ -95,8 +95,20 @@ As possibilidades de evolução estão no [documento de visão](docs/00-visao-do
 | [Contratos backend](docs/architecture/backend-contracts.md) | API `/v1`, permissões, erros, projeções e cobertura dos 19 UC e 27 RNF. |
 | [Decisões backend](docs/architecture/backend-decisions.md) | BA-01–BA-20: escolhas confirmadas, propostas técnicas, alternativas e limites. |
 | [Índice e controle documental](docs/DOCUMENTACAO.md) | Rastreabilidade e convenções para manter a documentação consistente. |
+| [Specs de entrega](specs/README.md) | Recortes aprovados que orientam a implementação conjunta de mobile e backend. |
 
 A versão 1.5 identifica a base de definição do MVP. Não representa, por si só, uma declaração de que o aplicativo foi implementado ou publicado.
+
+## Estrutura para implementação
+
+- `mobile/` será a raiz do aplicativo iOS/iPadOS.
+- `backend/` será a raiz da API e dos jobs do servidor.
+- `specs/` reúne as entregas aprovadas que conectam os dois projetos à base documental.
+- `docs/` continua sendo a fonte de verdade para comportamento, UX, modelo e arquitetura.
+
+Antes de desenvolver uma funcionalidade, a equipe deve partir de uma spec aprovada e
+consultar somente as referências rastreáveis que ela indica. As instruções completas
+para agentes estão em [AGENTS.md](AGENTS.md).
 
 A arquitetura mobile 1.2, documentada em 2026-10-05, consolida as decisões para implementação futura. O código e os nomes dos arquivos de código serão em inglês; os textos da experiência serão localizados. As estruturas e os exemplos nas docs não representam arquivos Swift já implementados.
 
