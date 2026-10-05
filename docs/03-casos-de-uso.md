@@ -5,7 +5,7 @@
 **Data:** 2026-10-02  
 **Situação:** base documental consolidada
 
-[Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md)
+[Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
 
 Os 19 casos de uso abaixo descrevem os fluxos vigentes. As referências de regras são derivadas dos RF associados; os RNFs indicam as condições de qualidade aplicáveis.
 
@@ -54,6 +54,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 ## UC01
 
+**Modelo de classes:** [Tipos e rastreabilidade de UC01](06-diagrama-de-classes.md#rastreio-uc01).
+
 **Nome:** Gerenciar família
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Acesso, família e perfis](04-diagramas-de-caso-de-uso.md#02-acesso-familia-perfis)
@@ -86,6 +88,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 **Pós-condição:** o usuário acessa sua família; se recém-criada, ela possui um Criador com perfil Administrador.
 
 ## UC02
+
+**Modelo de classes:** [Tipos e rastreabilidade de UC02](06-diagrama-de-classes.md#rastreio-uc02).
 
 **Nome:** Gerenciar membros
 
@@ -127,6 +131,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 ## UC03
 
+**Modelo de classes:** [Tipos e rastreabilidade de UC03](06-diagrama-de-classes.md#rastreio-uc03).
+
 **Nome:** Validar conclusão de tarefa Kids
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Participação Kids](04-diagramas-de-caso-de-uso.md#04-participacao-kids)
@@ -162,6 +168,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 ## UC04
 
+**Modelo de classes:** [Tipos e rastreabilidade de UC04](06-diagrama-de-classes.md#rastreio-uc04).
+
 **Nome:** Autenticar com Apple
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Acesso, família e perfis](04-diagramas-de-caso-de-uso.md#02-acesso-familia-perfis)
@@ -196,6 +204,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 **Pós-condição:** o Criador está autenticado e acessa sua família ou pode criá-la.
 
 ## UC05
+
+**Modelo de classes:** [Tipos e rastreabilidade de UC05](06-diagrama-de-classes.md#rastreio-uc05).
 
 **Nome:** Gerenciar missões
 
@@ -234,6 +244,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 ## UC06
 
+**Modelo de classes:** [Tipos e rastreabilidade de UC06](06-diagrama-de-classes.md#rastreio-uc06).
+
 **Nome:** Gerenciar itens de recompensas coletivas
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Missões e recompensas](04-diagramas-de-caso-de-uso.md#05-missoes-recompensas)
@@ -266,6 +278,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 **Pós-condição:** o item adicionado pode ser sorteado. Seu cadastro não o vincula automaticamente a uma missão; esse vínculo ocorre somente após sorteio e aceitação no [UC16](03-casos-de-uso.md#uc16).
 
 ## UC07
+
+**Modelo de classes:** [Tipos e rastreabilidade de UC07](06-diagrama-de-classes.md#rastreio-uc07).
 
 **Nome:** Gerenciar tarefas
 
@@ -305,6 +319,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 ## UC08
 
+**Modelo de classes:** [Tipos e rastreabilidade de UC08](06-diagrama-de-classes.md#rastreio-uc08).
+
 **Nome:** Definir recorrência de rotina
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Tarefas e rotina](04-diagramas-de-caso-de-uso.md#03-tarefas-rotina)
@@ -338,6 +354,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 **Pós-condição:** a configuração está salva; concluir uma ocorrência não conclui as demais.
 
 ## UC09
+
+**Modelo de classes:** [Tipos e rastreabilidade de UC09](06-diagrama-de-classes.md#rastreio-uc09).
 
 **Nome:** Ingressar por convite
 
@@ -377,6 +395,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 ## UC10
 
+**Modelo de classes:** [Tipos e rastreabilidade de UC10](06-diagrama-de-classes.md#rastreio-uc10).
+
 **Nome:** Editar perfil
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Acesso, família e perfis](04-diagramas-de-caso-de-uso.md#02-acesso-familia-perfis)
@@ -409,6 +429,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 **Pós-condição:** os dados permitidos estão atualizados, sem alteração indevida de permissões.
 
 ## UC11
+
+**Modelo de classes:** [Tipos e rastreabilidade de UC11](06-diagrama-de-classes.md#rastreio-uc11).
 
 **Nome:** Visualizar minhas tarefas
 
@@ -458,6 +480,8 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 ## UC12
 
+**Modelo de classes:** [Tipos e rastreabilidade de UC12](06-diagrama-de-classes.md#rastreio-uc12).
+
 **Nome:** Concluir tarefa
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Tarefas e rotina](04-diagramas-de-caso-de-uso.md#03-tarefas-rotina) · [Participação Kids](04-diagramas-de-caso-de-uso.md#04-participacao-kids)
@@ -494,6 +518,8 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 **Pós-condição:** tarefa concluída para todos os responsáveis finais. Quem apenas executou a ação, mantendo outros responsáveis, não recebe peso se não for um deles. Outras ocorrências da rotina não são alteradas.
 
 ## UC13
+
+**Modelo de classes:** [Tipos e rastreabilidade de UC13](06-diagrama-de-classes.md#rastreio-uc13).
 
 **Nome:** Visualizar carga diária ou semanal
 
@@ -534,6 +560,8 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 ## UC14
 
+**Modelo de classes:** [Tipos e rastreabilidade de UC14](06-diagrama-de-classes.md#rastreio-uc14).
+
 **Nome:** Acompanhar missões e recompensas
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Missões e recompensas](04-diagramas-de-caso-de-uso.md#05-missoes-recompensas)
@@ -571,6 +599,8 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 ## UC15
 
+**Modelo de classes:** [Tipos e rastreabilidade de UC15](06-diagrama-de-classes.md#rastreio-uc15).
+
 **Nome:** Sinalizar tarefa como realizada
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Participação Kids](04-diagramas-de-caso-de-uso.md#04-participacao-kids)
@@ -606,6 +636,8 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 ## UC16
 
+**Modelo de classes:** [Tipos e rastreabilidade de UC16](06-diagrama-de-classes.md#rastreio-uc16).
+
 **Nome:** Resgatar recompensa da missão
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Missões e recompensas](04-diagramas-de-caso-de-uso.md#05-missoes-recompensas)
@@ -640,6 +672,8 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 **Pós-condição:** uma única recompensa foi registrada. O resgate acrescenta esse registro sem modificar tarefas, progresso, selo ou demais dados preservados da missão concluída.
 
 ## UC17
+
+**Modelo de classes:** [Tipos e rastreabilidade de UC17](06-diagrama-de-classes.md#rastreio-uc17).
 
 **Nome:** Retornar tarefa concluída para Pendente
 
@@ -679,6 +713,8 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 ## UC18
 
+**Modelo de classes:** [Tipos e rastreabilidade de UC18](06-diagrama-de-classes.md#rastreio-uc18).
+
 **Nome:** Gerar relatório semanal em PDF
 
 **Diagramas:** [Visão geral](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Tarefas e rotina](04-diagramas-de-caso-de-uso.md#03-tarefas-rotina)
@@ -714,6 +750,8 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 **Pós-condição:** PDF referente ao período e ao momento de geração disponível, ou falha/cancelamento informado sem alterações nos dados da rotina.
 
 ## UC19
+
+**Modelo de classes:** [Tipos e rastreabilidade de UC19](06-diagrama-de-classes.md#rastreio-uc19).
 
 **Nome:** Apurar e compartilhar destaque semanal
 

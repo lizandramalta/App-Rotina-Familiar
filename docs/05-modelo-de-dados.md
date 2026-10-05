@@ -5,9 +5,11 @@
 **Data:** 2026-10-02  
 **Situação:** primeira versão para revisão; contém pendências de esclarecimento
 
-[Projeto](../README.md) · [Índice documental](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md)
+[Projeto](../README.md) · [Índice documental](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagrama de classes](06-diagrama-de-classes.md)
 
 Diagrama entidade-relacionamento em Mermaid (renderizado nativamente pelo GitHub). O DER foi auditado contra RN01–RN65, RF01–RF66, RNF01–RNF27 e UC01–UC19.
+
+A relação entre entidades persistidas e tipos Swift propostos está na [correspondência com o diagrama de classes](06-diagrama-de-classes.md#correspondencia-com-o-der), incluindo diferenças e pendências entre os modelos.
 
 ## Convenções de modelagem
 

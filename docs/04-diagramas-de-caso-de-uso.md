@@ -5,7 +5,7 @@
 **Data:** 2026-10-02  
 **Situação:** complemento visual da base documental
 
-[Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice documental](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Especificação dos casos de uso](03-casos-de-uso.md) · [Screen map](design/screen-map.md)
+[Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice documental](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Especificação dos casos de uso](03-casos-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
 
 Os seis diagramas representam os 19 casos de uso da versão 1.4. Os códigos, nomes e permissões seguem a especificação textual, que continua sendo a referência para pré-condições, fluxos, exceções e resultados. A visão geral reúne todo o escopo; os recortes permitem ler cada área em maior detalhe. Casos repetidos em mais de um desenho têm o mesmo significado.
 

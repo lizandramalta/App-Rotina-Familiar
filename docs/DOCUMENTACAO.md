@@ -5,7 +5,7 @@
 **Data:** 2026-10-02  
 **Situação:** base documental consolidada
 
-[Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Modelo de dados](05-modelo-de-dados.md)
+[Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Modelo de dados](05-modelo-de-dados.md) · [Diagrama de classes](06-diagrama-de-classes.md)
 
 ## Documentos
 
@@ -21,6 +21,7 @@
 | [Screen map](design/screen-map.md)                         | Mapa 1.0: navegação, catálogo de telas, modais, estados e cobertura de UC01–UC19; base funcional 1.4.                                   |
 | [User flows](design/user-flows.md)                         | Fluxos 1.0 para revisão: 15 percursos que cobrem UC01–UC19, com decisões, alternativas e retornos; base funcional 1.4 e screen map 1.0. |
 | [Modelo de dados (DER)](05-modelo-de-dados.md)             | Diagrama entidade-relacionamento em Mermaid: entidades, atributos, chaves e cardinalidades; base funcional 1.3.                         |
+| [Diagrama de classes](06-diagrama-de-classes.md) | Modelo de classes 1.0: contratos, diagramas por domínio e rastreabilidade UC–RF–RN/RNF–tipos; base funcional 1.4. |
 
 ## Como usar
 
@@ -30,11 +31,13 @@ Esta é uma base completa e consolidada. Não é uma lista de correções e não
 
 ## Organização dos arquivos
 
-- `docs/`: visão, regras, requisitos, casos de uso, modelo de dados e índice documental.
+- `docs/`: visão, regras, requisitos, casos de uso, modelo de dados, diagrama de classes e índice documental.
 - `docs/diagramas/casos-de-uso/`: fontes PlantUML e imagens dos diagramas de casos de uso.
 - `docs/design/`: screen map e user flows, com referências à base funcional.
 
 ## Rastreabilidade
+
+- **UC ↔ tipos → DER:** o [diagrama de classes](06-diagrama-de-classes.md#rastreabilidade-por-caso-de-uso) relaciona os 19 casos de uso aos tipos do modelo, RF e RN, com RNF e correspondência ao modelo de dados. Cada UC possui link de retorno. Esses vínculos documentam responsabilidades, não implementação concluída.
 
 - **Visão → RN/RF/UC:** as tabelas de regras centrais e de escopo conectam a proposta do produto aos comportamentos detalhados. Todos os documentos têm navegação para a visão e para a apresentação do projeto.
 - **RN → RF/RNF → UC:** cada regra aponta para os requisitos relacionados e os fluxos associados.
@@ -123,3 +126,5 @@ TEL-014 e TEL-031 foram incorporadas à TEL-050 e retiradas da navegação; os i
 Complemento visual de 2026-10-01: adicionados cinco diagramas de UC01–UC17 e referências de navegação; mantida a base funcional 1.0.
 
 Complemento de design de 2026-10-01: adicionados user flows 1.0 para revisão, referenciando a base funcional estável 1.2 e o screen map estável 1.0, sem alteração de comportamento.
+
+Complemento de modelagem de 2026-10-05: primeira versão (1.0) do diagrama de classes, alinhada à base funcional 1.4, com contratos, diagramas por domínio, rastreabilidade bidirecional e correspondência ao DER. Mantidas as premissas e definições pendentes da base funcional.
