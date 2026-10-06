@@ -1,9 +1,9 @@
 # Arquitetura mobile — Swift, SwiftUI e Clean Architecture
 
 **Projeto:** App de Organização Familiar — MVP\
-**Versão da arquitetura:** 1.2\
-**Base funcional:** 1.5 · Design: 1.1 · Modelo de classes: 1.2\
-**Data:** 2026-10-05\
+**Versão da arquitetura:** 1.3\
+**Base funcional:** 1.9 · Design: 1.4 · Modelo de classes: 1.5\
+**Data:** 2026-10-06\
 **Situação:** decisões consolidadas antes da implementação
 
 [Projeto](../../README.md) · [Índice](../DOCUMENTACAO.md) · [Catálogo mobile](mobile-feature-catalog.md) · [Decisões](mobile-decisions.md)
@@ -238,7 +238,7 @@ O [modelo de classes](../06-diagrama-de-classes.md) descreve o sistema; métodos
 
 Raiz distingue restauração, entrada, Criador sem família, shell adulto e shell Kids. Adultos mantêm quatro abas independentes; Kids exatamente duas, com perfil no avatar. Cada aba tem seu `NavigationStack`. TEL-014/031 continuam retiradas.
 
-Rotas tipadas transportam IDs e contexto, nunca entidades completas ou credenciais persistidas. `TaskQueryContext` inclui data de referência, Dia/Semana e escopo pessoal/família/membro. Detalhe do membro recebe cópia do período da origem e não altera o seletor de Família ao voltar. PDF sempre recebe a semana da data selecionada.
+Rotas tipadas transportam IDs e contexto, nunca entidades completas ou credenciais persistidas. `TaskQueryContext` inclui data de referência, escopo pessoal/família/membro e Dia/Semana somente nos escopos familiares adultos; o escopo pessoal é diário. Detalhe do membro recebe cópia do período da origem e não altera o seletor de Família ao voltar. PDF sempre recebe a semana da data selecionada.
 
 Novos destinos: TEL-053 Configurações da família (Admin), TEL-054 Detalhe do marco (titular), MOD-012 aplicação do fuso e MOD-013 confirmação da troca de acesso. Perfil → marco → missão preserva a pilha de origem. Na variante Kids, abrir missão não concede operação sobre tarefas alheias.
 
@@ -384,6 +384,7 @@ A sequência futura permanece: composição/acesso → família/membros → tare
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.3 | 2026-10-06 | `TaskQueryContext` distingue escopo pessoal diário dos períodos Dia/Semana familiares adultos. Para SPEC-009. |
 | 1.2 | 2026-10-05 | Integração com arquitetura backend 1.0 em Node.js, contratos `/v1`, bootstrap, preparação de rotinas e referências; base funcional 1.5 preservada. |
 | 1.1 | 2026-10-05 | Consolidação das decisões: mínimo 26/iPad, fuso configurável, datas livres, badges por participação, sessão única, reemissão de convites, Supabase/R2, última gravação e consulta após falha, PDF/sorteio locais, dois ambientes e sem rotina própria de backup. |
 | 1.0 | 2026-10-05 | Primeira proposta mobile, anterior às decisões consolidadas na versão 1.1. |

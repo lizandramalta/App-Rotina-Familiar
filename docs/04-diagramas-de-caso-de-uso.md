@@ -168,4 +168,4 @@ Ao alterar um UC, confira sua presença na visão geral e em todos os recortes l
 | 1.0 | 2026-10-01 | Complemento visual: visão geral e quatro recortes dos 17 UCs, sem alteração de escopo ou comportamento. |
 
 
-UC11 abrange a consulta diária ou semanal pessoal e a área Família para adultos, conforme a especificação textual. A separação de telas por perfil está no screen map.
+UC11 abrange a consulta pessoal diária e a área Família por Dia/Semana para adultos, conforme a especificação textual. A separação de telas por perfil está no screen map.

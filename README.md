@@ -3,7 +3,7 @@
 Organização colaborativa das responsabilidades domésticas, com tarefas compartilhadas, participação infantil e conquistas coletivas.
 
 **Escopo:** MVP  
-**Versão da base do projeto:** 1.8\
+**Versão da base do projeto:** 1.9\
 **Data:** 2026-10-06
 
 ## Por que este projeto existe
@@ -21,7 +21,7 @@ Famílias que compartilham a rotina doméstica e desejam organizar melhor suas r
 1. O Criador entra com Apple e cria a família ou acessa a que já está vinculada a ele.
 2. Um Administrador cria os perfis e compartilha convites com link e senha para um único ingresso. Depois, a sessão válida permite continuar acessando o aplicativo.
 3. Administradores e Membros criam tarefas únicas ou rotinas, definem o esforço e escolhem nenhum, um ou vários responsáveis.
-4. Todos acompanham suas tarefas e seu progresso diário ou semanal. Kids sinalizam a realização com foto opcional; um Administrador confirma ou recusa, ou um adulto conclui manualmente.
+4. Todos acompanham suas tarefas e seu progresso diário. Adultos também consultam tarefas e progresso familiares por dia ou semana. Kids sinalizam a realização com foto opcional; um Administrador confirma ou recusa, ou um adulto conclui manualmente.
 5. A conclusão vale para todos os responsáveis finais. Adultos acompanham a distribuição da carga diária ou semanal, sem ranking.
 6. A família realiza missões coletivas sem prazo. Ao concluir todas as tarefas vinculadas, registra participações e concede badges nos marcos atingidos e um Administrador pode sortear e aceitar uma recompensa coletiva.
 
@@ -31,7 +31,7 @@ Famílias que compartilham a rotina doméstica e desejam organizar melhor suas r
 - Tarefas com peso de 1 a 3 e responsáveis opcionais ou compartilhados.
 - Rotinas diárias ou a cada 7, 14, 21 ou 28 dias, com tarefas individuais independentes.
 - Conclusão de tarefas de outros membros, mantendo os responsáveis ou assumindo a tarefa com aviso sobre o crédito.
-- Checklist da criação da família até o último dia do mês corrente e progresso diário ou semanal para todos.
+- Checklist da criação da família até o último dia do mês corrente e progresso pessoal diário; consultas familiares adultas por dia ou semana.
 - Modo Kids com sinalização, foto opcional e avaliação pelo Administrador.
 - Carga por dia ou semana para adultos; a semana vai de segunda-feira a domingo.
 - Missões coletivas sem prazo, badges por marcos de participação e conquistas preservadas.
@@ -124,7 +124,7 @@ A sessão dos convidados é mantida por refresh token sem expiração temporal, 
 
 - **Kids:** tab bar com duas abas independentes, “Minhas tarefas” e “Missões e conquistas”. Meu perfil abre pelo avatar/cabeçalho, sem terceira aba. Adicionar foto à sinalização abre diretamente a câmera, com foto ainda opcional.
 - **Perfil:** foto opcional e etiqueta/apelido para todos, inclusive Kids. O apelido é visível à família, mas só o titular acessa sua configuração e edição. O perfil mostra os badges recebidos pelos marcos de 5, 10, 25 e 50 missões com participação.
-- **Períodos:** progresso pessoal e familiar e carga/sobrecarga alternam entre dia e semana. Kids continuam sem acesso à distribuição de carga familiar. Progresso e carga usam métricas distintas, detalhadas em RN61.
+- **Períodos:** progresso pessoal é diário. Adultos alternam dia e semana nas consultas familiares de tarefas, progresso e carga; Kids continuam sem acesso à distribuição de carga familiar. Progresso e carga usam métricas distintas, detalhadas em RN61.
 - **PDF semanal:** adultos geram relatório de segunda a domingo com gráficos de carga e progresso total da família, peso creditado e número de tarefas realizadas por membro. O relatório identifica período e geração; a semana atual é parcial.
 - **Destaque semanal:** na segunda-feira, apurar o primeiro lugar em pontos da semana encerrada, notificar a pessoa e mostrar o resultado no app. Pontos correspondem aos pesos creditados; todos os empatados em primeiro são reconhecidos. Compartilhar via WhatsApp é opcional e convida a sugerir uma atividade em família.
 
@@ -146,6 +146,7 @@ A arquitetura backend 1.0 está em [backend-architecture.md](docs/architecture/b
 
 | Versão | Data | Marco |
 |---|---|---|
+| 1.9 | 2026-10-06 | Consulta pessoal diária para todos os perfis; consultas familiares adultas por Dia/Semana; carga detalhada permanece na SPEC-018. |
 | 1.7 | 2026-10-06 | RF02, RF03 e RF40 passam a definir o nome administrativo de membro e os papéis permitidos na criação, para elaboração de SPEC-003. Tarefa ganha limite de título (1–60 caracteres), observação opcional (até 250 caracteres) e regra de resolução de sinalização Kids pendente ao editar/excluir; SPEC-007 em elaboração. |
 | 1.6 | 2026-10-06 | RF01 passa a definir o nome obrigatório da família: 1–60 caracteres Unicode visíveis após trim, sem caracteres de controle; SPEC-002 aprovada. |
 | 1.5 | 2026-10-05 | Pendências consolidadas: fuso, datas livres, edição de concluídas, participações/badges, convites e sessão única; RF67/68; arquitetura, modelo e design 1.1. |

@@ -1,7 +1,7 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.7\
+**Versão:** 1.8\
 **Data:** 2026-10-06\
 **Situação:** base documental consolidada
 
@@ -468,7 +468,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 **Regras relacionadas:** [RN16](01-regras-de-negocio.md#rn16), [RN22](01-regras-de-negocio.md#rn22), [RN26](01-regras-de-negocio.md#rn26), [RN27](01-regras-de-negocio.md#rn27), [RN28](01-regras-de-negocio.md#rn28), [RN33](01-regras-de-negocio.md#rn33), [RN49](01-regras-de-negocio.md#rn49), [RN55](01-regras-de-negocio.md#rn55), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61), [RN63](01-regras-de-negocio.md#rn63)\
 **Requisitos não funcionais:** [RNF01](02-requisitos.md#rnf01), [RNF02](02-requisitos.md#rnf02), [RNF04](02-requisitos.md#rnf04), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF08](02-requisitos.md#rnf08), [RNF09](02-requisitos.md#rnf09), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF14](02-requisitos.md#rnf14), [RNF22](02-requisitos.md#rnf22)
 
-**Objetivo:** consultar as próprias tarefas e o próprio progresso diário ou semanal; para adultos, também consultar as tarefas e o progresso coletivo pela área Família.
+**Objetivo:** consultar as próprias tarefas e o próprio progresso diário; para adultos, também consultar tarefas e progresso coletivo pela área Família, por dia ou semana.
 
 **Atores:** Administrador, Membro e Kids.
 
@@ -480,19 +480,18 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 1. O usuário abre o checklist.
 2. O sistema seleciona o dia atual por padrão.
 3. Apresenta as tarefas e os respectivos estados, respeitando as permissões do perfil.
-4. Apresenta o progresso do usuário e o seletor Dia/Semana.
-5. O usuário escolhe o modo e a data de referência, navegando entre dias ou semanas permitidos.
-6. O sistema apresenta tarefas e progresso do período, contando concluídas sobre o total previsto conforme RN61.
+4. Apresenta o progresso diário do usuário.
+5. O usuário escolhe a data de referência, navegando entre dias permitidos.
+6. O sistema apresenta tarefas e progresso daquele dia, contando concluídas sobre o total previsto conforme RN61.
 
 **Alternativas e exceções:**
 
 - O intervalo permitido vai da data de criação da família até o último dia do mês corrente, inclusive.
 - Dias futuros do mês corrente podem ser consultados. Datas anteriores à criação e meses seguintes são bloqueados.
-- No modo Semana, usar segunda–domingo e informar limites de borda; o percentual é calculado a partir dos totais, sem média dos percentuais diários.
 - Kids alternam diretamente entre Minhas tarefas e Missões e conquistas pelo tab bar de duas abas (RF65).
 - Dias sem tarefas são apresentados como tal, sem registros fictícios de conclusão.
 - Na mudança de dia, o checklist passa a abrir no novo dia; tarefas não realizadas não geram penalidades.
-- Kids visualizam seu próprio progresso diário ou semanal, mas não a carga diária ou semanal da família.
+- Kids visualizam somente seu próprio progresso diário e não acessam a área, o progresso nem a carga familiar.
 
 **Consulta complementar — Família (Administrador e Membro):**
 
@@ -502,7 +501,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 4. Ao abrir as tarefas da família, o sistema mantém o período e permite consultar tarefas de outras pessoas e sem responsável. Gerenciar e concluir continuam sujeitos a UC07 e UC12.
 5. A própria área apresenta a carga diária ou semanal por UC13 e o botão Gerar relatório PDF por UC18. Também apresenta a lista de membros: selecionar uma pessoa abre TEL-032 com suas tarefas por dia/semana. O detalhe herda o período e mantém o filtro por pessoa; voltar restaura o contexto da Família. Somente Administradores têm Adicionar membro na Família e, no detalhe, Editar perfil e Gerar/reenviar convite quando permitidos por UC02. Confirmações Kids continuam exclusivas dos Administradores.
 
-Sem tarefas no período, o sistema informa essa condição sem divisão por zero. Tarefas aguardando confirmação não entram nas concluídas. Conclusão, reabertura e exclusão autorizadas atualizam o progresso. Kids não acessam esta área. UC11 também abrange a consulta diária ou semanal familiar adulta.
+Sem tarefas no período, o sistema informa essa condição sem divisão por zero. Tarefas aguardando confirmação não entram nas concluídas. Conclusão, reabertura e exclusão autorizadas atualizam o progresso. Kids não acessam esta área. UC11 também abrange a consulta familiar adulta por dia ou semana.
 
 **Pós-condição:** o usuário consulta um período permitido sem alterar o estado das tarefas.
 
@@ -837,6 +836,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.8 | 2026-10-06 | UC11 passa a definir consulta própria diária e consulta familiar adulta por Dia/Semana. Para SPEC-009. |
 | 1.7 | 2026-10-06 | UC08 passa a registrar observação opcional na rotina, ausência de data final obrigatória e alcance inclusivo da ocorrência selecionada. Para SPEC-008. |
 | 1.6 | 2026-10-06 | UC07 passa a citar o limite de título (1–60 caracteres), a observação opcional (RN67/RF70) e a escolha entre Pendente e Aguardando confirmação ao editar tarefa sinalizada, com remoção da sinalização ao excluir (RN66/RF69). Para SPEC-007. |
 | 1.5 | 2026-10-05 | Pendências consolidadas: fuso, datas livres, edição de concluídas, participações/badges, convites e sessão única; RF67/68; arquitetura, modelo e design 1.1. |

@@ -1,7 +1,7 @@
 # Requisitos funcionais e não funcionais
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.8\
+**Versão:** 1.9\
 **Data:** 2026-10-06\
 **Situação:** base documental consolidada
 
@@ -167,7 +167,7 @@ O sistema deve apresentar a distribuição da carga de forma que Administradores
 
 ### RF22
 
-O sistema deve permitir a Kids consultar suas próprias tarefas da criação da família até o último dia do mês corrente, bloqueando datas fora desse intervalo.
+O sistema deve permitir a Kids consultar suas próprias tarefas por dia, da criação da família até o último dia do mês corrente, bloqueando datas fora desse intervalo.
 
 **Regras de negócio:** [RN27](01-regras-de-negocio.md#rn27), [RN49](01-regras-de-negocio.md#rn49)  
 **Casos de uso:** [UC11](03-casos-de-uso.md#uc11)
@@ -356,7 +356,7 @@ O sistema deve permitir a Administradores, Membros e Kids editar os dados permit
 
 ### RF49
 
-O sistema deve apresentar a todos os perfis o progresso pessoal por dia ou semana conforme RN61, contando tarefas próprias concluídas sobre o total próprio previsto no período, sem contar sinalizações aguardando confirmação. Kids não consultam a carga familiar.
+O sistema deve apresentar a todos os perfis o progresso pessoal diário conforme RN61, contando tarefas próprias concluídas sobre o total próprio previsto no dia, sem contar sinalizações aguardando confirmação. Kids não consultam a carga familiar.
 
 **Regras de negócio:** [RN26](01-regras-de-negocio.md#rn26), [RN33](01-regras-de-negocio.md#rn33), [RN61](01-regras-de-negocio.md#rn61)  
 **Casos de uso:** [UC11](03-casos-de-uso.md#uc11)
@@ -433,7 +433,7 @@ Ao excluir uma tarefa não concluída, o sistema deve remover seus vínculos de 
 
 ### RF60
 
-O sistema deve oferecer a Administradores e Membros a área Família (Minha família) na navegação principal, apresentando diretamente carga e progresso total por dia ou semana e uma lista de membros. Cada item abre o detalhe com as tarefas daquele membro e seletor Dia/Semana. Deve abrir no dia atual, herdar o período ao abrir o detalhe e preservar membro e período ao consultar suas tarefas; voltar restaura o contexto da origem. Todas as tarefas, inclusive sem responsável, permanecem acessíveis pela consulta familiar complementar.
+O sistema deve oferecer a Administradores e Membros a área Família (Minha família) na navegação principal, apresentando diretamente progresso total por dia ou semana e uma lista de membros. Cada item abre o detalhe com as tarefas daquele membro e seletor Dia/Semana. Deve abrir no dia atual, herdar o período ao abrir o detalhe e preservar membro e período ao consultar suas tarefas; voltar restaura o contexto da origem. Todas as tarefas, inclusive sem responsável, permanecem acessíveis pela consulta familiar complementar. A carga é integrada na entrega específica de UC13.
 
 O progresso deve mostrar concluídas/total e percentual, contar cada tarefa uma vez e apresentar “Sem tarefas” quando o total for zero. Carga e progresso seguem RN60–61 e são atualizados após alterações válidas.
 
@@ -479,7 +479,7 @@ O sistema deve oferecer ao perfil Kids exatamente duas abas independentes: “Mi
 
 ### RF66
 
-O sistema deve oferecer o seletor Dia/Semana em Minhas tarefas, nos indicadores de carga/progresso integrados em Minha família e nas tarefas do membro selecionado em seu detalhe. Deve informar datas, preservar período ao navegar para detalhes e listas e aplicar as fórmulas e limites de RN61. A consulta semanal não altera o período livre de prazo das missões.
+O sistema deve oferecer seletor Dia/Semana nos indicadores de progresso familiar em Minha família e nas tarefas do membro selecionado em seu detalhe. Minhas tarefas é diária para todos os perfis. Deve informar datas, preservar período ao navegar para detalhes e listas e aplicar as fórmulas e limites de RN61. A consulta semanal não altera o período livre de prazo das missões.
 
 **Regras de negócio:** [RN28](01-regras-de-negocio.md#rn28), [RN33](01-regras-de-negocio.md#rn33), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61)  
 **Casos de uso:** [UC11](03-casos-de-uso.md#uc11), [UC13](03-casos-de-uso.md#uc13)
@@ -549,7 +549,7 @@ A apresentação da carga deve facilitar a compreensão da distribuição e da p
 
 **Categoria:** Usabilidade
 
-A interface destinada ao perfil Kids deve usar linguagem e elementos visuais adequados a esse perfil, priorizar suas próprias tarefas e seu progresso diário ou semanal e respeitar as restrições de acesso às demais funcionalidades.
+A interface destinada ao perfil Kids deve usar linguagem e elementos visuais adequados a esse perfil, priorizar suas próprias tarefas e seu progresso diário e respeitar as restrições de acesso às demais funcionalidades.
 
 **Regras relacionadas:** [RN19](01-regras-de-negocio.md#rn19), [RN33](01-regras-de-negocio.md#rn33), [RN65](01-regras-de-negocio.md#rn65)\
 **Aplicação nos casos de uso:** [UC03](03-casos-de-uso.md#uc03), [UC09](03-casos-de-uso.md#uc09), [UC11](03-casos-de-uso.md#uc11), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15)
@@ -766,6 +766,7 @@ A configuração de apelido deve ser protegida por titularidade no backend, incl
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.9 | 2026-10-06 | RF22 e RF49 definem consulta e progresso próprios diários, inclusive para Kids. Para SPEC-009. |
 | 1.8 | 2026-10-06 | RF13 passa a incluir observação opcional, ausência de data final obrigatória e alcance inclusivo da ocorrência selecionada; RF70 passa a cobrir a configuração de rotina. Para SPEC-008. |
 | 1.7 | 2026-10-06 | RF02, RF03 e RF40 passam a definir o nome administrativo de membro e os papéis permitidos na criação, para elaboração de SPEC-003. RF07 passa a exigir título de 1–60 caracteress e aceitar observação opcional; RF69 (novo) define a escolha entre Pendente e Aguardando confirmação ao editar tarefa sinalizada, e a remoção da sinalização ao excluir; RF70 (novo) define a observação opcional de até 250 caracteres. Para SPEC-007. |
 | 1.6 | 2026-10-06 | RF01 passa a definir o nome obrigatório da família: 1–60 caracteres Unicode visíveis após trim, sem caracteres de controle; decisão registrada na aprovação de SPEC-002. |

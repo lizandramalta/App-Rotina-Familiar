@@ -1,7 +1,7 @@
 # Regras de negócio
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.7\
+**Versão:** 1.8\
 **Data:** 2026-10-06\
 **Situação:** base documental consolidada
 
@@ -249,7 +249,7 @@ A carga total da família é a soma das cargas individuais. A participação de 
 
 ## RN33
 
-Todos os perfis visualizam seu próprio progresso por dia ou semana. Administradores e Membros também visualizam o progresso familiar e a distribuição da carga/sobrecarga por dia ou semana. Kids não acessam a distribuição de carga, a área Família nem o relatório familiar. Podem receber seu próprio reconhecimento semanal conforme RN65.
+Todos os perfis visualizam seu próprio progresso diário. Administradores e Membros também visualizam o progresso familiar e a distribuição da carga/sobrecarga por dia ou semana. Kids não acessam a distribuição de carga, a área Família nem o relatório familiar. Podem receber seu próprio reconhecimento semanal conforme RN65.
 
 **Requisitos funcionais:** [RF20](02-requisitos.md#rf20), [RF49](02-requisitos.md#rf49), [RF65](02-requisitos.md#rf65), [RF66](02-requisitos.md#rf66)  
 **Requisitos não funcionais específicos:** [RNF04](02-requisitos.md#rnf04), [RNF06](02-requisitos.md#rnf06)  
@@ -480,7 +480,7 @@ Gerar relatório semanal em PDF fica na própria tela Família para adultos. Adi
 
 **Tema:** Períodos e métricas
 
-Minhas tarefas (todos os perfis), os indicadores integrados de Minha família e as tarefas no detalhe do membro (adultos) oferecem alternância Dia/Semana. A semana contém a data selecionada e vai de segunda a domingo. O intervalo de consulta de tarefas continua da criação da família até o último dia do mês corrente; nas semanas de borda, informar os dias efetivamente disponíveis. O progresso pessoal conta tarefas próprias concluídas sobre o total próprio previsto para o período; o familiar usa RN60. O progresso semanal é calculado sobre os totais da semana, nunca pela média simples dos percentuais diários.
+Minhas tarefas (todos os perfis) é uma consulta diária: mostra as tarefas próprias e o progresso da data selecionada, sem alternância Dia/Semana. Os indicadores integrados de Minha família, a consulta complementar de tarefas familiares e as tarefas no detalhe do membro (adultos) oferecem alternância Dia/Semana. A semana contém a data selecionada e vai de segunda a domingo. O intervalo de consulta de tarefas continua da criação da família até o último dia do mês corrente; nas semanas de borda, informar os dias efetivamente disponíveis. O progresso pessoal conta tarefas próprias concluídas sobre o total próprio previsto no dia; o familiar usa RN60. O progresso semanal familiar é calculado sobre os totais da semana, nunca pela média simples dos percentuais diários.
 
 A carga/sobrecarga usa a data da conclusão válida, enquanto o progresso usa as tarefas previstas para o período e seu estado atual. Uma tarefa atrasada pode contribuir para a carga de hoje e para o progresso do dia em que estava prevista. A carga indica participação creditada, sem limiar de diagnóstico de sobrecarga definido. Seleção, gráficos e rótulos devem explicitar período e métrica. Sem tarefas ou carga, informar ausência de dados; não simular 100%.
 
@@ -558,6 +558,7 @@ Toda tarefa pode ter uma observação opcional de até 250 caracteres, contando 
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.8 | 2026-10-06 | RN33 e RN61 distinguem consulta própria diária da consulta familiar adulta por Dia/Semana. Para SPEC-009. |
 | 1.7 | 2026-10-06 | RN14 passa a permitir observação opcional na rotina e explicita que não há data final obrigatória; RN17 define que “selecionada e futuras” inclui a ocorrência de origem; RN67 passa a cobrir UC08. Para SPEC-008. |
 | 1.6 | 2026-10-06 | RN11 passa a limitar o título da tarefa a 1–60 caracteres Unicode visíveis após trim. RN66 (novo) define a escolha entre retornar a Pendente ou manter Aguardando confirmação ao editar tarefa com sinalização Kids corrente, e a remoção dessa sinalização ao excluir. RN67 (novo) permite observação opcional de até 250 caracteres por tarefa. Para SPEC-007. |
 | 1.5 | 2026-10-05 | Pendências consolidadas: fuso, datas livres, edição de concluídas, participações/badges, convites e sessão única; RF67/68; arquitetura, modelo e design 1.1. |

@@ -1,7 +1,7 @@
-# Documentação do projeto — versão 1.8
+# Documentação do projeto — versão 1.9
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.8\
+**Versão:** 1.9\
 **Data:** 2026-10-06\
 **Situação:** base documental consolidada
 
@@ -18,15 +18,15 @@
 | [Requisitos](02-requisitos.md)                             | 70 requisitos funcionais e 27 não funcionais, com vínculos às regras e aos casos de uso.                                                |
 | [Especificação dos casos de uso](03-casos-de-uso.md)       | 19 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições.                                             |
 | [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) | Visão geral e cinco recortes UML, com fontes PlantUML e imagens SVG.                                                                    |
-| [Screen map](design/screen-map.md)                         | Mapa 1.3: navegação, catálogo de telas, modais, estados e cobertura de UC01–UC19; base funcional 1.8.                                   |
-| [User flows](design/user-flows.md)                         | Fluxos 1.3: 16 percursos que cobrem UC01–UC19, com decisões, alternativas e retornos; base funcional 1.8 e screen map 1.3. |
+| [Screen map](design/screen-map.md)                         | Mapa 1.4: navegação, catálogo de telas, modais, estados e cobertura de UC01–UC19; base funcional 1.9.                                   |
+| [User flows](design/user-flows.md)                         | Fluxos 1.4: 16 percursos que cobrem UC01–UC19, com decisões, alternativas e retornos; base funcional 1.9 e screen map 1.4. |
 | [Modelo de dados (DER)](05-modelo-de-dados.md)             | Diagrama entidade-relacionamento em Mermaid: entidades, atributos, chaves e cardinalidades; base funcional 1.8.                         |
-| [Diagrama de classes](06-diagrama-de-classes.md) | Modelo de classes 1.4: contratos, diagramas por domínio e rastreabilidade UC–RF–RN/RNF–tipos; base funcional 1.8. |
-| [Arquitetura mobile](architecture/mobile-architecture.md) | Arquitetura 1.2: Swift + SwiftUI, View + ViewModel e Clean Architecture; estrutura, dependências, estado, sessão, navegação, integrações e verificação. |
-| [Catálogo mobile](architecture/mobile-feature-catalog.md) | Catálogo 1.4: funcionalidades, nomes de arquivos em inglês e cobertura das 26 telas, 14 modais, UC01–UC19, UF-01–UF-16 e RNF01–27; base funcional 1.8. |
+| [Diagrama de classes](06-diagrama-de-classes.md) | Modelo de classes 1.5: contratos, diagramas por domínio e rastreabilidade UC–RF–RN/RNF–tipos; base funcional 1.9. |
+| [Arquitetura mobile](architecture/mobile-architecture.md) | Arquitetura 1.3: Swift + SwiftUI, View + ViewModel e Clean Architecture; estrutura, dependências, estado, sessão, navegação, integrações e verificação. |
+| [Catálogo mobile](architecture/mobile-feature-catalog.md) | Catálogo 1.5: funcionalidades, nomes de arquivos em inglês e cobertura das 26 telas, 14 modais, UC01–UC19, UF-01–UF-16 e RNF01–27; base funcional 1.9. |
 | [Decisões da arquitetura mobile](architecture/mobile-decisions.md) | MA-01–MA-17 e P-01–P-09 consolidadas, ajustes de modelagem e temas fora desta etapa. |
 | [Arquitetura backend](architecture/backend-architecture.md) | Backend 1.0: Node.js, Clean Architecture, monólito modular, Supabase/R2, transações, acesso e jobs. |
-| [Contratos backend](architecture/backend-contracts.md) | API `/v1`, permissões, erros, projeções e cobertura dos 19 UC e 27 RNF. |
+| [Contratos backend](architecture/backend-contracts.md) | Contratos 1.4 da API `/v1`, permissões, erros, projeções e cobertura dos 19 UC e 27 RNF; base funcional 1.9. |
 | [Decisões backend](architecture/backend-decisions.md) | BA-01–BA-20: escolhas confirmadas, propostas técnicas, alternativas e limites. |
 | [Specs de entrega](../specs/README.md) | Recortes aprovados de implementação compartilhados entre mobile e backend. |
 
@@ -78,7 +78,7 @@ As relações RN–UC são derivadas de RN–RF–UC. As relações de RNF repre
 - Kids podem sinalizar a realização com foto opcional. A sinalização não produz conclusão parcial. Confirmação do Administrador ou conclusão manual por adulto conclui a tarefa para todos os responsáveis.
 - Adultos podem concluir tarefa de outras pessoas mantendo os responsáveis ou assumindo-a, com aviso sobre o crédito. Assumir substitui todos os responsáveis pelo usuário que conclui.
 - Cada responsável recebe o peso integral da tarefa compartilhada. A carga total soma as cargas individuais; o progresso de uma missão conta cada tarefa apenas uma vez.
-- Todos os perfis visualizam o próprio progresso diário ou semanal. Somente Administradores e Membros acessam a carga diária ou semanal.
+- Todos os perfis visualizam o próprio progresso diário. Somente Administradores e Membros acessam consultas familiares por dia ou semana e, na SPEC-018, a carga diária ou semanal.
 - O carrossel vai da criação da família até o último dia do mês corrente, incluindo dias futuros dentro desse mês.
 - Missões não têm prazo nem expiram. A missão permanece em andamento enquanto houver tarefas não concluídas.
 - Administradores podem adicionar itens personalizados à roleta. A recompensa é vinculada à missão somente após sorteio e aceitação, com resgate único.
@@ -86,13 +86,13 @@ As relações RN–UC são derivadas de RN–RF–UC. As relações de RNF repre
 - Reabrir retira a contribuição da conclusão anterior da carga e do progresso. A exclusão posterior não desconta o peso novamente.
 - Missões concluídas preservam seus dados e vínculos. O resgate ainda disponível pode acrescentar a recompensa, sem modificar a conquista. A exclusão de tarefa não pode deixar uma missão sem tarefas.
 
-A tela Família apresenta diretamente carga e progresso por dia/semana, lista de membros, botão Gerar relatório PDF e, para Administradores, Adicionar membro. Selecionar uma pessoa abre seu detalhe com tarefas por dia/semana; edição de perfil e reenvio de convite ficam nesse detalhe, quando permitidos. A consulta da lista e das tarefas é adulta; a gestão continua exclusiva dos Administradores. O relatório permanece semanal. Referências: RN60–61, RF60–61/RF66, UC02/11/13/18.
+A tela Família apresenta diretamente o progresso por dia/semana, lista de membros, botão Gerar relatório PDF e, para Administradores, Adicionar membro. Selecionar uma pessoa abre seu detalhe com tarefas por dia/semana; edição de perfil e reenvio de convite ficam nesse detalhe, quando permitidos. A consulta da lista e das tarefas é adulta; a gestão continua exclusiva dos Administradores. A carga será integrada pela SPEC-018 e o relatório permanece semanal. Referências: RN60–61, RF60–61/RF66, UC02/11/13/18.
 
 ## Decisões de produto consolidadas em 2026-10-05
 
 - **Kids:** tab bar com duas abas independentes, “Minhas tarefas” e “Missões e conquistas”. Meu perfil abre pelo avatar/cabeçalho, sem terceira aba. Adicionar foto à sinalização abre diretamente a câmera, com foto ainda opcional.
 - **Perfil:** foto opcional e etiqueta/apelido para todos, inclusive Kids. O apelido é visível à família, mas só o titular acessa sua configuração e edição. O perfil mostra os badges recebidos pelos marcos de 5, 10, 25 e 50 missões com participação.
-- **Períodos:** progresso pessoal e familiar e carga/sobrecarga alternam entre dia e semana. Kids continuam sem acesso à distribuição de carga familiar. Progresso e carga usam métricas distintas, detalhadas em RN61.
+- **Períodos:** progresso pessoal é diário. Progresso familiar e carga/sobrecarga alternam entre dia e semana para adultos; Kids continuam sem acesso à distribuição de carga familiar. Progresso e carga usam métricas distintas, detalhadas em RN61.
 - **PDF semanal:** adultos geram relatório de segunda a domingo com gráficos de carga e progresso total da família, peso creditado e número de tarefas realizadas por membro. O relatório identifica período e geração; a semana atual é parcial.
 - **Destaque semanal:** na segunda-feira, apurar o primeiro lugar em pontos da semana encerrada, notificar a pessoa e mostrar o resultado no app. Pontos correspondem aos pesos creditados; todos os empatados em primeiro são reconhecidos. Compartilhar via WhatsApp é opcional e convida a sugerir uma atividade em família.
 
@@ -144,6 +144,7 @@ A arquitetura backend 1.0 possui versionamento independente da base funcional. N
 
 | Versão | Data       | Alteração                                                                                                                                                                                                         |
 | ------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.9 | 2026-10-06 | Consulta pessoal diária para todos os perfis; consultas familiares adultas de tarefas e progresso por Dia/Semana; contrato de filtros familiares e carga adiada para SPEC-018. Para SPEC-009. |
 | 1.8 | 2026-10-06 | Rotinas passam a transportar observação opcional (até 250 caracteres); edição no alcance “selecionada e futuras” inclui a ocorrência de origem; são definidos códigos estáveis para validação de início, frequência e ocorrência de origem. Para SPEC-008. |
 | 1.7 | 2026-10-06 | RF02, RF03 e RF40 passam a definir o nome administrativo de membro e os papéis permitidos na criação, para elaboração de SPEC-003. Tarefa (UC07) ganha limite de título (1–60 caracteres), observação opcional (até 250 caracteres) e regra de resolução de sinalização Kids pendente ao editar/excluir (RN66/67, RF69/70); screen map 1.2, user flows 1.2, catálogo mobile 1.3, contratos backend 1.2, DER 1.3. Para SPEC-007. |
 | 1.6 | 2026-10-06 | RF01 passa a definir o nome obrigatório da família (1–60 caracteres Unicode visíveis após trim, sem caracteres de controle), para aprovação de SPEC-002. |

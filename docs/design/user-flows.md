@@ -1,9 +1,9 @@
-# User flows — versão 1.3
+# User flows — versão 1.4
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão dos fluxos:** 1.3\
-**Base funcional:** 1.8\
-**Screen map:** 1.3 — revisão de 2026-10-06\
+**Versão dos fluxos:** 1.4\
+**Base funcional:** 1.9\
+**Screen map:** 1.4 — revisão de 2026-10-06\
 **Data:** 2026-10-05\
 **Situação:** primeira versão para revisão de design
 
@@ -44,7 +44,7 @@ Referências transversais: RNF01, RNF05–13 e RNF17–25, conforme a operação
 | [UF-01](#uf-01) | Criar família ou retornar como Criador | Criador | UC01, UC04 |
 | [UF-02](#uf-02) | Convidar e ingressar | Administrador e pessoa convidada | UC02, UC09 |
 | [UF-03](#uf-03) | Recuperar acesso ao perfil | Usuário sem sessão e Administrador | UC02, UC04, UC09 |
-| [UF-04](#uf-04) | Consultar tarefas e progresso diário ou semanal | Todos; área Família somente adultos | UC11 |
+| [UF-04](#uf-04) | Consultar tarefas e progresso pessoal diário ou familiar Dia/Semana | Todos; área Família somente adultos | UC11 |
 | [UF-05](#uf-05) | Criar ou editar tarefa e rotina | Administrador, Membro | UC07, UC08 |
 | [UF-06](#uf-06) | Concluir tarefa mantendo ou assumindo responsáveis | Administrador, Membro | UC12 |
 | [UF-07](#uf-07) | Sinalizar e validar tarefa Kids | Kids e Administrador | UC15, UC03 |
@@ -153,7 +153,7 @@ flowchart TD
 
 <a id="uf-04"></a>
 
-## UF-04 — Consultar tarefas e progresso diário ou semanal
+## UF-04 — Consultar tarefas e progresso pessoal diário ou familiar Dia/Semana
 
 **Objetivo:** consultar o período pessoal ou o período da família e abrir uma tarefa permitida.  
 **Entrada:** Minhas tarefas ou Família, escolhidas independentemente.  
@@ -161,16 +161,17 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A(["Escolher visão e período"]) --> B{"Qual visão?"}
+    A(["Escolher visão e data de referência"]) --> B{"Qual visão?"}
     B -->|Pessoal adulto| C["TEL-010 · Minhas tarefas"]
     B -->|Pessoal Kids| D["TEL-040 · Minhas tarefas Kids"]
     B -->|Familiar adulto| E["TEL-050 · Família"]
-    C --> F["Escolher Dia ou Semana mantendo a data de referência atual"]
+    C --> F["Escolher data diária"]
     D --> F
-    E -->|Consultar totais da família| F
+    E -->|Consultar totais da família| FF["Escolher Dia ou Semana mantendo a data de referência"]
     E -->|Selecionar membro da lista| PM["TEL-032 · Tarefas daquele membro · Dia/Semana"]
-    PM --> F
-    F --> G{"Período no intervalo permitido?"}
+    PM --> FF
+    F --> G{"Data no intervalo permitido?"}
+    FF --> G
     G -->|Não| H["Impedir seleção e manter data válida"]
     H --> F
     G -->|Sim| I{"Há tarefas nessa visão e período?"}
@@ -185,9 +186,9 @@ flowchart TD
     P --> N
 ```
 
-Dia/Semana mantém a data de referência. A semana vai de segunda a domingo; semanas de borda indicam os dias disponíveis. Progresso semanal usa concluídas/total da semana, não a média dos percentuais diários. O intervalo vai da criação da família ao último dia do mês corrente, incluindo dias futuros desse mês. Na visão familiar, cada tarefa prevista no período conta uma vez no total e, se concluída, uma vez no numerador; peso e quantidade de responsáveis não multiplicam o progresso. Tarefas sem responsável entram no total. Aguardando confirmação não conta como concluída.
+Em Minhas tarefas, todos os perfis consultam somente o dia de referência e seu progresso diário. Dia/Semana mantém a data de referência nas superfícies familiares adultas. A semana vai de segunda a domingo; semanas de borda indicam os dias disponíveis. Progresso semanal familiar usa concluídas/total da semana, não a média dos percentuais diários. O intervalo vai da criação da família ao último dia do mês corrente, incluindo dias futuros desse mês. Na visão familiar, cada tarefa prevista no período conta uma vez no total e, se concluída, uma vez no numerador; peso e quantidade de responsáveis não multiplicam o progresso. Tarefas sem responsável entram no total. Aguardando confirmação não conta como concluída.
 
-TEL-032 mantém o membro selecionado ao alternar Dia/Semana e abre TEL-012 para uma tarefa. Herdar o período da Família não liga os seletores: voltar restaura a seleção anterior de TEL-050. Membro sem tarefas mostra estado vazio; falha de consulta não é apresentada como ausência de tarefas. Ações administrativas no detalhe seguem UF-12.
+TEL-032 mantém o membro selecionado ao alternar Dia/Semana e abre TEL-012 para uma tarefa. Herdar o período da Família não liga os seletores: voltar restaura a seleção anterior de TEL-050. Membro sem tarefas mostra estado vazio; falha de consulta não é apresentada como ausência de tarefas. A carga não integra TEL-050 nesta entrega e fica para SPEC-018. Ações administrativas no detalhe seguem UF-12.
 
 **Continuação:** adultos podem seguir UF-05, UF-06 ou UF-08 a partir das telas permitidas; Kids seguem UF-07 somente para tarefa própria pendente. Voltar do detalhe restaura a origem, que pode ser uma lista pessoal, familiar ou missão. Consultar outra data não altera tarefas. Ao abrir o checklist em um novo dia, o padrão volta a ser o dia atual.
 
@@ -593,6 +594,7 @@ Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imedi
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.4 | 1.9 | 1.4 | 2026-10-06 | UF-04 distingue consulta própria diária da familiar adulta por Dia/Semana e adia carga para SPEC-018. Para SPEC-009. |
 | 1.3 | 1.8 | 1.3 | 2026-10-06 | UF-05 explicita que rotina não exige data final e que o alcance “selecionada e futuras” inclui a ocorrência aberta. Para SPEC-008. |
 | 1.2 | 1.7 | 1.2 | 2026-10-06 | UF-05 ganha o ramo MOD-014 (resolver sinalização pendente ao editar) e o campo de observação; UF-08 registra a remoção da sinalização ao excluir. Para SPEC-007. |
 | 1.1 | 1.5 | 1.1 | 2026-10-05 | 16 fluxos; UF-16 configura fuso; demais fluxos incorporam decisões de acesso, datas, badges, PDF e sorteio local. |

@@ -1,8 +1,8 @@
-# Diagrama de classes — versão 1.4
+# Diagrama de classes — versão 1.5
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.4\
-**Base funcional:** 1.8\
+**Versão:** 1.5\
+**Base funcional:** 1.9\
 **Data:** 2026-10-06  
 **Situação:** referência de modelagem da base funcional
 
@@ -642,7 +642,7 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 + ownHighlight(week: DateInterval) async throws -> WeeklyRecognition?
 ```
 
-**Restrições:** Todos os perfis consultam suas tarefas e progresso, com início no dia atual, Dia/Semana e limites do carrossel. Kids têm duas abas, Minhas tarefas e Missões e conquistas; perfil pelo avatar/cabeçalho. Sinalização com foto abre diretamente a câmera, permite revisar/refazer/descartar e continuar sem foto em caso de cancelamento ou indisponibilidade. Reconhecimento próprio não libera carga familiar ([RN27](01-regras-de-negocio.md#rn27), [RN33](01-regras-de-negocio.md#rn33), [RN54](01-regras-de-negocio.md#rn54), [RN61](01-regras-de-negocio.md#rn61), [RN63](01-regras-de-negocio.md#rn63), [RN65](01-regras-de-negocio.md#rn65); [RF55](02-requisitos.md#rf55), [RF65](02-requisitos.md#rf65)).
+**Restrições:** Todos os perfis consultam suas tarefas e progresso próprios diariamente, com início no dia atual e limites do carrossel. Dia/Semana é reservado às consultas familiares adultas. Kids têm duas abas, Minhas tarefas e Missões e conquistas; perfil pelo avatar/cabeçalho. Sinalização com foto abre diretamente a câmera, permite revisar/refazer/descartar e continuar sem foto em caso de cancelamento ou indisponibilidade. Reconhecimento próprio não libera carga familiar ([RN27](01-regras-de-negocio.md#rn27), [RN33](01-regras-de-negocio.md#rn33), [RN54](01-regras-de-negocio.md#rn54), [RN61](01-regras-de-negocio.md#rn61), [RN63](01-regras-de-negocio.md#rn63), [RN65](01-regras-de-negocio.md#rn65); [RF55](02-requisitos.md#rf55), [RF65](02-requisitos.md#rf65)).
 
 <a id="classe-familyarea"></a>
 ### FamilyArea «class»
@@ -1348,6 +1348,7 @@ A âncora anterior desta seção foi preservada para compatibilidade. O backend 
 
 | Versão | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.5 | 1.9 | 2026-10-06 | Restrições de UC11 distinguem consulta própria diária e consulta familiar adulta por Dia/Semana. Para SPEC-009. |
 | 1.4 | 1.8 | 2026-10-06 | `Routine` ganha `note`; atualização no alcance `thisAndFuture` inclui a ocorrência de origem e não há data final obrigatória. Para SPEC-008. |
 | 1.3 | 1.7 | 2026-10-06 | `FamilyTask` ganha `note` (opcional, ≤250) e exige `SignalResolution` (novo enum) ao editar com sinal pendente; `title` limitado a 60 caracteres; `DomainError` ganha `titleTooLong`, `noteTooLong` e `signalResolutionRequired`. Para SPEC-007. |
 | 1.2 | 1.5 | 2026-10-05 | Tradução para backend Node.js, identidade de bootstrap e tokens subordinados à sessão; contratos e correspondência ao DER 1.2. |

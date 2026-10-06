@@ -1,6 +1,6 @@
 # Catálogo de funcionalidades e rastreabilidade mobile
 
-**Versão:** 1.4 · **Base funcional:** 1.8 · **Design:** 1.3\
+**Versão:** 1.5 · **Base funcional:** 1.9 · **Design:** 1.4\
 **Data:** 2026-10-05 · **Situação:** especificação para implementação futura
 
 [Arquitetura mobile](mobile-architecture.md) · [Decisões](mobile-decisions.md) · [Índice documental](../DOCUMENTACAO.md) · [Screen map](../design/screen-map.md) · [User flows](../design/user-flows.md)
@@ -37,8 +37,8 @@ Para cada par abaixo, os arquivos são `<View>.swift` e `<ViewModel>.swift`, den
 | TEL-002 | `Family` | `CreateFamilyView` | `CreateFamilyViewModel` | Criador autenticado sem família |
 | TEL-003 | `Access` | `JoinInviteView` | `JoinInviteViewModel` | Validar link e efetivar ingresso com senha |
 | TEL-004 | `Access` | `AccessRecoveryView` | `AccessRecoveryViewModel` | Orientar novo convite ou Apple; não envia solicitação |
-| TEL-010 | `Tasks` | `PersonalTasksView` | `PersonalTasksViewModel` | Aba inicial adulta, período e progresso próprio |
-| TEL-011 | `Tasks` | `FamilyTasksView` | `FamilyTasksViewModel` | Consulta complementar incluindo sem responsável |
+| TEL-010 | `Tasks` | `PersonalTasksView` | `PersonalTasksViewModel` | Aba inicial adulta, tarefas e progresso próprios diários |
+| TEL-011 | `Tasks` | `FamilyTasksView` | `FamilyTasksViewModel` | Consulta familiar adulta por Dia/Semana, incluindo sem responsável |
 | TEL-012 | `Tasks` | `TaskDetailView` | `TaskDetailViewModel` | Detalhe e ações adultas conforme estado |
 | TEL-013 | `Tasks` + `Routines` | `TaskEditorView` | `TaskEditorViewModel` | Rascunho único; salva tarefa ou configuração recorrente pelo caso de uso adequado |
 | TEL-015 | `KidsParticipation` | `KidsReviewQueueView` | `KidsReviewQueueViewModel` | Fila exclusiva de Administrador |
@@ -49,12 +49,12 @@ Para cada par abaixo, os arquivos são `<View>.swift` e `<ViewModel>.swift`, den
 | TEL-023 | `Rewards` | `RewardItemsView` | `RewardItemsViewModel` | Catálogo e itens personalizados, com origem preservada |
 | TEL-024 | `Rewards` | `RewardWheelView` | `RewardWheelViewModel` | Resultado, novo sorteio, aceitação ou saída sem resgate |
 | TEL-030 | `Profile` | `ProfileView` | `ProfileViewModel` | Aba adulta ou avatar Kids; foto, apelido e badges; saída do papel Admin quando permitida |
-| TEL-032 | `Family` | `MemberDetailView` | `MemberDetailViewModel` | Consulta adulta das tarefas do membro; gestão só Admin |
+| TEL-032 | `Family` | `MemberDetailView` | `MemberDetailViewModel` | Consulta adulta Dia/Semana das tarefas do membro; gestão só Admin |
 | TEL-033 | `Family` | `MemberEditorView` | `MemberEditorViewModel` | Criar/editar dados administrativos, papel e modo |
 | TEL-034 | `Family` | `MemberInviteView` | `MemberInviteViewModel` | Emitir novo link e senha, revogando convites e sessão anteriores |
-| TEL-040 | `Tasks` | `KidsTasksView` | `KidsTasksViewModel` | Aba inicial Kids; tarefas/progresso próprios |
+| TEL-040 | `Tasks` | `KidsTasksView` | `KidsTasksViewModel` | Aba inicial Kids; tarefas/progresso próprios diários |
 | TEL-041 | `Tasks` | `KidsTaskDetailView` | `KidsTaskDetailViewModel` | Detalhe somente de tarefa própria; abre sinalização |
-| TEL-050 | `Family` | `FamilyOverviewView` | `FamilyOverviewViewModel` | Indicadores, lista de membros, PDF e ações administrativas permitidas |
+| TEL-050 | `Family` | `FamilyOverviewView` | `FamilyOverviewViewModel` | Progresso familiar Dia/Semana, membros, PDF e ações permitidas; carga na SPEC-018 |
 | TEL-051 | `Reports` | `WeeklyReportView` | `WeeklyReportViewModel` | Semana, geração, visualização e exportação |
 | TEL-052 | `Recognition` | `WeeklyRecognitionView` | `WeeklyRecognitionViewModel` | Reconhecimento próprio; texto editável e compartilhamento |
 | TEL-053 | `Family` | `FamilySettingsView` | `FamilySettingsViewModel` | Admin configura fuso e momento de aplicação |
@@ -166,6 +166,7 @@ Os contratos remotos e sua cobertura por UC estão no [catálogo backend](backen
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.5 | 2026-10-06 | Consulta própria passa a ser diária; consultas familiares adultas usam Dia/Semana, com `memberId` e tarefas sem responsável; carga fica para SPEC-018. Para SPEC-009; base funcional 1.9, design 1.4. |
 | 1.4 | 2026-10-06 | Rotina passa a aceitar observação; MOD-002 não exige data final e MOD-003 inclui a ocorrência de origem no alcance futuro. Para SPEC-008; base funcional 1.8, design 1.3. |
 | 1.3 | 2026-10-06 | MOD-014 (novo) resolve sinalização Kids pendente ao editar tarefa; TEL-013 ganha campo de observação; título limitado a 60 caracteres. Para SPEC-007; base funcional 1.7, design 1.2. |
 | 1.2 | 2026-10-05 | Integração com arquitetura backend 1.0 em Node.js, contratos `/v1`, bootstrap, preparação de rotinas e referências; base funcional 1.5 preservada. |

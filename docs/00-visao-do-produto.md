@@ -1,8 +1,8 @@
 # Documento de visão — MVP
 
 **Projeto:** App de Organização Familiar  
-**Versão:** 1.5\
-**Data:** 2026-10-05\
+**Versão:** 1.6\
+**Data:** 2026-10-06\
 **Situação:** visão consolidada do produto
 
 [Projeto](../README.md) · [Índice documental](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -31,7 +31,7 @@ A carga diária ou semanal representa a participação creditada em tarefas conc
 
 ## 4. Princípios da experiência
 
-- **Visibilidade:** cada pessoa entende suas tarefas e seu progresso diário ou semanal. Administradores e Membros também acompanham a carga diária ou semanal da família, respeitando as restrições do perfil Kids.
+- **Visibilidade:** cada pessoa entende suas tarefas e seu progresso diário. Administradores e Membros também consultam tarefas e progresso familiares por Dia/Semana; a carga é uma capacidade adulta própria.
 - **Equilíbrio:** a apresentação ajuda a perceber concentrações de participação, com uma visão de distribuição; o destaque semanal reconhece o primeiro lugar em pontos e convida à convivência familiar.
 - **Colaboração:** adultos podem gerenciar tarefas e a família compartilha objetivos e recompensas.
 - **Participação infantil:** Kids sinalizam a realização com foto opcional; a sinalização não produz conclusão parcial nem pontuação imediata.
@@ -46,8 +46,8 @@ O público-alvo são famílias que compartilham a rotina doméstica e desejam or
 | Perfil ou identificação | Participação no produto |
 |---|---|
 | Administrador | Gerencia membros, permissões, missões e itens de recompensa; valida sinalizações Kids; sorteia e aceita recompensas; também gerencia e conclui tarefas. Pode haver vários Administradores. |
-| Membro | Gerencia tarefas e rotinas, inclusive de outros membros; conclui tarefas; edita os dados permitidos de seu perfil; consulta progresso diário ou semanal, carga diária ou semanal e missões. |
-| Kids | Consulta suas tarefas e seu progresso diário ou semanal, sinaliza realização com foto opcional e acompanha missões e recompensas. Edita sua foto e apelido, consulta badges e recebe seu destaque semanal. Não gerencia tarefas nem acessa a carga familiar. |
+| Membro | Gerencia tarefas e rotinas, inclusive de outros membros; conclui tarefas; edita os dados permitidos de seu perfil; consulta progresso próprio diário, consultas familiares Dia/Semana, carga adulta e missões. |
+| Kids | Consulta suas tarefas e seu progresso diário, sinaliza realização com foto opcional e acompanha missões e recompensas. Edita sua foto e apelido, consulta badges e recebe seu destaque semanal. Não gerencia tarefas nem acessa a área ou carga familiar. |
 | Criador da Família | É um Administrador com identificação especial, não um quarto perfil. Usa Sign in with Apple e não pode ser removido, rebaixado nem sair da família. |
 
 Somente Administradores gerenciam membros e ativam ou desativam o Modo Kids. Um Administrador não pode permanecer em Modo Kids. Cada usuário pertence a uma única família.
@@ -59,7 +59,7 @@ Referências: [RN01](01-regras-de-negocio.md#rn01) a [RN10](01-regras-de-negocio
 1. O Criador autentica-se com Apple. Se já tiver família vinculada, é redirecionado para ela; caso contrário, cria sua família.
 2. Um Administrador cria os perfis e disponibiliza convites com link e senha gerada pelo sistema. A pessoa convidada informa a senha para efetivar o vínculo. O convite admite um ingresso bem-sucedido, e a sessão válida permite os próximos acessos sem reutilizá-lo.
 3. Administradores e Membros criam tarefas com título e peso obrigatório, responsáveis opcionais e, quando necessário, uma rotina de repetição.
-4. Cada perfil consulta suas tarefas e seu progresso diário ou semanal. O carrossel vai da criação da família até o último dia do mês corrente, incluindo dias futuros dentro desse mês.
+4. Cada perfil consulta suas tarefas e seu progresso diário. Adultos também consultam tarefas e progresso familiares por Dia/Semana. O carrossel vai da criação da família até o último dia do mês corrente, incluindo dias futuros dentro desse mês.
 5. Adultos concluem tarefas. Ao concluir tarefa atribuída a outras pessoas, podem manter os responsáveis ou assumir a tarefa, substituindo-os por si mesmos após aviso sobre o crédito. Tarefa sem responsável é atribuída a quem a conclui.
 6. Kids sinalizam a realização de sua parte, com foto opcional. Um Administrador pode confirmar ou recusar. Um adulto também pode concluir manualmente a tarefa. A conclusão vale para todos os responsáveis finais, inclusive Kids.
 7. O aplicativo calcula a carga por dia ou semana (segunda-feira a domingo), creditando o peso integral da tarefa a cada responsável. Administradores e Membros consultam a distribuição sem ranking.
@@ -77,7 +77,7 @@ Os fluxos completos estão na [especificação dos casos de uso](03-casos-de-uso
 | Esforço | Peso obrigatório de 1 a 3: pouco, médio e alto esforço. | [RN13](01-regras-de-negocio.md#rn13), [RF15](02-requisitos.md#rf15), [RF16](02-requisitos.md#rf16) |
 | Responsáveis e conclusão | Tarefas podem ter vários responsáveis. A conclusão é única e vale para todos. Cada responsável recebe o peso integral, sem divisão. Quem apenas marca a conclusão pode não receber crédito. | [RN30](01-regras-de-negocio.md#rn30), [RN55](01-regras-de-negocio.md#rn55), [RN56](01-regras-de-negocio.md#rn56), [UC12](03-casos-de-uso.md#uc12) |
 | Kids | Foto opcional; confirmação pelo Administrador ou conclusão manual por adulto. Aguardar confirmação não gera carga nem progresso concluído. | [RN23](01-regras-de-negocio.md#rn23), [RN26](01-regras-de-negocio.md#rn26), [RN54](01-regras-de-negocio.md#rn54), [UC03](03-casos-de-uso.md#uc03), [UC15](03-casos-de-uso.md#uc15) |
-| Consulta e progresso | Todos veem seu próprio progresso diário ou semanal. O carrossel vai da criação da família até o último dia do mês corrente. Kids não visualizam a carga diária ou semanal. | [RN33](01-regras-de-negocio.md#rn33), [RN49](01-regras-de-negocio.md#rn49), [UC11](03-casos-de-uso.md#uc11) |
+| Consulta e progresso | Todos veem tarefas e progresso próprios diários. Adultos também consultam tarefas e progresso familiares por Dia/Semana. O carrossel vai da criação da família até o último dia do mês corrente. Kids não visualizam a área nem a carga familiar. | [RN33](01-regras-de-negocio.md#rn33), [RN49](01-regras-de-negocio.md#rn49), [RN61](01-regras-de-negocio.md#rn61), [UC11](03-casos-de-uso.md#uc11) |
 | Carga diária ou semanal | Soma dos pesos creditados por responsável nas conclusões válidas do período. A carga total soma as cargas individuais. A apresentação prioriza equilíbrio, sem ranking. | [RN28](01-regras-de-negocio.md#rn28), [RN30](01-regras-de-negocio.md#rn30), [RN31](01-regras-de-negocio.md#rn31), [RN34](01-regras-de-negocio.md#rn34), [UC13](03-casos-de-uso.md#uc13) |
 | Missões | Coletivas, sem prazo ou expiração, com pelo menos uma tarefa individual. Cada tarefa conta uma vez no progresso, mesmo com vários responsáveis. | [RN35](01-regras-de-negocio.md#rn35), [RN36](01-regras-de-negocio.md#rn36), [RN39](01-regras-de-negocio.md#rn39), [RN50](01-regras-de-negocio.md#rn50), [UC05](03-casos-de-uso.md#uc05) |
 | Recompensas | Itens predefinidos e personalizados por Administradores. Após a missão, podem sortear novamente até aceitar; sair sem aceitar mantém o resgate disponível. A aceitação encerra o resgate para todos. | [RN42](01-regras-de-negocio.md#rn42), [RN52](01-regras-de-negocio.md#rn52), [RN53](01-regras-de-negocio.md#rn53), [UC06](03-casos-de-uso.md#uc06), [UC16](03-casos-de-uso.md#uc16) |
@@ -94,7 +94,7 @@ O escopo vigente corresponde ao conjunto consolidado de regras, requisitos e cas
 | Gerenciamento de membros, permissões e convites; ingresso com senha | [UC02](03-casos-de-uso.md#uc02), [UC09](03-casos-de-uso.md#uc09) |
 | Gerenciamento de tarefas, responsáveis e rotinas; conclusão e reabertura permitida | [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC12](03-casos-de-uso.md#uc12), [UC17](03-casos-de-uso.md#uc17) |
 | Foto opcional, apelido próprio e badges para todos os perfis | [UC10](03-casos-de-uso.md#uc10) |
-| Checklist por data e progresso diário ou semanal para todos | [UC11](03-casos-de-uso.md#uc11) |
+| Checklist próprio por data e progresso diário para todos; consultas familiares adultas Dia/Semana | [UC11](03-casos-de-uso.md#uc11) |
 | Modo Kids, sinalização com foto opcional e validação | [UC03](03-casos-de-uso.md#uc03), [UC15](03-casos-de-uso.md#uc15) |
 | Distribuição da carga diária ou semanal para adultos | [UC13](03-casos-de-uso.md#uc13) |
 | Missões coletivas sem prazo, badges por participação e acompanhamento | [UC05](03-casos-de-uso.md#uc05), [UC14](03-casos-de-uso.md#uc14) |
@@ -183,6 +183,7 @@ A arquitetura backend 1.0 está em [backend-architecture.md](architecture/backen
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.6 | 2026-10-06 | Consulta própria diária para todos; consulta familiar Dia/Semana apenas para adultos. Para SPEC-009. |
 | 1.5 | 2026-10-05 | Pendências consolidadas: fuso, datas livres, edição de concluídas, participações/badges, convites e sessão única; RF67/68; arquitetura, modelo e design 1.1. |
 | 1.4 | 2026-10-02 | Família concentra indicadores, lista, inclusão de membros e PDF; detalhe do membro reúne tarefas Dia/Semana, edição e reenvio quando permitidos. RN60–61, RF60–61/RF66 e UC02/11/13/18 revisados. |
 | 1.3 | 2026-10-02 | Duas abas Kids, câmera direta, foto/apelido e badges, progresso/carga Dia/Semana, PDF semanal e reconhecimento com WhatsApp; RN61–65, RF61–66, RNF26–27 e UC18–19. Empates e visibilidade do apelido confirmados. |
