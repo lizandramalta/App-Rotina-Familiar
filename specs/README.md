@@ -73,7 +73,7 @@ planejada antes, mas não deve depender de comportamento ainda indisponível.
 | [`SPEC-002-criar-configurar-familia`](SPEC-002-criar-configurar-familia.md) - Criar e configurar família | UC01 | ambos | SPEC-001 | aprovada |
 | [`SPEC-003-gerenciar-membros`](SPEC-003-gerenciar-membros.md) - Gerenciar membros | UC02 | ambos | SPEC-002 | aprovada |
 | [`SPEC-004-gerar-reenviar-convite`](SPEC-004-gerar-reenviar-convite.md) - Gerar e reenviar convite | UC02 | ambos | SPEC-003 | aprovada |
-| `SPEC-005-ingressar-por-convite` - Ingressar por convite | UC09 | ambos | SPEC-004 | não criada |
+| [`SPEC-005-ingressar-por-convite`](SPEC-005-ingressar-por-convite.md) - Ingressar por convite | UC09 | ambos | SPEC-004 | aprovada |
 | `SPEC-006-editar-perfil` - Editar perfil e consultar badges | UC10 | ambos | SPEC-003, SPEC-014 | não criada |
 
 `SPEC-002` inclui o fuso da família: seleção na criação e configuração posterior por
@@ -124,6 +124,7 @@ status e resumo; mantenha esta tabela como o panorama do backlog.
 | [SPEC-002-criar-configurar-familia](SPEC-002-criar-configurar-familia.md) | [UX-002-criar-configurar-familia.md](UX-002-criar-configurar-familia.md) | aprovada | ambos | Criação atômica da família pelo Criador e configuração autorizada do fuso familiar. |
 | [SPEC-003-gerenciar-membros](SPEC-003-gerenciar-membros.md) | [UX-003-gerenciar-membros](UX-003-gerenciar-membros.md) | aprovada | ambos | Criação e gestão autorizada de membros, papéis, modo Kids e remoção preservando histórico. |
 | [SPEC-004-gerar-reenviar-convite](SPEC-004-gerar-reenviar-convite.md) | [UX-004-gerar-reenviar-convite](UX-004-gerar-reenviar-convite.md) | aprovada | ambos | Emissão e reemissão segura de link e senha, com revogação de credenciais/sessão anteriores e compartilhamento nativo único. |
+| [SPEC-005-ingressar-por-convite](SPEC-005-ingressar-por-convite.md) | [UX-005-ingressar-por-convite](UX-005-ingressar-por-convite.md) | aprovada | ambos | Inspeção neutra e consumo único do convite, sessão vinculada à instalação, troca segura de acesso e recuperação limitada de resposta perdida. |
 | [SPEC-007-gerenciar-tarefas](SPEC-007-gerenciar-tarefas.md) | [UX-007-gerenciar-tarefas.md](UX-007-gerenciar-tarefas.md) | aprovada | ambos | CRUD da tarefa única (título, peso, data, responsáveis, observação), com proteções de missão/conclusão e resolução obrigatória de sinalização Kids pendente ao editar/excluir. |
 
 ## Templates
