@@ -7,6 +7,14 @@ As specs são contratos de trabalho, não uma nova fonte de verdade para o produ
 delimitam o que será entregue, quais regras aplicam e quais critérios devem ser
 verificados. A base funcional continua em `docs/`.
 
+## Regra de execução com IA
+
+Um agente de IA só inicia uma funcionalidade quando existir uma SPEC aprovada e, caso
+ela altere a experiência, uma UX-spec aprovada e vinculada. O agente usa o mapa abaixo
+para localizar a próxima entrega, mas não deve inferir comportamento a partir dele:
+regras, permissões, estados e exceções continuam em `docs/` e precisam estar
+referenciados na spec.
+
 ## Como criar uma spec funcional
 
 1. Copie `SPEC-000-template.md` para `SPEC-NNN-nome-curto.md`.
@@ -46,11 +54,74 @@ da experiência. Isso permite evoluir o visual sem perder decisões, estados e t
 | Backend ou API | `architecture/backend-architecture.md`, `backend-contracts.md`, `backend-decisions.md`, `05-modelo-de-dados.md` |
 | Alteração compartilhada | As fontes mobile e backend acima, mais os contratos de API |
 
-## Índice
+## Mapa de implementação
 
-| Spec | Status | Projetos | Resumo |
-|---|---|---|---|
-| Nenhuma spec criada ainda | — | — | Use o template para iniciar a primeira entrega. |
+**Base funcional:** 1.5 (2026-10-05)
+
+**Convenção de status:** `não criada` indica apenas uma entrega planejada; os status
+do template passam a valer depois que o arquivo da spec existir.
+
+O mapa organiza as entregas por tema e preserva a numeração estável dos futuros pares
+`SPEC-NNN` e `UX-NNN`. Dependências são funcionais: uma spec posterior pode ser
+planejada antes, mas não deve depender de comportamento ainda indisponível.
+
+### Tema 1 - Acesso, família e perfis
+
+| Spec planejada | UC principal | Projetos | Depende de | Status |
+|---|---|---|---|---|
+| `SPEC-001-autenticar-com-apple` - Autenticar com Apple | UC04 | ambos | - | não criada |
+| `SPEC-002-criar-configurar-familia` - Criar e configurar família | UC01 | ambos | SPEC-001 | não criada |
+| `SPEC-003-gerenciar-membros` - Gerenciar membros | UC02 | ambos | SPEC-002 | não criada |
+| `SPEC-004-gerar-reenviar-convite` - Gerar e reenviar convite | UC02 | ambos | SPEC-003 | não criada |
+| `SPEC-005-ingressar-por-convite` - Ingressar por convite | UC09 | ambos | SPEC-004 | não criada |
+| `SPEC-006-editar-perfil` - Editar perfil e consultar badges | UC10 | ambos | SPEC-003, SPEC-014 | não criada |
+
+`SPEC-002` inclui o fuso da família: seleção na criação e configuração posterior por
+Administradores. Ela cobre TEL-002, TEL-053 e MOD-012; não há uma SPEC-021 separada.
+
+### Tema 2 - Tarefas e rotina
+
+| Spec planejada | UC principal | Projetos | Depende de | Status |
+|---|---|---|---|---|
+| `SPEC-007-gerenciar-tarefas` - Gerenciar tarefas | UC07 | ambos | SPEC-002 | não criada |
+| `SPEC-008-definir-recorrencia` - Definir recorrência de rotina | UC08 | ambos | SPEC-007 | não criada |
+| `SPEC-009-visualizar-minhas-tarefas` - Visualizar minhas tarefas | UC11 | ambos | SPEC-007 | não criada |
+| `SPEC-010-concluir-tarefa` - Concluir tarefa | UC12 | ambos | SPEC-007 | não criada |
+| `SPEC-011-reabrir-tarefa` - Retornar tarefa concluída a Pendente | UC17 | ambos | SPEC-010, SPEC-014 | não criada |
+
+### Tema 3 - Participação Kids
+
+| Spec planejada | UC principal | Projetos | Depende de | Status |
+|---|---|---|---|---|
+| `SPEC-012-sinalizar-tarefa-kids` - Sinalizar tarefa como realizada | UC15 | ambos | SPEC-007 | não criada |
+| `SPEC-013-validar-conclusao-kids` - Validar conclusão de tarefa Kids | UC03 | ambos | SPEC-012 | não criada |
+
+### Tema 4 - Missões e recompensas
+
+| Spec planejada | UC principal | Projetos | Depende de | Status |
+|---|---|---|---|---|
+| `SPEC-014-gerenciar-missoes` - Gerenciar missões | UC05 | ambos | SPEC-007 | não criada |
+| `SPEC-015-gerenciar-recompensas-coletivas` - Gerenciar itens de recompensas coletivas | UC06 | ambos | SPEC-002 | não criada |
+| `SPEC-016-acompanhar-missoes-recompensas` - Acompanhar missões e recompensas | UC14 | ambos | SPEC-014 | não criada |
+| `SPEC-017-resgatar-recompensa` - Resgatar recompensa da missão | UC16 | ambos | SPEC-014, SPEC-015 | não criada |
+
+### Tema 5 - Acompanhamento e reconhecimento
+
+| Spec planejada | UC principal | Projetos | Depende de | Status |
+|---|---|---|---|---|
+| `SPEC-018-visualizar-carga` - Visualizar carga diária ou semanal | UC13 | ambos | SPEC-010, SPEC-013 | não criada |
+| `SPEC-019-gerar-relatorio-semanal-pdf` - Gerar relatório semanal em PDF | UC18 | ambos | SPEC-018 | não criada |
+| `SPEC-020-destaque-semanal` - Apurar e compartilhar destaque semanal | UC19 | ambos | SPEC-018 | não criada |
+
+## Índice de arquivos
+
+Os arquivos ainda não foram criados. Ao iniciar uma entrega, inclua neste índice a
+SPEC e sua UX-spec com seus links, status e resumo; mantenha esta tabela como o
+panorama do backlog.
+
+| Spec | UX-spec | Status | Projetos | Resumo |
+|---|---|---|---|---|
+| Nenhuma spec criada ainda | - | - | - | Use o template na primeira entrega aprovada. |
 
 ## Templates
 
