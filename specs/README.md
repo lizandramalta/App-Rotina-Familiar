@@ -69,7 +69,7 @@ planejada antes, mas não deve depender de comportamento ainda indisponível.
 
 | Spec planejada | UC principal | Projetos | Depende de | Status |
 |---|---|---|---|---|
-| `SPEC-001-autenticar-com-apple` - Autenticar com Apple | UC04 | ambos | - | não criada |
+| [`SPEC-001-autenticar-com-apple`](SPEC-001-autenticar-com-apple.md) - Autenticar com Apple | UC04 | ambos | - | rascunho |
 | `SPEC-002-criar-configurar-familia` - Criar e configurar família | UC01 | ambos | SPEC-001 | não criada |
 | `SPEC-003-gerenciar-membros` - Gerenciar membros | UC02 | ambos | SPEC-002 | não criada |
 | `SPEC-004-gerar-reenviar-convite` - Gerar e reenviar convite | UC02 | ambos | SPEC-003 | não criada |
@@ -121,7 +121,7 @@ panorama do backlog.
 
 | Spec | UX-spec | Status | Projetos | Resumo |
 |---|---|---|---|---|
-| Nenhuma spec criada ainda | - | - | - | Use o template na primeira entrega aprovada. |
+| [SPEC-001-autenticar-com-apple](SPEC-001-autenticar-com-apple.md) | [UX-001-autenticar-com-apple](UX-001-autenticar-com-apple.md) | rascunho | ambos | Login nativo Apple do Criador, emissão de sessão ou `creationGrant`, e ciclo de vida da sessão (consulta, renovação, revogação). |
 
 ## Templates
 

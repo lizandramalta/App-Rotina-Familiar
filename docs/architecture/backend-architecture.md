@@ -256,7 +256,7 @@ export class CompleteTask {
 
 Validar assinatura/chaves, emissor, audiência, validade e nonce da prova Apple; o cliente verifica também o contexto/state. Trocar authorization code conforme a integração oficial, sem confiar em email ou Apple ID isolado. Chaves públicas podem ter cache limitado e atualização; prova inválida não abre sessão. [Validação Apple](https://developer.apple.com/documentation/signinwithapple/verifying-a-user).
 
-Identidade sem família recebe `creationGrant` opaco, restrito a UC01, de curta duração configurada (proposta: dez minutos). Não é sessão de membro e não autoriza consultas de família. `CreateFamily` bloqueia a identidade, cria família, Criador, ciclo inicial e sessão na mesma transação. Concorrência retorna a família já vinculada, sem duplicá-la. Grant expirado exige Apple novamente. Identidade existente abre sessão do Criador e revoga a anterior. Cadastro por convite não cria/associa identidade Apple.
+Identidade sem família recebe `creationGrant` opaco, restrito a UC01, de curta duração configurada (dez minutos, confirmado em [BA-21](backend-decisions.md)). Não é sessão de membro e não autoriza consultas de família. `CreateFamily` bloqueia a identidade, cria família, Criador, ciclo inicial e sessão na mesma transação. Concorrência retorna a família já vinculada, sem duplicá-la. Grant expirado exige Apple novamente. Identidade existente abre sessão do Criador e revoga a anterior. Cadastro por convite não cria/associa identidade Apple.
 
 ### Credenciais e ingresso
 

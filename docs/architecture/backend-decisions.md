@@ -1,7 +1,7 @@
 # Decisões da arquitetura backend
 
-**Versão:** 1.0 · **Base funcional:** 1.5\
-**Data:** 2026-10-05 · **Situação:** referência arquitetural para implementação futura
+**Versão:** 1.1 · **Base funcional:** 1.5\
+**Data:** 2026-10-06 · **Situação:** referência arquitetural para implementação futura
 
 [Arquitetura](backend-architecture.md) · [Contratos](backend-contracts.md) · [Decisões mobile](mobile-decisions.md) · [Índice](../DOCUMENTACAO.md)
 
@@ -35,6 +35,7 @@ Node.js passa a ser a plataforma backend definida pelo usuário. Hospedagem, dis
 | BA-18 | Confirmada | Apenas desenvolvimento e produção; sem rotina própria de backup do banco |
 | BA-19 | Proposta técnica adotada no desenho | Supabase só como PostgreSQL gerenciado; sessão própria, schema privado/Data API desabilitada, sem dependência de Auth/Storage/Realtime/Edge Functions |
 | BA-20 | Proposta técnica adotada no desenho | API `/v1`, schemas em inglês, DTO por permissão e erros estáveis; contrato HTTP separado das entidades |
+| BA-21 | Confirmada (`SPEC-001`) | `creationGrant` emitido por `SignInWithApple` quando a identidade não tem família expira em 10 minutos; grant expirado exige nova autenticação Apple |
 
 ## 3. Alternativas consideradas
 
@@ -79,4 +80,5 @@ Sequência sugerida: composição e persistência → Apple/bootstrap/sessões/c
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.1 | 2026-10-06 | BA-21: confirma em 10 minutos o prazo técnico do `creationGrant` proposto em `backend-architecture.md` §8, decidido na aprovação de `SPEC-001`. |
 | 1.0 | 2026-10-05 | BA-01–BA-20, distinção entre decisões confirmadas e propostas técnicas, alternativas e detalhes derivados. |
