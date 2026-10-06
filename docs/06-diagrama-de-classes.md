@@ -1,8 +1,8 @@
-# Diagrama de classes — versão 1.3
+# Diagrama de classes — versão 1.4
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.3\
-**Base funcional:** 1.7\
+**Versão:** 1.4\
+**Base funcional:** 1.8\
 **Data:** 2026-10-06  
 **Situação:** referência de modelagem da base funcional
 
@@ -51,7 +51,7 @@ Os RF e RN são os vínculos declarados em cada UC na base funcional. A lista de
 | <a id="rastreio-uc05"></a>[UC05](03-casos-de-uso.md#uc05) — Gerenciar missões | [Mission](#classe-mission), [MissionStatus](#classe-missionstatus), [FamilyTask](#classe-familytask), [Badge](#classe-badge), [BadgeAward](#classe-badgeaward), [MissionService](#classe-missionservice) , [MissionParticipation](#classe-missionparticipation) | [RF28](02-requisitos.md#rf28), [RF29](02-requisitos.md#rf29), [RF31](02-requisitos.md#rf31), [RF32](02-requisitos.md#rf32), [RF50](02-requisitos.md#rf50), [RF58](02-requisitos.md#rf58) | [RN16](01-regras-de-negocio.md#rn16), [RN35](01-regras-de-negocio.md#rn35), [RN36](01-regras-de-negocio.md#rn36), [RN37](01-regras-de-negocio.md#rn37), [RN38](01-regras-de-negocio.md#rn38), [RN39](01-regras-de-negocio.md#rn39), [RN40](01-regras-de-negocio.md#rn40), [RN50](01-regras-de-negocio.md#rn50), [RN51](01-regras-de-negocio.md#rn51), [RN53](01-regras-de-negocio.md#rn53), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59), [RN64](01-regras-de-negocio.md#rn64) |
 | <a id="rastreio-uc06"></a>[UC06](03-casos-de-uso.md#uc06) — Gerenciar itens de recompensas coletivas | [RewardItem](#classe-rewarditem), [RewardItemSource](#classe-rewarditemsource) | [RF33](02-requisitos.md#rf33), [RF34](02-requisitos.md#rf34) | [RN41](01-regras-de-negocio.md#rn41), [RN42](01-regras-de-negocio.md#rn42) |
 | <a id="rastreio-uc07"></a>[UC07](03-casos-de-uso.md#uc07) — Gerenciar tarefas | [FamilyTask](#classe-familytask), [EffortWeight](#classe-effortweight), [TaskStatus](#classe-taskstatus), [SignalResolution](#classe-signalresolution), [TaskService](#classe-taskservice), [ChangeScope](#classe-changescope), [Routine](#classe-routine) | [RF07](02-requisitos.md#rf07), [RF08](02-requisitos.md#rf08), [RF09](02-requisitos.md#rf09), [RF10](02-requisitos.md#rf10), [RF15](02-requisitos.md#rf15), [RF16](02-requisitos.md#rf16), [RF27](02-requisitos.md#rf27), [RF58](02-requisitos.md#rf58), [RF59](02-requisitos.md#rf59), [RF69](02-requisitos.md#rf69), [RF70](02-requisitos.md#rf70) | [RN11](01-regras-de-negocio.md#rn11), [RN12](01-regras-de-negocio.md#rn12), [RN13](01-regras-de-negocio.md#rn13), [RN17](01-regras-de-negocio.md#rn17), [RN18](01-regras-de-negocio.md#rn18), [RN19](01-regras-de-negocio.md#rn19), [RN20](01-regras-de-negocio.md#rn20), [RN30](01-regras-de-negocio.md#rn30), [RN38](01-regras-de-negocio.md#rn38), [RN50](01-regras-de-negocio.md#rn50), [RN53](01-regras-de-negocio.md#rn53), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59), [RN66](01-regras-de-negocio.md#rn66), [RN67](01-regras-de-negocio.md#rn67) |
-| <a id="rastreio-uc08"></a>[UC08](03-casos-de-uso.md#uc08) — Definir recorrência de rotina | [Routine](#classe-routine), [RoutineFrequency](#classe-routinefrequency), [FamilyTask](#classe-familytask), [TaskService](#classe-taskservice), [ChangeScope](#classe-changescope) | [RF13](02-requisitos.md#rf13), [RF14](02-requisitos.md#rf14) | [RN11](01-regras-de-negocio.md#rn11), [RN14](01-regras-de-negocio.md#rn14), [RN16](01-regras-de-negocio.md#rn16), [RN17](01-regras-de-negocio.md#rn17) |
+| <a id="rastreio-uc08"></a>[UC08](03-casos-de-uso.md#uc08) — Definir recorrência de rotina | [Routine](#classe-routine), [RoutineFrequency](#classe-routinefrequency), [FamilyTask](#classe-familytask), [TaskService](#classe-taskservice), [ChangeScope](#classe-changescope) | [RF13](02-requisitos.md#rf13), [RF14](02-requisitos.md#rf14), [RF70](02-requisitos.md#rf70) | [RN11](01-regras-de-negocio.md#rn11), [RN14](01-regras-de-negocio.md#rn14), [RN16](01-regras-de-negocio.md#rn16), [RN17](01-regras-de-negocio.md#rn17), [RN67](01-regras-de-negocio.md#rn67) |
 | <a id="rastreio-uc09"></a>[UC09](03-casos-de-uso.md#uc09) — Ingressar por convite | [Invite](#classe-invite), [InviteStatus](#classe-invitestatus), [Session](#classe-session), [AccessService](#classe-accessservice), [InviteCredentials](#classe-invitecredentials) | [RF42](02-requisitos.md#rf42), [RF43](02-requisitos.md#rf43), [RF44](02-requisitos.md#rf44), [RF45](02-requisitos.md#rf45), [RF46](02-requisitos.md#rf46), [RF54](02-requisitos.md#rf54), [RF68](02-requisitos.md#rf68) | [RN09](01-regras-de-negocio.md#rn09), [RN10](01-regras-de-negocio.md#rn10), [RN45](01-regras-de-negocio.md#rn45), [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47) |
 | <a id="rastreio-uc10"></a>[UC10](03-casos-de-uso.md#uc10) — Editar perfil | [Member](#classe-member), [BadgeAward](#classe-badgeaward), [Badge](#classe-badge), [MemberService](#classe-memberservice), [MissionService](#classe-missionservice) , [BadgeTier](#classe-badgetier) | [RF48](02-requisitos.md#rf48), [RF62](02-requisitos.md#rf62), [RF65](02-requisitos.md#rf65) | [RN33](01-regras-de-negocio.md#rn33), [RN63](01-regras-de-negocio.md#rn63), [RN64](01-regras-de-negocio.md#rn64) |
 | <a id="rastreio-uc11"></a>[UC11](03-casos-de-uso.md#uc11) — Visualizar minhas tarefas | [FamilyArea](#classe-familyarea), [FamilyTask](#classe-familytask), [CarouselRange](#classe-carouselrange), [ViewPeriod](#classe-viewperiod), [PeriodProgress](#classe-periodprogress), [Member](#classe-member), [PersonalTasks](#classe-personaltasks), [WeeklyRecognition](#classe-weeklyrecognition), [PeriodCalculator](#classe-periodcalculator) | [RF11](02-requisitos.md#rf11), [RF17](02-requisitos.md#rf17), [RF22](02-requisitos.md#rf22), [RF49](02-requisitos.md#rf49), [RF60](02-requisitos.md#rf60), [RF65](02-requisitos.md#rf65), [RF66](02-requisitos.md#rf66) | [RN16](01-regras-de-negocio.md#rn16), [RN22](01-regras-de-negocio.md#rn22), [RN26](01-regras-de-negocio.md#rn26), [RN27](01-regras-de-negocio.md#rn27), [RN28](01-regras-de-negocio.md#rn28), [RN33](01-regras-de-negocio.md#rn33), [RN49](01-regras-de-negocio.md#rn49), [RN55](01-regras-de-negocio.md#rn55), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61), [RN63](01-regras-de-negocio.md#rn63) |
@@ -532,19 +532,20 @@ case closedByManualCompletion
 + familyID: UUID
 + title: String
 + weight: EffortWeight
++ note: String?
 + assigneeIDs: Set<UUID>
 + frequency: RoutineFrequency
 + startDate: LocalDate
 + isActive: Bool
 + upcomingDates(until: LocalDate, calendar: Calendar) -> [LocalDate]
 + generateTasks(until: LocalDate, calendar: Calendar) throws -> [FamilyTask]
-+ update(title: String, weight: EffortWeight, assignees: Set<UUID>,
++ update(title: String, weight: EffortWeight, note: String?, assignees: Set<UUID>,
       frequency: RoutineFrequency, from: LocalDate, by actor: Member,
       missions: [Mission]) throws
 + end(from: LocalDate, by actor: Member, missions: [Mission]) throws
 ```
 
-**Restrições:** Início escolhido em DatePicker sem limites de produto; diário ou 1/2/3/4 semanas. Backend gera até fim do mês seguinte, repõe diariamente/completa consulta. Início além do horizonte fica programado; passado é materializado em lotes sem truncamento silencioso. Chave de origem imutável impede duplicação mesmo após editar data da ocorrência. Alteração futura preserva passado e concluídas/protegidas. RN14/16/17/18/48/51.
+**Restrições:** Início escolhido em DatePicker sem limites de produto; diário ou 1/2/3/4 semanas; observação opcional de até 250 caracteres; sem data final obrigatória. Backend gera até fim do mês seguinte, repõe diariamente/completa consulta. Início além do horizonte fica programado; passado é materializado em lotes sem truncamento silencioso. Chave de origem imutável impede duplicação mesmo após editar data da ocorrência. Alteração em `thisAndFuture` inclui a ocorrência de origem e preserva passado e concluídas/protegidas. RN14/16/17/18/48/51/67.
 
 <a id="classe-routinefrequency"></a>
 ### RoutineFrequency: Int, Codable «enum»
@@ -1347,6 +1348,7 @@ A âncora anterior desta seção foi preservada para compatibilidade. O backend 
 
 | Versão | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.4 | 1.8 | 2026-10-06 | `Routine` ganha `note`; atualização no alcance `thisAndFuture` inclui a ocorrência de origem e não há data final obrigatória. Para SPEC-008. |
 | 1.3 | 1.7 | 2026-10-06 | `FamilyTask` ganha `note` (opcional, ≤250) e exige `SignalResolution` (novo enum) ao editar com sinal pendente; `title` limitado a 60 caracteres; `DomainError` ganha `titleTooLong`, `noteTooLong` e `signalResolutionRequired`. Para SPEC-007. |
 | 1.2 | 1.5 | 2026-10-05 | Tradução para backend Node.js, identidade de bootstrap e tokens subordinados à sessão; contratos e correspondência ao DER 1.2. |
 | 1.1 | 1.5 | 2026-10-05 | Contratos de sessão única, edições com auditoria, ciclos/fuso, participação, badges por marcos e notificações persistentes. |

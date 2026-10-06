@@ -1,7 +1,7 @@
 # Requisitos funcionais e não funcionais
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.7\
+**Versão:** 1.8\
 **Data:** 2026-10-06\
 **Situação:** base documental consolidada
 
@@ -104,9 +104,9 @@ O sistema deve permitir a Administradores e Membros concluir tarefas Pendentes o
 
 ### RF13
 
-O sistema deve configurar início por DatePicker sem limites de produto e frequência da rotina, gerando ocorrências independentes sem duplicação. Materializar até o fim do mês seguinte, repor diariamente e completar em consulta se necessário; início além do horizonte permanece programado. Concluir uma ocorrência não altera outras.
+O sistema deve configurar início por DatePicker sem limites de produto, frequência da rotina e observação opcional de até 250 caracteres, sem exigir data final. Deve gerar ocorrências independentes sem duplicação. Materializar até o fim do mês seguinte, repor diariamente e completar em consulta se necessário; início além do horizonte permanece programado. Concluir uma ocorrência não altera outras. A alteração “selecionada e futuras” inclui a ocorrência de origem, preservando passado e ocorrências concluídas ou protegidas.
 
-**Regras de negócio:** [RN11](01-regras-de-negocio.md#rn11), [RN14](01-regras-de-negocio.md#rn14), [RN16](01-regras-de-negocio.md#rn16), [RN17](01-regras-de-negocio.md#rn17)  
+**Regras de negócio:** [RN11](01-regras-de-negocio.md#rn11), [RN14](01-regras-de-negocio.md#rn14), [RN16](01-regras-de-negocio.md#rn16), [RN17](01-regras-de-negocio.md#rn17), [RN67](01-regras-de-negocio.md#rn67)
 **Casos de uso:** [UC08](03-casos-de-uso.md#uc08)
 
 ### RF14
@@ -507,10 +507,10 @@ Ao editar uma tarefa em Aguardando confirmação, o sistema deve exigir a escolh
 
 ### RF70
 
-O sistema deve permitir informar e editar uma observação opcional de até 250 caracteres, contando espaços, na tarefa, sujeita às mesmas regras de edição e proteção dos demais campos.
+O sistema deve permitir informar e editar uma observação opcional de até 250 caracteres, contando espaços, na tarefa única ou na configuração de rotina, sujeita às mesmas regras de edição e proteção dos demais campos.
 
 **Regras de negócio:** [RN67](01-regras-de-negocio.md#rn67).\
-**Casos de uso:** [UC07](03-casos-de-uso.md#uc07).
+**Casos de uso:** [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08).
 
 <a id="requisitos-nao-funcionais"></a>
 
@@ -766,6 +766,7 @@ A configuração de apelido deve ser protegida por titularidade no backend, incl
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.8 | 2026-10-06 | RF13 passa a incluir observação opcional, ausência de data final obrigatória e alcance inclusivo da ocorrência selecionada; RF70 passa a cobrir a configuração de rotina. Para SPEC-008. |
 | 1.7 | 2026-10-06 | RF02, RF03 e RF40 passam a definir o nome administrativo de membro e os papéis permitidos na criação, para elaboração de SPEC-003. RF07 passa a exigir título de 1–60 caracteress e aceitar observação opcional; RF69 (novo) define a escolha entre Pendente e Aguardando confirmação ao editar tarefa sinalizada, e a remoção da sinalização ao excluir; RF70 (novo) define a observação opcional de até 250 caracteres. Para SPEC-007. |
 | 1.6 | 2026-10-06 | RF01 passa a definir o nome obrigatório da família: 1–60 caracteres Unicode visíveis após trim, sem caracteres de controle; decisão registrada na aprovação de SPEC-002. |
 | 1.5 | 2026-10-05 | Pendências consolidadas: fuso, datas livres, edição de concluídas, participações/badges, convites e sessão única; RF67/68; arquitetura, modelo e design 1.1. |

@@ -1,7 +1,7 @@
 # Regras de negócio
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.6\
+**Versão:** 1.7\
 **Data:** 2026-10-06\
 **Situação:** base documental consolidada
 
@@ -109,7 +109,7 @@ Tarefas podem ter mais de um responsável.
 
 **Requisitos funcionais:** [RF10](02-requisitos.md#rf10)  
 **Requisitos não funcionais específicos:** Sem vínculo específico; requisitos transversais se aplicam conforme a operação.\
-**Casos de uso relacionados:** [UC07](03-casos-de-uso.md#uc07)
+**Casos de uso relacionados:** [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08)
 
 ## RN13
 
@@ -121,9 +121,9 @@ O peso é obrigatório e vai de 1 a 3: 1 = pouco esforço, 2 = médio esforço e
 
 ## RN14
 
-A criação oferece tarefa única ou rotina, com data inicial escolhida em DatePicker e frequência diária ou a cada 7, 14, 21 ou 28 dias (1, 2, 3 ou 4 semanas). Não existe frequência mensal. O backend materializa ocorrências até o fim do mês seguinte ao atual no fuso da família, repõe o horizonte diariamente e completa a geração em consultas quando necessário. Rotina que começa depois do horizonte fica salva e gera ocorrências quando alcançada; início passado é respeitado, com processamento em lotes se necessário, sem truncar silenciosamente o período. Retentativas não duplicam ocorrências.
+A criação oferece tarefa única ou rotina, com data inicial escolhida em DatePicker e frequência diária ou a cada 7, 14, 21 ou 28 dias (1, 2, 3 ou 4 semanas). A rotina pode transportar a observação opcional da tarefa, nos limites de RN67. Não existe frequência mensal nem data final obrigatória. O backend materializa ocorrências até o fim do mês seguinte ao atual no fuso da família, repõe o horizonte diariamente e completa a geração em consultas quando necessário. Rotina que começa depois do horizonte fica salva e gera ocorrências quando alcançada; início passado é respeitado, com processamento em lotes se necessário, sem truncar silenciosamente o período. Retentativas não duplicam ocorrências.
 
-**Requisitos funcionais:** [RF13](02-requisitos.md#rf13), [RF14](02-requisitos.md#rf14)  
+**Requisitos funcionais:** [RF13](02-requisitos.md#rf13), [RF14](02-requisitos.md#rf14), [RF70](02-requisitos.md#rf70)
 **Requisitos não funcionais específicos:** Sem vínculo específico; requisitos transversais se aplicam conforme a operação.\
 **Casos de uso relacionados:** [UC08](03-casos-de-uso.md#uc08)
 
@@ -137,7 +137,7 @@ Cada tarefa, inclusive a gerada por uma rotina, possui identificação e status 
 
 ## RN17
 
-A edição individual altera apenas a tarefa escolhida. Edições da rotina afetam somente as futuras abrangidas, preservando passado e ocorrências concluídas/protegidas. Uma tarefa concluída pode ser editada individualmente se não estiver protegida por missão concluída: título, peso, data prevista e responsáveis são ajustáveis. Peso e responsáveis atualizam o crédito vigente; data prevista atualiza o progresso, sem alterar o instante original da conclusão. Sem responsáveis, a tarefa continua concluída e conta no progresso familiar, mas não gera crédito individual. Registrar autor, instante e valores anteriores na auditoria. Destaques já apurados e PDFs exportados permanecem preservados. Nas edições válidas, prevalece a última gravação efetivada pelo servidor, sem rejeição por versão antiga; permissões e proteções continuam sendo verificadas.
+A edição individual altera apenas a tarefa escolhida. Edições da rotina no alcance “selecionada e futuras” incluem a ocorrência selecionada e afetam somente as futuras abrangidas, preservando passado e ocorrências concluídas/protegidas. Uma tarefa concluída pode ser editada individualmente se não estiver protegida por missão concluída: título, peso, data prevista e responsáveis são ajustáveis. Peso e responsáveis atualizam o crédito vigente; data prevista atualiza o progresso, sem alterar o instante original da conclusão. Sem responsáveis, a tarefa continua concluída e conta no progresso familiar, mas não gera crédito individual. Registrar autor, instante e valores anteriores na auditoria. Destaques já apurados e PDFs exportados permanecem preservados. Nas edições válidas, prevalece a última gravação efetivada pelo servidor, sem rejeição por versão antiga; permissões e proteções continuam sendo verificadas.
 
 **Requisitos funcionais:** [RF08](02-requisitos.md#rf08), [RF13](02-requisitos.md#rf13)  
 **Requisitos não funcionais específicos:** [RNF09](02-requisitos.md#rnf09)  
@@ -550,14 +550,15 @@ Editar uma tarefa Aguardando confirmação exige que o Administrador ou o Membro
 
 Toda tarefa pode ter uma observação opcional de até 250 caracteres, contando espaços. A observação não participa do cálculo de esforço, crédito ou carga e segue as mesmas regras de edição e proteção dos demais campos da tarefa (RN17, RN58).
 
-**Requisitos funcionais:** [RF70](02-requisitos.md#rf70)  
+**Requisitos funcionais:** [RF13](02-requisitos.md#rf13), [RF70](02-requisitos.md#rf70)
 **Requisitos não funcionais específicos:** [RNF02](02-requisitos.md#rnf02)  
-**Casos de uso relacionados:** [UC07](03-casos-de-uso.md#uc07)
+**Casos de uso relacionados:** [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08)
 
 ## Histórico de versões
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.7 | 2026-10-06 | RN14 passa a permitir observação opcional na rotina e explicita que não há data final obrigatória; RN17 define que “selecionada e futuras” inclui a ocorrência de origem; RN67 passa a cobrir UC08. Para SPEC-008. |
 | 1.6 | 2026-10-06 | RN11 passa a limitar o título da tarefa a 1–60 caracteres Unicode visíveis após trim. RN66 (novo) define a escolha entre retornar a Pendente ou manter Aguardando confirmação ao editar tarefa com sinalização Kids corrente, e a remoção dessa sinalização ao excluir. RN67 (novo) permite observação opcional de até 250 caracteres por tarefa. Para SPEC-007. |
 | 1.5 | 2026-10-05 | Pendências consolidadas: fuso, datas livres, edição de concluídas, participações/badges, convites e sessão única; RF67/68; arquitetura, modelo e design 1.1. |
 | 1.4 | 2026-10-02 | Família concentra indicadores, lista, inclusão de membros e PDF; detalhe do membro reúne tarefas Dia/Semana, edição e reenvio quando permitidos. RN60–61, RF60–61/RF66 e UC02/11/13/18 revisados. |

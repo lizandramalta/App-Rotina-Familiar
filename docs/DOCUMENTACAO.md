@@ -1,7 +1,7 @@
-# Documentação do projeto — versão 1.7
+# Documentação do projeto — versão 1.8
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.7\
+**Versão:** 1.8\
 **Data:** 2026-10-06\
 **Situação:** base documental consolidada
 
@@ -18,12 +18,12 @@
 | [Requisitos](02-requisitos.md)                             | 70 requisitos funcionais e 27 não funcionais, com vínculos às regras e aos casos de uso.                                                |
 | [Especificação dos casos de uso](03-casos-de-uso.md)       | 19 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições.                                             |
 | [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) | Visão geral e cinco recortes UML, com fontes PlantUML e imagens SVG.                                                                    |
-| [Screen map](design/screen-map.md)                         | Mapa 1.2: navegação, catálogo de telas, modais, estados e cobertura de UC01–UC19; base funcional 1.7.                                   |
-| [User flows](design/user-flows.md)                         | Fluxos 1.2: 16 percursos que cobrem UC01–UC19, com decisões, alternativas e retornos; base funcional 1.7 e screen map 1.2. |
-| [Modelo de dados (DER)](05-modelo-de-dados.md)             | Diagrama entidade-relacionamento em Mermaid: entidades, atributos, chaves e cardinalidades; base funcional 1.7.                         |
-| [Diagrama de classes](06-diagrama-de-classes.md) | Modelo de classes 1.3: contratos, diagramas por domínio e rastreabilidade UC–RF–RN/RNF–tipos; base funcional 1.7. |
+| [Screen map](design/screen-map.md)                         | Mapa 1.3: navegação, catálogo de telas, modais, estados e cobertura de UC01–UC19; base funcional 1.8.                                   |
+| [User flows](design/user-flows.md)                         | Fluxos 1.3: 16 percursos que cobrem UC01–UC19, com decisões, alternativas e retornos; base funcional 1.8 e screen map 1.3. |
+| [Modelo de dados (DER)](05-modelo-de-dados.md)             | Diagrama entidade-relacionamento em Mermaid: entidades, atributos, chaves e cardinalidades; base funcional 1.8.                         |
+| [Diagrama de classes](06-diagrama-de-classes.md) | Modelo de classes 1.4: contratos, diagramas por domínio e rastreabilidade UC–RF–RN/RNF–tipos; base funcional 1.8. |
 | [Arquitetura mobile](architecture/mobile-architecture.md) | Arquitetura 1.2: Swift + SwiftUI, View + ViewModel e Clean Architecture; estrutura, dependências, estado, sessão, navegação, integrações e verificação. |
-| [Catálogo mobile](architecture/mobile-feature-catalog.md) | Fronteiras de funcionalidades, nomes técnicos em inglês e rastreabilidade das 26 telas, 14 modais, UC01–UC19, UF-01–UF-16 e RNF01–27. |
+| [Catálogo mobile](architecture/mobile-feature-catalog.md) | Catálogo 1.4: funcionalidades, nomes de arquivos em inglês e cobertura das 26 telas, 14 modais, UC01–UC19, UF-01–UF-16 e RNF01–27; base funcional 1.8. |
 | [Decisões da arquitetura mobile](architecture/mobile-decisions.md) | MA-01–MA-17 e P-01–P-09 consolidadas, ajustes de modelagem e temas fora desta etapa. |
 | [Arquitetura backend](architecture/backend-architecture.md) | Backend 1.0: Node.js, Clean Architecture, monólito modular, Supabase/R2, transações, acesso e jobs. |
 | [Contratos backend](architecture/backend-contracts.md) | API `/v1`, permissões, erros, projeções e cobertura dos 19 UC e 27 RNF. |
@@ -144,6 +144,7 @@ A arquitetura backend 1.0 possui versionamento independente da base funcional. N
 
 | Versão | Data       | Alteração                                                                                                                                                                                                         |
 | ------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.8 | 2026-10-06 | Rotinas passam a transportar observação opcional (até 250 caracteres); edição no alcance “selecionada e futuras” inclui a ocorrência de origem; são definidos códigos estáveis para validação de início, frequência e ocorrência de origem. Para SPEC-008. |
 | 1.7 | 2026-10-06 | RF02, RF03 e RF40 passam a definir o nome administrativo de membro e os papéis permitidos na criação, para elaboração de SPEC-003. Tarefa (UC07) ganha limite de título (1–60 caracteres), observação opcional (até 250 caracteres) e regra de resolução de sinalização Kids pendente ao editar/excluir (RN66/67, RF69/70); screen map 1.2, user flows 1.2, catálogo mobile 1.3, contratos backend 1.2, DER 1.3. Para SPEC-007. |
 | 1.6 | 2026-10-06 | RF01 passa a definir o nome obrigatório da família (1–60 caracteres Unicode visíveis após trim, sem caracteres de controle), para aprovação de SPEC-002. |
 | 1.5 | 2026-10-05 | Pendências consolidadas: fuso, datas livres, edição de concluídas, participações/badges, convites e sessão única; RF67/68; arquitetura, modelo e design 1.1. |

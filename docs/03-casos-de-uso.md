@@ -1,7 +1,7 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.6\
+**Versão:** 1.7\
 **Data:** 2026-10-06\
 **Situação:** base documental consolidada
 
@@ -345,8 +345,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Tarefas e rotina](04-diagramas-de-caso-de-uso.md#03-tarefas-rotina)
 
-**Requisitos funcionais:** [RF13](02-requisitos.md#rf13), [RF14](02-requisitos.md#rf14)  
-**Regras relacionadas:** [RN11](01-regras-de-negocio.md#rn11), [RN14](01-regras-de-negocio.md#rn14), [RN16](01-regras-de-negocio.md#rn16), [RN17](01-regras-de-negocio.md#rn17)  
+**Requisitos funcionais:** [RF13](02-requisitos.md#rf13), [RF14](02-requisitos.md#rf14), [RF70](02-requisitos.md#rf70)
+**Regras relacionadas:** [RN11](01-regras-de-negocio.md#rn11), [RN14](01-regras-de-negocio.md#rn14), [RN16](01-regras-de-negocio.md#rn16), [RN17](01-regras-de-negocio.md#rn17), [RN67](01-regras-de-negocio.md#rn67)
 **Requisitos não funcionais:** [RNF01](02-requisitos.md#rnf01), [RNF02](02-requisitos.md#rnf02), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF08](02-requisitos.md#rnf08), [RNF09](02-requisitos.md#rnf09), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF14](02-requisitos.md#rnf14), [RNF22](02-requisitos.md#rnf22), [RNF25](02-requisitos.md#rnf25)
 
 **Objetivo:** configurar a geração recorrente de tarefas individuais.
@@ -358,7 +358,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Fluxo principal:**
 
-1. O usuário escolhe a data inicial em DatePicker, inicialmente hoje e sem limites de produto, e acessa a repetição.
+1. O usuário escolhe a data inicial em DatePicker, inicialmente hoje e sem limites de produto, pode informar observação opcional e acessa a repetição; não há data final obrigatória.
 2. O sistema oferece: sem repetição, diária ou a cada 7, 14, 21 ou 28 dias.
 3. O usuário escolhe a frequência e confirma.
 4. O sistema salva a configuração e gera tarefas até o fim do mês seguinte, repondo o horizonte diariamente e em consulta quando necessário. Início além desse horizonte fica programado; datas passadas são respeitadas sem truncamento silencioso.
@@ -367,7 +367,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 **Alternativas e exceções:**
 
 - Sem repetição, o sistema cria uma tarefa única.
-- Alterações de rotina afetam somente as tarefas futuras abrangidas, respeitando o histórico e as proteções de missões concluídas.
+- Alterações no alcance “selecionada e futuras” incluem a ocorrência escolhida e as futuras elegíveis, respeitando o histórico e as proteções de missões concluídas.
 - Não existe frequência mensal.
 - A limitação de consulta do carrossel não interrompe a geração de tarefas futuras.
 
@@ -837,6 +837,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.7 | 2026-10-06 | UC08 passa a registrar observação opcional na rotina, ausência de data final obrigatória e alcance inclusivo da ocorrência selecionada. Para SPEC-008. |
 | 1.6 | 2026-10-06 | UC07 passa a citar o limite de título (1–60 caracteres), a observação opcional (RN67/RF70) e a escolha entre Pendente e Aguardando confirmação ao editar tarefa sinalizada, com remoção da sinalização ao excluir (RN66/RF69). Para SPEC-007. |
 | 1.5 | 2026-10-05 | Pendências consolidadas: fuso, datas livres, edição de concluídas, participações/badges, convites e sessão única; RF67/68; arquitetura, modelo e design 1.1. |
 | 1.4 | 2026-10-02 | Família concentra indicadores, lista, inclusão de membros e PDF; detalhe do membro reúne tarefas Dia/Semana, edição e reenvio quando permitidos. RN60–61, RF60–61/RF66 e UC02/11/13/18 revisados. |

@@ -1,6 +1,6 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.2 · **Base funcional:** 1.7 · **Arquitetura backend:** 1.0\
+**Versão:** 1.3 · **Base funcional:** 1.8 · **Arquitetura backend:** 1.0\
 **Data:** 2026-10-06\
 **Situação:** contrato arquitetural para detalhamento OpenAPI na implementação
 
@@ -94,10 +94,10 @@ Preview de fuso é apenas leitura de suporte a MOD-012. A gravação pode reflet
 | `DELETE /tasks/{taskId}` | `DeleteTask` | Exclusão individual e vínculos afetados; remove sinalização Kids corrente sem registrar decisão | Adulto; não concluída/não protegida |
 | `POST /tasks/{taskId}/completion` | `CompleteTask` | `assignment: keepAssignees \| takeOver` → estado canônico | Adulto |
 | `POST /tasks/{taskId}/reopening` | `ReopenTask` | Comando explícito → conclusão desfeita e períodos afetados | Admin; missão em andamento, nenhuma concluída |
-| `POST /routines` | `CreateRoutine` | Título, peso, responsáveis, `startDate`, `frequencyDays` → rotina e materialização | Adulto |
+| `POST /routines` | `CreateRoutine` | Título, peso, responsáveis, `note` opcional, `startDate`, `frequencyDays`; sem `endDate` → rotina e materialização | Adulto |
 | `GET /routines/{routineId}` | `GetRoutine` | Configuração, versão vigente e progresso de materialização | Adulto |
-| `PATCH /routines/{routineId}` | `UpdateFutureRoutine` | `fromTaskId`, configuração/data inicial/frequência; somente futuras elegíveis | Adulto |
-| `POST /routines/{routineId}/future-task-deletions` | `DeleteFutureRoutineTasks` | `fromTaskId` → alcance, preservadas e fim de geração | Adulto |
+| `PATCH /routines/{routineId}` | `UpdateFutureRoutine` | `fromTaskId`, configuração/data inicial/frequência; a ocorrência de origem e futuras elegíveis | Adulto |
+| `POST /routines/{routineId}/future-task-deletions` | `DeleteFutureRoutineTasks` | `fromTaskId` → ocorrência de origem e futuras elegíveis, preservadas e fim de geração | Adulto |
 | `POST /tasks/{taskId}/signals` | `SignalTask` | `photoMediaId` opcional → sinalização corrente | Kids responsável e tarefa pendente |
 | `GET /kids/signals` | `GetKidsReviewQueue` | Sinalizações pendentes paginadas | Admin |
 | `GET /kids/signals/{signalId}` | `GetKidsSignal` | Tarefa, autor, foto opcional e estado da sinalização | Admin |
@@ -110,7 +110,7 @@ Preview de fuso é apenas leitura de suporte a MOD-012. A gravação pode reflet
 
 O servidor não aceita o perfil responsável como autor da conclusão. O ator vem da sessão; manter/assumir é uma decisão explícita do comando. `signalId` é identidade de domínio que protege uma decisão contra outra sinalização mais recente, não versão geral de edição.
 
-`EditTask` rejeita com `422 VALIDATION_FAILED`/`SIGNAL_RESOLUTION_REQUIRED` qualquer gravação sobre tarefa `awaitingConfirmation` sem `signalResolution`, independentemente de quais campos mudaram. `resetToPending` transiciona a tarefa para `pending` e descarta a sinalização corrente; `keepAwaitingConfirmation` preserva o estado e a sinalização corrente com os dados editados. `DeleteTask` sobre tarefa `awaitingConfirmation` remove a sinalização corrente junto da tarefa, sem gerar `CONFIRMED`/`REJECTED`.
+`CreateRoutine` e `UpdateFutureRoutine` usam `422 VALIDATION_FAILED` com `fieldErrors` estáveis: `FREQUENCY_DAYS_INVALID` para `frequencyDays` fora de 1/7/14/21/28, `START_DATE_INVALID` para `startDate` fora de `YYYY-MM-DD` e `ROUTINE_SOURCE_TASK_INVALID` quando `fromTaskId` não identifica uma ocorrência da rotina solicitada dentro da família do ator. Um `fromTaskId` de outra família é indisponível e responde `404`. Não existe `endDate` nesses comandos. `EditTask` rejeita com `422 VALIDATION_FAILED`/`SIGNAL_RESOLUTION_REQUIRED` qualquer gravação sobre tarefa `awaitingConfirmation` sem `signalResolution`, independentemente de quais campos mudaram. `resetToPending` transiciona a tarefa para `pending` e descarta a sinalização corrente; `keepAwaitingConfirmation` preserva o estado e a sinalização corrente com os dados editados. `DeleteTask` sobre tarefa `awaitingConfirmation` remove a sinalização corrente junto da tarefa, sem gerar `CONFIRMED`/`REJECTED`.
 
 `TaskMutationResult` contém `task` e `affectedResources` com IDs/tipos e períodos a invalidar. `familyOverview`, progresso pessoal, fila Kids, missão, badges e relatório corrente são recarregados quando afetados. Recursos sem permissão não têm dados privados devolvidos; pode-se invalidar uma área por tipo sem expor seus registros. Exclusões retornam ID removido, vínculos alterados e resumo dos registros preservados.
 
@@ -166,7 +166,7 @@ Cada linha cobre um objetivo funcional completo, não apenas uma rota. RF/RN per
 | <a id="backend-uc05"></a>[UC05](../03-casos-de-uso.md#uc05) | `CreateMission`, `EditMission`, `CloseEligibleMissions` | Ao menos uma tarefa, participação e marcos na transação | RF28/29/31/32/50/58; RN35–40/50/51/58/64 |
 | <a id="backend-uc06"></a>[UC06](../03-casos-de-uso.md#uc06) | `ListRewardItems`, `AddRewardItem` / Rewards | Predefinidas + família; só Admin adiciona | RF33/34; RN41/42 |
 | <a id="backend-uc07"></a>[UC07](../03-casos-de-uso.md#uc07) | `CreateTask`, `EditTask`, `DeleteTask` / Tasks | Datas livres, título ≤60, observação ≤250, edição de concluída não protegida, resolução de sinalização pendente, auditoria e missão não vazia | RF07–10/15/16/27/58/59/69/70; RN11–13/17–20/50/58/59/66/67 |
-| <a id="backend-uc08"></a>[UC08](../03-casos-de-uso.md#uc08) | `CreateRoutine`, `UpdateFutureRoutine`, `MaterializeRoutineOccurrences` | Frequências fixas, horizonte e origem estável; proteger passado/conquistas | RF13/14; RN14/16–18 |
+| <a id="backend-uc08"></a>[UC08](../03-casos-de-uso.md#uc08) | `CreateRoutine`, `UpdateFutureRoutine`, `MaterializeRoutineOccurrences` | Frequências fixas, observação opcional, horizonte e origem estável; proteger passado/conquistas | RF13/14/70; RN14/16–18/67 |
 | <a id="backend-uc09"></a>[UC09](../03-casos-de-uso.md#uc09) | `InspectInvite`, `JoinFamilyByInvite`, `RecoverInviteJoin`, `RefreshSession` | Consumo único, prova de instalação e troca sem remoção | RF42–46/54/68; RN09/10/45–47 |
 | <a id="backend-uc10"></a>[UC10](../03-casos-de-uso.md#uc10) | `UpdateOwnProfile`, `GetOwnBadges`, `GetBadgeContributions` | Titularidade, câmera/galeria na UI e marcos por participação | RF48/62/65; RN63/64 |
 | <a id="backend-uc11"></a>[UC11](../03-casos-de-uso.md#uc11) | `GetOwnTasks`, `GetFamilyTasks`, `GetMemberTasks`, `GetOwnProgress`, `GetFamilyOverview` | Dia/Semana e carrossel; Kids só projeção permitida | RF11/17/22/49/60/65/66; RN26/27/33/49/60/61 |
@@ -203,6 +203,7 @@ O OpenAPI futuro deve materializar schemas e exemplos de sucesso/erro dessas rot
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.3 | 2026-10-06 | Contratos de rotina passam a aceitar `note`, explicitam a ausência de `endDate`, o alcance inclusivo de `fromTaskId` e os erros `FREQUENCY_DAYS_INVALID`, `START_DATE_INVALID` e `ROUTINE_SOURCE_TASK_INVALID`. Para SPEC-008. |
 | 1.2 | 2026-10-06 | `CreateTask`/`EditTask` ganham `note` opcional (≤250 car.); `EditTask` ganha `signalResolution` obrigatório sobre tarefa `awaitingConfirmation`; `DeleteTask` remove a sinalização corrente. Para SPEC-007. |
 | 1.1 | 2026-10-06 | `SPEC-001`: `SessionResult` e `GetCurrentSession` passam a expor `isFamilyCreator`, necessário para o cliente aplicar as proteções do Criador. |
 | 1.0 | 2026-10-05 | Contratos `/v1`, autenticação, projeções, erros, cobertura UC01–UC19 e RNF01–27. |

@@ -1,9 +1,9 @@
-# User flows — versão 1.2
+# User flows — versão 1.3
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão dos fluxos:** 1.2\
-**Base funcional:** 1.7\
-**Screen map:** 1.2 — revisão de 2026-10-06\
+**Versão dos fluxos:** 1.3\
+**Base funcional:** 1.8\
+**Screen map:** 1.3 — revisão de 2026-10-06\
 **Data:** 2026-10-05\
 **Situação:** primeira versão para revisão de design
 
@@ -220,9 +220,9 @@ flowchart TD
     K -->|Sim| L(["Retornar à origem com dados atualizados"])
 ```
 
-Responsáveis e repetição são escolhas do formulário; não é obrigatório abrir os seletores quando a configuração desejada já estiver definida. Repetição oferece sem repetição, diária ou a cada 7, 14, 21 ou 28 dias. Não há mensal. Datas de cadastro/início são livres, inclusive antes da criação da família e em meses futuros. Backend mantém geração até fim do mês seguinte, com reposição diária e complemento em consulta. Cada ocorrência possui estado próprio; escolher uma tarefa não altera automaticamente outras ocorrências.
+Responsáveis e repetição são escolhas do formulário; não é obrigatório abrir os seletores quando a configuração desejada já estiver definida. Repetição oferece sem repetição, diária ou a cada 7, 14, 21 ou 28 dias. Não há mensal nem data final obrigatória. Datas de cadastro/início são livres, inclusive antes da criação da família e em meses futuros. Backend mantém geração até fim do mês seguinte, com reposição diária e complemento em consulta. Cada ocorrência possui estado próprio; escolher uma tarefa não altera automaticamente outras ocorrências.
 
-**Proteções:** edição individual afeta somente a selecionada; alteração de rotina alcança apenas futuras abrangidas e preserva passado e conquistas concluídas. O limite de consulta do carrossel não interrompe a geração futura. Concluída não protegida pode ser editada individualmente: peso/responsáveis ajustam crédito, data prevista ajusta progresso, sem mudar instante de conclusão ou destaque já finalizado; manter auditoria. Sem responsáveis, não há crédito individual. Última edição válida persistida vence. Cancelar antes de salvar não grava as mudanças e retorna à lista ou ao detalhe de origem. Editar tarefa Aguardando confirmação exige MOD-014 antes de salvar, mesmo que só a observação tenha mudado: retornar a Pendente descarta a sinalização corrente da criança, e manter Aguardando confirmação preserva a sinalização para decisão com os dados atualizados (RN66, RF69).
+**Proteções:** edição individual afeta somente a selecionada; alteração de rotina no alcance “selecionada e futuras” inclui a ocorrência aberta e alcança somente futuras elegíveis, preservando passado e conquistas concluídas. O limite de consulta do carrossel não interrompe a geração futura. Concluída não protegida pode ser editada individualmente: peso/responsáveis ajustam crédito, data prevista ajusta progresso, sem mudar instante de conclusão ou destaque já finalizado; manter auditoria. Sem responsáveis, não há crédito individual. Última edição válida persistida vence. Cancelar antes de salvar não grava as mudanças e retorna à lista ou ao detalhe de origem. Editar tarefa Aguardando confirmação exige MOD-014 antes de salvar, mesmo que só a observação tenha mudado: retornar a Pendente descarta a sinalização corrente da criança, e manter Aguardando confirmação preserva a sinalização para decisão com os dados atualizados (RN66, RF69).
 
 <a id="uf-06"></a>
 
@@ -593,6 +593,7 @@ Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imedi
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.3 | 1.8 | 1.3 | 2026-10-06 | UF-05 explicita que rotina não exige data final e que o alcance “selecionada e futuras” inclui a ocorrência aberta. Para SPEC-008. |
 | 1.2 | 1.7 | 1.2 | 2026-10-06 | UF-05 ganha o ramo MOD-014 (resolver sinalização pendente ao editar) e o campo de observação; UF-08 registra a remoção da sinalização ao excluir. Para SPEC-007. |
 | 1.1 | 1.5 | 1.1 | 2026-10-05 | 16 fluxos; UF-16 configura fuso; demais fluxos incorporam decisões de acesso, datas, badges, PDF e sorteio local. |
 | 1.0 | 1.4 | 1.0 | 2026-10-02 | UF-02/03/04/09/12/14 alinhados à lista integrada em Família e ao detalhe com tarefas do membro; mantido Dia/Semana. |

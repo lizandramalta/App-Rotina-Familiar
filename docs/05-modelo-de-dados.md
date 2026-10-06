@@ -1,7 +1,7 @@
 # Modelo de dados (DER)
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do modelo:** 1.3 · **Base funcional:** 1.7\
+**Versão do modelo:** 1.4 · **Base funcional:** 1.8\
 **Data:** 2026-10-05\
 **Situação:** modelo conceitual atualizado; sem migrações implementadas
 
@@ -151,6 +151,7 @@ erDiagram
         uuid familia_id FK
         varchar titulo
         smallint peso "1 a 3"
+        varchar observacao "opcional; max 250 caracteres"
         timestamptz excluida_em
     }
     TAREFA_RESPONSAVEL {
@@ -356,6 +357,7 @@ A versão 1.1 representava somente um access token na sessão. A versão 1.2 sep
 
 | Versão | Base | Data | Alteração |
 |---|---|---|---|
+| 1.4 | 1.8 | 2026-10-06 | `TAREFA` passa a armazenar `observacao` opcional (até 250 caracteres), herdada pelas ocorrências geradas por rotina. Para SPEC-008. |
 | 1.3 | 1.7 | 2026-10-06 | `OCORRENCIA_TAREFA` ganha `observacao` opcional (até 250 caracteres). Para SPEC-007. |
 | 1.2 | 1.5 | 2026-10-05 | Integração backend: identidade/bootstrap do Criador, tokens subordinados à sessão, origem civil e estados de mídia; armazenamento operacional de jobs/recuperação. |
 | 1.1 | 1.5 | 2026-10-05 | Modelo alinhado às decisões consolidadas: Supabase/R2, ciclos/fuso, sessão única, créditos/auditoria, participações/marcos e fila de notificações. |

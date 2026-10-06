@@ -1,8 +1,8 @@
-# Screen map — versão 1.2
+# Screen map — versão 1.3
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do mapa:** 1.2\
-**Base funcional:** 1.7\
+**Versão do mapa:** 1.3\
+**Base funcional:** 1.8\
 **Data:** 2026-10-05\
 **Situação:** referência inicial para design; organização de navegação proposta
 
@@ -320,6 +320,7 @@ Campos funcionais de data/fuso e seleção de foto estão definidos; o layout vi
 
 | Versão do mapa | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.3 | 1.8 | 2026-10-06 | MOD-002 mantém rotina sem data final obrigatória; MOD-003 define que “selecionada e futuras” inclui a ocorrência de origem. Para SPEC-008. |
 | 1.2 | 1.7 | 2026-10-06 | TEL-013 ganha observação opcional e limite de título; MOD-014 (novo) resolve sinalização Kids pendente ao editar. Para SPEC-007. |
 | 1.1 | 1.5 | 2026-10-05 | TEL-053/054 e MOD-012/013; 26 telas ativas, 13 modais, fuso, badges, datas livres e acesso único. |
 | 1.0 | 1.4 | 2026-10-02 | Família concentra carga/progresso, lista e inclusão de membros e PDF; detalhe do membro com tarefas e ações permitidas. TEL-014/031 retiradas da navegação; 24 telas ativas, 2 IDs reservados e 11 modais. |

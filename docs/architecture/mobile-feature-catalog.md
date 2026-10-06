@@ -1,6 +1,6 @@
 # Catálogo de funcionalidades e rastreabilidade mobile
 
-**Versão:** 1.3 · **Base funcional:** 1.7 · **Design:** 1.2\
+**Versão:** 1.4 · **Base funcional:** 1.8 · **Design:** 1.3\
 **Data:** 2026-10-05 · **Situação:** especificação para implementação futura
 
 [Arquitetura mobile](mobile-architecture.md) · [Decisões](mobile-decisions.md) · [Índice documental](../DOCUMENTACAO.md) · [Screen map](../design/screen-map.md) · [User flows](../design/user-flows.md)
@@ -71,8 +71,8 @@ Modais não se tornam automaticamente novos casos de uso ou novas ViewModels. Se
 | ID | Arquivo de View | Dono do estado / ação |
 |---|---|---|
 | MOD-001 | `AssigneePickerView.swift` | Rascunho de `TaskEditorViewModel`; nenhum, um ou vários responsáveis |
-| MOD-002 | `RecurrencePickerView.swift` | Rascunho de `TaskEditorViewModel`; única ou intervalos 1/7/14/21/28 |
-| MOD-003 | `ChangeScopeView.swift` | `TaskEditorViewModel` ou `TaskDetailViewModel`; alcance e registros preservados |
+| MOD-002 | `RecurrencePickerView.swift` | Rascunho de `TaskEditorViewModel`; única ou intervalos 1/7/14/21/28, sem data final |
+| MOD-003 | `ChangeScopeView.swift` | `TaskEditorViewModel` ou `TaskDetailViewModel`; “selecionada e futuras” inclui a origem, com registros preservados |
 | MOD-004 | `TaskCompletionConfirmationView.swift` | `TaskDetailViewModel`; mostra beneficiários e confirma manter/assumir |
 | MOD-005 | `TaskDeletionConfirmationView.swift` | `TaskDetailViewModel`; confirma alcance autorizado |
 | MOD-006 | `TaskReopeningConfirmationView.swift` | `TaskDetailViewModel`; efeitos sobre todos os responsáveis e missões |
@@ -100,7 +100,7 @@ Modais não se tornam automaticamente novos casos de uso ou novas ViewModels. Se
 | [UC05](../03-casos-de-uso.md#uc05) | `CreateMissionUseCase`, `UpdateMissionUseCase`, `GetMissionTaskOptionsUseCase` | TEL-020/021/022; MOD-007 | [UF-10](../design/user-flows.md#uf-10) | RF28/29/31/32/50/58; RN35–40/50/51/58/64 |
 | [UC06](../03-casos-de-uso.md#uc06) | `GetRewardItemsUseCase`, `AddRewardItemUseCase` | TEL-023; MOD-008 | [UF-11](../design/user-flows.md#uf-11) | RF33/34; RN41/42 |
 | [UC07](../03-casos-de-uso.md#uc07) | `CreateTaskUseCase`, `UpdateTaskUseCase`, `DeleteTaskUseCase`, `GetTaskDetailUseCase` | TEL-011/012/013; MOD-001/003/005/014 | [UF-05](../design/user-flows.md#uf-05), [UF-08](../design/user-flows.md#uf-08) | RF07–10/15/16/27/58/59/69/70; RN11–13/17–20/50/58/59/66/67 |
-| [UC08](../03-casos-de-uso.md#uc08) | `CreateRoutineUseCase`, `UpdateRoutineUseCase`, `DeleteFutureTasksUseCase` | TEL-013; MOD-002/003 | [UF-05](../design/user-flows.md#uf-05) | RF13/14; RN14/16–18 |
+| [UC08](../03-casos-de-uso.md#uc08) | `CreateRoutineUseCase`, `UpdateRoutineUseCase`, `DeleteFutureTasksUseCase` | TEL-013; MOD-002/003 | [UF-05](../design/user-flows.md#uf-05) | RF13/14/70; RN14/16–18/67 |
 | [UC09](../03-casos-de-uso.md#uc09) | `InspectInviteUseCase`, `JoinInviteUseCase`, `RestoreSessionUseCase` | TEL-003/004; MOD-013 | [UF-02](../design/user-flows.md#uf-02), [UF-03](../design/user-flows.md#uf-03) | RF42–46/54/68; RN09/10/45–47; RNF17–22 |
 | [UC10](../03-casos-de-uso.md#uc10) | `GetOwnProfileUseCase`, `UpdateOwnProfileUseCase`, `GetOwnBadgesUseCase`, `GetBadgeContributionsUseCase` | TEL-030/054; MOD-009 | [UF-13](../design/user-flows.md#uf-13) | RF48/62/65; RN63/64; RNF27 |
 | [UC11](../03-casos-de-uso.md#uc11) | `GetPersonalTasksUseCase`, `GetFamilyTasksUseCase`, `GetMemberTasksUseCase`, `GetPersonalProgressUseCase`, `GetFamilyOverviewUseCase` | TEL-010/011/032/040/050 | [UF-04](../design/user-flows.md#uf-04) | RF11/17/22/49/60/65/66; RN26/27/33/49/60/61 |
@@ -166,6 +166,7 @@ Os contratos remotos e sua cobertura por UC estão no [catálogo backend](backen
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.4 | 2026-10-06 | Rotina passa a aceitar observação; MOD-002 não exige data final e MOD-003 inclui a ocorrência de origem no alcance futuro. Para SPEC-008; base funcional 1.8, design 1.3. |
 | 1.3 | 2026-10-06 | MOD-014 (novo) resolve sinalização Kids pendente ao editar tarefa; TEL-013 ganha campo de observação; título limitado a 60 caracteres. Para SPEC-007; base funcional 1.7, design 1.2. |
 | 1.2 | 2026-10-05 | Integração com arquitetura backend 1.0 em Node.js, contratos `/v1`, bootstrap, preparação de rotinas e referências; base funcional 1.5 preservada. |
 | 1.1 | 2026-10-05 | Base 1.5; 26 telas, 13 modais, 16 fluxos; configurações de fuso, detalhe de badge, troca de acesso e responsabilidades atualizadas. |
