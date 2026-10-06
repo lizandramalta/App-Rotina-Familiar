@@ -56,7 +56,7 @@ da experiência. Isso permite evoluir o visual sem perder decisões, estados e t
 
 ## Mapa de implementação
 
-**Base funcional:** 1.5 (2026-10-05)
+**Base funcional:** 1.6 (2026-10-06)
 
 **Convenção de status:** `não criada` indica apenas uma entrega planejada; os status
 do template passam a valer depois que o arquivo da spec existir.
@@ -121,6 +121,7 @@ status e resumo; mantenha esta tabela como o panorama do backlog.
 | Spec | UX-spec | Status | Projetos | Resumo |
 |---|---|---|---|---|
 | [SPEC-001-autenticar-com-apple](SPEC-001-autenticar-com-apple.md) | [UX-001-autenticar-com-apple.md](UX-001-autenticar-com-apple.md) | aprovada | ambos | Login nativo Apple do Criador, emissão de sessão ou `creationGrant`, e ciclo de vida da sessão (consulta, renovação, revogação). |
+| [SPEC-002-criar-configurar-familia](SPEC-002-criar-configurar-familia.md) | [UX-002-criar-configurar-familia.md](UX-002-criar-configurar-familia.md) | aprovada | ambos | Criação atômica da família pelo Criador e configuração autorizada do fuso familiar. |
 
 ## Templates
 

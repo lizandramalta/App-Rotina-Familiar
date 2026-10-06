@@ -1,8 +1,8 @@
-# Documentação do projeto — versão 1.5
+# Documentação do projeto — versão 1.6
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.5\
-**Data:** 2026-10-05\
+**Versão:** 1.6\
+**Data:** 2026-10-06\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Modelo de dados](05-modelo-de-dados.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -131,7 +131,7 @@ TEL-014 e TEL-031 foram incorporadas à TEL-050 e retiradas da navegação; os i
 
 ## Política de versionamento
 
-1. A base funcional vigente está na versão **1.5**. Design está na versão **1.1**, mobile/modelos na **1.2** e backend na **1.0**, referenciando a base funcional vigente.
+1. A base funcional vigente está na versão **1.6**. Design está na versão **1.1**, mobile/modelos na **1.2** e backend na **1.0**; documentos ainda alinhados à versão anterior devem ser atualizados quando o comportamento que descrevem for afetado.
 2. Preserve os identificadores RN, RF, RNF, UC, TEL, MOD e UF. Novos itens recebem novos códigos; códigos retirados não são reutilizados.
 3. A edição vigente fica na raiz e em `docs/`. O Git mantém o histórico e permite comparar ou recuperar versões anteriores por commits e, quando adotadas, tags. Não mantenha cópias da documentação em pastas de versões.
 4. Alterações funcionais e suas referências devem evoluir juntas, com versão, data e histórico dos códigos e comportamentos afetados. Use 1.1, 1.2... para revisões incrementais e 2.0 para mudanças substanciais da base funcional.
@@ -144,6 +144,7 @@ A arquitetura backend 1.0 possui versionamento independente da base funcional. N
 
 | Versão | Data       | Alteração                                                                                                                                                                                                         |
 | ------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.6 | 2026-10-06 | RF01 passa a definir o nome obrigatório da família (1–60 caracteres Unicode visíveis após trim, sem caracteres de controle), para aprovação de SPEC-002. |
 | 1.5 | 2026-10-05 | Pendências consolidadas: fuso, datas livres, edição de concluídas, participações/badges, convites e sessão única; RF67/68; arquitetura, modelo e design 1.1. |
 | 1.4    | 2026-10-02 | Família concentra indicadores, lista, inclusão de membros e PDF; detalhe do membro reúne tarefas Dia/Semana, edição e reenvio quando permitidos. RN60–61, RF60–61/RF66 e UC02/11/13/18 revisados.                 |
 | 1.3    | 2026-10-02 | Duas abas Kids, câmera direta, foto/apelido e badges, progresso/carga Dia/Semana, PDF semanal e reconhecimento com WhatsApp; RN61–65, RF61–66, RNF26–27 e UC18–19. Empates e visibilidade do apelido confirmados. |

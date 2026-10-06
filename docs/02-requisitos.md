@@ -1,8 +1,8 @@
 # Requisitos funcionais e não funcionais
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.5\
-**Data:** 2026-10-05\
+**Versão:** 1.6\
+**Data:** 2026-10-06\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -20,7 +20,7 @@ RF descreve o comportamento que o sistema deve oferecer. RNF define condições 
 
 ### RF01
 
-O sistema deve criar a família e atribuir ao criador o perfil Administrador e a identificação de Criador. Deve manter o vínculo único por usuário e redirecionar o Criador para a família existente quando já houver associação.
+O sistema deve criar a família e atribuir ao criador o perfil Administrador e a identificação de Criador. O nome da família é obrigatório e, após remover espaços nas extremidades, deve ter de 1 a 60 caracteres Unicode visíveis, sem caracteres de controle. Deve manter o vínculo único por usuário e redirecionar o Criador para a família existente quando já houver associação.
 
 **Regras de negócio:** [RN01](01-regras-de-negocio.md#rn01), [RN09](01-regras-de-negocio.md#rn09)  
 **Casos de uso:** [UC01](03-casos-de-uso.md#uc01)
@@ -752,6 +752,7 @@ A configuração de apelido deve ser protegida por titularidade no backend, incl
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.6 | 2026-10-06 | RF01 passa a definir o nome obrigatório da família: 1–60 caracteres Unicode visíveis após trim, sem caracteres de controle; decisão registrada na aprovação de SPEC-002. |
 | 1.5 | 2026-10-05 | Pendências consolidadas: fuso, datas livres, edição de concluídas, participações/badges, convites e sessão única; RF67/68; arquitetura, modelo e design 1.1. |
 | 1.4 | 2026-10-02 | Família concentra indicadores, lista, inclusão de membros e PDF; detalhe do membro reúne tarefas Dia/Semana, edição e reenvio quando permitidos. RN60–61, RF60–61/RF66 e UC02/11/13/18 revisados. |
 | 1.3 | 2026-10-02 | Duas abas Kids, câmera direta, foto/apelido e badges, progresso/carga Dia/Semana, PDF semanal e reconhecimento com WhatsApp; RN61–65, RF61–66, RNF26–27 e UC18–19. Empates e visibilidade do apelido confirmados. |
