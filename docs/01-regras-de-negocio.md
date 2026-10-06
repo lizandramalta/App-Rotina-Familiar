@@ -1,19 +1,19 @@
 # Regras de negócio
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.5\
-**Data:** 2026-10-05\
+**Versão:** 1.6\
+**Data:** 2026-10-06\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
 
-Este documento contém todas as regras vigentes da versão 1.5. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
+Este documento contém todas as regras vigentes da versão 1.6. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
 
 **Identificadores preservados:** RN15, RN29 e RN32 não estavam definidos na base recebida e permanecem não utilizados. Não representam conteúdo faltante desta versão.
 
 ## Índice de regras
 
-[RN01](#rn01) · [RN02](#rn02) · [RN03](#rn03) · [RN04](#rn04) · [RN05](#rn05) · [RN06](#rn06) · [RN07](#rn07) · [RN08](#rn08) · [RN09](#rn09) · [RN10](#rn10) · [RN11](#rn11) · [RN12](#rn12) · [RN13](#rn13) · [RN14](#rn14) · [RN16](#rn16) · [RN17](#rn17) · [RN18](#rn18) · [RN19](#rn19) · [RN20](#rn20) · [RN21](#rn21) · [RN22](#rn22) · [RN23](#rn23) · [RN24](#rn24) · [RN25](#rn25) · [RN26](#rn26) · [RN27](#rn27) · [RN28](#rn28) · [RN30](#rn30) · [RN31](#rn31) · [RN33](#rn33) · [RN34](#rn34) · [RN35](#rn35) · [RN36](#rn36) · [RN37](#rn37) · [RN38](#rn38) · [RN39](#rn39) · [RN40](#rn40) · [RN41](#rn41) · [RN42](#rn42) · [RN43](#rn43) · [RN44](#rn44) · [RN45](#rn45) · [RN46](#rn46) · [RN47](#rn47) · [RN48](#rn48) · [RN49](#rn49) · [RN50](#rn50) · [RN51](#rn51) · [RN52](#rn52) · [RN53](#rn53) · [RN54](#rn54) · [RN55](#rn55) · [RN56](#rn56) · [RN57](#rn57) · [RN58](#rn58) · [RN59](#rn59) · [RN60](#rn60) · [RN61](#rn61) · [RN62](#rn62) · [RN63](#rn63) · [RN64](#rn64) · [RN65](#rn65)
+[RN01](#rn01) · [RN02](#rn02) · [RN03](#rn03) · [RN04](#rn04) · [RN05](#rn05) · [RN06](#rn06) · [RN07](#rn07) · [RN08](#rn08) · [RN09](#rn09) · [RN10](#rn10) · [RN11](#rn11) · [RN12](#rn12) · [RN13](#rn13) · [RN14](#rn14) · [RN16](#rn16) · [RN17](#rn17) · [RN18](#rn18) · [RN19](#rn19) · [RN20](#rn20) · [RN21](#rn21) · [RN22](#rn22) · [RN23](#rn23) · [RN24](#rn24) · [RN25](#rn25) · [RN26](#rn26) · [RN27](#rn27) · [RN28](#rn28) · [RN30](#rn30) · [RN31](#rn31) · [RN33](#rn33) · [RN34](#rn34) · [RN35](#rn35) · [RN36](#rn36) · [RN37](#rn37) · [RN38](#rn38) · [RN39](#rn39) · [RN40](#rn40) · [RN41](#rn41) · [RN42](#rn42) · [RN43](#rn43) · [RN44](#rn44) · [RN45](#rn45) · [RN46](#rn46) · [RN47](#rn47) · [RN48](#rn48) · [RN49](#rn49) · [RN50](#rn50) · [RN51](#rn51) · [RN52](#rn52) · [RN53](#rn53) · [RN54](#rn54) · [RN55](#rn55) · [RN56](#rn56) · [RN57](#rn57) · [RN58](#rn58) · [RN59](#rn59) · [RN60](#rn60) · [RN61](#rn61) · [RN62](#rn62) · [RN63](#rn63) · [RN64](#rn64) · [RN65](#rn65) · [RN66](#rn66) · [RN67](#rn67)
 
 ## RN01
 
@@ -97,7 +97,7 @@ A remoção de um membro revoga seu acesso, inclusive por sessão existente, ren
 
 ## RN11
 
-Toda tarefa tem título, peso e data prevista. Responsáveis são opcionais. A data começa no dia atual do fuso da família e pode ser alterada para qualquer data passada ou futura, inclusive antes da criação da família e em outros meses, sem limites de produto no DatePicker. A mesma liberdade aplica-se à data inicial da rotina. Os limites de consulta do carrossel em RN49 não limitam o cadastro ou a edição de datas.
+Toda tarefa tem título, peso e data prevista. Responsáveis são opcionais. A data começa no dia atual do fuso da família e pode ser alterada para qualquer data passada ou futura, inclusive antes da criação da família e em outros meses, sem limites de produto no DatePicker. A mesma liberdade aplica-se à data inicial da rotina. Os limites de consulta do carrossel em RN49 não limitam o cadastro ou a edição de datas. O título tem de 1 a 60 caracteres Unicode visíveis após trim, sem caracteres de controle, no mesmo padrão aplicado ao nome da família (RF01).
 
 **Requisitos funcionais:** [RF07](02-requisitos.md#rf07), [RF10](02-requisitos.md#rf10), [RF13](02-requisitos.md#rf13), [RF15](02-requisitos.md#rf15)  
 **Requisitos não funcionais específicos:** [RNF02](02-requisitos.md#rnf02)  
@@ -538,10 +538,27 @@ Em empate, todos os primeiros são reconhecidos. Todos os perfis ativos, inclusi
 **Requisitos não funcionais específicos:** [RNF04](02-requisitos.md#rnf04), [RNF06](02-requisitos.md#rnf06), [RNF10](02-requisitos.md#rnf10), [RNF12](02-requisitos.md#rnf12), [RNF26](02-requisitos.md#rnf26), [RNF27](02-requisitos.md#rnf27)  
 **Casos de uso relacionados:** [UC01](03-casos-de-uso.md#uc01), [UC19](03-casos-de-uso.md#uc19)
 
+## RN66
+
+Editar uma tarefa Aguardando confirmação exige que o Administrador ou o Membro escolha, no mesmo salvamento, entre retornar a tarefa a Pendente — descartando a sinalização corrente, que a criança pode refazer — ou manter o estado Aguardando confirmação com os dados atualizados e a sinalização corrente intacta para decisão. A escolha é obrigatória em qualquer edição salva nesse estado, independentemente de quais campos foram alterados. Excluir uma tarefa Aguardando confirmação remove a sinalização corrente junto com a tarefa, sem registrar confirmação ou recusa.
+
+**Requisitos funcionais:** [RF08](02-requisitos.md#rf08), [RF09](02-requisitos.md#rf09), [RF69](02-requisitos.md#rf69)  
+**Requisitos não funcionais específicos:** [RNF09](02-requisitos.md#rnf09), [RNF11](02-requisitos.md#rnf11)  
+**Casos de uso relacionados:** [UC07](03-casos-de-uso.md#uc07), [UC03](03-casos-de-uso.md#uc03), [UC15](03-casos-de-uso.md#uc15)
+
+## RN67
+
+Toda tarefa pode ter uma observação opcional de até 250 caracteres, contando espaços. A observação não participa do cálculo de esforço, crédito ou carga e segue as mesmas regras de edição e proteção dos demais campos da tarefa (RN17, RN58).
+
+**Requisitos funcionais:** [RF70](02-requisitos.md#rf70)  
+**Requisitos não funcionais específicos:** [RNF02](02-requisitos.md#rnf02)  
+**Casos de uso relacionados:** [UC07](03-casos-de-uso.md#uc07)
+
 ## Histórico de versões
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.6 | 2026-10-06 | RN11 passa a limitar o título da tarefa a 1–60 caracteres Unicode visíveis após trim. RN66 (novo) define a escolha entre retornar a Pendente ou manter Aguardando confirmação ao editar tarefa com sinalização Kids corrente, e a remoção dessa sinalização ao excluir. RN67 (novo) permite observação opcional de até 250 caracteres por tarefa. Para SPEC-007. |
 | 1.5 | 2026-10-05 | Pendências consolidadas: fuso, datas livres, edição de concluídas, participações/badges, convites e sessão única; RF67/68; arquitetura, modelo e design 1.1. |
 | 1.4 | 2026-10-02 | Família concentra indicadores, lista, inclusão de membros e PDF; detalhe do membro reúne tarefas Dia/Semana, edição e reenvio quando permitidos. RN60–61, RF60–61/RF66 e UC02/11/13/18 revisados. |
 | 1.3 | 2026-10-02 | Duas abas Kids, câmera direta, foto/apelido e badges, progresso/carga Dia/Semana, PDF semanal e reconhecimento com WhatsApp; RN61–65, RF61–66, RNF26–27 e UC18–19. Empates e visibilidade do apelido confirmados. |

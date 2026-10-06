@@ -83,7 +83,7 @@ Administradores. Ela cobre TEL-002, TEL-053 e MOD-012; não há uma SPEC-021 sep
 
 | Spec planejada | UC principal | Projetos | Depende de | Status |
 |---|---|---|---|---|
-| `SPEC-007-gerenciar-tarefas` - Gerenciar tarefas | UC07 | ambos | SPEC-002 | não criada |
+| [`SPEC-007-gerenciar-tarefas`](SPEC-007-gerenciar-tarefas.md) - Gerenciar tarefas | UC07 | ambos | SPEC-002 | aprovada |
 | `SPEC-008-definir-recorrencia` - Definir recorrência de rotina | UC08 | ambos | SPEC-007 | não criada |
 | `SPEC-009-visualizar-minhas-tarefas` - Visualizar minhas tarefas | UC11 | ambos | SPEC-007 | não criada |
 | `SPEC-010-concluir-tarefa` - Concluir tarefa | UC12 | ambos | SPEC-007 | não criada |
@@ -124,6 +124,7 @@ status e resumo; mantenha esta tabela como o panorama do backlog.
 | [SPEC-002-criar-configurar-familia](SPEC-002-criar-configurar-familia.md) | [UX-002-criar-configurar-familia.md](UX-002-criar-configurar-familia.md) | aprovada | ambos | Criação atômica da família pelo Criador e configuração autorizada do fuso familiar. |
 | [SPEC-003-gerenciar-membros](SPEC-003-gerenciar-membros.md) | [UX-003-gerenciar-membros](UX-003-gerenciar-membros.md) | aprovada | ambos | Criação e gestão autorizada de membros, papéis, modo Kids e remoção preservando histórico. |
 | [SPEC-004-gerar-reenviar-convite](SPEC-004-gerar-reenviar-convite.md) | [UX-004-gerar-reenviar-convite](UX-004-gerar-reenviar-convite.md) | aprovada | ambos | Emissão e reemissão segura de link e senha, com revogação de credenciais/sessão anteriores e compartilhamento nativo único. |
+| [SPEC-007-gerenciar-tarefas](SPEC-007-gerenciar-tarefas.md) | [UX-007-gerenciar-tarefas.md](UX-007-gerenciar-tarefas.md) | aprovada | ambos | CRUD da tarefa única (título, peso, data, responsáveis, observação), com proteções de missão/conclusão e resolução obrigatória de sinalização Kids pendente ao editar/excluir. |
 
 ## Templates
 

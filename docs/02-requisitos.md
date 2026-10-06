@@ -9,7 +9,7 @@
 
 RF descreve o comportamento que o sistema deve oferecer. RNF define condições de qualidade, segurança e integridade. As regras de negócio ficam no documento próprio; não é necessário consultar versões anteriores para interpretar esta base.
 
-**Conteúdo:** 68 requisitos funcionais e 27 requisitos não funcionais.
+**Conteúdo:** 70 requisitos funcionais e 27 requisitos não funcionais.
 
 ## Índice
 
@@ -62,9 +62,9 @@ O sistema deve permitir somente a Administradores ativar ou desativar o Modo Kid
 
 ### RF07
 
-O sistema deve permitir a adultos criar tarefas com título, peso e data prevista, responsáveis opcionais e repetição opcional. A data começa hoje no fuso da família; DatePicker permite qualquer data passada ou futura, inclusive antes da criação da família e fora do mês atual.
+O sistema deve permitir a adultos criar tarefas com título, peso e data prevista, responsáveis opcionais, observação opcional e repetição opcional. A data começa hoje no fuso da família; DatePicker permite qualquer data passada ou futura, inclusive antes da criação da família e fora do mês atual. O título é obrigatório e deve ter de 1 a 60 caracteres Unicode visíveis após trim, sem caracteres de controle.
 
-**Regras de negócio:** [RN11](01-regras-de-negocio.md#rn11), [RN19](01-regras-de-negocio.md#rn19), [RN20](01-regras-de-negocio.md#rn20)  
+**Regras de negócio:** [RN11](01-regras-de-negocio.md#rn11), [RN19](01-regras-de-negocio.md#rn19), [RN20](01-regras-de-negocio.md#rn20), [RN67](01-regras-de-negocio.md#rn67)  
 **Casos de uso:** [UC07](03-casos-de-uso.md#uc07)
 
 ### RF08
@@ -498,6 +498,20 @@ Ao abrir convite com sessão ativa, o sistema deve solicitar confirmação da tr
 **Regras de negócio:** [RN09](01-regras-de-negocio.md#rn09), [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47).\
 **Casos de uso:** [UC09](03-casos-de-uso.md#uc09).
 
+### RF69
+
+Ao editar uma tarefa em Aguardando confirmação, o sistema deve exigir a escolha entre retornar a Pendente, descartando a sinalização corrente, ou manter Aguardando confirmação com os dados atualizados e a sinalização corrente intacta. A exclusão de uma tarefa em Aguardando confirmação deve remover sua sinalização corrente sem registrar confirmação ou recusa.
+
+**Regras de negócio:** [RN66](01-regras-de-negocio.md#rn66).\
+**Casos de uso:** [UC07](03-casos-de-uso.md#uc07), [UC03](03-casos-de-uso.md#uc03).
+
+### RF70
+
+O sistema deve permitir informar e editar uma observação opcional de até 250 caracteres, contando espaços, na tarefa, sujeita às mesmas regras de edição e proteção dos demais campos.
+
+**Regras de negócio:** [RN67](01-regras-de-negocio.md#rn67).\
+**Casos de uso:** [UC07](03-casos-de-uso.md#uc07).
+
 <a id="requisitos-nao-funcionais"></a>
 
 ## Requisitos não funcionais
@@ -752,7 +766,7 @@ A configuração de apelido deve ser protegida por titularidade no backend, incl
 
 | Versão | Data | Alteração |
 |---|---|---|
-| 1.7 | 2026-10-06 | RF02, RF03 e RF40 passam a definir o nome administrativo de membro e os papéis permitidos na criação, para elaboração de SPEC-003. |
+| 1.7 | 2026-10-06 | RF02, RF03 e RF40 passam a definir o nome administrativo de membro e os papéis permitidos na criação, para elaboração de SPEC-003. RF07 passa a exigir título de 1–60 caracteress e aceitar observação opcional; RF69 (novo) define a escolha entre Pendente e Aguardando confirmação ao editar tarefa sinalizada, e a remoção da sinalização ao excluir; RF70 (novo) define a observação opcional de até 250 caracteres. Para SPEC-007. |
 | 1.6 | 2026-10-06 | RF01 passa a definir o nome obrigatório da família: 1–60 caracteres Unicode visíveis após trim, sem caracteres de controle; decisão registrada na aprovação de SPEC-002. |
 | 1.5 | 2026-10-05 | Pendências consolidadas: fuso, datas livres, edição de concluídas, participações/badges, convites e sessão única; RF67/68; arquitetura, modelo e design 1.1. |
 | 1.4 | 2026-10-02 | Família concentra indicadores, lista, inclusão de membros e PDF; detalhe do membro reúne tarefas Dia/Semana, edição e reenvio quando permitidos. RN60–61, RF60–61/RF66 e UC02/11/13/18 revisados. |

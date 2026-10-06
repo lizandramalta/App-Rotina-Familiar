@@ -1,11 +1,11 @@
 # Modelo de dados (DER)
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do modelo:** 1.2 · **Base funcional:** 1.5\
+**Versão do modelo:** 1.3 · **Base funcional:** 1.7\
 **Data:** 2026-10-05\
 **Situação:** modelo conceitual atualizado; sem migrações implementadas
 
-[Projeto](../README.md) · [Índice](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Classes](06-diagrama-de-classes.md) · [Arquitetura mobile](architecture/mobile-architecture.md)
+[Projeto](../README.md) · [Índice](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Classes](06-diagrama-de-classes.md#classe-familytask) · [Arquitetura mobile](architecture/mobile-architecture.md)
 
 Backend único com PostgreSQL no Supabase. Fotos ficam no R2; o banco armazena sua URL estável privada. O mobile usa a API, sem receber segredos do banco/armazenamento. O diagrama é conceitual; o backend será Node.js/Clean Architecture, conforme a [arquitetura backend](architecture/backend-architecture.md). Os nomes portugueses preservam a terminologia documental; SQL, código e arquivos futuros usam inglês conforme o glossário ao final.
 
@@ -175,8 +175,9 @@ erDiagram
         varchar chave_origem "UK com tarefa_id; imutavel"
         date data_origem "slot original imutavel"
         date data_prevista "editavel; sem limite de cadastro"
-        varchar titulo
+        varchar titulo "1 a 60 caracteres visiveis"
         smallint peso
+        varchar observacao "opcional; max 250 caracteres"
         enum status "PENDING, AWAITING_CONFIRMATION, COMPLETED"
         timestamptz cancelada_em
     }
@@ -355,6 +356,7 @@ A versão 1.1 representava somente um access token na sessão. A versão 1.2 sep
 
 | Versão | Base | Data | Alteração |
 |---|---|---|---|
+| 1.3 | 1.7 | 2026-10-06 | `OCORRENCIA_TAREFA` ganha `observacao` opcional (até 250 caracteres). Para SPEC-007. |
 | 1.2 | 1.5 | 2026-10-05 | Integração backend: identidade/bootstrap do Criador, tokens subordinados à sessão, origem civil e estados de mídia; armazenamento operacional de jobs/recuperação. |
 | 1.1 | 1.5 | 2026-10-05 | Modelo alinhado às decisões consolidadas: Supabase/R2, ciclos/fuso, sessão única, créditos/auditoria, participações/marcos e fila de notificações. |
 | 1.0 | 1.3 | 2026-10-02 | Primeiro DER, anterior à consolidação das decisões de arquitetura. |

@@ -1,9 +1,9 @@
-# User flows — versão 1.1
+# User flows — versão 1.2
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão dos fluxos:** 1.1\
-**Base funcional:** 1.5\
-**Screen map:** 1.1 — revisão de 2026-10-05\
+**Versão dos fluxos:** 1.2\
+**Base funcional:** 1.7\
+**Screen map:** 1.2 — revisão de 2026-10-06\
 **Data:** 2026-10-05\
 **Situação:** primeira versão para revisão de design
 
@@ -197,17 +197,20 @@ TEL-032 mantém o membro selecionado ao alternar Dia/Semana e abre TEL-012 para 
 
 **Objetivo:** salvar tarefa única ou rotina com esforço e responsáveis opcionais.  
 **Entrada:** TEL-010/TEL-011 para criar; TEL-012 para editar. Adultos apenas.  
-**Referências:** [UC07](../03-casos-de-uso.md#uc07), [UC08](../03-casos-de-uso.md#uc08); RF07–10, RF13–16, RF58.
+**Referências:** [UC07](../03-casos-de-uso.md#uc07), [UC08](../03-casos-de-uso.md#uc08); RF07–10, RF13–16, RF58, RF69, RF70.
 
 ```mermaid
 flowchart TD
-    A(["Criar ou editar tarefa"]) --> B["TEL-013 · Título, peso 1 a 3 e data livre / padrão hoje"]
+    A(["Criar ou editar tarefa"]) --> B["TEL-013 · Título (1–60 car.), peso 1 a 3, data livre / padrão hoje e observação opcional (até 250 car.)"]
     B --> C["MOD-001 · Definir nenhum, um ou vários responsáveis"]
     C --> D["MOD-002 · DatePicker inicial livre e frequência"]
     D --> E{"Editando tarefa de rotina?"}
     E -->|Sim| F["MOD-003 · Escolher edição individual ou rotina futura"]
-    E -->|Não| G["Conferir e salvar"]
-    F --> G
+    E -->|Não| G2{"Editando tarefa Aguardando confirmação?"}
+    F --> G2
+    G2 -->|Sim| F2["MOD-014 · Retornar a Pendente ou manter Aguardando confirmação"]
+    G2 -->|Não| G["Conferir e salvar"]
+    F2 --> G
     G --> H{"Dados, alcance e proteção válidos?"}
     H -->|Não| I["Explicar campos ou registros impedidos"]
     I --> B
@@ -219,7 +222,7 @@ flowchart TD
 
 Responsáveis e repetição são escolhas do formulário; não é obrigatório abrir os seletores quando a configuração desejada já estiver definida. Repetição oferece sem repetição, diária ou a cada 7, 14, 21 ou 28 dias. Não há mensal. Datas de cadastro/início são livres, inclusive antes da criação da família e em meses futuros. Backend mantém geração até fim do mês seguinte, com reposição diária e complemento em consulta. Cada ocorrência possui estado próprio; escolher uma tarefa não altera automaticamente outras ocorrências.
 
-**Proteções:** edição individual afeta somente a selecionada; alteração de rotina alcança apenas futuras abrangidas e preserva passado e conquistas concluídas. O limite de consulta do carrossel não interrompe a geração futura. Concluída não protegida pode ser editada individualmente: peso/responsáveis ajustam crédito, data prevista ajusta progresso, sem mudar instante de conclusão ou destaque já finalizado; manter auditoria. Sem responsáveis, não há crédito individual. Última edição válida persistida vence. Cancelar antes de salvar não grava as mudanças e retorna à lista ou ao detalhe de origem.
+**Proteções:** edição individual afeta somente a selecionada; alteração de rotina alcança apenas futuras abrangidas e preserva passado e conquistas concluídas. O limite de consulta do carrossel não interrompe a geração futura. Concluída não protegida pode ser editada individualmente: peso/responsáveis ajustam crédito, data prevista ajusta progresso, sem mudar instante de conclusão ou destaque já finalizado; manter auditoria. Sem responsáveis, não há crédito individual. Última edição válida persistida vence. Cancelar antes de salvar não grava as mudanças e retorna à lista ou ao detalhe de origem. Editar tarefa Aguardando confirmação exige MOD-014 antes de salvar, mesmo que só a observação tenha mudado: retornar a Pendente descarta a sinalização corrente da criança, e manter Aguardando confirmação preserva a sinalização para decisão com os dados atualizados (RN66, RF69).
 
 <a id="uf-06"></a>
 
@@ -308,7 +311,7 @@ A seta tracejada liga os registros entre os dois usuários; não representa nave
 
 **Objetivo:** aplicar a alteração permitida sem corromper conquistas ou descontar carga duas vezes.  
 **Entrada:** TEL-012. Reabertura somente Administrador; exclusão por Administrador ou Membro.  
-**Referências:** [UC17](../03-casos-de-uso.md#uc17), [UC07](../03-casos-de-uso.md#uc07); RN50, RN57–59; RF09, RF57–59.
+**Referências:** [UC17](../03-casos-de-uso.md#uc17), [UC07](../03-casos-de-uso.md#uc07); RN50, RN57–59, RN66; RF09, RF57–59, RF69.
 
 ```mermaid
 flowchart TD
@@ -332,7 +335,7 @@ flowchart TD
     M -->|Confirmar e salvar| O(["Retornar à lista de origem atualizada"])
 ```
 
-Não existe exclusão direta de tarefa concluída. Se não houver missão em andamento, não há reabertura neste MVP. Em exclusão de rotina, preservar ocorrências concluídas e informar os registros que não podem ser excluídos. A última tarefa de uma missão exige vincular outra antes de tentar excluí-la. Não se contorna a proteção de missão concluída pela mudança de alcance.
+Não existe exclusão direta de tarefa concluída. Se não houver missão em andamento, não há reabertura neste MVP. Em exclusão de rotina, preservar ocorrências concluídas e informar os registros que não podem ser excluídos. A última tarefa de uma missão exige vincular outra antes de tentar excluí-la. Não se contorna a proteção de missão concluída pela mudança de alcance. Excluir uma tarefa Aguardando confirmação remove a sinalização corrente da criança junto com a tarefa, sem pedir confirmação adicional sobre a sinalização (RN66).
 
 A reabertura é uma operação independente: retira o crédito do dia e da semana da conclusão anterior para todos os responsáveis, mantém responsáveis e atualiza progresso. Se a exclusão posterior falhar ou for cancelada, a reabertura já salva permanece. A exclusão não desconta o peso novamente. Cada gravação segue as condições comuns de falha e concorrência.
 
@@ -590,6 +593,7 @@ Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imedi
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.2 | 1.7 | 1.2 | 2026-10-06 | UF-05 ganha o ramo MOD-014 (resolver sinalização pendente ao editar) e o campo de observação; UF-08 registra a remoção da sinalização ao excluir. Para SPEC-007. |
 | 1.1 | 1.5 | 1.1 | 2026-10-05 | 16 fluxos; UF-16 configura fuso; demais fluxos incorporam decisões de acesso, datas, badges, PDF e sorteio local. |
 | 1.0 | 1.4 | 1.0 | 2026-10-02 | UF-02/03/04/09/12/14 alinhados à lista integrada em Família e ao detalhe com tarefas do membro; mantido Dia/Semana. |
 | 1.0 | 1.3 | 1.0 | 2026-10-02 | Revisão dos fluxos Kids, câmera, perfil, períodos e badges; novos UF-14/15 para PDF e destaque semanal. |

@@ -1,6 +1,6 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.1 · **Base funcional:** 1.5 · **Arquitetura backend:** 1.0\
+**Versão:** 1.2 · **Base funcional:** 1.7 · **Arquitetura backend:** 1.0\
 **Data:** 2026-10-06\
 **Situação:** contrato arquitetural para detalhamento OpenAPI na implementação
 
@@ -89,9 +89,9 @@ Preview de fuso é apenas leitura de suporte a MOD-012. A gravação pode reflet
 | `GET /family/tasks` | `GetFamilyTasks` | Período, membro opcional, sem responsáveis opcional, cursor | Adulto |
 | `GET /family/members/{memberId}/tasks` | `GetMemberTasks` | Período da origem e cursor | Adulto |
 | `GET /tasks/{taskId}` | `GetTaskDetail` | Estado atual, origem, capacidades e detalhes autorizados | Adulto; Kids apenas responsável |
-| `POST /tasks` | `CreateTask` | `title`, `weight`, `scheduledDate`, `assigneeIds` → tarefa única | Adulto |
-| `PATCH /tasks/{taskId}` | `EditTask` | Campos editáveis de uma ocorrência, incluindo data | Adulto; respeitar proteção |
-| `DELETE /tasks/{taskId}` | `DeleteTask` | Exclusão individual e vínculos afetados | Adulto; não concluída/não protegida |
+| `POST /tasks` | `CreateTask` | `title` (1–60 car.), `weight`, `scheduledDate`, `assigneeIds`, `note` (opcional, ≤250 car.) → tarefa única | Adulto |
+| `PATCH /tasks/{taskId}` | `EditTask` | Campos editáveis de uma ocorrência, incluindo data e `note`; `signalResolution` (`resetToPending` \| `keepAwaitingConfirmation`) obrigatório quando o estado atual é `awaitingConfirmation` | Adulto; respeitar proteção |
+| `DELETE /tasks/{taskId}` | `DeleteTask` | Exclusão individual e vínculos afetados; remove sinalização Kids corrente sem registrar decisão | Adulto; não concluída/não protegida |
 | `POST /tasks/{taskId}/completion` | `CompleteTask` | `assignment: keepAssignees \| takeOver` → estado canônico | Adulto |
 | `POST /tasks/{taskId}/reopening` | `ReopenTask` | Comando explícito → conclusão desfeita e períodos afetados | Admin; missão em andamento, nenhuma concluída |
 | `POST /routines` | `CreateRoutine` | Título, peso, responsáveis, `startDate`, `frequencyDays` → rotina e materialização | Adulto |
@@ -109,6 +109,8 @@ Preview de fuso é apenas leitura de suporte a MOD-012. A gravação pode reflet
 `period` aceita `day` ou `week`; `referenceDate` é a data selecionada, validada pelo limite de consulta RN49. O servidor devolve intervalo nominal e efetivo. `GET /tasks/{id}` resolve criação fora do carrossel quando o ator pode consultar aquela tarefa; isso não cria novo calendário de navegação. Cadastro/edição não bloqueiam passado, meses futuros ou datas anteriores à família.
 
 O servidor não aceita o perfil responsável como autor da conclusão. O ator vem da sessão; manter/assumir é uma decisão explícita do comando. `signalId` é identidade de domínio que protege uma decisão contra outra sinalização mais recente, não versão geral de edição.
+
+`EditTask` rejeita com `422 VALIDATION_FAILED`/`SIGNAL_RESOLUTION_REQUIRED` qualquer gravação sobre tarefa `awaitingConfirmation` sem `signalResolution`, independentemente de quais campos mudaram. `resetToPending` transiciona a tarefa para `pending` e descarta a sinalização corrente; `keepAwaitingConfirmation` preserva o estado e a sinalização corrente com os dados editados. `DeleteTask` sobre tarefa `awaitingConfirmation` remove a sinalização corrente junto da tarefa, sem gerar `CONFIRMED`/`REJECTED`.
 
 `TaskMutationResult` contém `task` e `affectedResources` com IDs/tipos e períodos a invalidar. `familyOverview`, progresso pessoal, fila Kids, missão, badges e relatório corrente são recarregados quando afetados. Recursos sem permissão não têm dados privados devolvidos; pode-se invalidar uma área por tipo sem expor seus registros. Exclusões retornam ID removido, vínculos alterados e resumo dos registros preservados.
 
@@ -163,7 +165,7 @@ Cada linha cobre um objetivo funcional completo, não apenas uma rota. RF/RN per
 | <a id="backend-uc04"></a>[UC04](../03-casos-de-uso.md#uc04) | `SignInWithApple` / Access | Prova validada; sessão única do Criador ou grant restrito | RF37/39; RN44; RNF15/16/22 |
 | <a id="backend-uc05"></a>[UC05](../03-casos-de-uso.md#uc05) | `CreateMission`, `EditMission`, `CloseEligibleMissions` | Ao menos uma tarefa, participação e marcos na transação | RF28/29/31/32/50/58; RN35–40/50/51/58/64 |
 | <a id="backend-uc06"></a>[UC06](../03-casos-de-uso.md#uc06) | `ListRewardItems`, `AddRewardItem` / Rewards | Predefinidas + família; só Admin adiciona | RF33/34; RN41/42 |
-| <a id="backend-uc07"></a>[UC07](../03-casos-de-uso.md#uc07) | `CreateTask`, `EditTask`, `DeleteTask` / Tasks | Datas livres, edição de concluída não protegida, auditoria e missão não vazia | RF07–10/15/16/27/58/59; RN11–13/17–20/50/58/59 |
+| <a id="backend-uc07"></a>[UC07](../03-casos-de-uso.md#uc07) | `CreateTask`, `EditTask`, `DeleteTask` / Tasks | Datas livres, título ≤60, observação ≤250, edição de concluída não protegida, resolução de sinalização pendente, auditoria e missão não vazia | RF07–10/15/16/27/58/59/69/70; RN11–13/17–20/50/58/59/66/67 |
 | <a id="backend-uc08"></a>[UC08](../03-casos-de-uso.md#uc08) | `CreateRoutine`, `UpdateFutureRoutine`, `MaterializeRoutineOccurrences` | Frequências fixas, horizonte e origem estável; proteger passado/conquistas | RF13/14; RN14/16–18 |
 | <a id="backend-uc09"></a>[UC09](../03-casos-de-uso.md#uc09) | `InspectInvite`, `JoinFamilyByInvite`, `RecoverInviteJoin`, `RefreshSession` | Consumo único, prova de instalação e troca sem remoção | RF42–46/54/68; RN09/10/45–47 |
 | <a id="backend-uc10"></a>[UC10](../03-casos-de-uso.md#uc10) | `UpdateOwnProfile`, `GetOwnBadges`, `GetBadgeContributions` | Titularidade, câmera/galeria na UI e marcos por participação | RF48/62/65; RN63/64 |
@@ -201,5 +203,6 @@ O OpenAPI futuro deve materializar schemas e exemplos de sucesso/erro dessas rot
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.2 | 2026-10-06 | `CreateTask`/`EditTask` ganham `note` opcional (≤250 car.); `EditTask` ganha `signalResolution` obrigatório sobre tarefa `awaitingConfirmation`; `DeleteTask` remove a sinalização corrente. Para SPEC-007. |
 | 1.1 | 2026-10-06 | `SPEC-001`: `SessionResult` e `GetCurrentSession` passam a expor `isFamilyCreator`, necessário para o cliente aplicar as proteções do Criador. |
 | 1.0 | 2026-10-05 | Contratos `/v1`, autenticação, projeções, erros, cobertura UC01–UC19 e RNF01–27. |

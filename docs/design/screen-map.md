@@ -1,8 +1,8 @@
-# Screen map — versão 1.1
+# Screen map — versão 1.2
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do mapa:** 1.1\
-**Base funcional:** 1.5\
+**Versão do mapa:** 1.2\
+**Base funcional:** 1.7\
 **Data:** 2026-10-05\
 **Situação:** referência inicial para design; organização de navegação proposta
 
@@ -242,7 +242,7 @@ A = Administrador (inclui Criador); M = Membro; K = Kids. Códigos RF e RNF são
 | TEL-010 | Minhas tarefas | A, M | Tela principal e inicial; checklist por data, estado e progresso diário ou semanal; abrir tarefa e criar | [UC11](../03-casos-de-uso.md#uc11); RF11, RF17, RF22, RF49 |
 | TEL-011 | Tarefas da família | A, M | Consultar tarefas de outros e sem responsável por data, com o mesmo carrossel de dias; abrir e criar | [UC07](../03-casos-de-uso.md#uc07), [UC12](../03-casos-de-uso.md#uc12); RF07–12 |
 | TEL-012 | Detalhe da tarefa | A, M | Título, peso, responsáveis, estado, origem em rotina; concluir, editar, excluir ou reabrir conforme regra | [UC07](../03-casos-de-uso.md#uc07), [UC12](../03-casos-de-uso.md#uc12), [UC17](../03-casos-de-uso.md#uc17); RF08–12, RF47, RF56–59 |
-| TEL-013 | Criar/editar tarefa ou rotina | A, M | Título, peso 1–3, data livre (padrão hoje), responsáveis e repetição com DatePicker inicial livre; identificar alcance e efeitos em concluídas | [UC07](../03-casos-de-uso.md#uc07), [UC08](../03-casos-de-uso.md#uc08); RF07–10, RF13–16 |
+| TEL-013 | Criar/editar tarefa ou rotina | A, M | Título (1–60 car.), peso 1–3, data livre (padrão hoje), responsáveis, observação opcional (até 250 car.) e repetição com DatePicker inicial livre; identificar alcance e efeitos em concluídas; editar tarefa Aguardando confirmação abre MOD-014 | [UC07](../03-casos-de-uso.md#uc07), [UC08](../03-casos-de-uso.md#uc08); RF07–10, RF13–16, RF69, RF70 |
 | TEL-014 | Retirada — carga incorporada à Família | — | Conteúdo incorporado à TEL-050; ID preservado, sem destino navegável | [UC13](../03-casos-de-uso.md#uc13); RF18–21, RF56–57 |
 | TEL-015 | Confirmações Kids | A | Fila de tarefas aguardando avaliação | [UC03](../03-casos-de-uso.md#uc03); RF25–26 |
 | TEL-016 | Avaliar sinalização | A | Responsáveis, criança que sinalizou, foto opcional; confirmar ou recusar | [UC03](../03-casos-de-uso.md#uc03); RF25–26, RF55–56 |
@@ -281,6 +281,7 @@ A = Administrador (inclui Criador); M = Membro; K = Kids. Códigos RF e RNF são
 | MOD-011 | Sinalizar realização | TEL-041 | Adicionar foto abre câmera; revisar/refazer/descartar; enviar ou cancelar; falha ou permissão negada permite seguir sem foto (UC15) |
 | MOD-012 | Confirmar aplicação do fuso | TEL-053 | Informativo de efeitos; aplicar imediatamente ou próximo ciclo, confirmar/cancelar; só Admin |
 | MOD-013 | Confirmar troca de acesso | Link de convite com sessão ativa | Confirmar segue ingresso; cancelar mantém acesso. Só substituir sessão local após ingresso válido, sem remover membro anterior |
+| MOD-014 | Resolver sinalização pendente | TEL-013, ao salvar edição | Obrigatório sobre tarefa Aguardando confirmação: retornar a Pendente (descarta sinalização) ou manter Aguardando confirmação com os dados editados (UC07) |
 
 ## 8. Estados que o design deve contemplar
 
@@ -291,7 +292,7 @@ A = Administrador (inclui Criador); M = Membro; K = Kids. Códigos RF e RNF são
 | TEL-001/002 | Apple cancelado ou com falha; dados obrigatórios inválidos; família já existente redireciona. |
 | TEL-003/034 | Senha incorreta, link inválido/consumido, perfil removido, geração com falha e ingresso concluído; não reutilizar convite consumido. |
 | TEL-010/040/050 | Sem tarefas no período; Pendente, Aguardando confirmação e Concluída; progresso apenas de conclusões válidas. Carrossel da criação da família até último dia do mês atual. |
-| TEL-011/012/013/032 | Lista vazia, inclusive membro sem tarefas no período; preservar filtro do membro e período no retorno; dados inválidos; sem responsáveis; compartilhada; origem em rotina; operação bloqueada por conquista ou vínculo com missão. |
+| TEL-011/012/013/032 | Lista vazia, inclusive membro sem tarefas no período; preservar filtro do membro e período no retorno; dados inválidos; sem responsáveis; compartilhada; origem em rotina; operação bloqueada por conquista ou vínculo com missão; editar tarefa Aguardando confirmação exige resolver a sinalização pendente (MOD-014). |
 | TEL-015/016 | Fila vazia, sinalização sem foto, foto indisponível e tarefa já decidida por outro adulto; atualizar estado e impedir decisão duplicada. |
 | TEL-050 | Dia/semana sem conclusões: informar ausência de carga, sem divisão por zero; distribuição sem ranking. |
 | TEL-020/021/022 | Sem missões; em andamento; concluída sem resgate; concluída com recompensa; seleção sem tarefas impede salvar. Conquista concluída não editável. |
@@ -319,6 +320,7 @@ Campos funcionais de data/fuso e seleção de foto estão definidos; o layout vi
 
 | Versão do mapa | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.2 | 1.7 | 2026-10-06 | TEL-013 ganha observação opcional e limite de título; MOD-014 (novo) resolve sinalização Kids pendente ao editar. Para SPEC-007. |
 | 1.1 | 1.5 | 2026-10-05 | TEL-053/054 e MOD-012/013; 26 telas ativas, 13 modais, fuso, badges, datas livres e acesso único. |
 | 1.0 | 1.4 | 2026-10-02 | Família concentra carga/progresso, lista e inclusão de membros e PDF; detalhe do membro com tarefas e ações permitidas. TEL-014/031 retiradas da navegação; 24 telas ativas, 2 IDs reservados e 11 modais. |
 | 1.0 | 1.3 | 2026-10-02 | Revisão durante elaboração: duas abas Kids, câmera direta, perfil para todos, períodos Dia/Semana, TEL-051/052; 26 telas e 11 modais. |

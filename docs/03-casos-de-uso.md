@@ -1,8 +1,8 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.5\
-**Data:** 2026-10-05\
+**Versão:** 1.6\
+**Data:** 2026-10-06\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -301,8 +301,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Tarefas e rotina](04-diagramas-de-caso-de-uso.md#03-tarefas-rotina)
 
-**Requisitos funcionais:** [RF07](02-requisitos.md#rf07), [RF08](02-requisitos.md#rf08), [RF09](02-requisitos.md#rf09), [RF10](02-requisitos.md#rf10), [RF15](02-requisitos.md#rf15), [RF16](02-requisitos.md#rf16), [RF27](02-requisitos.md#rf27), [RF58](02-requisitos.md#rf58), [RF59](02-requisitos.md#rf59)  
-**Regras relacionadas:** [RN11](01-regras-de-negocio.md#rn11), [RN12](01-regras-de-negocio.md#rn12), [RN13](01-regras-de-negocio.md#rn13), [RN17](01-regras-de-negocio.md#rn17), [RN18](01-regras-de-negocio.md#rn18), [RN19](01-regras-de-negocio.md#rn19), [RN20](01-regras-de-negocio.md#rn20), [RN30](01-regras-de-negocio.md#rn30), [RN38](01-regras-de-negocio.md#rn38), [RN50](01-regras-de-negocio.md#rn50), [RN53](01-regras-de-negocio.md#rn53), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59)  
+**Requisitos funcionais:** [RF07](02-requisitos.md#rf07), [RF08](02-requisitos.md#rf08), [RF09](02-requisitos.md#rf09), [RF10](02-requisitos.md#rf10), [RF15](02-requisitos.md#rf15), [RF16](02-requisitos.md#rf16), [RF27](02-requisitos.md#rf27), [RF58](02-requisitos.md#rf58), [RF59](02-requisitos.md#rf59), [RF69](02-requisitos.md#rf69), [RF70](02-requisitos.md#rf70)  
+**Regras relacionadas:** [RN11](01-regras-de-negocio.md#rn11), [RN12](01-regras-de-negocio.md#rn12), [RN13](01-regras-de-negocio.md#rn13), [RN17](01-regras-de-negocio.md#rn17), [RN18](01-regras-de-negocio.md#rn18), [RN19](01-regras-de-negocio.md#rn19), [RN20](01-regras-de-negocio.md#rn20), [RN30](01-regras-de-negocio.md#rn30), [RN38](01-regras-de-negocio.md#rn38), [RN50](01-regras-de-negocio.md#rn50), [RN53](01-regras-de-negocio.md#rn53), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59), [RN66](01-regras-de-negocio.md#rn66), [RN67](01-regras-de-negocio.md#rn67)  
 **Requisitos não funcionais:** [RNF01](02-requisitos.md#rnf01), [RNF02](02-requisitos.md#rnf02), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF08](02-requisitos.md#rnf08), [RNF09](02-requisitos.md#rnf09), [RNF10](02-requisitos.md#rnf10), [RNF11](02-requisitos.md#rnf11), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF14](02-requisitos.md#rnf14), [RNF22](02-requisitos.md#rnf22), [RNF25](02-requisitos.md#rnf25)
 
 **Objetivo:** criar, editar, atribuir, reatribuir e excluir tarefas conforme seu estado.
@@ -315,8 +315,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 **Fluxo principal — Criar tarefa:**
 
 1. O usuário seleciona criar tarefa.
-2. Informa o título e o peso: 1 para pouco esforço, 2 para médio e 3 para alto.
-3. Escolhe a data prevista, inicialmente hoje, sem restrição de passado/futuro ou criação da família, e opcionalmente seleciona responsáveis.
+2. Informa o título (1 a 60 caracteres visíveis) e o peso: 1 para pouco esforço, 2 para médio e 3 para alto.
+3. Escolhe a data prevista, inicialmente hoje, sem restrição de passado/futuro ou criação da família, e opcionalmente seleciona responsáveis e uma observação de até 250 caracteres.
 4. Escolhe tarefa única ou configura uma rotina pelo [UC08](03-casos-de-uso.md#uc08).
 5. Confirma o cadastro.
 6. O sistema valida os dados e salva a tarefa ou a rotina.
@@ -329,8 +329,9 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 - Uma tarefa concluída não pode ser excluída diretamente. O sistema informa que, se vinculada a missão em andamento e não protegida por missão concluída, somente um Administrador pode retorná-la a Pendente pelo [UC17](03-casos-de-uso.md#uc17) antes da exclusão.
 - Ao excluir tarefa não concluída vinculada a missão em andamento, o sistema remove o vínculo e recalcula o progresso. Se ela for a única tarefa da missão, bloqueia a exclusão até que outra tarefa seja vinculada.
 - O sistema impede excluir ou alterar uma tarefa quando isso modificar dados preservados de uma missão concluída.
-- Título ausente, peso fora de 1 a 3 e operações de gerenciamento por Kids são rejeitados.
-- Concluída sem proteção admite edição individual de título, peso, data e responsáveis. Informar os efeitos: créditos e progresso são recalculados, instante original da conclusão e auditoria são preservados. Sem responsáveis, não há crédito individual. Última edição válida efetivada no servidor prevalece, sem comparação de versão antiga (RN17).
+- Título ausente, com mais de 60 caracteres visíveis ou peso fora de 1 a 3 e operações de gerenciamento por Kids são rejeitados.
+- Concluída sem proteção admite edição individual de título, peso, data, responsáveis e observação. Informar os efeitos: créditos e progresso são recalculados, instante original da conclusão e auditoria são preservados. Sem responsáveis, não há crédito individual. Última edição válida efetivada no servidor prevalece, sem comparação de versão antiga (RN17).
+- Editar uma tarefa Aguardando confirmação exige escolher, no mesmo salvamento, entre retornar a Pendente — descartando a sinalização corrente da criança — ou manter Aguardando confirmação com os dados atualizados e a sinalização corrente intacta (RN66). Excluir uma tarefa Aguardando confirmação remove a sinalização corrente junto com a tarefa, sem registrar confirmação ou recusa.
 
 **Pós-condição:** a alteração permitida foi salva, sem exclusão direta de tarefas concluídas nem modificação de conquistas preservadas.
 
@@ -836,6 +837,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.6 | 2026-10-06 | UC07 passa a citar o limite de título (1–60 caracteres), a observação opcional (RN67/RF70) e a escolha entre Pendente e Aguardando confirmação ao editar tarefa sinalizada, com remoção da sinalização ao excluir (RN66/RF69). Para SPEC-007. |
 | 1.5 | 2026-10-05 | Pendências consolidadas: fuso, datas livres, edição de concluídas, participações/badges, convites e sessão única; RF67/68; arquitetura, modelo e design 1.1. |
 | 1.4 | 2026-10-02 | Família concentra indicadores, lista, inclusão de membros e PDF; detalhe do membro reúne tarefas Dia/Semana, edição e reenvio quando permitidos. RN60–61, RF60–61/RF66 e UC02/11/13/18 revisados. |
 | 1.3 | 2026-10-02 | Duas abas Kids, câmera direta, foto/apelido e badges, progresso/carga Dia/Semana, PDF semanal e reconhecimento com WhatsApp; RN61–65, RF61–66, RNF26–27 e UC18–19. Empates e visibilidade do apelido confirmados. |

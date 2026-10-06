@@ -1,6 +1,6 @@
 # Catálogo de funcionalidades e rastreabilidade mobile
 
-**Versão:** 1.2 · **Base funcional:** 1.5 · **Design:** 1.1\
+**Versão:** 1.3 · **Base funcional:** 1.7 · **Design:** 1.2\
 **Data:** 2026-10-05 · **Situação:** especificação para implementação futura
 
 [Arquitetura mobile](mobile-architecture.md) · [Decisões](mobile-decisions.md) · [Índice documental](../DOCUMENTACAO.md) · [Screen map](../design/screen-map.md) · [User flows](../design/user-flows.md)
@@ -83,6 +83,7 @@ Modais não se tornam automaticamente novos casos de uso ou novas ViewModels. Se
 | MOD-011 | `KidsSignalComposerView.swift` | `KidsSignalComposerViewModel`; captura, revisão, upload e sinalização |
 | MOD-012 | `TimeZoneChangeConfirmationView.swift` | `FamilySettingsViewModel`; informativo e aplicação imediata/próximo ciclo |
 | MOD-013 | `AccessSwitchConfirmationView.swift` | `JoinInviteViewModel`; confirma troca; mantém sessão antiga até ingresso válido |
+| MOD-014 | `SignalResolutionView.swift` | `TaskEditorViewModel`/`TaskDetailViewModel`; exigido ao salvar edição sobre tarefa Aguardando confirmação: retornar a Pendente ou manter Aguardando confirmação |
 
 `SheetRoute` e `ConfirmationRoute` pertencem à apresentação, com um destino ativo por fluxo. Fechar um modal restaura sua origem. Confirmar reabertura e depois cancelar exclusão não desfaz a reabertura já salva (UF-08).
 
@@ -98,7 +99,7 @@ Modais não se tornam automaticamente novos casos de uso ou novas ViewModels. Se
 | [UC04](../03-casos-de-uso.md#uc04) | `SignInWithAppleUseCase` | TEL-001 | [UF-01](../design/user-flows.md#uf-01), [UF-03](../design/user-flows.md#uf-03) | RF37/39; RN44; RNF15/16 |
 | [UC05](../03-casos-de-uso.md#uc05) | `CreateMissionUseCase`, `UpdateMissionUseCase`, `GetMissionTaskOptionsUseCase` | TEL-020/021/022; MOD-007 | [UF-10](../design/user-flows.md#uf-10) | RF28/29/31/32/50/58; RN35–40/50/51/58/64 |
 | [UC06](../03-casos-de-uso.md#uc06) | `GetRewardItemsUseCase`, `AddRewardItemUseCase` | TEL-023; MOD-008 | [UF-11](../design/user-flows.md#uf-11) | RF33/34; RN41/42 |
-| [UC07](../03-casos-de-uso.md#uc07) | `CreateTaskUseCase`, `UpdateTaskUseCase`, `DeleteTaskUseCase`, `GetTaskDetailUseCase` | TEL-011/012/013; MOD-001/003/005 | [UF-05](../design/user-flows.md#uf-05), [UF-08](../design/user-flows.md#uf-08) | RF07–10/15/16/27/58/59; RN11–13/17–20/50/58/59 |
+| [UC07](../03-casos-de-uso.md#uc07) | `CreateTaskUseCase`, `UpdateTaskUseCase`, `DeleteTaskUseCase`, `GetTaskDetailUseCase` | TEL-011/012/013; MOD-001/003/005/014 | [UF-05](../design/user-flows.md#uf-05), [UF-08](../design/user-flows.md#uf-08) | RF07–10/15/16/27/58/59/69/70; RN11–13/17–20/50/58/59/66/67 |
 | [UC08](../03-casos-de-uso.md#uc08) | `CreateRoutineUseCase`, `UpdateRoutineUseCase`, `DeleteFutureTasksUseCase` | TEL-013; MOD-002/003 | [UF-05](../design/user-flows.md#uf-05) | RF13/14; RN14/16–18 |
 | [UC09](../03-casos-de-uso.md#uc09) | `InspectInviteUseCase`, `JoinInviteUseCase`, `RestoreSessionUseCase` | TEL-003/004; MOD-013 | [UF-02](../design/user-flows.md#uf-02), [UF-03](../design/user-flows.md#uf-03) | RF42–46/54/68; RN09/10/45–47; RNF17–22 |
 | [UC10](../03-casos-de-uso.md#uc10) | `GetOwnProfileUseCase`, `UpdateOwnProfileUseCase`, `GetOwnBadgesUseCase`, `GetBadgeContributionsUseCase` | TEL-030/054; MOD-009 | [UF-13](../design/user-flows.md#uf-13) | RF48/62/65; RN63/64; RNF27 |
@@ -165,6 +166,7 @@ Os contratos remotos e sua cobertura por UC estão no [catálogo backend](backen
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.3 | 2026-10-06 | MOD-014 (novo) resolve sinalização Kids pendente ao editar tarefa; TEL-013 ganha campo de observação; título limitado a 60 caracteres. Para SPEC-007; base funcional 1.7, design 1.2. |
 | 1.2 | 2026-10-05 | Integração com arquitetura backend 1.0 em Node.js, contratos `/v1`, bootstrap, preparação de rotinas e referências; base funcional 1.5 preservada. |
 | 1.1 | 2026-10-05 | Base 1.5; 26 telas, 13 modais, 16 fluxos; configurações de fuso, detalhe de badge, troca de acesso e responsabilidades atualizadas. |
 | 1.0 | 2026-10-05 | Fronteiras de 11 funcionalidades, catálogo de 24 telas e 11 modais, cobertura UC01–UC19/UF-01–UF-15 e RNF01–27, com nomes técnicos em inglês. |

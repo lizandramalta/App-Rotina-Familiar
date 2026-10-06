@@ -1,9 +1,9 @@
-# Diagrama de classes — versão 1.2
+# Diagrama de classes — versão 1.3
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.2\
-**Base funcional:** 1.5\
-**Data:** 2026-10-05  
+**Versão:** 1.3\
+**Base funcional:** 1.7\
+**Data:** 2026-10-06  
 **Situação:** referência de modelagem da base funcional
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Modelo de dados](05-modelo-de-dados.md)
@@ -50,7 +50,7 @@ Os RF e RN são os vínculos declarados em cada UC na base funcional. A lista de
 | <a id="rastreio-uc04"></a>[UC04](03-casos-de-uso.md#uc04) — Autenticar com Apple | [AppleAuthenticating](#classe-appleauthenticating), [AccessService](#classe-accessservice), [Family](#classe-family), [Member](#classe-member) , [AppleAuthorizationProof](#classe-appleauthorizationproof) | [RF37](02-requisitos.md#rf37), [RF39](02-requisitos.md#rf39) | [RN44](01-regras-de-negocio.md#rn44) |
 | <a id="rastreio-uc05"></a>[UC05](03-casos-de-uso.md#uc05) — Gerenciar missões | [Mission](#classe-mission), [MissionStatus](#classe-missionstatus), [FamilyTask](#classe-familytask), [Badge](#classe-badge), [BadgeAward](#classe-badgeaward), [MissionService](#classe-missionservice) , [MissionParticipation](#classe-missionparticipation) | [RF28](02-requisitos.md#rf28), [RF29](02-requisitos.md#rf29), [RF31](02-requisitos.md#rf31), [RF32](02-requisitos.md#rf32), [RF50](02-requisitos.md#rf50), [RF58](02-requisitos.md#rf58) | [RN16](01-regras-de-negocio.md#rn16), [RN35](01-regras-de-negocio.md#rn35), [RN36](01-regras-de-negocio.md#rn36), [RN37](01-regras-de-negocio.md#rn37), [RN38](01-regras-de-negocio.md#rn38), [RN39](01-regras-de-negocio.md#rn39), [RN40](01-regras-de-negocio.md#rn40), [RN50](01-regras-de-negocio.md#rn50), [RN51](01-regras-de-negocio.md#rn51), [RN53](01-regras-de-negocio.md#rn53), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59), [RN64](01-regras-de-negocio.md#rn64) |
 | <a id="rastreio-uc06"></a>[UC06](03-casos-de-uso.md#uc06) — Gerenciar itens de recompensas coletivas | [RewardItem](#classe-rewarditem), [RewardItemSource](#classe-rewarditemsource) | [RF33](02-requisitos.md#rf33), [RF34](02-requisitos.md#rf34) | [RN41](01-regras-de-negocio.md#rn41), [RN42](01-regras-de-negocio.md#rn42) |
-| <a id="rastreio-uc07"></a>[UC07](03-casos-de-uso.md#uc07) — Gerenciar tarefas | [FamilyTask](#classe-familytask), [EffortWeight](#classe-effortweight), [TaskStatus](#classe-taskstatus), [TaskService](#classe-taskservice), [ChangeScope](#classe-changescope), [Routine](#classe-routine) | [RF07](02-requisitos.md#rf07), [RF08](02-requisitos.md#rf08), [RF09](02-requisitos.md#rf09), [RF10](02-requisitos.md#rf10), [RF15](02-requisitos.md#rf15), [RF16](02-requisitos.md#rf16), [RF27](02-requisitos.md#rf27), [RF58](02-requisitos.md#rf58), [RF59](02-requisitos.md#rf59) | [RN11](01-regras-de-negocio.md#rn11), [RN12](01-regras-de-negocio.md#rn12), [RN13](01-regras-de-negocio.md#rn13), [RN17](01-regras-de-negocio.md#rn17), [RN18](01-regras-de-negocio.md#rn18), [RN19](01-regras-de-negocio.md#rn19), [RN20](01-regras-de-negocio.md#rn20), [RN30](01-regras-de-negocio.md#rn30), [RN38](01-regras-de-negocio.md#rn38), [RN50](01-regras-de-negocio.md#rn50), [RN53](01-regras-de-negocio.md#rn53), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59) |
+| <a id="rastreio-uc07"></a>[UC07](03-casos-de-uso.md#uc07) — Gerenciar tarefas | [FamilyTask](#classe-familytask), [EffortWeight](#classe-effortweight), [TaskStatus](#classe-taskstatus), [SignalResolution](#classe-signalresolution), [TaskService](#classe-taskservice), [ChangeScope](#classe-changescope), [Routine](#classe-routine) | [RF07](02-requisitos.md#rf07), [RF08](02-requisitos.md#rf08), [RF09](02-requisitos.md#rf09), [RF10](02-requisitos.md#rf10), [RF15](02-requisitos.md#rf15), [RF16](02-requisitos.md#rf16), [RF27](02-requisitos.md#rf27), [RF58](02-requisitos.md#rf58), [RF59](02-requisitos.md#rf59), [RF69](02-requisitos.md#rf69), [RF70](02-requisitos.md#rf70) | [RN11](01-regras-de-negocio.md#rn11), [RN12](01-regras-de-negocio.md#rn12), [RN13](01-regras-de-negocio.md#rn13), [RN17](01-regras-de-negocio.md#rn17), [RN18](01-regras-de-negocio.md#rn18), [RN19](01-regras-de-negocio.md#rn19), [RN20](01-regras-de-negocio.md#rn20), [RN30](01-regras-de-negocio.md#rn30), [RN38](01-regras-de-negocio.md#rn38), [RN50](01-regras-de-negocio.md#rn50), [RN53](01-regras-de-negocio.md#rn53), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59), [RN66](01-regras-de-negocio.md#rn66), [RN67](01-regras-de-negocio.md#rn67) |
 | <a id="rastreio-uc08"></a>[UC08](03-casos-de-uso.md#uc08) — Definir recorrência de rotina | [Routine](#classe-routine), [RoutineFrequency](#classe-routinefrequency), [FamilyTask](#classe-familytask), [TaskService](#classe-taskservice), [ChangeScope](#classe-changescope) | [RF13](02-requisitos.md#rf13), [RF14](02-requisitos.md#rf14) | [RN11](01-regras-de-negocio.md#rn11), [RN14](01-regras-de-negocio.md#rn14), [RN16](01-regras-de-negocio.md#rn16), [RN17](01-regras-de-negocio.md#rn17) |
 | <a id="rastreio-uc09"></a>[UC09](03-casos-de-uso.md#uc09) — Ingressar por convite | [Invite](#classe-invite), [InviteStatus](#classe-invitestatus), [Session](#classe-session), [AccessService](#classe-accessservice), [InviteCredentials](#classe-invitecredentials) | [RF42](02-requisitos.md#rf42), [RF43](02-requisitos.md#rf43), [RF44](02-requisitos.md#rf44), [RF45](02-requisitos.md#rf45), [RF46](02-requisitos.md#rf46), [RF54](02-requisitos.md#rf54), [RF68](02-requisitos.md#rf68) | [RN09](01-regras-de-negocio.md#rn09), [RN10](01-regras-de-negocio.md#rn10), [RN45](01-regras-de-negocio.md#rn45), [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47) |
 | <a id="rastreio-uc10"></a>[UC10](03-casos-de-uso.md#uc10) — Editar perfil | [Member](#classe-member), [BadgeAward](#classe-badgeaward), [Badge](#classe-badge), [MemberService](#classe-memberservice), [MissionService](#classe-missionservice) , [BadgeTier](#classe-badgetier) | [RF48](02-requisitos.md#rf48), [RF62](02-requisitos.md#rf62), [RF65](02-requisitos.md#rf65) | [RN33](01-regras-de-negocio.md#rn33), [RN63](01-regras-de-negocio.md#rn63), [RN64](01-regras-de-negocio.md#rn64) |
@@ -340,7 +340,8 @@ case editOwnProfile, configureFamilyTimeZone, switchAccessByInvite
 case permissionDenied
 case creatorProtected
 case administratorInKidsMode
-case titleRequired, invalidWeight
+case titleRequired, titleTooLong, invalidWeight, noteTooLong
+case signalResolutionRequired
 case completedTaskNotDeletable
 case completedMissionProtected
 case missionWithoutTasks
@@ -401,6 +402,7 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 + routineID: UUID?
 + title: String
 + weight: EffortWeight
++ note: String?
 + date: LocalDate
 + originKey: String
 + assigneeIDs: Set<UUID>
@@ -410,8 +412,8 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 + isUnassigned: Bool { get }
 + currentCompletion: Completion? { get }
 + pendingSignal: KidsSignal? { get }
-+ edit(title: String, weight: EffortWeight, date: LocalDate, by actor: Member,
-      missions: [Mission]) throws
++ edit(title: String, weight: EffortWeight, date: LocalDate, note: String?, by actor: Member,
+      missions: [Mission], signalResolution: SignalResolution?) throws
 + assign(_ ids: Set<UUID>, by actor: Member, missions: [Mission]) throws
 + complete(by actor: Member, takeOver: Bool) throws -> Completion
 + signal(by kid: Member, photo: URL?) throws -> KidsSignal
@@ -419,9 +421,10 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 + rejectSignal(by admin: Member) throws
 + reopen(by admin: Member, missions: [Mission]) throws
 + canDelete(missions: [Mission]) -> Bool
++ delete(by actor: Member, missions: [Mission]) throws
 ```
 
-**Restrições:** Estado único e peso 1–3. DatePicker de cadastro/edição sem limites de produto, inclusive antes da criação da família. Adultos concluem; Kids responsáveis sinalizam pendente. Decisões disputam estado atual sem duplicação. Concluída sem missão concluída pode ser editada: crédito/progresso se adaptam e auditoria é preservada; data prevista não muda instante de conclusão. Sem responsáveis, continua concluída sem crédito individual. Última edição válida no servidor prevalece. Reabertura só Admin com missão em andamento e nenhuma concluída, desfazendo crédito uma vez. RN11/17/23/24/55/57/58.
+**Restrições:** Estado único e peso 1–3; título com 1–60 caracteres visíveis após trim; `note` opcional com até 250 caracteres. DatePicker de cadastro/edição sem limites de produto, inclusive antes da criação da família. Adultos concluem; Kids responsáveis sinalizam pendente. Decisões disputam estado atual sem duplicação. Concluída sem missão concluída pode ser editada: crédito/progresso se adaptam e auditoria é preservada; data prevista não muda instante de conclusão. Sem responsáveis, continua concluída sem crédito individual. Última edição válida no servidor prevalece. Editar com `pendingSignal` presente exige `signalResolution`: `resetToPending` descarta o sinal e volta a `pending`; `keepAwaitingConfirmation` preserva o sinal corrente. `delete` com `pendingSignal` presente remove o sinal junto da tarefa, sem decisão. Reabertura só Admin com missão em andamento e nenhuma concluída, desfazendo crédito uma vez. RN11/17/23/24/55/57/58/66/67.
 
 <a id="classe-taskstatus"></a>
 ### TaskStatus: String, Codable «enum»
@@ -433,6 +436,18 @@ case pending
 case awaitingConfirmation
 case completed
 ```
+
+<a id="classe-signalresolution"></a>
+### SignalResolution: String, Codable «enum»
+
+**Rastreabilidade:** [UC07](#rastreio-uc07).
+
+```swift
+case resetToPending
+case keepAwaitingConfirmation
+```
+
+Obrigatório em `FamilyTask.edit(...)` quando `pendingSignal` não é `nil`, independentemente de quais outros campos mudaram (RN66).
 
 <a id="classe-effortweight"></a>
 ### EffortWeight: Int, Codable «enum»
@@ -1332,6 +1347,7 @@ A âncora anterior desta seção foi preservada para compatibilidade. O backend 
 
 | Versão | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.3 | 1.7 | 2026-10-06 | `FamilyTask` ganha `note` (opcional, ≤250) e exige `SignalResolution` (novo enum) ao editar com sinal pendente; `title` limitado a 60 caracteres; `DomainError` ganha `titleTooLong`, `noteTooLong` e `signalResolutionRequired`. Para SPEC-007. |
 | 1.2 | 1.5 | 2026-10-05 | Tradução para backend Node.js, identidade de bootstrap e tokens subordinados à sessão; contratos e correspondência ao DER 1.2. |
 | 1.1 | 1.5 | 2026-10-05 | Contratos de sessão única, edições com auditoria, ciclos/fuso, participação, badges por marcos e notificações persistentes. |
 | 1.0 | 1.4 | 2026-10-05 | Primeira versão do diagrama de classes: tipos, contratos, relacionamentos e rastreabilidade com UC01–UC19, RF, RN e RNF da base funcional vigente. |
