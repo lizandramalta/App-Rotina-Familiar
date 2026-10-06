@@ -1,7 +1,7 @@
 # UX Spec 001: Autenticar com Apple
 
-**Status:** rascunho
-**Autor:** Ana Luísa Coleone | **Criada em:** 2026-10-06 | **Aprovada por:** | **Em:**
+**Status:** aprovada
+**Autor:** Ana Luísa Coleone | **Criada em:** 2026-10-06 | **Aprovada por:** Ana Luísa Coleone | **Em:** 2026-10-06
 **Spec funcional vinculada:** [SPEC-001-autenticar-com-apple.md](SPEC-001-autenticar-com-apple.md)
 **Base funcional:** 1.5
 **Superfícies de interface:** TEL-001

@@ -1,7 +1,7 @@
 # Spec 001: Autenticar com Apple
 
-**Status:** rascunho
-**Autor:** Ana Luísa Coleone | **Criada em:** 2026-10-06 | **Aprovada por:** | **Em:**
+**Status:** aprovada
+**Autor:** Ana Luísa Coleone | **Criada em:** 2026-10-06 | **Aprovada por:** Ana Luísa Coleone | **Em:** 2026-10-06
 **Base funcional:** 1.5
 **UX-spec:** [UX-001-autenticar-com-apple.md](UX-001-autenticar-com-apple.md)
 **Projetos envolvidos:** ambos
@@ -268,7 +268,7 @@ Todos os erros utilizam `Content-Type: application/problem+json`.
 | E-02 | O TTL do `creationGrant` era só uma proposta em `backend-architecture.md` (dez minutos), sem decisão `BA` confirmada. | Confirmado em 10 minutos; registrado como `BA-21`. | Ana Luísa Coleone / 2026-10-06 | Sim — `docs/architecture/backend-decisions.md` (BA-21, v1.1) e `docs/architecture/backend-architecture.md` (§8) atualizados nesta aprovação. |
 | E-03 | RN09 descreve o redirecionamento do Criador para a família existente (passo 5 de UC04), mas só é citada por UC01/UC09 na base funcional. Entra na rastreabilidade de `SPEC-001`? | Não. RN09 fica reservada para `SPEC-002`; `SPEC-001` cita apenas RN44. | Ana Luísa Coleone / 2026-10-06 | Não |
 | E-04 | Não havia convenção prévia de nomes de campo/header (`identityToken`, `authorizationCode`, `rawNonce`, `X-Installation-Proof`) nem de códigos de erro estáveis (`APPLE_PROOF_INVALID` etc.) para esta rota. | Aprovados os nomes propostos nesta spec; passam a ser a convenção inicial do módulo `Access` para as specs seguintes do Tema 1. | Ana Luísa Coleone / 2026-10-06 | Não |
-| E-05 | `SessionResult` (`backend-contracts.md`) não lista `isFamilyCreator`, mas a UI precisa saber disso para aplicar as proteções do Criador. | Aprovado incluir `isFamilyCreator` em `SessionResult` e em `GetCurrentSession`. | Ana Luísa Coleone / 2026-10-06 | Não |
+| E-05 | `SessionResult` (`backend-contracts.md`) não lista `isFamilyCreator`, mas a UI precisa saber disso para aplicar as proteções do Criador. | Aprovado incluir `isFamilyCreator` em `SessionResult` e em `GetCurrentSession`. | Ana Luísa Coleone / 2026-10-06 | Sim — `docs/architecture/backend-contracts.md` (v1.1) atualizado nesta aprovação. |
 
 ## 10. Fases de Implementação e Critérios de Conclusão
 

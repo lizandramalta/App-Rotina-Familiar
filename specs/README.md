@@ -69,7 +69,7 @@ planejada antes, mas não deve depender de comportamento ainda indisponível.
 
 | Spec planejada | UC principal | Projetos | Depende de | Status |
 |---|---|---|---|---|
-| [`SPEC-001-autenticar-com-apple`](SPEC-001-autenticar-com-apple.md) - Autenticar com Apple | UC04 | ambos | - | rascunho |
+| [`SPEC-001-autenticar-com-apple`](SPEC-001-autenticar-com-apple.md) - Autenticar com Apple | UC04 | ambos | - | aprovada |
 | `SPEC-002-criar-configurar-familia` - Criar e configurar família | UC01 | ambos | SPEC-001 | não criada |
 | `SPEC-003-gerenciar-membros` - Gerenciar membros | UC02 | ambos | SPEC-002 | não criada |
 | `SPEC-004-gerar-reenviar-convite` - Gerar e reenviar convite | UC02 | ambos | SPEC-003 | não criada |
@@ -115,13 +115,12 @@ Administradores. Ela cobre TEL-002, TEL-053 e MOD-012; não há uma SPEC-021 sep
 
 ## Índice de arquivos
 
-Os arquivos ainda não foram criados. Ao iniciar uma entrega, inclua neste índice a
-SPEC e sua UX-spec com seus links, status e resumo; mantenha esta tabela como o
-panorama do backlog.
+Ao iniciar uma entrega, inclua neste índice a SPEC e sua UX-spec com seus links,
+status e resumo; mantenha esta tabela como o panorama do backlog.
 
 | Spec | UX-spec | Status | Projetos | Resumo |
 |---|---|---|---|---|
-| [SPEC-001-autenticar-com-apple](SPEC-001-autenticar-com-apple.md) | [UX-001-autenticar-com-apple](UX-001-autenticar-com-apple.md) | rascunho | ambos | Login nativo Apple do Criador, emissão de sessão ou `creationGrant`, e ciclo de vida da sessão (consulta, renovação, revogação). |
+| [SPEC-001-autenticar-com-apple](SPEC-001-autenticar-com-apple.md) | [UX-001-autenticar-com-apple.md](UX-001-autenticar-com-apple.md) | aprovada | ambos | Login nativo Apple do Criador, emissão de sessão ou `creationGrant`, e ciclo de vida da sessão (consulta, renovação, revogação). |
 
 ## Templates
 
