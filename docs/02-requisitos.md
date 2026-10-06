@@ -1,7 +1,7 @@
 # Requisitos funcionais e não funcionais
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.6\
+**Versão:** 1.7\
 **Data:** 2026-10-06\
 **Situação:** base documental consolidada
 
@@ -27,14 +27,14 @@ O sistema deve criar a família e atribuir ao criador o perfil Administrador e a
 
 ### RF02
 
-O sistema deve permitir somente a Administradores adicionar membros à família, criando os perfis que serão utilizados para o ingresso por convite.
+O sistema deve permitir somente a Administradores adicionar membros à família, criando os perfis que serão utilizados para o ingresso por convite. O nome administrativo é obrigatório e, após remover espaços nas extremidades, deve ter de 1 a 60 caracteres Unicode visíveis, sem caracteres de controle.
 
 **Regras de negócio:** [RN07](01-regras-de-negocio.md#rn07)  
 **Casos de uso:** [UC02](03-casos-de-uso.md#uc02)
 
 ### RF03
 
-O sistema deve permitir somente a Administradores editar os dados e o perfil de outros membros, respeitando as condições de promoção, rebaixamento e ativação ou desativação do Modo Kids.
+O sistema deve permitir somente a Administradores editar os dados e o perfil de outros membros, respeitando as condições de promoção, rebaixamento e ativação ou desativação do Modo Kids. A edição do nome administrativo deve obedecer à validação de RF02.
 
 **Regras de negócio:** [RN02](01-regras-de-negocio.md#rn02), [RN03](01-regras-de-negocio.md#rn03), [RN07](01-regras-de-negocio.md#rn07), [RN08](01-regras-de-negocio.md#rn08)  
 **Casos de uso:** [UC02](03-casos-de-uso.md#uc02)
@@ -293,7 +293,7 @@ O sistema deve vincular a família ao identificador Apple do Criador obtido no f
 
 ### RF40
 
-O sistema deve permitir somente a Administradores criar os perfis dos demais membros antes do ingresso no aplicativo, inclusive perfis Kids. O perfil criado deve ser utilizado na geração do convite correspondente.
+O sistema deve permitir somente a Administradores criar os perfis dos demais membros antes do ingresso no aplicativo, nos papéis Administrador, Membro ou Kids. O perfil criado deve ser utilizado na geração do convite correspondente.
 
 **Regras de negócio:** [RN07](01-regras-de-negocio.md#rn07), [RN45](01-regras-de-negocio.md#rn45)  
 **Casos de uso:** [UC02](03-casos-de-uso.md#uc02)
@@ -752,6 +752,7 @@ A configuração de apelido deve ser protegida por titularidade no backend, incl
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.7 | 2026-10-06 | RF02, RF03 e RF40 passam a definir o nome administrativo de membro e os papéis permitidos na criação, para elaboração de SPEC-003. |
 | 1.6 | 2026-10-06 | RF01 passa a definir o nome obrigatório da família: 1–60 caracteres Unicode visíveis após trim, sem caracteres de controle; decisão registrada na aprovação de SPEC-002. |
 | 1.5 | 2026-10-05 | Pendências consolidadas: fuso, datas livres, edição de concluídas, participações/badges, convites e sessão única; RF67/68; arquitetura, modelo e design 1.1. |
 | 1.4 | 2026-10-02 | Família concentra indicadores, lista, inclusão de membros e PDF; detalhe do membro reúne tarefas Dia/Semana, edição e reenvio quando permitidos. RN60–61, RF60–61/RF66 e UC02/11/13/18 revisados. |

@@ -56,7 +56,7 @@ da experiência. Isso permite evoluir o visual sem perder decisões, estados e t
 
 ## Mapa de implementação
 
-**Base funcional:** 1.6 (2026-10-06)
+**Base funcional:** 1.7 (2026-10-06)
 
 **Convenção de status:** `não criada` indica apenas uma entrega planejada; os status
 do template passam a valer depois que o arquivo da spec existir.
@@ -70,8 +70,8 @@ planejada antes, mas não deve depender de comportamento ainda indisponível.
 | Spec planejada | UC principal | Projetos | Depende de | Status |
 |---|---|---|---|---|
 | [`SPEC-001-autenticar-com-apple`](SPEC-001-autenticar-com-apple.md) - Autenticar com Apple | UC04 | ambos | - | aprovada |
-| `SPEC-002-criar-configurar-familia` - Criar e configurar família | UC01 | ambos | SPEC-001 | não criada |
-| `SPEC-003-gerenciar-membros` - Gerenciar membros | UC02 | ambos | SPEC-002 | não criada |
+| [`SPEC-002-criar-configurar-familia`](SPEC-002-criar-configurar-familia.md) - Criar e configurar família | UC01 | ambos | SPEC-001 | aprovada |
+| [`SPEC-003-gerenciar-membros`](SPEC-003-gerenciar-membros.md) - Gerenciar membros | UC02 | ambos | SPEC-002 | aprovada |
 | `SPEC-004-gerar-reenviar-convite` - Gerar e reenviar convite | UC02 | ambos | SPEC-003 | não criada |
 | `SPEC-005-ingressar-por-convite` - Ingressar por convite | UC09 | ambos | SPEC-004 | não criada |
 | `SPEC-006-editar-perfil` - Editar perfil e consultar badges | UC10 | ambos | SPEC-003, SPEC-014 | não criada |
@@ -122,6 +122,7 @@ status e resumo; mantenha esta tabela como o panorama do backlog.
 |---|---|---|---|---|
 | [SPEC-001-autenticar-com-apple](SPEC-001-autenticar-com-apple.md) | [UX-001-autenticar-com-apple.md](UX-001-autenticar-com-apple.md) | aprovada | ambos | Login nativo Apple do Criador, emissão de sessão ou `creationGrant`, e ciclo de vida da sessão (consulta, renovação, revogação). |
 | [SPEC-002-criar-configurar-familia](SPEC-002-criar-configurar-familia.md) | [UX-002-criar-configurar-familia.md](UX-002-criar-configurar-familia.md) | aprovada | ambos | Criação atômica da família pelo Criador e configuração autorizada do fuso familiar. |
+| [SPEC-003-gerenciar-membros](SPEC-003-gerenciar-membros.md) | [UX-003-gerenciar-membros](UX-003-gerenciar-membros.md) | aprovada | ambos | Criação e gestão autorizada de membros, papéis, modo Kids e remoção preservando histórico. |
 
 ## Templates
 
