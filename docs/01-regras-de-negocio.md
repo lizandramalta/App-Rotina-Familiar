@@ -1,7 +1,7 @@
 # Regras de negócio
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.8\
+**Versão:** 1.9\
 **Data:** 2026-10-06\
 **Situação:** base documental consolidada
 
@@ -169,7 +169,7 @@ Administradores e Membros gerenciam tarefas: criam, editam, excluem, atribuem e 
 
 ## RN21
 
-Administradores e Membros podem concluir tarefas da família, ainda que não sejam responsáveis. Kids somente sinalizam tarefas sob sua responsabilidade. Ao concluir tarefa atribuída a outras pessoas, o adulto escolhe manter os responsáveis ou substituí-los por si mesmo, após ser informado dos efeitos sobre o crédito da conclusão.
+Administradores e Membros podem concluir tarefas da família que não tenham responsável Kids, ainda que não sejam responsáveis. Tarefas com ao menos um responsável Kids só podem ser concluídas manualmente por Administrador. Kids somente sinalizam tarefas sob sua responsabilidade. Ao concluir tarefa atribuída a outras pessoas, o adulto autorizado escolhe manter os responsáveis ou substituí-los por si mesmo, após ser informado dos efeitos sobre o crédito da conclusão.
 
 **Requisitos funcionais:** [RF12](02-requisitos.md#rf12), [RF23](02-requisitos.md#rf23)  
 **Requisitos não funcionais específicos:** [RNF07](02-requisitos.md#rnf07)  
@@ -177,7 +177,7 @@ Administradores e Membros podem concluir tarefas da família, ainda que não sej
 
 ## RN22
 
-Administradores e Membros podem concluir uma tarefa Pendente ou Aguardando confirmação. A conclusão é única e vale para todos os responsáveis finais, inclusive Kids.
+Administradores e Membros podem concluir uma tarefa Pendente ou Aguardando confirmação sem responsável Kids. Tarefa com ao menos um responsável Kids, inclusive Aguardando confirmação, somente pode ser concluída manualmente por Administrador. A conclusão é única e vale para todos os responsáveis finais.
 
 **Requisitos funcionais:** [RF12](02-requisitos.md#rf12), [RF17](02-requisitos.md#rf17), [RF24](02-requisitos.md#rf24), [RF26](02-requisitos.md#rf26)  
 **Requisitos não funcionais específicos:** [RNF02](02-requisitos.md#rnf02), [RNF11](02-requisitos.md#rnf11)  
@@ -185,7 +185,7 @@ Administradores e Membros podem concluir uma tarefa Pendente ou Aguardando confi
 
 ## RN23
 
-A sinalização de um perfil Kids altera a tarefa de Pendente para Aguardando confirmação, sem gerar conclusão parcial. A confirmação por Administrador ou a conclusão manual por Administrador ou Membro torna a tarefa Concluída para todos os responsáveis.
+A sinalização de um perfil Kids altera a tarefa de Pendente para Aguardando confirmação, sem gerar conclusão parcial. A confirmação por Administrador ou a conclusão manual por Administrador torna a tarefa Concluída para todos os responsáveis. A conclusão manual encerra a pendência e preserva a sinalização e a foto opcional exclusivamente para auditoria administrativa.
 
 **Requisitos funcionais:** [RF23](02-requisitos.md#rf23), [RF24](02-requisitos.md#rf24), [RF26](02-requisitos.md#rf26)  
 **Requisitos não funcionais específicos:** [RNF11](02-requisitos.md#rnf11)  
@@ -558,6 +558,7 @@ Toda tarefa pode ter uma observação opcional de até 250 caracteres, contando 
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.9 | 2026-10-06 | RN21–23 restringem conclusão manual de tarefa com responsável Kids ao Administrador e preservam sinalização/foto pendente para auditoria administrativa. Para SPEC-010. |
 | 1.8 | 2026-10-06 | RN33 e RN61 distinguem consulta própria diária da consulta familiar adulta por Dia/Semana. Para SPEC-009. |
 | 1.7 | 2026-10-06 | RN14 passa a permitir observação opcional na rotina e explicita que não há data final obrigatória; RN17 define que “selecionada e futuras” inclui a ocorrência de origem; RN67 passa a cobrir UC08. Para SPEC-008. |
 | 1.6 | 2026-10-06 | RN11 passa a limitar o título da tarefa a 1–60 caracteres Unicode visíveis após trim. RN66 (novo) define a escolha entre retornar a Pendente ou manter Aguardando confirmação ao editar tarefa com sinalização Kids corrente, e a remoção dessa sinalização ao excluir. RN67 (novo) permite observação opcional de até 250 caracteres por tarefa. Para SPEC-007. |

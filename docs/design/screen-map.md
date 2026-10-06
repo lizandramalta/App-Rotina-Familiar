@@ -1,8 +1,8 @@
-# Screen map — versão 1.4
+# Screen map — versão 1.5
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do mapa:** 1.4\
-**Base funcional:** 1.9\
+**Versão do mapa:** 1.5\
+**Base funcional:** 1.10\
 **Data:** 2026-10-06\
 **Situação:** referência inicial para design; organização de navegação proposta
 
@@ -271,7 +271,7 @@ A = Administrador (inclui Criador); M = Membro; K = Kids. Códigos RF e RNF são
 | MOD-001 | Selecionar responsáveis | TEL-013 | Nenhum, um ou vários; mudança sujeita às proteções de histórico (UC07) |
 | MOD-002 | Configurar repetição | TEL-013 | Sem repetição, diária, 7, 14, 21 ou 28 dias; sem mensal (UC08) |
 | MOD-003 | Definir alcance | TEL-012/013 | Edição individual ou rotina futura; exclusão somente selecionada ou ela e futuras; mostrar registros preservados (UC07/08) |
-| MOD-004 | Concluir tarefa | TEL-012 | Mostrar responsáveis; se adulto não é responsável, manter ou assumir com aviso do crédito; sem responsável, atribuir ao autor (UC12) |
+| MOD-004 | Concluir tarefa | TEL-012 | Mostrar responsáveis; se adulto não é responsável, manter ou assumir com aviso do crédito; sem responsável, atribuir ao autor. Em tarefa com responsável Kids, só Administrador vê e usa a ação; foto permanece no fluxo administrativo de validação (UC12) |
 | MOD-005 | Confirmar exclusão | TEL-012 ou MOD-003 | Confirmar alcance e impactos; bloquear concluída, conquista protegida ou última tarefa de missão (UC07) |
 | MOD-006 | Reabrir tarefa | TEL-012, somente A | Explicar retirada de carga e progresso de todos; exigir missão em andamento e nenhum vínculo com missão concluída (UC17) |
 | MOD-007 | Selecionar tarefas da missão | TEL-022 | Seleção individual, ao menos uma; não selecionar rotina inteira implicitamente (UC05) |
@@ -320,6 +320,7 @@ Campos funcionais de data/fuso e seleção de foto estão definidos; o layout vi
 
 | Versão do mapa | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.5 | 1.10 | 2026-10-06 | MOD-004 oculta conclusão de tarefa com responsável Kids para Membro; evidência Kids permanece administrativa. Para SPEC-010. |
 | 1.4 | 1.9 | 2026-10-06 | TEL-010 e TEL-040 ficam diárias; consultas familiares adultas usam Dia/Semana, e a carga é adiada para SPEC-018. Para SPEC-009. |
 | 1.3 | 1.8 | 2026-10-06 | MOD-002 mantém rotina sem data final obrigatória; MOD-003 define que “selecionada e futuras” inclui a ocorrência de origem. Para SPEC-008. |
 | 1.2 | 1.7 | 2026-10-06 | TEL-013 ganha observação opcional e limite de título; MOD-014 (novo) resolve sinalização Kids pendente ao editar. Para SPEC-007. |

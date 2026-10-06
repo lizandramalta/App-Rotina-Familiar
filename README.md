@@ -3,7 +3,7 @@
 Organização colaborativa das responsabilidades domésticas, com tarefas compartilhadas, participação infantil e conquistas coletivas.
 
 **Escopo:** MVP  
-**Versão da base do projeto:** 1.9\
+**Versão da base do projeto:** 1.10\
 **Data:** 2026-10-06
 
 ## Por que este projeto existe
@@ -46,7 +46,7 @@ Famílias que compartilham a rotina doméstica e desejam organizar melhor suas r
 | Perfil | Papel principal |
 |---|---|
 | Administrador | Gerencia membros, missões e recompensas; valida sinalizações Kids e também gerencia e conclui tarefas. |
-| Membro | Gerencia e conclui tarefas, acompanha carga diária ou semanal e missões e edita os dados permitidos de seu perfil. |
+| Membro | Gerencia e conclui tarefas que não tenham responsável Kids, acompanha carga diária ou semanal e missões e edita os dados permitidos de seu perfil. |
 | Kids | Consulta tarefas e progresso, sinaliza com câmera opcional, edita foto/apelido próprios, consulta badges e recebe seu destaque semanal. |
 
 O Criador da Família é um Administrador com identificação especial e proteção contra remoção, rebaixamento e saída. Podem existir outros Administradores, que ingressam por convite.
@@ -146,6 +146,7 @@ A arquitetura backend 1.0 está em [backend-architecture.md](docs/architecture/b
 
 | Versão | Data | Marco |
 |---|---|---|
+| 1.10 | 2026-10-06 | Tarefas com responsável Kids só podem ser concluídas manualmente por Administradores; sinalização/foto pendente é preservada para auditoria administrativa. Para SPEC-010. |
 | 1.9 | 2026-10-06 | Consulta pessoal diária para todos os perfis; consultas familiares adultas por Dia/Semana; carga detalhada permanece na SPEC-018. |
 | 1.7 | 2026-10-06 | RF02, RF03 e RF40 passam a definir o nome administrativo de membro e os papéis permitidos na criação, para elaboração de SPEC-003. Tarefa ganha limite de título (1–60 caracteres), observação opcional (até 250 caracteres) e regra de resolução de sinalização Kids pendente ao editar/excluir; SPEC-007 em elaboração. |
 | 1.6 | 2026-10-06 | RF01 passa a definir o nome obrigatório da família: 1–60 caracteres Unicode visíveis após trim, sem caracteres de controle; SPEC-002 aprovada. |

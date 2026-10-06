@@ -1,9 +1,9 @@
-# User flows — versão 1.4
+# User flows — versão 1.5
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão dos fluxos:** 1.4\
-**Base funcional:** 1.9\
-**Screen map:** 1.4 — revisão de 2026-10-06\
+**Versão dos fluxos:** 1.5\
+**Base funcional:** 1.10\
+**Screen map:** 1.5 — revisão de 2026-10-06\
 **Data:** 2026-10-05\
 **Situação:** primeira versão para revisão de design
 
@@ -230,12 +230,14 @@ Responsáveis e repetição são escolhas do formulário; não é obrigatório a
 ## UF-06 — Concluir tarefa mantendo ou assumindo responsáveis
 
 **Objetivo:** concluir a tarefa inteira e esclarecer quem recebe o crédito.  
-**Entrada:** TEL-012, tarefa Pendente ou Aguardando confirmação, por Administrador ou Membro.  
+**Entrada:** TEL-012, tarefa Pendente ou Aguardando confirmação; Administrador ou Membro apenas quando não houver responsável Kids.
 **Referências:** [UC12](../03-casos-de-uso.md#uc12); RN48, RN55–56; RF12, RF47, RF56.
 
 ```mermaid
 flowchart TD
-    A["TEL-012 · Acionar concluir"] --> B["MOD-004 · Mostrar responsáveis"]
+    A["TEL-012 · Acionar concluir"] --> AK{"Há responsável Kids?"}
+    AK -->|Sim e Membro| J(["TEL-012 · Ação não disponível"])
+    AK -->|Não ou Administrador| B["MOD-004 · Mostrar responsáveis"]
     B --> C{"Há responsáveis?"}
     C -->|Não| D["Indicar atribuição ao adulto que conclui"]
     C -->|Sim| E{"Usuário já é responsável?"}
@@ -250,10 +252,11 @@ flowchart TD
     I -->|Sim| K["Revalidar estado e salvar conclusão e responsáveis juntos"]
     K --> L{"Operação confirmada?"}
     L -->|Sim| M(["TEL-012 · Concluída para todos os responsáveis finais"])
-    L -->|Falha ou outra conclusão| N["Informar resultado e consultar estado atual"]
+    L -->|Já concluída| M
+    L -->|Falha| N["Informar falha e consultar estado atual"]
 ```
 
-As escolhas de responsável só são efetivadas com a conclusão confirmada. Cada responsável final recebe o peso integral; quem apenas executou a ação não recebe crédito se não for responsável. A tarefa conta uma vez no progresso de cada missão e no progresso coletivo diário ou semanal. Uma conclusão manual encerra eventual pendência Kids, valendo também para a criança. Outras ocorrências da rotina não mudam.
+As escolhas de responsável só são efetivadas com a conclusão confirmada. Cada responsável final recebe o peso integral; quem apenas executou a ação não recebe crédito se não for responsável. A tarefa conta uma vez no progresso de cada missão e no progresso coletivo diário ou semanal. Tarefa com responsável Kids só é concluída manualmente por Administrador; a pendência e foto são preservadas para auditoria administrativa. Se outra conclusão já foi confirmada, a interface atualiza silenciosamente para Concluída. Outras ocorrências da rotina não mudam.
 
 <a id="uf-07"></a>
 
@@ -594,6 +597,7 @@ Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imedi
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.5 | 1.10 | 1.5 | 2026-10-06 | UF-06 restringe conclusão manual de tarefa com responsável Kids ao Administrador e reconcilia silenciosamente conclusão concorrente. Para SPEC-010. |
 | 1.4 | 1.9 | 1.4 | 2026-10-06 | UF-04 distingue consulta própria diária da familiar adulta por Dia/Semana e adia carga para SPEC-018. Para SPEC-009. |
 | 1.3 | 1.8 | 1.3 | 2026-10-06 | UF-05 explicita que rotina não exige data final e que o alcance “selecionada e futuras” inclui a ocorrência aberta. Para SPEC-008. |
 | 1.2 | 1.7 | 1.2 | 2026-10-06 | UF-05 ganha o ramo MOD-014 (resolver sinalização pendente ao editar) e o campo de observação; UF-08 registra a remoção da sinalização ao excluir. Para SPEC-007. |

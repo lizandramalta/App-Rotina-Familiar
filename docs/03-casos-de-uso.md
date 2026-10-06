@@ -1,7 +1,7 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.8\
+**Versão:** 1.9\
 **Data:** 2026-10-06\
 **Situação:** base documental consolidada
 
@@ -307,7 +307,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Objetivo:** criar, editar, atribuir, reatribuir e excluir tarefas conforme seu estado.
 
-**Atores:** Administrador e Membro.
+**Atores:** Administrador e Membro, conforme responsáveis da tarefa.
 
 
 **Pré-condição:** permissão para gerenciamento de tarefas.
@@ -524,13 +524,13 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 **Atores:** Administrador e Membro.
 
 
-**Pré-condição:** tarefa da família ainda não concluída, inclusive quando aguarda confirmação de sinalização Kids.
+**Pré-condição:** tarefa da família ainda não concluída. Quando houver responsável Kids, somente Administrador pode concluir manualmente, inclusive se aguarda confirmação.
 
 **Fluxo principal:**
 
 1. O usuário seleciona a tarefa e aciona concluir.
 2. O sistema apresenta os responsáveis atuais.
-3. Se o usuário não estiver entre eles, o sistema alerta que a conclusão será creditada aos responsáveis existentes e oferece mantê-los ou assumir a tarefa.
+3. Se a tarefa tiver responsável Kids e o usuário for Membro, o sistema não oferece concluir. Caso contrário, se o usuário não estiver entre os responsáveis, o sistema alerta que a conclusão será creditada aos responsáveis existentes e oferece mantê-los ou assumir a tarefa.
 4. O usuário escolhe manter os responsáveis e confirma a conclusão.
 5. O sistema registra quem executou a ação e conclui a tarefa para todos os responsáveis.
 6. Cada responsável recebe o peso integral na carga; a tarefa conta uma única vez em cada missão vinculada.
@@ -540,7 +540,8 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 - **Assumir tarefa:** o sistema substitui todos os responsáveis pelo usuário que conclui. Somente ele recebe o peso dessa conclusão.
 - **Sem responsável:** o sistema atribui automaticamente a tarefa ao usuário que conclui.
 - **Usuário já responsável:** a conclusão mantém os responsáveis existentes e vale para todos.
-- **Sinalização Kids existente:** o adulto pode avaliar a foto opcional ou concluir manualmente depois. A conclusão encerra a pendência de confirmação e vale também para os responsáveis Kids.
+- **Sinalização Kids existente:** somente Administrador pode avaliar a foto opcional, confirmar/recusar ou concluir manualmente. A conclusão encerra a pendência, preserva sinalização/foto para auditoria administrativa e vale para todos os responsáveis.
+- **Membro diante de tarefa Kids:** pode visualizá-la na área Família, mas não pode concluí-la nem reabri-la.
 - **Cancelar:** nenhuma conclusão ou troca de responsável é salva.
 - **Conclusão simultânea:** o sistema registra somente uma conclusão válida, sem duplicar carga ou atribuições.
 
@@ -836,6 +837,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.9 | 2026-10-06 | UC12 restringe conclusão manual de tarefa com responsável Kids ao Administrador e preserva a evidência pendente para auditoria. Para SPEC-010. |
 | 1.8 | 2026-10-06 | UC11 passa a definir consulta própria diária e consulta familiar adulta por Dia/Semana. Para SPEC-009. |
 | 1.7 | 2026-10-06 | UC08 passa a registrar observação opcional na rotina, ausência de data final obrigatória e alcance inclusivo da ocorrência selecionada. Para SPEC-008. |
 | 1.6 | 2026-10-06 | UC07 passa a citar o limite de título (1–60 caracteres), a observação opcional (RN67/RF70) e a escolha entre Pendente e Aguardando confirmação ao editar tarefa sinalizada, com remoção da sinalização ao excluir (RN66/RF69). Para SPEC-007. |

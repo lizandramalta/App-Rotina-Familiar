@@ -86,7 +86,7 @@ Administradores. Ela cobre TEL-002, TEL-053 e MOD-012; não há uma SPEC-021 sep
 | [`SPEC-007-gerenciar-tarefas`](SPEC-007-gerenciar-tarefas.md) - Gerenciar tarefas | UC07 | ambos | SPEC-002 | aprovada |
 | [`SPEC-008-definir-recorrencia`](SPEC-008-definir-recorrencia.md) - Definir recorrência de rotina | UC08 | ambos | SPEC-007 | aprovada |
 | [`SPEC-009-visualizar-minhas-tarefas`](SPEC-009-visualizar-minhas-tarefas.md) - Visualizar minhas tarefas | UC11 | ambos | SPEC-007 | aprovada |
-| `SPEC-010-concluir-tarefa` - Concluir tarefa | UC12 | ambos | SPEC-007 | não criada |
+| [`SPEC-010-concluir-tarefa`](SPEC-010-concluir-tarefa.md) - Concluir tarefa | UC12 | ambos | SPEC-007 | aprovada |
 | `SPEC-011-reabrir-tarefa` - Retornar tarefa concluída a Pendente | UC17 | ambos | SPEC-010, SPEC-014 | não criada |
 
 ### Tema 3 - Participação Kids
@@ -128,6 +128,7 @@ status e resumo; mantenha esta tabela como o panorama do backlog.
 | [SPEC-007-gerenciar-tarefas](SPEC-007-gerenciar-tarefas.md) | [UX-007-gerenciar-tarefas.md](UX-007-gerenciar-tarefas.md) | aprovada | ambos | CRUD da tarefa única (título, peso, data, responsáveis, observação), com proteções de missão/conclusão e resolução obrigatória de sinalização Kids pendente ao editar/excluir. |
 | [SPEC-008-definir-recorrencia](SPEC-008-definir-recorrencia.md) | [UX-008-definir-recorrencia.md](UX-008-definir-recorrencia.md) | aprovada | ambos | Rotina com observação opcional, início sem data final obrigatória, frequências fixas, materialização segura e alcance inclusivo “selecionada e futuras”. |
 | [SPEC-009-visualizar-minhas-tarefas](SPEC-009-visualizar-minhas-tarefas.md) | [UX-009-visualizar-minhas-tarefas.md](UX-009-visualizar-minhas-tarefas.md) | aprovada | ambos | Consulta própria diária para todos; tarefas e progresso familiares adultos por Dia/Semana, com filtros de membro e tarefas sem responsável. |
+| [SPEC-010-concluir-tarefa](SPEC-010-concluir-tarefa.md) | [UX-010-concluir-tarefa.md](UX-010-concluir-tarefa.md) | aprovada | ambos | Conclusão atômica com crédito explícito; tarefa com responsável Kids somente por Administrador e reconciliação silenciosa de concorrência. |
 
 ## Templates
 

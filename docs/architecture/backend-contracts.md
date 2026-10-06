@@ -1,6 +1,6 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.4 · **Base funcional:** 1.9 · **Arquitetura backend:** 1.0\
+**Versão:** 1.5 · **Base funcional:** 1.10 · **Arquitetura backend:** 1.0\
 **Data:** 2026-10-06\
 **Situação:** contrato arquitetural para detalhamento OpenAPI na implementação
 
@@ -92,7 +92,7 @@ Preview de fuso é apenas leitura de suporte a MOD-012. A gravação pode reflet
 | `POST /tasks` | `CreateTask` | `title` (1–60 car.), `weight`, `scheduledDate`, `assigneeIds`, `note` (opcional, ≤250 car.) → tarefa única | Adulto |
 | `PATCH /tasks/{taskId}` | `EditTask` | Campos editáveis de uma ocorrência, incluindo data e `note`; `signalResolution` (`resetToPending` \| `keepAwaitingConfirmation`) obrigatório quando o estado atual é `awaitingConfirmation` | Adulto; respeitar proteção |
 | `DELETE /tasks/{taskId}` | `DeleteTask` | Exclusão individual e vínculos afetados; remove sinalização Kids corrente sem registrar decisão | Adulto; não concluída/não protegida |
-| `POST /tasks/{taskId}/completion` | `CompleteTask` | `assignment: keepAssignees \| takeOver` → estado canônico | Adulto |
+| `POST /tasks/{taskId}/completion` | `CompleteTask` | `assignment: keepAssignees \| takeOver` → estado canônico; tarefa com responsável Kids somente Admin | Adulto; Admin para tarefa Kids |
 | `POST /tasks/{taskId}/reopening` | `ReopenTask` | Comando explícito → conclusão desfeita e períodos afetados | Admin; missão em andamento, nenhuma concluída |
 | `POST /routines` | `CreateRoutine` | Título, peso, responsáveis, `note` opcional, `startDate`, `frequencyDays`; sem `endDate` → rotina e materialização | Adulto |
 | `GET /routines/{routineId}` | `GetRoutine` | Configuração, versão vigente e progresso de materialização | Adulto |
@@ -108,7 +108,7 @@ Preview de fuso é apenas leitura de suporte a MOD-012. A gravação pode reflet
 
 Nas rotas familiares, `period` aceita `day` ou `week`; `referenceDate` é a data selecionada, validada pelo limite de consulta RN49. As rotas pessoais são sempre diárias e não aceitam `period`. `memberId` restringe a lista familiar a um membro da família do ator; `includeUnassigned` inclui ou exclui tarefas sem responsável. O servidor devolve intervalo nominal e efetivo nas consultas familiares. `GET /tasks/{id}` resolve criação fora do carrossel quando o ator pode consultar aquela tarefa; isso não cria novo calendário de navegação. Cadastro/edição não bloqueiam passado, meses futuros ou datas anteriores à família.
 
-O servidor não aceita o perfil responsável como autor da conclusão. O ator vem da sessão; manter/assumir é uma decisão explícita do comando. `signalId` é identidade de domínio que protege uma decisão contra outra sinalização mais recente, não versão geral de edição.
+O servidor não aceita o perfil responsável como autor da conclusão. O ator vem da sessão; manter/assumir é uma decisão explícita do comando. Tarefa com ao menos um responsável Kids só aceita conclusão manual de Administrador; Membro recebe `403 ACTION_NOT_ALLOWED`. Se já estiver concluída, a transação não duplica créditos e responde `409 TASK_ALREADY_COMPLETED`; o cliente reconcilia silenciosamente consultando o estado canônico. Conclusão manual administrativa encerra a pendência Kids e preserva sinalização/foto para auditoria acessível apenas a Administradores. `signalId` é identidade de domínio que protege uma decisão contra outra sinalização mais recente, não versão geral de edição.
 
 `CreateRoutine` e `UpdateFutureRoutine` usam `422 VALIDATION_FAILED` com `fieldErrors` estáveis: `FREQUENCY_DAYS_INVALID` para `frequencyDays` fora de 1/7/14/21/28, `START_DATE_INVALID` para `startDate` fora de `YYYY-MM-DD` e `ROUTINE_SOURCE_TASK_INVALID` quando `fromTaskId` não identifica uma ocorrência da rotina solicitada dentro da família do ator. Um `fromTaskId` de outra família é indisponível e responde `404`. Não existe `endDate` nesses comandos. `EditTask` rejeita com `422 VALIDATION_FAILED`/`SIGNAL_RESOLUTION_REQUIRED` qualquer gravação sobre tarefa `awaitingConfirmation` sem `signalResolution`, independentemente de quais campos mudaram. `resetToPending` transiciona a tarefa para `pending` e descarta a sinalização corrente; `keepAwaitingConfirmation` preserva o estado e a sinalização corrente com os dados editados. `DeleteTask` sobre tarefa `awaitingConfirmation` remove a sinalização corrente junto da tarefa, sem gerar `CONFIRMED`/`REJECTED`.
 
@@ -170,7 +170,7 @@ Cada linha cobre um objetivo funcional completo, não apenas uma rota. RF/RN per
 | <a id="backend-uc09"></a>[UC09](../03-casos-de-uso.md#uc09) | `InspectInvite`, `JoinFamilyByInvite`, `RecoverInviteJoin`, `RefreshSession` | Consumo único, prova de instalação e troca sem remoção | RF42–46/54/68; RN09/10/45–47 |
 | <a id="backend-uc10"></a>[UC10](../03-casos-de-uso.md#uc10) | `UpdateOwnProfile`, `GetOwnBadges`, `GetBadgeContributions` | Titularidade, câmera/galeria na UI e marcos por participação | RF48/62/65; RN63/64 |
 | <a id="backend-uc11"></a>[UC11](../03-casos-de-uso.md#uc11) | `GetOwnTasks`, `GetFamilyTasks`, `GetMemberTasks`, `GetOwnProgress`, `GetFamilyOverview` | Consulta própria diária; Dia/Semana familiar adulta e carrossel; Kids só projeção própria | RF11/17/22/49/60/65/66; RN26/27/33/49/60/61 |
-| <a id="backend-uc12"></a>[UC12](../03-casos-de-uso.md#uc12) | `CompleteTask` / Tasks, Kids, Missions | Manter/assumir, crédito integral, uma conclusão vigente | RF12/47/56; RN21/22/30/48/55/56 |
+| <a id="backend-uc12"></a>[UC12](../03-casos-de-uso.md#uc12) | `CompleteTask` / Tasks, Kids, Missions | Manter/assumir, crédito integral, uma conclusão vigente; tarefa Kids só Admin | RF12/26/47/56; RN21–23/30/48/55/56 |
 | <a id="backend-uc13"></a>[UC13](../03-casos-de-uso.md#uc13) | `GetFamilyLoad` / Insights | Carga pelo instante da conclusão, sem duplicação por joins | RF18–21/56/57/66; RN28/30/31/33/34/57/61 |
 | <a id="backend-uc14"></a>[UC14](../03-casos-de-uso.md#uc14) | `ListMissions`, `GetMissionDetail` / Missions | Tarefas distintas e recompensa preservada; projeção Kids | RF30/31/36/58/62/65; RN35–39/43/51–53/58/64 |
 | <a id="backend-uc15"></a>[UC15](../03-casos-de-uso.md#uc15) | `UploadMedia`, `SignalTask` / Media, Kids | Foto opcional; sinalizar não conclui nem credita | RF23/24/55/56; RN21–26/54/55 |
@@ -203,6 +203,7 @@ O OpenAPI futuro deve materializar schemas e exemplos de sucesso/erro dessas rot
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.5 | 2026-10-06 | Conclusão de tarefa com responsável Kids exige Administrador; `TASK_ALREADY_COMPLETED` reconcilia concorrência sem duplicar crédito; sinalização/foto pendente é auditável só por Admin. Para SPEC-010. |
 | 1.4 | 2026-10-06 | Rotas pessoais de UC11 ficam diárias; rotas familiares adultas usam `period`, `memberId` e `includeUnassigned`; overview não inclui carga nesta entrega. Para SPEC-009. |
 | 1.3 | 2026-10-06 | Contratos de rotina passam a aceitar `note`, explicitam a ausência de `endDate`, o alcance inclusivo de `fromTaskId` e os erros `FREQUENCY_DAYS_INVALID`, `START_DATE_INVALID` e `ROUTINE_SOURCE_TASK_INVALID`. Para SPEC-008. |
 | 1.2 | 2026-10-06 | `CreateTask`/`EditTask` ganham `note` opcional (≤250 car.); `EditTask` ganha `signalResolution` obrigatório sobre tarefa `awaitingConfirmation`; `DeleteTask` remove a sinalização corrente. Para SPEC-007. |
