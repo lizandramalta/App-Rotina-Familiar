@@ -1,7 +1,7 @@
 # Requisitos funcionais e não funcionais
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.12\
+**Versão:** 1.13\
 **Data:** 2026-10-07\
 **Situação:** base documental consolidada
 
@@ -349,7 +349,7 @@ Ao concluir tarefa sem responsável, o sistema deve atribuí-la ao adulto que co
 
 ### RF48
 
-O sistema deve permitir a Administradores, Membros e Kids editar os dados permitidos do próprio perfil, adicionar, substituir ou remover foto opcional por câmera ou galeria e configurar etiqueta/apelido. Deve impedir acesso de terceiros à configuração de apelido, inclusive por operação administrativa. A edição não altera papel, família nem modo Kids.
+O sistema deve permitir a Administradores, Membros e Kids editar os dados permitidos do próprio perfil, adicionar, substituir ou remover foto opcional por câmera ou galeria e configurar etiqueta/apelido. O apelido é opcional, com até 20 caracteres não-espaço após remover espaços nas extremidades, sem caracteres de controle; vazio ou nulo remove a configuração vigente. Deve impedir acesso de terceiros à configuração de apelido, inclusive por operação administrativa. A edição não altera papel, família nem modo Kids.
 
 **Regras de negócio:** [RN63](01-regras-de-negocio.md#rn63).  
 **Casos de uso:** [UC10](03-casos-de-uso.md#uc10)
@@ -773,6 +773,7 @@ A configuração de apelido deve ser protegida por titularidade no backend, incl
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.13 | 2026-10-07 | RF48 passa a definir o limite do apelido: até 20 caracteres não-espaço após trim, sem caracteres de controle; vazio/nulo remove a configuração. Para SPEC-006. |
 | 1.12 | 2026-10-07 | RF71 (novo) define observação opcional de até 250 caracteres na missão, espelhando RF70. Para SPEC-014. |
 | 1.11 | 2026-10-07 | Conclusão direta mantém responsáveis existentes ou atribui o adulto sem responsável; reabertura por todos os perfis no alcance de consulta pode reabrir missão concluída e reverte recompensa, participações e badges. |
 | 1.10 | 2026-10-06 | RF12 e RF26 restringem conclusão manual de tarefa com responsável Kids ao Administrador e preservam a evidência pendente para auditoria. Para SPEC-010. |

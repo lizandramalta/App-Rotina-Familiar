@@ -1,7 +1,7 @@
-# Documentação do projeto — versão 1.12
+# Documentação do projeto — versão 1.13
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.12\
+**Versão:** 1.13\
 **Data:** 2026-10-07\
 **Situação:** base documental consolidada
 
@@ -14,8 +14,8 @@
 | [Apresentação do projeto](../README.md)                    | Propósito, público, jornada e escopo do MVP.                                                                                            |
 | [Visão do produto](00-visao-do-produto.md)                 | Contexto, objetivos, princípios, escopo e critérios de sucesso.                                                                         |
 | [Índice e versões](DOCUMENTACAO.md)                        | Organização documental, rastreabilidade e política de versões.                                                                          |
-| [Regras de negócio](01-regras-de-negocio.md)               | Regras vigentes e suas relações com RF, RNF e UC; base funcional 1.11.                                                                  |
-| [Requisitos](02-requisitos.md)                             | 71 requisitos funcionais e 27 não funcionais, com vínculos às regras e aos casos de uso; base funcional 1.12.                         |
+| [Regras de negócio](01-regras-de-negocio.md)               | Regras vigentes e suas relações com RF, RNF e UC; base funcional 1.12.                                                                  |
+| [Requisitos](02-requisitos.md)                             | 71 requisitos funcionais e 27 não funcionais, com vínculos às regras e aos casos de uso; base funcional 1.13.                         |
 | [Especificação dos casos de uso](03-casos-de-uso.md)       | 19 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições; base funcional 1.11.                      |
 | [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) | Visão geral e cinco recortes UML, com fontes PlantUML e imagens SVG.                                                                    |
 | [Screen map](design/screen-map.md)                         | Mapa 1.7: navegação, catálogo de telas, modais, estados e cobertura de UC01–UC19; base funcional 1.12.                                  |
@@ -144,6 +144,7 @@ A arquitetura backend 1.0 possui versionamento independente da base funcional. N
 
 | Versão | Data       | Alteração                                                                                                                                                                                                         |
 | ------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.13 | 2026-10-07 | RN63/RF48 passam a definir o limite do apelido: até 20 caracteres não-espaço após trim, sem caracteres de controle; vazio/nulo remove a configuração. Para SPEC-006. |
 | 1.12 | 2026-10-07 | RN68/RF71 definem observação opcional (até 250 caracteres) na missão; UC05 passa a cobrir o atalho de criação de tarefa durante a vinculação e a consulta explícita por todos os perfis, inclusive Kids; modelo de dados e diagrama de classes atualizados. Para SPEC-014. |
 | 1.11 | 2026-10-07 | Conclusão direta mantém responsáveis ou atribui adulto sem responsável; reabertura pode reabrir missão concluída e recalcula recompensa, participações e badges. |
 | 1.10 | 2026-10-06 | Tarefas com responsável Kids só recebem conclusão manual de Administrador; evidência pendente é auditável só por Admin e concorrência reconcilia sem erro na UI. Para SPEC-010. |

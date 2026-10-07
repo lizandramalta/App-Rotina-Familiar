@@ -3,7 +3,7 @@
 Organização colaborativa das responsabilidades domésticas, com tarefas compartilhadas, participação infantil e conquistas coletivas.
 
 **Escopo:** MVP  
-**Versão da base do projeto:** 1.12\
+**Versão da base do projeto:** 1.13\
 **Data:** 2026-10-07
 
 ## Por que este projeto existe
@@ -146,6 +146,7 @@ A arquitetura backend 1.0 está em [backend-architecture.md](docs/architecture/b
 
 | Versão | Data | Marco |
 |---|---|---|
+| 1.13 | 2026-10-07 | Apelido do perfil ganha limite explícito: até 20 caracteres não-espaço após trim, sem caracteres de controle. Para SPEC-006. |
 | 1.12 | 2026-10-07 | Missão ganha observação opcional (até 250 caracteres); criação de tarefa durante a vinculação de missão; consulta explícita por todos os perfis, inclusive Kids, em experiência simplificada. Para SPEC-014. |
 | 1.11 | 2026-10-07 | Conclusão direta preserva responsáveis existentes ou atribui o adulto sem responsável. Reabertura por todos os perfis no seu alcance pode reabrir missão concluída e reverte recompensa, participações e badges. |
 | 1.10 | 2026-10-06 | Tarefas com responsável Kids só podem ser concluídas manualmente por Administradores; sinalização/foto pendente é preservada para auditoria administrativa. Para SPEC-010. |

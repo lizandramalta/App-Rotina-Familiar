@@ -56,7 +56,7 @@ da experiência. Isso permite evoluir o visual sem perder decisões, estados e t
 
 ## Mapa de implementação
 
-**Base funcional:** 1.12 (2026-10-07)
+**Base funcional:** 1.13 (2026-10-07)
 
 **Convenção de status:** `não criada` indica apenas uma entrega planejada; os status
 do template passam a valer depois que o arquivo da spec existir.
@@ -74,7 +74,7 @@ planejada antes, mas não deve depender de comportamento ainda indisponível.
 | [`SPEC-003-gerenciar-membros`](SPEC-003-gerenciar-membros.md) - Gerenciar membros | UC02 | ambos | SPEC-002 | aprovada |
 | [`SPEC-004-gerar-reenviar-convite`](SPEC-004-gerar-reenviar-convite.md) - Gerar e reenviar convite | UC02 | ambos | SPEC-003 | aprovada |
 | [`SPEC-005-ingressar-por-convite`](SPEC-005-ingressar-por-convite.md) - Ingressar por convite | UC09 | ambos | SPEC-004 | aprovada |
-| `SPEC-006-editar-perfil` - Editar perfil e consultar badges | UC10 | ambos | SPEC-003, SPEC-014 | não criada |
+| [`SPEC-006-editar-perfil`](SPEC-006-editar-perfil.md) - Editar perfil e consultar badges | UC10 | ambos | SPEC-003, SPEC-014 | aprovada |
 
 `SPEC-002` inclui o fuso da família: seleção na criação e configuração posterior por
 Administradores. Ela cobre TEL-002, TEL-053 e MOD-012; não há uma SPEC-021 separada.
@@ -100,7 +100,7 @@ Administradores. Ela cobre TEL-002, TEL-053 e MOD-012; não há uma SPEC-021 sep
 
 | Spec planejada | UC principal | Projetos | Depende de | Status |
 |---|---|---|---|---|
-| [`SPEC-014-gerenciar-missoes`](SPEC-014-gerenciar-missoes.md) - Gerenciar missões | UC05 | ambos | SPEC-007 | rascunho |
+| [`SPEC-014-gerenciar-missoes`](SPEC-014-gerenciar-missoes.md) - Gerenciar missões | UC05 | ambos | SPEC-007 | aprovada |
 | `SPEC-015-gerenciar-recompensas-coletivas` - Gerenciar itens de recompensas coletivas | UC06 | ambos | SPEC-002 | não criada |
 | `SPEC-016-acompanhar-missoes-recompensas` - Acompanhar missões e recompensas | UC14 | ambos | SPEC-014 | não criada |
 | `SPEC-017-resgatar-recompensa` - Resgatar recompensa da missão | UC16 | ambos | SPEC-014, SPEC-015 | não criada |
@@ -129,7 +129,8 @@ status e resumo; mantenha esta tabela como o panorama do backlog.
 | [SPEC-008-definir-recorrencia](SPEC-008-definir-recorrencia.md) | [UX-008-definir-recorrencia.md](UX-008-definir-recorrencia.md) | aprovada | ambos | Rotina com observação opcional, início sem data final obrigatória, frequências fixas, materialização segura e alcance inclusivo “selecionada e futuras”. |
 | [SPEC-009-visualizar-minhas-tarefas](SPEC-009-visualizar-minhas-tarefas.md) | [UX-009-visualizar-minhas-tarefas.md](UX-009-visualizar-minhas-tarefas.md) | aprovada | ambos | Consulta própria diária para todos; tarefas e progresso familiares adultos por Dia/Semana, com filtros de membro e tarefas sem responsável. |
 | [SPEC-010-concluir-tarefa](SPEC-010-concluir-tarefa.md) | [UX-010-concluir-tarefa.md](UX-010-concluir-tarefa.md) | aprovada | ambos | Conclusão atômica com crédito explícito; tarefa com responsável Kids somente por Administrador e reconciliação silenciosa de concorrência. |
-| [SPEC-014-gerenciar-missoes](SPEC-014-gerenciar-missoes.md) | [UX-014-gerenciar-missoes.md](UX-014-gerenciar-missoes.md) | rascunho | ambos | Criação e edição de missões coletivas sem prazo com observação opcional, atalho de criação de tarefa, fechamento automático com participações/badges, e consulta básica por todos os perfis, inclusive Kids. |
+| [SPEC-014-gerenciar-missoes](SPEC-014-gerenciar-missoes.md) | [UX-014-gerenciar-missoes.md](UX-014-gerenciar-missoes.md) | aprovada | ambos | Criação e edição de missões coletivas sem prazo com observação opcional, atalho de criação de tarefa, fechamento automático com participações/badges, e consulta básica por todos os perfis, inclusive Kids. |
+| [SPEC-006-editar-perfil](SPEC-006-editar-perfil.md) | [UX-006-editar-perfil.md](UX-006-editar-perfil.md) | aprovada | ambos | Edição do próprio apelido (até 20 caracteres não-espaço) e foto opcional por câmera/galeria, com titularidade exclusiva; consulta de badges cumulativos e missões contribuintes por marco. |
 
 ## Templates
 

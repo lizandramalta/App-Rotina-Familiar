@@ -1,7 +1,7 @@
 # UX Spec 014: Gerenciar missões
 
-**Status:** rascunho
-**Autor:** Claude | **Criada em:** 2026-10-07 | **Aprovada por:** | **Em:**
+**Status:** aprovada
+**Autor:** Claude | **Criada em:** 2026-10-07 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-07
 **Spec funcional vinculada:** [SPEC-014-gerenciar-missoes.md](SPEC-014-gerenciar-missoes.md)
 **Base funcional:** 1.12
 **Superfícies de interface:** TEL-020 (parcial), TEL-021 (parcial), TEL-022, MOD-007

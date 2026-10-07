@@ -1,7 +1,7 @@
 # Spec 014: Gerenciar missões
 
-**Status:** rascunho
-**Autor:** Claude | **Criada em:** 2026-10-07 | **Aprovada por:** | **Em:**
+**Status:** aprovada
+**Autor:** Claude | **Criada em:** 2026-10-07 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-07
 **Base funcional:** 1.12
 **UX-spec:** [UX-014-gerenciar-missoes.md](UX-014-gerenciar-missoes.md)
 **Projetos envolvidos:** ambos
