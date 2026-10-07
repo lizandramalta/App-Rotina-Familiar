@@ -1,8 +1,8 @@
-# Documentação do projeto — versão 1.10
+# Documentação do projeto — versão 1.11
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.10\
-**Data:** 2026-10-06\
+**Versão:** 1.11\
+**Data:** 2026-10-07\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Modelo de dados](05-modelo-de-dados.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -82,9 +82,9 @@ As relações RN–UC são derivadas de RN–RF–UC. As relações de RNF repre
 - O carrossel vai da criação da família até o último dia do mês corrente, incluindo dias futuros dentro desse mês.
 - Missões não têm prazo nem expiram. A missão permanece em andamento enquanto houver tarefas não concluídas.
 - Administradores podem adicionar itens personalizados à roleta. A recompensa é vinculada à missão somente após sorteio e aceitação, com resgate único.
-- Tarefas concluídas não podem ser excluídas diretamente. Somente Administradores podem reabri-las quando vinculadas a missão em andamento, desde que não pertençam a nenhuma missão concluída. Não há reabertura de tarefa concluída sem missão nesta versão.
+- Tarefas concluídas não podem ser excluídas diretamente. Administradores e Membros podem reabrir tarefa acessível; Kids podem reabrir tarefa própria. Quando houver missão concluída e/ou recompensa aceita, confirmar a reabertura e reverter os dados derivados.
 - Reabrir retira a contribuição da conclusão anterior da carga e do progresso. A exclusão posterior não desconta o peso novamente.
-- Missões concluídas preservam seus dados e vínculos. O resgate ainda disponível pode acrescentar a recompensa, sem modificar a conquista. A exclusão de tarefa não pode deixar uma missão sem tarefas.
+- Missões concluídas preservam dados e vínculos contra edição/exclusão. A exceção é a reabertura confirmada de tarefa vinculada, que retorna a missão para Em andamento e remove recompensa, participações e badges derivados. A exclusão de tarefa não pode deixar uma missão sem tarefas.
 
 A tela Família apresenta diretamente o progresso por dia/semana, lista de membros, botão Gerar relatório PDF e, para Administradores, Adicionar membro. Selecionar uma pessoa abre seu detalhe com tarefas por dia/semana; edição de perfil e reenvio de convite ficam nesse detalhe, quando permitidos. A consulta da lista e das tarefas é adulta; a gestão continua exclusiva dos Administradores. A carga será integrada pela SPEC-018 e o relatório permanece semanal. Referências: RN60–61, RF60–61/RF66, UC02/11/13/18.
 
@@ -144,6 +144,7 @@ A arquitetura backend 1.0 possui versionamento independente da base funcional. N
 
 | Versão | Data       | Alteração                                                                                                                                                                                                         |
 | ------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.11 | 2026-10-07 | Conclusão direta mantém responsáveis ou atribui adulto sem responsável; reabertura pode reabrir missão concluída e recalcula recompensa, participações e badges. |
 | 1.10 | 2026-10-06 | Tarefas com responsável Kids só recebem conclusão manual de Administrador; evidência pendente é auditável só por Admin e concorrência reconcilia sem erro na UI. Para SPEC-010. |
 | 1.9 | 2026-10-06 | Consulta pessoal diária para todos os perfis; consultas familiares adultas de tarefas e progresso por Dia/Semana; contrato de filtros familiares e carga adiada para SPEC-018. Para SPEC-009. |
 | 1.8 | 2026-10-06 | Rotinas passam a transportar observação opcional (até 250 caracteres); edição no alcance “selecionada e futuras” inclui a ocorrência de origem; são definidos códigos estáveis para validação de início, frequência e ocorrência de origem. Para SPEC-008. |

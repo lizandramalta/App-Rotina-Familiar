@@ -1,10 +1,10 @@
-# User flows — versão 1.5
+# User flows — versão 1.6
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão dos fluxos:** 1.5\
-**Base funcional:** 1.10\
-**Screen map:** 1.5 — revisão de 2026-10-06\
-**Data:** 2026-10-05\
+**Versão dos fluxos:** 1.6\
+**Base funcional:** 1.11\
+**Screen map:** 1.6 — revisão de 2026-10-07\
+**Data:** 2026-10-07\
 **Situação:** primeira versão para revisão de design
 
 [Projeto](../../README.md) · [Índice documental](../DOCUMENTACAO.md) · [Screen map](screen-map.md) · [Regras](../01-regras-de-negocio.md) · [Requisitos](../02-requisitos.md) · [Casos de uso](../03-casos-de-uso.md) · [Diagrama de classes](../06-diagrama-de-classes.md)
@@ -229,7 +229,7 @@ Responsáveis e repetição são escolhas do formulário; não é obrigatório a
 
 ## UF-06 — Concluir tarefa mantendo ou assumindo responsáveis
 
-**Objetivo:** concluir a tarefa inteira e esclarecer quem recebe o crédito.  
+**Objetivo:** concluir a tarefa inteira diretamente, com crédito previsível.
 **Entrada:** TEL-012, tarefa Pendente ou Aguardando confirmação; Administrador ou Membro apenas quando não houver responsável Kids.
 **Referências:** [UC12](../03-casos-de-uso.md#uc12); RN48, RN55–56; RF12, RF47, RF56.
 
@@ -237,26 +237,18 @@ Responsáveis e repetição são escolhas do formulário; não é obrigatório a
 flowchart TD
     A["TEL-012 · Acionar concluir"] --> AK{"Há responsável Kids?"}
     AK -->|Sim e Membro| J(["TEL-012 · Ação não disponível"])
-    AK -->|Não ou Administrador| B["MOD-004 · Mostrar responsáveis"]
-    B --> C{"Há responsáveis?"}
-    C -->|Não| D["Indicar atribuição ao adulto que conclui"]
-    C -->|Sim| E{"Usuário já é responsável?"}
-    E -->|Sim| F["Manter responsáveis atuais"]
-    E -->|Não| G{"Avisar sobre crédito e escolher"}
-    G -->|Manter| F
-    G -->|Assumir| H["Substituir todos os responsáveis pelo usuário"]
-    D --> I{"Confirmar?"}
-    F --> I
-    H --> I
-    I -->|Cancelar| J(["TEL-012 · Sem alterações"])
-    I -->|Sim| K["Revalidar estado e salvar conclusão e responsáveis juntos"]
+    AK -->|Não ou Administrador| B{"Há responsáveis?"}
+    B -->|Não| C["Atribuir automaticamente ao adulto que conclui"]
+    B -->|Sim| D["Manter responsáveis atuais"]
+    C --> K["Revalidar estado e salvar conclusão e responsáveis juntos"]
+    D --> K
     K --> L{"Operação confirmada?"}
     L -->|Sim| M(["TEL-012 · Concluída para todos os responsáveis finais"])
     L -->|Já concluída| M
     L -->|Falha| N["Informar falha e consultar estado atual"]
 ```
 
-As escolhas de responsável só são efetivadas com a conclusão confirmada. Cada responsável final recebe o peso integral; quem apenas executou a ação não recebe crédito se não for responsável. A tarefa conta uma vez no progresso de cada missão e no progresso coletivo diário ou semanal. Tarefa com responsável Kids só é concluída manualmente por Administrador; a pendência e foto são preservadas para auditoria administrativa. Se outra conclusão já foi confirmada, a interface atualiza silenciosamente para Concluída. Outras ocorrências da rotina não mudam.
+Concluir não exibe alerta. Cada responsável final recebe o peso integral; quem apenas executou a ação não recebe crédito se não for responsável. A tarefa conta uma vez no progresso de cada missão e no progresso coletivo diário ou semanal. Tarefa com responsável Kids só é concluída manualmente por Administrador; a pendência e foto são preservadas para auditoria administrativa. Se outra conclusão já foi confirmada, a interface atualiza silenciosamente para Concluída. Outras ocorrências da rotina não mudam.
 
 <a id="uf-07"></a>
 
@@ -314,17 +306,17 @@ A seta tracejada liga os registros entre os dois usuários; não representa nave
 ## UF-08 — Reabrir e excluir tarefa
 
 **Objetivo:** aplicar a alteração permitida sem corromper conquistas ou descontar carga duas vezes.  
-**Entrada:** TEL-012. Reabertura somente Administrador; exclusão por Administrador ou Membro.  
+**Entrada:** TEL-012. Reabertura por Administrador/Membro em tarefa acessível e por Kids em tarefa própria; exclusão por Administrador ou Membro.
 **Referências:** [UC17](../03-casos-de-uso.md#uc17), [UC07](../03-casos-de-uso.md#uc07); RN50, RN57–59, RN66; RF09, RF57–59, RF69.
 
 ```mermaid
 flowchart TD
     A["TEL-012 · Solicitar reabertura ou exclusão"] --> B{"Tarefa concluída?"}
-    B -->|Sim| C{"Admin e missão em andamento e nenhuma missão concluída?"}
-    C -->|Não| D(["Explicar impedimento · manter tarefa"])
-    C -->|Sim| E["MOD-006 · Explicar e confirmar reabertura"]
-    E -->|Cancelar| D
-    E -->|Confirmar e salvar| F["Pendente · retirar crédito anterior e recalcular progresso"]
+    B -->|Sim| C{"Missão concluída ou recompensa aceita?"}
+    C -->|Não| F["Pendente · retirar crédito anterior e recalcular progresso"]
+    C -->|Sim| E["MOD-006 · Avisar que a missão será reaberta e confirmar"]
+    E -->|Cancelar| D(["TEL-012 · Manter concluída"])
+    E -->|Confirmar e salvar| F
     F --> G{"Deseja excluir depois?"}
     G -->|Não| H(["TEL-012 · Pendente"])
     G -->|Sim| I{"É ocorrência de rotina?"}
@@ -339,7 +331,7 @@ flowchart TD
     M -->|Confirmar e salvar| O(["Retornar à lista de origem atualizada"])
 ```
 
-Não existe exclusão direta de tarefa concluída. Se não houver missão em andamento, não há reabertura neste MVP. Em exclusão de rotina, preservar ocorrências concluídas e informar os registros que não podem ser excluídos. A última tarefa de uma missão exige vincular outra antes de tentar excluí-la. Não se contorna a proteção de missão concluída pela mudança de alcance. Excluir uma tarefa Aguardando confirmação remove a sinalização corrente da criança junto com a tarefa, sem pedir confirmação adicional sobre a sinalização (RN66).
+Não existe exclusão direta de tarefa concluída. Reabrir uma tarefa vinculada a missão concluída e/ou com recompensa aceita exige MOD-006: confirmar retorna a missão para Em andamento e remove recompensa, participações e badges derivados, sem histórico. Em exclusão de rotina, preservar ocorrências concluídas e informar os registros que não podem ser excluídos. A última tarefa de uma missão exige vincular outra antes de tentar excluí-la. Não se contorna a proteção de missão concluída pela mudança de alcance. Excluir uma tarefa Aguardando confirmação remove a sinalização corrente da criança junto com a tarefa, sem pedir confirmação adicional sobre a sinalização (RN66).
 
 A reabertura é uma operação independente: retira o crédito do dia e da semana da conclusão anterior para todos os responsáveis, mantém responsáveis e atualiza progresso. Se a exclusão posterior falhar ou for cancelada, a reabertura já salva permanece. A exclusão não desconta o peso novamente. Cada gravação segue as condições comuns de falha e concorrência.
 
@@ -400,7 +392,7 @@ flowchart TD
 
 Salvar retorna à origem que abriu o formulário: à lista em criação e ao detalhe em edição. Missão encerrada conta uma vez para cada responsável creditado em uma ou mais tarefas vinculadas; marcos 5/10/25/50 concedem badges cumulativos. Sem missões, TEL-020 mostra o estado vazio; somente Administradores têm ação de criação. Sem tarefas disponíveis, o Administrador precisa criar tarefas por UF-05 antes de salvar uma missão.
 
-Cada tarefa vinculada conta uma vez, sem incluir a rotina inteira implicitamente. Remover vínculos de missão em andamento pode concluí-la se todas as restantes estiverem concluídas. Progresso também é recalculado por conclusões e reaberturas autorizadas fora deste fluxo. Missão concluída não aceita edição; o resgate disponível é a única adição prevista à conquista. Não existe expiração por tempo.
+Cada tarefa vinculada conta uma vez, sem incluir a rotina inteira implicitamente. Remover vínculos de missão em andamento pode concluí-la se todas as restantes estiverem concluídas. Progresso também é recalculado por conclusões e reaberturas autorizadas fora deste fluxo. Missão concluída não aceita edição; a única exceção é a reabertura confirmada de tarefa vinculada, que remove os dados derivados do encerramento. Não existe expiração por tempo.
 
 **Consulta de tarefas:** adultos podem abrir TEL-012 a partir do detalhe da missão. Kids podem abrir TEL-041 somente para tarefas próprias; acompanhar as demais tarefas da missão não concede ações operacionais. Voltar retorna a TEL-021.
 
@@ -597,6 +589,7 @@ Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imedi
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.6 | 1.11 | 1.6 | 2026-10-07 | UF-06 conclui diretamente sem modal; UF-08 permite reabrir missão concluída com confirmação e reversão de recompensa, participações e badges. |
 | 1.5 | 1.10 | 1.5 | 2026-10-06 | UF-06 restringe conclusão manual de tarefa com responsável Kids ao Administrador e reconcilia silenciosamente conclusão concorrente. Para SPEC-010. |
 | 1.4 | 1.9 | 1.4 | 2026-10-06 | UF-04 distingue consulta própria diária da familiar adulta por Dia/Semana e adia carga para SPEC-018. Para SPEC-009. |
 | 1.3 | 1.8 | 1.3 | 2026-10-06 | UF-05 explicita que rotina não exige data final e que o alcance “selecionada e futuras” inclui a ocorrência aberta. Para SPEC-008. |

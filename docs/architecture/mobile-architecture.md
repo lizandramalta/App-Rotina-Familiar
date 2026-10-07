@@ -1,7 +1,7 @@
 # Arquitetura mobile — Swift, SwiftUI e Clean Architecture
 
 **Projeto:** App de Organização Familiar — MVP\
-**Versão da arquitetura:** 1.3\
+**Versão da arquitetura:** 1.4\
 **Base funcional:** 1.9 · Design: 1.4 · Modelo de classes: 1.5\
 **Data:** 2026-10-06\
 **Situação:** decisões consolidadas antes da implementação
@@ -182,13 +182,6 @@ Exemplo ilustrativo de UC12; tipos auxiliares e imports são omitidos, sem alega
 // CompleteTaskCommand.swift
 struct CompleteTaskCommand: Sendable {
     let taskID: UUID
-    let assignment: CompletionAssignment
-}
-
-// CompletionAssignment.swift
-enum CompletionAssignment: Sendable {
-    case keepAssignees
-    case takeOver
 }
 
 // TaskRepository.swift
@@ -208,7 +201,7 @@ struct CompleteTaskUseCase: Sendable {
 }
 ```
 
-O comando não tem `expectedVersion` ou chave geral de idempotência. O ator é derivado da sessão, não de `performedBy` enviado como autorização. A resposta devolve estado canônico e recursos/períodos afetados. `keepAssignees` sem responsáveis aplica atribuição automática do autor no servidor, conforme UC12.
+O comando não tem `expectedVersion` ou chave geral de idempotência. O ator é derivado da sessão, não de `performedBy` enviado como autorização. A resposta devolve estado canônico e recursos/períodos afetados. O servidor mantém responsáveis existentes e, sem responsáveis, atribui automaticamente o adulto autor, conforme UC12.
 
 O `AppContainer` monta cliente autenticado → repositório → caso de uso → ViewModel → View. Factories por feature concentram montagem. `Environment` distribui dependências de apresentação já montadas, sem busca de repositório concreto pela View. Previews usam fixtures fictícias e doubles sem rede.
 
@@ -384,6 +377,7 @@ A sequência futura permanece: composição/acesso → família/membros → tare
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.4 | 2026-10-07 | `CompleteTaskCommand` não transporta escolha de responsáveis; conclusão é direta e o servidor resolve a atribuição automática. |
 | 1.3 | 2026-10-06 | `TaskQueryContext` distingue escopo pessoal diário dos períodos Dia/Semana familiares adultos. Para SPEC-009. |
 | 1.2 | 2026-10-05 | Integração com arquitetura backend 1.0 em Node.js, contratos `/v1`, bootstrap, preparação de rotinas e referências; base funcional 1.5 preservada. |
 | 1.1 | 2026-10-05 | Consolidação das decisões: mínimo 26/iPad, fuso configurável, datas livres, badges por participação, sessão única, reemissão de convites, Supabase/R2, última gravação e consulta após falha, PDF/sorteio locais, dois ambientes e sem rotina própria de backup. |

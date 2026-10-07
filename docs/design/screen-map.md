@@ -1,9 +1,9 @@
-# Screen map — versão 1.5
+# Screen map — versão 1.6
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do mapa:** 1.5\
-**Base funcional:** 1.10\
-**Data:** 2026-10-06\
+**Versão do mapa:** 1.6\
+**Base funcional:** 1.11\
+**Data:** 2026-10-07\
 **Situação:** referência inicial para design; organização de navegação proposta
 
 [Projeto](../../README.md) · [Índice e versões](../DOCUMENTACAO.md) · [Visão](../00-visao-do-produto.md) · [Regras](../01-regras-de-negocio.md) · [Requisitos](../02-requisitos.md) · [Casos de uso](../03-casos-de-uso.md) · [Diagrama de classes](../06-diagrama-de-classes.md)
@@ -81,9 +81,9 @@ flowchart TD
     M001("MOD-001 · Responsáveis")
     M002("MOD-002 · Repetição")
     M003("MOD-003 · Alcance da edição ou exclusão")
-    M004("MOD-004 · Concluir / manter ou assumir")
+    M004("MOD-004 · Reservado")
     M005("MOD-005 · Confirmar exclusão")
-    M006("MOD-006 · Reabrir tarefa · Admin")
+    M006("MOD-006 · Confirmar reabertura")
     T050 -->|Selecionar item da lista de membros| T032
     T050 -->|Adicionar membro / Admin| T033
     T032 -->|Editar perfil / Admin e permitido| T033
@@ -271,9 +271,9 @@ A = Administrador (inclui Criador); M = Membro; K = Kids. Códigos RF e RNF são
 | MOD-001 | Selecionar responsáveis | TEL-013 | Nenhum, um ou vários; mudança sujeita às proteções de histórico (UC07) |
 | MOD-002 | Configurar repetição | TEL-013 | Sem repetição, diária, 7, 14, 21 ou 28 dias; sem mensal (UC08) |
 | MOD-003 | Definir alcance | TEL-012/013 | Edição individual ou rotina futura; exclusão somente selecionada ou ela e futuras; mostrar registros preservados (UC07/08) |
-| MOD-004 | Concluir tarefa | TEL-012 | Mostrar responsáveis; se adulto não é responsável, manter ou assumir com aviso do crédito; sem responsável, atribuir ao autor. Em tarefa com responsável Kids, só Administrador vê e usa a ação; foto permanece no fluxo administrativo de validação (UC12) |
+| MOD-004 | Reservado | — | Conclusão não abre modal: mantém responsáveis existentes ou atribui o adulto apenas quando não houver responsável (UC12). |
 | MOD-005 | Confirmar exclusão | TEL-012 ou MOD-003 | Confirmar alcance e impactos; bloquear concluída, conquista protegida ou última tarefa de missão (UC07) |
-| MOD-006 | Reabrir tarefa | TEL-012, somente A | Explicar retirada de carga e progresso de todos; exigir missão em andamento e nenhum vínculo com missão concluída (UC17) |
+| MOD-006 | Reabrir tarefa | TEL-012 | Exibir somente se houver missão concluída e/ou recompensa aceita; avisar que a missão será reaberta e que recompensa, participações e badges derivados serão removidos (UC17). |
 | MOD-007 | Selecionar tarefas da missão | TEL-022 | Seleção individual, ao menos uma; não selecionar rotina inteira implicitamente (UC05) |
 | MOD-008 | Adicionar recompensa | TEL-023 | Informar e salvar item; não vincula automaticamente a missão (UC06) |
 | MOD-009 | Editar meu perfil | TEL-030 | Foto opcional e etiqueta/apelido do titular; nenhum terceiro acessa a configuração; não muda permissões (UC10) |
@@ -320,6 +320,7 @@ Campos funcionais de data/fuso e seleção de foto estão definidos; o layout vi
 
 | Versão do mapa | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.6 | 1.11 | 2026-10-07 | Conclusão direta sem MOD-004; MOD-006 confirma reabertura de missão concluída e reversão de recompensa, participações e badges. |
 | 1.5 | 1.10 | 2026-10-06 | MOD-004 oculta conclusão de tarefa com responsável Kids para Membro; evidência Kids permanece administrativa. Para SPEC-010. |
 | 1.4 | 1.9 | 2026-10-06 | TEL-010 e TEL-040 ficam diárias; consultas familiares adultas usam Dia/Semana, e a carga é adiada para SPEC-018. Para SPEC-009. |
 | 1.3 | 1.8 | 2026-10-06 | MOD-002 mantém rotina sem data final obrigatória; MOD-003 define que “selecionada e futuras” inclui a ocorrência de origem. Para SPEC-008. |

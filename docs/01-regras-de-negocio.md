@@ -1,13 +1,13 @@
 # Regras de negócio
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.9\
-**Data:** 2026-10-06\
+**Versão:** 1.10\
+**Data:** 2026-10-07\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
 
-Este documento contém todas as regras vigentes da versão 1.6. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
+Este documento contém todas as regras vigentes da versão 1.10. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
 
 **Identificadores preservados:** RN15, RN29 e RN32 não estavam definidos na base recebida e permanecem não utilizados. Não representam conteúdo faltante desta versão.
 
@@ -289,7 +289,7 @@ Apenas Administradores criam missões, de forma personalizada.
 
 ## RN38
 
-Quando todas as tarefas vinculadas estiverem concluídas, o servidor conclui a missão, registra uma participação por membro elegível conforme RN64, concede os badges cujos marcos forem atingidos e habilita o resgate. Participação e badges independem do resgate. Os dados da missão concluída são preservados conforme RN58.
+Quando todas as tarefas vinculadas estiverem concluídas, o servidor conclui a missão, registra uma participação por membro elegível conforme RN64, concede os badges cujos marcos forem atingidos e habilita o resgate. Participação e badges independem do resgate. Uma reabertura confirmada de tarefa vinculada pode retornar a missão para Em andamento conforme RN57, revertendo suas participações, badges e recompensa aceita na mesma transação.
 
 **Requisitos funcionais:** [RF31](02-requisitos.md#rf31), [RF32](02-requisitos.md#rf32), [RF35](02-requisitos.md#rf35), [RF36](02-requisitos.md#rf36), [RF51](02-requisitos.md#rf51), [RF52](02-requisitos.md#rf52), [RF58](02-requisitos.md#rf58)  
 **Requisitos não funcionais específicos:** Sem vínculo específico; requisitos transversais se aplicam conforme a operação.\
@@ -329,7 +329,7 @@ A roleta oferece itens predefinidos e itens personalizados adicionados por Admin
 
 ## RN43
 
-Uma missão concluída sem resgate permite ao Administrador abrir a roleta. O aplicativo obtém o catálogo elegível e realiza sorteio e animação localmente. Resultados recusados não precisam ser persistidos. Ao aceitar, o servidor valida perfil, item e disponibilidade e registra uma única recompensa. O servidor valida o resgate, sem alegar comprovação do sorteio local. Não há limite de novos sorteios antes do aceite.
+Uma missão concluída sem resgate permite ao Administrador abrir a roleta. O aplicativo obtém o catálogo elegível e realiza sorteio e animação localmente. Resultados recusados não precisam ser persistidos. Ao aceitar, o servidor valida perfil, item e disponibilidade e registra uma única recompensa. O servidor valida o resgate, sem alegar comprovação do sorteio local. Não há limite de novos sorteios antes do aceite. Se a missão retornar para Em andamento por reabertura confirmada de uma tarefa vinculada, a recompensa aceita é removida sem histórico.
 
 **Requisitos funcionais:** [RF35](02-requisitos.md#rf35), [RF36](02-requisitos.md#rf36), [RF51](02-requisitos.md#rf51), [RF52](02-requisitos.md#rf52)  
 **Requisitos não funcionais específicos:** Sem vínculo específico; requisitos transversais se aplicam conforme a operação.\
@@ -433,7 +433,7 @@ Uma tarefa possui estado único para todos os responsáveis. Sua conclusão vale
 
 ## RN56
 
-Antes de concluir tarefa atribuída a outras pessoas, o adulto deve ser informado de quem receberá o crédito e pode manter os responsáveis ou assumir a tarefa, substituindo a lista completa. A troca só é efetivada junto com a conclusão confirmada.
+Concluir uma tarefa não exibe alerta nem oferece escolha de responsáveis. Se houver responsáveis, eles são mantidos e recebem o crédito; se não houver, o adulto que conclui torna-se o único responsável. A atribuição automática só é efetivada junto com a conclusão confirmada.
 
 **Requisitos funcionais:** [RF12](02-requisitos.md#rf12), [RF47](02-requisitos.md#rf47), [RF56](02-requisitos.md#rf56)  
 **Requisitos não funcionais específicos:** [RNF10](02-requisitos.md#rnf10)  
@@ -441,7 +441,7 @@ Antes de concluir tarefa atribuída a outras pessoas, o adulto deve ser informad
 
 ## RN57
 
-Somente Administradores podem retornar a Pendente uma tarefa concluída vinculada a missão em andamento, desde que ela não esteja vinculada a nenhuma missão concluída. A reabertura remove a contribuição da conclusão anterior da carga de todos os responsáveis e do progresso das missões em andamento, inclusive ajustando uma semana passada.
+Administradores e Membros podem retornar qualquer tarefa acessível da família para Pendente; Kids podem fazê-lo em tarefas próprias. A reabertura remove a contribuição da conclusão anterior da carga de todos os responsáveis e do progresso das missões vinculadas, inclusive ajustando uma semana passada. Quando atingir missão concluída ou recompensa aceita, exige confirmação explícita: retorna a missão para Em andamento, remove a recompensa aceita sem histórico e recalcula participações e badges derivados daquela missão na mesma transação.
 
 **Requisitos funcionais:** [RF09](02-requisitos.md#rf09), [RF18](02-requisitos.md#rf18), [RF19](02-requisitos.md#rf19), [RF57](02-requisitos.md#rf57), [RF59](02-requisitos.md#rf59)  
 **Requisitos não funcionais específicos:** [RNF07](02-requisitos.md#rnf07), [RNF09](02-requisitos.md#rnf09), [RNF10](02-requisitos.md#rnf10), [RNF11](02-requisitos.md#rnf11), [RNF25](02-requisitos.md#rnf25)  
@@ -449,7 +449,7 @@ Somente Administradores podem retornar a Pendente uma tarefa concluída vinculad
 
 ## RN58
 
-Missões concluídas não podem ter seus dados ou vínculos alterados ou ser excluídas. Tarefas vinculadas não podem ser reabertas, excluídas ou modificadas de modo a alterar os dados preservados da missão. O registro da recompensa aceita é permitido exclusivamente pelo fluxo de resgate único, sem modificar a conquista.
+Missões concluídas não podem ter seus dados ou vínculos editados ou ser excluídas. Uma reabertura confirmada de tarefa vinculada é a exceção: ela retorna a missão para Em andamento e remove os dados derivados do encerramento — participações, badges que dependam dela e recompensa aceita — sem preservar histórico. O registro da recompensa aceita continua permitido exclusivamente pelo fluxo de resgate único enquanto a missão estiver concluída.
 
 **Requisitos funcionais:** [RF08](02-requisitos.md#rf08), [RF09](02-requisitos.md#rf09), [RF10](02-requisitos.md#rf10), [RF28](02-requisitos.md#rf28), [RF50](02-requisitos.md#rf50), [RF57](02-requisitos.md#rf57), [RF58](02-requisitos.md#rf58), [RF59](02-requisitos.md#rf59)  
 **Requisitos não funcionais específicos:** [RNF07](02-requisitos.md#rnf07), [RNF09](02-requisitos.md#rnf09), [RNF25](02-requisitos.md#rnf25)  
@@ -516,7 +516,7 @@ O apelido é visível à família, com edição exclusiva do titular. A foto de 
 
 **Tema:** Participação em missões e badges por marcos
 
-Ao concluir uma missão, registrar uma participação por membro que figure como responsável creditado em pelo menos uma conclusão válida de tarefa vinculada. Quem apenas executou o clique ou confirmou sinalização, sem receber crédito, não participa por essa ação. Várias tarefas da mesma missão contam uma única missão por pessoa. A participação é registrada no encerramento e preservada com a conquista, inclusive no histórico de membros removidos; não se concede retroativamente a quem entrar depois.
+Ao concluir uma missão, registrar uma participação por membro que figure como responsável creditado em pelo menos uma conclusão válida de tarefa vinculada. Quem apenas executou o clique ou confirmou sinalização, sem receber crédito, não participa por essa ação. Várias tarefas da mesma missão contam uma única missão por pessoa. A participação é registrada no encerramento; se a missão for reaberta, ela e os badges cuja elegibilidade for alterada são recalculados. Não se concede retroativamente a quem entrar depois.
 
 O total de missões com participação concede badges fixos e cumulativos: bronze (`bronze`) em 5, prata (`silver`) em 10, ouro (`gold`) em 25 e diamante (`diamond`) em 50. Concessão é única por membro/marco; os anteriores são mantidos. Não existe seleção ou criação de selo por missão, nem concessão a todos apenas por pertencerem à família. No perfil, o detalhe do marco mostra as missões que contribuíram para ele e permite abrir cada missão. Participação e badges independem do resgate da recompensa.
 
@@ -558,6 +558,7 @@ Toda tarefa pode ter uma observação opcional de até 250 caracteres, contando 
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.10 | 2026-10-07 | Conclusão direta mantém responsáveis existentes ou atribui o adulto quando não houver; reabertura passa a todos os perfis no alcance de consulta e pode reabrir missão concluída, removendo recompensa, participações e badges derivados. |
 | 1.9 | 2026-10-06 | RN21–23 restringem conclusão manual de tarefa com responsável Kids ao Administrador e preservam sinalização/foto pendente para auditoria administrativa. Para SPEC-010. |
 | 1.8 | 2026-10-06 | RN33 e RN61 distinguem consulta própria diária da consulta familiar adulta por Dia/Semana. Para SPEC-009. |
 | 1.7 | 2026-10-06 | RN14 passa a permitir observação opcional na rotina e explicita que não há data final obrigatória; RN17 define que “selecionada e futuras” inclui a ocorrência de origem; RN67 passa a cobrir UC08. Para SPEC-008. |

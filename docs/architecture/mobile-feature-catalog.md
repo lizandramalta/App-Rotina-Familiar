@@ -1,7 +1,7 @@
 # Catálogo de funcionalidades e rastreabilidade mobile
 
-**Versão:** 1.5 · **Base funcional:** 1.9 · **Design:** 1.4\
-**Data:** 2026-10-05 · **Situação:** especificação para implementação futura
+**Versão:** 1.6 · **Base funcional:** 1.11 · **Design:** 1.6\
+**Data:** 2026-10-07 · **Situação:** especificação para implementação futura
 
 [Arquitetura mobile](mobile-architecture.md) · [Decisões](mobile-decisions.md) · [Índice documental](../DOCUMENTACAO.md) · [Screen map](../design/screen-map.md) · [User flows](../design/user-flows.md)
 
@@ -73,9 +73,9 @@ Modais não se tornam automaticamente novos casos de uso ou novas ViewModels. Se
 | MOD-001 | `AssigneePickerView.swift` | Rascunho de `TaskEditorViewModel`; nenhum, um ou vários responsáveis |
 | MOD-002 | `RecurrencePickerView.swift` | Rascunho de `TaskEditorViewModel`; única ou intervalos 1/7/14/21/28, sem data final |
 | MOD-003 | `ChangeScopeView.swift` | `TaskEditorViewModel` ou `TaskDetailViewModel`; “selecionada e futuras” inclui a origem, com registros preservados |
-| MOD-004 | `TaskCompletionConfirmationView.swift` | `TaskDetailViewModel`; mostra beneficiários e confirma manter/assumir |
+| MOD-004 | Reservado | Conclusão ocorre diretamente em `TaskDetailViewModel`, sem confirmação |
 | MOD-005 | `TaskDeletionConfirmationView.swift` | `TaskDetailViewModel`; confirma alcance autorizado |
-| MOD-006 | `TaskReopeningConfirmationView.swift` | `TaskDetailViewModel`; efeitos sobre todos os responsáveis e missões |
+| MOD-006 | `TaskReopeningConfirmationView.swift` | `TaskDetailViewModel`; exibido quando reabrir afetar missão concluída/recompensa e informa reversão dos dados derivados |
 | MOD-007 | `MissionTaskPickerView.swift` | Rascunho de `MissionEditorViewModel`; IDs individuais, sem selecionar rotina inteira |
 | MOD-008 | `RewardItemEditorView.swift` | `RewardItemEditorViewModel`; gravação independente do resgate |
 | MOD-009 | `OwnProfileEditorView.swift` | `OwnProfileEditorViewModel`; foto/apelido do titular e upload |
@@ -104,7 +104,7 @@ Modais não se tornam automaticamente novos casos de uso ou novas ViewModels. Se
 | [UC09](../03-casos-de-uso.md#uc09) | `InspectInviteUseCase`, `JoinInviteUseCase`, `RestoreSessionUseCase` | TEL-003/004; MOD-013 | [UF-02](../design/user-flows.md#uf-02), [UF-03](../design/user-flows.md#uf-03) | RF42–46/54/68; RN09/10/45–47; RNF17–22 |
 | [UC10](../03-casos-de-uso.md#uc10) | `GetOwnProfileUseCase`, `UpdateOwnProfileUseCase`, `GetOwnBadgesUseCase`, `GetBadgeContributionsUseCase` | TEL-030/054; MOD-009 | [UF-13](../design/user-flows.md#uf-13) | RF48/62/65; RN63/64; RNF27 |
 | [UC11](../03-casos-de-uso.md#uc11) | `GetPersonalTasksUseCase`, `GetFamilyTasksUseCase`, `GetMemberTasksUseCase`, `GetPersonalProgressUseCase`, `GetFamilyOverviewUseCase` | TEL-010/011/032/040/050 | [UF-04](../design/user-flows.md#uf-04) | RF11/17/22/49/60/65/66; RN26/27/33/49/60/61 |
-| [UC12](../03-casos-de-uso.md#uc12) | `CompleteTaskUseCase` | TEL-012; MOD-004 | [UF-06](../design/user-flows.md#uf-06) | RF12/47/56; RN21/22/30/48/55/56 |
+| [UC12](../03-casos-de-uso.md#uc12) | `CompleteTaskUseCase` | TEL-012 | [UF-06](../design/user-flows.md#uf-06) | RF12/47/56; RN21/22/30/48/55/56 |
 | [UC13](../03-casos-de-uso.md#uc13) | `GetFamilyLoadUseCase` | TEL-050 | [UF-09](../design/user-flows.md#uf-09) | RF18–21/56/57/66; RN28/30/31/33/34/57/61 |
 | [UC14](../03-casos-de-uso.md#uc14) | `GetMissionsUseCase`, `GetMissionDetailUseCase` | TEL-020/021 | [UF-10](../design/user-flows.md#uf-10) | RF30–32/36/58/62/65; RN35–39/43/51–53/58/64 |
 | [UC15](../03-casos-de-uso.md#uc15) | `UploadTaskPhotoUseCase`, `SignalTaskUseCase` | TEL-041; MOD-011 | [UF-07](../design/user-flows.md#uf-07) | RF23/24/55/56; RN21–26/54/55 |
@@ -127,8 +127,8 @@ Os contratos remotos e sua cobertura por UC estão no [catálogo backend](backen
 | Ingressar/recuperar | Link, senha, confirmação e armazenamento seguro da sessão | Validar prova, consumir convite uma vez, manter mesmo perfil e tratar concorrência |
 | Mudar/remover membro | Confirmar impactos e atualizar navegação | Proteção do Criador, regras Kids/Admin, revogação e preservação histórica |
 | Tarefa/rotina | Data livre, alcance e comando; consultar após resposta incerta | Última edição válida persistida vence; gerar sem duplicar, auditar correções, proteger conquistas |
-| Concluir/confirmar/recusar | Enviar intenção e reconciliar estado | Primeira decisão válida, autor/beneficiários corretos, efeitos consistentes em missões/badges |
-| Reabrir/excluir | Explicar impactos e aguardar confirmação | Validar missões atuais, retirar crédito uma vez e impedir missão vazia |
+| Concluir/confirmar/recusar | Enviar intenção e reconciliar estado | Conclusão direta mantém responsáveis ou atribui adulto sem responsável; primeira decisão válida e efeitos consistentes |
+| Reabrir/excluir | Confirmar somente reabertura que afeta missão concluída/recompensa | Retirar crédito uma vez, reverter dados derivados e impedir missão vazia |
 | Gerenciar missão | Selecionar tarefas individuais | Concluir se todas concluídas, registrar participações e conceder marcos sem duplicar |
 | Sortear/aceitar | Sortear localmente, animar, permitir novo sorteio e enviar aceite | Item elegível, permissão atual e uma única recompensa aceita |
 | Indicadores/PDF | Selecionar período, formatar e renderizar | Projeções completas/coerentes com calendário e leitura consistente do relatório |

@@ -1,8 +1,8 @@
 # Modelo de dados (DER)
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do modelo:** 1.4 · **Base funcional:** 1.8\
-**Data:** 2026-10-05\
+**Versão do modelo:** 1.5 · **Base funcional:** 1.11\
+**Data:** 2026-10-07\
 **Situação:** modelo conceitual atualizado; sem migrações implementadas
 
 [Projeto](../README.md) · [Índice](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Classes](06-diagrama-de-classes.md#classe-familytask) · [Arquitetura mobile](architecture/mobile-architecture.md)
@@ -305,11 +305,11 @@ erDiagram
 | Uma recorrência ativa por template; origem imutável identifica ocorrência mesmo quando data prevista muda | RN14, RN16/17 |
 | No máximo uma conclusão vigente por ocorrência; estado concluído exige conclusão vigente. Zero responsáveis/zero créditos é permitido após edição autorizada | RN17, RN22, RNF11 |
 | Correção de concluída atualiza crédito vigente e audita valores antigos na mesma transação; mantém instante de conclusão | RN17, RN30 |
-| Reabertura invalida conclusão/créditos uma vez e preserva histórico; exclusão posterior não subtrai novamente | RN57/59 |
-| Missão mantém ao menos uma ocorrência, sem selo configurável. Conquista encerrada protege dados/vínculos/tarefas | RN36, RN50, RN58 |
-| Participação única por membro/missão: exige ao menos um crédito válido em tarefa vinculada no encerramento. Não duplicar por várias tarefas | RN64 |
-| Badge único por membro/marco; quatro marcos fixos e cumulativos. Snapshot das participações contribuintes tem o mesmo titular | RN64 |
-| Resgate único e item de catálogo ou da mesma família; preservar título/autor do aceite | RN53, RNF23 |
+| Reabertura invalida conclusão/créditos uma vez; se reabrir missão concluída, remove recompensa, participações e badges derivados no mesmo commit; exclusão posterior não subtrai novamente | RN57/59 |
+| Missão mantém ao menos uma ocorrência, sem selo configurável. Edição/exclusão preservam dados/vínculos, exceto reabertura confirmada de tarefa vinculada | RN36, RN50, RN58 |
+| Participação única por membro/missão: exige ao menos um crédito válido em tarefa vinculada no encerramento; é removida quando a missão é reaberta | RN64 |
+| Badge por membro/marco é recalculado após reabertura de missão para refletir participações vigentes | RN64 |
+| Resgate único e item de catálogo ou da mesma família; reabertura de missão remove o aceite | RN43, RN53, RNF23 |
 | Ciclos contíguos, não sobrepostos; transição de fuso não reapura intervalos encerrados. Uma mudança programada vigente por família | RN28, RN65 |
 | Uma apuração por ciclo; resultado final imutável. Fila de notificação gravada com resultado, sem confundir aceitação APNs com leitura | RN65, RNF26 |
 | Família do recurso, titularidade e estado ativo conferidos no backend; URL de mídia não é permissão de leitura | RNF06/07/24/27 |
@@ -357,6 +357,7 @@ A versão 1.1 representava somente um access token na sessão. A versão 1.2 sep
 
 | Versão | Base | Data | Alteração |
 |---|---|---|---|
+| 1.5 | 1.11 | 2026-10-07 | Reabertura de missão concluída remove recompensa, participações e badges derivados na mesma transação. |
 | 1.4 | 1.8 | 2026-10-06 | `TAREFA` passa a armazenar `observacao` opcional (até 250 caracteres), herdada pelas ocorrências geradas por rotina. Para SPEC-008. |
 | 1.3 | 1.7 | 2026-10-06 | `OCORRENCIA_TAREFA` ganha `observacao` opcional (até 250 caracteres). Para SPEC-007. |
 | 1.2 | 1.5 | 2026-10-05 | Integração backend: identidade/bootstrap do Criador, tokens subordinados à sessão, origem civil e estados de mídia; armazenamento operacional de jobs/recuperação. |

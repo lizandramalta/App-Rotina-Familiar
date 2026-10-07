@@ -1,8 +1,8 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.9\
-**Data:** 2026-10-06\
+**Versão:** 1.10\
+**Data:** 2026-10-07\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -250,7 +250,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 - O sistema impede salvar uma missão sem tarefas. A remoção da última exige substituição antes de salvar.
 - Vincular uma tarefa não vincula sua rotina nem outras ocorrências presentes ou futuras.
 - Remover uma tarefa dos vínculos de uma missão em andamento recalcula seu progresso; se todas as restantes estiverem concluídas, a missão é concluída.
-- Uma missão concluída não pode ser editada nem ter seus vínculos alterados. Somente o resgate ainda disponível pode acrescentar a recompensa, pelo [UC16](03-casos-de-uso.md#uc16).
+- Uma missão concluída não pode ser editada nem ter seus vínculos alterados. Somente o resgate ainda disponível pode acrescentar a recompensa, pelo [UC16](03-casos-de-uso.md#uc16). A reabertura confirmada de uma tarefa vinculada pelo UC17 é a exceção: retorna a missão para Em andamento e reverte seus dados derivados.
 
 **Pós-condição:** a missão possui ao menos uma tarefa; permanece em andamento ou está concluída com seus dados preservados. Não existe expiração por prazo.
 
@@ -519,7 +519,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 **Regras relacionadas:** [RN21](01-regras-de-negocio.md#rn21), [RN22](01-regras-de-negocio.md#rn22), [RN30](01-regras-de-negocio.md#rn30), [RN35](01-regras-de-negocio.md#rn35), [RN48](01-regras-de-negocio.md#rn48), [RN55](01-regras-de-negocio.md#rn55), [RN56](01-regras-de-negocio.md#rn56)  
 **Requisitos não funcionais:** [RNF01](02-requisitos.md#rnf01), [RNF02](02-requisitos.md#rnf02), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF08](02-requisitos.md#rnf08), [RNF09](02-requisitos.md#rnf09), [RNF10](02-requisitos.md#rnf10), [RNF11](02-requisitos.md#rnf11), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF14](02-requisitos.md#rnf14), [RNF22](02-requisitos.md#rnf22), [RNF25](02-requisitos.md#rnf25)
 
-**Objetivo:** registrar a conclusão integral de uma tarefa, mantendo ou substituindo seus responsáveis.
+**Objetivo:** registrar diretamente a conclusão integral de uma tarefa, mantendo os responsáveis existentes ou atribuindo o adulto quando não houver responsável.
 
 **Atores:** Administrador e Membro.
 
@@ -529,20 +529,17 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 **Fluxo principal:**
 
 1. O usuário seleciona a tarefa e aciona concluir.
-2. O sistema apresenta os responsáveis atuais.
-3. Se a tarefa tiver responsável Kids e o usuário for Membro, o sistema não oferece concluir. Caso contrário, se o usuário não estiver entre os responsáveis, o sistema alerta que a conclusão será creditada aos responsáveis existentes e oferece mantê-los ou assumir a tarefa.
-4. O usuário escolhe manter os responsáveis e confirma a conclusão.
-5. O sistema registra quem executou a ação e conclui a tarefa para todos os responsáveis.
-6. Cada responsável recebe o peso integral na carga; a tarefa conta uma única vez em cada missão vinculada.
+2. Se a tarefa tiver responsável Kids e o usuário for Membro, o sistema não oferece concluir. Caso contrário, envia a conclusão sem alerta.
+3. O sistema mantém os responsáveis atuais; se não houver, atribui a tarefa ao adulto que conclui.
+4. O sistema registra quem executou a ação e conclui a tarefa para todos os responsáveis finais.
+5. Cada responsável final recebe o peso integral na carga; a tarefa conta uma única vez em cada missão vinculada.
 
 **Alternativas e exceções:**
 
-- **Assumir tarefa:** o sistema substitui todos os responsáveis pelo usuário que conclui. Somente ele recebe o peso dessa conclusão.
 - **Sem responsável:** o sistema atribui automaticamente a tarefa ao usuário que conclui.
 - **Usuário já responsável:** a conclusão mantém os responsáveis existentes e vale para todos.
 - **Sinalização Kids existente:** somente Administrador pode avaliar a foto opcional, confirmar/recusar ou concluir manualmente. A conclusão encerra a pendência, preserva sinalização/foto para auditoria administrativa e vale para todos os responsáveis.
-- **Membro diante de tarefa Kids:** pode visualizá-la na área Família, mas não pode concluí-la nem reabri-la.
-- **Cancelar:** nenhuma conclusão ou troca de responsável é salva.
+- **Membro diante de tarefa Kids:** pode visualizá-la na área Família, mas não pode concluí-la.
 - **Conclusão simultânea:** o sistema registra somente uma conclusão válida, sem duplicar carga ou atribuições.
 
 **Pós-condição:** tarefa concluída para todos os responsáveis finais. Quem apenas executou a ação, mantendo outros responsáveis, não recebe peso se não for um deles. Outras ocorrências da rotina não são alteradas.
@@ -624,8 +621,8 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 - Tarefas Kids aguardando confirmação não contam como concluídas.
 - Uma tarefa com vários responsáveis conta uma única vez no progresso da missão.
-- A reabertura autorizada reduz o progresso das missões em andamento às quais a tarefa está vinculada.
-- Missões concluídas preservam seus dados e vínculos.
+- A reabertura autorizada reduz o progresso das missões vinculadas. Quando a missão já estiver concluída, ela retorna para Em andamento, sem recompensa, participações ou badges derivados.
+- Missões concluídas preservam seus dados e vínculos, exceto pela reabertura confirmada de tarefa vinculada no UC17.
 - Somente Administradores acessam a ação de resgate pelo [UC16](03-casos-de-uso.md#uc16).
 - Sem missões, o sistema apresenta essa situação.
 
@@ -707,7 +704,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 - Se outro Administrador já tiver aceitado uma recompensa, o sistema apresenta o registro existente e impede outro resgate.
 - Falha de gravação não é apresentada como aceitação concluída.
 
-**Pós-condição:** uma única recompensa foi registrada. O resgate acrescenta esse registro sem modificar tarefas, progresso, participações ou demais dados preservados da missão concluída.
+**Pós-condição:** uma única recompensa foi registrada enquanto a missão permanecer concluída. Reabertura confirmada posterior de tarefa vinculada remove esse registro junto com os demais dados derivados do encerramento.
 
 ## UC17
 
@@ -723,32 +720,30 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 **Regras relacionadas:** [RN38](01-regras-de-negocio.md#rn38), [RN50](01-regras-de-negocio.md#rn50), [RN53](01-regras-de-negocio.md#rn53), [RN55](01-regras-de-negocio.md#rn55), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59)  
 **Requisitos não funcionais:** [RNF01](02-requisitos.md#rnf01), [RNF02](02-requisitos.md#rnf02), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF08](02-requisitos.md#rnf08), [RNF09](02-requisitos.md#rnf09), [RNF10](02-requisitos.md#rnf10), [RNF11](02-requisitos.md#rnf11), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF14](02-requisitos.md#rnf14), [RNF22](02-requisitos.md#rnf22), [RNF25](02-requisitos.md#rnf25)
 
-**Objetivo:** permitir ao Administrador desfazer uma conclusão em missão ainda em andamento, inclusive para possibilitar a exclusão posterior da tarefa.
+**Objetivo:** permitir a qualquer perfil desfazer uma conclusão acessível, inclusive quando isso reabre uma missão e remove seus dados derivados.
 
-**Ator:** Administrador.
+**Atores:** Administrador, Membro e Kids (somente tarefa própria).
 
 
-**Pré-condições:** tarefa concluída, vinculada a pelo menos uma missão em andamento e não vinculada a nenhuma missão concluída.
+**Pré-condições:** tarefa concluída e acessível ao ator.
 
 **Fluxo principal:**
 
-1. O Administrador seleciona a tarefa e solicita o retorno para Pendente.
+1. O ator seleciona a tarefa e solicita o retorno para Pendente.
 2. O sistema verifica o perfil, o estado e os vínculos da tarefa.
-3. Informa que a operação desfaz a conclusão para todos os responsáveis e altera a carga diária ou semanal e o progresso das missões em andamento.
-4. O Administrador confirma.
+3. Se houver missão concluída e/ou recompensa aceita, informa que a missão será reaberta e que recompensa, participações e badges derivados serão removidos; nos demais casos, informa os efeitos sobre carga e progresso.
+4. O ator confirma quando o alerta for apresentado.
 5. O sistema retorna a tarefa para Pendente, mantendo seus responsáveis.
 6. O sistema retira o peso anteriormente creditado a cada responsável do dia e da semana correspondentes.
-7. Recalcula o progresso das missões em andamento vinculadas à tarefa.
+7. Recalcula o progresso das missões vinculadas e, se necessário, retorna cada missão concluída para Em andamento, removendo recompensa, participações e badges derivados na mesma transação.
 
 **Alternativas e exceções:**
 
-- Se houver vínculo com qualquer missão concluída, o sistema bloqueia a operação e explica que os dados da conquista devem ser preservados.
-- Se não houver vínculo com missão em andamento, a operação não está disponível neste escopo.
-- Membros e Kids não podem executar a reabertura.
-- Cancelamento mantém a conclusão.
+- Sem missão concluída ou recompensa aceita, a reabertura ocorre diretamente.
+- Cancelamento do alerta mantém a conclusão.
 - Após a reabertura, a exclusão pode ocorrer pelo [UC07](03-casos-de-uso.md#uc07), respeitando a exigência de ao menos uma tarefa por missão.
 
-**Pós-condição:** tarefa pendente para todos os responsáveis, sem contribuição de sua conclusão anterior para a carga ou o progresso. O histórico da operação é preservado para consistência dos registros.
+**Pós-condição:** tarefa pendente para todos os responsáveis, sem contribuição de sua conclusão anterior para carga ou progresso. Missões reabertas ficam sem recompensa, participações e badges derivados; não há preservação desse histórico.
 
 
 ## UC18
@@ -837,6 +832,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.10 | 2026-10-07 | UC12 conclui diretamente mantendo responsáveis ou atribuindo adulto sem responsável. UC17 libera reabertura no alcance do perfil e permite reabrir missão concluída, removendo recompensa, participações e badges derivados. |
 | 1.9 | 2026-10-06 | UC12 restringe conclusão manual de tarefa com responsável Kids ao Administrador e preserva a evidência pendente para auditoria. Para SPEC-010. |
 | 1.8 | 2026-10-06 | UC11 passa a definir consulta própria diária e consulta familiar adulta por Dia/Semana. Para SPEC-009. |
 | 1.7 | 2026-10-06 | UC08 passa a registrar observação opcional na rotina, ausência de data final obrigatória e alcance inclusivo da ocorrência selecionada. Para SPEC-008. |

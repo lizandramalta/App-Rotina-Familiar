@@ -3,8 +3,8 @@
 Organização colaborativa das responsabilidades domésticas, com tarefas compartilhadas, participação infantil e conquistas coletivas.
 
 **Escopo:** MVP  
-**Versão da base do projeto:** 1.10\
-**Data:** 2026-10-06
+**Versão da base do projeto:** 1.11\
+**Data:** 2026-10-07
 
 ## Por que este projeto existe
 
@@ -34,7 +34,7 @@ Famílias que compartilham a rotina doméstica e desejam organizar melhor suas r
 - Checklist da criação da família até o último dia do mês corrente e progresso pessoal diário; consultas familiares adultas por dia ou semana.
 - Modo Kids com sinalização, foto opcional e avaliação pelo Administrador.
 - Carga por dia ou semana para adultos; a semana vai de segunda-feira a domingo.
-- Missões coletivas sem prazo, badges por marcos de participação e conquistas preservadas.
+- Missões coletivas sem prazo, badges por marcos de participação e reabertura que recalcula dados derivados quando necessária.
 - Roleta com itens predefinidos e personalizados por Administradores, com um resgate aceito por missão.
 - Foto opcional, apelido próprio e badges por participação no perfil de adultos e Kids.
 - Relatório semanal em PDF com gráficos e indicadores da família.
@@ -59,7 +59,7 @@ O Criador da Família é um Administrador com identificação especial e proteç
 
 **Autonomia com permissões claras.** Adultos gerenciam tarefas; somente Administradores gerenciam membros, missões e recompensas. Kids têm uma experiência simplificada e não acessam a carga diária ou semanal.
 
-**Conquistas preservadas.** Missões concluídas mantêm seus dados. Tarefas concluídas não podem ser excluídas diretamente. A reabertura exige Administrador, vínculo com missão em andamento e ausência de vínculo com qualquer missão concluída.
+**Missões reversíveis com confirmação.** Tarefas concluídas não podem ser excluídas diretamente. Qualquer perfil pode reabrir uma tarefa no seu alcance; quando isso afetar missão concluída e/ou recompensa aceita, confirma a reabertura e remove recompensa, participações e badges derivados.
 
 ## Como avaliar o sucesso
 
@@ -71,7 +71,7 @@ Missões e recompensas devem aumentar a participação sem gerar competição. O
 
 Não estão incluídos calendário compartilhado, widgets, lista de compras, disponibilidade por membro, negociação de troca de tarefas, pedidos de ajuda, redistribuição automática, inteligência artificial ou permissões personalizadas.
 
-O produto não prevê recorrência mensal, missões com prazo, conclusão parcial por responsável, rankings completos, streaks, controle de tempo de tela, mascote virtual ou recursos de localização. Tarefas com vários responsáveis e a opção de assumir ao concluir já estão no MVP.
+O produto não prevê recorrência mensal, missões com prazo, conclusão parcial por responsável, rankings completos, streaks, controle de tempo de tela, mascote virtual ou recursos de localização. Tarefas com vários responsáveis são concluídas mantendo responsáveis existentes; sem responsável, o adulto que conclui é atribuído automaticamente.
 
 As possibilidades de evolução estão no [documento de visão](docs/00-visao-do-produto.md), sem compromisso de implementação nesta versão.
 
@@ -146,6 +146,7 @@ A arquitetura backend 1.0 está em [backend-architecture.md](docs/architecture/b
 
 | Versão | Data | Marco |
 |---|---|---|
+| 1.11 | 2026-10-07 | Conclusão direta preserva responsáveis existentes ou atribui o adulto sem responsável. Reabertura por todos os perfis no seu alcance pode reabrir missão concluída e reverte recompensa, participações e badges. |
 | 1.10 | 2026-10-06 | Tarefas com responsável Kids só podem ser concluídas manualmente por Administradores; sinalização/foto pendente é preservada para auditoria administrativa. Para SPEC-010. |
 | 1.9 | 2026-10-06 | Consulta pessoal diária para todos os perfis; consultas familiares adultas por Dia/Semana; carga detalhada permanece na SPEC-018. |
 | 1.7 | 2026-10-06 | RF02, RF03 e RF40 passam a definir o nome administrativo de membro e os papéis permitidos na criação, para elaboração de SPEC-003. Tarefa ganha limite de título (1–60 caracteres), observação opcional (até 250 caracteres) e regra de resolução de sinalização Kids pendente ao editar/excluir; SPEC-007 em elaboração. |

@@ -1,9 +1,9 @@
-# Diagrama de classes — versão 1.5
+# Diagrama de classes — versão 1.6
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.5\
-**Base funcional:** 1.9\
-**Data:** 2026-10-06  
+**Versão:** 1.6\
+**Base funcional:** 1.11\
+**Data:** 2026-10-07
 **Situação:** referência de modelagem da base funcional
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Modelo de dados](05-modelo-de-dados.md)
@@ -73,7 +73,7 @@ Os contratos de serviço incluem autorização e persistência consistente no ba
 |---|---|---|
 | Isolamento e autorização | `AccessControl`, `Session`, serviços | [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07) e [RNF22](02-requisitos.md#rnf22): validar família, perfil ativo e permissão no backend em cada operação protegida. |
 | Apple e convites | `AppleAuthenticating`, `AccessService`, `Invite` | [RNF15](02-requisitos.md#rnf15), [RNF16](02-requisitos.md#rnf16), [RNF17](02-requisitos.md#rnf17), [RNF18](02-requisitos.md#rnf18), [RNF19](02-requisitos.md#rnf19), [RNF20](02-requisitos.md#rnf20) e [RNF21](02-requisitos.md#rnf21): integração oficial, proteção de credenciais, validação de vínculo, contenção de tentativas e consumo único atômico. |
-| Conclusão, reabertura e crédito | `FamilyTask`, `Completion`, `TaskService`, `PeriodCalculator`, `Mission` | [RNF09](02-requisitos.md#rnf09), [RNF10](02-requisitos.md#rnf10), [RNF11](02-requisitos.md#rnf11) e [RNF25](02-requisitos.md#rnf25): preservar histórico e processar decisões concorrentes sem duplicar crédito ou modificar conquistas. |
+| Conclusão, reabertura e crédito | `FamilyTask`, `Completion`, `TaskService`, `PeriodCalculator`, `Mission` | [RNF09](02-requisitos.md#rnf09), [RNF10](02-requisitos.md#rnf10), [RNF11](02-requisitos.md#rnf11) e [RNF25](02-requisitos.md#rnf25): preservar histórico de tarefa e processar decisões concorrentes sem duplicar crédito, revertendo dados derivados de missão quando necessário. |
 | Resgate | `RewardWheel`, `Mission`, `RedeemedReward` | [RNF23](02-requisitos.md#rnf23): persistir recompensa e encerramento do resgate em uma operação consistente. |
 | Fotos e perfil | `Member`, `KidsSignal` | [RNF24](02-requisitos.md#rnf24) e [RNF27](02-requisitos.md#rnf27): controlar acesso às fotos e edição de apelido por titularidade. |
 | PDF e apuração | `WeeklyReportService`, `PDFRendering`, `WeeklyHighlightService`, `HighlightNotifying` | [RNF26](02-requisitos.md#rnf26) e [RNF27](02-requisitos.md#rnf27): leitura consistente, processamento recuperável, notificações sem duplicidade e compartilhamento explícito. |
@@ -415,16 +415,16 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 + edit(title: String, weight: EffortWeight, date: LocalDate, note: String?, by actor: Member,
       missions: [Mission], signalResolution: SignalResolution?) throws
 + assign(_ ids: Set<UUID>, by actor: Member, missions: [Mission]) throws
-+ complete(by actor: Member, takeOver: Bool) throws -> Completion
++ complete(by actor: Member) throws -> Completion
 + signal(by kid: Member, photo: URL?) throws -> KidsSignal
 + confirmSignal(by admin: Member) throws -> Completion
 + rejectSignal(by admin: Member) throws
-+ reopen(by admin: Member, missions: [Mission]) throws
++ reopen(by actor: Member, missions: [Mission]) throws
 + canDelete(missions: [Mission]) -> Bool
 + delete(by actor: Member, missions: [Mission]) throws
 ```
 
-**Restrições:** Estado único e peso 1–3; título com 1–60 caracteres visíveis após trim; `note` opcional com até 250 caracteres. DatePicker de cadastro/edição sem limites de produto, inclusive antes da criação da família. Adultos concluem; Kids responsáveis sinalizam pendente. Decisões disputam estado atual sem duplicação. Concluída sem missão concluída pode ser editada: crédito/progresso se adaptam e auditoria é preservada; data prevista não muda instante de conclusão. Sem responsáveis, continua concluída sem crédito individual. Última edição válida no servidor prevalece. Editar com `pendingSignal` presente exige `signalResolution`: `resetToPending` descarta o sinal e volta a `pending`; `keepAwaitingConfirmation` preserva o sinal corrente. `delete` com `pendingSignal` presente remove o sinal junto da tarefa, sem decisão. Reabertura só Admin com missão em andamento e nenhuma concluída, desfazendo crédito uma vez. RN11/17/23/24/55/57/58/66/67.
+**Restrições:** Estado único e peso 1–3; título com 1–60 caracteres visíveis após trim; `note` opcional com até 250 caracteres. Adultos concluem diretamente, mantendo responsáveis ou atribuindo o adulto se não houver; Kids responsáveis sinalizam pendente. Reabertura acessível a Admin/Membro e Kids na própria tarefa desfaz crédito uma vez; se atingir missão concluída, reabre a missão e remove recompensa, participações e badges derivados. RN11/17/23/24/55/57/58/66/67.
 
 <a id="classe-taskstatus"></a>
 ### TaskStatus: String, Codable «enum»
@@ -583,7 +583,7 @@ case thisAndFuture
 + edit(_ taskID: UUID, title: String, weight: EffortWeight,
       date: LocalDate, assignees: Set<UUID>, scope: ChangeScope, by actor: Member) async throws
 + delete(_ taskID: UUID, scope: ChangeScope, by actor: Member) async throws
-+ complete(_ taskID: UUID, takeOver: Bool, by actor: Member) async throws
++ complete(_ taskID: UUID, by actor: Member) async throws
 + signal(_ taskID: UUID, photo: URL?, by kid: Member) async throws
 + confirmSignal(_ taskID: UUID, by admin: Member) async throws
 + rejectSignal(_ taskID: UUID, by admin: Member) async throws
@@ -591,7 +591,7 @@ case thisAndFuture
 + kidsConfirmationQueue(by admin: Member) async throws -> [FamilyTask]
 ```
 
-**Restrições:** Carrega estado atual e executa transações no servidor. Última edição válida prevalece, sem precondição de versão antiga. Conclusão/crédito/missões/participações/badges são consistentes; reabertura retira crédito uma vez e preserva conquista; exclusão não deixa missão vazia. Resposta perdida leva a consulta do estado, sem replay geral automático. RN17/48/50/55–59, RNF09–12/25.
+**Restrições:** Carrega estado atual e executa transações no servidor. Última edição válida prevalece, sem precondição de versão antiga. Conclusão/crédito/missões/participações/badges são consistentes; reabertura retira crédito uma vez e, se necessário, reverte recompensa, participações e badges derivados; exclusão não deixa missão vazia. Resposta perdida leva a consulta do estado, sem replay geral automático. RN17/48/50/55–59, RNF09–12/25.
 
 <a id="dominio-indicadores"></a>
 ## Área Família, progresso e carga
@@ -1348,6 +1348,7 @@ A âncora anterior desta seção foi preservada para compatibilidade. O backend 
 
 | Versão | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.6 | 1.11 | 2026-10-07 | Conclusão direta sem escolha de atribuição; reabertura reverte dados derivados de missão concluída. |
 | 1.5 | 1.9 | 2026-10-06 | Restrições de UC11 distinguem consulta própria diária e consulta familiar adulta por Dia/Semana. Para SPEC-009. |
 | 1.4 | 1.8 | 2026-10-06 | `Routine` ganha `note`; atualização no alcance `thisAndFuture` inclui a ocorrência de origem e não há data final obrigatória. Para SPEC-008. |
 | 1.3 | 1.7 | 2026-10-06 | `FamilyTask` ganha `note` (opcional, ≤250) e exige `SignalResolution` (novo enum) ao editar com sinal pendente; `title` limitado a 60 caracteres; `DomainError` ganha `titleTooLong`, `noteTooLong` e `signalResolutionRequired`. Para SPEC-007. |

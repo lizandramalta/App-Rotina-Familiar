@@ -1,6 +1,6 @@
 # Arquitetura backend — Node.js e Clean Architecture
 
-**Versão:** 1.0\
+**Versão:** 1.1\
 **Base funcional:** 1.5 · Mobile: 1.2 · Design: 1.1 · DER: 1.2\
 **Data:** 2026-10-05\
 **Situação:** arquitetura para implementação futura; sem servidor, migrações ou infraestrutura implementados
@@ -235,7 +235,6 @@ export class CompleteTask {
       const task = await tx.tasks.getRequired(actor.familyId, input.taskId);
       const completion = task.complete({
         actorId: member.id,
-        assignment: input.assignment,
         completedAt: tx.clock.now(),
       });
       await tx.tasks.save(task);
@@ -283,7 +282,7 @@ sequenceDiagram
     participant App as Mobile
     participant API as CompleteTask
     participant DB as PostgreSQL
-    App->>API: taskId + assignment + sessão
+    App->>API: taskId + sessão
     API->>DB: BEGIN / lock família
     API->>DB: Revalidar ator, tarefa e vínculos
     API->>DB: Estado + conclusão + créditos + auditoria
@@ -295,12 +294,12 @@ sequenceDiagram
 | Comando | Regras transacionais |
 |---|---|
 | Criar/editar tarefa | Adulto, título, peso 1–3, data civil livre, responsáveis da família; não alterar conquista protegida |
-| Concluir | Pendente/aguardando; manter responsáveis ou assumir; sem responsáveis atribui ao adulto; uma conclusão com crédito integral para cada responsável final |
+| Concluir | Pendente/aguardando; mantém responsáveis existentes ou, sem responsáveis, atribui ao adulto; uma conclusão com crédito integral para cada responsável final |
 | Sinalizar Kids | Própria tarefa pendente; registrar sinalização e foto opcional; estado único aguardando, sem crédito |
 | Confirmar/recusar sinalização | Só Admin; operar sobre `signalId` ainda corrente; confirmar conclui para todos, recusar volta a pendente; decisão antiga não atua sobre nova sinalização |
 | Concluir manualmente enquanto aguarda | Adulto; encerra sinalização corrente, audita e conclui uma vez |
 | Editar concluída | Permitido sem missão concluída; ajustar crédito vigente e auditoria, preservar `completedAt` e autor; lista vazia significa zero crédito individual |
-| Reabrir | Só Admin; pelo menos uma missão em andamento e nenhuma concluída; invalidar conclusão vigente uma vez, manter responsáveis, atualizar progresso |
+| Reabrir | Perfil com acesso à tarefa; Kids somente própria; se missão concluída/recompensa aceita, confirmação obrigatória e reversão de recompensa, participações e badges; invalidar conclusão vigente uma vez e atualizar progresso |
 | Excluir | Somente não concluída/não protegida; impedir missão vazia; retirar vínculos/reconciliar missões; tombstone impede regeneração |
 | Salvar missão | Só Admin; ao menos uma tarefa individual da mesma família; se todas concluídas, encerrar imediatamente |
 | Remover membro | Revogar sessão/convites; retirar só ele das futuras não concluídas/não protegidas; preservar pendências antigas, concluídas/protegidas e histórico |
@@ -421,4 +420,5 @@ Validação futura se concentra em comportamentos: acesso entre famílias, privi
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.1 | 2026-10-07 | Conclusão direta mantém responsáveis ou atribui adulto sem responsável; reabertura pode reverter dados derivados de missão concluída na mesma transação. |
 | 1.0 | 2026-10-05 | Arquitetura Node.js/Clean Architecture com Supabase/R2, módulos, transações, acesso, jobs, contratos e preservação da base funcional 1.5. |

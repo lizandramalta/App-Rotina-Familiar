@@ -1,8 +1,8 @@
 # Documento de visão — MVP
 
 **Projeto:** App de Organização Familiar  
-**Versão:** 1.6\
-**Data:** 2026-10-06\
+**Versão:** 1.7\
+**Data:** 2026-10-07\
 **Situação:** visão consolidada do produto
 
 [Projeto](../README.md) · [Índice documental](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -60,7 +60,7 @@ Referências: [RN01](01-regras-de-negocio.md#rn01) a [RN10](01-regras-de-negocio
 2. Um Administrador cria os perfis e disponibiliza convites com link e senha gerada pelo sistema. A pessoa convidada informa a senha para efetivar o vínculo. O convite admite um ingresso bem-sucedido, e a sessão válida permite os próximos acessos sem reutilizá-lo.
 3. Administradores e Membros criam tarefas com título e peso obrigatório, responsáveis opcionais e, quando necessário, uma rotina de repetição.
 4. Cada perfil consulta suas tarefas e seu progresso diário. Adultos também consultam tarefas e progresso familiares por Dia/Semana. O carrossel vai da criação da família até o último dia do mês corrente, incluindo dias futuros dentro desse mês.
-5. Adultos concluem tarefas. Ao concluir tarefa atribuída a outras pessoas, podem manter os responsáveis ou assumir a tarefa, substituindo-os por si mesmos após aviso sobre o crédito. Tarefa sem responsável é atribuída a quem a conclui.
+5. Adultos concluem tarefas diretamente, sem alerta. A conclusão mantém responsáveis existentes; tarefa sem responsável é atribuída automaticamente a quem a conclui.
 6. Kids sinalizam a realização de sua parte, com foto opcional. Um Administrador pode confirmar ou recusar. Um adulto também pode concluir manualmente a tarefa. A conclusão vale para todos os responsáveis finais, inclusive Kids.
 7. O aplicativo calcula a carga por dia ou semana (segunda-feira a domingo), creditando o peso integral da tarefa a cada responsável. Administradores e Membros consultam a distribuição sem ranking.
 8. Um Administrador cria missões coletivas sem prazo, vinculando tarefas individuais. A família acompanha o progresso até todas as tarefas serem concluídas.
@@ -81,8 +81,8 @@ Os fluxos completos estão na [especificação dos casos de uso](03-casos-de-uso
 | Carga diária ou semanal | Soma dos pesos creditados por responsável nas conclusões válidas do período. A carga total soma as cargas individuais. A apresentação prioriza equilíbrio, sem ranking. | [RN28](01-regras-de-negocio.md#rn28), [RN30](01-regras-de-negocio.md#rn30), [RN31](01-regras-de-negocio.md#rn31), [RN34](01-regras-de-negocio.md#rn34), [UC13](03-casos-de-uso.md#uc13) |
 | Missões | Coletivas, sem prazo ou expiração, com pelo menos uma tarefa individual. Cada tarefa conta uma vez no progresso, mesmo com vários responsáveis. | [RN35](01-regras-de-negocio.md#rn35), [RN36](01-regras-de-negocio.md#rn36), [RN39](01-regras-de-negocio.md#rn39), [RN50](01-regras-de-negocio.md#rn50), [UC05](03-casos-de-uso.md#uc05) |
 | Recompensas | Itens predefinidos e personalizados por Administradores. Após a missão, podem sortear novamente até aceitar; sair sem aceitar mantém o resgate disponível. A aceitação encerra o resgate para todos. | [RN42](01-regras-de-negocio.md#rn42), [RN52](01-regras-de-negocio.md#rn52), [RN53](01-regras-de-negocio.md#rn53), [UC06](03-casos-de-uso.md#uc06), [UC16](03-casos-de-uso.md#uc16) |
-| Exclusão e reabertura | Tarefa concluída não é excluída diretamente. Somente Administrador pode reabri-la se vinculada a missão em andamento e a nenhuma missão concluída. Isso desfaz a contribuição anterior na carga e no progresso. | [RN18](01-regras-de-negocio.md#rn18), [RN57](01-regras-de-negocio.md#rn57), [RN59](01-regras-de-negocio.md#rn59), [UC17](03-casos-de-uso.md#uc17) |
-| Preservação de conquistas | Missões concluídas e seus vínculos são preservados. Alterações nas tarefas não podem modificar esses dados. O resgate ainda disponível pode acrescentar a recompensa. Excluir uma tarefa não pode deixar missão em andamento sem tarefas. | [RN50](01-regras-de-negocio.md#rn50), [RN58](01-regras-de-negocio.md#rn58), [RF58](02-requisitos.md#rf58), [RF59](02-requisitos.md#rf59) |
+| Exclusão e reabertura | Tarefa concluída não é excluída diretamente. Administradores e Membros podem reabrir tarefa acessível; Kids podem reabrir tarefa própria. Reabrir desfaz carga e progresso; se atingir missão concluída e/ou recompensa aceita, pede confirmação. | [RN18](01-regras-de-negocio.md#rn18), [RN57](01-regras-de-negocio.md#rn57), [RN59](01-regras-de-negocio.md#rn59), [UC17](03-casos-de-uso.md#uc17) |
+| Missões reversíveis | Missões concluídas e seus vínculos são protegidos contra edição/exclusão. A reabertura confirmada de tarefa vinculada é a exceção: retorna a missão para Em andamento e remove recompensa, participações e badges derivados. Excluir uma tarefa não pode deixar missão em andamento sem tarefas. | [RN50](01-regras-de-negocio.md#rn50), [RN58](01-regras-de-negocio.md#rn58), [RF58](02-requisitos.md#rf58), [RF59](02-requisitos.md#rf59) |
 
 ## 8. Escopo do MVP
 
@@ -183,6 +183,7 @@ A arquitetura backend 1.0 está em [backend-architecture.md](architecture/backen
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.7 | 2026-10-07 | Conclusão direta mantém responsáveis ou atribui adulto sem responsável; reabertura pode reabrir missão concluída e reverter recompensa, participações e badges. |
 | 1.6 | 2026-10-06 | Consulta própria diária para todos; consulta familiar Dia/Semana apenas para adultos. Para SPEC-009. |
 | 1.5 | 2026-10-05 | Pendências consolidadas: fuso, datas livres, edição de concluídas, participações/badges, convites e sessão única; RF67/68; arquitetura, modelo e design 1.1. |
 | 1.4 | 2026-10-02 | Família concentra indicadores, lista, inclusão de membros e PDF; detalhe do membro reúne tarefas Dia/Semana, edição e reenvio quando permitidos. RN60–61, RF60–61/RF66 e UC02/11/13/18 revisados. |

@@ -1,8 +1,8 @@
 # Requisitos funcionais e não funcionais
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.10\
-**Data:** 2026-10-06\
+**Versão:** 1.11\
+**Data:** 2026-10-07\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -97,7 +97,7 @@ O sistema deve permitir consultar tarefas pelo carrossel, da criação da famíl
 
 ### RF12
 
-O sistema deve permitir a Administradores e Membros concluir tarefas Pendentes ou Aguardando confirmação sem responsável Kids, mesmo atribuídas a outras pessoas. Tarefas com ao menos um responsável Kids só podem ser concluídas manualmente por Administrador. Deve oferecer manter os responsáveis ou assumir a tarefa quando o usuário autorizado não estiver entre eles, alertando sobre o crédito. A conclusão deve valer para todos os responsáveis finais da tarefa individual.
+O sistema deve permitir a Administradores e Membros concluir tarefas Pendentes ou Aguardando confirmação sem responsável Kids, mesmo atribuídas a outras pessoas. Tarefas com ao menos um responsável Kids só podem ser concluídas manualmente por Administrador. A conclusão deve ocorrer diretamente, sem alerta: mantém os responsáveis existentes ou atribui o adulto que conclui quando não houver responsável. A conclusão deve valer para todos os responsáveis finais da tarefa individual.
 
 **Regras de negócio:** [RN21](01-regras-de-negocio.md#rn21), [RN22](01-regras-de-negocio.md#rn22), [RN48](01-regras-de-negocio.md#rn48), [RN55](01-regras-de-negocio.md#rn55), [RN56](01-regras-de-negocio.md#rn56)  
 **Casos de uso:** [UC12](03-casos-de-uso.md#uc12)
@@ -412,14 +412,14 @@ O sistema deve aplicar um único estado a todos os responsáveis, creditar o pes
 
 ### RF57
 
-O sistema deve permitir somente a Administradores retornar para Pendente uma tarefa concluída vinculada a missão em andamento, desde que não vinculada a missão concluída. Deve solicitar confirmação dos efeitos, manter os responsáveis e desfazer o crédito anterior na carga e no progresso das missões em andamento.
+O sistema deve permitir a Administradores e Membros retornar para Pendente uma tarefa acessível da família e a Kids retornar uma tarefa própria. Deve solicitar confirmação quando a tarefa estiver vinculada a missão concluída e/ou com recompensa aceita, manter os responsáveis e desfazer o crédito anterior na carga e no progresso das missões vinculadas. A confirmação deve retornar missões concluídas para Em andamento e remover recompensa, participações e badges derivados.
 
 **Regras de negócio:** [RN55](01-regras-de-negocio.md#rn55), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58)  
 **Casos de uso:** [UC13](03-casos-de-uso.md#uc13), [UC17](03-casos-de-uso.md#uc17)
 
 ### RF58
 
-O sistema deve impedir edição, exclusão ou mudança de vínculos da missão concluída e impedir operações sobre suas tarefas que modifiquem os dados preservados. Deve permitir apenas o registro da recompensa pelo resgate único ainda disponível, sem alterar a conquista.
+O sistema deve impedir edição, exclusão ou mudança de vínculos da missão concluída. A reabertura confirmada de tarefa vinculada é a única operação que pode retornar a missão para Em andamento, removendo recompensa, participações e badges derivados sem preservar histórico. Deve permitir o registro da recompensa somente pelo resgate único enquanto a missão estiver concluída.
 
 **Regras de negócio:** [RN38](01-regras-de-negocio.md#rn38), [RN53](01-regras-de-negocio.md#rn53), [RN58](01-regras-de-negocio.md#rn58)  
 **Casos de uso:** [UC05](03-casos-de-uso.md#uc05), [UC07](03-casos-de-uso.md#uc07), [UC14](03-casos-de-uso.md#uc14), [UC17](03-casos-de-uso.md#uc17)
@@ -766,6 +766,7 @@ A configuração de apelido deve ser protegida por titularidade no backend, incl
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.11 | 2026-10-07 | Conclusão direta mantém responsáveis existentes ou atribui o adulto sem responsável; reabertura por todos os perfis no alcance de consulta pode reabrir missão concluída e reverte recompensa, participações e badges. |
 | 1.10 | 2026-10-06 | RF12 e RF26 restringem conclusão manual de tarefa com responsável Kids ao Administrador e preservam a evidência pendente para auditoria. Para SPEC-010. |
 | 1.9 | 2026-10-06 | RF22 e RF49 definem consulta e progresso próprios diários, inclusive para Kids. Para SPEC-009. |
 | 1.8 | 2026-10-06 | RF13 passa a incluir observação opcional, ausência de data final obrigatória e alcance inclusivo da ocorrência selecionada; RF70 passa a cobrir a configuração de rotina. Para SPEC-008. |
