@@ -1,7 +1,7 @@
 # Modelo de dados (DER)
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do modelo:** 1.5 · **Base funcional:** 1.11\
+**Versão do modelo:** 1.6 · **Base funcional:** 1.12\
 **Data:** 2026-10-07\
 **Situação:** modelo conceitual atualizado; sem migrações implementadas
 
@@ -232,6 +232,7 @@ erDiagram
         uuid id PK
         uuid familia_id FK
         varchar titulo
+        varchar observacao "opcional, até 250 caracteres"
         timestamptz cumprida_em
         uuid recompensa_aceita_id FK
         varchar recompensa_titulo "snapshot do aceite"
@@ -357,6 +358,7 @@ A versão 1.1 representava somente um access token na sessão. A versão 1.2 sep
 
 | Versão | Base | Data | Alteração |
 |---|---|---|---|
+| 1.6 | 1.12 | 2026-10-07 | `MISSAO` ganha `observacao` opcional (até 250 caracteres). Para SPEC-014. |
 | 1.5 | 1.11 | 2026-10-07 | Reabertura de missão concluída remove recompensa, participações e badges derivados na mesma transação. |
 | 1.4 | 1.8 | 2026-10-06 | `TAREFA` passa a armazenar `observacao` opcional (até 250 caracteres), herdada pelas ocorrências geradas por rotina. Para SPEC-008. |
 | 1.3 | 1.7 | 2026-10-06 | `OCORRENCIA_TAREFA` ganha `observacao` opcional (até 250 caracteres). Para SPEC-007. |

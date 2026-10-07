@@ -1,7 +1,7 @@
 # Requisitos funcionais e não funcionais
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.11\
+**Versão:** 1.12\
 **Data:** 2026-10-07\
 **Situação:** base documental consolidada
 
@@ -512,6 +512,13 @@ O sistema deve permitir informar e editar uma observação opcional de até 250 
 **Regras de negócio:** [RN67](01-regras-de-negocio.md#rn67).\
 **Casos de uso:** [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08).
 
+### RF71
+
+O sistema deve permitir informar e editar uma observação opcional de até 250 caracteres, contando espaços, na missão, sujeita às mesmas regras de edição e proteção dos demais dados da missão.
+
+**Regras de negócio:** [RN68](01-regras-de-negocio.md#rn68).\
+**Casos de uso:** [UC05](03-casos-de-uso.md#uc05).
+
 <a id="requisitos-nao-funcionais"></a>
 
 ## Requisitos não funcionais
@@ -766,6 +773,7 @@ A configuração de apelido deve ser protegida por titularidade no backend, incl
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.12 | 2026-10-07 | RF71 (novo) define observação opcional de até 250 caracteres na missão, espelhando RF70. Para SPEC-014. |
 | 1.11 | 2026-10-07 | Conclusão direta mantém responsáveis existentes ou atribui o adulto sem responsável; reabertura por todos os perfis no alcance de consulta pode reabrir missão concluída e reverte recompensa, participações e badges. |
 | 1.10 | 2026-10-06 | RF12 e RF26 restringem conclusão manual de tarefa com responsável Kids ao Administrador e preservam a evidência pendente para auditoria. Para SPEC-010. |
 | 1.9 | 2026-10-06 | RF22 e RF49 definem consulta e progresso próprios diários, inclusive para Kids. Para SPEC-009. |

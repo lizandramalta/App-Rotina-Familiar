@@ -1,7 +1,7 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.10\
+**Versão:** 1.11\
 **Data:** 2026-10-07\
 **Situação:** base documental consolidada
 
@@ -223,21 +223,21 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Missões e recompensas](04-diagramas-de-caso-de-uso.md#05-missoes-recompensas)
 
-**Requisitos funcionais:** [RF28](02-requisitos.md#rf28), [RF29](02-requisitos.md#rf29), [RF31](02-requisitos.md#rf31), [RF32](02-requisitos.md#rf32), [RF50](02-requisitos.md#rf50), [RF58](02-requisitos.md#rf58)  
-**Regras relacionadas:** [RN16](01-regras-de-negocio.md#rn16), [RN35](01-regras-de-negocio.md#rn35), [RN36](01-regras-de-negocio.md#rn36), [RN37](01-regras-de-negocio.md#rn37), [RN38](01-regras-de-negocio.md#rn38), [RN39](01-regras-de-negocio.md#rn39), [RN40](01-regras-de-negocio.md#rn40), [RN50](01-regras-de-negocio.md#rn50), [RN51](01-regras-de-negocio.md#rn51), [RN53](01-regras-de-negocio.md#rn53), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59), [RN64](01-regras-de-negocio.md#rn64)  
+**Requisitos funcionais:** [RF28](02-requisitos.md#rf28), [RF29](02-requisitos.md#rf29), [RF31](02-requisitos.md#rf31), [RF32](02-requisitos.md#rf32), [RF50](02-requisitos.md#rf50), [RF58](02-requisitos.md#rf58), [RF71](02-requisitos.md#rf71)  
+**Regras relacionadas:** [RN16](01-regras-de-negocio.md#rn16), [RN35](01-regras-de-negocio.md#rn35), [RN36](01-regras-de-negocio.md#rn36), [RN37](01-regras-de-negocio.md#rn37), [RN38](01-regras-de-negocio.md#rn38), [RN39](01-regras-de-negocio.md#rn39), [RN40](01-regras-de-negocio.md#rn40), [RN50](01-regras-de-negocio.md#rn50), [RN51](01-regras-de-negocio.md#rn51), [RN53](01-regras-de-negocio.md#rn53), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59), [RN64](01-regras-de-negocio.md#rn64), [RN68](01-regras-de-negocio.md#rn68)  
 **Requisitos não funcionais:** [RNF01](02-requisitos.md#rnf01), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF08](02-requisitos.md#rnf08), [RNF09](02-requisitos.md#rnf09), [RNF11](02-requisitos.md#rnf11), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF14](02-requisitos.md#rnf14), [RNF22](02-requisitos.md#rnf22), [RNF25](02-requisitos.md#rnf25)
 
 **Objetivo:** criar e editar missões coletivas sem prazo, vinculadas a tarefas individuais.
 
-**Ator:** Administrador.
+**Ator:** Administrador. Demais perfis da família, inclusive Kids, podem consultar a missão (título, observação, tarefas vinculadas e status), sem ações de gestão.
 
 
 **Pré-condição:** existência de tarefas da família disponíveis para vinculação.
 
 **Fluxo principal — Criar missão:**
 
-1. O Administrador seleciona criar missão e informa seus dados.
-2. Seleciona individualmente uma ou mais tarefas, mesmo quando pertencem à mesma rotina.
+1. O Administrador seleciona criar missão e informa seus dados (título e observação opcional de até 250 caracteres).
+2. Seleciona individualmente uma ou mais tarefas, mesmo quando pertencem à mesma rotina. Pode também criar uma tarefa nova a partir desse ponto, pelo fluxo já existente de criação de tarefa, que retorna com a nova tarefa pré-selecionada.
 3. Confere as tarefas; não há campo de selo por missão. Os badges seguem os marcos fixos de participação em RN64.
 4. O sistema estabelece como objetivo concluir todas as tarefas vinculadas, sem período de vigência ou prazo.
 5. O Administrador confirma e o sistema salva a missão.
@@ -832,6 +832,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.11 | 2026-10-07 | UC05 passa a admitir observação opcional na missão (RF71/RN68), atalho de criação de tarefa durante a vinculação e consulta explícita por todos os perfis, inclusive Kids. Para SPEC-014. |
 | 1.10 | 2026-10-07 | UC12 conclui diretamente mantendo responsáveis ou atribuindo adulto sem responsável. UC17 libera reabertura no alcance do perfil e permite reabrir missão concluída, removendo recompensa, participações e badges derivados. |
 | 1.9 | 2026-10-06 | UC12 restringe conclusão manual de tarefa com responsável Kids ao Administrador e preserva a evidência pendente para auditoria. Para SPEC-010. |
 | 1.8 | 2026-10-06 | UC11 passa a definir consulta própria diária e consulta familiar adulta por Dia/Semana. Para SPEC-009. |

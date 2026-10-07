@@ -1,8 +1,8 @@
-# Diagrama de classes — versão 1.6
+# Diagrama de classes — versão 1.7
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.6\
-**Base funcional:** 1.11\
+**Versão:** 1.7\
+**Base funcional:** 1.12\
 **Data:** 2026-10-07
 **Situação:** referência de modelagem da base funcional
 
@@ -48,7 +48,7 @@ Os RF e RN são os vínculos declarados em cada UC na base funcional. A lista de
 | <a id="rastreio-uc02"></a>[UC02](03-casos-de-uso.md#uc02) — Gerenciar membros | [Family](#classe-family), [Member](#classe-member), [MemberRole](#classe-memberrole), [Invite](#classe-invite), [InviteStatus](#classe-invitestatus), [Session](#classe-session), [AccessService](#classe-accessservice), [AccessControl](#classe-accesscontrol), [MemberService](#classe-memberservice), [InviteCredentials](#classe-invitecredentials) | [RF02](02-requisitos.md#rf02), [RF03](02-requisitos.md#rf03), [RF04](02-requisitos.md#rf04), [RF05](02-requisitos.md#rf05), [RF06](02-requisitos.md#rf06), [RF40](02-requisitos.md#rf40), [RF41](02-requisitos.md#rf41), [RF54](02-requisitos.md#rf54) | [RN01](01-regras-de-negocio.md#rn01), [RN02](01-regras-de-negocio.md#rn02), [RN03](01-regras-de-negocio.md#rn03), [RN04](01-regras-de-negocio.md#rn04), [RN05](01-regras-de-negocio.md#rn05), [RN06](01-regras-de-negocio.md#rn06), [RN07](01-regras-de-negocio.md#rn07), [RN08](01-regras-de-negocio.md#rn08), [RN10](01-regras-de-negocio.md#rn10), [RN45](01-regras-de-negocio.md#rn45), [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47) |
 | <a id="rastreio-uc03"></a>[UC03](03-casos-de-uso.md#uc03) — Validar conclusão de tarefa Kids | [FamilyTask](#classe-familytask), [KidsSignal](#classe-kidssignal), [ValidationDecision](#classe-validationdecision), [Completion](#classe-completion), [TaskService](#classe-taskservice), [MissionService](#classe-missionservice) | [RF25](02-requisitos.md#rf25), [RF26](02-requisitos.md#rf26), [RF55](02-requisitos.md#rf55), [RF56](02-requisitos.md#rf56) | [RN22](01-regras-de-negocio.md#rn22), [RN23](01-regras-de-negocio.md#rn23), [RN24](01-regras-de-negocio.md#rn24), [RN25](01-regras-de-negocio.md#rn25), [RN26](01-regras-de-negocio.md#rn26), [RN30](01-regras-de-negocio.md#rn30), [RN35](01-regras-de-negocio.md#rn35), [RN54](01-regras-de-negocio.md#rn54), [RN55](01-regras-de-negocio.md#rn55), [RN56](01-regras-de-negocio.md#rn56) |
 | <a id="rastreio-uc04"></a>[UC04](03-casos-de-uso.md#uc04) — Autenticar com Apple | [AppleAuthenticating](#classe-appleauthenticating), [AccessService](#classe-accessservice), [Family](#classe-family), [Member](#classe-member) , [AppleAuthorizationProof](#classe-appleauthorizationproof) | [RF37](02-requisitos.md#rf37), [RF39](02-requisitos.md#rf39) | [RN44](01-regras-de-negocio.md#rn44) |
-| <a id="rastreio-uc05"></a>[UC05](03-casos-de-uso.md#uc05) — Gerenciar missões | [Mission](#classe-mission), [MissionStatus](#classe-missionstatus), [FamilyTask](#classe-familytask), [Badge](#classe-badge), [BadgeAward](#classe-badgeaward), [MissionService](#classe-missionservice) , [MissionParticipation](#classe-missionparticipation) | [RF28](02-requisitos.md#rf28), [RF29](02-requisitos.md#rf29), [RF31](02-requisitos.md#rf31), [RF32](02-requisitos.md#rf32), [RF50](02-requisitos.md#rf50), [RF58](02-requisitos.md#rf58) | [RN16](01-regras-de-negocio.md#rn16), [RN35](01-regras-de-negocio.md#rn35), [RN36](01-regras-de-negocio.md#rn36), [RN37](01-regras-de-negocio.md#rn37), [RN38](01-regras-de-negocio.md#rn38), [RN39](01-regras-de-negocio.md#rn39), [RN40](01-regras-de-negocio.md#rn40), [RN50](01-regras-de-negocio.md#rn50), [RN51](01-regras-de-negocio.md#rn51), [RN53](01-regras-de-negocio.md#rn53), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59), [RN64](01-regras-de-negocio.md#rn64) |
+| <a id="rastreio-uc05"></a>[UC05](03-casos-de-uso.md#uc05) — Gerenciar missões | [Mission](#classe-mission), [MissionStatus](#classe-missionstatus), [FamilyTask](#classe-familytask), [Badge](#classe-badge), [BadgeAward](#classe-badgeaward), [MissionService](#classe-missionservice) , [MissionParticipation](#classe-missionparticipation) | [RF28](02-requisitos.md#rf28), [RF29](02-requisitos.md#rf29), [RF31](02-requisitos.md#rf31), [RF32](02-requisitos.md#rf32), [RF50](02-requisitos.md#rf50), [RF58](02-requisitos.md#rf58), [RF71](02-requisitos.md#rf71) | [RN16](01-regras-de-negocio.md#rn16), [RN35](01-regras-de-negocio.md#rn35), [RN36](01-regras-de-negocio.md#rn36), [RN37](01-regras-de-negocio.md#rn37), [RN38](01-regras-de-negocio.md#rn38), [RN39](01-regras-de-negocio.md#rn39), [RN40](01-regras-de-negocio.md#rn40), [RN50](01-regras-de-negocio.md#rn50), [RN51](01-regras-de-negocio.md#rn51), [RN53](01-regras-de-negocio.md#rn53), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59), [RN64](01-regras-de-negocio.md#rn64), [RN68](01-regras-de-negocio.md#rn68) |
 | <a id="rastreio-uc06"></a>[UC06](03-casos-de-uso.md#uc06) — Gerenciar itens de recompensas coletivas | [RewardItem](#classe-rewarditem), [RewardItemSource](#classe-rewarditemsource) | [RF33](02-requisitos.md#rf33), [RF34](02-requisitos.md#rf34) | [RN41](01-regras-de-negocio.md#rn41), [RN42](01-regras-de-negocio.md#rn42) |
 | <a id="rastreio-uc07"></a>[UC07](03-casos-de-uso.md#uc07) — Gerenciar tarefas | [FamilyTask](#classe-familytask), [EffortWeight](#classe-effortweight), [TaskStatus](#classe-taskstatus), [SignalResolution](#classe-signalresolution), [TaskService](#classe-taskservice), [ChangeScope](#classe-changescope), [Routine](#classe-routine) | [RF07](02-requisitos.md#rf07), [RF08](02-requisitos.md#rf08), [RF09](02-requisitos.md#rf09), [RF10](02-requisitos.md#rf10), [RF15](02-requisitos.md#rf15), [RF16](02-requisitos.md#rf16), [RF27](02-requisitos.md#rf27), [RF58](02-requisitos.md#rf58), [RF59](02-requisitos.md#rf59), [RF69](02-requisitos.md#rf69), [RF70](02-requisitos.md#rf70) | [RN11](01-regras-de-negocio.md#rn11), [RN12](01-regras-de-negocio.md#rn12), [RN13](01-regras-de-negocio.md#rn13), [RN17](01-regras-de-negocio.md#rn17), [RN18](01-regras-de-negocio.md#rn18), [RN19](01-regras-de-negocio.md#rn19), [RN20](01-regras-de-negocio.md#rn20), [RN30](01-regras-de-negocio.md#rn30), [RN38](01-regras-de-negocio.md#rn38), [RN50](01-regras-de-negocio.md#rn50), [RN53](01-regras-de-negocio.md#rn53), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59), [RN66](01-regras-de-negocio.md#rn66), [RN67](01-regras-de-negocio.md#rn67) |
 | <a id="rastreio-uc08"></a>[UC08](03-casos-de-uso.md#uc08) — Definir recorrência de rotina | [Routine](#classe-routine), [RoutineFrequency](#classe-routinefrequency), [FamilyTask](#classe-familytask), [TaskService](#classe-taskservice), [ChangeScope](#classe-changescope) | [RF13](02-requisitos.md#rf13), [RF14](02-requisitos.md#rf14), [RF70](02-requisitos.md#rf70) | [RN11](01-regras-de-negocio.md#rn11), [RN14](01-regras-de-negocio.md#rn14), [RN16](01-regras-de-negocio.md#rn16), [RN17](01-regras-de-negocio.md#rn17), [RN67](01-regras-de-negocio.md#rn67) |
@@ -801,6 +801,7 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 + id: UUID
 + familyID: UUID
 + title: String
++ note: String?
 + createdBy: UUID
 + taskIDs: Set<UUID>
 + status: MissionStatus
@@ -809,13 +810,13 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 + participations: [MissionParticipation]
 + isRedemptionAvailable: Bool { get }
 + progress(tasks: [FamilyTask]) -> Double
-+ edit(title: String, by admin: Member) throws
++ edit(title: String, note: String?, by admin: Member) throws
 + link(_ task: FamilyTask, by admin: Member) throws
 + unlink(_ taskID: UUID, replacement: FamilyTask?, by admin: Member) throws
 + recordReward(_ reward: RedeemedReward, by admin: Member) throws
 ```
 
-**Restrições:** Ao menos uma tarefa individual, sem prazo nem selo configurável. Encerramento registra participação dos responsáveis creditados em tarefas vinculadas e avalia marcos de badges. Conquista protege dados/vínculos/tarefas; apenas resgate único pode acrescentar recompensa. RN36/38/50/58/64.
+**Restrições:** Ao menos uma tarefa individual, sem prazo nem selo configurável; `unlink` sem substituição é rejeitado quando `taskIDs` ficaria vazio (RN50). `note` opcional, até 250 caracteres, sem participar de progresso/participação/badges (RN68). Encerramento registra participação dos responsáveis creditados em tarefas vinculadas e avalia marcos de badges. Conquista protege dados/vínculos/tarefas; apenas resgate único pode acrescentar recompensa. RN36/38/50/58/64/68.
 
 <a id="classe-missionservice"></a>
 ### MissionService «class»
@@ -823,8 +824,8 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 **Rastreabilidade:** [UC03](#rastreio-uc03), [UC05](#rastreio-uc05), [UC10](#rastreio-uc10), [UC12](#rastreio-uc12), [UC14](#rastreio-uc14), [UC16](#rastreio-uc16), [UC17](#rastreio-uc17).
 
 ```swift
-+ create(title: String, taskIDs: Set<UUID>, by admin: Member) async throws -> Mission
-+ edit(_ missionID: UUID, title: String, taskIDs: Set<UUID>, by admin: Member) async throws
++ create(title: String, note: String?, taskIDs: Set<UUID>, by admin: Member) async throws -> Mission
++ edit(_ missionID: UUID, title: String, note: String?, taskIDs: Set<UUID>, by admin: Member) async throws
 + updateAfterTaskChange(_ taskID: UUID) async throws
 + acceptReward(_ item: RewardItem, for missionID: UUID, by admin: Member) async throws -> RedeemedReward
 + list(by actor: Member) async throws -> [Mission]
@@ -1348,6 +1349,7 @@ A âncora anterior desta seção foi preservada para compatibilidade. O backend 
 
 | Versão | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.7 | 1.12 | 2026-10-07 | `Mission` ganha `note` opcional (até 250 caracteres); `unlink` sem substituição é rejeitado quando deixaria a missão sem tarefas. Para SPEC-014. |
 | 1.6 | 1.11 | 2026-10-07 | Conclusão direta sem escolha de atribuição; reabertura reverte dados derivados de missão concluída. |
 | 1.5 | 1.9 | 2026-10-06 | Restrições de UC11 distinguem consulta própria diária e consulta familiar adulta por Dia/Semana. Para SPEC-009. |
 | 1.4 | 1.8 | 2026-10-06 | `Routine` ganha `note`; atualização no alcance `thisAndFuture` inclui a ocorrência de origem e não há data final obrigatória. Para SPEC-008. |

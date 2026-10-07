@@ -1,6 +1,6 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.6 · **Base funcional:** 1.11 · **Arquitetura backend:** 1.0\
+**Versão:** 1.7 · **Base funcional:** 1.12 · **Arquitetura backend:** 1.0\
 **Data:** 2026-10-07\
 **Situação:** contrato arquitetural para detalhamento OpenAPI na implementação
 
@@ -121,10 +121,10 @@ Consultas paginadas usam ordenação estável com ID como desempate e cursor opa
 | Método e caminho | Caso de uso de aplicação | Campos / resposta | Permissão |
 |---|---|---|---|
 | `GET /missions` | `ListMissions` | Em andamento/concluídas, progresso e recompensa | Todos |
-| `GET /missions/{missionId}` | `GetMissionDetail` | Vínculos individuais, participações e resgate; projeção Kids restrita | Todos da família |
+| `GET /missions/{missionId}` | `GetMissionDetail` | Título, `note`, vínculos individuais, participações e resgate; projeção Kids restrita | Todos da família |
 | `GET /missions/task-options` | `GetMissionTaskOptions` | Ocorrências persistidas, filtros e paginação; sem selecionar rotina inteira | Admin |
-| `POST /missions` | `CreateMission` | Título e `taskIds` não vazio; sem prazo nem selo | Admin |
-| `PATCH /missions/{missionId}` | `EditMission` | Título e/ou conjunto completo de `taskIds`; pode encerrar missão | Admin; em andamento |
+| `POST /missions` | `CreateMission` | Título, `note` opcional (≤250 car.) e `taskIds` não vazio; sem prazo nem selo | Admin |
+| `PATCH /missions/{missionId}` | `EditMission` | Título, `note` e/ou conjunto completo de `taskIds`; pode encerrar missão; rejeita `taskIds` vazio | Admin; em andamento |
 | `GET /reward-items` | `ListRewardItems` | Catálogo predefinido + personalizado da família | Admin |
 | `POST /reward-items` | `AddRewardItem` | Título da recompensa coletiva → item elegível | Admin |
 | `POST /missions/{missionId}/reward-acceptance` | `AcceptMissionReward` | `rewardItemId` → aceite único com snapshot do item | Admin; concluída/sem resgate |
@@ -203,6 +203,7 @@ O OpenAPI futuro deve materializar schemas e exemplos de sucesso/erro dessas rot
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.7 | 2026-10-07 | `CreateMission`/`EditMission` ganham `note` opcional (≤250 car.); `GetMissionDetail` expõe `note`; `EditMission` explicita rejeição de `taskIds` vazio. Para SPEC-014. |
 | 1.5 | 2026-10-06 | Conclusão de tarefa com responsável Kids exige Administrador; `TASK_ALREADY_COMPLETED` reconcilia concorrência sem duplicar crédito; sinalização/foto pendente é auditável só por Admin. Para SPEC-010. |
 | 1.4 | 2026-10-06 | Rotas pessoais de UC11 ficam diárias; rotas familiares adultas usam `period`, `memberId` e `includeUnassigned`; overview não inclui carga nesta entrega. Para SPEC-009. |
 | 1.3 | 2026-10-06 | Contratos de rotina passam a aceitar `note`, explicitam a ausência de `endDate`, o alcance inclusivo de `fromTaskId` e os erros `FREQUENCY_DAYS_INVALID`, `START_DATE_INVALID` e `ROUTINE_SOURCE_TASK_INVALID`. Para SPEC-008. |

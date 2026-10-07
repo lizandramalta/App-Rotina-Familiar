@@ -1,13 +1,13 @@
 # Regras de negócio
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.10\
+**Versão:** 1.11\
 **Data:** 2026-10-07\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
 
-Este documento contém todas as regras vigentes da versão 1.10. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
+Este documento contém todas as regras vigentes da versão 1.11. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
 
 **Identificadores preservados:** RN15, RN29 e RN32 não estavam definidos na base recebida e permanecem não utilizados. Não representam conteúdo faltante desta versão.
 
@@ -554,10 +554,19 @@ Toda tarefa pode ter uma observação opcional de até 250 caracteres, contando 
 **Requisitos não funcionais específicos:** [RNF02](02-requisitos.md#rnf02)  
 **Casos de uso relacionados:** [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08)
 
+## RN68
+
+A missão admite uma observação opcional de até 250 caracteres, contando espaços. A observação não participa do cálculo de progresso, participação ou badges e segue as mesmas regras de edição e proteção da missão (RN50, RN58).
+
+**Requisitos funcionais:** [RF71](02-requisitos.md#rf71)  
+**Requisitos não funcionais específicos:** Sem vínculo específico; requisitos transversais se aplicam conforme a operação.\
+**Casos de uso relacionados:** [UC05](03-casos-de-uso.md#uc05)
+
 ## Histórico de versões
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.11 | 2026-10-07 | RN68 (novo) permite observação opcional de até 250 caracteres por missão, espelhando RN67. Para SPEC-014. |
 | 1.10 | 2026-10-07 | Conclusão direta mantém responsáveis existentes ou atribui o adulto quando não houver; reabertura passa a todos os perfis no alcance de consulta e pode reabrir missão concluída, removendo recompensa, participações e badges derivados. |
 | 1.9 | 2026-10-06 | RN21–23 restringem conclusão manual de tarefa com responsável Kids ao Administrador e preservam sinalização/foto pendente para auditoria administrativa. Para SPEC-010. |
 | 1.8 | 2026-10-06 | RN33 e RN61 distinguem consulta própria diária da consulta familiar adulta por Dia/Semana. Para SPEC-009. |

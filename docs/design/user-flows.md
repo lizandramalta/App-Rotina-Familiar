@@ -1,9 +1,9 @@
-# User flows — versão 1.6
+# User flows — versão 1.7
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão dos fluxos:** 1.6\
-**Base funcional:** 1.11\
-**Screen map:** 1.6 — revisão de 2026-10-07\
+**Versão dos fluxos:** 1.7\
+**Base funcional:** 1.12\
+**Screen map:** 1.7 — revisão de 2026-10-07\
 **Data:** 2026-10-07\
 **Situação:** primeira versão para revisão de design
 
@@ -375,8 +375,10 @@ flowchart TD
     E -->|Sim| C
     E -->|Não| F(["Consultar progresso, tarefas, participações e recompensa"])
     C --> G["MOD-007 · Selecionar tarefas individuais"]
-    G --> H{"Ao menos uma tarefa e alterações permitidas?"}
-    H -->|Não · corrigir| G
+    G -->|"+ Nova tarefa"| G1["Fluxo padrão de criação de tarefa (TEL-013/MOD-001)"]
+    G1 --> G["Retorna com a tarefa pré-selecionada"]
+    G --> H{"Ao menos uma tarefa selecionada?"}
+    H -->|Não · bloqueado localmente, sem chamar o servidor| G
     H -->|Sim| I["Salvar missão e vínculos"]
     I --> J{"Todas as tarefas vinculadas concluídas?"}
     J -->|Não| K["Missão em andamento"]
@@ -390,11 +392,11 @@ flowchart TD
     M -->|Não| O(["Permanecer na consulta ou voltar à lista"])
 ```
 
-Salvar retorna à origem que abriu o formulário: à lista em criação e ao detalhe em edição. Missão encerrada conta uma vez para cada responsável creditado em uma ou mais tarefas vinculadas; marcos 5/10/25/50 concedem badges cumulativos. Sem missões, TEL-020 mostra o estado vazio; somente Administradores têm ação de criação. Sem tarefas disponíveis, o Administrador precisa criar tarefas por UF-05 antes de salvar uma missão.
+Salvar retorna à origem que abriu o formulário: à lista em criação e ao detalhe em edição. Missão encerrada conta uma vez para cada responsável creditado em uma ou mais tarefas vinculadas; marcos 5/10/25/50 concedem badges cumulativos. Sem missões, TEL-020 mostra o estado vazio; somente Administradores têm ação de criação. Sem tarefas disponíveis, o Administrador cria uma tarefa diretamente em MOD-007 (atalho para UF-05) ou navega a UF-05 antes de salvar uma missão; o botão Salvar permanece desabilitado enquanto não houver ao menos uma tarefa selecionada, sem chamar o servidor nesse estado.
 
-Cada tarefa vinculada conta uma vez, sem incluir a rotina inteira implicitamente. Remover vínculos de missão em andamento pode concluí-la se todas as restantes estiverem concluídas. Progresso também é recalculado por conclusões e reaberturas autorizadas fora deste fluxo. Missão concluída não aceita edição; a única exceção é a reabertura confirmada de tarefa vinculada, que remove os dados derivados do encerramento. Não existe expiração por tempo.
+Cada tarefa vinculada conta uma vez, sem incluir a rotina inteira implicitamente. Remover vínculos de missão em andamento pode concluí-la se todas as restantes estiverem concluídas; desmarcar a última tarefa restante sem substituição é bloqueado no próprio MOD-007, com mensagem explicando que uma missão precisa de ao menos uma tarefa. Progresso também é recalculado por conclusões e reaberturas autorizadas fora deste fluxo. Missão concluída não aceita edição; a única exceção é a reabertura confirmada de tarefa vinculada, que remove os dados derivados do encerramento. Não existe expiração por tempo.
 
-**Consulta de tarefas:** adultos podem abrir TEL-012 a partir do detalhe da missão. Kids podem abrir TEL-041 somente para tarefas próprias; acompanhar as demais tarefas da missão não concede ações operacionais. Voltar retorna a TEL-021.
+**Consulta de tarefas:** adultos podem abrir TEL-012 a partir do detalhe da missão. Kids podem abrir TEL-041 somente para tarefas próprias; acompanhar as demais tarefas da missão não concede ações operacionais. Kids consultam título, observação, tarefas vinculadas e status em TEL-020/021 numa apresentação simplificada, sem ações de gestão, participações ou recompensa. Voltar retorna a TEL-021.
 
 <a id="uf-11"></a>
 
@@ -589,6 +591,7 @@ Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imedi
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.7 | 1.12 | 1.7 | 2026-10-07 | UF-10 ganha atalho "+ Nova tarefa" em MOD-007, bloqueio local de salvar sem tarefas e consulta explícita por todos os perfis, inclusive Kids. Para SPEC-014. |
 | 1.6 | 1.11 | 1.6 | 2026-10-07 | UF-06 conclui diretamente sem modal; UF-08 permite reabrir missão concluída com confirmação e reversão de recompensa, participações e badges. |
 | 1.5 | 1.10 | 1.5 | 2026-10-06 | UF-06 restringe conclusão manual de tarefa com responsável Kids ao Administrador e reconcilia silenciosamente conclusão concorrente. Para SPEC-010. |
 | 1.4 | 1.9 | 1.4 | 2026-10-06 | UF-04 distingue consulta própria diária da familiar adulta por Dia/Semana e adia carga para SPEC-018. Para SPEC-009. |
