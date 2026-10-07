@@ -36,6 +36,29 @@ async function main(): Promise<void> {
       )
     `);
 
+    // No Supabase os roles `anon` e `authenticated` já existem; em um Postgres
+    // limpo (CI, instalação local) não, e as migrations que revogam privilégios
+    // deles falhariam. Criá-los aqui mantém o SQL das migrations intocado.
+    // O catch cobre bancos gerenciados onde o usuário não pode criar roles:
+    // nesse caso os roles já existem e seguir adiante é seguro.
+    try {
+      await client.query(`
+        do $$
+        begin
+          if not exists (select from pg_roles where rolname = 'anon') then
+            create role anon;
+          end if;
+          if not exists (select from pg_roles where rolname = 'authenticated') then
+            create role authenticated;
+          end if;
+        end
+        $$;
+      `);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.log(`aviso: não foi possível garantir os roles anon/authenticated (${message})`);
+    }
+
     const applied = new Map<string, string>(
       (
         await client.query<{ version: string; checksum: string }>(
