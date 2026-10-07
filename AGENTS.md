@@ -10,6 +10,16 @@ implementação independentes:
 
 ## Antes de alterar código
 
+Quando o pedido for implementar ou preparar tecnicamente um card já planejado ou uma
+SPEC aprovada, leia e aplique `skills/desenvolver-card/SKILL.md` antes de
+propor ou alterar código.
+
+Quando o pedido indicar `SPEC-NNN` ou solicitar a criação de uma especificação, leia e
+aplique `skills/criar-spec/SKILL.md` antes de propor ou alterar arquivos de spec.
+
+Quando o pedido for converter uma SPEC aprovada em cards ou replanejar essa entrega no
+Jira, leia e aplique `skills/spec-para-jira/SKILL.md` antes de alterar o Jira.
+
 1. Leia `README.md`, `docs/DOCUMENTACAO.md` e `specs/README.md`.
 2. Identifique a spec aprovada que cobre a tarefa. Caso ela ainda não exista, use
    `specs/SPEC-000-template.md` para criá-la antes de implementar comportamento novo.
@@ -40,31 +50,6 @@ uma base de consulta: use a rastreabilidade da spec para ler a menor fatia neces
 Quando uma informação não existir, estiver ambígua ou entrar em conflito, não invente
 comportamento. Registre-a em **Esclarecimentos** na spec e peça uma decisão antes de
 implementar.
-
-## Fluxo obrigatório para criar e aprovar specs
-
-Quando o pedido indicar um ID `SPEC-NNN`, localize-o no mapa de `specs/README.md`,
-valide suas dependências e prepare a SPEC funcional e, se houver impacto na
-experiência, a UX-spec correspondente com a mesma numeração e nome curto. Antes de
-preencher a rastreabilidade, pesquise os códigos aplicáveis (`RN`, `RF`, `RNF`, `UC`,
-`TEL`, `MOD`, `UF`, `MA` e `BA`) e leia somente os trechos necessários.
-
-Na primeira resposta, não crie nem altere arquivos. Apresente uma prévia para
-aprovação contendo: entrega identificada, dependências, rastreabilidade proposta,
-escopo e anti-requisitos, regras de acesso e isolamento familiar, contratos de dados
-ou API que sejam sustentados pelas fontes, critérios BDD e fases, proposta da UX-spec
-(jornada, superfícies, estados, microcopy localizável e acessibilidade),
-esclarecimentos pendentes e a lista exata de arquivos que serão modificados.
-
-Peça aprovação explícita da prévia e respostas para os esclarecimentos. Somente depois
-da aprovação, crie os arquivos a partir dos templates e atualize o índice em
-`specs/README.md`. Mantenha o status como `rascunho` ou `em esclarecimento` enquanto
-houver pendências; apenas o usuário pode autorizar o status `aprovada`.
-
-Com SPEC e UX-spec aprovadas, antes de alterar código, apresente uma segunda prévia
-técnica: arquivos a criar ou modificar, fase e critérios de aceite cobertos, testes
-planejados, riscos e impacto em mobile/backend. Aguarde nova aprovação explícita antes
-de editar código.
 
 ## Implementação e verificação
 

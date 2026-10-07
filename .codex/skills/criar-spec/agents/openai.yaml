@@ -1,0 +1,7 @@
+interface:
+  display_name: "Criar specs"
+  short_description: "Prepara pares SPEC e UX-spec"
+  default_prompt: "Use $criar-spec para preparar a SPEC-NNN indicada."
+
+policy:
+  allow_implicit_invocation: false

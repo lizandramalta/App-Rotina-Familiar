@@ -1,0 +1,7 @@
+interface:
+  display_name: "Desenvolver card"
+  short_description: "Prepara e implementa card aprovado"
+  default_prompt: "Use $desenvolver-card para preparar o card Jira indicado."
+
+policy:
+  allow_implicit_invocation: false

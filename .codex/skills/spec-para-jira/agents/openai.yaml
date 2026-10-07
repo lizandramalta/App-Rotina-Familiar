@@ -1,0 +1,7 @@
+interface:
+  display_name: "Planejar SPEC no Jira"
+  short_description: "Transforma SPEC aprovada em cards Jira"
+  default_prompt: "Use $spec-para-jira para planejar a SPEC-NNN indicada no Jira."
+
+policy:
+  allow_implicit_invocation: false
