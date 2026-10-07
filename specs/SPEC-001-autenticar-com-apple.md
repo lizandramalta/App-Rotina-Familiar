@@ -2,10 +2,11 @@
 
 **Status:** aprovada
 **Autor:** Ana Luísa Coleone | **Criada em:** 2026-10-06 | **Aprovada por:** Ana Luísa Coleone | **Em:** 2026-10-06
-**Base funcional:** 1.5
+**Base funcional:** 1.11
 **UX-spec:** [UX-001-autenticar-com-apple.md](UX-001-autenticar-com-apple.md)
 **Projetos envolvidos:** ambos
 **Tema do backlog:** Tema 1 - Acesso, família e perfis
+**Última revisão:** 2026-10-07 — decisões do SCRUM-46
 
 ## 1. Contexto e Objetivo
 
@@ -32,8 +33,10 @@
 ### 3.1. Dentro do escopo
 - `POST /access/apple`: validar a prova do login nativo Apple e, a partir dela, (a) abrir a sessão do Criador quando já houver família vinculada à identidade, ou (b) emitir um `creationGrant` restrito quando não houver família.
 - Substituição da sessão anterior do Criador quando um novo acesso Apple é confirmado (RN44).
-- Rejeição explícita de prova Apple ausente, inválida ou de autenticação cancelada/falha, sem conceder acesso.
+- Cancelamento ou falha reportada pelo sheet nativo Apple: retornar TEL-001 a `Idle`, sem mensagem do app, sessão, grant ou chamada a `POST /access/apple`.
+- Rejeição explícita de prova Apple recebida, mas inválida ou expirada, sem conceder acesso; `APPLE_PROOF_INVALID` permanece um retorno visível e não bloqueante para a pessoa.
 - Isolamento: `familyId` e `role` da sessão resultante são sempre derivados no servidor a partir da identidade Apple validada, nunca aceitos do cliente.
+- Associação de identidade: o backend identifica o Criador pelo `sub` estável extraído de uma prova Apple validada; e-mail, nome e tokens brutos não são chave de vínculo.
 - Ciclo de vida da sessão emitida por esta entrega: `GET /me/session` (consulta), `POST /access/refresh` (renovação do access token), `DELETE /me/session` (revogação).
 - Tela TEL-001 (Entrada): botão nativo Apple e feedback de erro/estado.
 
@@ -48,6 +51,8 @@
 - Administrador convidado, Membro e Kids NÃO se autenticam por `POST /access/apple`; eles ingressam exclusivamente por convite (UC09).
 - O `creationGrant` não é uma sessão de membro e não autoriza nenhuma consulta de dados de família (RNF06).
 - Não há login por e-mail/senha nem qualquer outro provedor de identidade nesta etapa.
+- O app não solicita `fullName` nem e-mail à Apple nesta entrega; ambos não são necessários para reconhecer a identidade do Criador.
+- O app não reenvia automaticamente uma prova obtida antes de uma falha de rede: uma nova tentativa parte sempre de um novo toque no botão Apple.
 
 ## 4. Perfis, Atores e Regras de Autorização (RBAC)
 
@@ -57,7 +62,7 @@ Esta entrega não segue a matriz Administrador/Membro/Kids porque a rota é de *
 |---|---|---|---|
 | **Identidade Apple sem família vinculada** | Receber `creationGrant` restrito e seguir para `SPEC-002` (criação) | Consultar ou alterar dados de qualquer família; usar o grant como sessão de membro | HTTP 403 `ACTION_NOT_ALLOWED` em qualquer rota que exija sessão de membro |
 | **Identidade Apple com família vinculada (Criador)** | Obter `SessionResult` e acessar sua própria família | Acessar dados de outra família | HTTP 404 `RESOURCE_NOT_FOUND` (RNF06) |
-| **Prova Apple ausente, inválida, expirada ou autenticação cancelada** | Tentar novamente | Obter sessão ou grant | HTTP 401 `APPLE_PROOF_INVALID`; nenhuma credencial é emitida |
+| **Prova Apple recebida, mas inválida ou expirada** | Tentar novamente | Obter sessão ou grant | HTTP 401 `APPLE_PROOF_INVALID`; nenhuma credencial é emitida |
 
 - **Isolamento Multitenant Familiar (RNF06):** o servidor nunca aceita `familyId` enviado pelo cliente nesta rota; a família devolvida vem exclusivamente da associação já persistida à identidade Apple validada (RN44).
 
@@ -72,6 +77,8 @@ Esta entrega não segue a matriz Administrador/Membro/Kids porque a rota é de *
 | `rawNonce` | string | Sim | Deve corresponder ao hash do `nonce` presente em `identityToken` | `APPLE_PROOF_INVALID` | Nonce gerado pelo app antes de iniciar o login nativo, usado para impedir replay |
 
 **Header privado de instalação:** `X-Installation-Proof` (string opaca) — obrigatório em todas as rotas desta spec; nunca registrado em log (RNF08, RNF16).
+
+**Identidade Apple persistida:** após validar a prova, o backend extrai o `sub` emitido pela Apple e o usa como identificador estável da identidade do Criador. A associação persistida usa seu valor protegido e seu hash para unicidade; `email`, `fullName`, `identityToken`, `authorizationCode` e `rawNonce` não são usados como chave de vínculo.
 
 ### 5.2. Contrato de API Compartilhado (Endpoints e Payloads)
 
@@ -152,7 +159,7 @@ Todos os erros utilizam `Content-Type: application/problem+json`.
 | HTTP Status | `code` estável | Cenário / Causa | Rotas |
 |---|---|---|---|
 | `400 Bad Request` | `VALIDATION_FAILED` | Campo obrigatório ausente ou formato inválido | Todas |
-| `401 Unauthorized` | `APPLE_PROOF_INVALID` | `identityToken`/`authorizationCode`/`rawNonce` inválidos, expirados ou autenticação cancelada no dispositivo | `POST /access/apple` |
+| `401 Unauthorized` | `APPLE_PROOF_INVALID` | `identityToken`/`authorizationCode`/`rawNonce` inválidos, inconsistentes ou expirados | `POST /access/apple` |
 | `401 Unauthorized` | `SESSION_REVOKED` | Refresh token inválido, revogado ou sessão encerrada | `POST /access/refresh` |
 | `401 Unauthorized` | `SESSION_EXPIRED` | Access token ausente, inválido ou expirado | `GET /me/session`, `DELETE /me/session` |
 | `403 Forbidden` | `ACTION_NOT_ALLOWED` | `creationGrant` usado como se fosse sessão de membro | Rotas protegidas de outras specs |
@@ -160,9 +167,9 @@ Todos os erros utilizam `Content-Type: application/problem+json`.
 | `429 Too Many Requests` | `RATE_LIMIT_EXCEEDED` | Excesso de tentativas de autenticação por origem | `POST /access/apple` |
 
 ### 5.3. Estratégia de Concorrência, Idempotência e Falhas
-- **Idempotência:** não há `Idempotency-Key` nesta rota. Em caso de resposta perdida após autenticação Apple concluída, o app deve repetir o login nativo (nova prova) ou, se a família já existir, simplesmente tentar `POST /access/apple` novamente — BA-21/`CreateFamily` (em `SPEC-002`) trata a concorrência de criação; esta spec não cria nada persistente além da sessão/grant.
+- **Idempotência:** não há `Idempotency-Key` nesta rota. Em caso de resposta perdida após autenticação Apple concluída, o app deve iniciar novamente o login nativo por ação explícita da pessoa, obtendo nova prova antes de chamar `POST /access/apple` — BA-21/`CreateFamily` (em `SPEC-002`) trata a concorrência de criação; esta spec não cria nada persistente além da sessão/grant.
 - **Concorrência:** novo acesso Apple bem-sucedido substitui/revoga a sessão anterior do Criador no mesmo commit (RN44, MA-10). `GET /me/session` sempre lê o estado atual do servidor, sem cache que prolongue sessão revogada.
-- **Tratamento de Falhas e Rede Intermitente (RNF12, RNF13):** se a chamada a `POST /access/apple` falhar por rede após o login nativo ter sido concluído, o app mantém o botão em estado de carregamento controlado, informa a falha de forma não bloqueante e permite nova tentativa sem repetir o login nativo quando a prova ainda for válida, ou solicitando novo login nativo quando ela tiver expirado.
+- **Tratamento de retornos nativos, falhas e rede (RNF12, RNF13):** cancelamento ou falha devolvidos pelo sheet nativo não geram chamada ao backend e retornam TEL-001 a `Idle` sem mensagem do app. Se `POST /access/apple` retornar `APPLE_PROOF_INVALID`, o app informa a mensagem não bloqueante definida na UX-spec. Se falhar por rede, o app informa a falha, não apresenta sessão como aberta e aguarda um novo toque explícito no botão Apple; não há reenvio automático nem reaproveitamento da prova anterior.
 
 ## 6. Estados de Domínio e Transições
 
@@ -190,14 +197,14 @@ Todos os erros utilizam `Content-Type: application/problem+json`.
 - **CA-03: [Alternativa - Cancelamento ou falha no login nativo]**
   - **DADO QUE** o usuário cancela o login nativo Apple ou a autenticação falha no dispositivo,
   - **QUANDO** o app não receber uma prova válida da Apple,
-  - **ENTÃO O SISTEMA DEVE** permanecer em TEL-001 sem conceder sessão ou grant algum,
+  - **ENTÃO O SISTEMA DEVE** retornar TEL-001 a `Idle` sem mensagem do app e sem conceder sessão ou grant algum,
   - **E** nenhuma chamada a `POST /access/apple` deve ser enviada sem prova. *(Origem: UC04 alternativa "cancelamento ou falha")*
 
 - **CA-04: [Validação - Prova Apple inválida]**
   - **DADO QUE** o backend recebe `identityToken`, `authorizationCode` ou `rawNonce` inválidos, inconsistentes entre si ou com validade expirada,
   - **QUANDO** `POST /access/apple` for processado,
   - **ENTÃO O SISTEMA DEVE** rejeitar a requisição sem emitir sessão ou grant,
-  - **E** retornar HTTP `401 Unauthorized` com código `APPLE_PROOF_INVALID`. *(Origem: RNF15, backend-architecture.md §8)*
+  - **E** retornar HTTP `401 Unauthorized` com código `APPLE_PROOF_INVALID`, que o app apresenta de forma não bloqueante conforme a UX-spec. *(Origem: RNF15, backend-architecture.md §8)*
 
 - **CA-05: [Consistência - Substituição da sessão anterior do Criador]**
   - **DADO QUE** o Criador já possui uma sessão ativa em outro contexto,
@@ -233,7 +240,13 @@ Todos os erros utilizam `Content-Type: application/problem+json`.
   - **DADO QUE** o login nativo Apple foi concluído mas a chamada a `POST /access/apple` falha por rede,
   - **QUANDO** o app detectar a falha,
   - **ENTÃO O SISTEMA DEVE** informar a falha de forma não bloqueante, sem apresentar sessão como aberta,
-  - **E** permitir nova tentativa assim que a conexão for restabelecida. *(Origem: RNF12, RNF13)*
+  - **E** permitir uma nova tentativa somente após novo toque no botão Apple, sem reenvio automático da prova anterior. *(Origem: RNF12, RNF13)*
+
+- **CA-11: [Resiliência - Limite de tentativas]**
+  - **DADO QUE** a origem excedeu o limite de tentativas de autenticação,
+  - **QUANDO** `POST /access/apple` for processado,
+  - **ENTÃO O SISTEMA DEVE** rejeitar a requisição com HTTP `429 Too Many Requests` e código `RATE_LIMIT_EXCEEDED`, sem emitir sessão ou grant,
+  - **E** o app DEVE informar de forma não bloqueante que a pessoa deve aguardar alguns minutos antes de tentar novamente. *(Origem: RNF15, seção 5.2 desta spec)*
 
 ### Checklist de Cobertura Obrigatória dos CAs:
 - [x] Fluxo principal de cada alternativa de UC04 coberto (CA-01, CA-02)
@@ -250,6 +263,7 @@ Todos os erros utilizam `Content-Type: application/problem+json`.
 |---|---|---|---|---|
 | `apple_sign_in_succeeded` | Métrica / Analytics | `POST /access/apple` concedeu sessão ou grant | `outcome` (`session`\|`creationGrant`), `familyId` quando houver | Analytics |
 | `apple_sign_in_rejected` | Log de Segurança | Prova Apple inválida ou excesso de tentativas | `requestId`, `reason`, IP de origem | Log estruturado |
+| `apple_sign_in_native_ended` | Diagnóstico técnico | Sheet nativo cancelado ou devolve falha sem prova | `outcome` (`cancelled`\|`native_error`), categoria do erro; nunca tokens ou dados de identidade | Diagnóstico mobile |
 | `session_revoked` | Log de Segurança | Substituição por novo login Apple ou revogação explícita | `sessionId`, `reason` | Log estruturado |
 
 *Nota de Privacidade e Segurança:* `identityToken`, `authorizationCode`, `rawNonce`, `accessToken`, `refreshToken` e o header `X-Installation-Proof` NUNCA são registrados em logs ou eventos de telemetria (RNF08, RNF16).
@@ -269,6 +283,11 @@ Todos os erros utilizam `Content-Type: application/problem+json`.
 | E-03 | RN09 descreve o redirecionamento do Criador para a família existente (passo 5 de UC04), mas só é citada por UC01/UC09 na base funcional. Entra na rastreabilidade de `SPEC-001`? | Não. RN09 fica reservada para `SPEC-002`; `SPEC-001` cita apenas RN44. | Ana Luísa Coleone / 2026-10-06 | Não |
 | E-04 | Não havia convenção prévia de nomes de campo/header (`identityToken`, `authorizationCode`, `rawNonce`, `X-Installation-Proof`) nem de códigos de erro estáveis (`APPLE_PROOF_INVALID` etc.) para esta rota. | Aprovados os nomes propostos nesta spec; passam a ser a convenção inicial do módulo `Access` para as specs seguintes do Tema 1. | Ana Luísa Coleone / 2026-10-06 | Não |
 | E-05 | `SessionResult` (`backend-contracts.md`) não lista `isFamilyCreator`, mas a UI precisa saber disso para aplicar as proteções do Criador. | Aprovado incluir `isFamilyCreator` em `SessionResult` e em `GetCurrentSession`. | Ana Luísa Coleone / 2026-10-06 | Sim — `docs/architecture/backend-contracts.md` (v1.1) atualizado nesta aprovação. |
+| E-06 | Como tratar cancelamento ou falha do sheet Apple? | Ambos retornam TEL-001 a `Idle`, sem mensagem do app e sem chamada ao backend; a categoria pode alimentar diagnóstico técnico sem credenciais. | Produto / 2026-10-07 | Não |
+| E-07 | Quais retornos aparecem em TEL-001? | `APPLE_PROOF_INVALID`, falha de rede e `RATE_LIMIT_EXCEEDED` usam mensagem inline não bloqueante. Cancelamento e falha nativa não aparecem como erro no app. | Produto / 2026-10-07 | Não |
+| E-08 | Como ocorre nova tentativa após falha de rede? | Somente após novo toque no botão Apple; não há retry automático nem reaproveitamento da prova anterior. | Produto / 2026-10-07 | Não |
+| E-09 | Quais dados devem ser solicitados à Apple e qual é a chave de vínculo? | Nenhum `requestedScope` adicional; o backend usa exclusivamente o `sub` estável da prova validada, nunca e-mail, nome ou token bruto. | Produto / 2026-10-07 | Não |
+| E-10 | Qual configuração usa o botão Apple? | Rótulo `.signIn` e estilo `.black`, preservando o componente nativo sem texto, ícone ou fonte customizados. | Produto / 2026-10-07 | Não |
 
 ## 10. Fases de Implementação e Critérios de Conclusão
 
@@ -276,10 +295,10 @@ Todos os erros utilizam `Content-Type: application/problem+json`.
 |---|---|---|---|---|
 | **1** | **Núcleo Mínimo:** validação da prova Apple, emissão de sessão/`creationGrant`, isolamento e rejeição explícita. | CA-01, CA-02, CA-03, CA-04, CA-05, CA-06 | Testes unitários e de integração verdes cobrindo os CAs listados. | a fazer |
 | **2** | **Sessão utilizável + resiliência:** consulta, renovação e revogação de sessão; tratamento de falha de rede no mobile. | CA-07, CA-08, CA-09, CA-10 | Telas integradas com a API, testes de UI/E2E e UX-spec verificada. | a fazer |
-| **3** | **Polimento:** limitação de tentativas e observabilidade. | Rate limiting (`RATE_LIMIT_EXCEEDED`) | Suíte de regressão verde e validação de QA concluída. | a fazer |
+| **3** | **Polimento:** limitação de tentativas e observabilidade. | CA-11 | Suíte de regressão verde e validação de QA concluída. | a fazer |
 
 ### Para cada fase:
-- **Fase 1 — Fora desta fase:** o usuário autenticado ainda não consegue manter a sessão por muito tempo (sem refresh) nem encerrá-la explicitamente; TEL-001 mostra erro genérico sem distinguir motivo até a Fase 2 refinar a UX-spec. **Pode ser publicada de forma independente em produção?** Não — depende da Fase 2 para a sessão não cair em 15 minutos.
+- **Fase 1 — Fora desta fase:** o usuário autenticado ainda não consegue manter a sessão por muito tempo (sem refresh) nem encerrá-la explicitamente; falha de rede e o ciclo completo de sessão ficam para a Fase 2. **Pode ser publicada de forma independente em produção?** Não — depende da Fase 2 para a sessão não cair em 15 minutos.
 - **Fase 2 — Fora desta fase:** sem limites de tentativas abusivas. **Pode ser publicada de forma independente em produção?** Sim.
 - **Fase 3 — Fora desta fase:** nada além de polimento. **Pode ser publicada de forma independente em produção?** Sim.
 
