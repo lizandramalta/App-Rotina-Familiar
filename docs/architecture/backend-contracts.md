@@ -1,6 +1,6 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.7 · **Base funcional:** 1.12 · **Arquitetura backend:** 1.0\
+**Versão:** 1.8 · **Base funcional:** 1.13 · **Arquitetura backend:** 1.0\
 **Data:** 2026-10-07\
 **Situação:** contrato arquitetural para detalhamento OpenAPI na implementação
 
@@ -110,6 +110,8 @@ Nas rotas familiares, `period` aceita `day` ou `week`; `referenceDate` é a data
 
 O servidor não aceita perfil responsável, autor da conclusão ou escolha de atribuição no comando. O ator vem da sessão; a conclusão mantém responsáveis existentes ou atribui o ator adulto se não houver nenhum. Tarefa com ao menos um responsável Kids só aceita conclusão manual de Administrador; Membro recebe `403 ACTION_NOT_ALLOWED`. Se já estiver concluída, a transação não duplica créditos e responde `409 TASK_ALREADY_COMPLETED`; o cliente reconcilia silenciosamente consultando o estado canônico. Reabrir missão concluída remove recompensa aceita, participações e badges derivados no mesmo commit. Conclusão manual administrativa encerra a pendência Kids e preserva sinalização/foto para auditoria acessível apenas a Administradores. `signalId` é identidade de domínio que protege uma decisão contra outra sinalização mais recente, não versão geral de edição.
 
+`SignalTask` exige ator com papel `kids` e revalida, na mesma transação, que o ator consta em `assigneeIds` e que a tarefa está `pending`; caso contrário responde `403 ACTION_NOT_ALLOWED` (ator não é Kids), `404 RESOURCE_NOT_FOUND` (tarefa indisponível, de outra família, ou da qual o Kids não é responsável — sem distinguir os casos) ou `409 TASK_NOT_PENDING` (tarefa já `awaitingConfirmation` ou `completed`). `photoMediaId`, quando enviado, é revalidado como `READY`, do titular e com `finalidade: taskSignal`, usando os mesmos códigos `PHOTO_MEDIA_NOT_READY`/`PHOTO_MEDIA_NOT_OWNED`/`PHOTO_MEDIA_PURPOSE_MISMATCH` de `UpdateOwnProfile`. Sucesso retorna `201 Created` com a tarefa canônica e a sinalização criada (`signal.id`, correspondente ao `signalId` usado por `DecideKidsSignal`). Para SPEC-012.
+
 `CreateRoutine` e `UpdateFutureRoutine` usam `422 VALIDATION_FAILED` com `fieldErrors` estáveis: `FREQUENCY_DAYS_INVALID` para `frequencyDays` fora de 1/7/14/21/28, `START_DATE_INVALID` para `startDate` fora de `YYYY-MM-DD` e `ROUTINE_SOURCE_TASK_INVALID` quando `fromTaskId` não identifica uma ocorrência da rotina solicitada dentro da família do ator. Um `fromTaskId` de outra família é indisponível e responde `404`. Não existe `endDate` nesses comandos. `EditTask` rejeita com `422 VALIDATION_FAILED`/`SIGNAL_RESOLUTION_REQUIRED` qualquer gravação sobre tarefa `awaitingConfirmation` sem `signalResolution`, independentemente de quais campos mudaram. `resetToPending` transiciona a tarefa para `pending` e descarta a sinalização corrente; `keepAwaitingConfirmation` preserva o estado e a sinalização corrente com os dados editados. `DeleteTask` sobre tarefa `awaitingConfirmation` remove a sinalização corrente junto da tarefa, sem gerar `CONFIRMED`/`REJECTED`.
 
 `TaskMutationResult` contém `task` e `affectedResources` com IDs/tipos e períodos a invalidar. `familyOverview`, progresso pessoal, fila Kids, missão, badges e relatório corrente são recarregados quando afetados. Recursos sem permissão não têm dados privados devolvidos; pode-se invalidar uma área por tipo sem expor seus registros. Exclusões retornam ID removido, vínculos alterados e resumo dos registros preservados.
@@ -144,12 +146,14 @@ O snapshot de relatório inclui `period`, `timeZoneId`, `isTransition`, `generat
 
 | Método e caminho | Contrato | Acesso |
 |---|---|---|
-| `POST /media` | Upload multipart, `purpose: profilePhoto \| taskSignal` → `mediaId`, estado e dimensões | Titular; `taskSignal` exige Kids responsável e contexto de tarefa válido |
+| `POST /media` | Upload multipart, `purpose: profilePhoto \| taskSignal` → `mediaId`, estado e dimensões | Titular; `taskSignal` exige somente que o ator tenha papel Kids — o upload não recebe nem valida `taskId` |
 | `GET /media/{mediaId}/content` | Streaming privado, tipo/tamanho corretos e sem cache compartilhado | Sessão ativa e leitura permitida pela finalidade/vínculo |
 | `GET /health/live` | Estado mínimo do processo | Operação; sem detalhes internos |
 | `GET /health/ready` | Prontidão da função API/worker | Infraestrutura autorizada |
 
 Perfil recebe `photoMediaId`; sinalização recebe `photoMediaId` opcional. Ambos revalidam que a mídia está pronta, é do titular/da família e tem finalidade compatível. URL arbitrária no body não substitui esse contrato. Antes de vínculo, só quem enviou pode consultar sua mídia. R2 é privado e credenciais S3 nunca aparecem no retorno.
+
+A revalidação de contexto de tarefa (estado `pending`, titularidade do responsável) acontece exclusivamente no vínculo via `SignalTask`, nunca no upload: `POST /media` com `purpose: taskSignal` não amarra a mídia a um `taskId` (SPEC-012). Reutilizar em outra sinalização uma mídia já vinculada não é um fluxo válido: cada sinalização recebe seu próprio `photoMediaId`, revalidado no momento do vínculo.
 
 Página de Universal Link e `/.well-known/apple-app-site-association` são artefatos HTTP de integração, fora do prefixo da API. Não consomem convite nem autenticam o visitante. Página orienta loja e nova abertura do link após instalar, sem prometer deferred deep linking. URLs/domínio reais serão configuração de implantação.
 
@@ -173,7 +177,7 @@ Cada linha cobre um objetivo funcional completo, não apenas uma rota. RF/RN per
 | <a id="backend-uc12"></a>[UC12](../03-casos-de-uso.md#uc12) | `CompleteTask` / Tasks, Kids, Missions | Direta, mantém responsáveis ou atribui adulto sem responsável; crédito integral e tarefa Kids só Admin | RF12/26/47/56; RN21–23/30/48/55/56 |
 | <a id="backend-uc13"></a>[UC13](../03-casos-de-uso.md#uc13) | `GetFamilyLoad` / Insights | Carga pelo instante da conclusão, sem duplicação por joins | RF18–21/56/57/66; RN28/30/31/33/34/57/61 |
 | <a id="backend-uc14"></a>[UC14](../03-casos-de-uso.md#uc14) | `ListMissions`, `GetMissionDetail` / Missions | Tarefas distintas; reabertura confirmada remove recompensa e dados derivados; projeção Kids | RF30/31/36/58/62/65; RN35–39/43/51–53/58/64 |
-| <a id="backend-uc15"></a>[UC15](../03-casos-de-uso.md#uc15) | `UploadMedia`, `SignalTask` / Media, Kids | Foto opcional; sinalizar não conclui nem credita | RF23/24/55/56; RN21–26/54/55 |
+| <a id="backend-uc15"></a>[UC15](../03-casos-de-uso.md#uc15) | `UploadMedia`, `SignalTask` / Media, Kids | Foto opcional; sinalizar não conclui nem credita; `404`/`409` protegem titularidade e estado `pending` | RF23/24/55/56; RN21–26/54/55 |
 | <a id="backend-uc16"></a>[UC16](../03-casos-de-uso.md#uc16) | `AcceptMissionReward` / Rewards, Missions | Sorteio local, um aceite remoto | RF35/51–53; RN42/43/52/53; RNF23 |
 | <a id="backend-uc17"></a>[UC17](../03-casos-de-uso.md#uc17) | `ReopenTask` / Tasks, Missions, Rewards | Perfil com acesso à tarefa; confirmação se missão concluída/recompensa; retirar crédito uma vez e reverter dados derivados | RF57–59; RN55/57–59 |
 | <a id="backend-uc18"></a>[UC18](../03-casos-de-uso.md#uc18) | `GetWeeklyReportSnapshot` / Reports, Insights | Snapshot consistente adulto para PDF local | RF61; RN62; RNF26/27 |
@@ -203,6 +207,7 @@ O OpenAPI futuro deve materializar schemas e exemplos de sucesso/erro dessas rot
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.8 | 2026-10-07 | `SignalTask` detalhado: ator Kids, revalidação de titularidade/estado (`403 ACTION_NOT_ALLOWED`, `404 RESOURCE_NOT_FOUND`, `409 TASK_NOT_PENDING`), resposta `201 Created` com `signal.id`. `POST /media` com `purpose: taskSignal` passa a ser aceito, validando somente o papel Kids no upload; contexto de tarefa é revalidado só no vínculo. Para SPEC-012. |
 | 1.7 | 2026-10-07 | `CreateMission`/`EditMission` ganham `note` opcional (≤250 car.); `GetMissionDetail` expõe `note`; `EditMission` explicita rejeição de `taskIds` vazio. Para SPEC-014. |
 | 1.5 | 2026-10-06 | Conclusão de tarefa com responsável Kids exige Administrador; `TASK_ALREADY_COMPLETED` reconcilia concorrência sem duplicar crédito; sinalização/foto pendente é auditável só por Admin. Para SPEC-010. |
 | 1.4 | 2026-10-06 | Rotas pessoais de UC11 ficam diárias; rotas familiares adultas usam `period`, `memberId` e `includeUnassigned`; overview não inclui carga nesta entrega. Para SPEC-009. |

@@ -93,7 +93,7 @@ Administradores. Ela cobre TEL-002, TEL-053 e MOD-012; não há uma SPEC-021 sep
 
 | Spec planejada | UC principal | Projetos | Depende de | Status |
 |---|---|---|---|---|
-| `SPEC-012-sinalizar-tarefa-kids` - Sinalizar tarefa como realizada | UC15 | ambos | SPEC-007 | não criada |
+| [`SPEC-012-sinalizar-tarefa-kids`](SPEC-012-sinalizar-tarefa-kids.md) - Sinalizar tarefa como realizada | UC15 | ambos | SPEC-007 | aprovada |
 | `SPEC-013-validar-conclusao-kids` - Validar conclusão de tarefa Kids | UC03 | ambos | SPEC-012 | não criada |
 
 ### Tema 4 - Missões e recompensas
@@ -132,6 +132,7 @@ status e resumo; mantenha esta tabela como o panorama do backlog.
 | [SPEC-014-gerenciar-missoes](SPEC-014-gerenciar-missoes.md) | [UX-014-gerenciar-missoes.md](UX-014-gerenciar-missoes.md) | aprovada | ambos | Criação e edição de missões coletivas sem prazo com observação opcional, atalho de criação de tarefa, fechamento automático com participações/badges, e consulta básica por todos os perfis, inclusive Kids. |
 | [SPEC-006-editar-perfil](SPEC-006-editar-perfil.md) | [UX-006-editar-perfil.md](UX-006-editar-perfil.md) | aprovada | ambos | Edição do próprio apelido (até 20 caracteres não-espaço) e foto opcional por câmera/galeria, com titularidade exclusiva; consulta de badges cumulativos e missões contribuintes por marco. |
 | [SPEC-011-reabrir-tarefa](SPEC-011-reabrir-tarefa.md) | [UX-011-reabrir-tarefa.md](UX-011-reabrir-tarefa.md) | aprovada | ambos | Retorno de tarefa concluída para Pendente por Admin/Membro (qualquer tarefa acessível) ou Kids (própria), com reversão de crédito e confirmação explícita quando afeta missão concluída e/ou recompensa aceita. |
+| [SPEC-012-sinalizar-tarefa-kids](SPEC-012-sinalizar-tarefa-kids.md) | [UX-012-sinalizar-tarefa-kids.md](UX-012-sinalizar-tarefa-kids.md) | aprovada | ambos | Kids sinaliza tarefa própria pendente com foto opcional por câmera direta, movendo-a para Aguardando confirmação sem crédito; habilita `purpose: taskSignal` reservado por SPEC-006. |
 
 ## Templates
 
