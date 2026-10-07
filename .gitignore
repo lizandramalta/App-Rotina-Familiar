@@ -78,5 +78,26 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Local iOS environment values. Commit only the *.example templates.
-mobile/Configuration/Development.xcconfig
-mobile/Configuration/Production.xcconfig
+*.xcconfig
+!*.xcconfig.example
+
+# Chaves privadas e certificados. Nunca versione credenciais reais.
+*.p8
+*.pem
+*.key
+*.cer
+*.p12
+*.mobileprovision
+*.keystore
+*.jks
+
+# Valores locais de ambiente (versione apenas os templates .example).
+.env
+.env.*
+!.env.example
+!*.env.example
+
+# GSD (Get Shit Done) - planejamento e artefatos locais de agentes
+.planning/
+.gsd/
+

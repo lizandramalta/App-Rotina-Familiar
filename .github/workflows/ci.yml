@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  backend:
+    name: Backend (Node 22 + Postgres 16)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 54322:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+      DATABASE_SCHEMA: app
+      DATABASE_SSL: 'false'
+      LOG_LEVEL: error
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - run: npm ci
+
+      - run: npm run lint
+
+      - run: npm run typecheck
+
+      - run: npm run test
+
+      - run: npm run build
+
+      - name: Apply database migrations
+        run: npm run migrate
+
+      - name: Health probes smoke test (/health/live, /health/ready)
+        run: npm run test:integration
+
+  mobile:
+    name: Mobile (iOS Simulator build + tests)
+    # IPHONEOS_DEPLOYMENT_TARGET = 26.0 exige SDK do Xcode 26+; a imagem macos-15
+    # traz Xcode 16 por padrão e não compila este target.
+    runs-on: macos-26
+    defaults:
+      run:
+        working-directory: mobile
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select the newest Xcode available on the runner
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+
+      - name: Generate local xcconfig files from templates
+        run: |
+          cp Configuration/Development.xcconfig.example Configuration/Development.xcconfig
+          cp Configuration/Production.xcconfig.example Configuration/Production.xcconfig
+
+      - name: Build for iOS Simulator
+        run: |
+          xcodebuild build \
+            -project mobile.xcodeproj \
+            -scheme FamilyRoutine \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Run FoundationTests on an available simulator
+        run: |
+          # O nome do simulador muda entre imagens do runner; resolvemos o UDID
+          # do primeiro iPhone disponível em vez de fixar um modelo.
+          udid=$(xcrun simctl list devices available --json \
+            | python3 -c 'import json,sys;d=json.load(sys.stdin)["devices"];print(next(x["udid"] for rt in d for x in d[rt] if "iOS" in rt and x["name"].startswith("iPhone")))')
+          xcodebuild test \
+            -project mobile.xcodeproj \
+            -scheme FamilyRoutine \
+            -destination "platform=iOS Simulator,id=$udid" \
+            CODE_SIGNING_ALLOWED=NO
