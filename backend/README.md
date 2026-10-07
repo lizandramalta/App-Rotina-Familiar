@@ -93,23 +93,47 @@ Conforme a decisão **BA-19**, o Supabase é utilizado **estritamente como Postg
 
 ### 5.1 Conexão com o Supabase Remoto
 
-No painel do Supabase (`Settings` → `Database` → `Connection string`):
+A string de conexão fica no botão **Connect**, no topo do painel do projeto — em `Connection Method`, escolha `Session pooler` e mantenha `Type` em `URI`.
 
-1. **Modo Recomendado (Supavisor em Modo Sessão - IPv4):**
+1. **Modo recomendado (Supavisor em modo sessão, IPv4):**
+
    ```env
-   DATABASE_URL="postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:5432/postgres?sslmode=require"
+   DATABASE_URL="postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-[N]-[REGION].pooler.supabase.com:5432/postgres"
    DATABASE_SSL=true
    ```
-2. **Modo Direto (IPv6):**
+
+   Use a porta **5432** (sessão), não a 6543 (transação): o modo transação não
+   mantém estado entre comandos e quebra as transações de múltiplas instruções
+   exigidas pelos casos de uso.
+
+2. **Modo direto (IPv6):**
    ```env
-   DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres?sslmode=require"
+   DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres"
    DATABASE_SSL=true
    ```
+   O host direto só publica registro `AAAA`. Em rede sem IPv6 a conexão falha com
+   `getaddrinfo ENOTFOUND` — nesse caso, use o modo 1.
+
+**Não inclua `?sslmode=require` na URL.** O `pg` trata esse parâmetro como
+`verify-full` e a verificação falha com `self-signed certificate in certificate
+chain`, porque a cadeia do Supabase não está entre as âncoras padrão do Node. O
+TLS é ativado por `DATABASE_SSL=true`. Hoje a conexão é cifrada sem validar a
+autoridade emissora; validar exige distribuir o certificado do Supabase e
+continua pendente.
+
+Se a senha tiver caracteres reservados de URL (`@`, `/`, `:`, `?`, `#`, `%`),
+codifique-os em percent-encoding ou a string é interpretada errado.
 
 ### 5.2 Schema Privado `app`
 
-As tabelas do produto são alocadas no schema `app`. O driver `pg` configura automaticamente `SET search_path TO "app", public` no handshake da conexão.
-No Supabase, a Data API pública (PostgREST) não deve expor o schema `app`.
+As tabelas do produto são alocadas no schema `app` (`DATABASE_SCHEMA`). O pool passa
+`-c search_path=app,public` nas opções de inicialização da conexão, de modo que o
+`search_path` já vale na primeira consulta do cliente.
+
+No Supabase, a Data API pública (PostgREST) não deve expor o schema `app`: confira
+em `Settings` → `API` → `Exposed schemas` que apenas `public` e `graphql_public`
+estão listados. A migration `0001` também retira privilégios de `anon` e
+`authenticated` sobre o schema, inclusive para objetos criados depois dela.
 
 ### 5.3 Desenvolvimento Local com Supabase CLI (Opcional)
 
@@ -131,6 +155,32 @@ Se optar por rodar uma instância local do Supabase via CLI:
    ```bash
    npx supabase stop
    ```
+
+### 5.4 Migrations
+
+O schema é versionado em `database/migrations/` como SQL **forward-only**
+(BA-05, `backend-architecture.md` §15). Não há rollback: corrigir é criar uma
+migration nova. O schema **não** é sincronizado no boot da API — aplicar é um
+passo explícito:
+
+```bash
+npm run migrate
+```
+
+O comando lê a `DATABASE_URL` do `.env`, aplica os arquivos pendentes em ordem de
+nome (cada um em sua própria transação) e registra versão e hash em
+`app.schema_migrations`. Rodar de novo sem mudanças não faz nada.
+
+Arquivos seguem `NNNN_descricao_em_ingles.sql`, com número sequencial nunca
+reaproveitado. Editar uma migration já aplicada é erro: o hash deixa de bater e o
+comando aborta antes de tocar no banco, porque quem já aplicou não receberia a
+alteração.
+
+Detalhes da convenção em [`database/migrations/README.md`](database/migrations/README.md).
+
+> Pendência: `backend-architecture.md` §6 exige que migrations usem credencial
+> separada e que o papel de runtime não tenha DDL. Hoje ambos usam a mesma
+> `DATABASE_URL`. Criar o papel restrito de runtime é trabalho ainda não feito.
 
 ---
 

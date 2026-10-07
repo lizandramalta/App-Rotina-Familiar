@@ -24,17 +24,14 @@ export class PostgresConnectionPool {
       min: config.DATABASE_POOL_MIN,
       max: config.DATABASE_POOL_MAX,
       ssl,
+      // search_path is applied during connection startup (BA-19: schema 'app').
+      // A `SET` issued from the pool's 'connect' event would race with the first
+      // query on that client, which could then resolve names in the wrong schema.
+      options: `-c search_path=${this.schema},public`,
     });
 
     this.pool.on('error', (err) => {
       this.logger.error('Unexpected error on idle PostgreSQL client in pool', err);
-    });
-
-    // Ensure search_path defaults to configured schema (BA-19: schema 'app')
-    this.pool.on('connect', (client) => {
-      client.query(`SET search_path TO "${this.schema}", public`).catch((err) => {
-        this.logger.error('Failed to set search_path on new database client', err);
-      });
     });
   }
 

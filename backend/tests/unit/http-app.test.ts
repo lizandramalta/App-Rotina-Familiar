@@ -22,6 +22,7 @@ describe('HTTP Presentation Layer (Fastify)', () => {
       DATABASE_SCHEMA: 'app',
       DATABASE_POOL_MIN: 1,
       DATABASE_POOL_MAX: 2,
+      DATABASE_SSL: false,
       SESSION_SECRET: 'test-session-secret-min-16-chars!',
       INVITE_ENVELOPE_KEY: 'test-invite-key-min-16-chars!',
     };

@@ -18,6 +18,6 @@
     "outDir": "./dist",
     "resolveJsonModule": true
   },
-  "include": ["src/**/*", "tests/**/*", "vitest.config.ts"],
+  "include": ["src/**/*", "tests/**/*", "database/**/*", "vitest.config.ts"],
   "exclude": ["node_modules", "dist"]
 }

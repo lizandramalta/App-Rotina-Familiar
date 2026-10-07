@@ -2,7 +2,7 @@
   "name": "app-rotina-familiar-backend",
   "version": "0.1.0",
   "private": true,
-  "description": "Backend monólito modular da plataforma App de Rotina Familiar",
+  "description": "Backend mon\u00f3lito modular da plataforma App de Rotina Familiar",
   "type": "module",
   "engines": {
     "node": ">=22.0.0",
@@ -14,6 +14,7 @@
     "build": "rimraf dist && tsc -p tsconfig.build.json",
     "start": "node dist/bootstrap/api-main.js",
     "start:worker": "node dist/bootstrap/worker-main.js",
+    "migrate": "tsx database/migrate.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
