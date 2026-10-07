@@ -2,7 +2,7 @@
 
 **Status:** aprovada  
 **Autor:** Codex | **Criada em:** 2026-10-06 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-06  
-**Base funcional:** 1.7  
+**Base funcional:** 1.14\
 **UX-spec:** [UX-003-gerenciar-membros.md](UX-003-gerenciar-membros.md)  
 **Projetos envolvidos:** ambos  
 **Tema do backlog:** Tema 1 - Acesso, família e perfis
@@ -16,9 +16,9 @@
 
 | Categoria | Códigos incluídos nesta entrega |
 |---|---|
-| Caso de uso | UC02 (recorte: criação e gestão de membro; sem emissão de convite) |
+| Caso de uso | UC02 (recorte: criação e gestão de membro; sem emissão de convite), UC01 (reuso no onboarding) |
 | Regras de negócio | RN01–RN08, RN10 |
-| Requisitos funcionais | RF02–RF06, RF40 |
+| Requisitos funcionais | RF02–RF06, RF38, RF40 |
 | Requisitos não funcionais | RNF01, RNF05–RNF09, RNF12–RNF14, RNF22 |
 | Telas e fluxos | TEL-030 (saída da administração), TEL-032, TEL-033, TEL-050, MOD-010, UF-12 |
 | Decisões arquiteturais | MA-07–MA-11, MA-15; BA-07, BA-08, BA-10, BA-20 |
@@ -32,7 +32,7 @@
 ### 3.1. Dentro do escopo
 
 - Consultar a projeção de membros e o detalhe administrativo da própria família, para adultos, em `GET /v1/family/members` e `GET /v1/family/members/{memberId}`.
-- Criar, por Administrador, perfil sem sessão nos papéis `administrator`, `member` ou `kids`.
+- Criar, por Administrador, perfil sem sessão nos papéis `administrator`, `member` ou `kids`, inclusive quando o Criador usa o mesmo fluxo em TEL-056 durante o onboarding.
 - Editar exclusivamente o nome administrativo de outro membro; apelido, foto e identidade Apple continuam fora do comando administrativo.
 - Alterar papel entre `administrator`, `member` e `kids`, aplicando as restrições de Criador e de modo Kids.
 - Permitir que Administrador que não seja Criador deixe a administração e se torne Membro.
@@ -198,6 +198,7 @@ Segredos, tokens, provas de instalação, hashes, apelido privado configurável 
 | E-02 | Os papéis permitidos na criação são `administrator`, `member` e `kids`; `kids` não possui booleano separado. | Aprovação da prévia em 2026-10-06 | Sim — RF40 e base 1.7 atualizadas |
 | E-03 | A saída voluntária de Administrador não-Criador pertence a esta entrega, embora sua entrada visual exista em TEL-030. | Aprovação da prévia em 2026-10-06 | Não — aplica UC02/RN04 existentes |
 | E-04 | A emissão e o reenvio de convite não integram esta entrega; criação de perfil e convite continuam comandos distintos. | Mapa de specs e contrato backend | Não |
+| E-05 | TEL-056 reutiliza a criação de membro sem alterar payload, autorização ou estados desta SPEC; após salvar, a orquestração decide oferecer convite explícito ou avançar. | Pessoa usuária / 2026-10-07 | Não |
 
 ## 10. Fases de implementação e conclusão
 

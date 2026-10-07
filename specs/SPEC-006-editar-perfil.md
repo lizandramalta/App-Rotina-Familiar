@@ -2,14 +2,14 @@
 
 **Status:** aprovada
 **Autor:** Claude | **Criada em:** 2026-10-07 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-07
-**Base funcional:** 1.13
+**Base funcional:** 1.14
 **UX-spec:** [UX-006-editar-perfil.md](UX-006-editar-perfil.md)
 **Projetos envolvidos:** ambos
 **Tema do backlog:** Tema 1 - Acesso, família e perfis
 
 ## 1. Contexto e Objetivo
 
-- **Problema / Necessidade:** com SPEC-003 aprovada, um Administrador já cria e gerencia perfis, mas nenhum perfil consegue configurar sua própria identificação pessoal (foto, apelido) — a rota administrativa recusa explicitamente esses campos. Com SPEC-014 aprovada, missões já concedem badges por participação, mas essa conquista fica invisível: não existe superfície de consulta. Sem esta entrega, UC10 permanece sem implementação.
+- **Problema / Necessidade:** com SPEC-003 aprovada, um Administrador já cria e gerencia perfis, mas nenhum perfil consegue configurar posteriormente sua própria identificação pessoal (foto, apelido) — a rota administrativa recusa explicitamente esses campos. A foto inicial opcional do Criador é tratada no onboarding por SPEC-002. Com SPEC-014 aprovada, missões já concedem badges por participação, mas essa conquista fica invisível: não existe superfície de consulta. Sem esta entrega, UC10 permanece sem implementação.
 - **Objetivo da entrega:** permitir que qualquer perfil (Administrador, Membro, Kids) edite a foto opcional e o apelido do próprio perfil, sem alterar papel, família ou modo Kids, e consultar os badges cumulativos por participação em missões, incluindo o detalhe das missões contribuintes de cada marco.
 
 ## 2. Rastreabilidade e Dependências
@@ -23,8 +23,8 @@
 | Telas e fluxos de navegação | TEL-030 (recorte de dados pessoais e badges), MOD-009, TEL-054, UF-13 |
 | Decisões arquiteturais aplicáveis | MA-07, MA-08, MA-11, MA-15, MA-16; BA-08, BA-16 |
 
-- **Documentos consultados:** `docs/01-regras-de-negocio.md` (RN33/63/64), `docs/02-requisitos.md` (RF48/62/65 e RNF citadas), `docs/03-casos-de-uso.md` (UC10), `docs/05-modelo-de-dados.md` (MEMBRO, MIDIA, BADGE, MEMBRO_BADGE, BADGE_PARTICIPACAO), `docs/06-diagrama-de-classes.md` (Member, MemberService, Badge, BadgeAward, BadgeTier, rastreio-uc10), `docs/design/screen-map.md` (TEL-030/054, MOD-009), `docs/design/user-flows.md` (UF-13), `docs/architecture/backend-contracts.md` (§1, §3, §6, §7), `docs/architecture/backend-architecture.md` (processamento de mídia), `docs/architecture/backend-decisions.md` (BA-16), `docs/architecture/mobile-decisions.md` (P-04), `docs/architecture/mobile-feature-catalog.md`.
-- **Depende de (specs pré-requisito):** [SPEC-003-gerenciar-membros](SPEC-003-gerenciar-membros.md) (aprovada) — define `Member` e a rota administrativa que já exclui apelido/foto. [SPEC-014-gerenciar-missoes](SPEC-014-gerenciar-missoes.md) (aprovada) — `CloseEligibleMissions` já registra `MissionParticipation` e concede `BadgeAward`.
+- **Documentos consultados:** `docs/01-regras-de-negocio.md` (RN01/33/63/64), `docs/02-requisitos.md` (RF01/48/62/65 e RNF citadas), `docs/03-casos-de-uso.md` (UC01, UC10), `docs/05-modelo-de-dados.md` (MEMBRO, MIDIA, BADGE, MEMBRO_BADGE, BADGE_PARTICIPACAO), `docs/06-diagrama-de-classes.md` (Member, MemberService, Badge, BadgeAward, BadgeTier, rastreio-uc10), `docs/design/screen-map.md` (TEL-030/054, MOD-009), `docs/design/user-flows.md` (UF-13), `docs/architecture/backend-contracts.md` (§1, §3, §6, §7), `docs/architecture/backend-architecture.md` (processamento de mídia), `docs/architecture/backend-decisions.md` (BA-16), `docs/architecture/mobile-decisions.md` (P-04), `docs/architecture/mobile-feature-catalog.md`.
+- **Depende de (specs pré-requisito):** [SPEC-002-criar-configurar-familia](SPEC-002-criar-configurar-familia.md) (aprovada) — estabelece a capacidade de mídia `profilePhoto` necessária ao onboarding. [SPEC-003-gerenciar-membros](SPEC-003-gerenciar-membros.md) (aprovada) — define `Member` e a rota administrativa que já exclui apelido/foto. [SPEC-014-gerenciar-missoes](SPEC-014-gerenciar-missoes.md) (aprovada) — `CloseEligibleMissions` já registra `MissionParticipation` e concede `BadgeAward`.
 - **Dependências externas e infraestrutura:** Cloudflare R2 (armazenamento privado de mídia), conforme BA-16. Nenhuma dependência de Apple Sign-In, APNs ou serviços externos novos.
 
 ## 3. Escopo da Entrega
@@ -35,7 +35,7 @@
 - `PATCH /v1/me/profile` (`UpdateOwnProfile`): atualizar `nickname` e/ou `photoMediaId`, ambos opcionais e nuláveis; rejeitar qualquer campo protegido (papel, família, modo Kids, identidade Apple).
 - `GET /v1/me/badges` (`GetOwnBadges`): lista de badges cumulativos concedidos ao titular (bronze/prata/ouro/diamante).
 - `GET /v1/me/badges/{awardId}` (`GetBadgeContributions`): marco, data de concessão e missões que contribuíram para ele, restrito ao titular do marco.
-- `POST /v1/media` e `GET /v1/media/{mediaId}/content`, restritos nesta entrega a `purpose: profilePhoto` — infraestrutura compartilhada de upload/leitura de mídia privada (R2), reutilizável por `purpose: taskSignal` em entrega futura (SPEC-012/UC15), que não é implementada aqui.
+- Reutilizar `POST /v1/media` e `GET /v1/media/{mediaId}/content`, introduzidos por SPEC-002 para `purpose: profilePhoto`, na edição posterior do próprio perfil. A infraestrutura continua reservada para `purpose: taskSignal` em SPEC-012/UC15.
 - TEL-030 (recorte de dados pessoais e badges — a ação "deixar administração" já entregue por SPEC-003 permanece inalterada), MOD-009 (Editar meu perfil) e TEL-054 (Detalhe do marco) no mobile.
 - Autorização por titularidade exclusiva, isolamento multitenant/entre membros e validação de entrada, desde a Fase 1.
 
@@ -76,7 +76,7 @@
 |---|---|---|---|---|---|
 | `nickname` | string ou `null` | Não | Opcional. Após remover espaços nas extremidades, no máximo **20 caracteres não-espaço** (espaços internos não contam para o limite); sem caracteres de controle. `null` ou string vazia após trim remove a configuração vigente. | `NICKNAME_INVALID_LENGTH` | Etiqueta/apelido visível à família; configuração exclusiva do titular (RN63) |
 | `photoMediaId` | uuid ou `null` | Não | Deve referenciar uma `MIDIA` em estado `READY`, pertencente ao titular (`titular_id`), com `finalidade: PROFILE_PHOTO`. `null` remove a foto vigente e volta à identificação padrão. | `PHOTO_MEDIA_NOT_READY` / `PHOTO_MEDIA_NOT_OWNED` / `PHOTO_MEDIA_PURPOSE_MISMATCH` | Foto de perfil opcional, por câmera ou galeria (RN63) |
-| `purpose` (em `POST /media`) | enum | Sim | Nesta entrega, apenas `profilePhoto` é aceito; `taskSignal` responde `422` até `SPEC-012` implementar esse uso. | `MEDIA_PURPOSE_NOT_SUPPORTED` | Finalidade declarada do upload |
+| `purpose` (em `POST /media`) | enum | Sim | Esta experiência envia `profilePhoto`; `taskSignal` é reservado ao fluxo Kids de SPEC-012 e não é iniciado por esta tela. | `MEDIA_PURPOSE_NOT_SUPPORTED` apenas para finalidade fora do contrato | Finalidade declarada do upload |
 | arquivo (multipart, em `POST /media`) | binário | Sim | Formato de imagem reconhecível pelo decodificador do servidor; o backend converte para JPEG com lado maior ≤1.600px e ≤5MB após processamento, removendo metadados (BA-16, mobile-decisions.md P-04). Falha de decodificação ou tamanho de entrada acima do limite operacional responde `415`/`413`. | `MEDIA_FORMAT_UNSUPPORTED` / `MEDIA_TOO_LARGE` | Conteúdo da foto a ser processado e armazenado no R2 |
 
 Campos não reconhecidos ou protegidos (`role`, `familyId`, `kidsMode`, `isFamilyCreator`, `appleUserID`, `status`, `concededAt`, `contributingMissionIds`) em `PATCH /v1/me/profile` são rejeitados com `400 UNKNOWN_FIELD`, sem persistir (convenção §1 dos contratos backend).
@@ -157,7 +157,7 @@ Campos não reconhecidos ou protegidos (`role`, `familyId`, `kidsMode`, `isFamil
 | `413 Payload Too Large` | `MEDIA_TOO_LARGE` | Upload acima do limite de entrada aceito pelo servidor |
 | `415 Unsupported Media Type` | `MEDIA_FORMAT_UNSUPPORTED` | Formato de imagem não reconhecido |
 | `422 Unprocessable Entity` | `PHOTO_MEDIA_NOT_READY` / `PHOTO_MEDIA_NOT_OWNED` / `PHOTO_MEDIA_PURPOSE_MISMATCH` | `photoMediaId` ainda processando, de outro titular, ou com finalidade incompatível |
-| `422 Unprocessable Entity` | `MEDIA_PURPOSE_NOT_SUPPORTED` | `purpose: taskSignal` nesta entrega (reservado para SPEC-012) |
+| `422 Unprocessable Entity` | `MEDIA_PURPOSE_NOT_SUPPORTED` | Finalidade fora das finalidades reconhecidas pelo contrato de mídia |
 | `429 Too Many Requests` | `RATE_LIMIT_EXCEEDED` | Excesso de requisições de edição/upload por janela |
 
 ### 5.3. Estratégia de Concorrência, Idempotência e Falhas
@@ -281,13 +281,13 @@ Campos não reconhecidos ou protegidos (`role`, `familyId`, `kidsMode`, `isFamil
 | # | Pergunta / Dúvida | Decisão Tomada | Decidido por / Data | Altera a documentação em `docs/`? |
 |---|---|---|---|---|
 | E-01 | Não havia limite de caracteres/charset definido para `nickname` em nenhuma fonte (RN63, RF48, modelo de dados). | Até 20 caracteres não-espaço após trim, sem caracteres de controle; vazio/nulo remove a configuração. | Pessoa usuária / 2026-10-07 | Sim — RN63 e RF48 atualizados (base funcional 1.13). |
-| E-02 | A tabela de rastreabilidade UC→backend associa `UploadMedia` explicitamente a UC15 (SPEC-012, ainda não criada), não a UC10. Quem implementa a infraestrutura compartilhada de mídia primeiro? | Esta spec (SPEC-006) implementa `POST /media`/`GET /media/{id}/content` restritos a `purpose: profilePhoto`; `taskSignal` fica reservado para SPEC-012 reutilizar a mesma infraestrutura. | Pessoa usuária / 2026-10-07 | Não — apenas sequenciamento de entrega, sem mudança de regra. |
+| E-02 | A tabela de rastreabilidade UC→backend associa `UploadMedia` explicitamente a UC15 (SPEC-012, ainda não criada), não a UC10. Quem implementa a infraestrutura compartilhada de mídia primeiro? | SPEC-002 implementa `POST /media`/`GET /media/{id}/content` restritos a `purpose: profilePhoto` para não bloquear o onboarding; esta SPEC os reutiliza e `taskSignal` continua reservado para SPEC-012. | Pessoa usuária / 2026-10-07 | Não — replanejamento técnico, sem mudança de regra. |
 
 ## 10. Fases de Implementação e Critérios de Conclusão
 
 | Fase | Objetivo da Entrega | Critérios de Aceite Atendidos | Critério de Prontidão (Definition of Done) | Status |
 |---|---|---|---|---|
-| **1** | **Núcleo Mínimo (Core API + Isolamento):** `GetOwnProfile`, `UpdateOwnProfile`, `GetOwnBadges`, `GetBadgeContributions`, `POST /media`/`GET /media/{id}/content` (`purpose: profilePhoto`); titularidade, isolamento e validação. | CA-01, CA-02, CA-03, CA-04, CA-05, CA-06, CA-07, CA-08, CA-10, CA-11, CA-12 | Testes unitários e de integração verdes cobrindo os CAs listados. | a fazer |
+| **1** | **Núcleo Mínimo (Core API + Isolamento):** `GetOwnProfile`, `UpdateOwnProfile`, `GetOwnBadges`, `GetBadgeContributions` e reutilização segura de `POST /media`/`GET /media/{id}/content` (`purpose: profilePhoto`) entregues por SPEC-002; titularidade, isolamento e validação. | CA-01 a CA-12 | Testes unitários e de integração verdes cobrindo os CAs listados. | a fazer |
 | **2** | **Experiência Mobile + Integração:** TEL-030 (recorte), MOD-009, TEL-054; câmera/galeria; estados de carregamento/erro/falha de upload. | CA-02, CA-06 a CA-10 integrados à UI | Telas integradas com a API, testes de UI/E2E e UX-spec verificada. | a fazer |
 | **3** | **Polimento e Casos Raros:** acessibilidade fina, transições de badge, textos de borda, animação de marco conquistado. | — (refinamento, sem novo CA) | Suíte de regressão verde e validação de QA concluída. | a fazer |
 

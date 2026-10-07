@@ -2,7 +2,7 @@
 
 **Status:** aprovada
 **Autor:** Ana Luísa Coleone | **Criada em:** 2026-10-06 | **Aprovada por:** Ana Luísa Coleone | **Em:** 2026-10-06
-**Base funcional:** 1.11
+**Base funcional:** 1.14
 **UX-spec:** [UX-001-autenticar-com-apple.md](UX-001-autenticar-com-apple.md)
 **Projetos envolvidos:** ambos
 **Tema do backlog:** Tema 1 - Acesso, família e perfis
@@ -17,14 +17,14 @@
 
 | Categoria | Códigos incluídos nesta entrega |
 |---|---|
-| Casos de uso | UC04 |
-| Regras de negócio | RN44 |
-| Requisitos funcionais | RF37, RF39 (parcial — apenas o reconhecimento da associação existente; a vinculação ao criar a família é de `SPEC-002`) |
+| Casos de uso | UC04, UC01 (encaminhamento) |
+| Regras de negócio | RN01, RN44, RN63 |
+| Requisitos funcionais | RF01, RF37–39, RF48 (parcial — encaminhamento ao onboarding; a vinculação é de `SPEC-002`) |
 | Requisitos não funcionais | RNF01, RNF05, RNF06, RNF07, RNF08, RNF12, RNF13, RNF14, RNF15, RNF16, RNF22 |
-| Telas e fluxos de navegação | TEL-001, UF-01 (trecho de autenticação), UF-03 (trecho "Criador retorna por Apple") |
+| Telas e fluxos de navegação | TEL-001, TEL-055, UF-01 (trecho de autenticação), UF-03 (trecho "Criador retorna por Apple") |
 | Decisões arquiteturais aplicáveis | MA-10, BA-10, BA-19, BA-21 |
 
-- **Documentos consultados:** `docs/01-regras-de-negocio.md` (RN44), `docs/02-requisitos.md` (RF37, RF39, RNF01/05/06/07/08/12/13/14/15/16/22), `docs/03-casos-de-uso.md` (UC04), `docs/design/screen-map.md` (TEL-001), `docs/design/user-flows.md` (UF-01, UF-03), `docs/architecture/mobile-architecture.md` (§9), `docs/architecture/mobile-decisions.md` (MA-10, P-07), `docs/architecture/mobile-feature-catalog.md` (módulo `Access`), `docs/architecture/backend-architecture.md` (§8 "Criador via Apple"), `docs/architecture/backend-contracts.md` (§2, §7 `backend-uc04`), `docs/architecture/backend-decisions.md` (BA-10, BA-19, BA-21).
+- **Documentos consultados:** `docs/01-regras-de-negocio.md` (RN01, RN44, RN63), `docs/02-requisitos.md` (RF01, RF37–39, RF48 e RNF citadas), `docs/03-casos-de-uso.md` (UC01, UC04), `docs/design/screen-map.md` (TEL-001, TEL-055), `docs/design/user-flows.md` (UF-01, UF-03), `docs/architecture/mobile-architecture.md` (§9), `docs/architecture/mobile-decisions.md` (MA-10, P-07), `docs/architecture/mobile-feature-catalog.md` (módulo `Access`), `docs/architecture/backend-architecture.md` (§8 "Criador via Apple"), `docs/architecture/backend-contracts.md` (§2, §7 `backend-uc04`), `docs/architecture/backend-decisions.md` (BA-10, BA-19, BA-21).
 - **Depende de (specs pré-requisito):** Nenhuma - entrega independente.
 - **Dependências externas e infraestrutura:** Sign in with Apple (`AuthenticationServices` no mobile; validação oficial de chaves/emissor/audiência no backend); TLS em todas as chamadas.
 
@@ -41,7 +41,7 @@
 - Tela TEL-001 (Entrada): botão nativo Apple e feedback de erro/estado.
 
 ### 3.2. Fora do escopo (desta spec)
-- Criação da própria família e tela TEL-002 (UC01) — fica em `SPEC-002-criar-configurar-familia`, que consome o `creationGrant` emitido aqui.
+- Perfil inicial, criação da família e telas TEL-055/TEL-002/TEL-056 (UC01) — ficam em `SPEC-002-criar-configurar-familia`, que consome o `creationGrant` emitido aqui.
 - Ingresso por convite, recuperação de ingresso, troca de acesso com sessão ativa (MOD-013) e tela TEL-004 (UC09) — ficam em `SPEC-005-ingressar-por-convite`.
 - Gerenciamento de membros, promoção/remoção de Administrador (UC02) — fica em `SPEC-003-gerenciar-membros`.
 
@@ -60,7 +60,7 @@ Esta entrega não segue a matriz Administrador/Membro/Kids porque a rota é de *
 
 | Situação | Pode | Não pode | Reação do sistema a tentativa não autorizada |
 |---|---|---|---|
-| **Identidade Apple sem família vinculada** | Receber `creationGrant` restrito e seguir para `SPEC-002` (criação) | Consultar ou alterar dados de qualquer família; usar o grant como sessão de membro | HTTP 403 `ACTION_NOT_ALLOWED` em qualquer rota que exija sessão de membro |
+| **Identidade Apple sem família vinculada** | Receber `creationGrant` restrito e seguir para TEL-055/TEL-002 (`SPEC-002`) | Consultar ou alterar dados de qualquer família; usar o grant como sessão de membro | HTTP 403 `ACTION_NOT_ALLOWED` em qualquer rota que exija sessão de membro |
 | **Identidade Apple com família vinculada (Criador)** | Obter `SessionResult` e acessar sua própria família | Acessar dados de outra família | HTTP 404 `RESOURCE_NOT_FOUND` (RNF06) |
 | **Prova Apple recebida, mas inválida ou expirada** | Tentar novamente | Obter sessão ou grant | HTTP 401 `APPLE_PROOF_INVALID`; nenhuma credencial é emitida |
 
@@ -191,7 +191,7 @@ Todos os erros utilizam `Content-Type: application/problem+json`.
 - **CA-02: [Fluxo Principal - Sucesso sem família vinculada]**
   - **DADO QUE** uma identidade Apple validada não possui família vinculada,
   - **QUANDO** o app enviar `POST /access/apple` com prova válida,
-  - **ENTÃO O SISTEMA DEVE** emitir um `creationGrant` restrito à criação de família, sem sessão de membro,
+  - **ENTÃO O SISTEMA DEVE** emitir um `creationGrant` restrito ao onboarding de perfil e criação de família, sem sessão de membro,
   - **E** retornar HTTP `200 OK` com o grant e seu `expiresAt` (10 minutos, BA-21). *(Origem: UC04 alternativa "sem família", RF37)*
 
 - **CA-03: [Alternativa - Cancelamento ou falha no login nativo]**

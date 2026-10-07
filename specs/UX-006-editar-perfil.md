@@ -3,7 +3,7 @@
 **Status:** aprovada
 **Autor:** Claude | **Criada em:** 2026-10-07 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-07
 **Spec funcional vinculada:** [SPEC-006-editar-perfil.md](SPEC-006-editar-perfil.md)
-**Base funcional:** 1.13
+**Base funcional:** 1.14
 **Superfícies de interface:** TEL-030 (recorte), MOD-009, TEL-054
 
 ## 1. Objetivo da Experiência e Jornada do Usuário

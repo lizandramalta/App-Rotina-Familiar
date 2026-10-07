@@ -3,13 +3,13 @@
 **Status:** aprovada
 **Autor:** Ana Luísa Coleone | **Criada em:** 2026-10-06 | **Aprovada por:** Ana Luísa Coleone | **Em:** 2026-10-06
 **Spec funcional vinculada:** [SPEC-001-autenticar-com-apple.md](SPEC-001-autenticar-com-apple.md)
-**Base funcional:** 1.11
+**Base funcional:** 1.14
 **Superfícies de interface:** TEL-001
 **Última revisão:** 2026-10-07 — decisões do SCRUM-46
 
 ## 1. Objetivo da Experiência e Jornada do Usuário
 
-- **Visão da Experiência:** a pessoa que cria a família (ou que já é Criadora) precisa entrar no aplicativo com um único toque, usando sua identidade Apple, sem preencher formulário algum. O app apenas reage ao resultado: segue para suas tarefas quando já tem família, ou entrega o controle para a criação da família quando ainda não tem.
+- **Visão da Experiência:** a pessoa que cria a família (ou que já é Criadora) entra no aplicativo com um único toque, usando sua identidade Apple. O app segue para suas tarefas quando já tem família, ou entrega o controle para a configuração inicial do perfil quando ainda não tem.
 - **Perfis Atendidos:** Criador da Família ou pessoa que ainda vai criá-la. Não atende Administrador convidado, Membro ou Kids — esses perfis entram por convite (coberto por outra UX-spec).
 
 ## 2. Rastreabilidade Complementar de Design
@@ -17,7 +17,7 @@
 | Referência | Código / Documento |
 |---|---|
 | Spec funcional vinculada | `SPEC-001-autenticar-com-apple.md` |
-| Telas existentes/alteradas | TEL-001 (Entrada) |
+| Telas existentes/alteradas | TEL-001 (Entrada); destino TEL-055 |
 | Fluxos de navegação (User Flows) | UF-01 (trecho de autenticação), UF-03 (trecho "Criador retorna por Apple") |
 | Documentos de design consultados | `docs/design/screen-map.md`, `docs/design/user-flows.md` |
 
@@ -26,7 +26,7 @@
 ## 3. Escopo da Experiência
 
 - **Dentro do escopo:** TEL-001 — estado inicial, botão nativo Apple, retorno silencioso para cancelamento/falha nativa, carregamento, mensagens inline para prova inválida, rede e limite de tentativas, e saída bem-sucedida.
-- **Fora do escopo:** TEL-002 (criação da família, outra UX-spec de `SPEC-002`); TEL-003/TEL-004 (convite e recuperação, outra UX-spec de `SPEC-005`). TEL-001 apenas referencia o destino — não os detalha.
+- **Fora do escopo:** TEL-055/TEL-002/TEL-056 (onboarding de perfil, família e membros, outra UX-spec de `SPEC-002`); TEL-003/TEL-004 (convite e recuperação, outra UX-spec de `SPEC-005`). TEL-001 apenas referencia o destino — não os detalha.
 
 ## 4. Jornada, Navegação e Preservação de Contexto
 
@@ -36,7 +36,7 @@
 | Sheet nativo Apple | Cancelar ou retornar falha sem prova | TEL-001 (`Idle`) | Dismiss do sheet pelo sistema | Retorno silencioso; foco do VoiceOver volta ao botão Apple | Não há dado digitado a preservar |
 | Sheet nativo Apple | Login concluído com sucesso | TEL-001 (estado `Submitting`, transitório) | — | — | Mantém o botão em estado de carregamento até a resposta do backend |
 | TEL-001 (`Submitting`) | Backend confirma família vinculada | TEL-010 (Minhas tarefas) | Dismiss automático da entrada | — | Sessão passa a ser mantida pelo app; não há retorno a TEL-001 |
-| TEL-001 (`Submitting`) | Backend confirma ausência de família | Entrega do `creationGrant` para o fluxo de criação (outra UX-spec) | Transição controlada pela navegação principal | — | `creationGrant` é mantido em memória até ser consumido ou expirar |
+| TEL-001 (`Submitting`) | Backend confirma ausência de família | TEL-055 (Configurar perfil inicial) | Push controlado pela navegação principal | Cancelar o onboarding retorna à entrada sem salvar | `creationGrant` é mantido em memória até ser consumido ou expirar |
 | TEL-001 (`Submitting`) | `401 APPLE_PROOF_INVALID`, falha de rede ou `429 RATE_LIMIT_EXCEEDED` | TEL-001 (`Idle` com mensagem inline) | Sem trocar de tela | Botão Apple fica disponível; novo toque inicia um novo login Apple | Nenhuma sessão, grant ou prova anterior é preservada para retry |
 
 - **Preservação de Estado:** não há formulário nesta tela; nada para preservar além do estado de carregamento durante a chamada ao backend.
@@ -63,7 +63,7 @@
 | **`Idle / Initial`** | Abertura de TEL-001 sem sessão válida | Botão Apple pronto, texto de apoio para convidados | Tocar o botão Apple | Transição suave de entrada |
 | **`Idle / Initial`** | Cancelamento ou falha devolvida pelo sheet nativo | Mesma tela inicial, sem mensagem do app | Tocar o botão Apple | Foco do VoiceOver retorna ao botão Apple |
 | **`Submitting`** | Login nativo concluído; aguardando `POST /access/apple` | Botão Apple com indicador de carregamento; texto de apoio oculto | Nenhuma (previne toque duplo) | Mantém foco no botão |
-| **`Content / Success`** | Backend confirma sessão ou `creationGrant` | Transição imediata para TEL-010 ou para o fluxo de criação | — | Dismiss automático de TEL-001 |
+| **`Content / Success`** | Backend confirma sessão ou `creationGrant` | Transição imediata para TEL-010 ou TEL-055 | — | Dismiss automático de TEL-001 |
 | **`Error (Não-Bloqueante)`** | Resposta `401 APPLE_PROOF_INVALID` ou `429 RATE_LIMIT_EXCEEDED` | Mensagem inline; botão Apple volta a `Idle` | Tocar o botão Apple novamente | Não exige recarregar a tela |
 | **`Offline / Sem Conexão`** | Falha de rede ao chamar `POST /access/apple` após login nativo concluído | Mensagem inline de conexão; botão Apple volta a `Idle` | Tocar o botão Apple novamente após restabelecer a conexão | Uma nova tentativa sempre reinicia o login Apple; a prova anterior não é reenviada |
 

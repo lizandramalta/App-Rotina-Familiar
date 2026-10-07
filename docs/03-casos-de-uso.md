@@ -1,7 +1,7 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.11\
+**Versão:** 1.12\
 **Data:** 2026-10-07\
 **Situação:** base documental consolidada
 
@@ -32,7 +32,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 | Caso de uso | Objetivo | Requisitos funcionais |
 |---|---|---|
-| [UC01](#uc01) | Gerenciar família | [RF01](02-requisitos.md#rf01), [RF38](02-requisitos.md#rf38), [RF39](02-requisitos.md#rf39), [RF67](02-requisitos.md#rf67) |
+| [UC01](#uc01) | Gerenciar família | [RF01](02-requisitos.md#rf01), [RF02](02-requisitos.md#rf02), [RF38](02-requisitos.md#rf38), [RF39](02-requisitos.md#rf39), [RF41](02-requisitos.md#rf41), [RF48](02-requisitos.md#rf48), [RF67](02-requisitos.md#rf67) |
 | [UC02](#uc02) | Gerenciar membros | [RF02](02-requisitos.md#rf02), [RF03](02-requisitos.md#rf03), [RF04](02-requisitos.md#rf04), [RF05](02-requisitos.md#rf05), [RF06](02-requisitos.md#rf06), [RF40](02-requisitos.md#rf40), [RF41](02-requisitos.md#rf41), [RF54](02-requisitos.md#rf54) |
 | [UC03](#uc03) | Validar conclusão de tarefa Kids | [RF25](02-requisitos.md#rf25), [RF26](02-requisitos.md#rf26), [RF55](02-requisitos.md#rf55), [RF56](02-requisitos.md#rf56) |
 | [UC04](#uc04) | Autenticar com Apple | [RF37](02-requisitos.md#rf37), [RF39](02-requisitos.md#rf39) |
@@ -62,11 +62,11 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Acesso, família e perfis](04-diagramas-de-caso-de-uso.md#02-acesso-familia-perfis)
 
-**Requisitos funcionais:** [RF01](02-requisitos.md#rf01), [RF38](02-requisitos.md#rf38), [RF39](02-requisitos.md#rf39), [RF67](02-requisitos.md#rf67)\
-**Regras relacionadas:** [RN01](01-regras-de-negocio.md#rn01), [RN09](01-regras-de-negocio.md#rn09), [RN28](01-regras-de-negocio.md#rn28), [RN44](01-regras-de-negocio.md#rn44), [RN65](01-regras-de-negocio.md#rn65)\
+**Requisitos funcionais:** [RF01](02-requisitos.md#rf01), [RF02](02-requisitos.md#rf02), [RF38](02-requisitos.md#rf38), [RF39](02-requisitos.md#rf39), [RF41](02-requisitos.md#rf41), [RF48](02-requisitos.md#rf48), [RF67](02-requisitos.md#rf67)\
+**Regras relacionadas:** [RN01](01-regras-de-negocio.md#rn01), [RN07](01-regras-de-negocio.md#rn07), [RN09](01-regras-de-negocio.md#rn09), [RN28](01-regras-de-negocio.md#rn28), [RN44](01-regras-de-negocio.md#rn44), [RN45](01-regras-de-negocio.md#rn45), [RN63](01-regras-de-negocio.md#rn63), [RN65](01-regras-de-negocio.md#rn65)\
 **Requisitos não funcionais:** [RNF01](02-requisitos.md#rnf01), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF08](02-requisitos.md#rnf08), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF14](02-requisitos.md#rnf14), [RNF15](02-requisitos.md#rnf15), [RNF16](02-requisitos.md#rnf16)
 
-**Objetivo:** criar/acessar a família e permitir aos Administradores configurar seu fuso.
+**Objetivo:** criar/acessar a família pelo onboarding do Criador e permitir aos Administradores configurar seu fuso.
 
 **Atores:** Criador na criação/retorno; qualquer Administrador na configuração do fuso.
 
@@ -77,15 +77,18 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 1. O usuário conclui a autenticação.
 2. O sistema verifica se há uma família vinculada ao seu identificador Apple.
-3. Não havendo vínculo, o usuário informa o nome e escolhe o fuso da família, inicialmente `America/Sao_Paulo`.
-4. O sistema valida os dados e cria a família.
-5. O sistema associa o usuário à família como Administrador, com a identificação de Criador da Família.
-6. O sistema registra a data de criação da família e apresenta sua área inicial.
+3. Não havendo vínculo, o usuário informa o nome administrativo obrigatório e pode configurar foto e etiqueta/apelido opcionais para o próprio perfil.
+4. O usuário informa o nome e escolhe o fuso da família, inicialmente `America/Sao_Paulo`.
+5. O sistema valida os dados e cria a família com o perfil do usuário como Administrador e Criador da Família.
+6. O sistema registra a data de criação da família, abre a sessão do Criador e oferece a adição de membros.
+7. O Criador pode adicionar e salvar zero ou mais membros pelo fluxo normal de UC02; após cada criação, pode escolher explicitamente gerar o convite correspondente.
+8. Quando selecionar avançar, o sistema apresenta a área principal do aplicativo.
 
 **Alternativas e exceções:**
 
 - Se já existir uma família vinculada, o sistema redireciona o usuário para ela, sem criar outra família.
-- Dados obrigatórios inválidos devem ser corrigidos antes da criação.
+- Nome do Criador ou da família inválido deve ser corrigido antes da criação. Foto e etiqueta/apelido são opcionais e não impedem o avanço.
+- O Criador pode avançar sem adicionar membro. Cancelar a emissão ou o compartilhamento de um convite não desfaz o perfil de membro já criado.
 
 **Fluxo complementar — Configurar fuso:** Administrador abre Família → Configurações da família (TEL-053), escolhe o fuso e lê o informativo (MOD-012). Escolhe aplicação imediata ou no próximo ciclo, confirma e aguarda persistência. A tela informa fuso vigente e eventual alteração programada. Cancelamento não salva; falha preserva a configuração anterior. Transições e apuração seguem RN28 e RF67.
 
@@ -122,6 +125,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 4. O Administrador solicita o convite.
 5. Após confirmação dos efeitos, o sistema gera novo link e senha e invalida convites e sessão anteriores daquele perfil, em operação consistente.
 6. O sistema disponibiliza o link e a senha para envio conjunto à pessoa convidada.
+
+**Variação — Onboarding inicial:** depois de criar a família em UC01, o Criador retorna a este fluxo quantas vezes desejar. Pode encerrar o onboarding sem membro adicional; a geração do convite de cada perfil continua explícita, com confirmação, e pode ser feita imediatamente após seu cadastro ou posteriormente.
 
 **Alternativas e exceções:**
 
@@ -207,7 +212,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Alternativas e exceções:**
 
-- Sem família vinculada, o sistema disponibiliza a criação pelo [UC01](03-casos-de-uso.md#uc01).
+- Sem família vinculada, o sistema disponibiliza o onboarding de perfil e família pelo [UC01](03-casos-de-uso.md#uc01).
 - Cancelamento ou falha de autenticação não concede acesso.
 - Os demais perfis ingressam por convite e senha, conforme [UC09](03-casos-de-uso.md#uc09).
 
@@ -832,6 +837,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.12 | 2026-10-07 | UC01 passa a cobrir perfil do Criador, família, adição opcional de membros e convite explícito antes da área principal; UC02 e UC04 registram a variação de onboarding. |
 | 1.11 | 2026-10-07 | UC05 passa a admitir observação opcional na missão (RF71/RN68), atalho de criação de tarefa durante a vinculação e consulta explícita por todos os perfis, inclusive Kids. Para SPEC-014. |
 | 1.10 | 2026-10-07 | UC12 conclui diretamente mantendo responsáveis ou atribuindo adulto sem responsável. UC17 libera reabertura no alcance do perfil e permite reabrir missão concluída, removendo recompensa, participações e badges derivados. |
 | 1.9 | 2026-10-06 | UC12 restringe conclusão manual de tarefa com responsável Kids ao Administrador e preserva a evidência pendente para auditoria. Para SPEC-010. |

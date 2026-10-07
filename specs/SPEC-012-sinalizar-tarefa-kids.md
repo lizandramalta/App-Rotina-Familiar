@@ -2,7 +2,7 @@
 
 **Status:** aprovada
 **Autor:** Claude | **Criada em:** 2026-10-07 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-07
-**Base funcional:** 1.13
+**Base funcional:** 1.14
 **UX-spec:** [UX-012-sinalizar-tarefa-kids.md](UX-012-sinalizar-tarefa-kids.md)
 **Projetos envolvidos:** ambos
 **Tema do backlog:** Tema 3 - Participação Kids
@@ -24,7 +24,7 @@
 | Decisões arquiteturais aplicáveis | MA-07, MA-08, MA-16; BA-16 |
 
 - **Documentos consultados:** `docs/01-regras-de-negocio.md` (RN21–24/30/35/54–56), `docs/02-requisitos.md` (RF23/24/55/56 e RNF citadas), `docs/03-casos-de-uso.md` (UC15, e UC03 para delimitar a fronteira), `docs/05-modelo-de-dados.md` (`OCORRENCIA`, `OCORRENCIA_EVENTO`, `MIDIA`), `docs/06-diagrama-de-classes.md` (`FamilyTask`, `KidsSignal`, `TaskStatus`, rastreio-uc15), `docs/design/screen-map.md` (TEL-041, MOD-011), `docs/design/user-flows.md` (UF-07), `docs/architecture/backend-contracts.md` (§4, §6, §7), `docs/architecture/backend-architecture.md` (§13, fotos no R2), `docs/architecture/backend-decisions.md` (BA-16), `docs/architecture/mobile-decisions.md` (MA-07/08/16), `docs/architecture/mobile-feature-catalog.md`.
-- **Depende de (specs pré-requisito):** [SPEC-007-gerenciar-tarefas](SPEC-007-gerenciar-tarefas.md) (aprovada) — define `FamilyTask` e os estados `pending`/`awaitingConfirmation`/`completed`. [SPEC-006-editar-perfil](SPEC-006-editar-perfil.md) (aprovada) — já implementa `POST /v1/media` e `GET /v1/media/{mediaId}/content`, reservando `purpose: taskSignal` para esta entrega.
+- **Depende de (specs pré-requisito):** [SPEC-002-criar-configurar-familia](SPEC-002-criar-configurar-familia.md) (aprovada) — introduz `POST /v1/media` e `GET /v1/media/{mediaId}/content` para `profilePhoto`; [SPEC-007-gerenciar-tarefas](SPEC-007-gerenciar-tarefas.md) (aprovada) — define `FamilyTask` e os estados `pending`/`awaitingConfirmation`/`completed`; [SPEC-006-editar-perfil](SPEC-006-editar-perfil.md) (aprovada) — reutiliza a mídia em edição posterior de perfil.
 - **Dependências externas e infraestrutura:** Cloudflare R2 (armazenamento privado de mídia), conforme BA-16. Câmera do dispositivo (captura local antes do upload). Nenhuma dependência de Apple Sign-In, APNs ou serviços externos novos.
 
 ## 3. Escopo da Entrega
@@ -32,7 +32,7 @@
 ### 3.1. Dentro do escopo
 
 - `POST /v1/tasks/{taskId}/signals` (`SignalTask`): Kids sinaliza tarefa própria em `pending` da qual é responsável, com `photoMediaId` opcional; transição para `awaitingConfirmation`.
-- Habilitar `purpose: taskSignal` em `POST /v1/media`, hoje recusado com `422 MEDIA_PURPOSE_NOT_SUPPORTED` por SPEC-006. A validação no upload fica restrita ao papel do ator (deve ser Kids); a validação de contexto da tarefa (estado `pending`, titularidade do responsável) acontece no vínculo, em `SignalTask` — não no upload.
+- Consumir `purpose: taskSignal` em `POST /v1/media`, cuja infraestrutura é introduzida por SPEC-002 e reutilizada por SPEC-006. A validação no upload fica restrita ao papel do ator (deve ser Kids); a validação de contexto da tarefa (estado `pending`, titularidade do responsável) acontece no vínculo, em `SignalTask` — não no upload.
 - Autorização exclusiva de Kids, isolamento multitenant/entre responsáveis e validação de entrada, desde a Fase 1.
 - TEL-041 (recorte "Sinalizar se pendente") e MOD-011 (Sinalizar realização) no mobile.
 
@@ -71,7 +71,7 @@
 |---|---|---|---|---|---|
 | `photoMediaId` (em `POST /tasks/{taskId}/signals`) | uuid | Não | Quando presente, deve referenciar uma `MIDIA` em estado `READY`, pertencente ao titular (perfil Kids autenticado), com `finalidade: TASK_SIGNAL`. Omitido ou `null` envia a sinalização sem foto. | `PHOTO_MEDIA_NOT_READY` / `PHOTO_MEDIA_NOT_OWNED` / `PHOTO_MEDIA_PURPOSE_MISMATCH` | Foto opcional da sinalização (RN54, RF55) |
 | `purpose` (em `POST /v1/media`) | enum | Sim | Passa a aceitar `profilePhoto` **e** `taskSignal`. O upload com `purpose: taskSignal` só exige que o ator autenticado tenha papel `kids`; não recebe nem valida `taskId` nesta etapa (decisão E-01) — a amarração à tarefa específica ocorre somente no vínculo via `SignalTask`. | `MEDIA_PURPOSE_NOT_SUPPORTED` (para qualquer valor fora desses dois) | Finalidade declarada do upload |
-| arquivo (multipart, em `POST /v1/media`) | binário | Sim | Inalterado em relação a SPEC-006: formato de imagem reconhecível; conversão para JPEG ≤1.600px/≤5MB; metadados removidos (BA-16) | `MEDIA_FORMAT_UNSUPPORTED` / `MEDIA_TOO_LARGE` | Conteúdo da foto a processar e armazenar no R2 |
+| arquivo (multipart, em `POST /v1/media`) | binário | Sim | Inalterado em relação a SPEC-002: formato de imagem reconhecível; conversão para JPEG ≤1.600px/≤5MB; metadados removidos (BA-16) | `MEDIA_FORMAT_UNSUPPORTED` / `MEDIA_TOO_LARGE` | Conteúdo da foto a processar e armazenar no R2 |
 
 Campos não reconhecidos em `POST /tasks/{taskId}/signals` são rejeitados com `400 UNKNOWN_FIELD`, sem persistir (convenção §1 dos contratos backend).
 
@@ -118,7 +118,7 @@ Campos não reconhecidos em `POST /tasks/{taskId}/signals` são rejeitados com `
 | `422 Unprocessable Entity` | `PHOTO_MEDIA_NOT_READY` / `PHOTO_MEDIA_NOT_OWNED` / `PHOTO_MEDIA_PURPOSE_MISMATCH` | `photoMediaId` ainda processando, de outro titular, ou com finalidade diferente de `TASK_SIGNAL` |
 | `429 Too Many Requests` | `RATE_LIMIT_EXCEEDED` | Excesso de requisições por janela |
 
-`POST /v1/media` com `purpose: taskSignal` reaproveita integralmente as respostas de erro já documentadas em SPEC-006 (`413 MEDIA_TOO_LARGE`, `415 MEDIA_FORMAT_UNSUPPORTED`); nenhum código novo é introduzido nesse endpoint.
+`POST /v1/media` com `purpose: taskSignal` reaproveita integralmente as respostas de erro já documentadas em SPEC-002 (`413 MEDIA_TOO_LARGE`, `415 MEDIA_FORMAT_UNSUPPORTED`); nenhum código novo é introduzido nesse endpoint.
 
 ### 5.3. Estratégia de Concorrência, Idempotência e Falhas
 
@@ -133,7 +133,7 @@ Campos não reconhecidos em `POST /tasks/{taskId}/signals` são rejeitados com `
 | `pending` | `SignalTask` | `awaitingConfirmation` | Kids responsável pela tarefa | Tarefa pertence à família do ator; ator consta em `assigneeIds`; estado atual é `pending` | Cria `KidsSignal` (`signaledBy`, `signaledAt`, `photoURL?`); nenhum crédito, carga ou progresso é afetado (RN23, RNF11) |
 | `awaitingConfirmation` | `SignalTask` | — (recusado) | — | Já existe sinalização corrente aguardando decisão | `409 TASK_NOT_PENDING`, nada persiste |
 | `completed` | `SignalTask` | — (recusado) | — | Tarefa já concluída (por confirmação, recusa+nova conclusão, ou conclusão manual concorrente) | `409 TASK_NOT_PENDING`, nada persiste |
-| `MIDIA.UPLOADING` (`finalidade: TASK_SIGNAL`) | Upload confirmado pelo R2 e verificado | `READY` | Sistema (backend) | Idêntico ao fluxo de `profilePhoto` descrito em SPEC-006 | Mídia torna-se vinculável via `photoMediaId` |
+| `MIDIA.UPLOADING` (`finalidade: TASK_SIGNAL`) | Upload confirmado pelo R2 e verificado | `READY` | Sistema (backend) | Idêntico ao fluxo de `profilePhoto` descrito em SPEC-002 | Mídia torna-se vinculável via `photoMediaId` |
 
 ## 7. Critérios de Aceitação (BDD Formal)
 
@@ -207,7 +207,7 @@ Campos não reconhecidos em `POST /tasks/{taskId}/signals` são rejeitados com `
 
 ### 9.1. Premissas
 
-- **P-01:** a infraestrutura de mídia (`POST /v1/media`, `GET /v1/media/{mediaId}/content`, estados `UPLOADING`/`READY`/`FAILED`/`DELETING`/`DELETED`, limpeza de órfãos após 24h) já existe integralmente por SPEC-006/BA-16; esta spec apenas habilita uma nova `finalidade`.
+- **P-01:** a infraestrutura de mídia (`POST /v1/media`, `GET /v1/media/{mediaId}/content`, estados `UPLOADING`/`READY`/`FAILED`/`DELETING`/`DELETED`, limpeza de órfãos após 24h) já existe integralmente por SPEC-002/BA-16; esta spec apenas habilita uma nova `finalidade`.
 - **P-02:** `GET /v1/media/{mediaId}/content` para fotos com `finalidade: TASK_SIGNAL` sendo lidas por um Administrador é responsabilidade de autorização da SPEC-013 (UC03), não desta spec — aqui a criança não relê a própria foto pela API após o upload local.
 
 ### 9.2. Esclarecimentos e Decisões

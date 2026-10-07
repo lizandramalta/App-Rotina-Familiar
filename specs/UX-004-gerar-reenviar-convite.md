@@ -3,8 +3,8 @@
 **Status:** aprovada  
 **Autor:** Codex | **Criada em:** 2026-10-06 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-06  
 **Spec funcional vinculada:** [SPEC-004-gerar-reenviar-convite.md](SPEC-004-gerar-reenviar-convite.md)  
-**Base funcional:** 1.7  
-**Superfícies de interface:** TEL-032, TEL-034, TEL-050, UF-12
+**Base funcional:** 1.14\
+**Superfícies de interface:** TEL-032, TEL-034, TEL-050, TEL-056, UF-01, UF-12
 
 ## 1. Objetivo da experiência e jornada
 
@@ -16,15 +16,15 @@
 | Referência | Código / documento |
 |---|---|
 | Spec funcional vinculada | `SPEC-004-gerar-reenviar-convite.md` |
-| Telas | TEL-032, TEL-034, TEL-050 |
-| Fluxo | UF-12 |
+| Telas | TEL-032, TEL-034, TEL-050, TEL-056 |
+| Fluxo | UF-01, UF-12 |
 | Documentos de design | `docs/design/screen-map.md`, `docs/design/user-flows.md` |
 
 As regras de domínio, autorização e contrato de dados são integralmente herdados da SPEC-004.
 
 ## 3. Escopo da experiência
 
-- **Dentro:** acesso autorizado a TEL-034 a partir do detalhe; confirmação dos efeitos; envio único para a folha de compartilhamento nativa; retorno para o detalhe preservando membro e período; carregamento, falha, recurso inelegível e resultado incerto.
+- **Dentro:** acesso autorizado a TEL-034 a partir do detalhe ou do onboarding; confirmação dos efeitos; envio único para a folha de compartilhamento nativa; retorno para a origem preservando contexto; carregamento, falha, recurso inelegível e resultado incerto.
 - **Fora:** formulário de criação/edição de membro, cópia de credenciais, seleção de canal próprio, mensagem automática, abertura e consumo do convite, troca de acesso e recuperação de ingresso.
 
 ## 4. Jornada, navegação e preservação de contexto
@@ -33,6 +33,7 @@ As regras de domínio, autorização e contrato de dados são integralmente herd
 |---|---|---|---|---|
 | TEL-050 | Adulto seleciona integrante | TEL-032 | Voltar retorna à Família | Dia/semana e rolagem da Família |
 | TEL-032 | Admin elegível toca em gerar ou reenviar convite | TEL-034 | Voltar/cancelar retorna ao detalhe | Membro, período e tarefas consultadas |
+| TEL-056 | Criador escolhe gerar convite para membro recém-criado | TEL-034 | Voltar/cancelar retorna ao onboarding | Membro recém-criado e lista inicial permanecem |
 | TEL-034 | Admin confirma a emissão | Folha de compartilhamento nativa | Cancelar a folha encerra o compartilhamento, sem desfazer a emissão | O app não conserva link ou senha; retorna ao detalhe |
 | TEL-034 | Admin cancela antes de confirmar | TEL-032 | Nenhuma emissão ocorre | Membro e período preservados |
 | TEL-034 | Emissão falha ou resultado é incerto | TEL-034 | Fechar retorna a TEL-032; nova emissão pede nova confirmação | Membro e contexto preservados; não há credencial exibida |
@@ -53,7 +54,7 @@ As regras de domínio, autorização e contrato de dados são integralmente herd
 - **Objetivo:** obter confirmação consciente antes de emitir credenciais que revogam convites e sessão anteriores.
 - **Anatomia:** botão Voltar; título; identificação não sensível do membro; aviso de efeitos; ação primária “Gerar convite” ou “Gerar novo convite”; ação secundária “Cancelar”.
 - **Aviso obrigatório:** nova emissão cria link e senha novos, torna convites anteriores indisponíveis e encerra a sessão anterior do integrante. Não afirma que o convite foi compartilhado ou consumido.
-- **Sucesso:** após confirmação do servidor, TEL-034 abre imediatamente a folha de compartilhamento nativa com o conteúdo conjunto. Ao fechá-la, volta a TEL-032 e elimina as credenciais da memória da interface.
+- **Sucesso:** após confirmação do servidor, TEL-034 abre imediatamente a folha de compartilhamento nativa com o conteúdo conjunto. Ao fechá-la, volta a TEL-032 ou TEL-056, conforme a origem, e elimina as credenciais da memória da interface.
 - **Sem controles alternativos:** não mostra o link/senha em campos, não oferece copiar, salvar, reenviar por aplicativo específico ou reabrir a folha com as mesmas credenciais.
 
 ## 6. Estados da interface
@@ -99,6 +100,7 @@ As regras de domínio, autorização e contrato de dados são integralmente herd
 |---|---|---|---|
 | UX-01 | A entrega usa exclusivamente a folha de compartilhamento nativa; link e senha são uma única mensagem e não há cópia individual. | Pessoa usuária, 2026-10-06 | Não; registrada também como E-01 na SPEC-004 |
 | UX-02 | Fechar a folha depois da emissão não reverte as credenciais e não as mantém para novo compartilhamento; nova emissão exige nova confirmação. | RN46, RF54 e ausência de recuperação de senha | Não |
+| UX-03 | TEL-056 pode abrir TEL-034 após o cadastro de um membro, mas “Avançar” permanece disponível mesmo se a folha nativa for cancelada. | Pessoa usuária, 2026-10-07 | Não; aplica UC01/RF41. |
 
 ## 10. Checklist de aprovação
 

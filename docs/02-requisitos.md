@@ -1,7 +1,7 @@
 # Requisitos funcionais e não funcionais
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.13\
+**Versão:** 1.14\
 **Data:** 2026-10-07\
 **Situação:** base documental consolidada
 
@@ -20,14 +20,14 @@ RF descreve o comportamento que o sistema deve oferecer. RNF define condições 
 
 ### RF01
 
-O sistema deve criar a família e atribuir ao criador o perfil Administrador e a identificação de Criador. O nome da família é obrigatório e, após remover espaços nas extremidades, deve ter de 1 a 60 caracteres Unicode visíveis, sem caracteres de controle. Deve manter o vínculo único por usuário e redirecionar o Criador para a família existente quando já houver associação.
+O sistema deve criar a família e atribuir ao criador o perfil Administrador e a identificação de Criador. Antes da criação, o futuro Criador informa nome administrativo obrigatório, com a mesma validação de nome de RF02, e pode configurar foto e etiqueta/apelido opcionais conforme RF48. O nome da família é obrigatório e, após remover espaços nas extremidades, deve ter de 1 a 60 caracteres Unicode visíveis, sem caracteres de controle. Deve manter o vínculo único por usuário e redirecionar o Criador para a família existente quando já houver associação.
 
-**Regras de negócio:** [RN01](01-regras-de-negocio.md#rn01), [RN09](01-regras-de-negocio.md#rn09)  
+**Regras de negócio:** [RN01](01-regras-de-negocio.md#rn01), [RN09](01-regras-de-negocio.md#rn09), [RN63](01-regras-de-negocio.md#rn63)\
 **Casos de uso:** [UC01](03-casos-de-uso.md#uc01)
 
 ### RF02
 
-O sistema deve permitir somente a Administradores adicionar membros à família, criando os perfis que serão utilizados para o ingresso por convite. O nome administrativo é obrigatório e, após remover espaços nas extremidades, deve ter de 1 a 60 caracteres Unicode visíveis, sem caracteres de controle.
+O sistema deve permitir somente a Administradores adicionar membros à família, criando os perfis que serão utilizados para o ingresso por convite. No onboarding de uma família recém-criada, o Criador Administrador pode adicionar zero ou mais membros antes de avançar para a área principal. O nome administrativo é obrigatório e, após remover espaços nas extremidades, deve ter de 1 a 60 caracteres Unicode visíveis, sem caracteres de controle.
 
 **Regras de negócio:** [RN07](01-regras-de-negocio.md#rn07)  
 **Casos de uso:** [UC02](03-casos-de-uso.md#uc02)
@@ -279,9 +279,9 @@ O sistema deve permitir ao Criador da Família autenticar-se por Sign in with Ap
 
 ### RF38
 
-Após autenticação Apple, o sistema deve permitir criar a família quando não existir vínculo e atribuir ao criador o papel de Administrador e sua identificação de Criador. Havendo vínculo, deve redirecioná-lo à família existente.
+Após autenticação Apple, o sistema deve encaminhar a pessoa sem vínculo ao onboarding: configurar o rascunho do próprio perfil, criar a família e, já como Criador Administrador, adicionar zero ou mais membros antes de avançar à área principal. A criação atribui ao Criador o papel de Administrador e sua identificação de Criador. Havendo vínculo, deve redirecioná-lo à família existente.
 
-**Regras de negócio:** [RN01](01-regras-de-negocio.md#rn01), [RN09](01-regras-de-negocio.md#rn09), [RN44](01-regras-de-negocio.md#rn44)  
+**Regras de negócio:** [RN01](01-regras-de-negocio.md#rn01), [RN09](01-regras-de-negocio.md#rn09), [RN44](01-regras-de-negocio.md#rn44), [RN63](01-regras-de-negocio.md#rn63)\
 **Casos de uso:** [UC01](03-casos-de-uso.md#uc01)
 
 ### RF39
@@ -300,7 +300,7 @@ O sistema deve permitir somente a Administradores criar os perfis dos demais mem
 
 ### RF41
 
-O Administrador pode gerar ou reenviar convite para perfil ativo existente. Cada emissão gera novo link e senha, invalida convites anteriores e revoga a sessão anterior atomicamente. Mostrar os efeitos para confirmação; preservar perfil, histórico e vínculos e disponibilizar novas credenciais para envio conjunto.
+O Administrador pode gerar ou reenviar convite para perfil ativo existente, inclusive imediatamente após criá-lo no onboarding. Cada emissão gera novo link e senha, invalida convites anteriores e revoga a sessão anterior atomicamente. A emissão é sempre uma ação explícita, não automática: deve mostrar os efeitos para confirmação, preservar perfil, histórico e vínculos e disponibilizar novas credenciais para envio conjunto.
 
 **Regras de negócio:** [RN45](01-regras-de-negocio.md#rn45), [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47)  
 **Casos de uso:** [UC02](03-casos-de-uso.md#uc02)
@@ -349,7 +349,7 @@ Ao concluir tarefa sem responsável, o sistema deve atribuí-la ao adulto que co
 
 ### RF48
 
-O sistema deve permitir a Administradores, Membros e Kids editar os dados permitidos do próprio perfil, adicionar, substituir ou remover foto opcional por câmera ou galeria e configurar etiqueta/apelido. O apelido é opcional, com até 20 caracteres não-espaço após remover espaços nas extremidades, sem caracteres de controle; vazio ou nulo remove a configuração vigente. Deve impedir acesso de terceiros à configuração de apelido, inclusive por operação administrativa. A edição não altera papel, família nem modo Kids.
+O sistema deve permitir a Administradores, Membros e Kids editar os dados permitidos do próprio perfil, adicionar, substituir ou remover foto opcional por câmera ou galeria e configurar etiqueta/apelido. Para o futuro Criador, esses dados são oferecidos no rascunho inicial antes da criação da família; a foto e a etiqueta podem ser omitidas. O apelido é opcional, com até 20 caracteres não-espaço após remover espaços nas extremidades, sem caracteres de controle; vazio ou nulo remove a configuração vigente. Deve impedir acesso de terceiros à configuração de apelido, inclusive por operação administrativa. A edição não altera papel, família nem modo Kids.
 
 **Regras de negócio:** [RN63](01-regras-de-negocio.md#rn63).  
 **Casos de uso:** [UC10](03-casos-de-uso.md#uc10)
@@ -773,6 +773,7 @@ A configuração de apelido deve ser protegida por titularidade no backend, incl
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.14 | 2026-10-07 | RF01, RF02, RF38, RF41 e RF48 passam a cobrir o onboarding do Criador: rascunho de perfil, criação da família, adição opcional de membros e emissão explícita de convite antes da área principal. |
 | 1.13 | 2026-10-07 | RF48 passa a definir o limite do apelido: até 20 caracteres não-espaço após trim, sem caracteres de controle; vazio/nulo remove a configuração. Para SPEC-006. |
 | 1.12 | 2026-10-07 | RF71 (novo) define observação opcional de até 250 caracteres na missão, espelhando RF70. Para SPEC-014. |
 | 1.11 | 2026-10-07 | Conclusão direta mantém responsáveis existentes ou atribui o adulto sem responsável; reabertura por todos os perfis no alcance de consulta pode reabrir missão concluída e reverte recompensa, participações e badges. |

@@ -2,7 +2,7 @@
 
 **Status:** aprovada  
 **Autor:** Codex | **Criada em:** 2026-10-06 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-06  
-**Base funcional:** 1.7  
+**Base funcional:** 1.14\
 **UX-spec:** [UX-004-gerar-reenviar-convite.md](UX-004-gerar-reenviar-convite.md)  
 **Projetos envolvidos:** ambos  
 **Tema do backlog:** Tema 1 - Acesso, família e perfis
@@ -16,11 +16,11 @@
 
 | Categoria | Códigos incluídos nesta entrega |
 |---|---|
-| Caso de uso | UC02 (recorte: gerar e reenviar convite) |
-| Regras de negócio | RN06, RN07, RN45–RN47 |
-| Requisitos funcionais | RF40, RF41, RF54 |
+| Caso de uso | UC02 (recorte: gerar e reenviar convite), UC01 (emissão inicial no onboarding) |
+| Regras de negócio | RN01, RN06, RN07, RN45–RN47 |
+| Requisitos funcionais | RF02, RF38, RF40, RF41, RF54 |
 | Requisitos não funcionais | RNF05–RNF08, RNF12–RNF14, RNF17–RNF22 |
-| Telas e fluxos | TEL-032, TEL-034, TEL-050, UF-12 |
+| Telas e fluxos | TEL-032, TEL-034, TEL-050, TEL-056, UF-01, UF-12 |
 | Decisões arquiteturais | MA-07–MA-11, MA-15; BA-07–BA-10, BA-20 |
 
 - **Documentos consultados:** `docs/01-regras-de-negocio.md`, `docs/02-requisitos.md`, `docs/03-casos-de-uso.md`, `docs/05-modelo-de-dados.md`, `docs/06-diagrama-de-classes.md`, `docs/design/screen-map.md`, `docs/design/user-flows.md`, `docs/architecture/mobile-architecture.md`, `docs/architecture/mobile-feature-catalog.md`, `docs/architecture/mobile-decisions.md`, `docs/architecture/backend-architecture.md`, `docs/architecture/backend-contracts.md` e `docs/architecture/backend-decisions.md`.
@@ -36,6 +36,7 @@
 - Criar link e senha novos, sem expiração temporal, e persistir apenas seus verificadores protegidos.
 - Revogar em uma única operação os convites disponíveis anteriores e a sessão ativa anterior do perfil, sem recriar ou alterar o perfil, seu histórico, suas tarefas ou vínculos.
 - Entregar as credenciais transitórias apenas como conteúdo único da folha de compartilhamento do sistema, contendo link e senha juntos.
+- Permitir que TEL-056 inicie a mesma emissão inicial imediatamente após a criação de um membro, sempre por ação explícita e sem criar uma variante de contrato.
 - Tratar autorização, isolamento familiar, concorrência, resposta perdida, auditoria sem segredos e falhas de dependência.
 
 ### 3.2. Fora do escopo
@@ -194,6 +195,7 @@ Token, senha, link, hashes, cabeçalhos de instalação e conteúdo compartilhad
 |---|---|---|---|
 | E-01 | Após emissão confirmada, o único meio de entrega é a folha de compartilhamento nativa, com link e senha no mesmo conteúdo; não há cópia individual nem canal próprio. | Pessoa usuária, 2026-10-06 | Não — define apresentação da entrega, coerente com compartilhamento explícito previsto em RF41/RF54 |
 | E-02 | A resposta de emissão usa `inviteId`, `link` e `password`, alinhada ao tipo `InviteCredentials`; o comando não recebe corpo. | Modelo de classes e contrato backend | Não |
+| E-03 | O onboarding pode iniciar a emissão logo após criar o membro, mas não a executa automaticamente; cancelar o compartilhamento não remove o membro nem impede avançar. | Pessoa usuária / 2026-10-07 | Não — concretiza RF41 e UC01. |
 
 Não há esclarecimentos pendentes para este recorte.
 

@@ -1,7 +1,7 @@
 # Documento de visão — MVP
 
 **Projeto:** App de Organização Familiar  
-**Versão:** 1.7\
+**Versão:** 1.8\
 **Data:** 2026-10-07\
 **Situação:** visão consolidada do produto
 
@@ -56,8 +56,8 @@ Referências: [RN01](01-regras-de-negocio.md#rn01) a [RN10](01-regras-de-negocio
 
 ## 6. Jornada principal
 
-1. O Criador autentica-se com Apple. Se já tiver família vinculada, é redirecionado para ela; caso contrário, cria sua família.
-2. Um Administrador cria os perfis e disponibiliza convites com link e senha gerada pelo sistema. A pessoa convidada informa a senha para efetivar o vínculo. O convite admite um ingresso bem-sucedido, e a sessão válida permite os próximos acessos sem reutilizá-lo.
+1. O Criador autentica-se com Apple. Se já tiver família vinculada, é redirecionado para ela; caso contrário, configura seu perfil com nome obrigatório, foto e etiqueta opcionais e cria sua família.
+2. Logo após a criação, o Criador pode adicionar quantos membros desejar, inclusive nenhum. Para cada perfil criado, pode gerar explicitamente um convite com link e senha; a pessoa convidada informa a senha para efetivar o vínculo. O convite admite um ingresso bem-sucedido, e a sessão válida permite os próximos acessos sem reutilizá-lo.
 3. Administradores e Membros criam tarefas com título e peso obrigatório, responsáveis opcionais e, quando necessário, uma rotina de repetição.
 4. Cada perfil consulta suas tarefas e seu progresso diário. Adultos também consultam tarefas e progresso familiares por Dia/Semana. O carrossel vai da criação da família até o último dia do mês corrente, incluindo dias futuros dentro desse mês.
 5. Adultos concluem tarefas diretamente, sem alerta. A conclusão mantém responsáveis existentes; tarefa sem responsável é atribuída automaticamente a quem a conclui.
@@ -183,6 +183,7 @@ A arquitetura backend 1.0 está em [backend-architecture.md](architecture/backen
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.8 | 2026-10-07 | Jornada inicial passa a configurar o perfil do Criador antes da família e permitir membros opcionais com convite explícito antes da área principal. |
 | 1.7 | 2026-10-07 | Conclusão direta mantém responsáveis ou atribui adulto sem responsável; reabertura pode reabrir missão concluída e reverter recompensa, participações e badges. |
 | 1.6 | 2026-10-06 | Consulta própria diária para todos; consulta familiar Dia/Semana apenas para adultos. Para SPEC-009. |
 | 1.5 | 2026-10-05 | Pendências consolidadas: fuso, datas livres, edição de concluídas, participações/badges, convites e sessão única; RF67/68; arquitetura, modelo e design 1.1. |

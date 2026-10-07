@@ -1,8 +1,8 @@
-# Screen map — versão 1.7
+# Screen map — versão 1.8
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do mapa:** 1.7\
-**Base funcional:** 1.12\
+**Versão do mapa:** 1.8\
+**Base funcional:** 1.14\
 **Data:** 2026-10-07\
 **Situação:** referência inicial para design; organização de navegação proposta
 
@@ -29,7 +29,9 @@ Administrador e Membro compartilham a experiência adulta. O Criador é Administ
 flowchart TD
     T001["TEL-001 · Entrada"]
     Apple[["Sign in with Apple · externo"]]
+    T055["TEL-055 · Configurar perfil inicial"]
     T002["TEL-002 · Criar família"]
+    T056["TEL-056 · Adicionar membros iniciais"]
     Link[["Link de convite · externo"]]
     T003["TEL-003 · Entrar por convite"]
     T004["TEL-004 · Orientação para recuperar acesso"]
@@ -44,9 +46,11 @@ flowchart TD
       KM["TEL-020 · Missões e conquistas · variante Kids"]
     end
     T001 --> Apple
-    Apple -->|Sem família| T002
+    Apple -->|Sem família| T055
     Apple -.->|Família existente| T010
-    T002 --> T010
+    T055 --> T002
+    T002 --> T056
+    T056 -->|Avançar| T010
     Link -.->|Sem sessão| T003
     Link -.->|Com sessão| M013("MOD-013 · Confirmar troca")
     M013 -->|Confirmar| T003
@@ -61,7 +65,7 @@ flowchart TD
 
 As duas abas Kids têm o mesmo nível: “Minhas tarefas” e “Missões e conquistas”. Missões é acessível diretamente no tab bar. Meu perfil fica no avatar/cabeçalho de ambas, sem terceira aba. As quatro telas dentro do agrupamento adulto têm o mesmo nível de navegação. As setas de acesso para TEL-010 indicam apenas a tela inicial após autenticação ou ingresso; não tornam as outras telas dependentes dela. Nos recortes seguintes, cada tela principal inicia seu próprio conjunto de subtelas.
 
-Com sessão válida, a entrada é dispensada e o sistema abre TEL-010 ou TEL-040 conforme o perfil atual. A renovação da sessão é transparente. TEL-004 orienta a contatar um Administrador fora do aplicativo; não envia pedidos nem cria um canal de comunicação. O novo link abre TEL-003 para o mesmo perfil. O Criador usa Apple para retornar à família existente.
+Com sessão válida, a entrada é dispensada e o sistema abre TEL-010 ou TEL-040 conforme o perfil atual. Para uma identidade Apple sem família, TEL-055 mantém o rascunho local de nome, apelido e foto opcional; TEL-002 confirma a criação da família e abre a sessão. TEL-056 permite usar a criação normal de TEL-033 e o convite de TEL-034 zero ou mais vezes antes de entrar em TEL-010. A renovação da sessão é transparente. TEL-004 orienta a contatar um Administrador fora do aplicativo; não envia pedidos nem cria um canal de comunicação. O novo link abre TEL-003 para o mesmo perfil. O Criador usa Apple para retornar à família existente.
 
 ## 2. Família, tarefas e navegação adulta
 
@@ -263,6 +267,8 @@ A = Administrador (inclui Criador); M = Membro; K = Kids. Códigos RF e RNF são
 | TEL-052 | Meu destaque semanal | A, M, K reconhecido | Semana encerrada, pontos, tarefas realizadas, convite e compartilhar no WhatsApp ou copiar mensagem | [UC19](../03-casos-de-uso.md#uc19); RF63–64, RN65 |
 | TEL-053 | Configurações da família | A | Fuso vigente/programado; selecionar novo fuso e confirmar aplicação imediata ou próximo ciclo em MOD-012 | [UC01](../03-casos-de-uso.md#uc01); RF67, RN28 |
 | TEL-054 | Detalhe do marco de participação | A, M, K titular | Bronze 5, prata 10, ouro 25, diamante 50; missões contribuintes do marco conquistado com acesso a TEL-021 | [UC10](../03-casos-de-uso.md#uc10); RF62, RN64 |
+| TEL-055 | Configurar perfil inicial | Criador autenticado sem família | Nome administrativo obrigatório; foto e etiqueta/apelido opcionais em rascunho local; avançar para criação da família ou cancelar sem salvar | [UC01](../03-casos-de-uso.md#uc01); RF01, RF38, RF48 |
+| TEL-056 | Adicionar membros iniciais | Criador Administrador de família recém-criada | Lista dos membros adicionados nesta etapa; abrir criação normal em TEL-033, convite explícito em TEL-034 e avançar com zero ou mais membros para TEL-010 | [UC01](../03-casos-de-uso.md#uc01), [UC02](../03-casos-de-uso.md#uc02); RF02, RF38, RF41 |
 
 ## 7. Modais e painéis
 
@@ -289,7 +295,7 @@ A = Administrador (inclui Criador); M = Membro; K = Kids. Códigos RF e RNF são
 |---|---|
 | Todas com rede/gravação | Carregando/processando, sucesso confirmado e falha com possibilidade de tentar novamente. Não apresentar operação como salva em falha. Manter a interface responsiva. |
 | Áreas protegidas | Sessão recuperável renova silenciosamente; sessão perdida encaminha à entrada. Perfil removido tem acesso bloqueado, inclusive na renovação; novo convite não reativa perfil removido. |
-| TEL-001/002 | Apple cancelado ou com falha; dados obrigatórios inválidos; família já existente redireciona. |
+| TEL-001/002/055/056 | Apple cancelado ou com falha; dados obrigatórios inválidos; família já existente redireciona; rascunho de perfil não é persistido antes da criação; foto opcional pode ser repetida ou omitida após falha; adicionar membros e emitir convite não é obrigatório para avançar. |
 | TEL-003/034 | Senha incorreta, link inválido/consumido, perfil removido, geração com falha e ingresso concluído; não reutilizar convite consumido. |
 | TEL-010/040/050 | Sem tarefas no período; Pendente, Aguardando confirmação e Concluída; progresso apenas de conclusões válidas. Carrossel da criação da família até último dia do mês atual. |
 | TEL-011/012/013/032 | Lista vazia, inclusive membro sem tarefas no período; preservar filtro do membro e período no retorno; dados inválidos; sem responsáveis; compartilhada; origem em rotina; operação bloqueada por conquista ou vínculo com missão; editar tarefa Aguardando confirmação exige resolver a sinalização pendente (MOD-014). |
@@ -310,7 +316,7 @@ Estados e permissões precisam de texto ou ícone além de cores. Aplicam-se RNF
 
 ## 9. Cobertura e continuidade
 
-Os 19 casos de uso estão cobertos no catálogo: UC01 em TEL-002/053; UC02 em TEL-050 e TEL-030/032–034; UC03 em TEL-015/016; UC04 em TEL-001; UC05 em TEL-020–022; UC06 em TEL-023; UC07/08 em TEL-011–013; UC09 em TEL-003/004 e MOD-013; UC10 em TEL-030/054; UC11 em TEL-010/040/050, tarefas por membro em TEL-032 e consulta familiar em TEL-011; UC12 em TEL-012; UC13 em TEL-050; UC14 em TEL-020/021; UC15 em TEL-041; UC16 em TEL-024; UC17 em TEL-012/MOD-006; UC18 em TEL-051; UC19 em TEL-052.
+Os 19 casos de uso estão cobertos no catálogo: UC01 em TEL-055/002/056/053; UC02 em TEL-056 e TEL-050 e TEL-030/032–034; UC03 em TEL-015/016; UC04 em TEL-001; UC05 em TEL-020–022; UC06 em TEL-023; UC07/08 em TEL-011–013; UC09 em TEL-003/004 e MOD-013; UC10 em TEL-030/054; UC11 em TEL-010/040/050, tarefas por membro em TEL-032 e consulta familiar em TEL-011; UC12 em TEL-012; UC13 em TEL-050; UC14 em TEL-020/021; UC15 em TEL-041; UC16 em TEL-024; UC17 em TEL-012/MOD-006; UC18 em TEL-051; UC19 em TEL-052.
 
 Os user flows UF-01–UF-16 referenciam estes IDs, incluindo configuração do fuso e troca confirmada de acesso. Prioridades: criar família; convidar e recuperar acesso; criar tarefa/rotina; concluir mantendo ou assumindo responsáveis; sinalizar e validar Kids; criar missão e resgatar recompensa; reabrir tarefa elegível.
 
@@ -324,6 +330,7 @@ Campos funcionais de data/fuso e seleção de foto estão definidos; o layout vi
 | 1.6 | 1.11 | 2026-10-07 | Conclusão direta sem MOD-004; MOD-006 confirma reabertura de missão concluída e reversão de recompensa, participações e badges. |
 | 1.5 | 1.10 | 2026-10-06 | MOD-004 oculta conclusão de tarefa com responsável Kids para Membro; evidência Kids permanece administrativa. Para SPEC-010. |
 | 1.4 | 1.9 | 2026-10-06 | TEL-010 e TEL-040 ficam diárias; consultas familiares adultas usam Dia/Semana, e a carga é adiada para SPEC-018. Para SPEC-009. |
+| 1.8 | 1.14 | 2026-10-07 | TEL-055 e TEL-056 (novas): perfil inicial do Criador, criação da família e membros opcionais com convite explícito antes da área principal. |
 | 1.3 | 1.8 | 2026-10-06 | MOD-002 mantém rotina sem data final obrigatória; MOD-003 define que “selecionada e futuras” inclui a ocorrência de origem. Para SPEC-008. |
 | 1.2 | 1.7 | 2026-10-06 | TEL-013 ganha observação opcional e limite de título; MOD-014 (novo) resolve sinalização Kids pendente ao editar. Para SPEC-007. |
 | 1.1 | 1.5 | 2026-10-05 | TEL-053/054 e MOD-012/013; 26 telas ativas, 13 modais, fuso, badges, datas livres e acesso único. |

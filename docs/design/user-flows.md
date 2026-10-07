@@ -1,9 +1,9 @@
-# User flows — versão 1.7
+# User flows — versão 1.8
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão dos fluxos:** 1.7\
-**Base funcional:** 1.12\
-**Screen map:** 1.7 — revisão de 2026-10-07\
+**Versão dos fluxos:** 1.8\
+**Base funcional:** 1.14\
+**Screen map:** 1.8 — revisão de 2026-10-07\
 **Data:** 2026-10-07\
 **Situação:** primeira versão para revisão de design
 
@@ -73,16 +73,22 @@ flowchart TD
     C -->|Cancelada ou falhou| A
     C -->|Sim| D{"Família já vinculada?"}
     D -->|Sim| H["TEL-010 · Minhas tarefas"]
-    D -->|Não| E["TEL-002 · Nome e fuso / padrão America/Sao_Paulo"]
+    D -->|Não| E["TEL-055 · Perfil: nome obrigatório, foto e etiqueta opcionais"]
     E --> F{"Dados válidos?"}
     F -->|Não · corrigir| E
-    F -->|Sim| G["Confirmar criação"]
+    F -->|Sim| G["TEL-002 · Nome e fuso / padrão America/Sao_Paulo"]
     G --> I{"Criação confirmada?"}
-    I -->|Não · informar falha| E
-    I -->|Sim| H
+    I -->|Não · informar falha| G
+    I -->|Sim| J["TEL-056 · Adicionar membros iniciais"]
+    J -->|Adicionar membro| K["TEL-033 · Criar membro"]
+    K -->|Salvar| L{"Gerar convite agora?"}
+    L -->|Sim| M["TEL-034 · Confirmar e compartilhar convite"]
+    M --> J
+    L -->|Não| J
+    J -->|Avançar, inclusive sem membro| H
 ```
 
-**Resultado:** família acessível ao Criador, com perfil Administrador e identificação protegida. Retorno a uma família existente não cria outra. Cancelar TEL-002 encerra a criação sem salvar e retorna à entrada.
+**Resultado:** família acessível ao Criador, com perfil Administrador e identificação protegida. O rascunho de perfil não existe antes da criação; a foto é opcional e pode ser enviada depois que a sessão for aberta, sem impedir a entrada. Retorno a uma família existente não cria outra. Cancelar antes da criação encerra o onboarding sem salvar; depois da criação, a pessoa pode avançar de TEL-056 sem adicionar membro.
 
 <a id="uf-02"></a>
 
@@ -585,12 +591,13 @@ Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imedi
 - As quatro telas principais adultas são entradas independentes; Minhas tarefas continua como inicial.
 - Fluxos Kids não concedem carga, relatório familiar, gestão ou conclusão direta. Perfil próprio e reconhecimento recebido são permitidos.
 - Toda alteração só é apresentada como concluída após confirmação da gravação.
-- TEL/MOD preservam o screen map 1.1; UF-01–UF-16 cobrem UC01–UC19, incluindo TEL-051/052/053/054 e MOD-012/013.
+- TEL/MOD preservam o screen map 1.8; UF-01–UF-16 cobrem UC01–UC19, incluindo TEL-051/052/053/054/055/056 e MOD-012/013.
 
 ## Histórico
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.8 | 1.14 | 1.8 | 2026-10-07 | UF-01 passa a configurar o perfil do Criador, criar a família e permitir zero ou mais membros com convite explícito antes da área principal. |
 | 1.7 | 1.12 | 1.7 | 2026-10-07 | UF-10 ganha atalho "+ Nova tarefa" em MOD-007, bloqueio local de salvar sem tarefas e consulta explícita por todos os perfis, inclusive Kids. Para SPEC-014. |
 | 1.6 | 1.11 | 1.6 | 2026-10-07 | UF-06 conclui diretamente sem modal; UF-08 permite reabrir missão concluída com confirmação e reversão de recompensa, participações e badges. |
 | 1.5 | 1.10 | 1.5 | 2026-10-06 | UF-06 restringe conclusão manual de tarefa com responsável Kids ao Administrador e reconcilia silenciosamente conclusão concorrente. Para SPEC-010. |

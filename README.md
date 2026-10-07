@@ -3,7 +3,7 @@
 Organização colaborativa das responsabilidades domésticas, com tarefas compartilhadas, participação infantil e conquistas coletivas.
 
 **Escopo:** MVP  
-**Versão da base do projeto:** 1.13\
+**Versão da base do projeto:** 1.14\
 **Data:** 2026-10-07
 
 ## Por que este projeto existe
@@ -18,8 +18,8 @@ Famílias que compartilham a rotina doméstica e desejam organizar melhor suas r
 
 ## Como funciona
 
-1. O Criador entra com Apple e cria a família ou acessa a que já está vinculada a ele.
-2. Um Administrador cria os perfis e compartilha convites com link e senha para um único ingresso. Depois, a sessão válida permite continuar acessando o aplicativo.
+1. O Criador entra com Apple e acessa a família já vinculada ou configura seu perfil — nome obrigatório, foto e etiqueta opcionais — antes de criar uma nova família.
+2. Após criar a família, o Criador pode adicionar zero ou mais membros e gerar explicitamente um convite com link e senha para cada perfil. Depois, a sessão válida permite continuar acessando o aplicativo.
 3. Administradores e Membros criam tarefas únicas ou rotinas, definem o esforço e escolhem nenhum, um ou vários responsáveis.
 4. Todos acompanham suas tarefas e seu progresso diário. Adultos também consultam tarefas e progresso familiares por dia ou semana. Kids sinalizam a realização com foto opcional; um Administrador confirma ou recusa, ou um adulto conclui manualmente.
 5. A conclusão vale para todos os responsáveis finais. Adultos acompanham a distribuição da carga diária ou semanal, sem ranking.
@@ -97,7 +97,7 @@ As possibilidades de evolução estão no [documento de visão](docs/00-visao-do
 | [Índice e controle documental](docs/DOCUMENTACAO.md) | Rastreabilidade e convenções para manter a documentação consistente. |
 | [Specs de entrega](specs/README.md) | Recortes aprovados que orientam a implementação conjunta de mobile e backend. |
 
-A versão 1.7 identifica a base de definição do MVP. Não representa, por si só, uma declaração de que o aplicativo foi implementado ou publicado.
+A versão 1.14 identifica a base de definição do MVP. Não representa, por si só, uma declaração de que o aplicativo foi implementado ou publicado.
 
 ## Como executar localmente (onboarding rápido)
 
@@ -222,6 +222,7 @@ A arquitetura backend 1.0 está em [backend-architecture.md](docs/architecture/b
 
 | Versão | Data | Marco |
 |---|---|---|
+| 1.14 | 2026-10-07 | Onboarding do Criador: perfil antes da família, membros opcionais e convite explícito antes da área principal. Base funcional 1.14. |
 | 1.13 | 2026-10-07 | Apelido do perfil ganha limite explícito: até 20 caracteres não-espaço após trim, sem caracteres de controle. Para SPEC-006. |
 | 1.12 | 2026-10-07 | Missão ganha observação opcional (até 250 caracteres); criação de tarefa durante a vinculação de missão; consulta explícita por todos os perfis, inclusive Kids, em experiência simplificada. Para SPEC-014. |
 | 1.11 | 2026-10-07 | Conclusão direta preserva responsáveis existentes ou atribui o adulto sem responsável. Reabertura por todos os perfis no seu alcance pode reabrir missão concluída e reverte recompensa, participações e badges. |

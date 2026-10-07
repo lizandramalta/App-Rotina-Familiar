@@ -1,13 +1,13 @@
 # Regras de negócio
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.12\
+**Versão:** 1.14\
 **Data:** 2026-10-07\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
 
-Este documento contém todas as regras vigentes da versão 1.12. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
+Este documento contém todas as regras vigentes da versão 1.14. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
 
 **Identificadores preservados:** RN15, RN29 e RN32 não estavam definidos na base recebida e permanecem não utilizados. Não representam conteúdo faltante desta versão.
 
@@ -19,7 +19,9 @@ Este documento contém todas as regras vigentes da versão 1.12. Os requisitos c
 
 Quem cria a família se torna automaticamente Administrador e Criador da Família, identificado pela flag isFamilyCreator. A família pode ter mais de um Administrador, todos com as mesmas permissões, exceto as proteções exclusivas do Criador.
 
-**Requisitos funcionais:** [RF01](02-requisitos.md#rf01), [RF05](02-requisitos.md#rf05), [RF38](02-requisitos.md#rf38)  
+Quando a identidade Apple ainda não possui família, a pessoa primeiro configura o rascunho do próprio perfil: nome administrativo obrigatório, etiqueta/apelido opcional e foto opcional. Esse rascunho não constitui perfil persistido nem concede acesso; seus dados passam a compor o perfil do Criador somente na criação confirmada da família. Depois de criada a família e a sessão do Criador, o onboarding permite adicionar zero ou mais membros antes da entrada na área principal.
+
+**Requisitos funcionais:** [RF01](02-requisitos.md#rf01), [RF05](02-requisitos.md#rf05), [RF38](02-requisitos.md#rf38), [RF48](02-requisitos.md#rf48)\
 **Requisitos não funcionais específicos:** Sem vínculo específico; requisitos transversais se aplicam conforme a operação.\
 **Casos de uso relacionados:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02)
 
@@ -65,7 +67,7 @@ Existem três perfis: Administrador, Membro e Kids. O Criador da Família é um 
 
 ## RN07
 
-Apenas Administradores podem adicionar, editar e remover membros administrativamente. A edição do próprio perfil é permitida a todos conforme RN63; a configuração de etiqueta/apelido pertence exclusivamente ao titular, inclusive quando o titular é Kids.
+Apenas Administradores podem adicionar, editar e remover membros administrativamente. A edição do próprio perfil é permitida a todos conforme RN63; a configuração de etiqueta/apelido pertence exclusivamente ao titular, inclusive quando o titular é Kids. No onboarding de uma família recém-criada, o Criador já autenticado atua como Administrador e pode repetir a adição normal de membros ou avançar sem adicionar nenhum.
 
 **Requisitos funcionais:** [RF02](02-requisitos.md#rf02), [RF03](02-requisitos.md#rf03), [RF04](02-requisitos.md#rf04), [RF40](02-requisitos.md#rf40)  
 **Requisitos não funcionais específicos:** [RNF07](02-requisitos.md#rnf07)  
@@ -81,7 +83,7 @@ Apenas Administradores podem ativar ou desativar o Modo Kids de um perfil. Um Ad
 
 ## RN09
 
-Cada perfil pertence a uma única família. Ao autenticar-se, o Criador que já possui família vinculada é redirecionado para ela. Abrir convite com sessão ativa permite confirmar a troca de acesso para o perfil indicado; não transfere o perfil ou histórico nem remove o membro da família anterior. A sessão local só é substituída após ingresso válido. A proteção do Criador em sua família permanece.
+Cada perfil pertence a uma única família. Ao autenticar-se, o Criador que já possui família vinculada é redirecionado para ela; sem vínculo, inicia o onboarding de perfil, família e membros. Abrir convite com sessão ativa permite confirmar a troca de acesso para o perfil indicado; não transfere o perfil ou histórico nem remove o membro da família anterior. A sessão local só é substituída após ingresso válido. A proteção do Criador em sua família permanece.
 
 **Requisitos funcionais:** [RF01](02-requisitos.md#rf01), [RF38](02-requisitos.md#rf38), [RF68](02-requisitos.md#rf68)\
 **Requisitos não funcionais específicos:** [RNF06](02-requisitos.md#rnf06)  
@@ -337,7 +339,7 @@ Uma missão concluída sem resgate permite ao Administrador abrir a roleta. O ap
 
 ## RN44
 
-Apenas o Criador da Família se autentica via Sign in with Apple, e a família é vinculada ao identificador Apple dele.
+Apenas o Criador da Família se autentica via Sign in with Apple, e a família é vinculada ao identificador Apple dele. Uma identidade Apple sem vínculo não recebe acesso a dados familiares: ela segue somente o onboarding que coleta o rascunho do perfil e cria sua primeira família.
 
 **Requisitos funcionais:** [RF37](02-requisitos.md#rf37), [RF38](02-requisitos.md#rf38), [RF39](02-requisitos.md#rf39)  
 **Requisitos não funcionais específicos:** [RNF15](02-requisitos.md#rnf15), [RNF16](02-requisitos.md#rnf16)  
@@ -504,15 +506,15 @@ Uma tarefa compartilhada conta uma vez para cada responsável no número individ
 
 **Tema:** Foto e etiqueta/apelido do perfil
 
-Todos os perfis, inclusive Kids, podem adicionar, substituir ou remover a própria foto, que é opcional. Sem foto, exibir identificação padrão. Todos podem configurar a própria etiqueta/apelido; outras pessoas, inclusive Administradores, não acessam sua configuração nem podem alterá-la. O nome de identificação permanece separado do apelido.
+Todos os perfis, inclusive Kids, podem adicionar, substituir ou remover a própria foto, que é opcional. Sem foto, exibir identificação padrão. Todos podem configurar a própria etiqueta/apelido; outras pessoas, inclusive Administradores, não acessam sua configuração nem podem alterá-la. O nome de identificação permanece separado do apelido. A pessoa que ainda criará a família informa esses mesmos dados no rascunho inicial; a foto e a etiqueta permanecem opcionais e não impedem a criação.
 
 O apelido é opcional: vazio ou nulo remove a configuração vigente. Admite até 20 caracteres não-espaço após remover espaços nas extremidades; espaços internos não contam para esse limite. Não admite caracteres de controle.
 
 O apelido é visível à família, com edição exclusiva do titular. A foto de perfil pode ser escolhida por câmera ou galeria, inclusive por Kids; isso não altera a câmera direta da sinalização Kids. Kids acessam Meu perfil pelo avatar/cabeçalho, sem terceira aba no tab bar.
 
-**Requisitos funcionais:** [RF48](02-requisitos.md#rf48), [RF65](02-requisitos.md#rf65)  
+**Requisitos funcionais:** [RF01](02-requisitos.md#rf01), [RF38](02-requisitos.md#rf38), [RF48](02-requisitos.md#rf48), [RF65](02-requisitos.md#rf65)\
 **Requisitos não funcionais específicos:** [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF12](02-requisitos.md#rnf12), [RNF24](02-requisitos.md#rnf24), [RNF27](02-requisitos.md#rnf27)  
-**Casos de uso relacionados:** [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC14](03-casos-de-uso.md#uc14)
+**Casos de uso relacionados:** [UC01](03-casos-de-uso.md#uc01), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC14](03-casos-de-uso.md#uc14)
 
 ## RN64
 
@@ -568,6 +570,7 @@ A missão admite uma observação opcional de até 250 caracteres, contando espa
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.14 | 2026-10-07 | Onboarding do Criador passa a coletar rascunho de nome, foto opcional e etiqueta opcional antes da criação da família; após a criação, permite adicionar zero ou mais membros e gerar convite explicitamente antes da área principal. RN01, RN07, RN09, RN44 e RN63 revisadas. |
 | 1.12 | 2026-10-07 | RN63 passa a definir o limite do apelido: até 20 caracteres não-espaço após trim, sem caracteres de controle; vazio/nulo remove a configuração. Para SPEC-006. |
 | 1.11 | 2026-10-07 | RN68 (novo) permite observação opcional de até 250 caracteres por missão, espelhando RN67. Para SPEC-014. |
 | 1.10 | 2026-10-07 | Conclusão direta mantém responsáveis existentes ou atribui o adulto quando não houver; reabertura passa a todos os perfis no alcance de consulta e pode reabrir missão concluída, removendo recompensa, participações e badges derivados. |
