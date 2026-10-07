@@ -14,6 +14,10 @@ Quando o pedido for implementar ou preparar tecnicamente um card já planejado o
 SPEC aprovada, leia e aplique `skills/desenvolver-card/SKILL.md` antes de
 propor ou alterar código.
 
+Quando o pedido for criar ou atualizar o protótipo de média fidelidade no Figma para
+um card Mobile já planejado, leia e aplique `skills/desenvolver-card-ux/SKILL.md`
+antes de propor ou alterar o arquivo Figma.
+
 Quando o pedido indicar `SPEC-NNN` ou solicitar a criação de uma especificação, leia e
 aplique `skills/criar-spec/SKILL.md` antes de propor ou alterar arquivos de spec.
 
@@ -50,6 +54,24 @@ uma base de consulta: use a rastreabilidade da spec para ler a menor fatia neces
 Quando uma informação não existir, estiver ambígua ou entrar em conflito, não invente
 comportamento. Registre-a em **Esclarecimentos** na spec e peça uma decisão antes de
 implementar.
+
+## Decisões tomadas em chat
+
+Quando uma dúvida for resolvida ou uma decisão for tomada durante a conversa, sinalize
+imediatamente na resposta de chat:
+
+1. a decisão e seu impacto em comportamento, permissão, dado, contrato, estado ou
+   escopo;
+2. os documentos funcionais que precisam ser atualizados, citando arquivo e códigos
+   (`RN`, `RF`, `RNF` ou `UC`) quando existirem;
+3. os artefatos posteriores afetados, como SPEC/UX-spec, fluxos, Figma, contratos,
+   Jira, código ou testes.
+
+Essa sinalização é uma comunicação de chat: não a replique como anotação, legenda ou
+texto no Figma. Ela não substitui a atualização formal necessária da documentação
+funcional nem os registros exigidos pela SPEC; uma decisão que altere comportamento,
+permissão ou estado só fica consolidada depois que as fontes aplicáveis forem
+atualizadas.
 
 ## Implementação e verificação
 
