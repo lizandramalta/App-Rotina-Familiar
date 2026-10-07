@@ -99,6 +99,82 @@ As possibilidades de evolução estão no [documento de visão](docs/00-visao-do
 
 A versão 1.7 identifica a base de definição do MVP. Não representa, por si só, uma declaração de que o aplicativo foi implementado ou publicado.
 
+## Como executar localmente (onboarding rápido)
+
+Passo a passo para sair de um clone limpo até backend e mobile rodando.
+
+### Pré-requisitos
+
+- Node.js 22 ou superior e npm 10 ou superior.
+- Acesso ao projeto PostgreSQL no Supabase (a connection string fica no botão **Connect**, em *Connection Method > Session pooler*).
+- Xcode 26 ou superior, com um simulador iOS/iPadOS 26, e `xcode-select` apontando para o Xcode completo.
+
+### Passo 1 — Backend
+
+```sh
+cd backend
+cp .env.example .env
+npm ci
+```
+
+Edite o `.env` e substitua os placeholders `[PROJECT-REF]`, `[PASSWORD]` e `[REGION]` do
+`DATABASE_URL` pelos valores do projeto no Supabase (botão **Connect**, *Session pooler*,
+porta 5432). O `DATABASE_SSL=true` do template já é o valor correto para o Supabase remoto;
+não acrescente `?sslmode=require` à URL, pois o driver `pg` trata isso como `verify-full` e
+a conexão falha. Em seguida:
+
+```sh
+npm run migrate          # aplica as migrations em app.schema_migrations
+npm run dev              # API em http://localhost:3000
+```
+
+Verifique as sondas operacionais em outro terminal:
+
+```sh
+curl http://localhost:3000/health/live     # 200 {"status":"ok",...}
+curl http://localhost:3000/health/ready    # 200 {"status":"ready",...} com o banco acessível
+```
+
+Checagens de qualidade, as mesmas que a CI executa:
+
+```sh
+npm run lint
+npm run typecheck
+npm run test              # testes unitários, sem necessidade de banco
+npm run build
+npm run test:integration  # smoke de /health/live e /health/ready contra o banco do .env
+```
+
+### Passo 2 — Mobile
+
+```sh
+cd mobile
+cp Configuration/Development.xcconfig.example Configuration/Development.xcconfig
+cp Configuration/Production.xcconfig.example Configuration/Production.xcconfig
+```
+
+Preencha `API_BASE_URL` no `Development.xcconfig` com o endereço da API local
+(use o IP da máquina, não `localhost`, quando rodar em dispositivo físico). Depois abra
+`mobile.xcodeproj` no Xcode, escolha o scheme `FamilyRoutine` e um simulador iOS/iPadOS 26.
+
+Pela linha de comando:
+
+```sh
+xcodebuild build -project mobile.xcodeproj -scheme FamilyRoutine \
+  -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO
+
+xcodebuild test -project mobile.xcodeproj -scheme FamilyRoutine \
+  -destination 'platform=iOS Simulator,name=<simulador instalado>'
+```
+
+Use `xcrun simctl list devices available` para ver os simuladores instalados.
+Detalhes e limites da fundação mobile estão em [mobile/SETUP.md](mobile/SETUP.md).
+
+### Segredos
+
+`.env` e os `*.xcconfig` são locais e ignorados pelo Git. Versione apenas os templates
+`.env.example` e `*.xcconfig.example`, e nunca inclua credenciais reais neles.
+
 ## Estrutura para implementação
 
 - `mobile/` será a raiz do aplicativo iOS/iPadOS.
