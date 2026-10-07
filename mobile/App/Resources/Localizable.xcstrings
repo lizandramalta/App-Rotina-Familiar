@@ -1,0 +1,56 @@
+{
+  "sourceLanguage" : "pt-BR",
+  "strings" : {
+    "foundation.placeholder.action" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir destino de exemplo"
+          }
+        }
+      }
+    },
+    "foundation.placeholder.description" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estrutura de navegação temporária para validar a fundação do aplicativo."
+          }
+        }
+      }
+    },
+    "foundation.tab.explore" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explorar"
+          }
+        }
+      }
+    },
+    "foundation.tab.home" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Início"
+          }
+        }
+      }
+    },
+    "foundation.tab.settings" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurações"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

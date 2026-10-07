@@ -75,3 +75,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# Local iOS environment values. Commit only the *.example templates.
+mobile/Configuration/Development.xcconfig
+mobile/Configuration/Production.xcconfig
