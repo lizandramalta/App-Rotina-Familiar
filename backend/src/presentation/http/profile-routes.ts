@@ -12,6 +12,9 @@ interface UpdateOwnProfileBody {
  * `400 UNKNOWN_FIELD`; o apelido entra com a SPEC-006.
  */
 const updateOwnProfileSchema = {
+  tags: ['Profile'],
+  summary: 'Update the authenticated member profile',
+  security: [{ bearerAuth: [] }],
   body: {
     type: 'object',
     required: ['photoMediaId'],

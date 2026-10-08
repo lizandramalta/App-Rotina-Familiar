@@ -59,6 +59,9 @@ export function registerTaskRoutes(app: FastifyInstance, container: ApplicationC
       '/tasks',
       {
         schema: {
+          tags: ['Tasks'],
+          summary: 'Create a single task',
+          security: [{ bearerAuth: [] }],
           body: { type: 'object', additionalProperties: false, properties: taskProperties },
           response: { 201: taskResponseSchema },
         },
@@ -82,7 +85,14 @@ export function registerTaskRoutes(app: FastifyInstance, container: ApplicationC
 
     scope.get<{ Params: TaskParams }>(
       '/tasks/:taskId',
-      { schema: { response: { 200: taskResponseSchema } } },
+      {
+        schema: {
+          tags: ['Tasks'],
+          summary: 'Get a single task',
+          security: [{ bearerAuth: [] }],
+          response: { 200: taskResponseSchema },
+        },
+      },
       async (request, reply) =>
         reply
           .status(200)
@@ -96,6 +106,9 @@ export function registerTaskRoutes(app: FastifyInstance, container: ApplicationC
       '/tasks/:taskId',
       {
         schema: {
+          tags: ['Tasks'],
+          summary: 'Edit a single task',
+          security: [{ bearerAuth: [] }],
           body: { type: 'object', additionalProperties: false, properties: taskProperties },
           response: { 200: taskResponseSchema },
         },
@@ -122,6 +135,9 @@ export function registerTaskRoutes(app: FastifyInstance, container: ApplicationC
       '/tasks/:taskId',
       {
         schema: {
+          tags: ['Tasks'],
+          summary: 'Delete a single task',
+          security: [{ bearerAuth: [] }],
           response: {
             200: { type: 'object', required: ['id'], properties: { id: { type: 'string' } } },
           },

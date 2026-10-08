@@ -1,6 +1,6 @@
 # Convenções de código backend
 
-**Versão:** 1.0  
+**Versão:** 1.1
 **Data:** 2026-10-08  
 **Situação:** norma técnica para implementações Node.js, TypeScript e Fastify
 
@@ -25,6 +25,7 @@ Código, arquivos, identificadores de banco, APIs e testes usam inglês. Documen
 
 - Registre rotas no módulo de Presentation e valide `params`, `querystring`, `headers` e `body` com schemas versionados no código. Defina schema de resposta para contratos públicos; schemas nunca vêm de entrada do usuário.
 - Todo endpoint usa o prefixo `/v1`, exceto probes operacionais. Preserve `application/problem+json`, `requestId` e os códigos estáveis definidos em `backend-contracts.md`.
+- Toda rota HTTP pública ou operacional criada ou alterada deve manter o schema OpenAPI que alimenta `/docs/json`: tag, resumo, autenticação quando necessária, entradas e respostas devem descrever o contrato efetivamente exposto. A interface interativa fica em `/docs`; suas próprias rotas não precisam ser documentadas como parte da API do produto.
 - Atores vêm da sessão/`ActorContext`; `familyId`, papel, créditos, autor e timestamps enviados pelo cliente jamais autorizam uma ação. Consulte recursos sempre no escopo da família/titularidade exigida.
 - Erros de domínio são intencionais e mapeados uma vez na borda. Não exponha stack trace, SQL, segredo, token, senha, prova de instalação ou conteúdo de mídia em resposta ou log.
 - Fastify valida e serializa a partir de schemas. Caso configure validadores/serializadores customizados, preserve o contrato síncrono de retorno de erro/valor recomendado pelo framework.
@@ -54,4 +55,5 @@ Código, arquivos, identificadores de banco, APIs e testes usam inglês. Documen
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.1 | 2026-10-08 | Rotas HTTP passam a exigir documentação OpenAPI/Swagger em `/docs` e `/docs/json`, alinhada ao contrato e coberta quando aplicável por teste de contrato. |
 | 1.0 | 2026-10-08 | Convenções iniciais de TypeScript/Fastify, camadas, contratos, persistência, segurança e testes. |
