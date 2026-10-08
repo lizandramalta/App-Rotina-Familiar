@@ -25,9 +25,11 @@
 | [Arquitetura mobile](architecture/mobile-architecture.md) | Arquitetura 1.3: Swift + SwiftUI, View + ViewModel e Clean Architecture; estrutura, dependências, estado, sessão, navegação, integrações e verificação. |
 | [Catálogo mobile](architecture/mobile-feature-catalog.md) | Catálogo 1.5: funcionalidades, nomes de arquivos em inglês e cobertura das 26 telas, 14 modais, UC01–UC19, UF-01–UF-16 e RNF01–27; base funcional 1.9. |
 | [Decisões da arquitetura mobile](architecture/mobile-decisions.md) | MA-01–MA-17 e P-01–P-09 consolidadas, ajustes de modelagem e temas fora desta etapa. |
+| [Convenções de código mobile](architecture/mobile-code-conventions.md) | Convenções de Swift/SwiftUI, camadas, concorrência, segurança, testes e revisão. |
 | [Arquitetura backend](architecture/backend-architecture.md) | Backend 1.0: Node.js, Clean Architecture, monólito modular, Supabase/R2, transações, acesso e jobs. |
 | [Contratos backend](architecture/backend-contracts.md) | Contratos 1.7 da API `/v1`, permissões, erros, projeções e cobertura dos 19 UC e 27 RNF; base funcional 1.12. |
 | [Decisões backend](architecture/backend-decisions.md) | BA-01–BA-20: escolhas confirmadas, propostas técnicas, alternativas e limites. |
+| [Convenções de código backend](architecture/backend-code-conventions.md) | Convenções de TypeScript/Fastify, camadas, contratos, SQL, segurança, testes e revisão. |
 | [Specs de entrega](../specs/README.md) | Recortes aprovados de implementação compartilhados entre mobile e backend. |
 
 ## Como usar
@@ -48,7 +50,7 @@ agentes e a ordem das fontes de verdade estão em [`AGENTS.md`](../AGENTS.md).
 - `docs/`: visão, regras, requisitos, casos de uso, modelo de dados, diagrama de classes e índice documental.
 - `docs/diagramas/casos-de-uso/`: fontes PlantUML e imagens dos diagramas de casos de uso.
 - `docs/design/`: screen map e user flows, com referências à base funcional.
-- `docs/architecture/`: arquiteturas mobile/backend, catálogos de funcionalidades/contratos e registros de decisões; especificação anterior à implementação.
+- `docs/architecture/`: arquiteturas mobile/backend, convenções de código, catálogos de funcionalidades/contratos e registros de decisões; fundação técnica e direcionamento para implementações incrementais.
 - `../specs/`: specs aprovadas e o template para cada entrega vertical entre mobile e backend.
 - `../mobile/` e `../backend/`: raízes reservadas para os projetos de implementação.
 

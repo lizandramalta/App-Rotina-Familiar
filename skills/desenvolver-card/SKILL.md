@@ -20,7 +20,10 @@ Antes de propor ou alterar código:
 
 1. Leia `AGENTS.md`, `README.md`, `docs/DOCUMENTACAO.md` e `specs/README.md`.
 2. Localize a SPEC e a UX-spec vinculadas e confirme que ambas estão com status `aprovada`; para uma capacidade puramente interna, a SPEC deve justificar UX-spec não aplicável.
-3. Leia somente os documentos e os trechos citados na seção **Rastreabilidade** da SPEC, mais a arquitetura aplicável à responsabilidade do card.
+3. Leia somente os documentos e os trechos citados na seção **Rastreabilidade** da SPEC, mais a arquitetura e as convenções aplicáveis à responsabilidade do card:
+   - Mobile: `docs/architecture/mobile-code-conventions.md`.
+   - Backend: `docs/architecture/backend-code-conventions.md`.
+   - Integração: ambas, respeitando a fronteira entre os projetos.
 4. Confirme a fase e os critérios de aceite que o card cobre. Não implemente critérios de outra fase por conveniência.
 5. Se houver acesso ao Jira, confira os vínculos de bloqueio. Caso não haja, peça a informação necessária ou declare a limitação, sem supor que uma dependência foi concluída.
 
@@ -48,6 +51,8 @@ Não faça mudanças enquanto a prévia não for aprovada. Se uma lacuna mudar c
 
 Depois da aprovação técnica:
 
+- Prepare o Git antes de editar código. Confirme que não há alterações não relacionadas no worktree; não faça stash, reset ou descarte automático. Execute `git fetch origin develop`, valide a referência `origin/develop` e crie a branch diretamente dela com `git switch --create feature/<CHAVE-JIRA>_<descricao-curta> origin/develop`.
+- Use a chave Jira do card como identificador preservado (`SCRUM-123`) e uma descrição curta em minúsculas, ASCII e `kebab-case` (`feature/SCRUM-123_create-family`). Se a branch já existir ou `origin/develop` não estiver acessível, pare e peça orientação em vez de reutilizar, sobrescrever ou partir de outra referência.
 - Implemente somente o recorte e a fase aprovados.
 - Inclua autorização, isolamento entre famílias, validação e falhas recuperáveis na primeira exposição da capacidade; não trate esses itens como acabamento.
 - Use nomes de código, arquivos, APIs e testes em inglês. Mantenha documentação explicativa em português e textos de interface localizáveis.
@@ -60,3 +65,8 @@ Depois da aprovação técnica:
 2. Verifique cada critério de aceite atribuído à fase, sem marcar como coberto o que não foi implementado.
 3. Resuma arquivos alterados, comportamento entregue, critérios cobertos, testes e riscos residuais.
 4. Ao criar uma PR ou atualizar Jira sob solicitação do usuário, cite a SPEC, a UX-spec e os critérios cobertos.
+5. Sempre encerre com **Como testar**, destinado a quem desenvolverá/revisará o card. Sugira passos manuais concretos, proporcionais ao escopo e ligados aos critérios de aceite:
+   - Mobile: pré-requisitos de ambiente, rota/tela a abrir, ações, estados esperados, acessibilidade e cenários de erro ou permissão relevantes.
+   - Backend: configuração necessária, comando para iniciar/testar, chamada HTTP ou fluxo consumidor, status/corpo esperado e cenários de validação, autorização ou isolamento relevantes.
+   - Integração: fluxo de tela que dispara a chamada, contrato observado e como confirmar o resultado canônico após uma falha/reconciliação quando aplicável.
+   Não invente endpoints, telas ou dados de teste: derive o roteiro da SPEC, UX-spec, contrato e implementação entregue.
