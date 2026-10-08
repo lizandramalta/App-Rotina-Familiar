@@ -1,7 +1,7 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.8 · **Base funcional:** 1.13 · **Arquitetura backend:** 1.0\
-**Data:** 2026-10-07\
+**Versão:** 1.9 · **Base funcional:** 1.13 · **Arquitetura backend:** 1.0\
+**Data:** 2026-10-08\
 **Situação:** contrato arquitetural para detalhamento OpenAPI na implementação
 
 [Arquitetura](backend-architecture.md) · [Decisões](backend-decisions.md) · [Catálogo mobile](mobile-feature-catalog.md) · [UC](../03-casos-de-uso.md) · [Índice](../DOCUMENTACAO.md)
@@ -43,7 +43,7 @@ Rotas públicas não autorizam leitura geral do perfil; respostas de inspeção 
 | Método e caminho | Caso de uso de aplicação | Entrada / resultado | Acesso |
 |---|---|---|---|
 | `POST /access/apple` | `SignInWithApple` | Prova Apple, contexto da tentativa e instalação → sessão do Criador ou `creationGrant` | Prova Apple válida |
-| `POST /families` | `CreateFamily` | Grant, `name`, `timeZoneId` → família, Criador e sessão | Grant restrito à criação |
+| `POST /families` | `CreateFamily` | `creationGrant`, `creatorName`, `creatorNickname` opcional, `name`, `timeZoneId` opcional (padrão `America/Sao_Paulo`) e prova da instalação no header → família, Criador, ciclo semanal inicial e sessão. O grant só vale para a instalação que o recebeu | Grant restrito à criação |
 | `POST /access/invites/inspect` | `InspectInvite` | Token → disponibilidade e contexto mínimo para ingresso, sem senha/dados privados | Posse do token e limites de tentativas |
 | `POST /access/invite-joins` | `JoinFamilyByInvite` | Token, senha, provas de instalação/tentativa; sessão anterior opcional e troca confirmada → sessão nova | Convite válido; antiga só é encerrada com sucesso |
 | `POST /access/invite-joins/recover` | `RecoverInviteJoin` | `attemptId`, segredo da tentativa e prova original → credenciais daquele ingresso | Janela de dez minutos e sessão ainda ativa |
@@ -207,6 +207,7 @@ O OpenAPI futuro deve materializar schemas e exemplos de sucesso/erro dessas rot
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.9 | 2026-10-08 | `CreateFamily` passa a declarar `creatorName` e `creatorNickname` (nome e apelido do Criador, RF01/RF48), o ciclo semanal inicial na mesma transação e a conferência da prova da instalação contra o grant. Alinha o contrato ao que a SPEC-002 já aprovou; sem mudança de comportamento. Para SPEC-002 / SCRUM-18. |
 | 1.8 | 2026-10-07 | `SignalTask` detalhado: ator Kids, revalidação de titularidade/estado (`403 ACTION_NOT_ALLOWED`, `404 RESOURCE_NOT_FOUND`, `409 TASK_NOT_PENDING`), resposta `201 Created` com `signal.id`. `POST /media` com `purpose: taskSignal` passa a ser aceito, validando somente o papel Kids no upload; contexto de tarefa é revalidado só no vínculo. Para SPEC-012. |
 | 1.7 | 2026-10-07 | `CreateMission`/`EditMission` ganham `note` opcional (≤250 car.); `GetMissionDetail` expõe `note`; `EditMission` explicita rejeição de `taskIds` vazio. Para SPEC-014. |
 | 1.5 | 2026-10-06 | Conclusão de tarefa com responsável Kids exige Administrador; `TASK_ALREADY_COMPLETED` reconcilia concorrência sem duplicar crédito; sinalização/foto pendente é auditável só por Admin. Para SPEC-010. |
