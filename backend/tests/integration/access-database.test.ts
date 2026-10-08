@@ -160,6 +160,7 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
               'family_creation_grants',
               'sessions',
               'session_access_tokens',
+              'push_devices',
             ],
           ],
         );
@@ -169,6 +170,7 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
           'families',
           'family_creation_grants',
           'members',
+          'push_devices',
           'session_access_tokens',
           'sessions',
         ]);
@@ -592,6 +594,45 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
         ).rejects.toBeInstanceOf(SessionRevokedError);
       });
 
+      it('revokes the push device registered for the session (CA-09)', async () => {
+        const seed = await seedLinkedCreator();
+        const session = await openSession(seed.subject);
+        const pushDeviceId = await insertActivePushDevice(session.sessionId);
+
+        expect(await readPushDeviceRevokedAt(pushDeviceId)).toBeNull();
+
+        await buildSessionUseCases().revokeSession.execute({ accessToken: session.accessToken });
+
+        expect(await readPushDeviceRevokedAt(pushDeviceId)).toBeInstanceOf(Date);
+      });
+
+      it('leaves the push device of another session untouched', async () => {
+        const seed = await seedLinkedCreator();
+        const other = await seedLinkedCreator();
+        const session = await openSession(seed.subject);
+        const otherSession = await openSession(other.subject);
+
+        const pushDeviceId = await insertActivePushDevice(session.sessionId);
+        const otherPushDeviceId = await insertActivePushDevice(otherSession.sessionId);
+
+        await buildSessionUseCases().revokeSession.execute({ accessToken: session.accessToken });
+
+        expect(await readPushDeviceRevokedAt(pushDeviceId)).toBeInstanceOf(Date);
+        expect(await readPushDeviceRevokedAt(otherPushDeviceId)).toBeNull();
+      });
+
+      it('revokes nothing of the push registration when the token is not accepted', async () => {
+        const seed = await seedLinkedCreator();
+        const session = await openSession(seed.subject);
+        const pushDeviceId = await insertActivePushDevice(session.sessionId);
+
+        await expect(
+          buildSessionUseCases().revokeSession.execute({ accessToken: randomUUID() }),
+        ).rejects.toBeInstanceOf(SessionExpiredError);
+
+        expect(await readPushDeviceRevokedAt(pushDeviceId)).toBeNull();
+      });
+
       it('refuses a second revocation with SESSION_REVOKED', async () => {
         const seed = await seedLinkedCreator();
         const session = await openSession(seed.subject);
@@ -650,6 +691,33 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
         ).rejects.toBeInstanceOf(SessionRevokedError);
       });
     });
+
+    /** Registro de push ativo na sessão, como a instalação real o criaria. */
+    async function insertActivePushDevice(sessionId: string): Promise<string> {
+      const pushDeviceId = randomUUID();
+
+      await container.dbPool.query(
+        `insert into app.push_devices (id, session_id, device_token, environment)
+         values ($1, $2, $3, 'development')`,
+        [pushDeviceId, sessionId, `device-token-${pushDeviceId}`],
+      );
+
+      return pushDeviceId;
+    }
+
+    async function readPushDeviceRevokedAt(pushDeviceId: string): Promise<Date | null> {
+      const result = await container.dbPool.query<{ revoked_at: Date | null }>(
+        'select revoked_at from app.push_devices where id = $1',
+        [pushDeviceId],
+      );
+
+      const row = result.rows[0];
+      if (row === undefined) {
+        throw new Error('expected the push device to exist');
+      }
+
+      return row.revoked_at;
+    }
 
     async function readLastSeenAt(sessionId: string): Promise<Date> {
       const result = await container.dbPool.query<{ last_seen_at: Date }>(

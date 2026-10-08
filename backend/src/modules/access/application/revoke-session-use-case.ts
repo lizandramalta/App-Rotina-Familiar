@@ -12,9 +12,10 @@ const EXPLICIT_SIGN_OUT_REASON = 'explicit_sign_out';
 /**
  * `RevokeSession` (CA-09, SPEC-001 §5.2.4).
  *
- * Encerra a sessão e os access tokens dela no mesmo commit, para que o token
- * recém-usado não continue valendo depois da resposta (CA-05). O membro não é
- * removido de `app.members`: a pessoa continua na família.
+ * Encerra a sessão, os access tokens e os registros de push dela no mesmo
+ * commit, para que o token recém-usado não continue valendo depois da resposta
+ * (CA-05) e a instalação pare de receber notificação. O membro não é removido de
+ * `app.members`: a pessoa continua na família.
  */
 export class RevokeSessionUseCase {
   constructor(
@@ -44,6 +45,7 @@ export class RevokeSessionUseCase {
       });
 
       await this.deps.repository.revokeAccessTokensForSession(tx, session.sessionId);
+      await this.deps.repository.revokePushDevicesForSession(tx, session.sessionId);
 
       return revoked ? session.sessionId : undefined;
     });

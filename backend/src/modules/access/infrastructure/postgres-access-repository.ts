@@ -290,4 +290,18 @@ export class PostgresAccessRepository implements AccessRepositoryPort {
       [sessionId],
     );
   }
+
+  public async revokePushDevicesForSession(
+    tx: TransactionContext,
+    sessionId: string,
+  ): Promise<void> {
+    await asPostgresClient(tx).query(
+      `update app.push_devices
+          set revoked_at = now(),
+              updated_at = now()
+        where session_id = $1
+          and revoked_at is null`,
+      [sessionId],
+    );
+  }
 }

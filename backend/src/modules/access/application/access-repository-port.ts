@@ -141,4 +141,11 @@ export interface AccessRepositoryPort {
 
   /** Encerra os access tokens ativos da sessão, junto da revogação (CA-09). */
   revokeAccessTokensForSession(tx: TransactionContext, sessionId: string): Promise<void>;
+
+  /**
+   * Encerra os registros de push da sessão, no mesmo commit da revogação: um
+   * token de dispositivo que sobrevivesse ao logout seguiria recebendo
+   * notificação da família (CA-09).
+   */
+  revokePushDevicesForSession(tx: TransactionContext, sessionId: string): Promise<void>;
 }

@@ -41,6 +41,12 @@ export interface StoredSession {
   lastSeenAt: Date | undefined;
 }
 
+export interface StoredPushDevice {
+  readonly pushDeviceId: string;
+  readonly sessionId: string;
+  revokedAt: Date | undefined;
+}
+
 export interface StoredAccessToken {
   readonly tokenHash: string;
   readonly sessionId: string;
@@ -67,6 +73,7 @@ export class InMemoryAccessRepository implements AccessRepositoryPort {
   public members: CreatorMembershipRecord[] = [];
   public sessions: StoredSession[] = [];
   public accessTokens: StoredAccessToken[] = [];
+  public pushDevices: StoredPushDevice[] = [];
 
   public async findCreatorIdentityByAppleSubjectHash(
     tx: TransactionContext,
@@ -251,6 +258,20 @@ export class InMemoryAccessRepository implements AccessRepositoryPort {
       }
     }
   }
+
+  public async revokePushDevicesForSession(
+    tx: TransactionContext,
+    sessionId: string,
+  ): Promise<void> {
+    this.seenContexts.push(tx);
+    this.operations.push('revokePushDevicesForSession');
+
+    for (const device of this.pushDevices) {
+      if (device.sessionId === sessionId && device.revokedAt === undefined) {
+        device.revokedAt = new Date();
+      }
+    }
+  }
 }
 
 /** Crypto determinístico: os valores emitidos ficam previsíveis no teste. */
@@ -338,6 +359,14 @@ export function seedActiveSession(
     tokenHash: sha256Hex(seeded.accessToken),
     sessionId: seeded.sessionId,
     expiresAt: overrides.accessTokenExpiresAt,
+    revokedAt: undefined,
+  });
+
+  // Registro de push ativo na sessão, como a instalação real teria: é o que
+  // CA-09 manda encerrar junto do logout.
+  repository.pushDevices.push({
+    pushDeviceId: `push-device-${seeded.sessionId}`,
+    sessionId: seeded.sessionId,
     revokedAt: undefined,
   });
 

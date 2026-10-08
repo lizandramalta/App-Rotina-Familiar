@@ -88,7 +88,33 @@ describe('RevokeSession use case (CA-09)', () => {
         'findSessionByAccessToken',
         'revokeSessionById',
         'revokeAccessTokensForSession',
+        'revokePushDevicesForSession',
       ]);
+    });
+
+    it('revokes the push device registered for the session (CA-09)', async () => {
+      const seeded = givenActiveSession();
+
+      await useCase.execute({ accessToken: seeded.accessToken });
+
+      expect(repository.pushDevices).toHaveLength(1);
+      expect(repository.pushDevices[0]?.revokedAt).toBeInstanceOf(Date);
+    });
+
+    it('leaves the push device of another session untouched', async () => {
+      const seeded = givenActiveSession();
+      repository.pushDevices.push({
+        pushDeviceId: 'push-device-other-session',
+        sessionId: 'session-of-another-installation',
+        revokedAt: undefined,
+      });
+
+      await useCase.execute({ accessToken: seeded.accessToken });
+
+      const other = repository.pushDevices.find(
+        (device) => device.sessionId === 'session-of-another-installation',
+      );
+      expect(other?.revokedAt).toBeUndefined();
     });
 
     it('keeps the member in the family (CA-09)', async () => {
@@ -188,6 +214,7 @@ describe('RevokeSession use case (CA-09)', () => {
 
       expect(repository.sessions[0]?.revokedAt).toBeUndefined();
       expect(repository.accessTokens[0]?.revokedAt).toBeUndefined();
+      expect(repository.pushDevices[0]?.revokedAt).toBeUndefined();
       expect(logger.info).not.toHaveBeenCalled();
     });
   });
