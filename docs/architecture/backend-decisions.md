@@ -1,7 +1,7 @@
 # Decisões da arquitetura backend
 
-**Versão:** 1.1 · **Base funcional:** 1.5\
-**Data:** 2026-10-06 · **Situação:** referência arquitetural para implementação futura
+**Versão:** 1.2 · **Base funcional:** 1.5\
+**Data:** 2026-10-08 · **Situação:** fundação técnica da Sprint 0 implementada; referência para entregas incrementais
 
 [Arquitetura](backend-architecture.md) · [Contratos](backend-contracts.md) · [Decisões mobile](mobile-decisions.md) · [Índice](../DOCUMENTACAO.md)
 
@@ -70,7 +70,7 @@ Esses detalhes são decisões técnicas da arquitetura. Os IDs funcionais perman
 
 ## 5. Limites e continuidade
 
-Não foram criados servidor, migrations, recursos Supabase/R2, credenciais ou publicação. A documentação define responsabilidades e contratos para esse trabalho posterior.
+A Sprint 0 criou o servidor Fastify, a configuração validada, o schema privado `app`, migrations e as verificações de CI. Ela não cria recursos Supabase/R2 gerenciados, credenciais, publicação, endpoints de produto, sessões ou jobs de domínio; esses itens continuam orientados por esta documentação e pelas SPECs aprovadas.
 
 Hospedagem/domínio, patches exatos de bibliotecas, parâmetros operacionais de pool/retry, retenção de fotos vinculadas, distribuição e volumes de testes não bloqueiam a arquitetura. Valores operacionais serão configuração validada, sem alterar os comportamentos de produto. Escolhas de implementação que alterem permissões, datas livres, refresh sem prazo, retenção, sorteio local ou snapshot de destaque exigem revisar explicitamente a base funcional.
 
@@ -80,5 +80,6 @@ Sequência sugerida: composição e persistência → Apple/bootstrap/sessões/c
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.2 | 2026-10-08 | Registra a fundação backend da Sprint 0 sem alterar decisões funcionais ou introduzir capacidades de produto. |
 | 1.1 | 2026-10-06 | BA-21: confirma em 10 minutos o prazo técnico do `creationGrant` proposto em `backend-architecture.md` §8, decidido na aprovação de `SPEC-001`. |
 | 1.0 | 2026-10-05 | BA-01–BA-20, distinção entre decisões confirmadas e propostas técnicas, alternativas e detalhes derivados. |

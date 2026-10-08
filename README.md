@@ -175,10 +175,10 @@ Detalhes e limites da fundação mobile estão em [mobile/SETUP.md](mobile/SETUP
 `.env` e os `*.xcconfig` são locais e ignorados pelo Git. Versione apenas os templates
 `.env.example` e `*.xcconfig.example`, e nunca inclua credenciais reais neles.
 
-## Estrutura para implementação
+## Estrutura de implementação
 
-- `mobile/` será a raiz do aplicativo iOS/iPadOS.
-- `backend/` será a raiz da API e dos jobs do servidor.
+- `mobile/` é a raiz do aplicativo iOS/iPadOS.
+- `backend/` é a raiz da API e dos jobs do servidor.
 - `specs/` reúne as entregas aprovadas que conectam os dois projetos à base documental.
 - `docs/` continua sendo a fonte de verdade para comportamento, UX, modelo e arquitetura.
 
@@ -186,7 +186,7 @@ Antes de desenvolver uma funcionalidade, a equipe deve partir de uma spec aprova
 consultar somente as referências rastreáveis que ela indica. As instruções completas
 para agentes estão em [AGENTS.md](AGENTS.md).
 
-A arquitetura mobile 1.2, documentada em 2026-10-05, consolida as decisões para implementação futura. O código e os nomes dos arquivos de código serão em inglês; os textos da experiência serão localizados. As estruturas e os exemplos nas docs não representam arquivos Swift já implementados.
+A Sprint 0 implementou a fundação técnica de mobile, backend, migrations e CI, sem introduzir comportamento de produto. As arquiteturas mantêm as funcionalidades, telas e integrações de produto como implementação futura orientada por SPECs aprovadas. O código e os nomes dos arquivos de código são em inglês; os textos da experiência são localizáveis.
 
 ## Área Família
 

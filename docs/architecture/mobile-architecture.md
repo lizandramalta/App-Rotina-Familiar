@@ -1,10 +1,10 @@
 # Arquitetura mobile — Swift, SwiftUI e Clean Architecture
 
 **Projeto:** App de Organização Familiar — MVP\
-**Versão da arquitetura:** 1.4\
+**Versão da arquitetura:** 1.5\
 **Base funcional:** 1.9 · Design: 1.4 · Modelo de classes: 1.5\
-**Data:** 2026-10-06\
-**Situação:** decisões consolidadas antes da implementação
+**Data:** 2026-10-08\
+**Situação:** fundação técnica da Sprint 0 implementada; decisões de produto permanecem para implementação incremental
 
 [Projeto](../../README.md) · [Índice](../DOCUMENTACAO.md) · [Catálogo mobile](mobile-feature-catalog.md) · [Decisões](mobile-decisions.md)
 
@@ -12,7 +12,7 @@
 
 Aplicativo nativo para iPhone e iPad, mínimo iOS/iPadOS 26, em Swift e SwiftUI. View + ViewModel organiza Presentation; Clean Architecture separa apresentação, casos de uso, domínio e integrações. Código, arquivos, tipos, membros, recursos e comentários de código usam inglês; documentação e textos da experiência permanecem em português, com strings localizáveis.
 
-Esta arquitetura incorpora as decisões do usuário sobre datas, fuso, créditos, badges, convites, sessão única, Supabase, R2, concorrência e falhas. Árvores e exemplos abaixo são especificações futuras; nenhum projeto ou código de aplicativo foi implementado.
+Esta arquitetura incorpora as decisões do usuário sobre datas, fuso, créditos, badges, convites, sessão única, Supabase, R2, concorrência e falhas. A Sprint 0 criou o projeto SwiftUI, a configuração por ambiente, o shell neutro de navegação e testes básicos. Árvores e exemplos abaixo continuam sendo especificações para funcionalidades de produto futuras.
 
 Fontes: [visão](../00-visao-do-produto.md), [RN](../01-regras-de-negocio.md), [RF/RNF](../02-requisitos.md), [UC01–UC19](../03-casos-de-uso.md), [diagramas UML](../04-diagramas-de-caso-de-uso.md), [DER](../05-modelo-de-dados.md), [classes](../06-diagrama-de-classes.md), [screen map](../design/screen-map.md) e [user flows](../design/user-flows.md). A base Markdown vigente é a referência; PDFs exportados anteriormente não são automaticamente atualizados.
 
@@ -347,9 +347,9 @@ Nova abertura offline não libera acervo protegido persistente. Conteúdo já ca
 
 Tokens e componentes compartilhados usam nomes em inglês; valores visuais finais seguem design. Texto/ícones acompanham cores. Usar Dynamic Type, VoiceOver, contraste, ordem de foco e Reduce Motion; roleta comunica resultado sem depender de animação. Gráficos têm rótulos e alternativa textual. iPad adapta layout mantendo permissões e jornadas; variante Kids não ganha áreas adultas pelo tamanho da tela.
 
-## 15. Estratégia de verificação futura
+## 15. Estratégia de verificação
 
-Esta revisão executa verificação documental, não testes do aplicativo inexistente. Na implementação:
+A Sprint 0 verifica o build e os testes da fundação na CI. Nas funcionalidades posteriores, a verificação deve cobrir:
 
 - Domain: datas livres de cadastro versus consulta limitada, frequências, períodos/fusos/transições, métricas e elegibilidade dos badges.
 - Application/Data: última gravação em edições, unicidade das operações críticas, ausência de retentativa automática após resposta perdida, recuperação específica de ingresso e revogação por convite.
@@ -377,6 +377,7 @@ A sequência futura permanece: composição/acesso → família/membros → tare
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.5 | 2026-10-08 | Registra a fundação mobile da Sprint 0: projeto SwiftUI, configuração por ambiente, navegação neutra e testes básicos; funcionalidades de produto permanecem futuras. |
 | 1.4 | 2026-10-07 | `CompleteTaskCommand` não transporta escolha de responsáveis; conclusão é direta e o servidor resolve a atribuição automática. |
 | 1.3 | 2026-10-06 | `TaskQueryContext` distingue escopo pessoal diário dos períodos Dia/Semana familiares adultos. Para SPEC-009. |
 | 1.2 | 2026-10-05 | Integração com arquitetura backend 1.0 em Node.js, contratos `/v1`, bootstrap, preparação de rotinas e referências; base funcional 1.5 preservada. |

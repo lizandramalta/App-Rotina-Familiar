@@ -1,9 +1,9 @@
 # Arquitetura backend — Node.js e Clean Architecture
 
-**Versão:** 1.1\
+**Versão:** 1.2\
 **Base funcional:** 1.5 · Mobile: 1.2 · Design: 1.1 · DER: 1.2\
-**Data:** 2026-10-05\
-**Situação:** arquitetura para implementação futura; sem servidor, migrações ou infraestrutura implementados
+**Data:** 2026-10-08\
+**Situação:** fundação técnica da Sprint 0 implementada; capacidades de produto e integrações permanecem futuras
 
 [Índice](../DOCUMENTACAO.md) · [Contratos e rastreabilidade](backend-contracts.md) · [Decisões](backend-decisions.md) · [Mobile](mobile-architecture.md) · [DER](../05-modelo-de-dados.md)
 
@@ -420,5 +420,6 @@ Validação futura se concentra em comportamentos: acesso entre famílias, privi
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.2 | 2026-10-08 | Registra a fundação backend da Sprint 0: API Fastify, configuração, migrations, PostgreSQL de integração e CI; não introduz capacidades de produto. |
 | 1.1 | 2026-10-07 | Conclusão direta mantém responsáveis ou atribui adulto sem responsável; reabertura pode reverter dados derivados de missão concluída na mesma transação. |
 | 1.0 | 2026-10-05 | Arquitetura Node.js/Clean Architecture com Supabase/R2, módulos, transações, acesso, jobs, contratos e preservação da base funcional 1.5. |

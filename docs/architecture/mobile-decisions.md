@@ -1,7 +1,7 @@
 # Decisões consolidadas da arquitetura mobile
 
-**Versão:** 1.2 · **Base funcional:** 1.5\
-**Data:** 2026-10-05 · **Situação:** decisões do usuário incorporadas; sem implementação
+**Versão:** 1.3 · **Base funcional:** 1.5\
+**Data:** 2026-10-08 · **Situação:** fundação técnica da Sprint 0 implementada; decisões de produto preservadas
 
 [Arquitetura](mobile-architecture.md) · [Catálogo](mobile-feature-catalog.md) · [Índice](../DOCUMENTACAO.md)
 
@@ -106,6 +106,7 @@ As propostas substituídas (iOS 17, sorteio remoto, controle de versão otimista
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.3 | 2026-10-08 | Registra a fundação mobile da Sprint 0 sem alterar decisões funcionais ou implementar jornadas de produto. |
 | 1.2 | 2026-10-05 | Integração com arquitetura backend 1.0 em Node.js, contratos `/v1`, bootstrap, preparação de rotinas e referências; base funcional 1.5 preservada. |
 | 1.1 | 2026-10-05 | Consolidação das respostas do usuário, fechamento de P-01–P-09 e registro de MA-16/17; propostas anteriores substituídas. |
 | 1.0 | 2026-10-05 | Propostas e pendências iniciais, anteriores às decisões desta revisão. |

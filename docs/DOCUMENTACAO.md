@@ -131,14 +131,14 @@ TEL-014 e TEL-031 foram incorporadas à TEL-050 e retiradas da navegação; os i
 
 ## Política de versionamento
 
-1. A base funcional vigente está na versão **1.7**. Design está na versão **1.2**, mobile/modelos na **1.3** e backend na **1.0**; documentos ainda alinhados à versão anterior devem ser atualizados quando o comportamento que descrevem for afetado.
+1. A base funcional vigente está na versão **1.14**. Screen map e user flows estão na versão **1.8**; as arquiteturas mobile e backend têm versionamento técnico independente. Documentos ainda alinhados a uma versão funcional anterior devem ser atualizados quando o comportamento que descrevem for afetado.
 2. Preserve os identificadores RN, RF, RNF, UC, TEL, MOD e UF. Novos itens recebem novos códigos; códigos retirados não são reutilizados.
 3. A edição vigente fica na raiz e em `docs/`. O Git mantém o histórico e permite comparar ou recuperar versões anteriores por commits e, quando adotadas, tags. Não mantenha cópias da documentação em pastas de versões.
 4. Alterações funcionais e suas referências devem evoluir juntas, com versão, data e histórico dos códigos e comportamentos afetados. Use 1.1, 1.2... para revisões incrementais e 2.0 para mudanças substanciais da base funcional.
 5. Preserve os IDs para design e user flows e registre as alterações no Git. Revisões do screen map e dos user flows são versionadas em conjunto. Se alterarem comportamento, atualize e versione a base funcional correspondente; a versão de design é independente.
-6. A arquitetura mobile em `docs/architecture/` tem versão independente, atualmente **1.2**, referenciando a base funcional **1.5**. Decisões técnicas não alteram requisitos implicitamente; mudanças funcionais exigem revisão da base e das referências afetadas. A presença de exemplos e árvores de arquivos não indica implementação.
+6. As arquiteturas em `docs/architecture/` têm versionamento independente da base funcional. A Sprint 0 implementa somente a fundação técnica de mobile, backend, migrations e CI; árvores e exemplos de funcionalidades continuam sendo direcionamento para entregas futuras. Decisões técnicas não alteram requisitos implicitamente; mudanças funcionais exigem revisão da base e das referências afetadas.
 
-A arquitetura backend 1.0 possui versionamento independente da base funcional. Node.js foi definido pelo usuário; TypeScript, Fastify, `pg` e execução API/worker são recomendações documentadas, sem implementação.
+A fundação backend adota Node.js, TypeScript, Fastify e `pg`; API de produto, worker funcional e integrações permanecem dependentes das SPECs aprovadas.
 
 ## Histórico de versões
 
