@@ -10,6 +10,7 @@ Use esta skill para transformar um card de implementação já planejado em cód
 ## Entrada e limites
 
 - Receba uma chave/link de card, uma SPEC aprovada ou uma indicação inequívoca do recorte a implementar.
+- Ao receber uma chave Jira no padrão `SCRUM-*`, consulte o item pelo MCP Atlassian antes de localizar a SPEC ou propor escopo. Use o ticket para confirmar título, descrição, responsabilidade, fase, critérios de aceite, status, sprint e vínculos de bloqueio; não tente deduzir essas informações pelo nome da chave, pelo repositório ou pelo histórico Git. Esta consulta é somente leitura e não autoriza alterar o Jira.
 - Identifique a responsabilidade do card: `Backend`, `Mobile` ou integração entre ambos. Não implemente responsabilidades de outro card sem autorização explícita.
 - Trate a SPEC funcional como fonte do comportamento e a UX-spec como fonte de apresentação. Documentos de arquitetura definem decisões técnicas; nenhum deles autoriza inventar regras, permissões ou estados.
 - Só altere Jira, Figma, serviços externos ou o status de um card se o usuário pedir isso explicitamente.
@@ -25,7 +26,7 @@ Antes de propor ou alterar código:
    - Backend: `docs/architecture/backend-code-conventions.md`, incluindo as regras OpenAPI/Swagger se o card criar ou alterar rotas HTTP.
    - Integração: ambas, respeitando a fronteira entre os projetos.
 4. Confirme a fase e os critérios de aceite que o card cobre. Não implemente critérios de outra fase por conveniência.
-5. Se houver acesso ao Jira, confira os vínculos de bloqueio. Caso não haja, peça a informação necessária ou declare a limitação, sem supor que uma dependência foi concluída.
+5. Para cards `SCRUM-*`, confira no MCP Atlassian os vínculos de bloqueio e o estado das dependências. Se o MCP Atlassian não estiver disponível ou a consulta falhar, declare a limitação e peça o link ou o conteúdo do ticket; não suponha que uma dependência foi concluída. Para outras chaves, use o rastreador disponível e aplique a mesma regra.
 
 ### Regra para design e dependências
 

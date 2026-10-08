@@ -1,7 +1,7 @@
-# Screen map — versão 1.8
+# Screen map — versão 1.9
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do mapa:** 1.8\
+**Versão do mapa:** 1.9\
 **Base funcional:** 1.14\
 **Data:** 2026-10-07\
 **Situação:** referência inicial para design; organização de navegação proposta
@@ -294,6 +294,7 @@ A = Administrador (inclui Criador); M = Membro; K = Kids. Códigos RF e RNF são
 | Telas | Estados e respostas |
 |---|---|
 | Todas com rede/gravação | Carregando/processando, sucesso confirmado e falha com possibilidade de tentar novamente. Não apresentar operação como salva em falha. Manter a interface responsiva. |
+| Listas paginadas | Carregar a próxima página por rolagem infinita antes do fim dos itens confirmados; cada página tem até 20 itens. Falha de página preserva a lista e permite nova tentativa, sem interpretar como fim da lista. |
 | Áreas protegidas | Sessão recuperável renova silenciosamente; sessão perdida encaminha à entrada. Perfil removido tem acesso bloqueado, inclusive na renovação; novo convite não reativa perfil removido. |
 | TEL-001/002/055/056 | Apple cancelado ou com falha; dados obrigatórios inválidos; família já existente redireciona; rascunho de perfil não é persistido antes da criação; foto opcional pode ser repetida ou omitida após falha; adicionar membros e emitir convite não é obrigatório para avançar. |
 | TEL-003/034 | Senha incorreta, link inválido/consumido, perfil removido, geração com falha e ingresso concluído; não reutilizar convite consumido. |
@@ -326,6 +327,7 @@ Campos funcionais de data/fuso e seleção de foto estão definidos; o layout vi
 
 | Versão do mapa | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.9 | 1.14 | 2026-10-08 | Listas paginadas usam páginas de até 20 itens e rolagem infinita, preservando itens confirmados em falha de nova página. Para SPEC-003 / SCRUM-27. |
 | 1.7 | 1.12 | 2026-10-07 | TEL-022 ganha observação opcional; MOD-007 ganha atalho "+ Nova tarefa"; TEL-021 explicita consulta básica por todos os perfis, inclusive Kids. Para SPEC-014. |
 | 1.6 | 1.11 | 2026-10-07 | Conclusão direta sem MOD-004; MOD-006 confirma reabertura de missão concluída e reversão de recompensa, participações e badges. |
 | 1.5 | 1.10 | 2026-10-06 | MOD-004 oculta conclusão de tarefa com responsável Kids para Membro; evidência Kids permanece administrativa. Para SPEC-010. |

@@ -47,7 +47,7 @@
 ### 5.1. TEL-050 — Família
 
 - **Objetivo nesta entrega:** iniciar a criação para Administradores e abrir o detalhe de qualquer membro para adultos.
-- **Anatomia:** a lista de membros continua como conteúdo existente; o botão “Adicionar membro” aparece apenas quando a capacidade `manageMembers` estiver confirmada.
+- **Anatomia:** a lista de membros continua como conteúdo existente e carrega a próxima página de até 20 perfis ao se aproximar do fim da rolagem; o botão “Adicionar membro” aparece apenas quando a capacidade `manageMembers` estiver confirmada.
 - **Transição:** criar não gera credenciais. Pela origem TEL-050, abre TEL-032; pela origem TEL-056, retorna ao onboarding, que pode oferecer TEL-034 por ação explícita.
 
 ### 5.2. TEL-032 — Detalhe e tarefas do membro
@@ -118,6 +118,7 @@ As mensagens recebem o código de erro estável da API como chave de decisão; t
 | UX-03 | MOD-010 é obrigatório para remover, mudar papel/modo e sair da administração. | Não; apresenta efeitos já definidos. |
 | UX-04 | Ao falhar ou haver resposta incerta, formulário e contexto são preservados e a tela recarrega o estado confirmado antes de nova ação. | Não; aplica RNF12. |
 | UX-05 | No onboarding, TEL-033 preserva os campos e retorna a TEL-056 após criação confirmada; não abre o convite automaticamente. | Não; aplica RF02 e RF41. |
+| UX-06 | Listas paginadas carregam continuamente a próxima página durante a rolagem; falha ao carregar uma página preserva os itens confirmados e oferece nova tentativa. | Não; aplica o contrato de consulta da SPEC-003 e RNF12. |
 
 ## 10. Checklist de aprovação
 

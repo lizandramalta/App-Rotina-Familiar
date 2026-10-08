@@ -1,6 +1,6 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.11 · **Base funcional:** 1.13 · **Arquitetura backend:** 1.3\
+**Versão:** 1.12 · **Base funcional:** 1.14 · **Arquitetura backend:** 1.3\
 **Data:** 2026-10-08\
 **Situação:** contrato arquitetural materializado pela documentação OpenAPI da API
 
@@ -64,7 +64,7 @@ Troca confirmada não é endpoint para transferir membro. Uma sessão anterior d
 | `GET /family/settings` | `GetFamilySettings` | `timeZoneId`, `scheduledTimeZoneChange` (`{timeZoneId, effectiveAt}` ou `null`) e `limits` (`{startsAt, endsAt, timeZoneId, isTransition}`) | Admin |
 | `POST /family/time-zone-changes/preview` | `PreviewFamilyTimeZoneChange` | `timeZoneId`, `application` → `proposedTimeZoneId`, `application`, `effectiveAt`, `effectiveLimits` e `isTransition`; recusa o fuso já vigente com `422 TIME_ZONE_UNCHANGED` | Admin; só lê, a liquidação de ciclos vencidos é feita em memória |
 | `POST /family/time-zone-changes` | `ChangeFamilyTimeZone` | `timeZoneId`, `application: immediate \| nextCycle` → mesmo formato de `GET /family/settings`; recusa o fuso já vigente com `422 TIME_ZONE_UNCHANGED`; nova solicitação válida substitui a programada | Admin; revalidar papel e limites no commit |
-| `GET /family/members` | `ListFamilyMembers` | Projeção familiar paginada | Adulto |
+| `GET /family/members` | `ListFamilyMembers` | `cursor` opaco opcional → `{items, nextCursor}`; até 20 perfis por página, em ordem estável | Adulto |
 | `GET /family/members/{memberId}` | `GetMemberDetail` | Dados públicos do perfil e capacidades administrativas do ator | Adulto da família |
 | `POST /family/members` | `CreateMember` | Nome administrativo/papel permitido → perfil ainda sem sessão | Admin |
 | `PATCH /family/members/{memberId}` | `UpdateMember` | Nome administrativo; sem apelido/foto pessoal/identidade Apple | Admin |
@@ -207,6 +207,7 @@ O documento OpenAPI 3.1 é gerado pelos schemas HTTP em `/docs/json`, e a interf
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.12 | 2026-10-08 | `ListFamilyMembers` passa a definir cursor opaco, ordenação estável, páginas de até 20 perfis e `{items, nextCursor}`; cursor malformado recebe `422 VALIDATION_FAILED` com `CURSOR_INVALID`. Para SPEC-003 / SCRUM-27. |
 | 1.11 | 2026-10-08 | Contrato passa a registrar a documentação OpenAPI 3.1 executável em `/docs/json` e a interface Swagger em `/docs`; sem alteração de comportamento dos endpoints. |
 | 1.10 | 2026-10-08 | Formatos de resposta de `GetFamilySettings`, `PreviewFamilyTimeZoneChange` e `ChangeFamilyTimeZone`, e o código `TIME_ZONE_UNCHANGED`. Sem mudança de comportamento. Para SPEC-002 / SCRUM-21. |
 | 1.9 | 2026-10-08 | `CreateFamily` passa a declarar `creatorName` e `creatorNickname` (nome e apelido do Criador, RF01/RF48), o ciclo semanal inicial na mesma transação e a conferência da prova da instalação contra o grant. Alinha o contrato ao que a SPEC-002 já aprovou; sem mudança de comportamento. Para SPEC-002 / SCRUM-18. |

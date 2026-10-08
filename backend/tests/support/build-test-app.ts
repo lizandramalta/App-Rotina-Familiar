@@ -16,6 +16,9 @@ export interface TestApp {
   readonly getFamilySettings: UseCaseMock;
   readonly previewTimeZoneChange: UseCaseMock;
   readonly changeTimeZone: UseCaseMock;
+  readonly listFamilyMembers: UseCaseMock;
+  readonly getMemberDetail: UseCaseMock;
+  readonly createMember: UseCaseMock;
   readonly uploadMedia: UseCaseMock;
   readonly updateOwnProfile: UseCaseMock;
   readonly authenticateSession: UseCaseMock;
@@ -48,6 +51,9 @@ export function buildTestApp(): TestApp {
   const getFamilySettings: UseCaseMock = { execute: vi.fn() };
   const previewTimeZoneChange: UseCaseMock = { execute: vi.fn() };
   const changeTimeZone: UseCaseMock = { execute: vi.fn() };
+  const listFamilyMembers: UseCaseMock = { execute: vi.fn() };
+  const getMemberDetail: UseCaseMock = { execute: vi.fn() };
+  const createMember: UseCaseMock = { execute: vi.fn() };
   const uploadMedia: UseCaseMock = { execute: vi.fn() };
   const updateOwnProfile: UseCaseMock = { execute: vi.fn() };
   const authenticateSession: UseCaseMock = { execute: vi.fn().mockResolvedValue(TEST_ACTOR) };
@@ -68,6 +74,9 @@ export function buildTestApp(): TestApp {
     getFamilySettingsUseCase: getFamilySettings,
     previewFamilyTimeZoneChangeUseCase: previewTimeZoneChange,
     changeFamilyTimeZoneUseCase: changeTimeZone,
+    listFamilyMembersUseCase: listFamilyMembers,
+    getMemberDetailUseCase: getMemberDetail,
+    createMemberUseCase: createMember,
     uploadMediaUseCase: uploadMedia,
     updateOwnProfileUseCase: updateOwnProfile,
     createTaskUseCase: createTask,
@@ -83,6 +92,9 @@ export function buildTestApp(): TestApp {
     getFamilySettings,
     previewTimeZoneChange,
     changeTimeZone,
+    listFamilyMembers,
+    getMemberDetail,
+    createMember,
     uploadMedia,
     updateOwnProfile,
     authenticateSession,

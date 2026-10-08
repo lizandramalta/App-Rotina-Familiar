@@ -80,6 +80,15 @@ describe('HTTP Presentation Layer (Fastify)', () => {
       changeFamilyTimeZoneUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['changeFamilyTimeZoneUseCase'],
+      listFamilyMembersUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['listFamilyMembersUseCase'],
+      getMemberDetailUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['getMemberDetailUseCase'],
+      createMemberUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['createMemberUseCase'],
       uploadMediaUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['uploadMediaUseCase'],
@@ -186,6 +195,8 @@ describe('HTTP Presentation Layer (Fastify)', () => {
         '/health/ready',
         '/v1/access/apple',
         '/v1/families',
+        '/v1/family/members',
+        '/v1/family/members/{memberId}',
         '/v1/media',
         '/v1/me/profile',
         '/v1/tasks',

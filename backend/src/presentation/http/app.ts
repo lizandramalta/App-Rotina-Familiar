@@ -14,6 +14,7 @@ import { registerFamilyRoutes } from './family-routes.js';
 import { registerMediaRoutes } from './media-routes.js';
 import { registerProfileRoutes } from './profile-routes.js';
 import { registerTaskRoutes } from './task-routes.js';
+import { registerMemberRoutes } from './member-routes.js';
 
 export function buildHttpApp(
   container: ApplicationContainer,
@@ -60,6 +61,7 @@ export function buildHttpApp(
         { name: 'Operational', description: 'Sondas e metadados operacionais.' },
         { name: 'Access', description: 'Autenticação e início de sessão.' },
         { name: 'Family', description: 'Onboarding e criação de família.' },
+        { name: 'Members', description: 'Consulta e criação de perfis da família.' },
         { name: 'Media', description: 'Upload de mídia privada.' },
         { name: 'Profile', description: 'Dados do próprio perfil.' },
         { name: 'Tasks', description: 'Gestão de tarefas únicas.' },
@@ -274,6 +276,7 @@ export function buildHttpApp(
       registerAccessRoutes(scope, container);
       registerSessionRoutes(scope, container);
       registerFamilyRoutes(scope, container);
+      registerMemberRoutes(scope, container);
       registerMediaRoutes(scope, container);
       registerProfileRoutes(scope, container);
       registerTaskRoutes(scope, container);

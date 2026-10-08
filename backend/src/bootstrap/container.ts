@@ -27,6 +27,12 @@ import { ChangeFamilyTimeZoneUseCase } from '../modules/family/application/chang
 import { GetFamilySettingsUseCase } from '../modules/family/application/get-family-settings-use-case.js';
 import { PreviewFamilyTimeZoneChangeUseCase } from '../modules/family/application/preview-family-time-zone-change-use-case.js';
 import { PostgresFamilySettingsRepository } from '../modules/family/infrastructure/postgres-family-settings-repository.js';
+import {
+  CreateMemberUseCase,
+  GetMemberDetailUseCase,
+  ListFamilyMembersUseCase,
+} from '../modules/family/application/member-management-use-cases.js';
+import { PostgresMemberManagementRepository } from '../modules/family/infrastructure/postgres-member-management-repository.js';
 import { UploadMediaUseCase } from '../modules/media/application/upload-media-use-case.js';
 import type { ObjectStoragePort } from '../modules/media/application/media-ports.js';
 import { PostgresMediaRepository } from '../modules/media/infrastructure/postgres-media-repository.js';
@@ -62,6 +68,9 @@ export interface ApplicationContainer {
   readonly getFamilySettingsUseCase: GetFamilySettingsUseCase;
   readonly previewFamilyTimeZoneChangeUseCase: PreviewFamilyTimeZoneChangeUseCase;
   readonly changeFamilyTimeZoneUseCase: ChangeFamilyTimeZoneUseCase;
+  readonly listFamilyMembersUseCase: ListFamilyMembersUseCase;
+  readonly getMemberDetailUseCase: GetMemberDetailUseCase;
+  readonly createMemberUseCase: CreateMemberUseCase;
   readonly uploadMediaUseCase: UploadMediaUseCase;
   readonly updateOwnProfileUseCase: UpdateOwnProfileUseCase;
   readonly createTaskUseCase: CreateTaskUseCase;
@@ -170,6 +179,21 @@ export function createContainer(config: Configuration): ApplicationContainer {
     logger,
   });
 
+  const memberManagementRepository = new PostgresMemberManagementRepository();
+  const listFamilyMembersUseCase = new ListFamilyMembersUseCase({
+    repository: memberManagementRepository,
+    transactionRunner,
+  });
+  const getMemberDetailUseCase = new GetMemberDetailUseCase({
+    repository: memberManagementRepository,
+    transactionRunner,
+  });
+  const createMemberUseCase = new CreateMemberUseCase({
+    repository: memberManagementRepository,
+    transactionRunner,
+    clock,
+  });
+
   // Sem R2 configurado o upload responde 503; a criação da família não depende
   // dele, já que a foto é opcional (SPEC-002 CA-10).
   const mediaRepository = new PostgresMediaRepository();
@@ -217,6 +241,9 @@ export function createContainer(config: Configuration): ApplicationContainer {
     getFamilySettingsUseCase,
     previewFamilyTimeZoneChangeUseCase,
     changeFamilyTimeZoneUseCase,
+    listFamilyMembersUseCase,
+    getMemberDetailUseCase,
+    createMemberUseCase,
     uploadMediaUseCase,
     updateOwnProfileUseCase,
     createTaskUseCase,
