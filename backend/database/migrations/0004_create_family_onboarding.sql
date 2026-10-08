@@ -1,4 +1,4 @@
--- 0003 — Onboarding do Criador (SPEC-002, Fase 1).
+-- 0004 — Onboarding do Criador (SPEC-002, Fase 1).
 --
 -- Acrescenta o que a criação atômica da família precisa: apelido e foto no
 -- membro, a reserva de mídia (BA-16) e o ciclo semanal inicial (BA-13).

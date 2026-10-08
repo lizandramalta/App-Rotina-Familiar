@@ -609,7 +609,7 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
       });
     });
 
-    describe('database invariants of migration 0003', () => {
+    describe('database invariants of migration 0004', () => {
       it('grants no privilege on the new tables to anon or authenticated (BA-19)', async () => {
         const result = await container.dbPool.query<{ grantee: string; table_name: string }>(
           `select grantee, table_name
