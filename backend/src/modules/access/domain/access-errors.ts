@@ -12,3 +12,27 @@ export class AppleProofInvalidError extends DomainError {
     super({ message, code: 'APPLE_PROOF_INVALID', statusCode: 401 });
   }
 }
+
+/**
+ * Access token ausente, malformado, desconhecido ou fora da janela de 15
+ * minutos (BA-10). Orienta o app a renovar o acesso com o refresh token.
+ *
+ * A mensagem não distingue "ausente" de "expirado": saber qual dos dois é o
+ * caso diria ao chamador se o token existiu algum dia (RNF08, RNF16).
+ */
+export class SessionExpiredError extends DomainError {
+  constructor(message = 'The access token is missing, invalid, or expired.') {
+    super({ message, code: 'SESSION_EXPIRED', statusCode: 401 });
+  }
+}
+
+/**
+ * Sessão encerrada — por revogação explícita (CA-09) ou substituída por um novo
+ * login Apple (CA-05). Diferente de `SessionExpiredError` de propósito: aqui
+ * renovar não resolve, e o app precisa voltar ao login.
+ */
+export class SessionRevokedError extends DomainError {
+  constructor(message = 'The session has been revoked.') {
+    super({ message, code: 'SESSION_REVOKED', statusCode: 401 });
+  }
+}
