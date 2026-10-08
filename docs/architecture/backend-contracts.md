@@ -1,8 +1,8 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.10 · **Base funcional:** 1.13 · **Arquitetura backend:** 1.0\
+**Versão:** 1.11 · **Base funcional:** 1.13 · **Arquitetura backend:** 1.3\
 **Data:** 2026-10-08\
-**Situação:** contrato arquitetural para detalhamento OpenAPI na implementação
+**Situação:** contrato arquitetural materializado pela documentação OpenAPI da API
 
 [Arquitetura](backend-architecture.md) · [Decisões](backend-decisions.md) · [Catálogo mobile](mobile-feature-catalog.md) · [UC](../03-casos-de-uso.md) · [Índice](../DOCUMENTACAO.md)
 
@@ -201,12 +201,13 @@ Cada linha cobre um objetivo funcional completo, não apenas uma rota. RF/RN per
 | RNF26 | Snapshot para PDF, resultado semanal único e fila persistente |
 | RNF27 | Perfil por titularidade, PDF adulto e compartilhamento explícito no cliente |
 
-O OpenAPI futuro deve materializar schemas e exemplos de sucesso/erro dessas rotas. Esta versão define fronteiras e semântica, sem alegar que existe especificação executável, SDK gerado ou endpoint em funcionamento.
+O documento OpenAPI 3.1 é gerado pelos schemas HTTP em `/docs/json`, e a interface interativa fica em `/docs`. Cada rota implementada mantém schema, segurança e respostas compatíveis com este contrato; a documentação executável não substitui esta fonte para comportamento, autorização ou regras de domínio.
 
 ## Histórico
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.11 | 2026-10-08 | Contrato passa a registrar a documentação OpenAPI 3.1 executável em `/docs/json` e a interface Swagger em `/docs`; sem alteração de comportamento dos endpoints. |
 | 1.10 | 2026-10-08 | Formatos de resposta de `GetFamilySettings`, `PreviewFamilyTimeZoneChange` e `ChangeFamilyTimeZone`, e o código `TIME_ZONE_UNCHANGED`. Sem mudança de comportamento. Para SPEC-002 / SCRUM-21. |
 | 1.9 | 2026-10-08 | `CreateFamily` passa a declarar `creatorName` e `creatorNickname` (nome e apelido do Criador, RF01/RF48), o ciclo semanal inicial na mesma transação e a conferência da prova da instalação contra o grant. Alinha o contrato ao que a SPEC-002 já aprovou; sem mudança de comportamento. Para SPEC-002 / SCRUM-18. |
 | 1.8 | 2026-10-07 | `SignalTask` detalhado: ator Kids, revalidação de titularidade/estado (`403 ACTION_NOT_ALLOWED`, `404 RESOURCE_NOT_FOUND`, `409 TASK_NOT_PENDING`), resposta `201 Created` com `signal.id`. `POST /media` com `purpose: taskSignal` passa a ser aceito, validando somente o papel Kids no upload; contexto de tarefa é revalidado só no vínculo. Para SPEC-012. |

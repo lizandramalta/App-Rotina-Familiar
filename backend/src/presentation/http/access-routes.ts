@@ -25,6 +25,9 @@ interface RefreshSessionBody {
  * resposta.
  */
 const signInWithAppleSchema = {
+  tags: ['Access'],
+  summary: 'Authenticate with Sign in with Apple',
+  description: 'Returns an active session or a short-lived family creation grant.',
   headers: {
     type: 'object',
     required: ['x-installation-proof'],

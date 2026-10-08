@@ -49,6 +49,9 @@ const sessionResponseSchema = {
  *   pelo caso de uso. O grant ausente é `401`, não `400`.
  */
 const createFamilySchema = {
+  tags: ['Family'],
+  summary: 'Create a family and its creator profile',
+  description: 'Consumes a valid creation grant and returns the newly active session.',
   headers: {
     type: 'object',
     required: ['x-installation-proof'],

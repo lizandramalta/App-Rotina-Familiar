@@ -206,6 +206,17 @@ npm run dev
 
 O servidor iniciará em `http://0.0.0.0:3000`.
 
+### 6.1.1 Documentação OpenAPI / Swagger
+
+Com a API em execução, abra a documentação interativa em
+`http://localhost:3000/docs`. A especificação OpenAPI 3.1 gerada pelos schemas
+das rotas fica disponível em `http://localhost:3000/docs/json`.
+
+Os endpoints protegidos mostram o esquema **Bearer**. Depois de obter um access
+token em um fluxo válido, use o botão **Authorize** para incluí-lo nos testes
+interativos. A documentação não gera tokens nem substitui a autorização real da
+API.
+
 Para iniciar o processo de Worker (background jobs) em desenvolvimento:
 
 ```bash

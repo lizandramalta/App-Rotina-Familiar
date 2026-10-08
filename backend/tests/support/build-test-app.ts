@@ -19,6 +19,10 @@ export interface TestApp {
   readonly uploadMedia: UseCaseMock;
   readonly updateOwnProfile: UseCaseMock;
   readonly authenticateSession: UseCaseMock;
+  readonly createTask: UseCaseMock;
+  readonly getTask: UseCaseMock;
+  readonly editTask: UseCaseMock;
+  readonly deleteTask: UseCaseMock;
 }
 
 export const TEST_ACTOR: ActorContext = {
@@ -47,6 +51,10 @@ export function buildTestApp(): TestApp {
   const uploadMedia: UseCaseMock = { execute: vi.fn() };
   const updateOwnProfile: UseCaseMock = { execute: vi.fn() };
   const authenticateSession: UseCaseMock = { execute: vi.fn().mockResolvedValue(TEST_ACTOR) };
+  const createTask: UseCaseMock = { execute: vi.fn() };
+  const getTask: UseCaseMock = { execute: vi.fn() };
+  const editTask: UseCaseMock = { execute: vi.fn() };
+  const deleteTask: UseCaseMock = { execute: vi.fn() };
 
   const container = {
     config,
@@ -62,6 +70,10 @@ export function buildTestApp(): TestApp {
     changeFamilyTimeZoneUseCase: changeTimeZone,
     uploadMediaUseCase: uploadMedia,
     updateOwnProfileUseCase: updateOwnProfile,
+    createTaskUseCase: createTask,
+    getTaskUseCase: getTask,
+    editTaskUseCase: editTask,
+    deleteTaskUseCase: deleteTask,
     dispose: vi.fn(),
   } as unknown as ApplicationContainer;
 
@@ -74,5 +86,9 @@ export function buildTestApp(): TestApp {
     uploadMedia,
     updateOwnProfile,
     authenticateSession,
+    createTask,
+    getTask,
+    editTask,
+    deleteTask,
   };
 }

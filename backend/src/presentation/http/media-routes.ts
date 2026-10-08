@@ -37,39 +37,51 @@ export function registerMediaRoutes(app: FastifyInstance, container: Application
 
     scope.addHook('onRequest', createAuthenticationHook(container));
 
-    scope.post('/media', { schema: { response: uploadResponseSchema } }, async (request, reply) => {
-      const actor = requireActor(request);
+    scope.post(
+      '/media',
+      {
+        schema: {
+          tags: ['Media'],
+          summary: 'Upload private media',
+          security: [{ bearerAuth: [] }],
+          consumes: ['multipart/form-data'],
+          response: uploadResponseSchema,
+        },
+      },
+      async (request, reply) => {
+        const actor = requireActor(request);
 
-      let purpose: unknown;
-      let content: Buffer | undefined;
+        let purpose: unknown;
+        let content: Buffer | undefined;
 
-      try {
-        for await (const part of request.parts()) {
-          if (part.type === 'file') {
-            content = await part.toBuffer();
-          } else if (part.fieldname === 'purpose') {
-            purpose = part.value;
+        try {
+          for await (const part of request.parts()) {
+            if (part.type === 'file') {
+              content = await part.toBuffer();
+            } else if (part.fieldname === 'purpose') {
+              purpose = part.value;
+            }
           }
+        } catch (error) {
+          if (isErrorWithCode(error, 'FST_REQ_FILE_TOO_LARGE')) {
+            throw new MediaTooLargeError();
+          }
+
+          throw new ValidationError('The upload must be a multipart request with one file.', {
+            file: ['MEDIA_FILE_REQUIRED'],
+          });
         }
-      } catch (error) {
-        if (isErrorWithCode(error, 'FST_REQ_FILE_TOO_LARGE')) {
-          throw new MediaTooLargeError();
+
+        if (content === undefined || content.length === 0) {
+          throw new ValidationError('The upload must include one file.', {
+            file: ['MEDIA_FILE_REQUIRED'],
+          });
         }
 
-        throw new ValidationError('The upload must be a multipart request with one file.', {
-          file: ['MEDIA_FILE_REQUIRED'],
-        });
-      }
+        const result = await container.uploadMediaUseCase.execute({ actor, purpose, content });
 
-      if (content === undefined || content.length === 0) {
-        throw new ValidationError('The upload must include one file.', {
-          file: ['MEDIA_FILE_REQUIRED'],
-        });
-      }
-
-      const result = await container.uploadMediaUseCase.execute({ actor, purpose, content });
-
-      return reply.status(201).header('Cache-Control', 'no-store').send(result);
-    });
+        return reply.status(201).header('Cache-Control', 'no-store').send(result);
+      },
+    );
   });
 }
