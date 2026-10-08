@@ -1,6 +1,6 @@
 # Arquitetura backend — Node.js e Clean Architecture
 
-**Versão:** 1.2\
+**Versão:** 1.3\
 **Base funcional:** 1.5 · Mobile: 1.2 · Design: 1.1 · DER: 1.2\
 **Data:** 2026-10-08\
 **Situação:** fundação técnica da Sprint 0 implementada; capacidades de produto e integrações permanecem futuras
@@ -332,6 +332,8 @@ O servidor persiste `WeeklyCycle` com início inclusivo, fim exclusivo, fuso, re
 
 Admin escolhe `immediate` ou `nextCycle` em RF67. Sob lock, fechar/apurar ciclos já vencidos antes de alterar o ciclo aberto. Imediata conserva seu início e define fim na próxima segunda 00:00 no novo fuso, estritamente futura. Programada conserva fim atual, aplica fuso ao começar o seguinte e usa a primeira segunda 00:00 posterior àquele início. Primeiro instante válido da data cobre transições de calendário. Ciclos permanecem contíguos; uma alteração programada nova substitui a anterior ainda não aplicada, com auditoria, segundo última gravação válida.
 
+Enquanto não houver worker de apuração, a liquidação de ciclos vencidos acontece sob o lock da família, ao ler ou alterar as configurações de fuso. O servidor cria os ciclos semanais contíguos até o instante atual, sem apurar destaque (SPEC-020), e a alteração programada passa a valer no primeiro ciclo que começa em ou depois do seu encerramento. A prévia calcula o mesmo resultado em memória e não grava. Toda mudança de fuso marca o ciclo afetado como transição. O worker futuro reutiliza essa operação.
+
 Mudança de fuso não desloca datas previstas nem reabre ciclos encerrados. O servidor devolve limites civis e absolutos explícitos, inclusive transição; o mobile não reconstrói o período usando o fuso do aparelho. Em período de transição, não prometer que carga semanal é soma de sete dias normais: o intervalo efetivo está identificado no retorno/PDF.
 
 Scheduler busca ciclos vencidos pelo relógio do banco e ordena os atrasados. Às 00:00 locais o ciclo se torna elegível; processamento não depende de app aberto nem de um cron por fuso. Proposta operacional: varredura a cada minuto e também no início do worker. Um lease permite recuperar trabalho interrompido.
@@ -420,6 +422,7 @@ Validação futura se concentra em comportamentos: acesso entre famílias, privi
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.3 | 2026-10-08 | Liquidação preguiçosa de ciclos vencidos e aplicação de mudança programada de fuso (SPEC-002 Fase 3). Sem mudança funcional. |
 | 1.2 | 2026-10-08 | Registra a fundação backend da Sprint 0: API Fastify, configuração, migrations, PostgreSQL de integração e CI; não introduz capacidades de produto. |
 | 1.1 | 2026-10-07 | Conclusão direta mantém responsáveis ou atribui adulto sem responsável; reabertura pode reverter dados derivados de missão concluída na mesma transação. |
 | 1.0 | 2026-10-05 | Arquitetura Node.js/Clean Architecture com Supabase/R2, módulos, transações, acesso, jobs, contratos e preservação da base funcional 1.5. |
