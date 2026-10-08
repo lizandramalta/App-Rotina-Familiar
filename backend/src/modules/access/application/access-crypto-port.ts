@@ -13,6 +13,13 @@ export interface AccessCryptoPort {
   /** SHA-256 do token opaco; é isso que vai para o banco. */
   hashToken(token: string): string;
 
+  /**
+   * Compara dois hashes em tempo constante. Validar a prova de instalação do
+   * refresh com `===` deixaria o tempo de resposta contar quantos caracteres
+   * do hash coincidem (CA-08).
+   */
+  hashesMatch(left: string, right: string): boolean;
+
   /** SHA-256 do `sub` da Apple, usado como chave de unicidade. */
   hashAppleSubject(appleSubject: string): string;
 

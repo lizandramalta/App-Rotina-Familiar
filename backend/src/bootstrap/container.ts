@@ -14,6 +14,9 @@ import type { TransactionRunner } from '../shared/application/transaction-runner
 import { PostgresAccessRepository } from '../modules/access/infrastructure/postgres-access-repository.js';
 import { CryptoTokenService } from '../modules/access/infrastructure/crypto-token-service.js';
 import { SignInWithAppleUseCase } from '../modules/access/application/sign-in-with-apple-use-case.js';
+import { GetCurrentSessionUseCase } from '../modules/access/application/get-current-session-use-case.js';
+import { RefreshSessionUseCase } from '../modules/access/application/refresh-session-use-case.js';
+import { RevokeSessionUseCase } from '../modules/access/application/revoke-session-use-case.js';
 import type { AccessRepositoryPort } from '../modules/access/application/access-repository-port.js';
 import { SessionIssuer } from '../modules/access/application/session-issuer.js';
 import { AuthenticateSessionUseCase } from '../modules/access/application/authenticate-session-use-case.js';
@@ -44,6 +47,9 @@ export interface ApplicationContainer {
   readonly accessRepository: AccessRepositoryPort;
   readonly transactionRunner: TransactionRunner;
   readonly signInWithAppleUseCase: SignInWithAppleUseCase;
+  readonly getCurrentSessionUseCase: GetCurrentSessionUseCase;
+  readonly refreshSessionUseCase: RefreshSessionUseCase;
+  readonly revokeSessionUseCase: RevokeSessionUseCase;
   readonly authenticateSessionUseCase: AuthenticateSessionUseCase;
   readonly createFamilyUseCase: CreateFamilyUseCase;
   readonly getFamilySettingsUseCase: GetFamilySettingsUseCase;
@@ -75,12 +81,34 @@ export function createContainer(config: Configuration): ApplicationContainer {
   );
 
   const accessRepository = new PostgresAccessRepository();
-
+  // Uma instância só: a chave AES vem de uma derivação scrypt, que é custosa.
   const accessCrypto = new CryptoTokenService(config.SESSION_SECRET);
 
   const signInWithAppleUseCase = new SignInWithAppleUseCase({
     repository: accessRepository,
     tokenVerifier: appleTokenVerifier,
+    crypto: accessCrypto,
+    transactionRunner,
+    clock,
+    logger,
+  });
+
+  const getCurrentSessionUseCase = new GetCurrentSessionUseCase({
+    repository: accessRepository,
+    crypto: accessCrypto,
+    transactionRunner,
+    clock,
+  });
+
+  const refreshSessionUseCase = new RefreshSessionUseCase({
+    repository: accessRepository,
+    crypto: accessCrypto,
+    transactionRunner,
+    clock,
+  });
+
+  const revokeSessionUseCase = new RevokeSessionUseCase({
+    repository: accessRepository,
     crypto: accessCrypto,
     transactionRunner,
     clock,
@@ -163,6 +191,9 @@ export function createContainer(config: Configuration): ApplicationContainer {
     accessRepository,
     transactionRunner,
     signInWithAppleUseCase,
+    getCurrentSessionUseCase,
+    refreshSessionUseCase,
+    revokeSessionUseCase,
     authenticateSessionUseCase,
     createFamilyUseCase,
     getFamilySettingsUseCase,

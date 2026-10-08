@@ -42,6 +42,37 @@ export interface InsertCreationGrantParams {
 }
 
 /**
+ * Sessão localizada pelo hash do refresh token (CA-08). `installationProofHash`
+ * volta para o caso de uso comparar a prova apresentada; `revokedAt` distingue
+ * sessão encerrada de sessão inexistente.
+ */
+export interface SessionRecord {
+  readonly sessionId: string;
+  readonly familyId: string;
+  readonly memberId: string;
+  readonly installationProofHash: string;
+  readonly revokedAt: Date | undefined;
+}
+
+/**
+ * Access token com a sessão e o membro a que pertence (CA-07, CA-09).
+ *
+ * Traz os três marcadores de invalidação separados — expiração do token,
+ * revogação do token e revogação da sessão — porque a borda precisa responder
+ * `SESSION_EXPIRED` ou `SESSION_REVOKED` conforme o caso (CA-05).
+ */
+export interface AccessTokenSessionRecord {
+  readonly sessionId: string;
+  readonly memberId: string;
+  readonly familyId: string;
+  readonly role: MemberRole;
+  readonly isFamilyCreator: boolean;
+  readonly tokenExpiresAt: Date;
+  readonly tokenRevokedAt: Date | undefined;
+  readonly sessionRevokedAt: Date | undefined;
+}
+
+/**
  * Porta de persistência do módulo Access. Toda operação recebe o
  * `TransactionContext`, porque a revogação da sessão anterior e a criação da
  * nova precisam do mesmo commit (CA-05, RN44).
@@ -80,4 +111,41 @@ export interface AccessRepositoryPort {
   insertAccessToken(tx: TransactionContext, params: InsertAccessTokenParams): Promise<void>;
 
   insertCreationGrant(tx: TransactionContext, params: InsertCreationGrantParams): Promise<void>;
+
+  /** Sessão pelo hash do refresh token, revogada ou não (CA-08). */
+  findSessionByRefreshTokenHash(
+    tx: TransactionContext,
+    refreshTokenHash: string,
+  ): Promise<SessionRecord | undefined>;
+
+  /**
+   * Access token com sessão e membro, revogados ou não: quem decide o erro é o
+   * caso de uso, não a ausência de linha (CA-05, CA-07).
+   */
+  findSessionAndMemberByAccessTokenHash(
+    tx: TransactionContext,
+    tokenHash: string,
+  ): Promise<AccessTokenSessionRecord | undefined>;
+
+  /** Marca atividade da sessão na renovação (CA-08). */
+  touchSessionLastSeen(tx: TransactionContext, sessionId: string): Promise<void>;
+
+  /**
+   * Revoga a sessão informada se ela ainda estiver ativa. Devolve `true` quando
+   * revogou, para que o caso de uso só registre `session_revoked` uma vez.
+   */
+  revokeSessionById(
+    tx: TransactionContext,
+    params: { readonly sessionId: string; readonly reason: string },
+  ): Promise<boolean>;
+
+  /** Encerra os access tokens ativos da sessão, junto da revogação (CA-09). */
+  revokeAccessTokensForSession(tx: TransactionContext, sessionId: string): Promise<void>;
+
+  /**
+   * Encerra os registros de push da sessão, no mesmo commit da revogação: um
+   * token de dispositivo que sobrevivesse ao logout seguiria recebendo
+   * notificação da família (CA-09).
+   */
+  revokePushDevicesForSession(tx: TransactionContext, sessionId: string): Promise<void>;
 }
