@@ -20,6 +20,10 @@ import { AuthenticateSessionUseCase } from '../modules/access/application/authen
 import { PostgresSessionLookup } from '../modules/access/infrastructure/postgres-session-lookup.js';
 import { CreateFamilyUseCase } from '../modules/family/application/create-family-use-case.js';
 import { PostgresFamilyCreationRepository } from '../modules/family/infrastructure/postgres-family-creation-repository.js';
+import { ChangeFamilyTimeZoneUseCase } from '../modules/family/application/change-family-time-zone-use-case.js';
+import { GetFamilySettingsUseCase } from '../modules/family/application/get-family-settings-use-case.js';
+import { PreviewFamilyTimeZoneChangeUseCase } from '../modules/family/application/preview-family-time-zone-change-use-case.js';
+import { PostgresFamilySettingsRepository } from '../modules/family/infrastructure/postgres-family-settings-repository.js';
 import { UploadMediaUseCase } from '../modules/media/application/upload-media-use-case.js';
 import type { ObjectStoragePort } from '../modules/media/application/media-ports.js';
 import { PostgresMediaRepository } from '../modules/media/infrastructure/postgres-media-repository.js';
@@ -42,6 +46,9 @@ export interface ApplicationContainer {
   readonly signInWithAppleUseCase: SignInWithAppleUseCase;
   readonly authenticateSessionUseCase: AuthenticateSessionUseCase;
   readonly createFamilyUseCase: CreateFamilyUseCase;
+  readonly getFamilySettingsUseCase: GetFamilySettingsUseCase;
+  readonly previewFamilyTimeZoneChangeUseCase: PreviewFamilyTimeZoneChangeUseCase;
+  readonly changeFamilyTimeZoneUseCase: ChangeFamilyTimeZoneUseCase;
   readonly uploadMediaUseCase: UploadMediaUseCase;
   readonly updateOwnProfileUseCase: UpdateOwnProfileUseCase;
   dispose(): Promise<void>;
@@ -99,6 +106,31 @@ export function createContainer(config: Configuration): ApplicationContainer {
     logger,
   });
 
+  const familySettingsRepository = new PostgresFamilySettingsRepository();
+
+  const getFamilySettingsUseCase = new GetFamilySettingsUseCase({
+    repository: familySettingsRepository,
+    crypto: accessCrypto,
+    transactionRunner,
+    clock,
+    logger,
+  });
+
+  const previewFamilyTimeZoneChangeUseCase = new PreviewFamilyTimeZoneChangeUseCase({
+    repository: familySettingsRepository,
+    transactionRunner,
+    clock,
+    logger,
+  });
+
+  const changeFamilyTimeZoneUseCase = new ChangeFamilyTimeZoneUseCase({
+    repository: familySettingsRepository,
+    crypto: accessCrypto,
+    transactionRunner,
+    clock,
+    logger,
+  });
+
   // Sem R2 configurado o upload responde 503; a criação da família não depende
   // dele, já que a foto é opcional (SPEC-002 CA-10).
   const mediaRepository = new PostgresMediaRepository();
@@ -133,6 +165,9 @@ export function createContainer(config: Configuration): ApplicationContainer {
     signInWithAppleUseCase,
     authenticateSessionUseCase,
     createFamilyUseCase,
+    getFamilySettingsUseCase,
+    previewFamilyTimeZoneChangeUseCase,
+    changeFamilyTimeZoneUseCase,
     uploadMediaUseCase,
     updateOwnProfileUseCase,
     async dispose(): Promise<void> {

@@ -62,6 +62,15 @@ describe('HTTP Presentation Layer (Fastify)', () => {
       createFamilyUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['createFamilyUseCase'],
+      getFamilySettingsUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['getFamilySettingsUseCase'],
+      previewFamilyTimeZoneChangeUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['previewFamilyTimeZoneChangeUseCase'],
+      changeFamilyTimeZoneUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['changeFamilyTimeZoneUseCase'],
       uploadMediaUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['uploadMediaUseCase'],
