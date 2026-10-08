@@ -15,6 +15,19 @@ import { PostgresAccessRepository } from '../modules/access/infrastructure/postg
 import { CryptoTokenService } from '../modules/access/infrastructure/crypto-token-service.js';
 import { SignInWithAppleUseCase } from '../modules/access/application/sign-in-with-apple-use-case.js';
 import type { AccessRepositoryPort } from '../modules/access/application/access-repository-port.js';
+import { SessionIssuer } from '../modules/access/application/session-issuer.js';
+import { AuthenticateSessionUseCase } from '../modules/access/application/authenticate-session-use-case.js';
+import { PostgresSessionLookup } from '../modules/access/infrastructure/postgres-session-lookup.js';
+import { CreateFamilyUseCase } from '../modules/family/application/create-family-use-case.js';
+import { PostgresFamilyCreationRepository } from '../modules/family/infrastructure/postgres-family-creation-repository.js';
+import { UploadMediaUseCase } from '../modules/media/application/upload-media-use-case.js';
+import type { ObjectStoragePort } from '../modules/media/application/media-ports.js';
+import { PostgresMediaRepository } from '../modules/media/infrastructure/postgres-media-repository.js';
+import { R2ObjectStorage } from '../modules/media/infrastructure/r2-object-storage.js';
+import { SharpImageProcessor } from '../modules/media/infrastructure/sharp-image-processor.js';
+import { UnavailableObjectStorage } from '../modules/media/infrastructure/unavailable-object-storage.js';
+import { UpdateOwnProfileUseCase } from '../modules/profile/application/update-own-profile-use-case.js';
+import { PostgresProfileRepository } from '../modules/profile/infrastructure/postgres-profile-repository.js';
 import type { AppleTokenVerifierPort } from '../integrations/apple/apple-token-verifier-port.js';
 
 export interface ApplicationContainer {
@@ -27,6 +40,10 @@ export interface ApplicationContainer {
   readonly accessRepository: AccessRepositoryPort;
   readonly transactionRunner: TransactionRunner;
   readonly signInWithAppleUseCase: SignInWithAppleUseCase;
+  readonly authenticateSessionUseCase: AuthenticateSessionUseCase;
+  readonly createFamilyUseCase: CreateFamilyUseCase;
+  readonly uploadMediaUseCase: UploadMediaUseCase;
+  readonly updateOwnProfileUseCase: UpdateOwnProfileUseCase;
   dispose(): Promise<void>;
 }
 
@@ -52,13 +69,56 @@ export function createContainer(config: Configuration): ApplicationContainer {
 
   const accessRepository = new PostgresAccessRepository();
 
+  const accessCrypto = new CryptoTokenService(config.SESSION_SECRET);
+
   const signInWithAppleUseCase = new SignInWithAppleUseCase({
     repository: accessRepository,
     tokenVerifier: appleTokenVerifier,
-    crypto: new CryptoTokenService(config.SESSION_SECRET),
+    crypto: accessCrypto,
     transactionRunner,
     clock,
     logger,
+  });
+
+  const authenticateSessionUseCase = new AuthenticateSessionUseCase({
+    sessionLookup: new PostgresSessionLookup(dbPool),
+    crypto: accessCrypto,
+    clock,
+  });
+
+  const createFamilyUseCase = new CreateFamilyUseCase({
+    repository: new PostgresFamilyCreationRepository(),
+    sessionIssuer: new SessionIssuer({
+      repository: accessRepository,
+      crypto: accessCrypto,
+      logger,
+    }),
+    crypto: accessCrypto,
+    transactionRunner,
+    clock,
+    logger,
+  });
+
+  // Sem R2 configurado o upload responde 503; a criação da família não depende
+  // dele, já que a foto é opcional (SPEC-002 CA-10).
+  const mediaRepository = new PostgresMediaRepository();
+  const objectStorage = createObjectStorage(config, logger);
+
+  const uploadMediaUseCase = new UploadMediaUseCase({
+    repository: mediaRepository,
+    storage: objectStorage,
+    imageProcessor: new SharpImageProcessor(),
+    crypto: accessCrypto,
+    transactionRunner,
+    logger,
+    keyPrefix: config.NODE_ENV,
+  });
+
+  const updateOwnProfileUseCase = new UpdateOwnProfileUseCase({
+    profileRepository: new PostgresProfileRepository(),
+    mediaRepository,
+    transactionRunner,
+    clock,
   });
 
   return {
@@ -71,10 +131,35 @@ export function createContainer(config: Configuration): ApplicationContainer {
     accessRepository,
     transactionRunner,
     signInWithAppleUseCase,
+    authenticateSessionUseCase,
+    createFamilyUseCase,
+    uploadMediaUseCase,
+    updateOwnProfileUseCase,
     async dispose(): Promise<void> {
       logger.info('Disposing application container...');
       await dbPool.close();
       logger.info('Application container disposed.');
     },
   };
+}
+
+function createObjectStorage(config: Configuration, logger: Logger): ObjectStoragePort {
+  const { R2_ENDPOINT, R2_BUCKET_NAME, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY } = config;
+
+  if (
+    R2_ENDPOINT === undefined ||
+    R2_BUCKET_NAME === undefined ||
+    R2_ACCESS_KEY_ID === undefined ||
+    R2_SECRET_ACCESS_KEY === undefined
+  ) {
+    logger.warn('r2_not_configured', { effect: 'media uploads respond 503' });
+    return new UnavailableObjectStorage();
+  }
+
+  return new R2ObjectStorage({
+    endpoint: R2_ENDPOINT,
+    bucketName: R2_BUCKET_NAME,
+    accessKeyId: R2_ACCESS_KEY_ID,
+    secretAccessKey: R2_SECRET_ACCESS_KEY,
+  });
 }
