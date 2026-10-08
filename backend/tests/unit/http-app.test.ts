@@ -56,6 +56,15 @@ describe('HTTP Presentation Layer (Fastify)', () => {
       signInWithAppleUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['signInWithAppleUseCase'],
+      getCurrentSessionUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['getCurrentSessionUseCase'],
+      refreshSessionUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['refreshSessionUseCase'],
+      revokeSessionUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['revokeSessionUseCase'],
       dispose: vi.fn(),
     };
   });

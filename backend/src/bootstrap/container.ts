@@ -14,6 +14,9 @@ import type { TransactionRunner } from '../shared/application/transaction-runner
 import { PostgresAccessRepository } from '../modules/access/infrastructure/postgres-access-repository.js';
 import { CryptoTokenService } from '../modules/access/infrastructure/crypto-token-service.js';
 import { SignInWithAppleUseCase } from '../modules/access/application/sign-in-with-apple-use-case.js';
+import { GetCurrentSessionUseCase } from '../modules/access/application/get-current-session-use-case.js';
+import { RefreshSessionUseCase } from '../modules/access/application/refresh-session-use-case.js';
+import { RevokeSessionUseCase } from '../modules/access/application/revoke-session-use-case.js';
 import type { AccessRepositoryPort } from '../modules/access/application/access-repository-port.js';
 import type { AppleTokenVerifierPort } from '../integrations/apple/apple-token-verifier-port.js';
 
@@ -27,6 +30,9 @@ export interface ApplicationContainer {
   readonly accessRepository: AccessRepositoryPort;
   readonly transactionRunner: TransactionRunner;
   readonly signInWithAppleUseCase: SignInWithAppleUseCase;
+  readonly getCurrentSessionUseCase: GetCurrentSessionUseCase;
+  readonly refreshSessionUseCase: RefreshSessionUseCase;
+  readonly revokeSessionUseCase: RevokeSessionUseCase;
   dispose(): Promise<void>;
 }
 
@@ -51,11 +57,35 @@ export function createContainer(config: Configuration): ApplicationContainer {
   );
 
   const accessRepository = new PostgresAccessRepository();
+  // Uma instância só: a chave AES vem de uma derivação scrypt, que é custosa.
+  const accessCrypto = new CryptoTokenService(config.SESSION_SECRET);
 
   const signInWithAppleUseCase = new SignInWithAppleUseCase({
     repository: accessRepository,
     tokenVerifier: appleTokenVerifier,
-    crypto: new CryptoTokenService(config.SESSION_SECRET),
+    crypto: accessCrypto,
+    transactionRunner,
+    clock,
+    logger,
+  });
+
+  const getCurrentSessionUseCase = new GetCurrentSessionUseCase({
+    repository: accessRepository,
+    crypto: accessCrypto,
+    transactionRunner,
+    clock,
+  });
+
+  const refreshSessionUseCase = new RefreshSessionUseCase({
+    repository: accessRepository,
+    crypto: accessCrypto,
+    transactionRunner,
+    clock,
+  });
+
+  const revokeSessionUseCase = new RevokeSessionUseCase({
+    repository: accessRepository,
+    crypto: accessCrypto,
     transactionRunner,
     clock,
     logger,
@@ -71,6 +101,9 @@ export function createContainer(config: Configuration): ApplicationContainer {
     accessRepository,
     transactionRunner,
     signInWithAppleUseCase,
+    getCurrentSessionUseCase,
+    refreshSessionUseCase,
+    revokeSessionUseCase,
     async dispose(): Promise<void> {
       logger.info('Disposing application container...');
       await dbPool.close();

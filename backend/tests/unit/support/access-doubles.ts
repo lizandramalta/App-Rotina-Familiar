@@ -21,6 +21,7 @@ import type {
 import type { AccessCryptoPort } from '../../../src/modules/access/application/access-crypto-port.js';
 import type { TransactionContext } from '../../../src/shared/application/transaction-runner.js';
 import type { Logger } from '../../../src/shared/infrastructure/observability/logger.js';
+import { MemberRole } from '../../../src/shared/domain/member-role.js';
 
 /**
  * Digest real no dublê: um hash de brincadeira como `sha256(<token>)` conteria
@@ -29,7 +30,7 @@ import type { Logger } from '../../../src/shared/infrastructure/observability/lo
 export const sha256Hex = (value: string): string =>
   createHash('sha256').update(value).digest('hex');
 
-interface StoredSession {
+export interface StoredSession {
   readonly sessionId: string;
   readonly familyId: string;
   readonly memberId: string;
@@ -40,7 +41,7 @@ interface StoredSession {
   lastSeenAt: Date | undefined;
 }
 
-interface StoredAccessToken {
+export interface StoredAccessToken {
   readonly tokenHash: string;
   readonly sessionId: string;
   readonly expiresAt: Date;
@@ -284,4 +285,61 @@ export function createSilentLogger(): Logger {
     child: () => logger,
   };
   return logger;
+}
+
+export interface SeededSession {
+  readonly sessionId: string;
+  readonly memberId: string;
+  readonly familyId: string;
+  readonly refreshToken: string;
+  readonly installationProof: string;
+  readonly accessToken: string;
+}
+
+/**
+ * Sessão ativa pronta no repositório, como `SignInWithApple` a teria deixado.
+ * Os tokens entram em claro e são guardados como hash, igual ao caminho real.
+ */
+export function seedActiveSession(
+  repository: InMemoryAccessRepository,
+  overrides: Partial<SeededSession> & { readonly accessTokenExpiresAt: Date } & {
+    readonly role?: MemberRole;
+    readonly isFamilyCreator?: boolean;
+  },
+): SeededSession {
+  const seeded: SeededSession = {
+    sessionId: overrides.sessionId ?? 'session-seeded',
+    memberId: overrides.memberId ?? 'member-seeded',
+    familyId: overrides.familyId ?? 'family-seeded',
+    refreshToken: overrides.refreshToken ?? 'refresh-token-seeded',
+    installationProof: overrides.installationProof ?? 'installation-proof-seeded',
+    accessToken: overrides.accessToken ?? 'access-token-seeded',
+  };
+
+  repository.members.push({
+    memberId: seeded.memberId,
+    familyId: seeded.familyId,
+    role: overrides.role ?? MemberRole.ADMINISTRATOR,
+    isFamilyCreator: overrides.isFamilyCreator ?? true,
+  });
+
+  repository.sessions.push({
+    sessionId: seeded.sessionId,
+    familyId: seeded.familyId,
+    memberId: seeded.memberId,
+    refreshTokenHash: sha256Hex(seeded.refreshToken),
+    installationProofHash: sha256Hex(seeded.installationProof),
+    revokedAt: undefined,
+    revokedReason: undefined,
+    lastSeenAt: undefined,
+  });
+
+  repository.accessTokens.push({
+    tokenHash: sha256Hex(seeded.accessToken),
+    sessionId: seeded.sessionId,
+    expiresAt: overrides.accessTokenExpiresAt,
+    revokedAt: undefined,
+  });
+
+  return seeded;
 }

@@ -6,12 +6,10 @@ import type {
 import type { Logger } from '../../../shared/infrastructure/observability/logger.js';
 import type { AppleTokenVerifierPort } from '../../../integrations/apple/apple-token-verifier-port.js';
 import { AppleProofInvalidError } from '../domain/access-errors.js';
+import { ACCESS_TOKEN_TTL_MS } from './access-token-ttl.js';
 import type { AccessCryptoPort } from './access-crypto-port.js';
 import type { AccessRepositoryPort, CreatorMembershipRecord } from './access-repository-port.js';
 import type { SignInWithAppleCommand, SignInWithAppleResult } from './sign-in-with-apple-dto.js';
-
-/** Access token de 15 minutos (BA-10). */
-const ACCESS_TOKEN_TTL_MS = 15 * 60 * 1000;
 
 /** `creationGrant` de 10 minutos (BA-21, CA-02). */
 const CREATION_GRANT_TTL_MS = 10 * 60 * 1000;
