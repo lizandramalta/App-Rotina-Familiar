@@ -7,6 +7,7 @@ import type { Configuration } from '../../bootstrap/configuration.js';
 import { DomainError } from '../../shared/domain/domain-error.js';
 import { createProblemDetails } from './problem-details.js';
 import { registerAccessRoutes } from './access-routes.js';
+import { registerSessionRoutes } from './session-routes.js';
 
 export function buildHttpApp(
   container: ApplicationContainer,
@@ -171,6 +172,7 @@ export function buildHttpApp(
   app.register(
     async (scope) => {
       registerAccessRoutes(scope, container);
+      registerSessionRoutes(scope, container);
     },
     { prefix: '/v1' },
   );

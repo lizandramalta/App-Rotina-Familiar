@@ -12,6 +12,10 @@ interface SignInWithAppleHeaders {
   readonly 'x-installation-proof': string;
 }
 
+interface RefreshSessionBody {
+  readonly refreshToken: string;
+}
+
 /**
  * Schema de entrada de `POST /v1/access/apple`.
  *
@@ -78,6 +82,41 @@ const signInWithAppleSchema = {
   },
 } as const;
 
+/**
+ * Schema de `POST /v1/access/refresh` (CA-08, SPEC-001 §5.2.3).
+ *
+ * A credencial vai no corpo e a prova de instalação no header, obrigatória: o
+ * refresh token sozinho abriria sessão em qualquer instalação. A ausência do
+ * header é defeito de requisição, logo `400 VALIDATION_FAILED`, e não 401.
+ */
+const refreshSessionSchema = {
+  headers: {
+    type: 'object',
+    required: ['x-installation-proof'],
+    properties: {
+      'x-installation-proof': { type: 'string', minLength: 1 },
+    },
+  },
+  body: {
+    type: 'object',
+    required: ['refreshToken'],
+    properties: {
+      refreshToken: { type: 'string', minLength: 1 },
+    },
+  },
+  response: {
+    200: {
+      type: 'object',
+      required: ['accessToken', 'accessTokenExpiresAt'],
+      additionalProperties: false,
+      properties: {
+        accessToken: { type: 'string' },
+        accessTokenExpiresAt: { type: 'string' },
+      },
+    },
+  },
+} as const;
+
 /** Monta o corpo da resposta sem o discriminante interno `outcome`. */
 function toResponseBody(result: SignInWithAppleResult): Record<string, unknown> {
   if (result.outcome === 'creationGrant') {
@@ -110,6 +149,19 @@ export function registerAccessRoutes(app: FastifyInstance, container: Applicatio
       });
 
       return reply.status(200).send(toResponseBody(result));
+    },
+  );
+
+  app.post<{ Body: RefreshSessionBody; Headers: SignInWithAppleHeaders }>(
+    '/access/refresh',
+    { schema: refreshSessionSchema },
+    async (request, reply) => {
+      const result = await container.refreshSessionUseCase.execute({
+        refreshToken: request.body.refreshToken,
+        installationProof: request.headers['x-installation-proof'],
+      });
+
+      return reply.status(200).send(result);
     },
   );
 }

@@ -4,15 +4,14 @@
  * O caso de uso é dublê: o que está sob teste é o contrato de transporte —
  * validação de entrada, status, corpo de resposta e mapeamento de erro.
  */
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildHttpApp } from '../../src/presentation/http/app.js';
-import { validateConfiguration, type Configuration } from '../../src/bootstrap/configuration.js';
-import { createAppleConfiguration } from '../../src/integrations/apple/apple-configuration.js';
-import type { ApplicationContainer } from '../../src/bootstrap/container.js';
-import { AppleProofInvalidError } from '../../src/modules/access/domain/access-errors.js';
-import { SystemClock } from '../../src/shared/application/clock.js';
-import { ConsoleLogger } from '../../src/shared/infrastructure/observability/logger.js';
+import {
+  AppleProofInvalidError,
+  SessionRevokedError,
+} from '../../src/modules/access/domain/access-errors.js';
+import { createHttpTestContainer, type HttpTestContainer } from './support/http-container.js';
 
 const VALID_BODY = {
   identityToken: 'apple-identity-token',
@@ -40,39 +39,15 @@ const GRANT_RESULT = {
 
 describe('POST /v1/access/apple', () => {
   let app: FastifyInstance;
-  let execute: ReturnType<typeof vi.fn>;
-  let config: Configuration;
+  let doubles: HttpTestContainer;
+  let execute: HttpTestContainer['signInWithApple'];
 
   beforeEach(() => {
-    config = validateConfiguration({
-      NODE_ENV: 'test',
-      DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/postgres_test',
-      LOG_LEVEL: 'fatal',
-    });
+    doubles = createHttpTestContainer();
+    execute = doubles.signInWithApple;
+    execute.mockResolvedValue(SESSION_RESULT);
 
-    execute = vi.fn().mockResolvedValue(SESSION_RESULT);
-
-    const container = {
-      config,
-      logger: new ConsoleLogger('fatal'),
-      clock: new SystemClock(),
-      dbPool: { checkHealth: vi.fn() } as unknown as ApplicationContainer['dbPool'],
-      appleConfig: createAppleConfiguration(config),
-      appleTokenVerifier: {
-        verifyIdentityProof: vi.fn(),
-      } as unknown as ApplicationContainer['appleTokenVerifier'],
-      accessRepository: {} as unknown as ApplicationContainer['accessRepository'],
-      transactionRunner: {
-        run: vi.fn(),
-        forFamily: vi.fn(),
-      } as unknown as ApplicationContainer['transactionRunner'],
-      signInWithAppleUseCase: {
-        execute,
-      } as unknown as ApplicationContainer['signInWithAppleUseCase'],
-      dispose: vi.fn(),
-    } as unknown as ApplicationContainer;
-
-    app = buildHttpApp(container, config);
+    app = buildHttpApp(doubles.container, doubles.config);
   });
 
   afterEach(async () => {
@@ -259,6 +234,150 @@ describe('POST /v1/access/apple', () => {
 
       expect(response.statusCode).toBe(200);
       expect(response.json().familyId).toBe(SESSION_RESULT.familyId);
+    });
+  });
+});
+
+describe('POST /v1/access/refresh (CA-08)', () => {
+  let app: FastifyInstance;
+  let doubles: HttpTestContainer;
+
+  const REFRESHED = {
+    accessToken: 'new-opaque-access-token',
+    accessTokenExpiresAt: '2026-10-08T12:30:00.000Z',
+  };
+
+  beforeEach(() => {
+    doubles = createHttpTestContainer();
+    doubles.refreshSession.mockResolvedValue(REFRESHED);
+
+    app = buildHttpApp(doubles.container, doubles.config);
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  function postRefresh(payload: unknown, headers: Record<string, string> = {}) {
+    return app.inject({
+      method: 'POST',
+      url: '/v1/access/refresh',
+      headers: { 'x-installation-proof': 'installation-proof-value', ...headers },
+      payload: payload as never,
+    });
+  }
+
+  describe('renovação bem-sucedida', () => {
+    it('returns 200 with the new access token and its expiry', async () => {
+      const response = await postRefresh({ refreshToken: 'opaque-refresh-token' });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toEqual(REFRESHED);
+    });
+
+    it('forwards the refresh token from the body and the proof from the header', async () => {
+      await postRefresh(
+        { refreshToken: 'opaque-refresh-token' },
+        {
+          'x-installation-proof': 'proof-abc',
+        },
+      );
+
+      expect(doubles.refreshSession).toHaveBeenCalledWith({
+        refreshToken: 'opaque-refresh-token',
+        installationProof: 'proof-abc',
+      });
+    });
+
+    it('does not reissue the refresh token in the response', async () => {
+      doubles.refreshSession.mockResolvedValue({
+        ...REFRESHED,
+        refreshToken: 'leaked-refresh-token',
+      });
+
+      const response = await postRefresh({ refreshToken: 'opaque-refresh-token' });
+
+      expect(response.json()).toEqual(REFRESHED);
+      expect(response.body).not.toContain('leaked-refresh-token');
+    });
+
+    it('requires no Authorization header', async () => {
+      const response = await postRefresh({ refreshToken: 'opaque-refresh-token' });
+
+      expect(response.statusCode).toBe(200);
+    });
+  });
+
+  describe('requisição inválida', () => {
+    it('rejects a body with no refreshToken with 400 VALIDATION_FAILED', async () => {
+      const response = await postRefresh({});
+
+      expect(response.statusCode).toBe(400);
+      expect(response.json().code).toBe('VALIDATION_FAILED');
+      expect(doubles.refreshSession).not.toHaveBeenCalled();
+    });
+
+    it('rejects an empty refreshToken with 400 VALIDATION_FAILED', async () => {
+      const response = await postRefresh({ refreshToken: '' });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.json().code).toBe('VALIDATION_FAILED');
+      expect(doubles.refreshSession).not.toHaveBeenCalled();
+    });
+
+    it('rejects a request with no X-Installation-Proof header', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/v1/access/refresh',
+        payload: { refreshToken: 'opaque-refresh-token' },
+      });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.json().code).toBe('VALIDATION_FAILED');
+      expect(doubles.refreshSession).not.toHaveBeenCalled();
+    });
+
+    it('answers validation failures as application/problem+json with a requestId', async () => {
+      const response = await postRefresh({});
+
+      expect(response.headers['content-type']).toContain('application/problem+json');
+      expect(response.json().requestId).toBeDefined();
+    });
+  });
+
+  describe('sessão encerrada ou prova divergente', () => {
+    it('maps SessionRevokedError to 401 SESSION_REVOKED', async () => {
+      doubles.refreshSession.mockRejectedValue(new SessionRevokedError());
+
+      const response = await postRefresh({ refreshToken: 'opaque-refresh-token' });
+
+      expect(response.statusCode).toBe(401);
+      expect(response.json().code).toBe('SESSION_REVOKED');
+      expect(response.headers['content-type']).toContain('application/problem+json');
+    });
+
+    it('issues no credential in the rejection body', async () => {
+      doubles.refreshSession.mockRejectedValue(new SessionRevokedError());
+
+      const response = await postRefresh({ refreshToken: 'opaque-refresh-token' });
+      const body = response.json();
+
+      expect(body).not.toHaveProperty('accessToken');
+      expect(body).not.toHaveProperty('refreshToken');
+    });
+
+    it('does not echo the submitted credentials in the error payload', async () => {
+      doubles.refreshSession.mockRejectedValue(new SessionRevokedError());
+
+      const response = await postRefresh(
+        { refreshToken: 'opaque-refresh-token' },
+        {
+          'x-installation-proof': 'secret-installation-proof',
+        },
+      );
+
+      expect(response.body).not.toContain('opaque-refresh-token');
+      expect(response.body).not.toContain('secret-installation-proof');
     });
   });
 });
