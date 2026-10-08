@@ -29,6 +29,14 @@ A validação da chave privada não olha apenas os delimitadores `-----BEGIN/END
 o backend pede ao Node para interpretar a chave, então um `.p8` truncado ou com
 base64 corrompido é recusado no boot, e não na primeira tentativa de assinatura.
 
+Em `production` a chave precisa ainda ser EC na curva **P-256** (`prime256v1`). O
+client secret da Apple é assinado em ES256, que é definido como ECDSA com P-256 e
+SHA-256 (RFC 7518 §3.4): uma chave RSA ou EC de outra curva (`secp384r1`,
+`secp521r1`) geraria assinatura de tamanho incompatível com o `alg` declarado, e a
+Apple recusaria toda troca de `authorizationCode`. As chaves `.p8` emitidas pelo
+Apple Developer Portal já são P-256; a checagem existe para apontar no boot uma
+chave trocada por engano, em vez de derrubar a autenticação em runtime.
+
 `APPLE_ISSUER`, `APPLE_JWKS_URL` e `APPLE_TOKEN_URL` podem apontar para um stub em
 `development` e `test`. Em `production` precisam ser exatamente os endpoints
 canônicos da Apple listados acima — conferir a prova de identidade contra outra
@@ -114,7 +122,9 @@ npm run test
 A chave privada da Apple não expira, mas deve ser rotacionada quando houver
 suspeita de exposição, saída de pessoa com acesso ou política interna de prazo.
 
-1. Crie uma **nova** chave seguindo a seção 4, sem revogar a atual.
+1. Crie uma **nova** chave seguindo a seção 4, sem revogar a atual. Use sempre a
+   chave `.p8` gerada pela Apple, que é EC P-256; não substitua por chave própria
+   de outro tipo ou curva, porque o boot em produção a recusa.
 2. Atualize `APPLE_KEY_ID` e `APPLE_PRIVATE_KEY` no gerenciador de segredos de
    cada ambiente e reinicie os processos.
 3. Confirme que a autenticação funciona com a nova chave.
