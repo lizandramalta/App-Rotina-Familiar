@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { buildHttpApp } from '../../src/presentation/http/app.js';
 import type { ApplicationContainer } from '../../src/bootstrap/container.js';
-import type { Configuration } from '../../src/bootstrap/configuration.js';
+import { validateConfiguration, type Configuration } from '../../src/bootstrap/configuration.js';
+import { createAppleConfiguration } from '../../src/integrations/apple/apple-configuration.js';
 import { SystemClock } from '../../src/shared/application/clock.js';
 import { ConsoleLogger } from '../../src/shared/infrastructure/observability/logger.js';
 import { NotFoundError } from '../../src/shared/domain/domain-error.js';
@@ -12,7 +13,9 @@ describe('HTTP Presentation Layer (Fastify)', () => {
   let mockDbCheckHealth: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    testConfig = {
+    // Derivar do schema em vez de montar o objeto na mão: novos campos de
+    // configuração ganham default sem quebrar esta fixture.
+    testConfig = validateConfiguration({
       NODE_ENV: 'test',
       PORT: 3001,
       HOST: '127.0.0.1',
@@ -22,10 +25,9 @@ describe('HTTP Presentation Layer (Fastify)', () => {
       DATABASE_SCHEMA: 'app',
       DATABASE_POOL_MIN: 1,
       DATABASE_POOL_MAX: 2,
-      DATABASE_SSL: false,
       SESSION_SECRET: 'test-session-secret-min-16-chars!',
       INVITE_ENVELOPE_KEY: 'test-invite-key-min-16-chars!',
-    };
+    });
 
     mockDbCheckHealth = vi.fn().mockResolvedValue({ isHealthy: true, latencyMs: 2 });
 
@@ -40,6 +42,7 @@ describe('HTTP Presentation Layer (Fastify)', () => {
         query: vi.fn(),
         getClient: vi.fn(),
       } as unknown as ApplicationContainer['dbPool'],
+      appleConfig: createAppleConfiguration(testConfig),
       dispose: vi.fn(),
     };
   });

@@ -1,5 +1,6 @@
 import { config as loadDotenv } from 'dotenv';
 import { z } from 'zod';
+import { createPrivateKey } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -13,6 +14,69 @@ export class ConfigurationError extends Error {
     Object.setPrototypeOf(this, new.target.prototype);
   }
 }
+
+/**
+ * Arquivos .env guardam a chave em uma única linha, com "\n" literal no lugar das
+ * quebras. Normalizar antes de validar e antes de usar evita exigir formatação
+ * diferente entre `.env` e variáveis injetadas pela plataforma.
+ */
+export function normalizePrivateKeyPem(value: string): string {
+  return value
+    .trim()
+    .replace(/^["']|["']$/g, '')
+    .replace(/\\r\\n|\\n|\\r/g, '\n')
+    .trim();
+}
+
+/**
+ * Delimitadores corretos não garantem uma chave utilizável: um .p8 truncado ou
+ * com base64 corrompido passa por qualquer regex e só falha ao assinar o client
+ * secret, em produção. Deixar o Node tentar interpretar a chave é a única
+ * verificação que prova que ela serve.
+ */
+function isPrivateKeyPem(value: string): boolean {
+  try {
+    createPrivateKey({ key: normalizePrivateKeyPem(value), format: 'pem' });
+    return true;
+  } catch {
+    // A exceção carrega detalhes do material da chave; não propagar nem registrar.
+    return false;
+  }
+}
+
+/**
+ * Trata variável ausente e string vazia como "não informada", para que um
+ * placeholder vazio no .env local não derrube o boot em development/test.
+ */
+function optionalEnv<T extends z.ZodTypeAny>(schema: T) {
+  return z.preprocess(
+    (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+    schema.optional(),
+  );
+}
+
+/** Team ID e Key ID da Apple têm exatamente 10 caracteres alfanuméricos. */
+const appleIdentifierSchema = z
+  .string()
+  .length(10, 'must have exactly 10 characters')
+  .regex(/^[A-Za-z0-9]{10}$/, 'must contain only alphanumeric characters');
+
+const APPLE_PRODUCTION_REQUIRED_KEYS = [
+  'APPLE_TEAM_ID',
+  'APPLE_KEY_ID',
+  'APPLE_PRIVATE_KEY',
+] as const;
+
+/**
+ * Endpoints oficiais da Apple. Sobrescrever é legítimo apenas para apontar a um
+ * stub em development/test; em production um host diferente significaria
+ * conferir a prova de identidade contra uma origem não confiável.
+ */
+const APPLE_CANONICAL_URLS = {
+  APPLE_ISSUER: 'https://appleid.apple.com',
+  APPLE_JWKS_URL: 'https://appleid.apple.com/auth/keys',
+  APPLE_TOKEN_URL: 'https://appleid.apple.com/auth/token',
+} as const;
 
 const environmentSchema = z
   .object({
@@ -49,30 +113,58 @@ const environmentSchema = z
     R2_BUCKET_NAME: z.string().optional(),
     R2_ENDPOINT: z.string().optional(),
 
-    APPLE_CLIENT_ID: z.string().optional(),
-    APPLE_TEAM_ID: z.string().optional(),
-    APPLE_KEY_ID: z.string().optional(),
-    APPLE_PRIVATE_KEY: z.string().optional(),
+    // Sign in with Apple (BA-04, SPEC-001). Em development/test as credenciais
+    // reais são opcionais para não bloquear o boot local; em production a
+    // validação é estrita (ver superRefine abaixo).
+    APPLE_CLIENT_ID: z.string().min(1).default('com.lizandramalta.familyroutine'),
+    APPLE_TEAM_ID: optionalEnv(appleIdentifierSchema),
+    APPLE_KEY_ID: optionalEnv(appleIdentifierSchema),
+    APPLE_PRIVATE_KEY: optionalEnv(
+      z.string().refine(isPrivateKeyPem, 'must be a PEM-encoded private key'),
+    ),
+    APPLE_ISSUER: z.string().url().default(APPLE_CANONICAL_URLS.APPLE_ISSUER),
+    APPLE_JWKS_URL: z.string().url().default(APPLE_CANONICAL_URLS.APPLE_JWKS_URL),
+    APPLE_TOKEN_URL: z.string().url().default(APPLE_CANONICAL_URLS.APPLE_TOKEN_URL),
 
     APNS_KEY_ID: z.string().optional(),
     APNS_TEAM_ID: z.string().optional(),
     APNS_TOPIC: z.string().optional(),
     APNS_PRIVATE_KEY: z.string().optional(),
   })
-  .refine(
-    (data) => {
-      // In production, enforce 32+ char secrets
-      if (data.NODE_ENV === 'production') {
-        return data.SESSION_SECRET.length >= 32 && data.INVITE_ENVELOPE_KEY.length >= 32;
+  .superRefine((data, ctx) => {
+    if (data.NODE_ENV !== 'production') {
+      return;
+    }
+
+    if (data.SESSION_SECRET.length < 32 || data.INVITE_ENVELOPE_KEY.length < 32) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          'In production, SESSION_SECRET and INVITE_ENVELOPE_KEY must have at least 32 characters.',
+        path: ['SESSION_SECRET'],
+      });
+    }
+
+    for (const key of APPLE_PRODUCTION_REQUIRED_KEYS) {
+      if (data[key] === undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `${key} is required in production for Sign in with Apple.`,
+          path: [key],
+        });
       }
-      return true;
-    },
-    {
-      message:
-        'In production, SESSION_SECRET and INVITE_ENVELOPE_KEY must have at least 32 characters.',
-      path: ['SESSION_SECRET'],
-    },
-  );
+    }
+
+    for (const [key, canonicalUrl] of Object.entries(APPLE_CANONICAL_URLS)) {
+      if (data[key as keyof typeof APPLE_CANONICAL_URLS] !== canonicalUrl) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `${key} must be the canonical Apple endpoint ${canonicalUrl} in production.`,
+          path: [key],
+        });
+      }
+    }
+  });
 
 export type Configuration = z.infer<typeof environmentSchema>;
 
