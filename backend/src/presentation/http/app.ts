@@ -8,6 +8,9 @@ import { DomainError } from '../../shared/domain/domain-error.js';
 import { createProblemDetails } from './problem-details.js';
 import { registerAccessRoutes } from './access-routes.js';
 import { registerSessionRoutes } from './session-routes.js';
+import { registerFamilyRoutes } from './family-routes.js';
+import { registerMediaRoutes } from './media-routes.js';
+import { registerProfileRoutes } from './profile-routes.js';
 
 export function buildHttpApp(
   container: ApplicationContainer,
@@ -22,6 +25,12 @@ export function buildHttpApp(
       return randomUUID();
     },
     logger: false, // Observability is handled via container.logger and custom hooks
+    ajv: {
+      // O default do Fastify (`removeAdditional: true`) apaga em silêncio os
+      // campos fora do schema com `additionalProperties: false`. O contrato exige
+      // o contrário: campo desconhecido é recusado com UNKNOWN_FIELD (CA-04).
+      customOptions: { removeAdditional: false },
+    },
   });
 
   // Plugins
@@ -78,19 +87,35 @@ export function buildHttpApp(
 
     // Fastify schema validation error
     if (isRecord(error) && Array.isArray(error.validation)) {
+      const issues = error.validation as Array<{
+        instancePath?: string;
+        message?: string;
+        keyword?: string;
+        params?: { additionalProperty?: string };
+      }>;
       const fieldErrors: Record<string, string[]> = {};
-      for (const vErr of error.validation as Array<{ instancePath?: string; message?: string }>) {
-        const field = vErr.instancePath?.replace(/^\//, '') || 'body';
+
+      // Campo fora do schema tem código próprio no contrato (UNKNOWN_FIELD) e o
+      // nome do campo recusado vai em `fieldErrors`.
+      const unknownFields = issues.filter(
+        (issue) => issue.keyword === 'additionalProperties' && issue.params?.additionalProperty,
+      );
+
+      for (const vErr of unknownFields.length > 0 ? unknownFields : issues) {
+        const field =
+          vErr.params?.additionalProperty ?? (vErr.instancePath?.replace(/^\//, '') || 'body');
         if (!fieldErrors[field]) {
           fieldErrors[field] = [];
         }
-        fieldErrors[field].push(vErr.message || 'Invalid value');
+        fieldErrors[field].push(
+          unknownFields.length > 0 ? 'UNKNOWN_FIELD' : vErr.message || 'Invalid value',
+        );
       }
 
       const problem = createProblemDetails({
         status: 400,
-        // Código estável do contrato (SPEC-001 §5.2, backend-contracts.md §1).
-        code: 'VALIDATION_FAILED',
+        // Códigos estáveis do contrato (SPEC-001 §5.2, SPEC-002 §5.3).
+        code: unknownFields.length > 0 ? 'UNKNOWN_FIELD' : 'VALIDATION_FAILED',
         title: 'Bad Request',
         detail: typeof error.message === 'string' ? error.message : 'Validation failed',
         requestId,
@@ -182,6 +207,9 @@ export function buildHttpApp(
 
       registerAccessRoutes(scope, container);
       registerSessionRoutes(scope, container);
+      registerFamilyRoutes(scope, container);
+      registerMediaRoutes(scope, container);
+      registerProfileRoutes(scope, container);
     },
     { prefix: '/v1' },
   );

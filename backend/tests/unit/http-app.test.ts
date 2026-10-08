@@ -65,6 +65,18 @@ describe('HTTP Presentation Layer (Fastify)', () => {
       revokeSessionUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['revokeSessionUseCase'],
+      authenticateSessionUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['authenticateSessionUseCase'],
+      createFamilyUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['createFamilyUseCase'],
+      uploadMediaUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['uploadMediaUseCase'],
+      updateOwnProfileUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['updateOwnProfileUseCase'],
       dispose: vi.fn(),
     };
   });

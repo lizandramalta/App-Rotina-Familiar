@@ -36,3 +36,14 @@ export class SessionRevokedError extends DomainError {
     super({ message, code: 'SESSION_REVOKED', statusCode: 401 });
   }
 }
+
+/**
+ * Access token ausente, desconhecido, expirado ou de sessão revogada. Uma única
+ * resposta para todos os casos: distinguir o motivo diria a quem sonda qual
+ * etapa falhou.
+ */
+export class AccessTokenInvalidError extends DomainError {
+  constructor(message = 'The access token is missing, invalid or has expired.') {
+    super({ message, code: 'ACCESS_TOKEN_INVALID', statusCode: 401 });
+  }
+}

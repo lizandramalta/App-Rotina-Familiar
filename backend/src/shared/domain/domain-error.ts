@@ -52,3 +52,15 @@ export class ValidationError extends DomainError {
     super({ message, code, statusCode: 422, fieldErrors });
   }
 }
+
+/**
+ * Dependência (banco, storage) indisponível ou resultado de gravação incerto.
+ * Nunca afirma que a gravação foi desfeita (backend-contracts.md §1, 503).
+ */
+export class DependencyUnavailableError extends DomainError {
+  constructor(
+    message = 'A required dependency is unavailable. The outcome of the operation is uncertain.',
+  ) {
+    super({ message, code: 'DEPENDENCY_UNAVAILABLE', statusCode: 503 });
+  }
+}

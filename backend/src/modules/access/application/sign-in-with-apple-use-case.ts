@@ -6,15 +6,13 @@ import type {
 import type { Logger } from '../../../shared/infrastructure/observability/logger.js';
 import type { AppleTokenVerifierPort } from '../../../integrations/apple/apple-token-verifier-port.js';
 import { AppleProofInvalidError } from '../domain/access-errors.js';
-import { ACCESS_TOKEN_TTL_MS } from './access-token-ttl.js';
 import type { AccessCryptoPort } from './access-crypto-port.js';
 import type { AccessRepositoryPort, CreatorMembershipRecord } from './access-repository-port.js';
 import type { SignInWithAppleCommand, SignInWithAppleResult } from './sign-in-with-apple-dto.js';
+import { SessionIssuer } from './session-issuer.js';
 
 /** `creationGrant` de 10 minutos (BA-21, CA-02). */
 const CREATION_GRANT_TTL_MS = 10 * 60 * 1000;
-
-const SESSION_REPLACED_REASON = 'replaced_by_new_apple_sign_in';
 
 /**
  * `SignInWithApple` (UC04, SPEC-001 Fase 1).
@@ -25,6 +23,8 @@ const SESSION_REPLACED_REASON = 'replaced_by_new_apple_sign_in';
  * grant tenha a quem se vincular.
  */
 export class SignInWithAppleUseCase {
+  private readonly sessionIssuer: SessionIssuer;
+
   constructor(
     private readonly deps: {
       readonly repository: AccessRepositoryPort;
@@ -34,7 +34,13 @@ export class SignInWithAppleUseCase {
       readonly clock: Clock;
       readonly logger: Logger;
     },
-  ) {}
+  ) {
+    this.sessionIssuer = new SessionIssuer({
+      repository: deps.repository,
+      crypto: deps.crypto,
+      logger: deps.logger,
+    });
+  }
 
   public async execute(command: SignInWithAppleCommand): Promise<SignInWithAppleResult> {
     const identity = await this.verifyProof(command);
@@ -132,38 +138,13 @@ export class SignInWithAppleUseCase {
   ): Promise<SignInWithAppleResult> {
     const { membership } = params;
 
-    // Antes de inserir: o índice único parcial de sessão ativa por membro
-    // recusaria a nova sessão enquanto a anterior existisse.
-    const revokedSessionIds = await this.deps.repository.revokeActiveSessionsForMember(tx, {
-      memberId: membership.memberId,
-      reason: SESSION_REPLACED_REASON,
-    });
-
-    for (const sessionId of revokedSessionIds) {
-      this.deps.logger.info('session_revoked', {
-        sessionId,
-        reason: SESSION_REPLACED_REASON,
-      });
-    }
-
-    const sessionId = this.deps.crypto.newId();
-    const accessToken = this.deps.crypto.generateOpaqueToken();
-    const refreshToken = this.deps.crypto.generateOpaqueToken();
-    const accessTokenExpiresAt = new Date(params.now.getTime() + ACCESS_TOKEN_TTL_MS);
-
-    await this.deps.repository.insertSession(tx, {
-      sessionId,
+    const session = await this.sessionIssuer.issue(tx, {
       familyId: membership.familyId,
       memberId: membership.memberId,
-      refreshTokenHash: this.deps.crypto.hashToken(refreshToken),
+      role: membership.role,
+      isFamilyCreator: membership.isFamilyCreator,
       installationProofHash: params.installationProofHash,
-    });
-
-    await this.deps.repository.insertAccessToken(tx, {
-      accessTokenId: this.deps.crypto.newId(),
-      sessionId,
-      tokenHash: this.deps.crypto.hashToken(accessToken),
-      expiresAt: accessTokenExpiresAt,
+      now: params.now,
     });
 
     this.deps.logger.info('apple_sign_in_succeeded', {
@@ -171,16 +152,6 @@ export class SignInWithAppleUseCase {
       familyId: membership.familyId,
     });
 
-    return {
-      outcome: 'session',
-      sessionId,
-      memberId: membership.memberId,
-      familyId: membership.familyId,
-      role: membership.role,
-      isFamilyCreator: membership.isFamilyCreator,
-      accessToken,
-      accessTokenExpiresAt: accessTokenExpiresAt.toISOString(),
-      refreshToken,
-    };
+    return { outcome: 'session', ...session };
   }
 }
