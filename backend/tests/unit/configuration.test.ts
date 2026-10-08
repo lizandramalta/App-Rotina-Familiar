@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { generateKeyPairSync } from 'node:crypto';
+import { generateKeyPairSync, type KeyObject } from 'node:crypto';
 import { validateConfiguration, ConfigurationError } from '../../src/bootstrap/configuration.js';
 
 describe('Configuration & Fail-Fast Validation', () => {
@@ -143,6 +143,81 @@ describe('Sign in with Apple configuration', () => {
         APPLE_PRIVATE_KEY: 'not-a-pem-key',
       }),
     ).toThrow(ConfigurationError);
+  });
+
+  describe('APPLE_PRIVATE_KEY curve (ES256 requires P-256)', () => {
+    const pemOf = (key: KeyObject): string =>
+      key.export({ format: 'pem', type: 'pkcs8' }).toString();
+
+    it.each(['secp384r1', 'secp521r1'])(
+      'fails fast in production when the EC key uses the %s curve',
+      (namedCurve) => {
+        const wrongCurvePem = pemOf(generateKeyPairSync('ec', { namedCurve }).privateKey);
+
+        expect(() =>
+          validateConfiguration({
+            ...PRODUCTION_BASE,
+            ...VALID_APPLE_CREDENTIALS,
+            APPLE_PRIVATE_KEY: wrongCurvePem,
+          }),
+        ).toThrow(ConfigurationError);
+      },
+    );
+
+    it('fails fast in production when the key is RSA instead of EC', () => {
+      const rsaPem = pemOf(generateKeyPairSync('rsa', { modulusLength: 2048 }).privateKey);
+
+      expect(() =>
+        validateConfiguration({
+          ...PRODUCTION_BASE,
+          ...VALID_APPLE_CREDENTIALS,
+          APPLE_PRIVATE_KEY: rsaPem,
+        }),
+      ).toThrow(ConfigurationError);
+    });
+
+    it('names APPLE_PRIVATE_KEY as the offending variable', () => {
+      const rsaPem = pemOf(generateKeyPairSync('rsa', { modulusLength: 2048 }).privateKey);
+
+      try {
+        validateConfiguration({
+          ...PRODUCTION_BASE,
+          ...VALID_APPLE_CREDENTIALS,
+          APPLE_PRIVATE_KEY: rsaPem,
+        });
+        expect.unreachable('expected ConfigurationError');
+      } catch (error) {
+        const paths = (error as ConfigurationError).issues.map((issue) => issue.path.join('.'));
+        expect(paths).toContain('APPLE_PRIVATE_KEY');
+      }
+    });
+
+    it('accepts a P-256 key in production', () => {
+      const config = validateConfiguration({
+        ...PRODUCTION_BASE,
+        ...VALID_APPLE_CREDENTIALS,
+      });
+
+      expect(config.APPLE_PRIVATE_KEY).toBe(VALID_PEM);
+    });
+
+    it('does not leak the key material when rejecting a wrong curve', () => {
+      const wrongCurvePem = pemOf(
+        generateKeyPairSync('ec', { namedCurve: 'secp384r1' }).privateKey,
+      );
+
+      try {
+        validateConfiguration({
+          ...PRODUCTION_BASE,
+          ...VALID_APPLE_CREDENTIALS,
+          APPLE_PRIVATE_KEY: wrongCurvePem,
+        });
+        expect.unreachable('expected ConfigurationError');
+      } catch (error) {
+        const body = wrongCurvePem.split('\n')[1] ?? '';
+        expect((error as Error).message).not.toContain(body);
+      }
+    });
   });
 
   it.each(['APPLE_ISSUER', 'APPLE_JWKS_URL', 'APPLE_TOKEN_URL'])(

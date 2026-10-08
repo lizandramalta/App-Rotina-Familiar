@@ -6,6 +6,7 @@ import type { ApplicationContainer } from '../../bootstrap/container.js';
 import type { Configuration } from '../../bootstrap/configuration.js';
 import { DomainError } from '../../shared/domain/domain-error.js';
 import { createProblemDetails } from './problem-details.js';
+import { registerAccessRoutes } from './access-routes.js';
 
 export function buildHttpApp(
   container: ApplicationContainer,
@@ -87,7 +88,8 @@ export function buildHttpApp(
 
       const problem = createProblemDetails({
         status: 400,
-        code: 'VALIDATION_ERROR',
+        // Código estável do contrato (SPEC-001 §5.2, backend-contracts.md §1).
+        code: 'VALIDATION_FAILED',
         title: 'Bad Request',
         detail: typeof error.message === 'string' ? error.message : 'Validation failed',
         requestId,
@@ -162,6 +164,16 @@ export function buildHttpApp(
       timestamp: container.clock.nowIsoString(),
     });
   });
+
+  // --------------------------------------------------------------------------
+  // Rotas de módulo sob o prefixo /v1 (BA-20)
+  // --------------------------------------------------------------------------
+  app.register(
+    async (scope) => {
+      registerAccessRoutes(scope, container);
+    },
+    { prefix: '/v1' },
+  );
 
   // GET /v1 - API root / info
   app.get('/v1', async (_req, reply) => {

@@ -68,6 +68,8 @@ node_modules/
 backend/node_modules/
 backend/dist/
 backend/coverage/
+# Relatório JSON gerado pelo runner local de testes.
+backend/.vitest/
 # Valores de ambiente do backend. Versione apenas o template .env.example.
 backend/.env*
 !backend/.env.example

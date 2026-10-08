@@ -1,6 +1,6 @@
 import { config as loadDotenv } from 'dotenv';
 import { z } from 'zod';
-import { createPrivateKey } from 'node:crypto';
+import { createPrivateKey, type KeyObject } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -34,14 +34,36 @@ export function normalizePrivateKeyPem(value: string): string {
  * secret, em produção. Deixar o Node tentar interpretar a chave é a única
  * verificação que prova que ela serve.
  */
-function isPrivateKeyPem(value: string): boolean {
+/**
+ * Nomes com que o Node identifica a curva NIST P-256. ES256 é definido como
+ * ECDSA com P-256 e SHA-256 (RFC 7518 §3.4): qualquer outra curva produz
+ * assinatura de tamanho diferente e a Apple recusa.
+ */
+export const P256_CURVE_NAMES: ReadonlySet<string> = new Set(['prime256v1', 'p256', 'secp256r1']);
+
+function privateKeyFromPem(value: string): KeyObject | undefined {
   try {
-    createPrivateKey({ key: normalizePrivateKeyPem(value), format: 'pem' });
-    return true;
+    return createPrivateKey({ key: normalizePrivateKeyPem(value), format: 'pem' });
   } catch {
     // A exceção carrega detalhes do material da chave; não propagar nem registrar.
+    return undefined;
+  }
+}
+
+function isPrivateKeyPem(value: string): boolean {
+  return privateKeyFromPem(value) !== undefined;
+}
+
+/** Chave efetivamente utilizável para assinar o client secret ES256 da Apple. */
+function isP256PrivateKeyPem(value: string): boolean {
+  const key = privateKeyFromPem(value);
+
+  if (key === undefined || key.asymmetricKeyType !== 'ec') {
     return false;
   }
+
+  const curve = key.asymmetricKeyDetails?.namedCurve;
+  return curve !== undefined && P256_CURVE_NAMES.has(curve);
 }
 
 /**
@@ -153,6 +175,18 @@ const environmentSchema = z
           path: [key],
         });
       }
+    }
+
+    // Em produção a chave precisa ser utilizável de fato: uma chave RSA ou EC de
+    // outra curva passa como PEM válido, mas produziria um client secret que a
+    // Apple recusa, derrubando toda autenticação em runtime em vez do boot.
+    if (data.APPLE_PRIVATE_KEY !== undefined && !isP256PrivateKeyPem(data.APPLE_PRIVATE_KEY)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          'APPLE_PRIVATE_KEY must be an EC private key on the P-256 curve in production, as required by the ES256 client secret.',
+        path: ['APPLE_PRIVATE_KEY'],
+      });
     }
 
     for (const [key, canonicalUrl] of Object.entries(APPLE_CANONICAL_URLS)) {

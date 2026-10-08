@@ -43,6 +43,19 @@ describe('HTTP Presentation Layer (Fastify)', () => {
         getClient: vi.fn(),
       } as unknown as ApplicationContainer['dbPool'],
       appleConfig: createAppleConfiguration(testConfig),
+      // Dependências do módulo Access: estes testes exercitam só as rotas
+      // operacionais, então stubs bastam. access-routes.test.ts cobre a rota.
+      appleTokenVerifier: {
+        verifyIdentityProof: vi.fn(),
+      } as unknown as ApplicationContainer['appleTokenVerifier'],
+      accessRepository: {} as unknown as ApplicationContainer['accessRepository'],
+      transactionRunner: {
+        run: vi.fn(),
+        forFamily: vi.fn(),
+      } as unknown as ApplicationContainer['transactionRunner'],
+      signInWithAppleUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['signInWithAppleUseCase'],
       dispose: vi.fn(),
     };
   });
