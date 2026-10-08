@@ -87,7 +87,7 @@ Todas as rotas usam `/v1`, HTTPS, JSON em inglês, `Authorization: Bearer <acces
 
 | Método e rota | Caso de uso | Acesso | Entrada | Resultado confirmado |
 |---|---|---|---|---|
-| `GET /family/members` | `ListFamilyMembers` | Adulto | Paginação conforme contrato compartilhado | Projeção paginada da própria família |
+| `GET /family/members` | `ListFamilyMembers` | Adulto | `cursor` opaco opcional | `{ items, nextCursor }` da própria família, em páginas de até 20 perfis |
 | `GET /family/members/{memberId}` | `GetMemberDetail` | Adulto da família | `memberId` na rota | Dados públicos do perfil e capacidades administrativas do ator |
 | `POST /family/members` | `CreateMember` | Administrador | `name`, `role` | `201 Created` e projeção do perfil, ainda sem sessão/convite |
 | `PATCH /family/members/{memberId}` | `UpdateMember` | Administrador | `name` | `200 OK` e projeção confirmada |
@@ -117,7 +117,7 @@ Todos os erros usam `application/problem+json` com `type`, `title`, `status`, `c
 | 403 | `ACTION_NOT_ALLOWED` | Ator sem capacidade administrativa |
 | 404 | `RESOURCE_NOT_FOUND` | Membro ausente, removido ou de outra família |
 | 409 | `MEMBER_STATE_CONFLICT` | Estado atual impede a operação, inclusive proteção do Criador ou mudança incompatível com o estado atual |
-| 422 | `VALIDATION_FAILED` | Nome ou papel semanticamente inválidos; inclui `fieldErrors` |
+| 422 | `VALIDATION_FAILED` | Nome, papel ou cursor semanticamente inválidos; inclui `fieldErrors` (`CURSOR_INVALID` para cursor opaco malformado) |
 | 503 | `DEPENDENCY_UNAVAILABLE` | Persistência ou dependência indisponível; não afirmar reversão de escrita incerta |
 
 - **Concorrência:** aplica-se última gravação válida persistida para edição de nome. Mudanças de papel e remoção usam transação curta, lock por família e revalidação das invariantes no commit (BA-07, BA-08).
@@ -199,6 +199,7 @@ Segredos, tokens, provas de instalação, hashes, apelido privado configurável 
 | E-03 | A saída voluntária de Administrador não-Criador pertence a esta entrega, embora sua entrada visual exista em TEL-030. | Aprovação da prévia em 2026-10-06 | Não — aplica UC02/RN04 existentes |
 | E-04 | A emissão e o reenvio de convite não integram esta entrega; criação de perfil e convite continuam comandos distintos. | Mapa de specs e contrato backend | Não |
 | E-05 | TEL-056 reutiliza a criação de membro sem alterar payload, autorização ou estados desta SPEC; após salvar, a orquestração decide oferecer convite explícito ou avançar. | Pessoa usuária / 2026-10-07 | Não |
+| E-06 | A lista de membros usa cursor opaco, ordenação estável e páginas de até 20 perfis; `nextCursor: null` encerra a consulta. O Mobile carrega as páginas seguintes por rolagem infinita. | Pessoa usuária / 2026-10-08 | Não — detalha o contrato e a experiência de consulta, sem alterar RN/RF. |
 
 ## 10. Fases de implementação e conclusão
 

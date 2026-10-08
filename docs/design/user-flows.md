@@ -1,9 +1,9 @@
-# User flows — versão 1.8
+# User flows — versão 1.9
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão dos fluxos:** 1.8\
+**Versão dos fluxos:** 1.9\
 **Base funcional:** 1.14\
-**Screen map:** 1.8 — revisão de 2026-10-07\
+**Screen map:** 1.9 — revisão de 2026-10-08\
 **Data:** 2026-10-07\
 **Situação:** primeira versão para revisão de design
 
@@ -27,6 +27,7 @@ O detalhamento traduz a base 1.5 em caminhos para design; as decisões de 2026-1
 |---|---|
 | Operação em andamento | Exibir processamento sem bloquear toda a interface e sem indicar sucesso antes da confirmação. |
 | Falha de consulta | Informar que os dados não puderam ser carregados e oferecer nova tentativa na mesma tela; não confundir falha com lista vazia. |
+| Paginação de lista | Ao se aproximar do fim dos itens confirmados, carregar a próxima página de até 20 itens. Falha mantém os itens carregados e oferece nova tentativa; `nextCursor` ausente encerra a rolagem. |
 | Falha de gravação | Consultar estado após resposta perdida, sem repetição automática ou chave geral de operação; informar quando não for possível determinar se uma criação foi salva; permanecer na tela de origem da operação e permitir nova tentativa. Não atualizar progresso como se houvesse sucesso. |
 | Cancelar formulário ou modal | Retornar à origem sem gravar a alteração cancelada. Fechar um seletor interno retorna ao formulário que o abriu. |
 | Voltar após consulta | Retornar à tela que abriu o detalhe, mantendo o contexto de data quando aplicável. |
@@ -597,6 +598,7 @@ Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imedi
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.9 | 1.14 | 1.9 | 2026-10-08 | Listas paginadas usam páginas de até 20 itens, rolagem infinita e nova tentativa sem perder itens confirmados. Para SPEC-003 / SCRUM-27. |
 | 1.8 | 1.14 | 1.8 | 2026-10-07 | UF-01 passa a configurar o perfil do Criador, criar a família e permitir zero ou mais membros com convite explícito antes da área principal. |
 | 1.7 | 1.12 | 1.7 | 2026-10-07 | UF-10 ganha atalho "+ Nova tarefa" em MOD-007, bloqueio local de salvar sem tarefas e consulta explícita por todos os perfis, inclusive Kids. Para SPEC-014. |
 | 1.6 | 1.11 | 1.6 | 2026-10-07 | UF-06 conclui diretamente sem modal; UF-08 permite reabrir missão concluída com confirmação e reversão de recompensa, participações e badges. |
