@@ -253,6 +253,18 @@ class InMemoryDatabase implements FamilyCreationRepositoryPort, AccessRepository
   public async insertCreationGrant(): Promise<void> {
     throw new Error('not used');
   }
+  public async findSessionByRefreshTokenHash(): Promise<undefined> {
+    return undefined;
+  }
+  public async findSessionAndMemberByAccessTokenHash(): Promise<undefined> {
+    return undefined;
+  }
+  public async touchSessionLastSeen(): Promise<void> {}
+  public async revokeSessionById(): Promise<boolean> {
+    return true;
+  }
+  public async revokeAccessTokensForSession(): Promise<void> {}
+  public async revokePushDevicesForSession(): Promise<void> {}
 }
 
 class RollbackTransactionRunner implements TransactionRunner {
@@ -285,6 +297,7 @@ const crypto: AccessCryptoPort = {
   hashToken: sha256,
   hashAppleSubject: sha256,
   encryptAppleSubject: (value) => `enc(${value})`,
+  hashesMatch: (left, right) => left === right,
 };
 const clock: Clock = { now: () => FIXED_NOW, nowIsoString: () => FIXED_NOW.toISOString() };
 

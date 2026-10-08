@@ -7,6 +7,7 @@ import type { Configuration } from '../../bootstrap/configuration.js';
 import { DomainError } from '../../shared/domain/domain-error.js';
 import { createProblemDetails } from './problem-details.js';
 import { registerAccessRoutes } from './access-routes.js';
+import { registerSessionRoutes } from './session-routes.js';
 import { registerFamilyRoutes } from './family-routes.js';
 import { registerMediaRoutes } from './media-routes.js';
 import { registerProfileRoutes } from './profile-routes.js';
@@ -195,7 +196,17 @@ export function buildHttpApp(
   // --------------------------------------------------------------------------
   app.register(
     async (scope) => {
+      // `no-store` em todas as rotas de Access e de sessão (backend-contracts.md
+      // §1): `POST /access/apple` e `POST /access/refresh` emitem credenciais no
+      // corpo, e uma resposta de `/me/session` guardada em cache prolongaria uma
+      // sessão já revogada (SPEC-001 §5.3). O hook cobre também as respostas de
+      // erro, que um header posto em cada handler deixaria de fora.
+      scope.addHook('onSend', async (_request, reply) => {
+        reply.header('Cache-Control', 'no-store');
+      });
+
       registerAccessRoutes(scope, container);
+      registerSessionRoutes(scope, container);
       registerFamilyRoutes(scope, container);
       registerMediaRoutes(scope, container);
       registerProfileRoutes(scope, container);

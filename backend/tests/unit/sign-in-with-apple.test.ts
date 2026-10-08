@@ -5,18 +5,9 @@
  * teste é a orquestração (vínculo, grant, sessão, revogação e isolamento).
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { createHash } from 'node:crypto';
 import { SignInWithAppleUseCase } from '../../src/modules/access/application/sign-in-with-apple-use-case.js';
 import { AppleProofInvalidError } from '../../src/modules/access/domain/access-errors.js';
-import type {
-  AccessRepositoryPort,
-  CreatorIdentityRecord,
-  CreatorMembershipRecord,
-  InsertAccessTokenParams,
-  InsertCreationGrantParams,
-  InsertSessionParams,
-} from '../../src/modules/access/application/access-repository-port.js';
-import type { AccessCryptoPort } from '../../src/modules/access/application/access-crypto-port.js';
+import type { CreatorMembershipRecord } from '../../src/modules/access/application/access-repository-port.js';
 import type { AppleTokenVerifierPort } from '../../src/integrations/apple/apple-token-verifier-port.js';
 import type {
   TransactionContext,
@@ -25,12 +16,12 @@ import type {
 import type { Clock } from '../../src/shared/application/clock.js';
 import type { Logger } from '../../src/shared/infrastructure/observability/logger.js';
 import { MemberRole } from '../../src/shared/domain/member-role.js';
-
-/**
- * Digest real no dublê: um hash de brincadeira como `sha256(<token>)` conteria
- * o token e faria as asserções de não vazamento passarem por acidente.
- */
-const sha256Hex = (value: string): string => createHash('sha256').update(value).digest('hex');
+import {
+  createFakeCrypto,
+  createSilentLogger,
+  InMemoryAccessRepository,
+  sha256Hex,
+} from './support/access-doubles.js';
 
 const APPLE_SUBJECT = '001234.abcdef0123456789.0000';
 const INSTALLATION_PROOF = 'installation-proof-opaque-value';
@@ -42,124 +33,6 @@ const VALID_COMMAND = {
   rawNonce: 'valid-raw-nonce',
   installationProof: INSTALLATION_PROOF,
 };
-
-/**
- * Repositório em memória. Registra também se cada escrita recebeu o mesmo
- * contexto de transação, para provar a atomicidade exigida por CA-05.
- */
-class InMemoryAccessRepository implements AccessRepositoryPort {
-  public identities: CreatorIdentityRecord[] = [];
-  public membership?: CreatorMembershipRecord;
-  public activeSessionIds: string[] = [];
-  public insertedSessions: InsertSessionParams[] = [];
-  public insertedAccessTokens: InsertAccessTokenParams[] = [];
-  public insertedGrants: InsertCreationGrantParams[] = [];
-  public revokedWith: { memberId: string; reason: string }[] = [];
-  public seenContexts: TransactionContext[] = [];
-  /** Ordem das operações, para verificar que a revogação precede a inserção. */
-  public operations: string[] = [];
-
-  public async findCreatorIdentityByAppleSubjectHash(
-    tx: TransactionContext,
-    appleSubjectHash: string,
-  ): Promise<CreatorIdentityRecord | undefined> {
-    this.seenContexts.push(tx);
-    this.operations.push('findIdentity');
-    return this.identities.find((identity) => identity.appleSubjectHash === appleSubjectHash);
-  }
-
-  public async insertCreatorIdentity(
-    tx: TransactionContext,
-    params: {
-      readonly identityId: string;
-      readonly appleSubjectHash: string;
-      readonly appleSubjectEncrypted: string;
-    },
-  ): Promise<CreatorIdentityRecord> {
-    this.seenContexts.push(tx);
-    this.operations.push('insertIdentity');
-    const record = { id: params.identityId, appleSubjectHash: params.appleSubjectHash };
-    this.identities.push(record);
-    return record;
-  }
-
-  public async findCreatorMembership(
-    tx: TransactionContext,
-  ): Promise<CreatorMembershipRecord | undefined> {
-    this.seenContexts.push(tx);
-    this.operations.push('findMembership');
-    return this.membership;
-  }
-
-  public async revokeActiveSessionsForMember(
-    tx: TransactionContext,
-    params: { readonly memberId: string; readonly reason: string },
-  ): Promise<string[]> {
-    this.seenContexts.push(tx);
-    this.operations.push('revokeSessions');
-    this.revokedWith.push({ ...params });
-    const revoked = [...this.activeSessionIds];
-    this.activeSessionIds = [];
-    return revoked;
-  }
-
-  public async insertSession(tx: TransactionContext, params: InsertSessionParams): Promise<void> {
-    this.seenContexts.push(tx);
-    this.operations.push('insertSession');
-    this.insertedSessions.push(params);
-  }
-
-  public async insertAccessToken(
-    tx: TransactionContext,
-    params: InsertAccessTokenParams,
-  ): Promise<void> {
-    this.seenContexts.push(tx);
-    this.operations.push('insertAccessToken');
-    this.insertedAccessTokens.push(params);
-  }
-
-  public async insertCreationGrant(
-    tx: TransactionContext,
-    params: InsertCreationGrantParams,
-  ): Promise<void> {
-    this.seenContexts.push(tx);
-    this.operations.push('insertCreationGrant');
-    this.insertedGrants.push(params);
-  }
-}
-
-/** Crypto determinístico: os valores emitidos ficam previsíveis no teste. */
-function createFakeCrypto(): AccessCryptoPort & { issuedTokens: string[] } {
-  let idCounter = 0;
-  let tokenCounter = 0;
-  const issuedTokens: string[] = [];
-
-  return {
-    issuedTokens,
-    newId: () => `id-${++idCounter}`,
-    generateOpaqueToken: () => {
-      const token = `opaque-token-${++tokenCounter}`;
-      issuedTokens.push(token);
-      return token;
-    },
-    hashToken: sha256Hex,
-    hashAppleSubject: sha256Hex,
-    encryptAppleSubject: (subject: string) => `enc(${sha256Hex(subject)})`,
-  };
-}
-
-function createSilentLogger(): Logger {
-  const logger: Logger = {
-    trace: vi.fn(),
-    debug: vi.fn(),
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-    fatal: vi.fn(),
-    child: () => logger,
-  };
-  return logger;
-}
 
 describe('SignInWithApple use case (SPEC-001 Fase 1)', () => {
   let repository: InMemoryAccessRepository;
