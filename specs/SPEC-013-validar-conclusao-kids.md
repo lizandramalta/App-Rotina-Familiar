@@ -1,8 +1,8 @@
 # Spec 013: Validar conclusão de tarefa Kids
 
-**Status:** rascunho
+**Status:** aprovada
 
-**Autor:** Codex | **Criada em:** 2026-10-08 | **Aprovada por:** | **Em:**
+**Autor:** Codex | **Criada em:** 2026-10-08 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-08
 
 **Base funcional:** 1.14
 
@@ -195,4 +195,4 @@ Erros seguem RFC 9457: `401 SESSION_EXPIRED`, `403 ACTION_NOT_ALLOWED`, `404 RES
 - [x] Contrato, concorrência, autorização e isolamento foram definidos.
 - [x] UX-spec correspondente foi criada como rascunho.
 - [x] Decisões E-01 a E-03 estão registradas.
-- [ ] Status `aprovada` autorizado explicitamente para esta SPEC e UX-spec.
+- [x] Status `aprovada` autorizado explicitamente pela pessoa usuária em 2026-10-08.

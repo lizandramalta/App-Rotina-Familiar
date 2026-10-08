@@ -1,8 +1,8 @@
 # UX Spec 013: Validar conclusão de tarefa Kids
 
-**Status:** rascunho
+**Status:** aprovada
 
-**Autor:** Codex | **Criada em:** 2026-10-08 | **Aprovada por:** | **Em:**
+**Autor:** Codex | **Criada em:** 2026-10-08 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-08
 
 **Spec funcional vinculada:** [SPEC-013-validar-conclusao-kids.md](SPEC-013-validar-conclusao-kids.md)
 
@@ -112,4 +112,4 @@ Voltar de TEL-016 sem decidir não altera a sinalização. Não há rascunho ou 
 - [x] Navegação, retorno, estados, microcopy e acessibilidade foram especificados.
 - [x] iPhone e iPad foram considerados.
 - [x] Decisões de concorrência e ausência de histórico foram refletidas sem alterar regras de domínio.
-- [ ] Status `aprovada` autorizado explicitamente para esta UX-spec e SPEC-013.
+- [x] Status `aprovada` autorizado explicitamente pela pessoa usuária em 2026-10-08.
