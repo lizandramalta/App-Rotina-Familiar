@@ -36,6 +36,13 @@ import { UnavailableObjectStorage } from '../modules/media/infrastructure/unavai
 import { UpdateOwnProfileUseCase } from '../modules/profile/application/update-own-profile-use-case.js';
 import { PostgresProfileRepository } from '../modules/profile/infrastructure/postgres-profile-repository.js';
 import type { AppleTokenVerifierPort } from '../integrations/apple/apple-token-verifier-port.js';
+import {
+  CreateTaskUseCase,
+  DeleteTaskUseCase,
+  EditTaskUseCase,
+  GetTaskUseCase,
+} from '../modules/tasks/application/manage-task-use-cases.js';
+import { PostgresTaskRepository } from '../modules/tasks/infrastructure/postgres-task-repository.js';
 
 export interface ApplicationContainer {
   readonly config: Configuration;
@@ -57,6 +64,10 @@ export interface ApplicationContainer {
   readonly changeFamilyTimeZoneUseCase: ChangeFamilyTimeZoneUseCase;
   readonly uploadMediaUseCase: UploadMediaUseCase;
   readonly updateOwnProfileUseCase: UpdateOwnProfileUseCase;
+  readonly createTaskUseCase: CreateTaskUseCase;
+  readonly getTaskUseCase: GetTaskUseCase;
+  readonly editTaskUseCase: EditTaskUseCase;
+  readonly deleteTaskUseCase: DeleteTaskUseCase;
   dispose(): Promise<void>;
 }
 
@@ -181,6 +192,13 @@ export function createContainer(config: Configuration): ApplicationContainer {
     clock,
   });
 
+  const taskRepository = new PostgresTaskRepository();
+  const taskDependencies = { repository: taskRepository, transactionRunner, clock };
+  const createTaskUseCase = new CreateTaskUseCase(taskDependencies);
+  const getTaskUseCase = new GetTaskUseCase({ repository: taskRepository, transactionRunner });
+  const editTaskUseCase = new EditTaskUseCase(taskDependencies);
+  const deleteTaskUseCase = new DeleteTaskUseCase(taskDependencies);
+
   return {
     config,
     logger,
@@ -201,6 +219,10 @@ export function createContainer(config: Configuration): ApplicationContainer {
     changeFamilyTimeZoneUseCase,
     uploadMediaUseCase,
     updateOwnProfileUseCase,
+    createTaskUseCase,
+    getTaskUseCase,
+    editTaskUseCase,
+    deleteTaskUseCase,
     async dispose(): Promise<void> {
       logger.info('Disposing application container...');
       await dbPool.close();

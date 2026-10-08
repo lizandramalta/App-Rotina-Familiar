@@ -11,6 +11,7 @@ import { registerSessionRoutes } from './session-routes.js';
 import { registerFamilyRoutes } from './family-routes.js';
 import { registerMediaRoutes } from './media-routes.js';
 import { registerProfileRoutes } from './profile-routes.js';
+import { registerTaskRoutes } from './task-routes.js';
 
 export function buildHttpApp(
   container: ApplicationContainer,
@@ -210,6 +211,7 @@ export function buildHttpApp(
       registerFamilyRoutes(scope, container);
       registerMediaRoutes(scope, container);
       registerProfileRoutes(scope, container);
+      registerTaskRoutes(scope, container);
     },
     { prefix: '/v1' },
   );
