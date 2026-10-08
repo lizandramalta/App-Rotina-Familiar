@@ -1,4 +1,11 @@
-import { createCipheriv, createHash, randomBytes, randomUUID, scryptSync } from 'node:crypto';
+import {
+  createCipheriv,
+  createHash,
+  randomBytes,
+  randomUUID,
+  scryptSync,
+  timingSafeEqual,
+} from 'node:crypto';
 import type { AccessCryptoPort } from '../application/access-crypto-port.js';
 
 /** 256 bits de entropia no token opaco devolvido ao cliente (BA-10). */
@@ -38,6 +45,19 @@ export class CryptoTokenService implements AccessCryptoPort {
 
   public hashToken(token: string): string {
     return createHash('sha256').update(token).digest('hex');
+  }
+
+  public hashesMatch(left: string, right: string): boolean {
+    const leftBuffer = Buffer.from(left, 'utf8');
+    const rightBuffer = Buffer.from(right, 'utf8');
+
+    // `timingSafeEqual` exige o mesmo tamanho; hashes de tamanhos diferentes já
+    // são diferentes, e sair aqui não revela nada sobre o conteúdo.
+    if (leftBuffer.length !== rightBuffer.length) {
+      return false;
+    }
+
+    return timingSafeEqual(leftBuffer, rightBuffer);
   }
 
   public hashAppleSubject(appleSubject: string): string {

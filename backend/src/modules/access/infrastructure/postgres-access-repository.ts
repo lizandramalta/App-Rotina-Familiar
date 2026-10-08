@@ -3,11 +3,13 @@ import { asPostgresClient } from '../../../shared/infrastructure/postgres/postgr
 import { isValidMemberRole, MemberRole } from '../../../shared/domain/member-role.js';
 import type {
   AccessRepositoryPort,
+  AccessTokenSessionRecord,
   CreatorIdentityRecord,
   CreatorMembershipRecord,
   InsertAccessTokenParams,
   InsertCreationGrantParams,
   InsertSessionParams,
+  SessionRecord,
 } from '../application/access-repository-port.js';
 
 interface CreatorIdentityRow {
@@ -24,6 +26,25 @@ interface CreatorMembershipRow {
 
 interface SessionIdRow {
   id: string;
+}
+
+interface SessionRow {
+  id: string;
+  family_id: string;
+  member_id: string;
+  installation_proof_hash: string;
+  revoked_at: Date | null;
+}
+
+interface AccessTokenSessionRow {
+  session_id: string;
+  member_id: string;
+  family_id: string;
+  role: string;
+  is_family_creator: boolean;
+  token_expires_at: Date;
+  token_revoked_at: Date | null;
+  session_revoked_at: Date | null;
 }
 
 /**
@@ -158,6 +179,115 @@ export class PostgresAccessRepository implements AccessRepositoryPort {
         params.installationProofHash,
         params.expiresAt,
       ],
+    );
+  }
+
+  public async findSessionByRefreshTokenHash(
+    tx: TransactionContext,
+    refreshTokenHash: string,
+  ): Promise<SessionRecord | undefined> {
+    const result = await asPostgresClient(tx).query<SessionRow>(
+      `select id, family_id, member_id, installation_proof_hash, revoked_at
+         from app.sessions
+        where refresh_token_hash = $1`,
+      [refreshTokenHash],
+    );
+
+    const row = result.rows[0];
+    if (row === undefined) {
+      return undefined;
+    }
+
+    return {
+      sessionId: row.id,
+      familyId: row.family_id,
+      memberId: row.member_id,
+      installationProofHash: row.installation_proof_hash,
+      revokedAt: row.revoked_at ?? undefined,
+    };
+  }
+
+  /**
+   * O join com `app.members` usa a chave composta `(family_id, id)`: é a mesma
+   * garantia da FK da sessão, então o papel devolvido é sempre o do membro
+   * daquela família (RNF06).
+   */
+  public async findSessionAndMemberByAccessTokenHash(
+    tx: TransactionContext,
+    tokenHash: string,
+  ): Promise<AccessTokenSessionRecord | undefined> {
+    const result = await asPostgresClient(tx).query<AccessTokenSessionRow>(
+      `select s.id            as session_id,
+              m.id            as member_id,
+              m.family_id     as family_id,
+              m.role          as role,
+              m.is_family_creator,
+              t.expires_at    as token_expires_at,
+              t.revoked_at    as token_revoked_at,
+              s.revoked_at    as session_revoked_at
+         from app.session_access_tokens t
+         join app.sessions s on s.id = t.session_id
+         join app.members  m on m.family_id = s.family_id and m.id = s.member_id
+        where t.token_hash = $1`,
+      [tokenHash],
+    );
+
+    const row = result.rows[0];
+    if (row === undefined) {
+      return undefined;
+    }
+
+    return {
+      sessionId: row.session_id,
+      memberId: row.member_id,
+      familyId: row.family_id,
+      role: isValidMemberRole(row.role) ? row.role : MemberRole.ADMINISTRATOR,
+      isFamilyCreator: row.is_family_creator,
+      tokenExpiresAt: row.token_expires_at,
+      tokenRevokedAt: row.token_revoked_at ?? undefined,
+      sessionRevokedAt: row.session_revoked_at ?? undefined,
+    };
+  }
+
+  public async touchSessionLastSeen(tx: TransactionContext, sessionId: string): Promise<void> {
+    await asPostgresClient(tx).query(
+      `update app.sessions
+          set last_seen_at = now()
+        where id = $1
+          and revoked_at is null`,
+      [sessionId],
+    );
+  }
+
+  public async revokeSessionById(
+    tx: TransactionContext,
+    params: { readonly sessionId: string; readonly reason: string },
+  ): Promise<boolean> {
+    // `revoked_at is null` no WHERE torna a revogação idempotente: uma segunda
+    // chamada não sobrescreve o motivo da primeira nem devolve `true` de novo.
+    const result = await asPostgresClient(tx).query<SessionIdRow>(
+      `update app.sessions
+          set revoked_at = now(),
+              revoked_reason = $2
+        where id = $1
+          and revoked_at is null
+     returning id`,
+      [params.sessionId, params.reason],
+    );
+
+    return result.rows.length > 0;
+  }
+
+  public async revokeAccessTokensForSession(
+    tx: TransactionContext,
+    sessionId: string,
+  ): Promise<void> {
+    await asPostgresClient(tx).query(
+      `update app.session_access_tokens
+          set revoked_at = now()
+        where session_id = $1
+          and revoked_at is null`,
+      [sessionId],
     );
   }
 }
