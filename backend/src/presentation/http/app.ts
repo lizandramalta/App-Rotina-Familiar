@@ -171,6 +171,15 @@ export function buildHttpApp(
   // --------------------------------------------------------------------------
   app.register(
     async (scope) => {
+      // `no-store` em todas as rotas de Access e de sessão (backend-contracts.md
+      // §1): `POST /access/apple` e `POST /access/refresh` emitem credenciais no
+      // corpo, e uma resposta de `/me/session` guardada em cache prolongaria uma
+      // sessão já revogada (SPEC-001 §5.3). O hook cobre também as respostas de
+      // erro, que um header posto em cada handler deixaria de fora.
+      scope.addHook('onSend', async (_request, reply) => {
+        reply.header('Cache-Control', 'no-store');
+      });
+
       registerAccessRoutes(scope, container);
       registerSessionRoutes(scope, container);
     },

@@ -197,6 +197,30 @@ describe('POST /v1/access/apple', () => {
     });
   });
 
+  describe('no-store nas respostas que emitem credenciais', () => {
+    it('answers the issued session with Cache-Control: no-store', async () => {
+      const response = await postApple(VALID_BODY);
+
+      expect(response.headers['cache-control']).toContain('no-store');
+    });
+
+    it('answers the issued creationGrant with Cache-Control: no-store', async () => {
+      execute.mockResolvedValue(GRANT_RESULT);
+
+      const response = await postApple(VALID_BODY);
+
+      expect(response.headers['cache-control']).toContain('no-store');
+    });
+
+    it('answers a rejected proof with Cache-Control: no-store', async () => {
+      execute.mockRejectedValue(new AppleProofInvalidError());
+
+      const response = await postApple(VALID_BODY);
+
+      expect(response.headers['cache-control']).toContain('no-store');
+    });
+  });
+
   describe('CA-06: familyId nunca vem do cliente', () => {
     it('accepts the request and ignores a familyId sent in the body', async () => {
       const response = await postApple({
@@ -342,6 +366,28 @@ describe('POST /v1/access/refresh (CA-08)', () => {
 
       expect(response.headers['content-type']).toContain('application/problem+json');
       expect(response.json().requestId).toBeDefined();
+    });
+  });
+
+  describe('no-store na resposta que emite credencial', () => {
+    it('answers the new access token with Cache-Control: no-store', async () => {
+      const response = await postRefresh({ refreshToken: 'opaque-refresh-token' });
+
+      expect(response.headers['cache-control']).toContain('no-store');
+    });
+
+    it('answers a validation failure with Cache-Control: no-store', async () => {
+      const response = await postRefresh({});
+
+      expect(response.headers['cache-control']).toContain('no-store');
+    });
+
+    it('answers a revoked session with Cache-Control: no-store', async () => {
+      doubles.refreshSession.mockRejectedValue(new SessionRevokedError());
+
+      const response = await postRefresh({ refreshToken: 'opaque-refresh-token' });
+
+      expect(response.headers['cache-control']).toContain('no-store');
     });
   });
 

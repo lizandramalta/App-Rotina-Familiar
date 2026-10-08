@@ -109,6 +109,28 @@ describe('Session routes (CA-07, CA-09)', () => {
     });
   });
 
+  describe('no-store nas respostas de sessão (SPEC-001 §5.3)', () => {
+    it('answers GET with Cache-Control: no-store', async () => {
+      const response = await callSession('GET');
+
+      expect(response.headers['cache-control']).toContain('no-store');
+    });
+
+    it('answers DELETE with Cache-Control: no-store', async () => {
+      const response = await callSession('DELETE');
+
+      expect(response.headers['cache-control']).toContain('no-store');
+    });
+
+    it('answers a revoked session with Cache-Control: no-store', async () => {
+      doubles.getCurrentSession.mockRejectedValue(new SessionRevokedError());
+
+      const response = await callSession('GET');
+
+      expect(response.headers['cache-control']).toContain('no-store');
+    });
+  });
+
   describe('Authorization ausente ou malformado', () => {
     const malformed: Array<[string, Record<string, string>]> = [
       ['no Authorization header', {}],
