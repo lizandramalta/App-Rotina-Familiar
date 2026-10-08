@@ -1,6 +1,6 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.9 · **Base funcional:** 1.13 · **Arquitetura backend:** 1.0\
+**Versão:** 1.10 · **Base funcional:** 1.13 · **Arquitetura backend:** 1.0\
 **Data:** 2026-10-08\
 **Situação:** contrato arquitetural para detalhamento OpenAPI na implementação
 
@@ -61,9 +61,9 @@ Troca confirmada não é endpoint para transferir membro. Uma sessão anterior d
 
 | Método e caminho | Caso de uso de aplicação | Campos / resposta | Permissão |
 |---|---|---|---|
-| `GET /family/settings` | `GetFamilySettings` | Fuso vigente, mudança programada e limites do ciclo | Admin |
-| `POST /family/time-zone-changes/preview` | `PreviewFamilyTimeZoneChange` | `timeZoneId`, `application` → limites estimados e informativo | Admin; sem gravação |
-| `POST /family/time-zone-changes` | `ChangeFamilyTimeZone` | `timeZoneId`, `application: immediate \| nextCycle` → configuração confirmada | Admin; revalidar limites no commit |
+| `GET /family/settings` | `GetFamilySettings` | `timeZoneId`, `scheduledTimeZoneChange` (`{timeZoneId, effectiveAt}` ou `null`) e `limits` (`{startsAt, endsAt, timeZoneId, isTransition}`) | Admin |
+| `POST /family/time-zone-changes/preview` | `PreviewFamilyTimeZoneChange` | `timeZoneId`, `application` → `proposedTimeZoneId`, `application`, `effectiveAt`, `effectiveLimits` e `isTransition`; recusa o fuso já vigente com `422 TIME_ZONE_UNCHANGED` | Admin; só lê, a liquidação de ciclos vencidos é feita em memória |
+| `POST /family/time-zone-changes` | `ChangeFamilyTimeZone` | `timeZoneId`, `application: immediate \| nextCycle` → mesmo formato de `GET /family/settings`; recusa o fuso já vigente com `422 TIME_ZONE_UNCHANGED`; nova solicitação válida substitui a programada | Admin; revalidar papel e limites no commit |
 | `GET /family/members` | `ListFamilyMembers` | Projeção familiar paginada | Adulto |
 | `GET /family/members/{memberId}` | `GetMemberDetail` | Dados públicos do perfil e capacidades administrativas do ator | Adulto da família |
 | `POST /family/members` | `CreateMember` | Nome administrativo/papel permitido → perfil ainda sem sessão | Admin |
@@ -207,6 +207,7 @@ O OpenAPI futuro deve materializar schemas e exemplos de sucesso/erro dessas rot
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.10 | 2026-10-08 | Formatos de resposta de `GetFamilySettings`, `PreviewFamilyTimeZoneChange` e `ChangeFamilyTimeZone`, e o código `TIME_ZONE_UNCHANGED`. Sem mudança de comportamento. Para SPEC-002 / SCRUM-21. |
 | 1.9 | 2026-10-08 | `CreateFamily` passa a declarar `creatorName` e `creatorNickname` (nome e apelido do Criador, RF01/RF48), o ciclo semanal inicial na mesma transação e a conferência da prova da instalação contra o grant. Alinha o contrato ao que a SPEC-002 já aprovou; sem mudança de comportamento. Para SPEC-002 / SCRUM-18. |
 | 1.8 | 2026-10-07 | `SignalTask` detalhado: ator Kids, revalidação de titularidade/estado (`403 ACTION_NOT_ALLOWED`, `404 RESOURCE_NOT_FOUND`, `409 TASK_NOT_PENDING`), resposta `201 Created` com `signal.id`. `POST /media` com `purpose: taskSignal` passa a ser aceito, validando somente o papel Kids no upload; contexto de tarefa é revalidado só no vínculo. Para SPEC-012. |
 | 1.7 | 2026-10-07 | `CreateMission`/`EditMission` ganham `note` opcional (≤250 car.); `GetMissionDetail` expõe `note`; `EditMission` explicita rejeição de `taskIds` vazio. Para SPEC-014. |

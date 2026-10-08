@@ -92,7 +92,7 @@ As possibilidades de evolução estão no [documento de visão](docs/00-visao-do
 | [Catálogo mobile](docs/architecture/mobile-feature-catalog.md) | Funcionalidades, nomes de arquivos em inglês e cobertura das 26 telas, 13 modais, 19 casos de uso e 16 fluxos. |
 | [Decisões da arquitetura mobile](docs/architecture/mobile-decisions.md) | Escolhas técnicas consolidadas, pendências resolvidas e temas fora desta etapa. |
 | [Convenções de código mobile](docs/architecture/mobile-code-conventions.md) | Convenções de Swift/SwiftUI, arquitetura, concorrência, segurança e testes. |
-| [Arquitetura backend](docs/architecture/backend-architecture.md) | Backend 1.0: Node.js, Clean Architecture, monólito modular, Supabase/R2, transações, acesso e jobs. |
+| [Arquitetura backend](docs/architecture/backend-architecture.md) | Backend 1.3: Node.js, Clean Architecture, monólito modular, Supabase/R2, transações, acesso e jobs. |
 | [Contratos backend](docs/architecture/backend-contracts.md) | API `/v1`, permissões, erros, projeções e cobertura dos 19 UC e 27 RNF. |
 | [Decisões backend](docs/architecture/backend-decisions.md) | BA-01–BA-20: escolhas confirmadas, propostas técnicas, alternativas e limites. |
 | [Convenções de código backend](docs/architecture/backend-code-conventions.md) | Convenções de TypeScript/Fastify, contratos, SQL, segurança e testes. |

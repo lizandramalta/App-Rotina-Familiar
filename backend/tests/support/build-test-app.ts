@@ -13,6 +13,9 @@ type UseCaseMock = { execute: ReturnType<typeof vi.fn> };
 export interface TestApp {
   readonly app: FastifyInstance;
   readonly createFamily: UseCaseMock;
+  readonly getFamilySettings: UseCaseMock;
+  readonly previewTimeZoneChange: UseCaseMock;
+  readonly changeTimeZone: UseCaseMock;
   readonly uploadMedia: UseCaseMock;
   readonly updateOwnProfile: UseCaseMock;
   readonly authenticateSession: UseCaseMock;
@@ -38,6 +41,9 @@ export function buildTestApp(): TestApp {
   });
 
   const createFamily: UseCaseMock = { execute: vi.fn() };
+  const getFamilySettings: UseCaseMock = { execute: vi.fn() };
+  const previewTimeZoneChange: UseCaseMock = { execute: vi.fn() };
+  const changeTimeZone: UseCaseMock = { execute: vi.fn() };
   const uploadMedia: UseCaseMock = { execute: vi.fn() };
   const updateOwnProfile: UseCaseMock = { execute: vi.fn() };
   const authenticateSession: UseCaseMock = { execute: vi.fn().mockResolvedValue(TEST_ACTOR) };
@@ -51,6 +57,9 @@ export function buildTestApp(): TestApp {
     signInWithAppleUseCase: { execute: vi.fn() },
     authenticateSessionUseCase: authenticateSession,
     createFamilyUseCase: createFamily,
+    getFamilySettingsUseCase: getFamilySettings,
+    previewFamilyTimeZoneChangeUseCase: previewTimeZoneChange,
+    changeFamilyTimeZoneUseCase: changeTimeZone,
     uploadMediaUseCase: uploadMedia,
     updateOwnProfileUseCase: updateOwnProfile,
     dispose: vi.fn(),
@@ -59,6 +68,9 @@ export function buildTestApp(): TestApp {
   return {
     app: buildHttpApp(container, config),
     createFamily,
+    getFamilySettings,
+    previewTimeZoneChange,
+    changeTimeZone,
     uploadMedia,
     updateOwnProfile,
     authenticateSession,

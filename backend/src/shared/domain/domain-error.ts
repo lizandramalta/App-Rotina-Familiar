@@ -64,3 +64,13 @@ export class DependencyUnavailableError extends DomainError {
     super({ message, code: 'DEPENDENCY_UNAVAILABLE', statusCode: 503 });
   }
 }
+
+/**
+ * Sessão válida sem a capacidade exigida pela ação (por exemplo, Membro ou Kids
+ * em configurações da família). O papel vem da sessão, nunca do cliente.
+ */
+export class ActionNotAllowedError extends DomainError {
+  constructor(message = 'The current profile is not allowed to perform this action.') {
+    super({ message, code: 'ACTION_NOT_ALLOWED', statusCode: 403 });
+  }
+}
