@@ -1,7 +1,7 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.8 · **Base funcional:** 1.13 · **Arquitetura backend:** 1.0\
-**Data:** 2026-10-07\
+**Versão:** 1.9 · **Base funcional:** 1.14 · **Arquitetura backend:** 1.0\
+**Data:** 2026-10-08\
 **Situação:** contrato arquitetural para detalhamento OpenAPI na implementação
 
 [Arquitetura](backend-architecture.md) · [Decisões](backend-decisions.md) · [Catálogo mobile](mobile-feature-catalog.md) · [UC](../03-casos-de-uso.md) · [Índice](../DOCUMENTACAO.md)
@@ -99,9 +99,9 @@ Preview de fuso é apenas leitura de suporte a MOD-012. A gravação pode reflet
 | `PATCH /routines/{routineId}` | `UpdateFutureRoutine` | `fromTaskId`, configuração/data inicial/frequência; a ocorrência de origem e futuras elegíveis | Adulto |
 | `POST /routines/{routineId}/future-task-deletions` | `DeleteFutureRoutineTasks` | `fromTaskId` → ocorrência de origem e futuras elegíveis, preservadas e fim de geração | Adulto |
 | `POST /tasks/{taskId}/signals` | `SignalTask` | `photoMediaId` opcional → sinalização corrente | Kids responsável e tarefa pendente |
-| `GET /kids/signals` | `GetKidsReviewQueue` | Sinalizações pendentes paginadas | Admin |
-| `GET /kids/signals/{signalId}` | `GetKidsSignal` | Tarefa, autor, foto opcional e estado da sinalização | Admin |
-| `POST /kids/signals/{signalId}/decision` | `DecideKidsSignal` | `decision: confirm \| reject` → tarefa/decisão | Admin; sinalização ainda corrente |
+| `GET /kids/signals` | `GetKidsReviewQueue` | Sinalizações pendentes paginadas, da mais antiga para a mais recente | Admin |
+| `GET /kids/signals/{signalId}` | `GetKidsSignal` | Tarefa, autor, foto opcional e estado da sinalização corrente | Admin |
+| `POST /kids/signals/{signalId}/decision` | `DecideKidsSignal` | `decision: confirm \| reject` → tarefa/resultado canônico | Admin |
 | `GET /me/progress` | `GetOwnProgress` | Totais próprios do dia; sem carga familiar | Todos |
 | `GET /family/overview` | `GetFamilyOverview` | Progresso familiar e membros num snapshot; sem carga | Adulto |
 | `GET /family/load` | `GetFamilyLoad` | Distribuição por membro e totais, sem ranking | Adulto |
@@ -111,6 +111,10 @@ Nas rotas familiares, `period` aceita `day` ou `week`; `referenceDate` é a data
 O servidor não aceita perfil responsável, autor da conclusão ou escolha de atribuição no comando. O ator vem da sessão; a conclusão mantém responsáveis existentes ou atribui o ator adulto se não houver nenhum. Tarefa com ao menos um responsável Kids só aceita conclusão manual de Administrador; Membro recebe `403 ACTION_NOT_ALLOWED`. Se já estiver concluída, a transação não duplica créditos e responde `409 TASK_ALREADY_COMPLETED`; o cliente reconcilia silenciosamente consultando o estado canônico. Reabrir missão concluída remove recompensa aceita, participações e badges derivados no mesmo commit. Conclusão manual administrativa encerra a pendência Kids e preserva sinalização/foto para auditoria acessível apenas a Administradores. `signalId` é identidade de domínio que protege uma decisão contra outra sinalização mais recente, não versão geral de edição.
 
 `SignalTask` exige ator com papel `kids` e revalida, na mesma transação, que o ator consta em `assigneeIds` e que a tarefa está `pending`; caso contrário responde `403 ACTION_NOT_ALLOWED` (ator não é Kids), `404 RESOURCE_NOT_FOUND` (tarefa indisponível, de outra família, ou da qual o Kids não é responsável — sem distinguir os casos) ou `409 TASK_NOT_PENDING` (tarefa já `awaitingConfirmation` ou `completed`). `photoMediaId`, quando enviado, é revalidado como `READY`, do titular e com `finalidade: taskSignal`, usando os mesmos códigos `PHOTO_MEDIA_NOT_READY`/`PHOTO_MEDIA_NOT_OWNED`/`PHOTO_MEDIA_PURPOSE_MISMATCH` de `UpdateOwnProfile`. Sucesso retorna `201 Created` com a tarefa canônica e a sinalização criada (`signal.id`, correspondente ao `signalId` usado por `DecideKidsSignal`). Para SPEC-012.
+
+`GetKidsReviewQueue` retorna exclusivamente sinalizações ainda correntes em `awaitingConfirmation`, ordenadas por `signaledAt` crescente e `signalId` crescente, com cursor opaco associado a essa ordenação. `GetKidsSignal` só expõe sinalização corrente da família do Administrador; sinalização resolvida não integra histórico navegável e responde `404 RESOURCE_NOT_FOUND` nessa rota. A foto `taskSignal` pode ser transmitida somente ao Administrador da mesma família enquanto estiver vinculada a sinalização corrente avaliável; Membro/Kids recebem `403 ACTION_NOT_ALLOWED` e recursos de outra família respondem `404`, sem URL pública ou assinada.
+
+`DecideKidsSignal` recebe somente `decision: confirm | reject`. Sob a mesma transação/lock de tarefa e família, `confirm` muda `awaitingConfirmation` para `completed`, registra o Administrador e cria crédito dos responsáveis finais; `reject` muda para `pending`, sem crédito ou efeito em missão. Ambos atualizam missões quando aplicável. Se outra decisão ou `CompleteTask` administrativo já retirou a sinalização do estado corrente, a rota responde `200 OK` com a tarefa canônica, `decisionOutcome` (`confirmed`, `rejected` ou `closedByManualCompletion`) e `applied: false`; não há escrita, erro visual obrigatório, crédito ou efeito duplicado. Na primeira decisão válida, retorna o mesmo formato com `applied: true`. Resposta perdida continua exigindo consulta antes de nova ação explícita. Para SPEC-013.
 
 `CreateRoutine` e `UpdateFutureRoutine` usam `422 VALIDATION_FAILED` com `fieldErrors` estáveis: `FREQUENCY_DAYS_INVALID` para `frequencyDays` fora de 1/7/14/21/28, `START_DATE_INVALID` para `startDate` fora de `YYYY-MM-DD` e `ROUTINE_SOURCE_TASK_INVALID` quando `fromTaskId` não identifica uma ocorrência da rotina solicitada dentro da família do ator. Um `fromTaskId` de outra família é indisponível e responde `404`. Não existe `endDate` nesses comandos. `EditTask` rejeita com `422 VALIDATION_FAILED`/`SIGNAL_RESOLUTION_REQUIRED` qualquer gravação sobre tarefa `awaitingConfirmation` sem `signalResolution`, independentemente de quais campos mudaram. `resetToPending` transiciona a tarefa para `pending` e descarta a sinalização corrente; `keepAwaitingConfirmation` preserva o estado e a sinalização corrente com os dados editados. `DeleteTask` sobre tarefa `awaitingConfirmation` remove a sinalização corrente junto da tarefa, sem gerar `CONFIRMED`/`REJECTED`.
 
@@ -207,6 +211,7 @@ O OpenAPI futuro deve materializar schemas e exemplos de sucesso/erro dessas rot
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.9 | 2026-10-08 | `GetKidsReviewQueue`, `GetKidsSignal` e `DecideKidsSignal` detalhados: fila pendente ordenada por antiguidade, foto privada de sinalização corrente, decisão atômica e retorno canônico silencioso (`applied: false`) para decisão/conclusão concorrente já resolvida. Para SPEC-013. |
 | 1.8 | 2026-10-07 | `SignalTask` detalhado: ator Kids, revalidação de titularidade/estado (`403 ACTION_NOT_ALLOWED`, `404 RESOURCE_NOT_FOUND`, `409 TASK_NOT_PENDING`), resposta `201 Created` com `signal.id`. `POST /media` com `purpose: taskSignal` passa a ser aceito, validando somente o papel Kids no upload; contexto de tarefa é revalidado só no vínculo. Para SPEC-012. |
 | 1.7 | 2026-10-07 | `CreateMission`/`EditMission` ganham `note` opcional (≤250 car.); `GetMissionDetail` expõe `note`; `EditMission` explicita rejeição de `taskIds` vazio. Para SPEC-014. |
 | 1.5 | 2026-10-06 | Conclusão de tarefa com responsável Kids exige Administrador; `TASK_ALREADY_COMPLETED` reconcilia concorrência sem duplicar crédito; sinalização/foto pendente é auditável só por Admin. Para SPEC-010. |

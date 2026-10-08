@@ -95,7 +95,7 @@ posterior por Administradores em TEL-053/MOD-012; não há uma SPEC-021 separada
 | Spec planejada | UC principal | Projetos | Depende de | Status |
 |---|---|---|---|---|
 | [`SPEC-012-sinalizar-tarefa-kids`](SPEC-012-sinalizar-tarefa-kids.md) - Sinalizar tarefa como realizada | UC15 | ambos | SPEC-002, SPEC-007 | aprovada |
-| `SPEC-013-validar-conclusao-kids` - Validar conclusão de tarefa Kids | UC03 | ambos | SPEC-012 | não criada |
+| [SPEC-013-validar-conclusao-kids](SPEC-013-validar-conclusao-kids.md) - Validar conclusão de tarefa Kids | UC03 | ambos | SPEC-012 | rascunho |
 
 ### Tema 4 - Missões e recompensas
 
@@ -134,6 +134,7 @@ status e resumo; mantenha esta tabela como o panorama do backlog.
 | [SPEC-006-editar-perfil](SPEC-006-editar-perfil.md) | [UX-006-editar-perfil.md](UX-006-editar-perfil.md) | aprovada | ambos | Edição posterior do próprio apelido e foto opcional, reutilizando a mídia iniciada no onboarding, com titularidade exclusiva; consulta de badges cumulativos e missões contribuintes por marco. |
 | [SPEC-011-reabrir-tarefa](SPEC-011-reabrir-tarefa.md) | [UX-011-reabrir-tarefa.md](UX-011-reabrir-tarefa.md) | aprovada | ambos | Retorno de tarefa concluída para Pendente por Admin/Membro (qualquer tarefa acessível) ou Kids (própria), com reversão de crédito e confirmação explícita quando afeta missão concluída e/ou recompensa aceita. |
 | [SPEC-012-sinalizar-tarefa-kids](SPEC-012-sinalizar-tarefa-kids.md) | [UX-012-sinalizar-tarefa-kids.md](UX-012-sinalizar-tarefa-kids.md) | aprovada | ambos | Kids sinaliza tarefa própria pendente com foto opcional por câmera direta, movendo-a para Aguardando confirmação sem crédito; habilita `purpose: taskSignal` reservado por SPEC-006. |
+| [SPEC-013-validar-conclusao-kids](SPEC-013-validar-conclusao-kids.md) | [UX-013-validar-conclusao-kids.md](UX-013-validar-conclusao-kids.md) | rascunho | ambos | Fila administrativa de sinalizações Kids, avaliação com foto privada opcional e decisão atômica, incluindo reconciliação silenciosa de ações concorrentes. |
 
 ## Templates
 
