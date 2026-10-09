@@ -7,6 +7,7 @@ import { randomUUID } from 'node:crypto';
 import type { ApplicationContainer } from '../../bootstrap/container.js';
 import type { Configuration } from '../../bootstrap/configuration.js';
 import { DomainError } from '../../shared/domain/domain-error.js';
+import { RateLimitedError } from '../../modules/access/domain/invite-errors.js';
 import { createProblemDetails } from './problem-details.js';
 import { registerAccessRoutes } from './access-routes.js';
 import { registerSessionRoutes } from './session-routes.js';
@@ -21,6 +22,9 @@ export function buildHttpApp(
   config: Configuration,
 ): FastifyInstance {
   const app = Fastify({
+    // Só atrás de proxy confiável: caso contrário `X-Forwarded-For` é forjável e
+    // o limite por origem do ingresso por convite (SPEC-005) seria contornável.
+    trustProxy: config.TRUST_PROXY,
     genReqId: (req) => {
       const headerId = req.headers['x-request-id'];
       if (typeof headerId === 'string' && headerId.length > 0) {
@@ -59,7 +63,7 @@ export function buildHttpApp(
       servers: [{ url: config.API_BASE_URL, description: 'API configurada para o ambiente atual' }],
       tags: [
         { name: 'Operational', description: 'Sondas e metadados operacionais.' },
-        { name: 'Access', description: 'Autenticação e início de sessão.' },
+        { name: 'Access', description: 'Autenticação, convite e início de sessão.' },
         { name: 'Family', description: 'Onboarding e criação de família.' },
         { name: 'Members', description: 'Consulta e criação de perfis da família.' },
         { name: 'Media', description: 'Upload de mídia privada.' },
@@ -121,6 +125,10 @@ export function buildHttpApp(
         requestId,
         fieldErrors: error.fieldErrors,
       });
+
+      if (error instanceof RateLimitedError) {
+        reply.header('Retry-After', String(error.retryAfterSeconds));
+      }
 
       return reply
         .status(error.statusCode)

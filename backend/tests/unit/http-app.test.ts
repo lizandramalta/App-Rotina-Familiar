@@ -68,6 +68,15 @@ describe('HTTP Presentation Layer (Fastify)', () => {
       authenticateSessionUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['authenticateSessionUseCase'],
+      inspectInviteUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['inspectInviteUseCase'],
+      joinFamilyByInviteUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['joinFamilyByInviteUseCase'],
+      recoverInviteJoinUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['recoverInviteJoinUseCase'],
       createFamilyUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['createFamilyUseCase'],

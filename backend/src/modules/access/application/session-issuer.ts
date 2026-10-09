@@ -46,19 +46,22 @@ export class SessionIssuer {
       readonly isFamilyCreator: boolean;
       readonly installationProofHash: string;
       readonly now: Date;
+      /** Motivo gravado nas sessões do membro que a nova substitui. */
+      readonly replacedReason?: string;
     },
   ): Promise<IssuedSession> {
     // Antes de inserir: o índice único parcial de sessão ativa por membro
     // recusaria a nova sessão enquanto a anterior existisse.
+    const reason = params.replacedReason ?? SESSION_REPLACED_REASON;
     const revokedSessionIds = await this.deps.repository.revokeActiveSessionsForMember(tx, {
       memberId: params.memberId,
-      reason: SESSION_REPLACED_REASON,
+      reason,
     });
 
     for (const sessionId of revokedSessionIds) {
       this.deps.logger.info('session_revoked', {
         sessionId,
-        reason: SESSION_REPLACED_REASON,
+        reason,
       });
     }
 
