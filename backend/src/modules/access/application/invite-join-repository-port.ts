@@ -63,6 +63,13 @@ export interface InviteJoinRepositoryPort {
   /** `false` quando o `attemptId` já existe (a linha não é sobrescrita). */
   insertJoinRecovery(tx: TransactionContext, params: InsertJoinRecoveryParams): Promise<boolean>;
 
+  /**
+   * Remove os envelopes já vencidos de qualquer ingresso. O envelope guarda
+   * credenciais de sessão: sem esta limpeza, quem nunca chama a recuperação
+   * deixaria o resultado cifrado no banco depois da janela de dez minutos.
+   */
+  purgeExpiredJoinRecoveries(tx: TransactionContext, now: Date): Promise<void>;
+
   findJoinRecovery(
     tx: TransactionContext,
     attemptId: string,

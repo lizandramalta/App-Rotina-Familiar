@@ -118,6 +118,13 @@ export class PostgresInviteJoinRepository implements InviteJoinRepositoryPort {
     return result.rowCount === 1;
   }
 
+  public async purgeExpiredJoinRecoveries(tx: TransactionContext, now: Date): Promise<void> {
+    await asPostgresClient(tx).query(
+      'delete from app.invite_join_recoveries where expires_at <= $1',
+      [now],
+    );
+  }
+
   public async findJoinRecovery(
     tx: TransactionContext,
     attemptId: string,

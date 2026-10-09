@@ -159,6 +159,10 @@ export class JoinFamilyByInviteUseCase {
           replacedReason: INVITE_JOIN_REPLACED_REASON,
         });
 
+        // Aproveita o commit do ingresso para varrer envelopes vencidos, já que
+        // não há job de limpeza próprio nesta fase (BA-32).
+        await this.deps.repository.purgeExpiredJoinRecoveries(tx, now);
+
         const stored = await this.deps.repository.insertJoinRecovery(tx, {
           attemptId: command.attemptId,
           inviteId: locked.inviteId,

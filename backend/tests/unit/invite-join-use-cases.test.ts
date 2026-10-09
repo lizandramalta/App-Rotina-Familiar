@@ -466,6 +466,36 @@ describe('Invite join use cases (SPEC-005 phase 1)', () => {
     });
   });
 
+  describe('expired envelopes', () => {
+    it('purges vencidos envelopes of other joins in the commit of a new join', async () => {
+      await join.execute(joinCommand());
+      expect(joinRepository.recoveries).toHaveLength(1);
+
+      // Outro convite, depois da janela do primeiro ingresso.
+      const second: StoredInvite = {
+        ...invite,
+        inviteId: 'invite-2',
+        memberId: 'member-second',
+        tokenHash: sha256Hex('second-token'),
+        status: 'available',
+      };
+      joinRepository.invites.push(second);
+      now = new Date(NOW.getTime() + 11 * 60 * 1000);
+
+      await join.execute(
+        joinCommand({
+          token: 'second-token',
+          attemptId: '33333333-3333-4333-8333-333333333333',
+          attemptSecret: 'another-attempt-secret-01',
+        }),
+      );
+
+      expect(joinRepository.recoveries.map((item) => item.attemptId)).toEqual([
+        '33333333-3333-4333-8333-333333333333',
+      ]);
+    });
+  });
+
   describe('observability — SPEC-005 §8', () => {
     it('never logs token, password, proofs, verifiers or credentials', async () => {
       const session = await join.execute(joinCommand());

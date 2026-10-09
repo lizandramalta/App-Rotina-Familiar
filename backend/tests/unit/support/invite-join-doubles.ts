@@ -93,6 +93,10 @@ export class InMemoryInviteJoinRepository implements InviteJoinRepositoryPort {
     return true;
   }
 
+  public async purgeExpiredJoinRecoveries(_tx: TransactionContext, now: Date): Promise<void> {
+    this.recoveries = this.recoveries.filter((item) => item.expiresAt.getTime() > now.getTime());
+  }
+
   public async findJoinRecovery(
     _tx: TransactionContext,
     attemptId: string,

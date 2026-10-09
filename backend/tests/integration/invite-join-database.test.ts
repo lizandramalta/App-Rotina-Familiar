@@ -302,6 +302,53 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
       expect(await inviteStatus(seeded.inviteId)).toBe('available');
     });
 
+    it('forgets attempts older than the window instead of locking the invite forever', async () => {
+      const seeded = await seedInvite();
+      const subject = sha256(`invite:${sha256(seeded.token)}`);
+      const windowMs = container.config.INVITE_ATTEMPT_WINDOW_MINUTES * 60 * 1000;
+      // Mais tentativas do que o limite, todas anteriores à janela.
+      for (let index = 0; index < container.config.INVITE_ATTEMPT_LIMIT + 3; index += 1) {
+        await container.dbPool.query(
+          `insert into app.invite_attempt_log (scope, subject_hash, attempted_at)
+           values ('invite', $1, $2)`,
+          [subject, new Date(Date.now() - windowMs - 60_000)],
+        );
+      }
+
+      const session = await container.joinFamilyByInviteUseCase.execute(joinInput(seeded));
+
+      expect(session.memberId).toBe(seeded.guestId);
+      const remaining = await container.dbPool.query(
+        `select 1 from app.invite_attempt_log where scope = 'invite' and subject_hash = $1`,
+        [subject],
+      );
+      // Só a tentativa atual sobra: as vencidas foram removidas na contagem.
+      expect(remaining.rows).toHaveLength(1);
+      await container.dbPool.query('delete from app.invite_attempt_log where subject_hash = $1', [
+        subject,
+      ]);
+    });
+
+    it('removes expired recovery envelopes of other joins when a new join commits', async () => {
+      const first = await seedInvite();
+      const firstInput = joinInput(first);
+      await container.joinFamilyByInviteUseCase.execute(firstInput);
+      await container.dbPool.query(
+        `update app.invite_join_recoveries set expires_at = now() - interval '1 minute'
+          where attempt_id = $1`,
+        [firstInput.attemptId],
+      );
+
+      const second = await seedInvite();
+      await container.joinFamilyByInviteUseCase.execute(joinInput(second));
+
+      const stale = await container.dbPool.query(
+        'select 1 from app.invite_join_recoveries where attempt_id = $1',
+        [firstInput.attemptId],
+      );
+      expect(stale.rows).toHaveLength(0);
+    });
+
     it('CA-05 confirms one session and one consumption for two simultaneous attempts', async () => {
       const seeded = await seedInvite();
 
