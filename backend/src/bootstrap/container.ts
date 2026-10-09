@@ -48,6 +48,10 @@ import {
   EditTaskUseCase,
   GetTaskUseCase,
 } from '../modules/tasks/application/manage-task-use-cases.js';
+import {
+  GetOwnProgressUseCase,
+  GetOwnTasksUseCase,
+} from '../modules/tasks/application/get-own-tasks-use-cases.js';
 import { PostgresTaskRepository } from '../modules/tasks/infrastructure/postgres-task-repository.js';
 
 export interface ApplicationContainer {
@@ -75,6 +79,8 @@ export interface ApplicationContainer {
   readonly updateOwnProfileUseCase: UpdateOwnProfileUseCase;
   readonly createTaskUseCase: CreateTaskUseCase;
   readonly getTaskUseCase: GetTaskUseCase;
+  readonly getOwnTasksUseCase: GetOwnTasksUseCase;
+  readonly getOwnProgressUseCase: GetOwnProgressUseCase;
   readonly editTaskUseCase: EditTaskUseCase;
   readonly deleteTaskUseCase: DeleteTaskUseCase;
   dispose(): Promise<void>;
@@ -220,6 +226,9 @@ export function createContainer(config: Configuration): ApplicationContainer {
   const taskDependencies = { repository: taskRepository, transactionRunner, clock };
   const createTaskUseCase = new CreateTaskUseCase(taskDependencies);
   const getTaskUseCase = new GetTaskUseCase({ repository: taskRepository, transactionRunner });
+  const taskQueryDependencies = { repository: taskRepository, transactionRunner, clock };
+  const getOwnTasksUseCase = new GetOwnTasksUseCase(taskQueryDependencies);
+  const getOwnProgressUseCase = new GetOwnProgressUseCase(taskQueryDependencies);
   const editTaskUseCase = new EditTaskUseCase(taskDependencies);
   const deleteTaskUseCase = new DeleteTaskUseCase(taskDependencies);
 
@@ -248,6 +257,8 @@ export function createContainer(config: Configuration): ApplicationContainer {
     updateOwnProfileUseCase,
     createTaskUseCase,
     getTaskUseCase,
+    getOwnTasksUseCase,
+    getOwnProgressUseCase,
     editTaskUseCase,
     deleteTaskUseCase,
     async dispose(): Promise<void> {

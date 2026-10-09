@@ -101,6 +101,12 @@ describe('HTTP Presentation Layer (Fastify)', () => {
       getTaskUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['getTaskUseCase'],
+      getOwnTasksUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['getOwnTasksUseCase'],
+      getOwnProgressUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['getOwnProgressUseCase'],
       editTaskUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['editTaskUseCase'],

@@ -24,6 +24,8 @@ export interface TestApp {
   readonly authenticateSession: UseCaseMock;
   readonly createTask: UseCaseMock;
   readonly getTask: UseCaseMock;
+  readonly getOwnTasks: UseCaseMock;
+  readonly getOwnProgress: UseCaseMock;
   readonly editTask: UseCaseMock;
   readonly deleteTask: UseCaseMock;
 }
@@ -59,6 +61,8 @@ export function buildTestApp(): TestApp {
   const authenticateSession: UseCaseMock = { execute: vi.fn().mockResolvedValue(TEST_ACTOR) };
   const createTask: UseCaseMock = { execute: vi.fn() };
   const getTask: UseCaseMock = { execute: vi.fn() };
+  const getOwnTasks: UseCaseMock = { execute: vi.fn() };
+  const getOwnProgress: UseCaseMock = { execute: vi.fn() };
   const editTask: UseCaseMock = { execute: vi.fn() };
   const deleteTask: UseCaseMock = { execute: vi.fn() };
 
@@ -81,6 +85,8 @@ export function buildTestApp(): TestApp {
     updateOwnProfileUseCase: updateOwnProfile,
     createTaskUseCase: createTask,
     getTaskUseCase: getTask,
+    getOwnTasksUseCase: getOwnTasks,
+    getOwnProgressUseCase: getOwnProgress,
     editTaskUseCase: editTask,
     deleteTaskUseCase: deleteTask,
     dispose: vi.fn(),
@@ -100,6 +106,8 @@ export function buildTestApp(): TestApp {
     authenticateSession,
     createTask,
     getTask,
+    getOwnTasks,
+    getOwnProgress,
     editTask,
     deleteTask,
   };
