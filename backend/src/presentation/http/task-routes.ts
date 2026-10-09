@@ -6,6 +6,15 @@ interface TaskParams {
   readonly taskId: string;
 }
 
+interface OwnTasksQuery {
+  readonly referenceDate: string;
+  readonly cursor?: string;
+}
+
+interface OwnProgressQuery {
+  readonly referenceDate: string;
+}
+
 interface TaskBody {
   readonly title?: unknown;
   readonly weight?: unknown;
@@ -50,10 +59,114 @@ const taskResponseSchema = {
   },
 } as const;
 
-/** Rotas de CRUD da tarefa única — SPEC-007 fases 1 e 2. */
+const problemResponseSchema = {
+  type: 'object',
+  required: ['type', 'title', 'status', 'code', 'requestId'],
+  properties: {
+    type: { type: 'string' },
+    title: { type: 'string' },
+    status: { type: 'integer' },
+    code: { type: 'string' },
+    requestId: { type: 'string' },
+    fieldErrors: {
+      type: 'object',
+      additionalProperties: { type: 'array', items: { type: 'string' } },
+    },
+  },
+} as const;
+
+const ownTasksResponseSchema = {
+  type: 'object',
+  required: ['items', 'nextCursor'],
+  properties: {
+    items: { type: 'array', items: taskResponseSchema },
+    nextCursor: { type: ['string', 'null'] },
+  },
+} as const;
+
+const ownProgressResponseSchema = {
+  type: 'object',
+  required: ['total', 'completed', 'percentage'],
+  properties: {
+    total: { type: 'integer', minimum: 0 },
+    completed: { type: 'integer', minimum: 0 },
+    percentage: { type: ['number', 'null'], minimum: 0, maximum: 100 },
+  },
+} as const;
+
+const referenceDateQuerySchema = {
+  type: 'object',
+  required: ['referenceDate'],
+  additionalProperties: false,
+  properties: { referenceDate: { type: 'string' } },
+} as const;
+
+/** Rotas de tarefas — SPEC-007 e consulta pessoal diária da SPEC-009 Fase 1. */
 export function registerTaskRoutes(app: FastifyInstance, container: ApplicationContainer): void {
   app.register(async (scope) => {
     scope.addHook('onRequest', createAuthenticationHook(container));
+
+    scope.get<{ Querystring: OwnTasksQuery }>(
+      '/me/tasks',
+      {
+        schema: {
+          tags: ['Tasks'],
+          summary: 'List the authenticated member tasks for one day',
+          security: [{ bearerAuth: [] }],
+          querystring: {
+            ...referenceDateQuerySchema,
+            properties: { ...referenceDateQuerySchema.properties, cursor: { type: 'string' } },
+          },
+          response: {
+            200: ownTasksResponseSchema,
+            400: problemResponseSchema,
+            401: problemResponseSchema,
+            422: problemResponseSchema,
+            503: problemResponseSchema,
+          },
+        },
+      },
+      async (request, reply) =>
+        reply
+          .status(200)
+          .header('Cache-Control', 'no-store')
+          .send(
+            await container.getOwnTasksUseCase.execute(
+              requireActor(request),
+              request.query.referenceDate,
+              request.query.cursor,
+            ),
+          ),
+    );
+
+    scope.get<{ Querystring: OwnProgressQuery }>(
+      '/me/progress',
+      {
+        schema: {
+          tags: ['Tasks'],
+          summary: 'Get the authenticated member daily task progress',
+          security: [{ bearerAuth: [] }],
+          querystring: referenceDateQuerySchema,
+          response: {
+            200: ownProgressResponseSchema,
+            400: problemResponseSchema,
+            401: problemResponseSchema,
+            422: problemResponseSchema,
+            503: problemResponseSchema,
+          },
+        },
+      },
+      async (request, reply) =>
+        reply
+          .status(200)
+          .header('Cache-Control', 'no-store')
+          .send(
+            await container.getOwnProgressUseCase.execute(
+              requireActor(request),
+              request.query.referenceDate,
+            ),
+          ),
+    );
 
     scope.post<{ Body: TaskBody }>(
       '/tasks',

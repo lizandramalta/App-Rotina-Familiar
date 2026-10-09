@@ -6,6 +6,12 @@ import type {
   TaskRepositoryPort,
   TaskStatus,
 } from '../application/task-repository-port.js';
+import type {
+  FamilyCalendarRecord,
+  OwnTaskPageCursor,
+  OwnTaskProgressRecord,
+  TaskQueryRepositoryPort,
+} from '../application/task-query-repository-port.js';
 
 interface TaskRow {
   id: string;
@@ -45,7 +51,7 @@ const taskSelect = `
    where t.family_id = $1 and t.id = $2 and t.deleted_at is null
    group by t.id`;
 
-export class PostgresTaskRepository implements TaskRepositoryPort {
+export class PostgresTaskRepository implements TaskRepositoryPort, TaskQueryRepositoryPort {
   public async insertSingleTask(
     tx: TransactionContext,
     params: {
@@ -126,6 +132,102 @@ export class PostgresTaskRepository implements TaskRepositoryPort {
     const result = await client.query<TaskRow>(taskSelect, [familyId, taskId]);
     const row = result.rows[0];
     return row === undefined ? undefined : toTask(row);
+  }
+
+  public async findFamilyCalendar(
+    tx: TransactionContext,
+    familyId: string,
+  ): Promise<FamilyCalendarRecord | undefined> {
+    const result = await asPostgresClient(tx).query<{
+      created_at: Date;
+      timezone: string;
+    }>(
+      `select created_at, timezone
+         from app.families
+        where id = $1`,
+      [familyId],
+    );
+    const row = result.rows[0];
+    return row === undefined ? undefined : { createdAt: row.created_at, timeZoneId: row.timezone };
+  }
+
+  public async findOwnTasksPage(
+    tx: TransactionContext,
+    params: {
+      readonly familyId: string;
+      readonly memberId: string;
+      readonly referenceDate: string;
+      readonly after: OwnTaskPageCursor | undefined;
+      readonly limit: number;
+    },
+  ): Promise<readonly TaskRecord[]> {
+    const result = await asPostgresClient(tx).query<TaskRow>(
+      `select t.id, t.family_id, t.title, t.weight,
+              to_char(t.scheduled_date, 'YYYY-MM-DD') as scheduled_date,
+              t.note, t.status, t.routine_id, t.created_at,
+              assignees.ids as assignee_ids
+         from app.task_occurrences t
+         cross join lateral (
+           select coalesce(array_agg(a.member_id order by a.member_id), '{}') as ids
+             from app.task_assignees a
+            where a.family_id = t.family_id and a.task_id = t.id
+         ) assignees
+        where t.family_id = $1
+          and t.scheduled_date = $3::date
+          and t.deleted_at is null
+          and exists (
+            select 1
+              from app.task_assignees mine
+             where mine.family_id = t.family_id
+               and mine.task_id = t.id
+               and mine.member_id = $2
+          )
+          and ($4::uuid is null or t.id > $4::uuid)
+        order by t.id asc
+        limit $5`,
+      [
+        params.familyId,
+        params.memberId,
+        params.referenceDate,
+        params.after?.id ?? null,
+        params.limit,
+      ],
+    );
+    return result.rows.map(toTask);
+  }
+
+  public async countOwnTasksProgress(
+    tx: TransactionContext,
+    params: {
+      readonly familyId: string;
+      readonly memberId: string;
+      readonly referenceDate: string;
+    },
+  ): Promise<OwnTaskProgressRecord> {
+    const result = await asPostgresClient(tx).query<{
+      total: number;
+      completed: number;
+    }>(
+      `select count(*)::integer as total,
+              count(*) filter (where t.status = 'completed')::integer as completed
+         from app.task_occurrences t
+        where t.family_id = $1
+          and t.scheduled_date = $3::date
+          and t.deleted_at is null
+          and exists (
+            select 1
+              from app.task_assignees mine
+             where mine.family_id = t.family_id
+               and mine.task_id = t.id
+               and mine.member_id = $2
+          )`,
+      [params.familyId, params.memberId, params.referenceDate],
+    );
+    const row = result.rows[0];
+    if (row === undefined) {
+      throw new TypeError('Own task progress aggregation did not return a row.');
+    }
+    return row;
   }
 
   public async countFamilyMembers(

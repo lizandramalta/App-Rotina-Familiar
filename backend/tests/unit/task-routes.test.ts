@@ -20,6 +20,9 @@ const TASK = {
   createdAt: '2026-10-08T12:00:00.000Z',
 };
 
+const OWN_TASKS = { items: [TASK], nextCursor: null };
+const OWN_PROGRESS = { total: 1, completed: 0, percentage: 0 };
+
 describe('Task routes — SPEC-007 phases 1 and 2', () => {
   let test: TestApp;
 
@@ -27,11 +30,66 @@ describe('Task routes — SPEC-007 phases 1 and 2', () => {
     test = buildTestApp();
     test.createTask.execute.mockResolvedValue(TASK);
     test.getTask.execute.mockResolvedValue(TASK);
+    test.getOwnTasks.execute.mockResolvedValue(OWN_TASKS);
+    test.getOwnProgress.execute.mockResolvedValue(OWN_PROGRESS);
     test.editTask.execute.mockResolvedValue(TASK);
     test.deleteTask.execute.mockResolvedValue({ id: TASK_ID });
   });
 
   afterEach(async () => test.app.close());
+
+  it('SCRUM-38 CA-01 lists only the authenticated member daily tasks', async () => {
+    const response = await test.app.inject({
+      method: 'GET',
+      url: '/v1/me/tasks?referenceDate=2026-10-10',
+      headers: AUTH,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['cache-control']).toBe('no-store');
+    expect(response.json()).toEqual(OWN_TASKS);
+    expect(test.getOwnTasks.execute).toHaveBeenCalledWith(TEST_ACTOR, '2026-10-10', undefined);
+  });
+
+  it('SCRUM-38 CA-01 returns the authenticated member daily progress', async () => {
+    const response = await test.app.inject({
+      method: 'GET',
+      url: '/v1/me/progress?referenceDate=2026-10-10',
+      headers: AUTH,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual(OWN_PROGRESS);
+    expect(test.getOwnProgress.execute).toHaveBeenCalledWith(TEST_ACTOR, '2026-10-10');
+  });
+
+  it('SCRUM-38 CA-01 rejects the family period field from personal routes', async () => {
+    const response = await test.app.inject({
+      method: 'GET',
+      url: '/v1/me/tasks?referenceDate=2026-10-10&period=week',
+      headers: AUTH,
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({
+      code: 'UNKNOWN_FIELD',
+      fieldErrors: { period: ['UNKNOWN_FIELD'] },
+    });
+    expect(test.getOwnTasks.execute).not.toHaveBeenCalled();
+  });
+
+  it('documents the personal task and progress contracts in OpenAPI', async () => {
+    const response = await test.app.inject({ method: 'GET', url: '/docs/json' });
+    const document = response.json() as {
+      paths: Record<string, { get: { security: unknown[]; responses: Record<string, unknown> } }>;
+    };
+
+    expect(response.statusCode).toBe(200);
+    expect(document.paths['/v1/me/tasks']?.get.security).toEqual([{ bearerAuth: [] }]);
+    expect(document.paths['/v1/me/tasks']?.get.responses).toHaveProperty('422');
+    expect(document.paths['/v1/me/progress']?.get.security).toEqual([{ bearerAuth: [] }]);
+    expect(document.paths['/v1/me/progress']?.get.responses).toHaveProperty('503');
+  });
 
   it('CA-01 creates a task as the authenticated adult and returns its canonical resource', async () => {
     const response = await test.app.inject({
