@@ -67,6 +67,16 @@ const problemResponseSchema = {
   },
 } as const;
 
+const inviteCredentialsResponseSchema = {
+  type: 'object',
+  required: ['inviteId', 'link', 'password'],
+  properties: {
+    inviteId: { type: 'string' },
+    link: { type: 'string' },
+    password: { type: 'string' },
+  },
+} as const;
+
 /** Rotas de consulta e criação de membros — SPEC-003 Fase 1. */
 export function registerMemberRoutes(app: FastifyInstance, container: ApplicationContainer): void {
   app.register(async (scope) => {
@@ -173,6 +183,49 @@ export function registerMemberRoutes(app: FastifyInstance, container: Applicatio
           .header('Cache-Control', 'no-store')
           .send(member);
       },
+    );
+
+    // SPEC-004 Fase 1: o comando não aceita corpo; qualquer campo é UNKNOWN_FIELD.
+    scope.post<{ Params: MemberParams }>(
+      '/family/members/:memberId/invites',
+      {
+        // O comando não tem corpo: sem payload o schema `object` falharia, então
+        // a ausência vira `{}` e qualquer campo enviado continua UNKNOWN_FIELD.
+        preValidation: async (request) => {
+          request.body ??= {};
+        },
+        schema: {
+          tags: ['Members'],
+          summary: 'Issue or reissue a member invite (transient link and password)',
+          security: [{ bearerAuth: [] }],
+          params: {
+            type: 'object',
+            required: ['memberId'],
+            properties: { memberId: { type: 'string', format: 'uuid' } },
+          },
+          body: { type: 'object', additionalProperties: false, properties: {} },
+          response: {
+            201: inviteCredentialsResponseSchema,
+            400: problemResponseSchema,
+            401: problemResponseSchema,
+            403: problemResponseSchema,
+            404: problemResponseSchema,
+            409: problemResponseSchema,
+            503: problemResponseSchema,
+          },
+        },
+      },
+      async (request, reply) =>
+        reply
+          .status(201)
+          .header('Cache-Control', 'no-store')
+          .send(
+            await container.issueMemberInviteUseCase.execute({
+              actor: requireActor(request),
+              memberId: request.params.memberId,
+              requestId: request.id,
+            }),
+          ),
     );
   });
 }

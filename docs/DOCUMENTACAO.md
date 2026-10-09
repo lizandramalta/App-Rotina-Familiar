@@ -28,7 +28,7 @@
 | [Convenções de código mobile](architecture/mobile-code-conventions.md)   | Convenções de Swift/SwiftUI, camadas, concorrência, segurança, testes e revisão.                                                                        |
 | [Arquitetura backend](architecture/backend-architecture.md)              | Backend 1.3: Node.js, Clean Architecture, monólito modular, Supabase/R2, transações, acesso e jobs.                                                     |
 | [Contratos backend](architecture/backend-contracts.md)                   | Contratos 1.12 da API `/v1`, documentação OpenAPI, permissões, erros, projeções e cobertura dos 19 UC e 27 RNF; base funcional 1.14.                    |
-| [Decisões backend](architecture/backend-decisions.md)                    | BA-01–BA-20: escolhas confirmadas, propostas técnicas, alternativas e limites.                                                                          |
+| [Decisões backend](architecture/backend-decisions.md)                    | BA-01–BA-28: escolhas confirmadas, propostas técnicas, alternativas e limites.                                                                          |
 | [Convenções de código backend](architecture/backend-code-conventions.md) | Convenções de TypeScript/Fastify, camadas, contratos, SQL, segurança, testes e revisão.                                                                 |
 | [Specs de entrega](../specs/README.md)                                   | Recortes aprovados de implementação compartilhados entre mobile e backend.                                                                              |
 

@@ -52,6 +52,7 @@ describe('Configuration & Fail-Fast Validation', () => {
       DATABASE_URL: 'postgresql://postgres:pass@remote:5432/postgres?sslmode=require',
       SESSION_SECRET: 'a'.repeat(32),
       INVITE_ENVELOPE_KEY: 'b'.repeat(32),
+      INVITE_LINK_BASE_URL: 'https://app.rotinafamiliar.example',
       // Production também exige as credenciais da Apple (SPEC-001).
       ...VALID_APPLE_CREDENTIALS,
     });
@@ -73,6 +74,7 @@ const PRODUCTION_BASE = {
   DATABASE_URL: 'postgresql://postgres:pass@remote:5432/postgres',
   SESSION_SECRET: 'a'.repeat(32),
   INVITE_ENVELOPE_KEY: 'b'.repeat(32),
+  INVITE_LINK_BASE_URL: 'https://app.rotinafamiliar.example',
 };
 
 const VALID_APPLE_CREDENTIALS = {
@@ -356,5 +358,35 @@ describe('Sign in with Apple configuration', () => {
     } catch (error) {
       expect((error as Error).message).not.toContain('S'.repeat(40));
     }
+  });
+});
+
+describe('Invite link base URL — SPEC-004', () => {
+  const production = {
+    NODE_ENV: 'production',
+    DATABASE_URL: 'postgresql://postgres:pass@remote:5432/postgres',
+    SESSION_SECRET: 'a'.repeat(32),
+    INVITE_ENVELOPE_KEY: 'b'.repeat(32),
+    ...VALID_APPLE_CREDENTIALS,
+  };
+
+  it('defaults to the reserved .invalid domain outside production', () => {
+    const config = validateConfiguration({
+      NODE_ENV: 'development',
+      DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/postgres',
+    });
+    expect(config.INVITE_LINK_BASE_URL).toBe('https://example.invalid');
+  });
+
+  it('refuses the reserved placeholder domain in production', () => {
+    expect(() => validateConfiguration(production)).toThrow(/INVITE_LINK_BASE_URL/);
+  });
+
+  it('accepts a real public URL in production', () => {
+    const config = validateConfiguration({
+      ...production,
+      INVITE_LINK_BASE_URL: 'https://app.rotinafamiliar.example',
+    });
+    expect(config.INVITE_LINK_BASE_URL).toBe('https://app.rotinafamiliar.example');
   });
 });

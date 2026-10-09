@@ -19,6 +19,7 @@ export interface TestApp {
   readonly listFamilyMembers: UseCaseMock;
   readonly getMemberDetail: UseCaseMock;
   readonly createMember: UseCaseMock;
+  readonly issueMemberInvite: UseCaseMock;
   readonly uploadMedia: UseCaseMock;
   readonly updateOwnProfile: UseCaseMock;
   readonly authenticateSession: UseCaseMock;
@@ -56,6 +57,7 @@ export function buildTestApp(): TestApp {
   const listFamilyMembers: UseCaseMock = { execute: vi.fn() };
   const getMemberDetail: UseCaseMock = { execute: vi.fn() };
   const createMember: UseCaseMock = { execute: vi.fn() };
+  const issueMemberInvite: UseCaseMock = { execute: vi.fn() };
   const uploadMedia: UseCaseMock = { execute: vi.fn() };
   const updateOwnProfile: UseCaseMock = { execute: vi.fn() };
   const authenticateSession: UseCaseMock = { execute: vi.fn().mockResolvedValue(TEST_ACTOR) };
@@ -81,6 +83,7 @@ export function buildTestApp(): TestApp {
     listFamilyMembersUseCase: listFamilyMembers,
     getMemberDetailUseCase: getMemberDetail,
     createMemberUseCase: createMember,
+    issueMemberInviteUseCase: issueMemberInvite,
     uploadMediaUseCase: uploadMedia,
     updateOwnProfileUseCase: updateOwnProfile,
     createTaskUseCase: createTask,
@@ -101,6 +104,7 @@ export function buildTestApp(): TestApp {
     listFamilyMembers,
     getMemberDetail,
     createMember,
+    issueMemberInvite,
     uploadMedia,
     updateOwnProfile,
     authenticateSession,

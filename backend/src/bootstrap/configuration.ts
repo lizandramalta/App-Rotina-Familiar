@@ -128,6 +128,10 @@ const environmentSchema = z
       .min(16, 'INVITE_ENVELOPE_KEY must be at least 16 characters for dev and 32 in production')
       .default('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'),
 
+    // Base pública do link de convite (SPEC-004). O padrão é um domínio reservado
+    // (RFC 2606) que nunca resolve: serve a dev/test, e em production é recusado.
+    INVITE_LINK_BASE_URL: z.string().url().default('https://example.invalid'),
+
     // Integrations (optional for base phase)
     R2_ACCOUNT_ID: z.string().optional(),
     R2_ACCESS_KEY_ID: z.string().optional(),
@@ -164,6 +168,15 @@ const environmentSchema = z
         message:
           'In production, SESSION_SECRET and INVITE_ENVELOPE_KEY must have at least 32 characters.',
         path: ['SESSION_SECRET'],
+      });
+    }
+
+    // Um link apontando para o domínio reservado entregaria convites inúteis.
+    if (new URL(data.INVITE_LINK_BASE_URL).hostname.endsWith('.invalid')) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'INVITE_LINK_BASE_URL must be a real public URL in production.',
+        path: ['INVITE_LINK_BASE_URL'],
       });
     }
 

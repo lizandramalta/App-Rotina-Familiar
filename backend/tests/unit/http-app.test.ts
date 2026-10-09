@@ -89,6 +89,9 @@ describe('HTTP Presentation Layer (Fastify)', () => {
       createMemberUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['createMemberUseCase'],
+      issueMemberInviteUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['issueMemberInviteUseCase'],
       uploadMediaUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['uploadMediaUseCase'],

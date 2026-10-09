@@ -32,6 +32,9 @@ import {
   GetMemberDetailUseCase,
   ListFamilyMembersUseCase,
 } from '../modules/family/application/member-management-use-cases.js';
+import { IssueMemberInviteUseCase } from '../modules/family/application/issue-member-invite-use-case.js';
+import { CryptoInviteCredentials } from '../modules/family/infrastructure/crypto-invite-credentials.js';
+import { PostgresMemberInviteRepository } from '../modules/family/infrastructure/postgres-member-invite-repository.js';
 import { PostgresMemberManagementRepository } from '../modules/family/infrastructure/postgres-member-management-repository.js';
 import { UploadMediaUseCase } from '../modules/media/application/upload-media-use-case.js';
 import type { ObjectStoragePort } from '../modules/media/application/media-ports.js';
@@ -75,6 +78,7 @@ export interface ApplicationContainer {
   readonly listFamilyMembersUseCase: ListFamilyMembersUseCase;
   readonly getMemberDetailUseCase: GetMemberDetailUseCase;
   readonly createMemberUseCase: CreateMemberUseCase;
+  readonly issueMemberInviteUseCase: IssueMemberInviteUseCase;
   readonly uploadMediaUseCase: UploadMediaUseCase;
   readonly updateOwnProfileUseCase: UpdateOwnProfileUseCase;
   readonly createTaskUseCase: CreateTaskUseCase;
@@ -200,6 +204,14 @@ export function createContainer(config: Configuration): ApplicationContainer {
     clock,
   });
 
+  const issueMemberInviteUseCase = new IssueMemberInviteUseCase({
+    repository: new PostgresMemberInviteRepository(),
+    credentials: new CryptoInviteCredentials(config.INVITE_LINK_BASE_URL),
+    transactionRunner,
+    clock,
+    logger,
+  });
+
   // Sem R2 configurado o upload responde 503; a criação da família não depende
   // dele, já que a foto é opcional (SPEC-002 CA-10).
   const mediaRepository = new PostgresMediaRepository();
@@ -253,6 +265,7 @@ export function createContainer(config: Configuration): ApplicationContainer {
     listFamilyMembersUseCase,
     getMemberDetailUseCase,
     createMemberUseCase,
+    issueMemberInviteUseCase,
     uploadMediaUseCase,
     updateOwnProfileUseCase,
     createTaskUseCase,
