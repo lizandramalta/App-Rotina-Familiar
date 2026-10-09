@@ -1,6 +1,6 @@
 # Decisões da arquitetura backend
 
-**Versão:** 1.2 · **Base funcional:** 1.5\
+**Versão:** 1.3 · **Base funcional:** 1.5\
 **Data:** 2026-10-08 · **Situação:** fundação técnica da Sprint 0 implementada; referência para entregas incrementais
 
 [Arquitetura](backend-architecture.md) · [Contratos](backend-contracts.md) · [Decisões mobile](mobile-decisions.md) · [Índice](../DOCUMENTACAO.md)
@@ -68,6 +68,20 @@ Estas definições tornam os fluxos implementáveis sem acrescentar novas jornad
 
 Esses detalhes são decisões técnicas da arquitetura. Os IDs funcionais permanecem os mesmos; o catálogo liga cada contrato ao UC correspondente.
 
+## 4.1. Decisões de implementação da SPEC-004 (emissão de convite)
+
+Escolhas técnicas tomadas ao implementar o SCRUM-30, aprovadas em chat em 2026-10-09. Nenhuma altera comportamento, permissão ou estado da base funcional.
+
+| # | Decisão | Por quê |
+|---|---|---|
+| BA-22 | Senha do convite com **6 caracteres** de um alfabeto de 32 símbolos sem ambíguos (sem `0/O/1/I`), sorteados com `crypto.randomInt`. Persistida só como verificador **scrypt** com sal próprio (`scrypt$v1$N$r$p$salt$hash`, N=2^15, r=8, p=1). | O tamanho foi escolhido pelo usuário para facilitar a digitação por quem recebe. São apenas 30 bits de entropia, então a proteção não vem da senha: vem do verificador lento (contra vazamento do banco) e do limite de tentativas no ingresso (BA-23). O link carrega 256 bits independentes; conhecer um não revela o outro. Os parâmetros são versionados no próprio verificador para permitir evolução sem migration. |
+| BA-23 | `429 RATE_LIMITED` **não** é implementado em `IssueMemberInvite` neste card. | A SPEC lista o código, mas não fixa limites e o backend não tem mecanismo de rate limit. Inventar valores seria decidir contrato por conta própria. A emissão já exige sessão de Administrador e serializa por família. **Pendência:** o limite de tentativas de senha é obrigatório no ingresso (SPEC-005/SCRUM-32), pois é ele que compensa a senha curta de BA-22; a emissão deve ser coberta por um card transversal. |
+| BA-24 | O link é `<INVITE_LINK_BASE_URL>/invite/<token>`. A variável tem como padrão o domínio reservado `https://example.invalid` e é **recusada em produção** se terminar em `.invalid`. | O domínio real (universal link) ainda não existe. O padrão `.invalid` (RFC 2606) nunca resolve, então não vaza para um endereço real em dev/test, e a validação no boot impede subir produção emitindo convites inúteis. |
+| BA-25 | Perfil removido: **sem tratamento neste card**. Não foi criada coluna de remoção em `app.members`. | A remoção pertence ao recorte de SPEC-003 ainda sem card. Antecipar a coluna decidiria o modelo de remoção fora do seu escopo. O `404` para removido (SPEC-004 CA-04) deve ser entregue junto com a remoção, que precisa filtrar o alvo em `findTarget`. |
+| BA-26 | Emitir convite para **o próprio ator** responde `409 INVITE_NOT_ISSUABLE`. | A SPEC fala em emitir para "outro perfil" e a emissão revoga a sessão do alvo; se o alvo fosse o ator, o Administrador encerraria a própria sessão. O Criador já é inelegível, então a regra só alcança Administradores não-Criadores. |
+| BA-27 | Eventos `member_invite_issued`, `member_invite_issue_denied` e `member_invite_issue_uncertain` são **logs estruturados**, sem tabela de auditoria. | Não existe infraestrutura de auditoria e a SPEC define só os campos permitidos. Logs cobrem a necessidade sem criar um modelo de dados novo. Token, senha, link e verificadores nunca são registrados. |
+| BA-28 | O hash scrypt é calculado **antes** de adquirir o lock da família; a transação revalida ator, sessão e alvo depois dele. | O scrypt consome CPU e memória por dezenas de milissegundos. Segurar o lock durante o cálculo serializaria todas as escritas da família (backend-architecture.md §7). |
+
 ## 5. Limites e continuidade
 
 A Sprint 0 criou o servidor Fastify, a configuração validada, o schema privado `app`, migrations e as verificações de CI. Ela não cria recursos Supabase/R2 gerenciados, credenciais, publicação, endpoints de produto, sessões ou jobs de domínio; esses itens continuam orientados por esta documentação e pelas SPECs aprovadas.
@@ -80,6 +94,7 @@ Sequência sugerida: composição e persistência → Apple/bootstrap/sessões/c
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.3 | 2026-10-09 | BA-22–BA-28: decisões de implementação da emissão de convite (SPEC-004 Fase 1), com justificativas. Sem mudança funcional. |
 | 1.2 | 2026-10-08 | Registra a fundação backend da Sprint 0 sem alterar decisões funcionais ou introduzir capacidades de produto. |
 | 1.1 | 2026-10-06 | BA-21: confirma em 10 minutos o prazo técnico do `creationGrant` proposto em `backend-architecture.md` §8, decidido na aprovação de `SPEC-001`. |
 | 1.0 | 2026-10-05 | BA-01–BA-20, distinção entre decisões confirmadas e propostas técnicas, alternativas e detalhes derivados. |
