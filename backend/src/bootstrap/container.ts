@@ -21,6 +21,13 @@ import type { AccessRepositoryPort } from '../modules/access/application/access-
 import { SessionIssuer } from '../modules/access/application/session-issuer.js';
 import { AuthenticateSessionUseCase } from '../modules/access/application/authenticate-session-use-case.js';
 import { PostgresSessionLookup } from '../modules/access/infrastructure/postgres-session-lookup.js';
+import { InspectInviteUseCase } from '../modules/access/application/inspect-invite-use-case.js';
+import { JoinFamilyByInviteUseCase } from '../modules/access/application/join-family-by-invite-use-case.js';
+import { RecoverInviteJoinUseCase } from '../modules/access/application/recover-invite-join-use-case.js';
+import { PostgresInviteJoinRepository } from '../modules/access/infrastructure/postgres-invite-join-repository.js';
+import { PostgresInviteAttemptLimiter } from '../modules/access/infrastructure/postgres-invite-attempt-limiter.js';
+import { ScryptInvitePasswordVerifier } from '../modules/access/infrastructure/scrypt-invite-password-verifier.js';
+import { AesGcmInviteJoinEnvelope } from '../modules/access/infrastructure/aes-gcm-invite-join-envelope.js';
 import { CreateFamilyUseCase } from '../modules/family/application/create-family-use-case.js';
 import { PostgresFamilyCreationRepository } from '../modules/family/infrastructure/postgres-family-creation-repository.js';
 import { ChangeFamilyTimeZoneUseCase } from '../modules/family/application/change-family-time-zone-use-case.js';
@@ -71,6 +78,9 @@ export interface ApplicationContainer {
   readonly refreshSessionUseCase: RefreshSessionUseCase;
   readonly revokeSessionUseCase: RevokeSessionUseCase;
   readonly authenticateSessionUseCase: AuthenticateSessionUseCase;
+  readonly inspectInviteUseCase: InspectInviteUseCase;
+  readonly joinFamilyByInviteUseCase: JoinFamilyByInviteUseCase;
+  readonly recoverInviteJoinUseCase: RecoverInviteJoinUseCase;
   readonly createFamilyUseCase: CreateFamilyUseCase;
   readonly getFamilySettingsUseCase: GetFamilySettingsUseCase;
   readonly previewFamilyTimeZoneChangeUseCase: PreviewFamilyTimeZoneChangeUseCase;
@@ -149,6 +159,57 @@ export function createContainer(config: Configuration): ApplicationContainer {
     sessionLookup: new PostgresSessionLookup(dbPool),
     crypto: accessCrypto,
     clock,
+  });
+
+  // Ingresso por convite (SPEC-005). Mesmo `SessionIssuer` do login Apple: a
+  // sessão nasce pelo mesmo caminho, com a mesma garantia de uma ativa por perfil.
+  const inviteJoinRepository = new PostgresInviteJoinRepository();
+  const inviteAttemptLimiter = new PostgresInviteAttemptLimiter(dbPool);
+  const inviteAttemptPolicy = {
+    originLimit: config.INVITE_ORIGIN_ATTEMPT_LIMIT,
+    inviteLimit: config.INVITE_ATTEMPT_LIMIT,
+    windowMs: config.INVITE_ATTEMPT_WINDOW_MINUTES * 60 * 1000,
+  };
+  const inviteJoinEnvelope = new AesGcmInviteJoinEnvelope(config.INVITE_ENVELOPE_KEY);
+
+  const inspectInviteUseCase = new InspectInviteUseCase({
+    repository: inviteJoinRepository,
+    limiter: inviteAttemptLimiter,
+    crypto: accessCrypto,
+    transactionRunner,
+    clock,
+    logger,
+    policy: inviteAttemptPolicy,
+  });
+
+  const joinFamilyByInviteUseCase = new JoinFamilyByInviteUseCase({
+    repository: inviteJoinRepository,
+    accessRepository,
+    sessionIssuer: new SessionIssuer({
+      repository: accessRepository,
+      crypto: accessCrypto,
+      logger,
+    }),
+    authenticate: authenticateSessionUseCase,
+    passwordVerifier: new ScryptInvitePasswordVerifier(),
+    envelope: inviteJoinEnvelope,
+    limiter: inviteAttemptLimiter,
+    crypto: accessCrypto,
+    transactionRunner,
+    clock,
+    logger,
+    policy: inviteAttemptPolicy,
+  });
+
+  const recoverInviteJoinUseCase = new RecoverInviteJoinUseCase({
+    repository: inviteJoinRepository,
+    envelope: inviteJoinEnvelope,
+    limiter: inviteAttemptLimiter,
+    crypto: accessCrypto,
+    transactionRunner,
+    clock,
+    logger,
+    policy: inviteAttemptPolicy,
   });
 
   const createFamilyUseCase = new CreateFamilyUseCase({
@@ -258,6 +319,9 @@ export function createContainer(config: Configuration): ApplicationContainer {
     refreshSessionUseCase,
     revokeSessionUseCase,
     authenticateSessionUseCase,
+    inspectInviteUseCase,
+    joinFamilyByInviteUseCase,
+    recoverInviteJoinUseCase,
     createFamilyUseCase,
     getFamilySettingsUseCase,
     previewFamilyTimeZoneChangeUseCase,

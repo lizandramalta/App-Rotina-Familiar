@@ -1,7 +1,7 @@
 # Decisões da arquitetura backend
 
-**Versão:** 1.3 · **Base funcional:** 1.5\
-**Data:** 2026-10-08 · **Situação:** fundação técnica da Sprint 0 implementada; referência para entregas incrementais
+**Versão:** 1.4 · **Base funcional:** 1.5\
+**Data:** 2026-10-09 · **Situação:** fundação técnica da Sprint 0 implementada; referência para entregas incrementais
 
 [Arquitetura](backend-architecture.md) · [Contratos](backend-contracts.md) · [Decisões mobile](mobile-decisions.md) · [Índice](../DOCUMENTACAO.md)
 
@@ -82,6 +82,19 @@ Escolhas técnicas tomadas ao implementar o SCRUM-30, aprovadas em chat em 2026-
 | BA-27 | Eventos `member_invite_issued`, `member_invite_issue_denied` e `member_invite_issue_uncertain` são **logs estruturados**, sem tabela de auditoria. | Não existe infraestrutura de auditoria e a SPEC define só os campos permitidos. Logs cobrem a necessidade sem criar um modelo de dados novo. Token, senha, link e verificadores nunca são registrados. |
 | BA-28 | O hash scrypt é calculado **antes** de adquirir o lock da família; a transação revalida ator, sessão e alvo depois dele. | O scrypt consome CPU e memória por dezenas de milissegundos. Segurar o lock durante o cálculo serializaria todas as escritas da família (backend-architecture.md §7). |
 
+## 4.2. Decisões de implementação da SPEC-005 (ingresso por convite)
+
+Escolhas técnicas tomadas ao implementar o SCRUM-32, aprovadas em chat em 2026-10-09. Nenhuma altera comportamento, permissão ou estado da base funcional; os valores de limite são configuração validada, não regra de produto.
+
+| # | Decisão | Por quê |
+|---|---|---|
+| BA-29 | Limite de tentativas em **PostgreSQL** (`app.invite_attempt_log`), sem Redis: por convite, **5 tentativas de ingresso por 15 min**; por origem, **30 requisições por 15 min** somando inspeção, ingresso e recuperação. Valores em `INVITE_ATTEMPT_LIMIT`, `INVITE_ORIGIN_ATTEMPT_LIMIT` e `INVITE_ATTEMPT_WINDOW_MINUTES`. O registro e a contagem ocorrem sob lock consultivo por sujeito, fora da transação do ingresso. | A senha de BA-22 tem 30 bits; este limite é o que a protege (pendência de BA-23). A SPEC exige `429` sem fixar números, e os valores são propostas desta implementação. O lock consultivo impede que uma rajada simultânea leia a mesma contagem e passe inteira. Fora da transação, a tentativa recusada continua contada mesmo com rollback. O identificador é um hash; token e IP nunca são gravados em claro. |
+| BA-30 | `TRUST_PROXY` (padrão `false`) controla o `trustProxy` do Fastify; a origem do limite é `request.ip`. | Sem proxy confiável, `X-Forwarded-For` é forjável e contornaria o limite por origem. Hospedagem segue fora da etapa; atrás de proxy, o operador liga a variável. O limite por convite não depende de IP e permanece a defesa principal. |
+| BA-31 | Ingresso: senha conferida (scrypt) **antes** do lock; dentro de `forFamily` o convite é relido `FOR UPDATE`, com perfil e flag de Criador, e o commit único consome o convite, revoga sessões do perfil, abre a sessão, grava o envelope e, na troca confirmada, encerra a sessão anterior, seus access tokens e dispositivos push. | Mesmo critério de BA-28 (scrypt custoso não segura lock). A revalidação sob lock é o que faz a segunda tentativa concorrente receber `INVITE_UNAVAILABLE` (CA-05); o índice parcial de uma sessão ativa por perfil é a defesa final. |
+| BA-32 | Envelope de recuperação em `app.invite_join_recoveries`: AES-256-GCM com chave derivada de `INVITE_ENVELOPE_KEY`, `attemptId` como dado autenticado, validade de 10 min desde o commit conferida a cada recuperação. Guarda só hashes do segredo da tentativa e da prova de instalação. O envelope expirado é removido na própria tentativa de recuperação **e** a cada ingresso confirmado (varredura dos vencidos no mesmo commit), de modo que credenciais cifradas não sobrevivam à janela mesmo sem recuperação; o job `CleanExpiredAccessArtifacts` fica para depois. | BA-11 pede criptografia autenticada com chave fora do banco. O `attemptId` como AAD impede copiar um envelope para outra tentativa. A senha do convite nunca entra no envelope. |
+| BA-33 | Falha de dependência no ingresso responde `JOIN_RESULT_UNCERTAIN` somente depois de iniciado o commit; antes dele, `DEPENDENCY_UNAVAILABLE`. Inspeção e recuperação usam `DEPENDENCY_UNAVAILABLE`. `429` envia `Retry-After` com a janela inteira. Credencial anterior malformada ou inválida responde `401 SESSION_INVALID` em vez de ser ignorada. | Distingue "nada foi gravado" de "pode ter sido gravado" sem afirmar rollback. Ignorar um Bearer malformado trocaria o acesso sem a pessoa saber. |
+| BA-34 | **Perfil removido: sem tratamento neste card** (continuidade de BA-25). Hoje, remover o membro apaga a linha e o convite cai por `ON DELETE CASCADE`, resultando em `INVITE_UNAVAILABLE`. | A remoção com preservação de histórico pertence à SPEC-003 e ainda não existe. Quando houver coluna de remoção, ela deve invalidar convites e `lockInviteForJoin` deve filtrá-la. |
+
 ## 5. Limites e continuidade
 
 A Sprint 0 criou o servidor Fastify, a configuração validada, o schema privado `app`, migrations e as verificações de CI. Ela não cria recursos Supabase/R2 gerenciados, credenciais, publicação, endpoints de produto, sessões ou jobs de domínio; esses itens continuam orientados por esta documentação e pelas SPECs aprovadas.
@@ -94,6 +107,7 @@ Sequência sugerida: composição e persistência → Apple/bootstrap/sessões/c
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.4 | 2026-10-09 | BA-29–BA-34: decisões de implementação do ingresso por convite (SPEC-005 Fase 1), com limites de tentativas, envelope de recuperação e tratamento de falhas. Sem mudança funcional. |
 | 1.3 | 2026-10-09 | BA-22–BA-28: decisões de implementação da emissão de convite (SPEC-004 Fase 1), com justificativas. Sem mudança funcional. |
 | 1.2 | 2026-10-08 | Registra a fundação backend da Sprint 0 sem alterar decisões funcionais ou introduzir capacidades de produto. |
 | 1.1 | 2026-10-06 | BA-21: confirma em 10 minutos o prazo técnico do `creationGrant` proposto em `backend-architecture.md` §8, decidido na aprovação de `SPEC-001`. |

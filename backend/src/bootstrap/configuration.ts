@@ -132,6 +132,19 @@ const environmentSchema = z
     // (RFC 2606) que nunca resolve: serve a dev/test, e em production é recusado.
     INVITE_LINK_BASE_URL: z.string().url().default('https://example.invalid'),
 
+    // Limite de tentativas do ingresso por convite (SPEC-005, RNF21, BA-29). A
+    // senha tem poucos bits; este limite é o que a protege contra adivinhação.
+    INVITE_ATTEMPT_LIMIT: z.coerce.number().int().min(1).default(5),
+    INVITE_ORIGIN_ATTEMPT_LIMIT: z.coerce.number().int().min(1).default(30),
+    INVITE_ATTEMPT_WINDOW_MINUTES: z.coerce.number().int().min(1).default(15),
+
+    // Atrás de proxy, `request.ip` só reflete o cliente real com isto ligado.
+    // Padrão desligado: confiar em `X-Forwarded-For` sem proxy permite forjá-lo.
+    TRUST_PROXY: z
+      .string()
+      .optional()
+      .transform((val) => val === 'true' || val === '1'),
+
     // Integrations (optional for base phase)
     R2_ACCOUNT_ID: z.string().optional(),
     R2_ACCESS_KEY_ID: z.string().optional(),

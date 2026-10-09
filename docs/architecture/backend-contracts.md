@@ -1,7 +1,7 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.12 · **Base funcional:** 1.14 · **Arquitetura backend:** 1.3\
-**Data:** 2026-10-08\
+**Versão:** 1.13 · **Base funcional:** 1.14 · **Arquitetura backend:** 1.3\
+**Data:** 2026-10-09\
 **Situação:** contrato arquitetural materializado pela documentação OpenAPI da API
 
 [Arquitetura](backend-architecture.md) · [Decisões](backend-decisions.md) · [Catálogo mobile](mobile-feature-catalog.md) · [UC](../03-casos-de-uso.md) · [Índice](../DOCUMENTACAO.md)
@@ -54,6 +54,8 @@ Rotas públicas não autorizam leitura geral do perfil; respostas de inspeção 
 `creationGrant` não cria um quarto perfil. Seu prazo técnico não altera a ausência de expiração temporal de convite/refresh. Para criação concorrente, associação única à identidade Apple impede segunda família; retomar Apple permite descobrir a família criada após resposta perdida.
 
 `SessionResult` contém `sessionId`, `memberId`, `familyId`, `role`, `isFamilyCreator`, `accessToken`, `accessTokenExpiresAt` e `refreshToken` no ingresso/recuperação. `GetCurrentSession` devolve `memberId`, `familyId`, `role` e `isFamilyCreator`, sem credenciais. Refresh não precisa devolver novamente o segredo estável.
+
+Códigos públicos do ingresso: `INVITE_UNAVAILABLE` (404, neutro para token inválido, consumido, revogado ou perfil indisponível), `INVITE_PASSWORD_INVALID` (422, convite continua disponível), `ACCESS_SWITCH_CONFIRMATION_REQUIRED` (409), `SESSION_INVALID` (401, credencial anterior inválida), `RATE_LIMITED` (429, com `Retry-After`), `JOIN_RESULT_UNCERTAIN` (503, usar a recuperação) e `JOIN_RECOVERY_UNAVAILABLE` (404, neutro). Campos desconhecidos recebem `400 UNKNOWN_FIELD`; `familyId`, `memberId` e papel nunca são aceitos do cliente. Limites de entrada do ingresso e da recuperação: `token` até 256 caracteres, `password` até 64, `attemptSecret` de 16 a 256 e `installationProof` até 512, para que o cliente gere segredos com entropia suficiente e o scrypt não receba entradas desproporcionais. Limites e mecanismo em [BA-29–BA-34](backend-decisions.md#42-decisões-de-implementação-da-spec-005-ingresso-por-convite).
 
 Troca confirmada não é endpoint para transferir membro. Uma sessão anterior de outra família pode ser encerrada por seu próprio titular como parte da troca, sem conceder acesso cruzado aos dados. Falha antes do commit preserva ambas as identidades; commit com resposta perdida exige recuperação, conforme a arquitetura.
 
@@ -207,6 +209,7 @@ O documento OpenAPI 3.1 é gerado pelos schemas HTTP em `/docs/json`, e a interf
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.13 | 2026-10-09 | Códigos públicos e garantias do ingresso por convite (inspeção, ingresso e recuperação), `Retry-After` em `429` e referência a BA-29–BA-34. Sem mudança de comportamento. Para SPEC-005 / SCRUM-32. |
 | 1.12 | 2026-10-08 | `ListFamilyMembers` passa a definir cursor opaco, ordenação estável, páginas de até 20 perfis e `{items, nextCursor}`; cursor malformado recebe `422 VALIDATION_FAILED` com `CURSOR_INVALID`. Para SPEC-003 / SCRUM-27. |
 | 1.11 | 2026-10-08 | Contrato passa a registrar a documentação OpenAPI 3.1 executável em `/docs/json` e a interface Swagger em `/docs`; sem alteração de comportamento dos endpoints. |
 | 1.10 | 2026-10-08 | Formatos de resposta de `GetFamilySettings`, `PreviewFamilyTimeZoneChange` e `ChangeFamilyTimeZone`, e o código `TIME_ZONE_UNCHANGED`. Sem mudança de comportamento. Para SPEC-002 / SCRUM-21. |

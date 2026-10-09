@@ -23,6 +23,9 @@ export interface TestApp {
   readonly uploadMedia: UseCaseMock;
   readonly updateOwnProfile: UseCaseMock;
   readonly authenticateSession: UseCaseMock;
+  readonly inspectInvite: UseCaseMock;
+  readonly joinFamilyByInvite: UseCaseMock;
+  readonly recoverInviteJoin: UseCaseMock;
   readonly createTask: UseCaseMock;
   readonly getTask: UseCaseMock;
   readonly getOwnTasks: UseCaseMock;
@@ -61,6 +64,9 @@ export function buildTestApp(): TestApp {
   const uploadMedia: UseCaseMock = { execute: vi.fn() };
   const updateOwnProfile: UseCaseMock = { execute: vi.fn() };
   const authenticateSession: UseCaseMock = { execute: vi.fn().mockResolvedValue(TEST_ACTOR) };
+  const inspectInvite: UseCaseMock = { execute: vi.fn() };
+  const joinFamilyByInvite: UseCaseMock = { execute: vi.fn() };
+  const recoverInviteJoin: UseCaseMock = { execute: vi.fn() };
   const createTask: UseCaseMock = { execute: vi.fn() };
   const getTask: UseCaseMock = { execute: vi.fn() };
   const getOwnTasks: UseCaseMock = { execute: vi.fn() };
@@ -76,6 +82,9 @@ export function buildTestApp(): TestApp {
     appleConfig: createAppleConfiguration(config),
     signInWithAppleUseCase: { execute: vi.fn() },
     authenticateSessionUseCase: authenticateSession,
+    inspectInviteUseCase: inspectInvite,
+    joinFamilyByInviteUseCase: joinFamilyByInvite,
+    recoverInviteJoinUseCase: recoverInviteJoin,
     createFamilyUseCase: createFamily,
     getFamilySettingsUseCase: getFamilySettings,
     previewFamilyTimeZoneChangeUseCase: previewTimeZoneChange,
@@ -108,6 +117,9 @@ export function buildTestApp(): TestApp {
     uploadMedia,
     updateOwnProfile,
     authenticateSession,
+    inspectInvite,
+    joinFamilyByInvite,
+    recoverInviteJoin,
     createTask,
     getTask,
     getOwnTasks,
