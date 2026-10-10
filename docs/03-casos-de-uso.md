@@ -1,8 +1,8 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.12\
-**Data:** 2026-10-07\
+**Versão:** 1.15\
+**Data:** 2026-10-10\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -285,13 +285,15 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 1. O Administrador acessa os itens disponíveis para sorteio.
 2. O sistema apresenta os itens predefinidos pelo aplicativo e os personalizados já cadastrados.
 3. O Administrador seleciona adicionar item de recompensa.
-4. Informa a recompensa coletiva que deseja incluir.
+4. Informa o título obrigatório da recompensa coletiva e, se desejar, uma descrição opcional.
 5. Confirma o cadastro.
 6. O sistema salva o item e o inclui entre as opções disponíveis nos próximos sorteios.
 
 **Alternativas e exceções:**
 
-- Dados obrigatórios incompletos impedem salvar até sua correção.
+- Título vazio após `trim`, com caracteres de controle ou acima de 60 caracteres não-espaço impede salvar até sua correção.
+- Descrição acima de 255 caracteres, contando espaços, impede salvar até sua correção.
+- Título personalizado já usado na mesma família após `trim`, sem distinguir maiúsculas/minúsculas, impede salvar até sua correção.
 - O Administrador pode consultar os itens sem adicionar novos.
 
 **Pós-condição:** o item adicionado pode ser sorteado. Seu cadastro não o vincula automaticamente a uma missão; esse vínculo ocorre somente após sorteio e aceitação no [UC16](03-casos-de-uso.md#uc16).
@@ -586,6 +588,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 - A reabertura autorizada retira o peso de todos os responsáveis do dia e da semana da conclusão desfeita, inclusive se for uma semana anterior.
 - Uma tarefa concluída não pode ser excluída diretamente. A exclusão depois da reabertura não produz nova subtração de carga.
 - Sem carga no período, o sistema informa a ausência de conclusões e não divide por zero.
+- Crédito válido de perfil removido permanece na carga histórica em linha “Membro removido”, sem expor dados pessoais.
 - Kids não podem acessar esta visualização.
 - Gerar relatório abre UC18 com a semana correspondente à data selecionada, mesmo se a consulta estava em Dia.
 - O primeiro lugar semanal é apurado e consultado separadamente em UC19.
@@ -774,10 +777,10 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 **Fluxo principal:**
 
 1. O adulto aciona Gerar relatório PDF na própria tela Minha família (TEL-050) e abre TEL-051.
-2. Seleciona uma semana de segunda a domingo; a data da origem sugere a semana correspondente.
+2. Seleciona uma `referenceDate`; o servidor resolve a semana de segunda a domingo no fuso da família, e a data da origem sugere a semana correspondente.
 3. O sistema identifica o período e, se atual, indica que o relatório é parcial até o momento da geração.
 4. O adulto confirma gerar. O backend fornece um snapshot consistente; o aplicativo gera o PDF e monta gráficos de carga semanal por membro e progresso total da família, com concluídas/total e percentual.
-5. Inclui tabela com o peso total creditado e o número de tarefas realizadas por membro, período, família, geração e explicação das métricas e do crédito compartilhado (RN62).
+5. Inclui tabela com o peso total creditado e o número de tarefas realizadas por membro, período, família, geração e explicação das métricas e do crédito compartilhado; crédito de removido aparece como “Membro removido” (RN62).
 6. Disponibiliza o PDF para visualizar, salvar ou compartilhar por ação do usuário.
 
 **Alternativas e exceções:**
@@ -837,6 +840,9 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.15 | 2026-10-10 | UC18 adota `referenceDate` para semana e identifica crédito histórico como “Membro removido”. Para SPEC-019. |
+| 1.14 | 2026-10-10 | UC13 preserva crédito histórico de perfil removido como “Membro removido”. Para SPEC-018. |
+| 1.13 | 2026-10-10 | UC06 passa a detalhar título obrigatório, descrição opcional, limites e unicidade de item personalizado; catálogo inicial definido em RN42. Para SPEC-015. |
 | 1.12 | 2026-10-07 | UC01 passa a cobrir perfil do Criador, família, adição opcional de membros e convite explícito antes da área principal; UC02 e UC04 registram a variação de onboarding. |
 | 1.11 | 2026-10-07 | UC05 passa a admitir observação opcional na missão (RF71/RN68), atalho de criação de tarefa durante a vinculação e consulta explícita por todos os perfis, inclusive Kids. Para SPEC-014. |
 | 1.10 | 2026-10-07 | UC12 conclui diretamente mantendo responsáveis ou atribuindo adulto sem responsável. UC17 libera reabertura no alcance do perfil e permite reabrir missão concluída, removendo recompensa, participações e badges derivados. |

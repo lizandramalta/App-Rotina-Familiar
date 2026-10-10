@@ -1,13 +1,13 @@
 # Regras de negócio
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.14\
-**Data:** 2026-10-07\
+**Versão:** 1.17\
+**Data:** 2026-10-10\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
 
-Este documento contém todas as regras vigentes da versão 1.14. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
+Este documento contém todas as regras vigentes da versão 1.15. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
 
 **Identificadores preservados:** RN15, RN29 e RN32 não estavam definidos na base recebida e permanecem não utilizados. Não representam conteúdo faltante desta versão.
 
@@ -235,7 +235,7 @@ A semana vai de segunda-feira a domingo no fuso IANA da família, cujo padrão n
 
 ## RN30
 
-A carga de um membro é a soma dos pesos integrais das tarefas com conclusão válida no dia ou na semana selecionada nas quais ele consta como responsável da conclusão. Em tarefas compartilhadas, cada responsável recebe o peso integral. Executar a ação de concluir não gera crédito para quem não for responsável. Pontos do destaque semanal usam essa mesma soma, sem uma segunda moeda de pontuação.
+A carga de um membro é a soma dos pesos integrais das tarefas com conclusão válida no dia ou na semana selecionada nas quais ele consta como responsável da conclusão. Em tarefas compartilhadas, cada responsável recebe o peso integral. Executar a ação de concluir não gera crédito para quem não for responsável. Crédito válido de perfil posteriormente removido permanece nos períodos históricos e é apresentado como “Membro removido”, sem expor dados pessoais além dessa identificação. Pontos do destaque semanal usam essa mesma soma, sem uma segunda moeda de pontuação.
 
 **Requisitos funcionais:** [RF15](02-requisitos.md#rf15), [RF18](02-requisitos.md#rf18), [RF19](02-requisitos.md#rf19), [RF20](02-requisitos.md#rf20), [RF56](02-requisitos.md#rf56), [RF63](02-requisitos.md#rf63)  
 **Requisitos não funcionais específicos:** [RNF03](02-requisitos.md#rnf03), [RNF10](02-requisitos.md#rnf10)  
@@ -243,7 +243,7 @@ A carga de um membro é a soma dos pesos integrais das tarefas com conclusão v�
 
 ## RN31
 
-A carga total da família é a soma das cargas individuais. A participação de cada membro é sua carga dividida pela carga total, em percentual. Quando o total for zero, não se realiza divisão por zero.
+A carga total da família é a soma das cargas individuais, inclusive créditos históricos de membro removido. A participação de cada membro é sua carga dividida pela carga total, em percentual. Quando o total for zero, não se realiza divisão por zero.
 
 **Requisitos funcionais:** [RF20](02-requisitos.md#rf20), [RF21](02-requisitos.md#rf21)  
 **Requisitos não funcionais específicos:** [RNF03](02-requisitos.md#rnf03), [RNF10](02-requisitos.md#rnf10)  
@@ -323,7 +323,7 @@ Recompensas são coletivas e beneficiam a família inteira.
 
 ## RN42
 
-A roleta oferece itens predefinidos e itens personalizados adicionados por Administradores. Somente Administradores podem adicionar itens, sortear e aceitar recompensas. Adicionar um item o torna elegível para sorteios, sem vinculá-lo automaticamente a uma missão.
+A roleta oferece os itens predefinidos “Escolher o filme da noite”, “Escolher o jantar em família”, “Noite de jogos em família”, “Sobremesa especial”, “Piquenique ou passeio no parque” e “Escolher uma atividade em família”, além de itens personalizados adicionados por Administradores. O título de item personalizado é obrigatório, não pode conter caracteres de controle e admite até 60 caracteres não-espaço após `trim`; sua descrição é opcional e admite até 255 caracteres, contando espaços. Na mesma família, títulos personalizados são únicos após `trim`, sem distinguir maiúsculas de minúsculas. Somente Administradores podem adicionar itens, sortear e aceitar recompensas. Adicionar um item o torna elegível para sorteios, sem vinculá-lo automaticamente a uma missão.
 
 **Requisitos funcionais:** [RF34](02-requisitos.md#rf34), [RF51](02-requisitos.md#rf51), [RF52](02-requisitos.md#rf52)  
 **Requisitos não funcionais específicos:** [RNF07](02-requisitos.md#rnf07)  
@@ -484,7 +484,7 @@ Gerar relatório semanal em PDF fica na própria tela Família para adultos. Adi
 
 Minhas tarefas (todos os perfis) é uma consulta diária: mostra as tarefas próprias e o progresso da data selecionada, sem alternância Dia/Semana. Os indicadores integrados de Minha família, a consulta complementar de tarefas familiares e as tarefas no detalhe do membro (adultos) oferecem alternância Dia/Semana. A semana contém a data selecionada e vai de segunda a domingo. O intervalo de consulta de tarefas continua da criação da família até o último dia do mês corrente; nas semanas de borda, informar os dias efetivamente disponíveis. O progresso pessoal conta tarefas próprias concluídas sobre o total próprio previsto no dia; o familiar usa RN60. O progresso semanal familiar é calculado sobre os totais da semana, nunca pela média simples dos percentuais diários.
 
-A carga/sobrecarga usa a data da conclusão válida, enquanto o progresso usa as tarefas previstas para o período e seu estado atual. Uma tarefa atrasada pode contribuir para a carga de hoje e para o progresso do dia em que estava prevista. A carga indica participação creditada, sem limiar de diagnóstico de sobrecarga definido. Seleção, gráficos e rótulos devem explicitar período e métrica. Sem tarefas ou carga, informar ausência de dados; não simular 100%.
+A carga/sobrecarga usa a data da conclusão válida, enquanto o progresso usa as tarefas previstas para o período e seu estado atual. Uma tarefa atrasada pode contribuir para a carga de hoje e para o progresso do dia em que estava prevista. Crédito histórico de perfil removido permanece em linha identificada como “Membro removido”. A carga indica participação creditada, sem limiar de diagnóstico de sobrecarga definido. Seleção, gráficos e rótulos devem explicitar período e métrica. Sem tarefas ou carga, informar ausência de dados; não simular 100%.
 
 **Requisitos funcionais:** [RF18](02-requisitos.md#rf18), [RF49](02-requisitos.md#rf49), [RF60](02-requisitos.md#rf60), [RF66](02-requisitos.md#rf66)  
 **Requisitos não funcionais específicos:** [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF09](02-requisitos.md#rnf09), [RNF10](02-requisitos.md#rnf10)  
@@ -496,7 +496,7 @@ A carga/sobrecarga usa a data da conclusão válida, enquanto o progresso usa as
 
 O backend fornece um snapshot consistente e o aplicativo gera o arquivo. Administradores e Membros podem gerar um relatório familiar em PDF para uma semana selecionada de segunda a domingo. O documento identifica família, período e momento de geração, inclui gráficos da distribuição de carga semanal por membro e do progresso total da família, além do peso total creditado e número de tarefas realizadas por membro. O gráfico de progresso usa concluídas/total de tarefas previstas para a semana (RN60); peso e quantidade realizada por membro usam conclusões válidas naquela semana (RN30).
 
-Uma tarefa compartilhada conta uma vez para cada responsável no número individual e credita o peso integral a cada um; o total familiar de tarefas realizadas conta tarefas distintas, sem somar contagens individuais. O relatório explica essa diferença. Semana atual é identificada como parcial até o momento da geração; semanas futuras não geram relatório. Na semana de criação, manter o intervalo explícito e considerar as tarefas retroativas cadastradas; não presumir ausência de dados apenas por uma data prevista anteceder a criação da família. Semana sem dados pode gerar relatório com zeros e indicação “Sem tarefas” onde aplicável. O PDF reflete os dados no momento de geração; reabrir uma tarefa exige gerar novo arquivo para obter valores atualizados. Não incluir fotos de validação, credenciais ou configuração privada de perfil.
+Uma tarefa compartilhada conta uma vez para cada responsável no número individual e credita o peso integral a cada um; o total familiar de tarefas realizadas conta tarefas distintas, sem somar contagens individuais. O relatório explica essa diferença. Crédito histórico de perfil removido é identificado como “Membro removido”, sem dado pessoal. A semana é selecionada por data de referência e resolvida de segunda a domingo no fuso da família. Semana atual é identificada como parcial até o momento da geração; semanas futuras não geram relatório. Na semana de criação, manter o intervalo explícito e considerar as tarefas retroativas cadastradas; não presumir ausência de dados apenas por uma data prevista anteceder a criação da família. Semana sem dados pode gerar relatório com zeros e indicação “Sem tarefas” onde aplicável. O PDF reflete os dados no momento de geração; reabrir uma tarefa exige gerar novo arquivo para obter valores atualizados. Não incluir fotos de validação, credenciais ou configuração privada de perfil.
 
 **Requisitos funcionais:** [RF61](02-requisitos.md#rf61)  
 **Requisitos não funcionais específicos:** [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF10](02-requisitos.md#rnf10), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF26](02-requisitos.md#rnf26), [RNF27](02-requisitos.md#rnf27)  
@@ -570,6 +570,9 @@ A missão admite uma observação opcional de até 250 caracteres, contando espa
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.17 | 2026-10-10 | RN62 define `referenceDate` para resolver a semana do PDF e identifica crédito histórico como “Membro removido”. Para SPEC-019. |
+| 1.16 | 2026-10-10 | RN30, RN31 e RN61 preservam carga histórica de perfil removido em linha “Membro removido”, sem expor dados pessoais. Para SPEC-018. |
+| 1.15 | 2026-10-10 | RN42 passa a definir o catálogo predefinido e o cadastro de item personalizado: título obrigatório com até 60 caracteres não-espaço após `trim`, unicidade por família sem distinguir maiúsculas/minúsculas e descrição opcional de até 255 caracteres. Para SPEC-015. |
 | 1.14 | 2026-10-07 | Onboarding do Criador passa a coletar rascunho de nome, foto opcional e etiqueta opcional antes da criação da família; após a criação, permite adicionar zero ou mais membros e gerar convite explicitamente antes da área principal. RN01, RN07, RN09, RN44 e RN63 revisadas. |
 | 1.12 | 2026-10-07 | RN63 passa a definir o limite do apelido: até 20 caracteres não-espaço após trim, sem caracteres de controle; vazio/nulo remove a configuração. Para SPEC-006. |
 | 1.11 | 2026-10-07 | RN68 (novo) permite observação opcional de até 250 caracteres por missão, espelhando RN67. Para SPEC-014. |

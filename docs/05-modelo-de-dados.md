@@ -1,8 +1,8 @@
 # Modelo de dados (DER)
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do modelo:** 1.7 · **Base funcional:** 1.12\
-**Data:** 2026-10-09\
+**Versão do modelo:** 1.8 · **Base funcional:** 1.17\
+**Data:** 2026-10-10\
 **Situação:** modelo conceitual atualizado; sem migrações implementadas
 
 [Projeto](../README.md) · [Índice](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Classes](06-diagrama-de-classes.md#classe-familytask) · [Arquitetura mobile](architecture/mobile-architecture.md)
@@ -269,7 +269,10 @@ erDiagram
     RECOMPENSA {
         uuid id PK
         uuid familia_id FK "nulo para catalogo"
+        uuid criado_por_id FK "nulo para catalogo"
         varchar titulo
+        varchar titulo_normalizado "customizado; trim/case-insensitive"
+        varchar descricao "opcional; até 255 caracteres"
         timestamptz criado_em
     }
     APURACAO_SEMANAL {
@@ -311,6 +314,7 @@ erDiagram
 | Participação única por membro/missão: exige ao menos um crédito válido em tarefa vinculada no encerramento; é removida quando a missão é reaberta | RN64 |
 | Badge por membro/marco é recalculado após reabertura de missão para refletir participações vigentes | RN64 |
 | Resgate único e item de catálogo ou da mesma família; reabertura de missão remove o aceite | RN43, RN53, RNF23 |
+| Item personalizado: título obrigatório sem controle, até 60 caracteres não-espaço após `trim`; descrição opcional até 255 caracteres contando espaços; `titulo_normalizado` único por família para itens personalizados | RN42, RF34, UC06 |
 | Ciclos contíguos, não sobrepostos; transição de fuso não reapura intervalos encerrados. Uma mudança programada vigente por família | RN28, RN65 |
 | Uma apuração por ciclo; resultado final imutável. Fila de notificação gravada com resultado, sem confundir aceitação APNs com leitura | RN65, RNF26 |
 | Família do recurso, titularidade e estado ativo conferidos no backend; URL de mídia não é permissão de leitura | RNF06/07/24/27 |
@@ -359,7 +363,8 @@ A versão 1.1 representava somente um access token na sessão. A versão 1.2 sep
 
 | Versão | Base | Data | Alteração |
 |---|---|---|---|
-| 1.7 | 1.12 | 2026-10-09 | Estrutura técnica `invite_attempt_log` para o limite de tentativas do ingresso por convite (RNF21). Sem mudança funcional. Para SPEC-005 / SCRUM-32. |
+| 1.8 | 1.17 | 2026-10-10 | Consolida `RECOMPENSA` com autor, descrição opcional e título normalizado único por família (SPEC-015) e `invite_attempt_log` para o limite de tentativas de ingresso (RNF21/SCRUM-32). |
+| 1.7 | 1.15 | 2026-10-10 | `RECOMPENSA` ganha autor, descrição opcional e título normalizado; restrição registra limite e unicidade do item personalizado. Para SPEC-015. |
 | 1.6 | 1.12 | 2026-10-07 | `MISSAO` ganha `observacao` opcional (até 250 caracteres). Para SPEC-014. |
 | 1.5 | 1.11 | 2026-10-07 | Reabertura de missão concluída remove recompensa, participações e badges derivados na mesma transação. |
 | 1.4 | 1.8 | 2026-10-06 | `TAREFA` passa a armazenar `observacao` opcional (até 250 caracteres), herdada pelas ocorrências geradas por rotina. Para SPEC-008. |

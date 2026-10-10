@@ -1,10 +1,10 @@
-# User flows — versão 1.9
+# User flows — versão 1.14
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão dos fluxos:** 1.9\
-**Base funcional:** 1.14\
-**Screen map:** 1.9 — revisão de 2026-10-08\
-**Data:** 2026-10-07\
+**Versão dos fluxos:** 1.14\
+**Base funcional:** 1.17\
+**Screen map:** 1.13 — revisão de 2026-10-10\
+**Data:** 2026-10-10\
 **Situação:** primeira versão para revisão de design
 
 [Projeto](../../README.md) · [Índice documental](../DOCUMENTACAO.md) · [Screen map](screen-map.md) · [Regras](../01-regras-de-negocio.md) · [Requisitos](../02-requisitos.md) · [Casos de uso](../03-casos-de-uso.md) · [Diagrama de classes](../06-diagrama-de-classes.md)
@@ -363,7 +363,7 @@ flowchart TD
     G -->|Voltar| A
 ```
 
-Cada responsável recebe o peso integral; o total soma cargas individuais. Pendentes e Aguardando confirmação não entram. Reaberturas ajustam o dia e a semana originais. Sem carga, não dividir por zero. A semana vai de segunda a domingo; a consulta ocorre na própria TEL-050 e mantém a referência selecionada. Kids não acessam esta tela. O destaque semanal é consultado separadamente em UF-15.
+Cada responsável recebe o peso integral; o total soma cargas individuais. Pendentes e Aguardando confirmação não entram. Reaberturas ajustam o dia e a semana originais. Crédito histórico de perfil removido aparece como “Membro removido”, sem dado pessoal. Sem carga, não dividir por zero. A semana vai de segunda a domingo; a consulta ocorre na própria TEL-050 e mantém a referência selecionada. Kids não acessam esta tela. O destaque semanal é consultado separadamente em UF-15.
 
 <a id="uf-10"></a>
 
@@ -403,7 +403,7 @@ Salvar retorna à origem que abriu o formulário: à lista em criação e ao det
 
 Cada tarefa vinculada conta uma vez, sem incluir a rotina inteira implicitamente. Remover vínculos de missão em andamento pode concluí-la se todas as restantes estiverem concluídas; desmarcar a última tarefa restante sem substituição é bloqueado no próprio MOD-007, com mensagem explicando que uma missão precisa de ao menos uma tarefa. Progresso também é recalculado por conclusões e reaberturas autorizadas fora deste fluxo. Missão concluída não aceita edição; a única exceção é a reabertura confirmada de tarefa vinculada, que remove os dados derivados do encerramento. Não existe expiração por tempo.
 
-**Consulta de tarefas:** adultos podem abrir TEL-012 a partir do detalhe da missão. Kids podem abrir TEL-041 somente para tarefas próprias; acompanhar as demais tarefas da missão não concede ações operacionais. Kids consultam título, observação, tarefas vinculadas e status em TEL-020/021 numa apresentação simplificada, sem ações de gestão, participações ou recompensa. Voltar retorna a TEL-021.
+**Consulta de tarefas:** adultos podem abrir TEL-012 a partir do detalhe da missão. Kids podem abrir TEL-041 somente para tarefas próprias; acompanhar as demais tarefas da missão não concede ações operacionais. Kids consultam título, observação, tarefas vinculadas, status e recompensa aceita em TEL-020/021 numa apresentação simplificada, sem ações de gestão, participações ou resgate. Voltar retorna a TEL-021.
 
 <a id="uf-11"></a>
 
@@ -437,7 +437,7 @@ flowchart TD
     O --> H
 ```
 
-Cadastrar um item é opcional e independente: a roleta já dispõe dos itens predefinidos. Salvar um item o inclui em próximos sorteios, sem vinculá-lo a missão. Cancelar MOD-008 volta a TEL-023 sem adicionar. A origem de TEL-023 determina o retorno: lista de missões ou roleta.
+Cadastrar um item é opcional e independente: a roleta já dispõe dos itens predefinidos. No MOD-008, o título é obrigatório, sem caracteres de controle, tem até 60 caracteres não-espaço após `trim` e deve ser único na família sem distinguir maiúsculas/minúsculas; a descrição é opcional e tem até 255 caracteres contando espaços. Salvar um item o inclui em próximos sorteios, sem vinculá-lo a missão. Cancelar MOD-008 volta a TEL-023 sem adicionar. A origem de TEL-023 determina o retorno: lista de missões ou roleta.
 
 **Resultado:** aceitação salva encerra o resgate para toda a família e acrescenta a recompensa à conquista sem alterar suas tarefas, progresso ou participações. Consultar itens, sortear ou sair sem aceitar não consome o resgate. Após falha ou concorrência, consultar a situação corrente antes de tentar aceitar novamente.
 
@@ -526,7 +526,7 @@ flowchart TD
     G -->|Voltar| I(["Retornar à origem preservando período"])
 ```
 
-O PDF contém gráficos de carga semanal e progresso total da família e, por membro, peso creditado e número de tarefas realizadas. Identifica período, geração e métricas de RN62; compartilhadas não duplicam o total familiar de tarefas. Ausência de dados permite PDF com indicação apropriada. Falha de geração não disponibiliza arquivo incompleto. Abrir compartilhamento não comprova envio. Kids não têm acesso.
+O PDF contém gráficos de carga semanal e progresso total da família e, por membro, peso creditado e número de tarefas realizadas. A semana é resolvida pela data de referência no fuso familiar; identifica período, geração e métricas de RN62; compartilhadas não duplicam o total familiar de tarefas. Crédito histórico usa “Membro removido”, sem dado pessoal. Ausência de dados permite PDF com indicação apropriada. Falha de geração não disponibiliza arquivo incompleto. Abrir compartilhamento não comprova envio. Kids não têm acesso.
 
 <a id="uf-15"></a>
 
@@ -592,13 +592,18 @@ Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imedi
 - As quatro telas principais adultas são entradas independentes; Minhas tarefas continua como inicial.
 - Fluxos Kids não concedem carga, relatório familiar, gestão ou conclusão direta. Perfil próprio e reconhecimento recebido são permitidos.
 - Toda alteração só é apresentada como concluída após confirmação da gravação.
-- TEL/MOD preservam o screen map 1.8; UF-01–UF-16 cobrem UC01–UC19, incluindo TEL-051/052/053/054/055/056 e MOD-012/013.
+- TEL/MOD preservam o screen map 1.10; UF-01–UF-16 cobrem UC01–UC19, incluindo TEL-051/052/053/054/055/056 e MOD-012/013.
 
 ## Histórico
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
-| 1.9 | 1.14 | 1.9 | 2026-10-08 | Listas paginadas usam páginas de até 20 itens, rolagem infinita e nova tentativa sem perder itens confirmados. Para SPEC-003 / SCRUM-27. |
+| 1.14 | 1.17 | 1.13 | 2026-10-10 | Consolida UF-09/10/11/14/15 com listas paginadas de até 20 itens, rolagem infinita e nova tentativa sem perder itens confirmados. Para SPEC-003, SPEC-015, SPEC-016, SPEC-018, SPEC-019 e SPEC-020. |
+| 1.13 | 1.17 | 1.12 | 2026-10-10 | UF-15 detalha variante Kids, consulta interna e compartilhamento cancelável. Para SPEC-020. |
+| 1.12 | 1.17 | 1.11 | 2026-10-10 | UF-14 define semana por data de referência e crédito histórico como “Membro removido”. Para SPEC-019. |
+| 1.11 | 1.16 | 1.11 | 2026-10-10 | UF-09 integra carga Dia/Semana e preserva crédito histórico de removido sem ranking. Para SPEC-018. |
+| 1.10 | 1.15 | 1.10 | 2026-10-10 | UF-10 alinha Kids a RF36: recompensa aceita é consultável; participações e resgate seguem indisponíveis. Para SPEC-016. |
+| 1.9 | 1.15 | 1.9 | 2026-10-10 | UF-11 detalha título, descrição, limites e unicidade do item personalizado. Para SPEC-015. |
 | 1.8 | 1.14 | 1.8 | 2026-10-07 | UF-01 passa a configurar o perfil do Criador, criar a família e permitir zero ou mais membros com convite explícito antes da área principal. |
 | 1.7 | 1.12 | 1.7 | 2026-10-07 | UF-10 ganha atalho "+ Nova tarefa" em MOD-007, bloqueio local de salvar sem tarefas e consulta explícita por todos os perfis, inclusive Kids. Para SPEC-014. |
 | 1.6 | 1.11 | 1.6 | 2026-10-07 | UF-06 conclui diretamente sem modal; UF-08 permite reabrir missão concluída com confirmação e reversão de recompensa, participações e badges. |

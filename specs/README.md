@@ -56,7 +56,7 @@ da experiência. Isso permite evoluir o visual sem perder decisões, estados e t
 
 ## Mapa de implementação
 
-**Base funcional:** 1.14 (2026-10-07)
+**Base funcional:** 1.15 (2026-10-10)
 
 **Convenção de status:** `não criada` indica apenas uma entrega planejada; os status
 do template passam a valer depois que o arquivo da spec existir.
@@ -95,24 +95,24 @@ posterior por Administradores em TEL-053/MOD-012; não há uma SPEC-021 separada
 | Spec planejada | UC principal | Projetos | Depende de | Status |
 |---|---|---|---|---|
 | [`SPEC-012-sinalizar-tarefa-kids`](SPEC-012-sinalizar-tarefa-kids.md) - Sinalizar tarefa como realizada | UC15 | ambos | SPEC-002, SPEC-007 | aprovada |
-| `SPEC-013-validar-conclusao-kids` - Validar conclusão de tarefa Kids | UC03 | ambos | SPEC-012 | não criada |
+| [SPEC-013-validar-conclusao-kids](SPEC-013-validar-conclusao-kids.md) - Validar conclusão de tarefa Kids | UC03 | ambos | SPEC-012 | aprovada |
 
 ### Tema 4 - Missões e recompensas
 
 | Spec planejada | UC principal | Projetos | Depende de | Status |
 |---|---|---|---|---|
 | [`SPEC-014-gerenciar-missoes`](SPEC-014-gerenciar-missoes.md) - Gerenciar missões | UC05 | ambos | SPEC-007 | aprovada |
-| `SPEC-015-gerenciar-recompensas-coletivas` - Gerenciar itens de recompensas coletivas | UC06 | ambos | SPEC-002 | não criada |
-| `SPEC-016-acompanhar-missoes-recompensas` - Acompanhar missões e recompensas | UC14 | ambos | SPEC-014 | não criada |
-| `SPEC-017-resgatar-recompensa` - Resgatar recompensa da missão | UC16 | ambos | SPEC-014, SPEC-015 | não criada |
+| [`SPEC-015-gerenciar-recompensas-coletivas`](SPEC-015-gerenciar-recompensas-coletivas.md) - Gerenciar itens de recompensas coletivas | UC06 | ambos | SPEC-002 | aprovada |
+| [`SPEC-016-acompanhar-missoes-recompensas`](SPEC-016-acompanhar-missoes-recompensas.md) - Acompanhar missões e recompensas | UC14 | ambos | SPEC-014 | aprovada |
+| [`SPEC-017-resgatar-recompensa`](SPEC-017-resgatar-recompensa.md) - Resgatar recompensa da missão | UC16 | ambos | SPEC-014, SPEC-015 | aprovada |
 
 ### Tema 5 - Acompanhamento e reconhecimento
 
 | Spec planejada | UC principal | Projetos | Depende de | Status |
 |---|---|---|---|---|
-| `SPEC-018-visualizar-carga` - Visualizar carga diária ou semanal | UC13 | ambos | SPEC-010, SPEC-013 | não criada |
-| `SPEC-019-gerar-relatorio-semanal-pdf` - Gerar relatório semanal em PDF | UC18 | ambos | SPEC-018 | não criada |
-| `SPEC-020-destaque-semanal` - Apurar e compartilhar destaque semanal | UC19 | ambos | SPEC-018 | não criada |
+| [`SPEC-018-visualizar-carga`](SPEC-018-visualizar-carga.md) - Visualizar carga diária ou semanal | UC13 | ambos | SPEC-010, SPEC-013 | aprovada |
+| [`SPEC-019-gerar-relatorio-semanal-pdf`](SPEC-019-gerar-relatorio-semanal-pdf.md) - Gerar relatório semanal em PDF | UC18 | ambos | SPEC-018 | aprovada |
+| [`SPEC-020-destaque-semanal`](SPEC-020-destaque-semanal.md) - Apurar e compartilhar destaque semanal | UC19 | ambos | SPEC-018 | aprovada |
 
 ## Índice de arquivos
 
@@ -134,6 +134,13 @@ status e resumo; mantenha esta tabela como o panorama do backlog.
 | [SPEC-006-editar-perfil](SPEC-006-editar-perfil.md) | [UX-006-editar-perfil.md](UX-006-editar-perfil.md) | aprovada | ambos | Edição posterior do próprio apelido e foto opcional, reutilizando a mídia iniciada no onboarding, com titularidade exclusiva; consulta de badges cumulativos e missões contribuintes por marco. |
 | [SPEC-011-reabrir-tarefa](SPEC-011-reabrir-tarefa.md) | [UX-011-reabrir-tarefa.md](UX-011-reabrir-tarefa.md) | aprovada | ambos | Retorno de tarefa concluída para Pendente por Admin/Membro (qualquer tarefa acessível) ou Kids (própria), com reversão de crédito e confirmação explícita quando afeta missão concluída e/ou recompensa aceita. |
 | [SPEC-012-sinalizar-tarefa-kids](SPEC-012-sinalizar-tarefa-kids.md) | [UX-012-sinalizar-tarefa-kids.md](UX-012-sinalizar-tarefa-kids.md) | aprovada | ambos | Kids sinaliza tarefa própria pendente com foto opcional por câmera direta, movendo-a para Aguardando confirmação sem crédito; habilita `purpose: taskSignal` reservado por SPEC-006. |
+| [SPEC-013-validar-conclusao-kids](SPEC-013-validar-conclusao-kids.md) | [UX-013-validar-conclusao-kids.md](UX-013-validar-conclusao-kids.md) | aprovada | ambos | Fila administrativa de sinalizações Kids, avaliação com foto privada opcional e decisão atômica, incluindo reconciliação silenciosa de ações concorrentes. |
+| [SPEC-015-gerenciar-recompensas-coletivas](SPEC-015-gerenciar-recompensas-coletivas.md) | [UX-015-gerenciar-recompensas-coletivas.md](UX-015-gerenciar-recompensas-coletivas.md) | aprovada | ambos | Catálogo de recompensas coletivas com seis itens predefinidos e cadastro administrativo de item personalizado com título único por família e descrição opcional. |
+| [SPEC-016-acompanhar-missoes-recompensas](SPEC-016-acompanhar-missoes-recompensas.md) | [UX-016-acompanhar-missoes-recompensas.md](UX-016-acompanhar-missoes-recompensas.md) | aprovada | ambos | Consulta segura de progresso, tarefas, participações autorizadas e situação/recompensa aceita da missão; Kids visualiza recompensa aceita, sem participações ou resgate. |
+| [SPEC-017-resgatar-recompensa](SPEC-017-resgatar-recompensa.md) | [UX-017-resgatar-recompensa.md](UX-017-resgatar-recompensa.md) | aprovada | ambos | Roleta local e aceite único de recompensa por Administrador, com validação transacional, concorrência e recuperação segura de resultado incerto. |
+| [SPEC-018-visualizar-carga](SPEC-018-visualizar-carga.md) | [UX-018-visualizar-carga.md](UX-018-visualizar-carga.md) | aprovada | ambos | Carga familiar Dia/Semana integrada à Família, com distribuição sem ranking, períodos efetivos e crédito histórico de membro removido. |
+| [SPEC-019-gerar-relatorio-semanal-pdf](SPEC-019-gerar-relatorio-semanal-pdf.md) | [UX-019-gerar-relatorio-semanal-pdf.md](UX-019-gerar-relatorio-semanal-pdf.md) | aprovada | ambos | Snapshot semanal autorizado e PDF local com gráficos, tabela, dados parciais e crédito histórico preservado. |
+| [SPEC-020-destaque-semanal](SPEC-020-destaque-semanal.md) | [UX-020-destaque-semanal.md](UX-020-destaque-semanal.md) | aprovada | ambos | Apuração semanal única, reconhecimento de empates, consulta própria, notificação opcional e compartilhamento local. |
 
 ## Templates
 
