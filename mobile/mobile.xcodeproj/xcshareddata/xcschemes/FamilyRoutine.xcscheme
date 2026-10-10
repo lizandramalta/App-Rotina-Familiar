@@ -39,6 +39,16 @@
                ReferencedContainer="container:mobile.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped="NO">
+            <BuildableReference
+               BuildableIdentifier="primary"
+               BlueprintIdentifier="5A000016307607650025D147"
+               BuildableName="FamilyRoutineUITests.xctest"
+               BlueprintName="FamilyRoutineUITests"
+               ReferencedContainer="container:mobile.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

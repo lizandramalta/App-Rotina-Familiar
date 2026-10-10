@@ -9,13 +9,16 @@
 /* Begin PBXFileReference section */
 		559C5206307607650025D147 /* FamilyRoutine.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FamilyRoutine.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A000001307607650025D147 /* FamilyRoutineTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FamilyRoutineTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5A000014307607650025D147 /* FamilyRoutineUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FamilyRoutineUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A000002307607650025D147 /* AppConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfigurationTests.swift; sourceTree = "<group>"; };
+		5A000012307607650025D147 /* EntryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Access/EntryViewModelTests.swift; sourceTree = "<group>"; };
 		5A00000E307607650025D147 /* Development.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Development.xcconfig; sourceTree = "<group>"; };
 		5A00000F307607650025D147 /* Production.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Production.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXBuildFile section */
 		5A000004307607650025D147 /* AppConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A000002307607650025D147 /* AppConfigurationTests.swift */; };
+		5A000013307607650025D147 /* EntryViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A000012307607650025D147 /* EntryViewModelTests.swift */; };
 		5A000011307607650025D147 /* FamilyRoutine.app in Frameworks */ = {isa = PBXBuildFile; fileRef = 559C5206307607650025D147 /* FamilyRoutine.app */; };
 /* End PBXBuildFile section */
 
@@ -23,6 +26,11 @@
 		559C5208307607650025D147 /* App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = App;
+			sourceTree = "<group>";
+		};
+		5A000015307607650025D147 /* FamilyRoutineUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = FamilyRoutineUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -43,6 +51,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5A000018307607650025D147 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -51,6 +66,7 @@
 			children = (
 				559C5208307607650025D147 /* App */,
 				5A000003307607650025D147 /* FamilyRoutineTests */,
+				5A000015307607650025D147 /* FamilyRoutineUITests */,
 				5A000010307607650025D147 /* Configuration */,
 				559C5207307607650025D147 /* Products */,
 			);
@@ -61,6 +77,7 @@
 			children = (
 				559C5206307607650025D147 /* FamilyRoutine.app */,
 				5A000001307607650025D147 /* FamilyRoutineTests.xctest */,
+				5A000014307607650025D147 /* FamilyRoutineUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -69,6 +86,7 @@
 			isa = PBXGroup;
 			children = (
 				5A000002307607650025D147 /* AppConfigurationTests.swift */,
+				5A000012307607650025D147 /* EntryViewModelTests.swift */,
 			);
 			path = FoundationTests;
 			sourceTree = "<group>";
@@ -127,10 +145,40 @@
 			productReference = 5A000001307607650025D147 /* FamilyRoutineTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		5A000016307607650025D147 /* FamilyRoutineUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5A00001E307607650025D147 /* Build configuration list for PBXNativeTarget "FamilyRoutineUITests" */;
+			buildPhases = (
+				5A000017307607650025D147 /* Sources */,
+				5A000018307607650025D147 /* Frameworks */,
+				5A000019307607650025D147 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5A00001A307607650025D147 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				5A000015307607650025D147 /* FamilyRoutineUITests */,
+			);
+			name = FamilyRoutineUITests;
+			packageProductDependencies = (
+			);
+			productName = FamilyRoutineUITests;
+			productReference = 5A000014307607650025D147 /* FamilyRoutineUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXContainerItemProxy section */
 		5A00000D307607650025D147 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 559C51FE307607650025D147 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 559C5205307607650025D147;
+			remoteInfo = FamilyRoutine;
+		};
+		5A00001B307607650025D147 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 559C51FE307607650025D147 /* Project object */;
 			proxyType = 1;
@@ -144,6 +192,11 @@
 			isa = PBXTargetDependency;
 			target = 559C5205307607650025D147 /* FamilyRoutine */;
 			targetProxy = 5A00000D307607650025D147 /* PBXContainerItemProxy */;
+		};
+		5A00001A307607650025D147 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 559C5205307607650025D147 /* FamilyRoutine */;
+			targetProxy = 5A00001B307607650025D147 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -161,9 +214,10 @@
 				};
 			};
 			buildConfigurationList = 559C5201307607650025D147 /* Build configuration list for PBXProject "mobile" */;
-			developmentRegion = en;
+			developmentRegion = "pt-BR";
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				"pt-BR",
 				en,
 				Base,
 			);
@@ -176,6 +230,7 @@
 			targets = (
 				559C5205307607650025D147 /* FamilyRoutine */,
 				5A000008307607650025D147 /* FamilyRoutineTests */,
+				5A000016307607650025D147 /* FamilyRoutineUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -189,6 +244,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		5A000007307607650025D147 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A000019307607650025D147 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -210,6 +272,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				5A000004307607650025D147 /* AppConfigurationTests.swift in Sources */,
+				5A000013307607650025D147 /* EntryViewModelTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A000017307607650025D147 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -343,11 +413,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = App/FamilyRoutine.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 55Z24S2H7V;
+				DEVELOPMENT_LANGUAGE = "pt-BR";
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Configuration/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_APIBaseURL = "$(API_BASE_URL)";
 				INFOPLIST_KEY_AppEnvironment = "$(APP_ENVIRONMENT)";
@@ -378,11 +451,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = App/FamilyRoutine.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 55Z24S2H7V;
+				DEVELOPMENT_LANGUAGE = "pt-BR";
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Configuration/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_APIBaseURL = "$(API_BASE_URL)";
 				INFOPLIST_KEY_AppEnvironment = "$(APP_ENVIRONMENT)";
@@ -437,6 +513,34 @@
 			};
 			name = Release;
 		};
+		5A00001C307607650025D147 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lizandramalta.familyroutine.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = FamilyRoutine;
+			};
+			name = Debug;
+		};
+		5A00001D307607650025D147 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.lizandramalta.familyroutine.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = FamilyRoutine;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -463,6 +567,15 @@
 			buildConfigurations = (
 				5A00000A307607650025D147 /* Debug */,
 				5A00000B307607650025D147 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5A00001E307607650025D147 /* Build configuration list for PBXNativeTarget "FamilyRoutineUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5A00001C307607650025D147 /* Debug */,
+				5A00001D307607650025D147 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
