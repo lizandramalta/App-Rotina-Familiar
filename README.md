@@ -3,7 +3,7 @@
 Organização colaborativa das responsabilidades domésticas, com tarefas compartilhadas, participação infantil e conquistas coletivas.
 
 **Escopo:** MVP  
-**Versão da base do projeto:** 1.17\
+**Versão da base do projeto:** 1.18\
 **Data:** 2026-10-10
 
 ## Por que este projeto existe
@@ -92,7 +92,7 @@ As possibilidades de evolução estão no [documento de visão](docs/00-visao-do
 | [Catálogo mobile](docs/architecture/mobile-feature-catalog.md) | Funcionalidades, nomes de arquivos em inglês e cobertura das 26 telas, 13 modais, 19 casos de uso e 16 fluxos. |
 | [Decisões da arquitetura mobile](docs/architecture/mobile-decisions.md) | Escolhas técnicas consolidadas, pendências resolvidas e temas fora desta etapa. |
 | [Convenções de código mobile](docs/architecture/mobile-code-conventions.md) | Convenções de Swift/SwiftUI, arquitetura, concorrência, segurança e testes. |
-| [Arquitetura backend](docs/architecture/backend-architecture.md) | Backend 1.0: Node.js, Clean Architecture, monólito modular, Supabase/R2, transações, acesso e jobs. |
+| [Arquitetura backend](docs/architecture/backend-architecture.md) | Backend 1.3: Node.js, Clean Architecture, monólito modular, Supabase/R2, transações, acesso e jobs. |
 | [Contratos backend](docs/architecture/backend-contracts.md) | API `/v1`, permissões, erros, projeções e cobertura dos 19 UC e 27 RNF. |
 | [Decisões backend](docs/architecture/backend-decisions.md) | BA-01–BA-20: escolhas confirmadas, propostas técnicas, alternativas e limites. |
 | [Convenções de código backend](docs/architecture/backend-code-conventions.md) | Convenções de TypeScript/Fastify, contratos, SQL, segurança e testes. |
@@ -224,6 +224,9 @@ A arquitetura backend 1.0 está em [backend-architecture.md](docs/architecture/b
 
 | Versão | Data | Marco |
 |---|---|---|
+| 1.18 | 2026-10-10 | Consolidação das SPECs 015–020 com as implementações de acesso, família, convites, tarefas e sessão do `develop`; registros técnicos preservados na documentação de arquitetura. |
+| 1.17 | 2026-10-10 | Snapshot semanal passa a usar `referenceDate` e identifica crédito histórico como “Membro removido”. Para SPEC-019. |
+| 1.16 | 2026-10-10 | Carga histórica preserva crédito de perfil removido como “Membro removido”. Para SPEC-018. |
 | 1.15 | 2026-10-10 | Itens de recompensa coletiva ganham catálogo inicial, título personalizado único por família e descrição opcional de até 255 caracteres. Para SPEC-015. |
 | 1.14 | 2026-10-07 | Onboarding do Criador: perfil antes da família, membros opcionais e convite explícito antes da área principal. Base funcional 1.14. |
 | 1.13 | 2026-10-07 | Apelido do perfil ganha limite explícito: até 20 caracteres não-espaço após trim, sem caracteres de controle. Para SPEC-006. |

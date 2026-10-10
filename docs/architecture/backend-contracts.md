@@ -1,8 +1,8 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.14 · **Base funcional:** 1.17 · **Arquitetura backend:** 1.0\
+**Versão:** 1.15 · **Base funcional:** 1.17 · **Arquitetura backend:** 1.3\
 **Data:** 2026-10-10\
-**Situação:** contrato arquitetural para detalhamento OpenAPI na implementação
+**Situação:** contrato arquitetural consolidado e materializado pela documentação OpenAPI da API
 
 [Arquitetura](backend-architecture.md) · [Decisões](backend-decisions.md) · [Catálogo mobile](mobile-feature-catalog.md) · [UC](../03-casos-de-uso.md) · [Índice](../DOCUMENTACAO.md)
 
@@ -43,7 +43,7 @@ Rotas públicas não autorizam leitura geral do perfil; respostas de inspeção 
 | Método e caminho | Caso de uso de aplicação | Entrada / resultado | Acesso |
 |---|---|---|---|
 | `POST /access/apple` | `SignInWithApple` | Prova Apple, contexto da tentativa e instalação → sessão do Criador ou `creationGrant` | Prova Apple válida |
-| `POST /families` | `CreateFamily` | Grant, `name`, `timeZoneId` → família, Criador e sessão | Grant restrito à criação |
+| `POST /families` | `CreateFamily` | `creationGrant`, `creatorName`, `creatorNickname` opcional, `name`, `timeZoneId` opcional (padrão `America/Sao_Paulo`) e prova da instalação no header → família, Criador, ciclo semanal inicial e sessão. O grant só vale para a instalação que o recebeu | Grant restrito à criação |
 | `POST /access/invites/inspect` | `InspectInvite` | Token → disponibilidade e contexto mínimo para ingresso, sem senha/dados privados | Posse do token e limites de tentativas |
 | `POST /access/invite-joins` | `JoinFamilyByInvite` | Token, senha, provas de instalação/tentativa; sessão anterior opcional e troca confirmada → sessão nova | Convite válido; antiga só é encerrada com sucesso |
 | `POST /access/invite-joins/recover` | `RecoverInviteJoin` | `attemptId`, segredo da tentativa e prova original → credenciais daquele ingresso | Janela de dez minutos e sessão ainda ativa |
@@ -55,16 +55,18 @@ Rotas públicas não autorizam leitura geral do perfil; respostas de inspeção 
 
 `SessionResult` contém `sessionId`, `memberId`, `familyId`, `role`, `isFamilyCreator`, `accessToken`, `accessTokenExpiresAt` e `refreshToken` no ingresso/recuperação. `GetCurrentSession` devolve `memberId`, `familyId`, `role` e `isFamilyCreator`, sem credenciais. Refresh não precisa devolver novamente o segredo estável.
 
+Códigos públicos do ingresso: `INVITE_UNAVAILABLE` (404, neutro para token inválido, consumido, revogado ou perfil indisponível), `INVITE_PASSWORD_INVALID` (422, convite continua disponível), `ACCESS_SWITCH_CONFIRMATION_REQUIRED` (409), `SESSION_INVALID` (401, credencial anterior inválida), `RATE_LIMITED` (429, com `Retry-After`), `JOIN_RESULT_UNCERTAIN` (503, usar a recuperação) e `JOIN_RECOVERY_UNAVAILABLE` (404, neutro). Campos desconhecidos recebem `400 UNKNOWN_FIELD`; `familyId`, `memberId` e papel nunca são aceitos do cliente. Limites de entrada do ingresso e da recuperação: `token` até 256 caracteres, `password` até 64, `attemptSecret` de 16 a 256 e `installationProof` até 512, para que o cliente gere segredos com entropia suficiente e o scrypt não receba entradas desproporcionais. Limites e mecanismo em [BA-29–BA-34](backend-decisions.md#42-decisões-de-implementação-da-spec-005-ingresso-por-convite).
+
 Troca confirmada não é endpoint para transferir membro. Uma sessão anterior de outra família pode ser encerrada por seu próprio titular como parte da troca, sem conceder acesso cruzado aos dados. Falha antes do commit preserva ambas as identidades; commit com resposta perdida exige recuperação, conforme a arquitetura.
 
 ## 3. Família, membros e perfil
 
 | Método e caminho | Caso de uso de aplicação | Campos / resposta | Permissão |
 |---|---|---|---|
-| `GET /family/settings` | `GetFamilySettings` | Fuso vigente, mudança programada e limites do ciclo | Admin |
-| `POST /family/time-zone-changes/preview` | `PreviewFamilyTimeZoneChange` | `timeZoneId`, `application` → limites estimados e informativo | Admin; sem gravação |
-| `POST /family/time-zone-changes` | `ChangeFamilyTimeZone` | `timeZoneId`, `application: immediate \| nextCycle` → configuração confirmada | Admin; revalidar limites no commit |
-| `GET /family/members` | `ListFamilyMembers` | Projeção familiar paginada | Adulto |
+| `GET /family/settings` | `GetFamilySettings` | `timeZoneId`, `scheduledTimeZoneChange` (`{timeZoneId, effectiveAt}` ou `null`) e `limits` (`{startsAt, endsAt, timeZoneId, isTransition}`) | Admin |
+| `POST /family/time-zone-changes/preview` | `PreviewFamilyTimeZoneChange` | `timeZoneId`, `application` → `proposedTimeZoneId`, `application`, `effectiveAt`, `effectiveLimits` e `isTransition`; recusa o fuso já vigente com `422 TIME_ZONE_UNCHANGED` | Admin; só lê, a liquidação de ciclos vencidos é feita em memória |
+| `POST /family/time-zone-changes` | `ChangeFamilyTimeZone` | `timeZoneId`, `application: immediate \| nextCycle` → mesmo formato de `GET /family/settings`; recusa o fuso já vigente com `422 TIME_ZONE_UNCHANGED`; nova solicitação válida substitui a programada | Admin; revalidar papel e limites no commit |
+| `GET /family/members` | `ListFamilyMembers` | `cursor` opaco opcional → `{items, nextCursor}`; até 20 perfis por página, em ordem estável | Adulto |
 | `GET /family/members/{memberId}` | `GetMemberDetail` | Dados públicos do perfil e capacidades administrativas do ator | Adulto da família |
 | `POST /family/members` | `CreateMember` | Nome administrativo/papel permitido → perfil ainda sem sessão | Admin |
 | `PATCH /family/members/{memberId}` | `UpdateMember` | Nome administrativo; sem apelido/foto pessoal/identidade Apple | Admin |
@@ -120,7 +122,7 @@ O servidor não aceita perfil responsável, autor da conclusão ou escolha de at
 
 `CreateRoutine` e `UpdateFutureRoutine` usam `422 VALIDATION_FAILED` com `fieldErrors` estáveis: `FREQUENCY_DAYS_INVALID` para `frequencyDays` fora de 1/7/14/21/28, `START_DATE_INVALID` para `startDate` fora de `YYYY-MM-DD` e `ROUTINE_SOURCE_TASK_INVALID` quando `fromTaskId` não identifica uma ocorrência da rotina solicitada dentro da família do ator. Um `fromTaskId` de outra família é indisponível e responde `404`. Não existe `endDate` nesses comandos. `EditTask` rejeita com `422 VALIDATION_FAILED`/`SIGNAL_RESOLUTION_REQUIRED` qualquer gravação sobre tarefa `awaitingConfirmation` sem `signalResolution`, independentemente de quais campos mudaram. `resetToPending` transiciona a tarefa para `pending` e descarta a sinalização corrente; `keepAwaitingConfirmation` preserva o estado e a sinalização corrente com os dados editados. `DeleteTask` sobre tarefa `awaitingConfirmation` remove a sinalização corrente junto da tarefa, sem gerar `CONFIRMED`/`REJECTED`.
 
-`TaskMutationResult` contém `task` e `affectedResources` com IDs/tipos e períodos a invalidar. `familyOverview`, progresso pessoal, fila Kids, missão, badges e relatório corrente são recarregados quando afetados. Recursos sem permissão não têm dados privados devolvidos; pode-se invalidar uma área por tipo sem expor seus registros. Exclusões retornam ID removido, vínculos alterados e resumo dos registros preservados.
+`TaskMutationResult` contém `task` e `affectedResources` com IDs/tipos e períodos a invalidar. Na conclusão implementada, `affectedResources` devolve, nesta ordem, `{type: "task", id}`, `{type: "ownTasks", referenceDate}` e `{type: "ownProgress", referenceDate}`; `referenceDate` é a data civil agendada da tarefa. `familyOverview`, fila Kids, missão, badges e relatório corrente entram quando essas projeções forem materializadas. Recursos sem permissão não têm dados privados devolvidos; pode-se invalidar uma área por tipo sem expor seus registros. Exclusões retornam ID removido, vínculos alterados e resumo dos registros preservados.
 
 Consultas paginadas usam ordenação estável com ID como desempate e cursor opaco vinculado ao filtro. Página não determina totais. Em listas que mudam entre páginas, app recarrega ao receber invalidação; snapshot de relatório não depende dessas páginas. Limite de página é operacional, não limite de tarefas cadastráveis.
 
@@ -211,12 +213,13 @@ Cada linha cobre um objetivo funcional completo, não apenas uma rota. RF/RN per
 | RNF26 | Snapshot para PDF, resultado semanal único e fila persistente |
 | RNF27 | Perfil por titularidade, PDF adulto e compartilhamento explícito no cliente |
 
-O OpenAPI futuro deve materializar schemas e exemplos de sucesso/erro dessas rotas. Esta versão define fronteiras e semântica, sem alegar que existe especificação executável, SDK gerado ou endpoint em funcionamento.
+O documento OpenAPI 3.1 é gerado pelos schemas HTTP em `/docs/json`, e a interface interativa fica em `/docs`. Cada rota implementada mantém schema, segurança e respostas compatíveis com este contrato; a documentação executável não substitui esta fonte para comportamento, autorização ou regras de domínio.
 
 ## Histórico
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.15 | 2026-10-10 | Consolida os contratos de SPEC-015 a SPEC-020 com as rotas materializadas de família, convites, sessão e tarefas, incluindo OpenAPI executável, paginação de membros e `CompleteTask`. |
 | 1.14 | 2026-10-10 | `FinalizeWeeklyHighlight` e as consultas próprias de reconhecimento detalhados: resultado único, empate, outbox e titularidade. Para SPEC-020. |
 | 1.13 | 2026-10-10 | `GetWeeklyReportSnapshot` detalhado: `referenceDate`, validação de semana, projeção de removido e erros estáveis. Para SPEC-019. |
 | 1.12 | 2026-10-10 | `GetFamilyLoad` detalhado: snapshot Dia/Semana, período efetivo/fuso, membros removidos históricos, totais, percentuais e erros estáveis. Para SPEC-018. |

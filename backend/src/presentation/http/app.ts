@@ -1,18 +1,30 @@
 import Fastify, { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
 import sensible from '@fastify/sensible';
+import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
 import { randomUUID } from 'node:crypto';
 import type { ApplicationContainer } from '../../bootstrap/container.js';
 import type { Configuration } from '../../bootstrap/configuration.js';
 import { DomainError } from '../../shared/domain/domain-error.js';
+import { RateLimitedError } from '../../modules/access/domain/invite-errors.js';
 import { createProblemDetails } from './problem-details.js';
 import { registerAccessRoutes } from './access-routes.js';
+import { registerSessionRoutes } from './session-routes.js';
+import { registerFamilyRoutes } from './family-routes.js';
+import { registerMediaRoutes } from './media-routes.js';
+import { registerProfileRoutes } from './profile-routes.js';
+import { registerTaskRoutes } from './task-routes.js';
+import { registerMemberRoutes } from './member-routes.js';
 
 export function buildHttpApp(
   container: ApplicationContainer,
   config: Configuration,
 ): FastifyInstance {
   const app = Fastify({
+    // Só atrás de proxy confiável: caso contrário `X-Forwarded-For` é forjável e
+    // o limite por origem do ingresso por convite (SPEC-005) seria contornável.
+    trustProxy: config.TRUST_PROXY,
     genReqId: (req) => {
       const headerId = req.headers['x-request-id'];
       if (typeof headerId === 'string' && headerId.length > 0) {
@@ -21,6 +33,12 @@ export function buildHttpApp(
       return randomUUID();
     },
     logger: false, // Observability is handled via container.logger and custom hooks
+    ajv: {
+      // O default do Fastify (`removeAdditional: true`) apaga em silêncio os
+      // campos fora do schema com `additionalProperties: false`. O contrato exige
+      // o contrário: campo desconhecido é recusado com UNKNOWN_FIELD (CA-04).
+      customOptions: { removeAdditional: false },
+    },
   });
 
   // Plugins
@@ -30,6 +48,45 @@ export function buildHttpApp(
   });
 
   app.register(sensible);
+
+  // A especificação é gerada dos schemas de rota, mantendo a documentação de
+  // teste alinhada ao contrato realmente validado e serializado pelo Fastify.
+  // Estes plugins precisam ser registrados antes das rotas para descobri-las.
+  app.register(swagger, {
+    openapi: {
+      openapi: '3.1.0',
+      info: {
+        title: 'App Rotina Familiar API',
+        version: '0.1.0',
+        description: 'API HTTP do MVP. Os recursos protegidos usam Bearer tokens opacos.',
+      },
+      servers: [{ url: config.API_BASE_URL, description: 'API configurada para o ambiente atual' }],
+      tags: [
+        { name: 'Operational', description: 'Sondas e metadados operacionais.' },
+        { name: 'Access', description: 'Autenticação, convite e início de sessão.' },
+        { name: 'Family', description: 'Onboarding e criação de família.' },
+        { name: 'Members', description: 'Consulta e criação de perfis da família.' },
+        { name: 'Media', description: 'Upload de mídia privada.' },
+        { name: 'Profile', description: 'Dados do próprio perfil.' },
+        { name: 'Tasks', description: 'Gestão de tarefas únicas.' },
+      ],
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'Opaque access token',
+            description: 'Access token emitido após autenticação ou criação da família.',
+          },
+        },
+      },
+    },
+  });
+
+  app.register(swaggerUi, {
+    routePrefix: '/docs',
+    uiConfig: { docExpansion: 'list', deepLinking: true, persistAuthorization: true },
+  });
 
   // Request logging & tracking hook
   app.addHook('onRequest', async (req: FastifyRequest) => {
@@ -69,6 +126,10 @@ export function buildHttpApp(
         fieldErrors: error.fieldErrors,
       });
 
+      if (error instanceof RateLimitedError) {
+        reply.header('Retry-After', String(error.retryAfterSeconds));
+      }
+
       return reply
         .status(error.statusCode)
         .header('Content-Type', 'application/problem+json')
@@ -77,19 +138,35 @@ export function buildHttpApp(
 
     // Fastify schema validation error
     if (isRecord(error) && Array.isArray(error.validation)) {
+      const issues = error.validation as Array<{
+        instancePath?: string;
+        message?: string;
+        keyword?: string;
+        params?: { additionalProperty?: string };
+      }>;
       const fieldErrors: Record<string, string[]> = {};
-      for (const vErr of error.validation as Array<{ instancePath?: string; message?: string }>) {
-        const field = vErr.instancePath?.replace(/^\//, '') || 'body';
+
+      // Campo fora do schema tem código próprio no contrato (UNKNOWN_FIELD) e o
+      // nome do campo recusado vai em `fieldErrors`.
+      const unknownFields = issues.filter(
+        (issue) => issue.keyword === 'additionalProperties' && issue.params?.additionalProperty,
+      );
+
+      for (const vErr of unknownFields.length > 0 ? unknownFields : issues) {
+        const field =
+          vErr.params?.additionalProperty ?? (vErr.instancePath?.replace(/^\//, '') || 'body');
         if (!fieldErrors[field]) {
           fieldErrors[field] = [];
         }
-        fieldErrors[field].push(vErr.message || 'Invalid value');
+        fieldErrors[field].push(
+          unknownFields.length > 0 ? 'UNKNOWN_FIELD' : vErr.message || 'Invalid value',
+        );
       }
 
       const problem = createProblemDetails({
         status: 400,
-        // Código estável do contrato (SPEC-001 §5.2, backend-contracts.md §1).
-        code: 'VALIDATION_FAILED',
+        // Códigos estáveis do contrato (SPEC-001 §5.2, SPEC-002 §5.3).
+        code: unknownFields.length > 0 ? 'UNKNOWN_FIELD' : 'VALIDATION_FAILED',
         title: 'Bad Request',
         detail: typeof error.message === 'string' ? error.message : 'Validation failed',
         requestId,
@@ -127,42 +204,67 @@ export function buildHttpApp(
   // Operational Routes (backend-contracts.md §6)
   // --------------------------------------------------------------------------
 
-  // GET /health/live - Liveness probe (process is up)
-  app.get('/health/live', async (_req, reply) => {
-    return reply.status(200).send({
-      status: 'ok',
-      environment: config.NODE_ENV,
-      timestamp: container.clock.nowIsoString(),
-    });
-  });
-
-  // GET /health/ready - Readiness probe (essential dependencies verified)
-  app.get('/health/ready', async (_req, reply) => {
-    const dbHealth = await container.dbPool.checkHealth();
-
-    if (!dbHealth.isHealthy) {
-      return reply.status(503).send({
-        status: 'not_ready',
-        checks: {
-          database: {
-            status: 'unhealthy',
-            error: dbHealth.error,
-          },
-        },
-        timestamp: container.clock.nowIsoString(),
-      });
-    }
-
-    return reply.status(200).send({
-      status: 'ready',
-      checks: {
-        database: {
-          status: 'healthy',
-          latencyMs: dbHealth.latencyMs,
-        },
+  app.register(async (scope) => {
+    // GET /health/live - Liveness probe (process is up)
+    scope.get(
+      '/health/live',
+      { schema: { tags: ['Operational'], summary: 'Liveness probe' } },
+      async (_req, reply) => {
+        return reply.status(200).send({
+          status: 'ok',
+          environment: config.NODE_ENV,
+          timestamp: container.clock.nowIsoString(),
+        });
       },
-      timestamp: container.clock.nowIsoString(),
-    });
+    );
+
+    // GET /health/ready - Readiness probe (essential dependencies verified)
+    scope.get(
+      '/health/ready',
+      { schema: { tags: ['Operational'], summary: 'Readiness probe' } },
+      async (_req, reply) => {
+        const dbHealth = await container.dbPool.checkHealth();
+
+        if (!dbHealth.isHealthy) {
+          return reply.status(503).send({
+            status: 'not_ready',
+            checks: {
+              database: {
+                status: 'unhealthy',
+                error: dbHealth.error,
+              },
+            },
+            timestamp: container.clock.nowIsoString(),
+          });
+        }
+
+        return reply.status(200).send({
+          status: 'ready',
+          checks: {
+            database: {
+              status: 'healthy',
+              latencyMs: dbHealth.latencyMs,
+            },
+          },
+          timestamp: container.clock.nowIsoString(),
+        });
+      },
+    );
+
+    // GET /v1 - API root / info
+    scope.get(
+      '/v1',
+      { schema: { tags: ['Operational'], summary: 'API metadata' } },
+      async (_req, reply) => {
+        return reply.status(200).send({
+          name: 'App Rotina Familiar API',
+          version: '0.1.0',
+          status: 'operational',
+          environment: config.NODE_ENV,
+          timestamp: container.clock.nowIsoString(),
+        });
+      },
+    );
   });
 
   // --------------------------------------------------------------------------
@@ -170,21 +272,25 @@ export function buildHttpApp(
   // --------------------------------------------------------------------------
   app.register(
     async (scope) => {
+      // `no-store` em todas as rotas de Access e de sessão (backend-contracts.md
+      // §1): `POST /access/apple` e `POST /access/refresh` emitem credenciais no
+      // corpo, e uma resposta de `/me/session` guardada em cache prolongaria uma
+      // sessão já revogada (SPEC-001 §5.3). O hook cobre também as respostas de
+      // erro, que um header posto em cada handler deixaria de fora.
+      scope.addHook('onSend', async (_request, reply) => {
+        reply.header('Cache-Control', 'no-store');
+      });
+
       registerAccessRoutes(scope, container);
+      registerSessionRoutes(scope, container);
+      registerFamilyRoutes(scope, container);
+      registerMemberRoutes(scope, container);
+      registerMediaRoutes(scope, container);
+      registerProfileRoutes(scope, container);
+      registerTaskRoutes(scope, container);
     },
     { prefix: '/v1' },
   );
-
-  // GET /v1 - API root / info
-  app.get('/v1', async (_req, reply) => {
-    return reply.status(200).send({
-      name: 'App Rotina Familiar API',
-      version: '0.1.0',
-      status: 'operational',
-      environment: config.NODE_ENV,
-      timestamp: container.clock.nowIsoString(),
-    });
-  });
 
   return app;
 }

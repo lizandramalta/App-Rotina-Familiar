@@ -148,6 +148,8 @@ O mobile mantém a imagem somente enquanto o rascunho do onboarding estiver ativ
 
 O servidor recalcula os limites no commit; uma prévia não reserva estado. Em aplicação imediata, preserva o início do ciclo aberto e fixa o próximo encerramento válido no novo fuso. Em `nextCycle`, preserva o ciclo atual e programa a mudança para seu encerramento.
 
+As três rotas respondem `200` com `Cache-Control: no-store`. `GET` e confirmação devolvem `timeZoneId`, `scheduledTimeZoneChange` (`{timeZoneId, effectiveAt}` ou `null`) e `limits` (`{startsAt, endsAt, timeZoneId, isTransition}`). A prévia devolve `proposedTimeZoneId`, `application`, `effectiveAt`, `effectiveLimits` e `isTransition`. Instantes em ISO 8601 UTC.
+
 ### 5.3. Erros, concorrência e resultado incerto
 
 | HTTP | Código | Situação |
@@ -157,6 +159,7 @@ O servidor recalcula os limites no commit; uma prévia não reserva estado. Em a
 | 403 | `ACTION_NOT_ALLOWED` | Sessão válida sem papel Administrador para configurações de fuso |
 | 404 | `RESOURCE_NOT_FOUND` | Recurso de outra família ou indisponível ao ator |
 | 422 | `VALIDATION_FAILED` | Nome, fuso ou modo de aplicação semanticamente inválido; inclui `fieldErrors` |
+| 422 | `VALIDATION_FAILED` com `fieldErrors.timeZoneId = TIME_ZONE_UNCHANGED` | O fuso pedido já é o vigente, na prévia e na confirmação |
 | 413 | `MEDIA_TOO_LARGE` | Arquivo de foto acima do limite operacional de entrada |
 | 415 | `MEDIA_FORMAT_UNSUPPORTED` | Arquivo sem formato de imagem reconhecível |
 | 422 | `PHOTO_MEDIA_NOT_READY`, `PHOTO_MEDIA_NOT_OWNED` ou `PHOTO_MEDIA_PURPOSE_MISMATCH` | Mídia ainda processando, de outro titular ou com finalidade incompatível |
@@ -264,15 +267,20 @@ Segredos, tokens, `creationGrant`, cabeçalhos de instalação e dados de autent
 | E-04 | Códigos de erro definidos na seção 5.3. | Decidida em 2026-10-06 | Não |
 | E-05 | Resultado incerto preserva rascunho e pede nova autenticação Apple, sem retry automático. | Decidida em 2026-10-06 | Não |
 | E-06 | A foto escolhida antes da criação é um rascunho local. A família e a sessão são confirmadas primeiro; a foto é enviada e vinculada sob essa sessão, podendo falhar sem desfazer a criação. | Pessoa usuária / 2026-10-07 | Não — concretiza foto opcional já definida em RN01/RN63/RF48. |
+| E-07 | Sem worker de apuração, um ciclo aberto vencido é liquidado antes de ler ou alterar o fuso: criam-se os ciclos semanais contíguos que faltam, sem apurar destaque, que continua na SPEC-020. | Pessoa usuária / 2026-10-08 | Sim — `backend-architecture.md` §11 |
+| E-08 | Uma alteração `nextCycle` entra em vigor de forma preguiçosa, sob o lock da família, na primeira leitura ou alteração após o encerramento do ciclo. O worker futuro reutiliza a mesma operação. | Pessoa usuária / 2026-10-08 | Sim — `backend-architecture.md` §11 |
+| E-09 | Pedir o fuso já vigente é recusado com `TIME_ZONE_UNCHANGED`. Uma mudança programada só é substituída por outra solicitação válida de fuso diferente, e não há cancelamento sem novo fuso. | Pessoa usuária / 2026-10-08 | Sim — `backend-contracts.md` §3 |
 
 ## 10. Fases de implementação e conclusão
 
 | Fase | Objetivo | CAs | Prontidão | Status |
 |---|---|---|---|---|
-| 1 | Onboarding seguro: grant, rascunho local de perfil, transação de criação, sessão, foto opcional, validação, isolamento e TEL-055/TEL-002 | CA-01 a CA-04, CA-09, CA-10 | Testes unitários, integração e UI verdes | a fazer |
+| 1 | Onboarding seguro: grant, rascunho local de perfil, transação de criação, sessão, foto opcional, validação, isolamento e TEL-055/TEL-002 | CA-01 a CA-04, CA-09, CA-10 | Testes unitários, integração e UI verdes | em andamento — backend concluído (SCRUM-18); Mobile pendente (SCRUM-20) |
 | 2 | Orquestração de membros iniciais: TEL-056 integra criação normal e convite explícito sem alterar seus contratos | CA-11 | Testes de UI/iPhone/iPad e integração com SPEC-003/SPEC-004 verdes | a fazer |
-| 3 | Configuração de fuso: leitura, prévia, confirmação, RBAC e TEL-053/MOD-012 | CA-05 a CA-08 | Testes de integração temporal e UX-spec verificada | a fazer |
+| 3 | Configuração de fuso: leitura, prévia, confirmação, RBAC e TEL-053/MOD-012 | CA-05 a CA-08 | Testes de integração temporal e UX-spec verificada | em andamento — backend concluído (SCRUM-21); Mobile pendente (SCRUM-22) |
 | 4 | Auditoria, telemetria segura e regressão de transições | CA-03, CA-08 a CA-11 | Regressão verde e QA | a fazer |
+
+**Registro de execução (2026-10-10):** SCRUM-18 entregou a transação de criação no backend e SCRUM-21 entregou leitura, prévia e alteração de fuso no backend. As telas Mobile que compõem as Fases 1 e 3 ainda não foram concluídas; por isso as fases permanecem em andamento.
 
 - **Fase 1:** não publica a alteração posterior de fuso; a família nasce com o fuso escolhido. Não deve ser publicada isoladamente sem a fase necessária de SPEC-001 que emite grant e sessão.
 - **Fase 2:** não altera os contratos de membros ou convites; somente orquestra fluxos já especificados e pode avançar sem membro.

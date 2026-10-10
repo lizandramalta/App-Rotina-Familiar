@@ -267,9 +267,11 @@ Segredos, tokens e dados de autenticação nunca entram em logs ou telemetria. `
 
 | Fase | Objetivo | CAs | Prontidão | Status |
 |---|---|---|---|---|
-| 1 | Núcleo: criar e consultar com autorização, isolamento e validação | CA-01, CA-02, CA-03, CA-04, CA-16 | Testes unitários e de integração verdes | a fazer |
-| 2 | Editar e excluir com proteções de missão/conclusão e resolução de sinalização pendente | CA-05 a CA-10, CA-12 a CA-15 | Testes de integração e UX-spec verificada | a fazer |
+| 1 | Núcleo: criar e consultar com autorização, isolamento e validação | CA-01, CA-02, CA-03, CA-04, CA-16 | Testes unitários e de integração verdes | em andamento — backend concluído (SCRUM-35); Mobile pendente (SCRUM-37) |
+| 2 | Editar e excluir com proteções de missão/conclusão e resolução de sinalização pendente | CA-05 a CA-10, CA-12 a CA-15 | Testes de integração e UX-spec verificada | em andamento — backend concluído (SCRUM-35); Mobile pendente (SCRUM-37) |
 | 3 | Resiliência de rede | CA-11 | Regressão verde | a fazer |
+
+**Registro de execução (2026-10-10):** SCRUM-35 concluiu o escopo backend das Fases 1 e 2. As fases permanecem em andamento até a entrega Mobile correspondente (SCRUM-37) e sua validação de interface.
 
 - **Fase 1:** não publica edição nem exclusão; apenas criação e consulta. Não deve ser publicada isoladamente, pois TEL-012 precisa das ações da Fase 2 para ser útil.
 - **Fase 2:** entrega o CRUD completo da tarefa única, incluindo a interação com sinalização Kids pendente; pode ser publicada junto com a Fase 1.

@@ -87,7 +87,7 @@ Todas as rotas usam `/v1`, HTTPS, JSON em inglês, `Authorization: Bearer <acces
 
 | Método e rota | Caso de uso | Acesso | Entrada | Resultado confirmado |
 |---|---|---|---|---|
-| `GET /family/members` | `ListFamilyMembers` | Adulto | Paginação conforme contrato compartilhado | Projeção paginada da própria família |
+| `GET /family/members` | `ListFamilyMembers` | Adulto | `cursor` opaco opcional | `{ items, nextCursor }` da própria família, em páginas de até 20 perfis |
 | `GET /family/members/{memberId}` | `GetMemberDetail` | Adulto da família | `memberId` na rota | Dados públicos do perfil e capacidades administrativas do ator |
 | `POST /family/members` | `CreateMember` | Administrador | `name`, `role` | `201 Created` e projeção do perfil, ainda sem sessão/convite |
 | `PATCH /family/members/{memberId}` | `UpdateMember` | Administrador | `name` | `200 OK` e projeção confirmada |
@@ -117,7 +117,7 @@ Todos os erros usam `application/problem+json` com `type`, `title`, `status`, `c
 | 403 | `ACTION_NOT_ALLOWED` | Ator sem capacidade administrativa |
 | 404 | `RESOURCE_NOT_FOUND` | Membro ausente, removido ou de outra família |
 | 409 | `MEMBER_STATE_CONFLICT` | Estado atual impede a operação, inclusive proteção do Criador ou mudança incompatível com o estado atual |
-| 422 | `VALIDATION_FAILED` | Nome ou papel semanticamente inválidos; inclui `fieldErrors` |
+| 422 | `VALIDATION_FAILED` | Nome, papel ou cursor semanticamente inválidos; inclui `fieldErrors` (`CURSOR_INVALID` para cursor opaco malformado) |
 | 503 | `DEPENDENCY_UNAVAILABLE` | Persistência ou dependência indisponível; não afirmar reversão de escrita incerta |
 
 - **Concorrência:** aplica-se última gravação válida persistida para edição de nome. Mudanças de papel e remoção usam transação curta, lock por família e revalidação das invariantes no commit (BA-07, BA-08).
@@ -199,14 +199,17 @@ Segredos, tokens, provas de instalação, hashes, apelido privado configurável 
 | E-03 | A saída voluntária de Administrador não-Criador pertence a esta entrega, embora sua entrada visual exista em TEL-030. | Aprovação da prévia em 2026-10-06 | Não — aplica UC02/RN04 existentes |
 | E-04 | A emissão e o reenvio de convite não integram esta entrega; criação de perfil e convite continuam comandos distintos. | Mapa de specs e contrato backend | Não |
 | E-05 | TEL-056 reutiliza a criação de membro sem alterar payload, autorização ou estados desta SPEC; após salvar, a orquestração decide oferecer convite explícito ou avançar. | Pessoa usuária / 2026-10-07 | Não |
+| E-06 | A lista de membros usa cursor opaco, ordenação estável e páginas de até 20 perfis; `nextCursor: null` encerra a consulta. O Mobile carrega as páginas seguintes por rolagem infinita. | Pessoa usuária / 2026-10-08 | Não — detalha o contrato e a experiência de consulta, sem alterar RN/RF. |
 
 ## 10. Fases de implementação e conclusão
 
 | Fase | Objetivo | CAs | Prontidão | Status |
 |---|---|---|---|---|
-| 1 | Consulta e criação segura: projeções adultas, criação e validação de perfil, RBAC e isolamento | CA-01 a CA-03, CA-07 | Testes unitários, integração e UI dos fluxos publicados verdes | a fazer |
+| 1 | Consulta e criação segura: projeções adultas, criação e validação de perfil, RBAC e isolamento | CA-01 a CA-03, CA-07 | Testes unitários, integração e UI dos fluxos publicados verdes | em andamento — backend concluído (SCRUM-27); Mobile pendente (SCRUM-29) |
 | 2 | Administração de papel e modo Kids, incluindo saída voluntária | CA-04, CA-05, CA-07 | Transições e recusas por papel/Criador cobertas por testes de integração e UI | a fazer |
 | 3 | Remoção consistente, revogação e regressão | CA-06, CA-07 | Transação de remoção, sessão revogada e regressão de responsabilidades verificadas | a fazer |
+
+**Registro de execução (2026-10-10):** SCRUM-27 concluiu a criação e consulta de membros no backend. A Fase 1 não é considerada concluída porque a interface Mobile correspondente (SCRUM-29) ainda não foi entregue.
 
 - **Fase 1:** não expõe mudança de papel, saída voluntária ou remoção; o perfil recém-criado permanece sem convite, que pertence à SPEC-004.
 - **Fase 2:** não emite convite nem implementa edição de foto/apelido; pode ser publicada depois da Fase 1.

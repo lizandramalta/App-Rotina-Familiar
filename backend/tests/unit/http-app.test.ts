@@ -56,6 +56,78 @@ describe('HTTP Presentation Layer (Fastify)', () => {
       signInWithAppleUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['signInWithAppleUseCase'],
+      getCurrentSessionUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['getCurrentSessionUseCase'],
+      refreshSessionUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['refreshSessionUseCase'],
+      revokeSessionUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['revokeSessionUseCase'],
+      authenticateSessionUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['authenticateSessionUseCase'],
+      inspectInviteUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['inspectInviteUseCase'],
+      joinFamilyByInviteUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['joinFamilyByInviteUseCase'],
+      recoverInviteJoinUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['recoverInviteJoinUseCase'],
+      createFamilyUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['createFamilyUseCase'],
+      getFamilySettingsUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['getFamilySettingsUseCase'],
+      previewFamilyTimeZoneChangeUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['previewFamilyTimeZoneChangeUseCase'],
+      changeFamilyTimeZoneUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['changeFamilyTimeZoneUseCase'],
+      listFamilyMembersUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['listFamilyMembersUseCase'],
+      getMemberDetailUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['getMemberDetailUseCase'],
+      createMemberUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['createMemberUseCase'],
+      issueMemberInviteUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['issueMemberInviteUseCase'],
+      uploadMediaUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['uploadMediaUseCase'],
+      updateOwnProfileUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['updateOwnProfileUseCase'],
+      createTaskUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['createTaskUseCase'],
+      completeTaskUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['completeTaskUseCase'],
+      getTaskUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['getTaskUseCase'],
+      getOwnTasksUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['getOwnTasksUseCase'],
+      getOwnProgressUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['getOwnProgressUseCase'],
+      editTaskUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['editTaskUseCase'],
+      deleteTaskUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['deleteTaskUseCase'],
       dispose: vi.fn(),
     };
   });
@@ -118,6 +190,43 @@ describe('HTTP Presentation Layer (Fastify)', () => {
     expect(body.name).toBe('App Rotina Familiar API');
     expect(body.version).toBe('0.1.0');
     expect(body.status).toBe('operational');
+  });
+
+  it('serves Swagger UI and an OpenAPI document for every implemented API area', async () => {
+    const app = buildHttpApp(mockContainer, testConfig);
+
+    const ui = await app.inject({ method: 'GET', url: '/docs' });
+    expect(ui.statusCode).toBe(200);
+    expect(ui.headers['content-type']).toContain('text/html');
+
+    const specResponse = await app.inject({ method: 'GET', url: '/docs/json' });
+    expect(specResponse.statusCode).toBe(200);
+
+    const spec = specResponse.json() as {
+      openapi: string;
+      info: { title: string };
+      paths: Record<string, unknown>;
+      components: { securitySchemes: Record<string, { scheme: string }> };
+    };
+    expect(spec.openapi).toBe('3.1.0');
+    expect(spec.info.title).toBe('App Rotina Familiar API');
+    expect(Object.keys(spec.paths)).toEqual(
+      expect.arrayContaining([
+        '/health/live',
+        '/health/ready',
+        '/v1/access/apple',
+        '/v1/families',
+        '/v1/family/members',
+        '/v1/family/members/{memberId}',
+        '/v1/media',
+        '/v1/me/profile',
+        '/v1/tasks',
+        '/v1/tasks/{taskId}',
+      ]),
+    );
+    expect(spec.components.securitySchemes.bearerAuth).toMatchObject({ scheme: 'bearer' });
+
+    await app.close();
   });
 
   it('formats DomainError as RFC 9457 Problem Details', async () => {

@@ -293,9 +293,11 @@ Todos os erros utilizam `Content-Type: application/problem+json`.
 
 | Fase | Objetivo da Entrega | Critérios de Aceite Atendidos | Critério de Prontidão (Definition of Done) | Status |
 |---|---|---|---|---|
-| **1** | **Núcleo Mínimo:** validação da prova Apple, emissão de sessão/`creationGrant`, isolamento e rejeição explícita. | CA-01, CA-02, CA-03, CA-04, CA-05, CA-06 | Testes unitários e de integração verdes cobrindo os CAs listados. | a fazer |
-| **2** | **Sessão utilizável + resiliência:** consulta, renovação e revogação de sessão; tratamento de falha de rede no mobile. | CA-07, CA-08, CA-09, CA-10 | Telas integradas com a API, testes de UI/E2E e UX-spec verificada. | a fazer |
+| **1** | **Núcleo Mínimo:** validação da prova Apple, emissão de sessão/`creationGrant`, isolamento e rejeição explícita. | CA-01, CA-02, CA-03, CA-04, CA-05, CA-06 | Testes unitários e de integração verdes cobrindo os CAs listados. | concluída — SCRUM-11 e SCRUM-13 |
+| **2** | **Sessão utilizável + resiliência:** consulta, renovação e revogação de sessão; tratamento de falha de rede no mobile. | CA-07, CA-08, CA-09, CA-10 | Telas integradas com a API, testes de UI/E2E e UX-spec verificada. | concluída — SCRUM-14 e SCRUM-16 |
 | **3** | **Polimento:** limitação de tentativas e observabilidade. | CA-11 | Suíte de regressão verde e validação de QA concluída. | a fazer |
+
+**Registro de execução (2026-10-10):** as Fases 1 e 2 estão em `develop`; a Fase 1 foi entregue pelos cards backend SCRUM-11/SCRUM-13 e a Fase 2 por SCRUM-14 (backend) e SCRUM-16 (Mobile). A Fase 3 permanece fora do incremento concluído.
 
 ### Para cada fase:
 - **Fase 1 — Fora desta fase:** o usuário autenticado ainda não consegue manter a sessão por muito tempo (sem refresh) nem encerrá-la explicitamente; falha de rede e o ciclo completo de sessão ficam para a Fase 2. **Pode ser publicada de forma independente em produção?** Não — depende da Fase 2 para a sessão não cair em 15 minutos.

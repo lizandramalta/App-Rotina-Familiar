@@ -52,3 +52,25 @@ export class ValidationError extends DomainError {
     super({ message, code, statusCode: 422, fieldErrors });
   }
 }
+
+/**
+ * Dependência (banco, storage) indisponível ou resultado de gravação incerto.
+ * Nunca afirma que a gravação foi desfeita (backend-contracts.md §1, 503).
+ */
+export class DependencyUnavailableError extends DomainError {
+  constructor(
+    message = 'A required dependency is unavailable. The outcome of the operation is uncertain.',
+  ) {
+    super({ message, code: 'DEPENDENCY_UNAVAILABLE', statusCode: 503 });
+  }
+}
+
+/**
+ * Sessão válida sem a capacidade exigida pela ação (por exemplo, Membro ou Kids
+ * em configurações da família). O papel vem da sessão, nunca do cliente.
+ */
+export class ActionNotAllowedError extends DomainError {
+  constructor(message = 'The current profile is not allowed to perform this action.') {
+    super({ message, code: 'ACTION_NOT_ALLOWED', statusCode: 403 });
+  }
+}

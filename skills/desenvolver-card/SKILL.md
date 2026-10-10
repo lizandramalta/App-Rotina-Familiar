@@ -10,6 +10,7 @@ Use esta skill para transformar um card de implementação já planejado em cód
 ## Entrada e limites
 
 - Receba uma chave/link de card, uma SPEC aprovada ou uma indicação inequívoca do recorte a implementar.
+- Ao receber uma chave Jira no padrão `SCRUM-*`, consulte o item pelo MCP Atlassian antes de localizar a SPEC ou propor escopo. Use o ticket para confirmar título, descrição, responsabilidade, fase, critérios de aceite, status, sprint e vínculos de bloqueio; não tente deduzir essas informações pelo nome da chave, pelo repositório ou pelo histórico Git. Esta consulta é somente leitura e não autoriza alterar o Jira.
 - Identifique a responsabilidade do card: `Backend`, `Mobile` ou integração entre ambos. Não implemente responsabilidades de outro card sem autorização explícita.
 - Trate a SPEC funcional como fonte do comportamento e a UX-spec como fonte de apresentação. Documentos de arquitetura definem decisões técnicas; nenhum deles autoriza inventar regras, permissões ou estados.
 - Só altere Jira, Figma, serviços externos ou o status de um card se o usuário pedir isso explicitamente.
@@ -22,10 +23,10 @@ Antes de propor ou alterar código:
 2. Localize a SPEC e a UX-spec vinculadas e confirme que ambas estão com status `aprovada`; para uma capacidade puramente interna, a SPEC deve justificar UX-spec não aplicável.
 3. Leia somente os documentos e os trechos citados na seção **Rastreabilidade** da SPEC, mais a arquitetura e as convenções aplicáveis à responsabilidade do card:
    - Mobile: `docs/architecture/mobile-code-conventions.md`.
-   - Backend: `docs/architecture/backend-code-conventions.md`.
+   - Backend: `docs/architecture/backend-code-conventions.md`, incluindo as regras OpenAPI/Swagger se o card criar ou alterar rotas HTTP.
    - Integração: ambas, respeitando a fronteira entre os projetos.
 4. Confirme a fase e os critérios de aceite que o card cobre. Não implemente critérios de outra fase por conveniência.
-5. Se houver acesso ao Jira, confira os vínculos de bloqueio. Caso não haja, peça a informação necessária ou declare a limitação, sem supor que uma dependência foi concluída.
+5. Para cards `SCRUM-*`, confira no MCP Atlassian os vínculos de bloqueio e o estado das dependências. Se o MCP Atlassian não estiver disponível ou a consulta falhar, declare a limitação e peça o link ou o conteúdo do ticket; não suponha que uma dependência foi concluída. Para outras chaves, use o rastreador disponível e aplique a mesma regra.
 
 ### Regra para design e dependências
 
@@ -41,7 +42,7 @@ Antes de editar qualquer arquivo de código, entregue uma prévia e aguarde apro
 1. card, SPEC/UX-spec, fase e critérios de aceite cobertos;
 2. dependências verificadas e pendências que bloqueiam o início;
 3. arquivos a criar ou modificar, separados em Mobile e Backend quando aplicável;
-4. contratos, migrações, autorização, isolamento familiar, validações e tratamento de falhas que serão preservados;
+4. contratos, migrações, autorização, isolamento familiar, validações e tratamento de falhas que serão preservados; quando houver mudança de rota HTTP, inclua também os schemas OpenAPI/Swagger, segurança e respostas documentadas;
 5. estratégia de testes (unidade, integração, UI/contrato), incluindo os critérios que cada grupo verifica;
 6. riscos ou esclarecimentos que impedem uma implementação segura.
 
@@ -55,6 +56,7 @@ Depois da aprovação técnica:
 - Use a chave Jira do card como identificador preservado (`SCRUM-123`) e uma descrição curta em minúsculas, ASCII e `kebab-case` (`feature/SCRUM-123_create-family`). Se a branch já existir ou `origin/develop` não estiver acessível, pare e peça orientação em vez de reutilizar, sobrescrever ou partir de outra referência.
 - Implemente somente o recorte e a fase aprovados.
 - Inclua autorização, isolamento entre famílias, validação e falhas recuperáveis na primeira exposição da capacidade; não trate esses itens como acabamento.
+- Se o recorte criar ou alterar uma rota HTTP, mantenha sua documentação OpenAPI/Swagger junto à implementação: tags, resumo, autenticação, entradas e respostas devem refletir o contrato efetivamente exposto. Não aplique esta etapa a cards sem mudança na superfície HTTP.
 - Use nomes de código, arquivos, APIs e testes em inglês. Mantenha documentação explicativa em português e textos de interface localizáveis.
 - Preserve os limites do card: um card Backend não cria telas; um card Mobile não altera regra ou contrato não sustentado pela SPEC.
 - Quando a implementação depender de resposta incerta ou concorrência, siga exatamente o comportamento definido na SPEC e no contrato, incluindo reconciliação antes de repetir uma ação.
@@ -63,9 +65,10 @@ Depois da aprovação técnica:
 
 1. Execute os testes planejados que estiverem disponíveis e reporte resultado, limitações e testes não executados.
 2. Verifique cada critério de aceite atribuído à fase, sem marcar como coberto o que não foi implementado.
-3. Resuma arquivos alterados, comportamento entregue, critérios cobertos, testes e riscos residuais.
-4. Ao criar uma PR ou atualizar Jira sob solicitação do usuário, cite a SPEC, a UX-spec e os critérios cobertos.
-5. Sempre encerre com **Como testar**, destinado a quem desenvolverá/revisará o card. Sugira passos manuais concretos, proporcionais ao escopo e ligados aos critérios de aceite:
+3. Quando houver mudança de rota HTTP, verifique o documento OpenAPI em `/docs/json` e cubra no teste de contrato a presença e a segurança da rota, quando aplicável.
+4. Resuma arquivos alterados, comportamento entregue, critérios cobertos, testes e riscos residuais.
+5. Ao criar uma PR ou atualizar Jira sob solicitação do usuário, cite a SPEC, a UX-spec e os critérios cobertos.
+6. Sempre encerre com **Como testar**, destinado a quem desenvolverá/revisará o card. Sugira passos manuais concretos, proporcionais ao escopo e ligados aos critérios de aceite:
    - Mobile: pré-requisitos de ambiente, rota/tela a abrir, ações, estados esperados, acessibilidade e cenários de erro ou permissão relevantes.
    - Backend: configuração necessária, comando para iniciar/testar, chamada HTTP ou fluxo consumidor, status/corpo esperado e cenários de validação, autorização ou isolamento relevantes.
    - Integração: fluxo de tela que dispara a chamada, contrato observado e como confirmar o resultado canônico após uma falha/reconciliação quando aplicável.

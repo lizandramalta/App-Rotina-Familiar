@@ -1,8 +1,8 @@
-# Screen map — versão 1.10
+# Screen map — versão 1.13
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do mapa:** 1.10\
-**Base funcional:** 1.15\
+**Versão do mapa:** 1.13\
+**Base funcional:** 1.17\
 **Data:** 2026-10-10\
 **Situação:** referência inicial para design; organização de navegação proposta
 
@@ -294,6 +294,7 @@ A = Administrador (inclui Criador); M = Membro; K = Kids. Códigos RF e RNF são
 | Telas | Estados e respostas |
 |---|---|
 | Todas com rede/gravação | Carregando/processando, sucesso confirmado e falha com possibilidade de tentar novamente. Não apresentar operação como salva em falha. Manter a interface responsiva. |
+| Listas paginadas | Carregar a próxima página por rolagem infinita antes do fim dos itens confirmados; cada página tem até 20 itens. Falha de página preserva a lista e permite nova tentativa, sem interpretar como fim da lista. |
 | Áreas protegidas | Sessão recuperável renova silenciosamente; sessão perdida encaminha à entrada. Perfil removido tem acesso bloqueado, inclusive na renovação; novo convite não reativa perfil removido. |
 | TEL-001/002/055/056 | Apple cancelado ou com falha; dados obrigatórios inválidos; família já existente redireciona; rascunho de perfil não é persistido antes da criação; foto opcional pode ser repetida ou omitida após falha; adicionar membros e emitir convite não é obrigatório para avançar. |
 | TEL-003/034 | Senha incorreta, link inválido/consumido, perfil removido, geração com falha e ingresso concluído; não reutilizar convite consumido. |
@@ -326,6 +327,7 @@ Campos funcionais de data/fuso e seleção de foto estão definidos; o layout vi
 
 | Versão do mapa | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.13 | 1.17 | 2026-10-10 | Consolida TEL-021/023/050/052 com listas paginadas de até 20 itens e rolagem infinita que preserva itens confirmados em falha. Para SPEC-003, SPEC-015, SPEC-016, SPEC-018 e SPEC-020. |
 | 1.12 | 1.17 | 2026-10-10 | TEL-052 detalha variante Kids e compartilhamento opcional/cancelável do destaque. Para SPEC-020. |
 | 1.11 | 1.16 | 2026-10-10 | TEL-050 integra carga Dia/Semana sem ranking e preserva crédito histórico como “Membro removido”. Para SPEC-018. |
 | 1.10 | 1.15 | 2026-10-10 | TEL-021 alinha Kids a RF36: recompensa aceita é consultável, mas participações e resgate continuam restritos. Para SPEC-016. |

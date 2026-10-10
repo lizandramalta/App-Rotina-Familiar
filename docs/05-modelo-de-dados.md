@@ -1,7 +1,7 @@
 # Modelo de dados (DER)
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do modelo:** 1.7 · **Base funcional:** 1.15\
+**Versão do modelo:** 1.8 · **Base funcional:** 1.17\
 **Data:** 2026-10-10\
 **Situação:** modelo conceitual atualizado; sem migrações implementadas
 
@@ -349,6 +349,7 @@ A [arquitetura backend](architecture/backend-architecture.md) complementa este m
 | `creator_identities` / `family_creation_grants` | Identidade Apple verificada antes de existir família; grant restrito, temporário, com hash e vínculo à instalação. No máximo um membro Criador por identidade; grant não é convite/sessão de membro |
 | `session_access_tokens` | Um hash por access token/validade; vários tokens de 15 minutos podem coexistir sob a mesma sessão. Revogar sessão invalida todos, sem criar múltiplos aparelhos |
 | `invite_join_recoveries` | Tentativa e verificadores originais, sessão criada, envelope autenticado criptografado, expiração em dez minutos. Chave fora do banco; nenhuma senha de convite armazenada em claro |
+| `invite_attempt_log` | Um registro por tentativa contada pelo limite do ingresso (por convite e por origem), com hash do identificador e instante. Sem token, senha ou endereço em claro; linhas fora da janela de 15 minutos são removidas na própria contagem. Não expira convite nem sessão |
 | `background_jobs` | Tipo, chave natural, referências de recurso, estado, próxima tentativa, contador, lease/dono/versão do claim e erro sanitizado; sem payload com credenciais |
 | `routine_materialization_state` | Versão vigente, cursor/horizonte e estado de preparação. Origem/tombstones preservados; revalidar versão antes de avançar |
 | `media_assets` | Reserva anterior ao upload, URL privada gerada pelo backend, estado/finalidade, tamanho/tipo e vínculo. Nunca armazenar imagem binária no banco |
@@ -362,6 +363,7 @@ A versão 1.1 representava somente um access token na sessão. A versão 1.2 sep
 
 | Versão | Base | Data | Alteração |
 |---|---|---|---|
+| 1.8 | 1.17 | 2026-10-10 | Consolida `RECOMPENSA` com autor, descrição opcional e título normalizado único por família (SPEC-015) e `invite_attempt_log` para o limite de tentativas de ingresso (RNF21/SCRUM-32). |
 | 1.7 | 1.15 | 2026-10-10 | `RECOMPENSA` ganha autor, descrição opcional e título normalizado; restrição registra limite e unicidade do item personalizado. Para SPEC-015. |
 | 1.6 | 1.12 | 2026-10-07 | `MISSAO` ganha `observacao` opcional (até 250 caracteres). Para SPEC-014. |
 | 1.5 | 1.11 | 2026-10-07 | Reabertura de missão concluída remove recompensa, participações e badges derivados na mesma transação. |

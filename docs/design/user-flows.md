@@ -1,9 +1,9 @@
-# User flows — versão 1.10
+# User flows — versão 1.14
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão dos fluxos:** 1.10\
-**Base funcional:** 1.15\
-**Screen map:** 1.10 — revisão de 2026-10-10\
+**Versão dos fluxos:** 1.14\
+**Base funcional:** 1.17\
+**Screen map:** 1.13 — revisão de 2026-10-10\
 **Data:** 2026-10-10\
 **Situação:** primeira versão para revisão de design
 
@@ -27,6 +27,7 @@ O detalhamento traduz a base 1.5 em caminhos para design; as decisões de 2026-1
 |---|---|
 | Operação em andamento | Exibir processamento sem bloquear toda a interface e sem indicar sucesso antes da confirmação. |
 | Falha de consulta | Informar que os dados não puderam ser carregados e oferecer nova tentativa na mesma tela; não confundir falha com lista vazia. |
+| Paginação de lista | Ao se aproximar do fim dos itens confirmados, carregar a próxima página de até 20 itens. Falha mantém os itens carregados e oferece nova tentativa; `nextCursor` ausente encerra a rolagem. |
 | Falha de gravação | Consultar estado após resposta perdida, sem repetição automática ou chave geral de operação; informar quando não for possível determinar se uma criação foi salva; permanecer na tela de origem da operação e permitir nova tentativa. Não atualizar progresso como se houvesse sucesso. |
 | Cancelar formulário ou modal | Retornar à origem sem gravar a alteração cancelada. Fechar um seletor interno retorna ao formulário que o abriu. |
 | Voltar após consulta | Retornar à tela que abriu o detalhe, mantendo o contexto de data quando aplicável. |
@@ -597,6 +598,7 @@ Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imedi
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.14 | 1.17 | 1.13 | 2026-10-10 | Consolida UF-09/10/11/14/15 com listas paginadas de até 20 itens, rolagem infinita e nova tentativa sem perder itens confirmados. Para SPEC-003, SPEC-015, SPEC-016, SPEC-018, SPEC-019 e SPEC-020. |
 | 1.13 | 1.17 | 1.12 | 2026-10-10 | UF-15 detalha variante Kids, consulta interna e compartilhamento cancelável. Para SPEC-020. |
 | 1.12 | 1.17 | 1.11 | 2026-10-10 | UF-14 define semana por data de referência e crédito histórico como “Membro removido”. Para SPEC-019. |
 | 1.11 | 1.16 | 1.11 | 2026-10-10 | UF-09 integra carga Dia/Semana e preserva crédito histórico de removido sem ranking. Para SPEC-018. |

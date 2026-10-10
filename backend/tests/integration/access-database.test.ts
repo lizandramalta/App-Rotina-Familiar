@@ -16,6 +16,13 @@ import { createContainer, type ApplicationContainer } from '../../src/bootstrap/
 import { PostgresAccessRepository } from '../../src/modules/access/infrastructure/postgres-access-repository.js';
 import { CryptoTokenService } from '../../src/modules/access/infrastructure/crypto-token-service.js';
 import { SignInWithAppleUseCase } from '../../src/modules/access/application/sign-in-with-apple-use-case.js';
+import { GetCurrentSessionUseCase } from '../../src/modules/access/application/get-current-session-use-case.js';
+import { RefreshSessionUseCase } from '../../src/modules/access/application/refresh-session-use-case.js';
+import { RevokeSessionUseCase } from '../../src/modules/access/application/revoke-session-use-case.js';
+import {
+  SessionExpiredError,
+  SessionRevokedError,
+} from '../../src/modules/access/domain/access-errors.js';
 import type { AppleTokenVerifierPort } from '../../src/integrations/apple/apple-token-verifier-port.js';
 import { MemberRole } from '../../src/shared/domain/member-role.js';
 
@@ -103,6 +110,34 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
       });
     }
 
+    function buildSessionUseCases(): {
+      getCurrentSession: GetCurrentSessionUseCase;
+      refreshSession: RefreshSessionUseCase;
+      revokeSession: RevokeSessionUseCase;
+    } {
+      const deps = {
+        repository,
+        crypto,
+        transactionRunner: container.transactionRunner,
+        clock: container.clock,
+      };
+
+      return {
+        getCurrentSession: new GetCurrentSessionUseCase(deps),
+        refreshSession: new RefreshSessionUseCase(deps),
+        revokeSession: new RevokeSessionUseCase({ ...deps, logger: container.logger }),
+      };
+    }
+
+    /** Sessão real aberta pelo caminho de login, como a Fase 1 a produz. */
+    async function openSession(subject: string) {
+      const result = await buildUseCase(subject).execute(command);
+      if (result.outcome !== 'session') {
+        throw new Error('expected a session result');
+      }
+      return result;
+    }
+
     const command = {
       identityToken: 'integration-identity-token',
       authorizationCode: 'integration-authorization-code',
@@ -125,6 +160,7 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
               'family_creation_grants',
               'sessions',
               'session_access_tokens',
+              'push_devices',
             ],
           ],
         );
@@ -134,6 +170,7 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
           'families',
           'family_creation_grants',
           'members',
+          'push_devices',
           'session_access_tokens',
           'sessions',
         ]);
@@ -373,6 +410,328 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
         expect(observed).toBe(true);
       });
     });
+
+    describe('CA-07: consulta da sessão ativa', () => {
+      it('projects the member, family, role and creator flag stored now', async () => {
+        const seed = await seedLinkedCreator();
+        const session = await openSession(seed.subject);
+
+        const current = await buildSessionUseCases().getCurrentSession.execute({
+          accessToken: session.accessToken,
+        });
+
+        expect(current).toEqual({
+          memberId: seed.memberId,
+          familyId: seed.familyId,
+          role: MemberRole.ADMINISTRATOR,
+          isFamilyCreator: true,
+        });
+      });
+
+      it('returns no token, hash or secret in the projection', async () => {
+        const seed = await seedLinkedCreator();
+        const session = await openSession(seed.subject);
+
+        const current = await buildSessionUseCases().getCurrentSession.execute({
+          accessToken: session.accessToken,
+        });
+
+        expect(Object.keys(current).sort()).toEqual([
+          'familyId',
+          'isFamilyCreator',
+          'memberId',
+          'role',
+        ]);
+        const serialized = JSON.stringify(current);
+        expect(serialized).not.toContain(session.accessToken);
+        expect(serialized).not.toContain(session.refreshToken);
+        expect(serialized).not.toContain(crypto.hashToken(session.accessToken));
+      });
+
+      it('rejects an access token that was never issued with SESSION_EXPIRED', async () => {
+        await expect(
+          buildSessionUseCases().getCurrentSession.execute({ accessToken: randomUUID() }),
+        ).rejects.toBeInstanceOf(SessionExpiredError);
+      });
+
+      it('rejects an access token already past its expiry with SESSION_EXPIRED', async () => {
+        const seed = await seedLinkedCreator();
+        const session = await openSession(seed.subject);
+
+        await container.dbPool.query(
+          `update app.session_access_tokens
+              set expires_at = now() - interval '1 minute'
+            where token_hash = $1`,
+          [crypto.hashToken(session.accessToken)],
+        );
+
+        await expect(
+          buildSessionUseCases().getCurrentSession.execute({ accessToken: session.accessToken }),
+        ).rejects.toBeInstanceOf(SessionExpiredError);
+      });
+    });
+
+    describe('CA-08: renovação do access token', () => {
+      it('issues a new token and keeps the previous one usable', async () => {
+        const seed = await seedLinkedCreator();
+        const session = await openSession(seed.subject);
+        const { getCurrentSession, refreshSession } = buildSessionUseCases();
+
+        const refreshed = await refreshSession.execute({
+          refreshToken: session.refreshToken,
+          installationProof: command.installationProof,
+        });
+
+        expect(refreshed.accessToken).not.toBe(session.accessToken);
+        expect(new Date(refreshed.accessTokenExpiresAt).getTime()).toBeGreaterThan(Date.now());
+
+        // Os dois tokens valem ao mesmo tempo dentro da janela de 15 minutos.
+        await expect(
+          getCurrentSession.execute({ accessToken: refreshed.accessToken }),
+        ).resolves.toMatchObject({ memberId: seed.memberId });
+        await expect(
+          getCurrentSession.execute({ accessToken: session.accessToken }),
+        ).resolves.toMatchObject({ memberId: seed.memberId });
+      });
+
+      it('persists only the hash of the new token, on the same session', async () => {
+        const seed = await seedLinkedCreator();
+        const session = await openSession(seed.subject);
+
+        const refreshed = await buildSessionUseCases().refreshSession.execute({
+          refreshToken: session.refreshToken,
+          installationProof: command.installationProof,
+        });
+
+        const tokens = await container.dbPool.query<{ token_hash: string }>(
+          `select token_hash
+             from app.session_access_tokens
+            where session_id = $1
+            order by created_at`,
+          [session.sessionId],
+        );
+
+        expect(tokens.rows).toHaveLength(2);
+        expect(tokens.rows.map((row) => row.token_hash)).toContain(
+          crypto.hashToken(refreshed.accessToken),
+        );
+        expect(tokens.rows.map((row) => row.token_hash)).not.toContain(refreshed.accessToken);
+      });
+
+      it('advances last_seen_at of the session', async () => {
+        const seed = await seedLinkedCreator();
+        const session = await openSession(seed.subject);
+
+        const before = await readLastSeenAt(session.sessionId);
+        await buildSessionUseCases().refreshSession.execute({
+          refreshToken: session.refreshToken,
+          installationProof: command.installationProof,
+        });
+        const after = await readLastSeenAt(session.sessionId);
+
+        expect(after.getTime()).toBeGreaterThanOrEqual(before.getTime());
+      });
+
+      it('rejects a divergent installation proof with SESSION_REVOKED and issues nothing', async () => {
+        const seed = await seedLinkedCreator();
+        const session = await openSession(seed.subject);
+
+        await expect(
+          buildSessionUseCases().refreshSession.execute({
+            refreshToken: session.refreshToken,
+            installationProof: 'proof-from-another-installation',
+          }),
+        ).rejects.toBeInstanceOf(SessionRevokedError);
+
+        const tokens = await container.dbPool.query(
+          'select id from app.session_access_tokens where session_id = $1',
+          [session.sessionId],
+        );
+        expect(tokens.rows).toHaveLength(1);
+      });
+
+      it('rejects an unknown refresh token with SESSION_REVOKED', async () => {
+        await expect(
+          buildSessionUseCases().refreshSession.execute({
+            refreshToken: randomUUID(),
+            installationProof: command.installationProof,
+          }),
+        ).rejects.toBeInstanceOf(SessionRevokedError);
+      });
+    });
+
+    describe('CA-09: revogação explícita', () => {
+      it('ends the session and its access tokens without removing the member', async () => {
+        const seed = await seedLinkedCreator();
+        const session = await openSession(seed.subject);
+        const { getCurrentSession, revokeSession } = buildSessionUseCases();
+
+        await revokeSession.execute({ accessToken: session.accessToken });
+
+        const stored = await container.dbPool.query<{
+          revoked_at: Date | null;
+          revoked_reason: string | null;
+        }>('select revoked_at, revoked_reason from app.sessions where id = $1', [
+          session.sessionId,
+        ]);
+        const activeTokens = await container.dbPool.query(
+          'select id from app.session_access_tokens where session_id = $1 and revoked_at is null',
+          [session.sessionId],
+        );
+        const member = await container.dbPool.query<{ id: string }>(
+          'select id from app.members where id = $1',
+          [seed.memberId],
+        );
+
+        expect(stored.rows[0]?.revoked_at).toBeInstanceOf(Date);
+        expect(stored.rows[0]?.revoked_reason).toBe('explicit_sign_out');
+        expect(activeTokens.rows).toHaveLength(0);
+        expect(member.rows).toHaveLength(1);
+
+        // O token usado na revogação para de autenticar imediatamente (CA-05).
+        await expect(
+          getCurrentSession.execute({ accessToken: session.accessToken }),
+        ).rejects.toBeInstanceOf(SessionRevokedError);
+      });
+
+      it('revokes the push device registered for the session (CA-09)', async () => {
+        const seed = await seedLinkedCreator();
+        const session = await openSession(seed.subject);
+        const pushDeviceId = await insertActivePushDevice(session.sessionId);
+
+        expect(await readPushDeviceRevokedAt(pushDeviceId)).toBeNull();
+
+        await buildSessionUseCases().revokeSession.execute({ accessToken: session.accessToken });
+
+        expect(await readPushDeviceRevokedAt(pushDeviceId)).toBeInstanceOf(Date);
+      });
+
+      it('leaves the push device of another session untouched', async () => {
+        const seed = await seedLinkedCreator();
+        const other = await seedLinkedCreator();
+        const session = await openSession(seed.subject);
+        const otherSession = await openSession(other.subject);
+
+        const pushDeviceId = await insertActivePushDevice(session.sessionId);
+        const otherPushDeviceId = await insertActivePushDevice(otherSession.sessionId);
+
+        await buildSessionUseCases().revokeSession.execute({ accessToken: session.accessToken });
+
+        expect(await readPushDeviceRevokedAt(pushDeviceId)).toBeInstanceOf(Date);
+        expect(await readPushDeviceRevokedAt(otherPushDeviceId)).toBeNull();
+      });
+
+      it('revokes nothing of the push registration when the token is not accepted', async () => {
+        const seed = await seedLinkedCreator();
+        const session = await openSession(seed.subject);
+        const pushDeviceId = await insertActivePushDevice(session.sessionId);
+
+        await expect(
+          buildSessionUseCases().revokeSession.execute({ accessToken: randomUUID() }),
+        ).rejects.toBeInstanceOf(SessionExpiredError);
+
+        expect(await readPushDeviceRevokedAt(pushDeviceId)).toBeNull();
+      });
+
+      it('refuses a second revocation with SESSION_REVOKED', async () => {
+        const seed = await seedLinkedCreator();
+        const session = await openSession(seed.subject);
+        const { revokeSession } = buildSessionUseCases();
+
+        await revokeSession.execute({ accessToken: session.accessToken });
+
+        await expect(
+          revokeSession.execute({ accessToken: session.accessToken }),
+        ).rejects.toBeInstanceOf(SessionRevokedError);
+      });
+
+      it('frees the member to open a new session right after signing out', async () => {
+        const seed = await seedLinkedCreator();
+        const first = await openSession(seed.subject);
+
+        await buildSessionUseCases().revokeSession.execute({ accessToken: first.accessToken });
+        const second = await openSession(seed.subject);
+
+        expect(second.sessionId).not.toBe(first.sessionId);
+        await expect(
+          buildSessionUseCases().getCurrentSession.execute({ accessToken: second.accessToken }),
+        ).resolves.toMatchObject({ memberId: seed.memberId });
+      });
+
+      it('rejects a revocation with an unknown access token with SESSION_EXPIRED', async () => {
+        await expect(
+          buildSessionUseCases().revokeSession.execute({ accessToken: randomUUID() }),
+        ).rejects.toBeInstanceOf(SessionExpiredError);
+      });
+    });
+
+    describe('CA-05: sessão substituída por novo login Apple', () => {
+      it('answers SESSION_REVOKED to the access token of the replaced session', async () => {
+        const seed = await seedLinkedCreator();
+        const first = await openSession(seed.subject);
+
+        await openSession(seed.subject);
+
+        await expect(
+          buildSessionUseCases().getCurrentSession.execute({ accessToken: first.accessToken }),
+        ).rejects.toBeInstanceOf(SessionRevokedError);
+      });
+
+      it('refuses to refresh with the refresh token of the replaced session', async () => {
+        const seed = await seedLinkedCreator();
+        const first = await openSession(seed.subject);
+
+        await openSession(seed.subject);
+
+        await expect(
+          buildSessionUseCases().refreshSession.execute({
+            refreshToken: first.refreshToken,
+            installationProof: command.installationProof,
+          }),
+        ).rejects.toBeInstanceOf(SessionRevokedError);
+      });
+    });
+
+    /** Registro de push ativo na sessão, como a instalação real o criaria. */
+    async function insertActivePushDevice(sessionId: string): Promise<string> {
+      const pushDeviceId = randomUUID();
+
+      await container.dbPool.query(
+        `insert into app.push_devices (id, session_id, device_token, environment)
+         values ($1, $2, $3, 'development')`,
+        [pushDeviceId, sessionId, `device-token-${pushDeviceId}`],
+      );
+
+      return pushDeviceId;
+    }
+
+    async function readPushDeviceRevokedAt(pushDeviceId: string): Promise<Date | null> {
+      const result = await container.dbPool.query<{ revoked_at: Date | null }>(
+        'select revoked_at from app.push_devices where id = $1',
+        [pushDeviceId],
+      );
+
+      const row = result.rows[0];
+      if (row === undefined) {
+        throw new Error('expected the push device to exist');
+      }
+
+      return row.revoked_at;
+    }
+
+    async function readLastSeenAt(sessionId: string): Promise<Date> {
+      const result = await container.dbPool.query<{ last_seen_at: Date }>(
+        'select last_seen_at from app.sessions where id = $1',
+        [sessionId],
+      );
+
+      const lastSeenAt = result.rows[0]?.last_seen_at;
+      if (lastSeenAt === undefined) {
+        throw new Error('expected the session to exist');
+      }
+
+      return lastSeenAt;
+    }
 
     async function countSessions(memberId: string): Promise<number> {
       const result = await container.dbPool.query<{ total: string }>(
