@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  CompleteTaskUseCase,
   CreateTaskUseCase,
   DeleteTaskUseCase,
   EditTaskUseCase,
@@ -11,6 +12,7 @@ import type {
 import {
   MissionWouldHaveNoTasksError,
   SignalResolutionRequiredError,
+  TaskAlreadyCompletedError,
   TaskManagementNotAllowedError,
 } from '../../src/modules/tasks/domain/task-errors.js';
 import type {
@@ -42,10 +44,13 @@ describe('Task management use cases — SPEC-007', () => {
     repository = {
       insertSingleTask: vi.fn().mockResolvedValue(TASK),
       findTask: vi.fn().mockResolvedValue(TASK),
+      findMemberRole: vi.fn().mockResolvedValue(MemberRole.ADMINISTRATOR),
       countFamilyMembers: vi.fn().mockResolvedValue(1),
       hasCompletedMission: vi.fn().mockResolvedValue(false),
       isOnlyTaskOfAnActiveMission: vi.fn().mockResolvedValue(false),
       hasCurrentSignal: vi.fn().mockResolvedValue(false),
+      hasKidsAssignee: vi.fn().mockResolvedValue(false),
+      completeTask: vi.fn().mockResolvedValue({ ...TASK, status: 'completed' }),
       updateTask: vi.fn().mockResolvedValue(TASK),
       deleteTask: vi.fn(),
     };
@@ -171,5 +176,72 @@ describe('Task management use cases — SPEC-007', () => {
       MissionWouldHaveNoTasksError,
     );
     expect(repository.deleteTask).not.toHaveBeenCalled();
+  });
+
+  it('SCRUM-40 CA-01 maintains final assignees and credits under the family lock', async () => {
+    const result = await new CompleteTaskUseCase(dependencies()).execute(TEST_ACTOR, TASK.id);
+
+    expect(transactionRunner.forFamily).toHaveBeenCalledWith(
+      TEST_ACTOR.familyId,
+      expect.any(Function),
+    );
+    expect(repository.findMemberRole).toHaveBeenCalledWith(
+      expect.anything(),
+      TEST_ACTOR.familyId,
+      TEST_ACTOR.memberId,
+    );
+    expect(repository.completeTask).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ task: TASK, actorId: TEST_ACTOR.memberId, now: NOW }),
+    );
+    expect(result).toEqual({
+      task: expect.objectContaining({ id: TASK.id, status: 'completed' }),
+      affectedResources: [
+        { type: 'task', id: TASK.id },
+        { type: 'ownTasks', referenceDate: TASK.scheduledDate },
+        { type: 'ownProgress', referenceDate: TASK.scheduledDate },
+      ],
+    });
+  });
+
+  it('SCRUM-40 CA-02 delegates automatic assignment to the transactional repository', async () => {
+    const unassigned = { ...TASK, assigneeIds: [] };
+    repository.findTask.mockResolvedValue(unassigned);
+    await new CompleteTaskUseCase(dependencies()).execute(TEST_ACTOR, TASK.id);
+
+    expect(repository.completeTask).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ task: unassigned, actorId: TEST_ACTOR.memberId }),
+    );
+  });
+
+  it('SCRUM-40 CA-04 rejects a member completing a task with a Kids assignee', async () => {
+    repository.findMemberRole.mockResolvedValue(MemberRole.MEMBER);
+    repository.hasKidsAssignee.mockResolvedValue(true);
+
+    await expect(
+      new CompleteTaskUseCase(dependencies()).execute(TEST_ACTOR, TASK.id),
+    ).rejects.toBeInstanceOf(TaskManagementNotAllowedError);
+    expect(repository.completeTask).not.toHaveBeenCalled();
+  });
+
+  it('SCRUM-40 CA-06 rejects a second completion before another credit write', async () => {
+    repository.findTask.mockResolvedValue({ ...TASK, status: 'completed' });
+
+    await expect(
+      new CompleteTaskUseCase(dependencies()).execute(TEST_ACTOR, TASK.id),
+    ).rejects.toBeInstanceOf(TaskAlreadyCompletedError);
+    expect(repository.completeTask).not.toHaveBeenCalled();
+  });
+
+  it('SCRUM-40 CA-07 does not reveal a task outside the actor family', async () => {
+    repository.findTask.mockResolvedValue(undefined);
+
+    await expect(
+      new CompleteTaskUseCase(dependencies()).execute(TEST_ACTOR, TASK.id),
+    ).rejects.toMatchObject({
+      code: 'RESOURCE_NOT_FOUND',
+    });
+    expect(repository.completeTask).not.toHaveBeenCalled();
   });
 });

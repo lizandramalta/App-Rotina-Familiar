@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   MissionCompletedProtectedError,
   SignalResolutionRequiredError,
+  TaskAlreadyCompletedError,
   TaskManagementNotAllowedError,
 } from '../../src/modules/tasks/domain/task-errors.js';
 import { buildTestApp, TEST_ACTOR, type TestApp } from '../support/build-test-app.js';
@@ -22,6 +23,14 @@ const TASK = {
 
 const OWN_TASKS = { items: [TASK], nextCursor: null };
 const OWN_PROGRESS = { total: 1, completed: 0, percentage: 0 };
+const COMPLETION_RESULT = {
+  task: { ...TASK, status: 'completed' },
+  affectedResources: [
+    { type: 'task', id: TASK_ID },
+    { type: 'ownTasks', referenceDate: TASK.scheduledDate },
+    { type: 'ownProgress', referenceDate: TASK.scheduledDate },
+  ],
+};
 
 describe('Task routes — SPEC-007 phases 1 and 2', () => {
   let test: TestApp;
@@ -29,6 +38,7 @@ describe('Task routes — SPEC-007 phases 1 and 2', () => {
   beforeEach(() => {
     test = buildTestApp();
     test.createTask.execute.mockResolvedValue(TASK);
+    test.completeTask.execute.mockResolvedValue(COMPLETION_RESULT);
     test.getTask.execute.mockResolvedValue(TASK);
     test.getOwnTasks.execute.mockResolvedValue(OWN_TASKS);
     test.getOwnProgress.execute.mockResolvedValue(OWN_PROGRESS);
@@ -128,6 +138,69 @@ describe('Task routes — SPEC-007 phases 1 and 2', () => {
 
     expect(response.statusCode).toBe(200);
     expect(test.getTask.execute).toHaveBeenCalledWith(TEST_ACTOR, TASK_ID);
+  });
+
+  it('SCRUM-40 completes a task without accepting actor or credit data from the client', async () => {
+    const response = await test.app.inject({
+      method: 'POST',
+      url: `/v1/tasks/${TASK_ID}/completion`,
+      headers: AUTH,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['cache-control']).toBe('no-store');
+    expect(response.json()).toEqual(COMPLETION_RESULT);
+    expect(test.completeTask.execute).toHaveBeenCalledWith(TEST_ACTOR, TASK_ID);
+  });
+
+  it('SCRUM-40 rejects a completion body instead of trusting client actor or credit data', async () => {
+    const response = await test.app.inject({
+      method: 'POST',
+      url: `/v1/tasks/${TASK_ID}/completion`,
+      headers: AUTH,
+      payload: { actorId: 'attacker', completedAt: '2026-10-10T00:00:00.000Z' },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({
+      code: 'UNKNOWN_FIELD',
+      fieldErrors: { actorId: ['UNKNOWN_FIELD'], completedAt: ['UNKNOWN_FIELD'] },
+    });
+    expect(test.completeTask.execute).not.toHaveBeenCalled();
+  });
+
+  it('SCRUM-40 maps permission and concurrent completion errors to the public contract', async () => {
+    test.completeTask.execute.mockRejectedValueOnce(new TaskManagementNotAllowedError());
+    const denied = await test.app.inject({
+      method: 'POST',
+      url: `/v1/tasks/${TASK_ID}/completion`,
+      headers: AUTH,
+    });
+    expect(denied.statusCode).toBe(403);
+    expect(denied.json().code).toBe('ACTION_NOT_ALLOWED');
+
+    test.completeTask.execute.mockRejectedValueOnce(
+      new TaskAlreadyCompletedError('Task is already completed.'),
+    );
+    const conflict = await test.app.inject({
+      method: 'POST',
+      url: `/v1/tasks/${TASK_ID}/completion`,
+      headers: AUTH,
+    });
+    expect(conflict.statusCode).toBe(409);
+    expect(conflict.json().code).toBe('TASK_ALREADY_COMPLETED');
+  });
+
+  it('documents the SCRUM-40 completion contract in OpenAPI', async () => {
+    const response = await test.app.inject({ method: 'GET', url: '/docs/json' });
+    const document = response.json() as {
+      paths: Record<string, { post: { security: unknown[]; responses: Record<string, unknown> } }>;
+    };
+
+    const route = document.paths['/v1/tasks/{taskId}/completion']?.post;
+    expect(route?.security).toEqual([{ bearerAuth: [] }]);
+    expect(route?.responses).toHaveProperty('200');
+    expect(route?.responses).toHaveProperty('409');
   });
 
   it.each(['familyId', 'status', 'createdAt', 'routineId'])(

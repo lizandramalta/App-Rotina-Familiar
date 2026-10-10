@@ -27,6 +27,7 @@ export interface TestApp {
   readonly joinFamilyByInvite: UseCaseMock;
   readonly recoverInviteJoin: UseCaseMock;
   readonly createTask: UseCaseMock;
+  readonly completeTask: UseCaseMock;
   readonly getTask: UseCaseMock;
   readonly getOwnTasks: UseCaseMock;
   readonly getOwnProgress: UseCaseMock;
@@ -68,6 +69,7 @@ export function buildTestApp(): TestApp {
   const joinFamilyByInvite: UseCaseMock = { execute: vi.fn() };
   const recoverInviteJoin: UseCaseMock = { execute: vi.fn() };
   const createTask: UseCaseMock = { execute: vi.fn() };
+  const completeTask: UseCaseMock = { execute: vi.fn() };
   const getTask: UseCaseMock = { execute: vi.fn() };
   const getOwnTasks: UseCaseMock = { execute: vi.fn() };
   const getOwnProgress: UseCaseMock = { execute: vi.fn() };
@@ -96,6 +98,7 @@ export function buildTestApp(): TestApp {
     uploadMediaUseCase: uploadMedia,
     updateOwnProfileUseCase: updateOwnProfile,
     createTaskUseCase: createTask,
+    completeTaskUseCase: completeTask,
     getTaskUseCase: getTask,
     getOwnTasksUseCase: getOwnTasks,
     getOwnProgressUseCase: getOwnProgress,
@@ -121,6 +124,7 @@ export function buildTestApp(): TestApp {
     joinFamilyByInvite,
     recoverInviteJoin,
     createTask,
+    completeTask,
     getTask,
     getOwnTasks,
     getOwnProgress,

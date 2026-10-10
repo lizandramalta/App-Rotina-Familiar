@@ -54,6 +54,7 @@ import { PostgresProfileRepository } from '../modules/profile/infrastructure/pos
 import type { AppleTokenVerifierPort } from '../integrations/apple/apple-token-verifier-port.js';
 import {
   CreateTaskUseCase,
+  CompleteTaskUseCase,
   DeleteTaskUseCase,
   EditTaskUseCase,
   GetTaskUseCase,
@@ -92,6 +93,7 @@ export interface ApplicationContainer {
   readonly uploadMediaUseCase: UploadMediaUseCase;
   readonly updateOwnProfileUseCase: UpdateOwnProfileUseCase;
   readonly createTaskUseCase: CreateTaskUseCase;
+  readonly completeTaskUseCase: CompleteTaskUseCase;
   readonly getTaskUseCase: GetTaskUseCase;
   readonly getOwnTasksUseCase: GetOwnTasksUseCase;
   readonly getOwnProgressUseCase: GetOwnProgressUseCase;
@@ -298,6 +300,7 @@ export function createContainer(config: Configuration): ApplicationContainer {
   const taskRepository = new PostgresTaskRepository();
   const taskDependencies = { repository: taskRepository, transactionRunner, clock };
   const createTaskUseCase = new CreateTaskUseCase(taskDependencies);
+  const completeTaskUseCase = new CompleteTaskUseCase(taskDependencies);
   const getTaskUseCase = new GetTaskUseCase({ repository: taskRepository, transactionRunner });
   const taskQueryDependencies = { repository: taskRepository, transactionRunner, clock };
   const getOwnTasksUseCase = new GetOwnTasksUseCase(taskQueryDependencies);
@@ -333,6 +336,7 @@ export function createContainer(config: Configuration): ApplicationContainer {
     uploadMediaUseCase,
     updateOwnProfileUseCase,
     createTaskUseCase,
+    completeTaskUseCase,
     getTaskUseCase,
     getOwnTasksUseCase,
     getOwnProgressUseCase,

@@ -1,6 +1,6 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.13 · **Base funcional:** 1.14 · **Arquitetura backend:** 1.3\
+**Versão:** 1.14 · **Base funcional:** 1.14 · **Arquitetura backend:** 1.3\
 **Data:** 2026-10-09\
 **Situação:** contrato arquitetural materializado pela documentação OpenAPI da API
 
@@ -116,7 +116,7 @@ O servidor não aceita perfil responsável, autor da conclusão ou escolha de at
 
 `CreateRoutine` e `UpdateFutureRoutine` usam `422 VALIDATION_FAILED` com `fieldErrors` estáveis: `FREQUENCY_DAYS_INVALID` para `frequencyDays` fora de 1/7/14/21/28, `START_DATE_INVALID` para `startDate` fora de `YYYY-MM-DD` e `ROUTINE_SOURCE_TASK_INVALID` quando `fromTaskId` não identifica uma ocorrência da rotina solicitada dentro da família do ator. Um `fromTaskId` de outra família é indisponível e responde `404`. Não existe `endDate` nesses comandos. `EditTask` rejeita com `422 VALIDATION_FAILED`/`SIGNAL_RESOLUTION_REQUIRED` qualquer gravação sobre tarefa `awaitingConfirmation` sem `signalResolution`, independentemente de quais campos mudaram. `resetToPending` transiciona a tarefa para `pending` e descarta a sinalização corrente; `keepAwaitingConfirmation` preserva o estado e a sinalização corrente com os dados editados. `DeleteTask` sobre tarefa `awaitingConfirmation` remove a sinalização corrente junto da tarefa, sem gerar `CONFIRMED`/`REJECTED`.
 
-`TaskMutationResult` contém `task` e `affectedResources` com IDs/tipos e períodos a invalidar. `familyOverview`, progresso pessoal, fila Kids, missão, badges e relatório corrente são recarregados quando afetados. Recursos sem permissão não têm dados privados devolvidos; pode-se invalidar uma área por tipo sem expor seus registros. Exclusões retornam ID removido, vínculos alterados e resumo dos registros preservados.
+`TaskMutationResult` contém `task` e `affectedResources` com IDs/tipos e períodos a invalidar. Na conclusão implementada, `affectedResources` devolve, nesta ordem, `{type: "task", id}`, `{type: "ownTasks", referenceDate}` e `{type: "ownProgress", referenceDate}`; `referenceDate` é a data civil agendada da tarefa. `familyOverview`, fila Kids, missão, badges e relatório corrente entram quando essas projeções forem materializadas. Recursos sem permissão não têm dados privados devolvidos; pode-se invalidar uma área por tipo sem expor seus registros. Exclusões retornam ID removido, vínculos alterados e resumo dos registros preservados.
 
 Consultas paginadas usam ordenação estável com ID como desempate e cursor opaco vinculado ao filtro. Página não determina totais. Em listas que mudam entre páginas, app recarrega ao receber invalidação; snapshot de relatório não depende dessas páginas. Limite de página é operacional, não limite de tarefas cadastráveis.
 
@@ -209,6 +209,7 @@ O documento OpenAPI 3.1 é gerado pelos schemas HTTP em `/docs/json`, e a interf
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.14 | 2026-10-09 | `CompleteTask` materializado em `POST /tasks/{taskId}/completion`: resultado canônico com `TaskMutationResult` e invalidações de tarefa/consultas próprias, sem corpo cliente para ator, crédito ou instante. Para SPEC-010 Fase 1 / SCRUM-40. |
 | 1.13 | 2026-10-09 | Códigos públicos e garantias do ingresso por convite (inspeção, ingresso e recuperação), `Retry-After` em `429` e referência a BA-29–BA-34. Sem mudança de comportamento. Para SPEC-005 / SCRUM-32. |
 | 1.12 | 2026-10-08 | `ListFamilyMembers` passa a definir cursor opaco, ordenação estável, páginas de até 20 perfis e `{items, nextCursor}`; cursor malformado recebe `422 VALIDATION_FAILED` com `CURSOR_INVALID`. Para SPEC-003 / SCRUM-27. |
 | 1.11 | 2026-10-08 | Contrato passa a registrar a documentação OpenAPI 3.1 executável em `/docs/json` e a interface Swagger em `/docs`; sem alteração de comportamento dos endpoints. |

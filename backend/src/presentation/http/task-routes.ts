@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import type { ApplicationContainer } from '../../bootstrap/container.js';
 import { createAuthenticationHook, requireActor } from './authentication.js';
+import { DomainError } from '../../shared/domain/domain-error.js';
 
 interface TaskParams {
   readonly taskId: string;
@@ -94,12 +95,65 @@ const ownProgressResponseSchema = {
   },
 } as const;
 
+const affectedResourceSchema = {
+  anyOf: [
+    {
+      type: 'object',
+      required: ['type', 'id'],
+      additionalProperties: false,
+      properties: { type: { const: 'task' }, id: { type: 'string' } },
+    },
+    {
+      type: 'object',
+      required: ['type', 'referenceDate'],
+      additionalProperties: false,
+      properties: {
+        type: { enum: ['ownTasks', 'ownProgress'] },
+        referenceDate: { type: 'string' },
+      },
+    },
+  ],
+} as const;
+
+const taskMutationResultSchema = {
+  type: 'object',
+  required: ['task', 'affectedResources'],
+  additionalProperties: false,
+  properties: {
+    task: taskResponseSchema,
+    affectedResources: { type: 'array', items: affectedResourceSchema },
+  },
+} as const;
+
 const referenceDateQuerySchema = {
   type: 'object',
   required: ['referenceDate'],
   additionalProperties: false,
   properties: { referenceDate: { type: 'string' } },
 } as const;
+
+function requireEmptyCompletionBody(body: unknown): void {
+  if (body === undefined) {
+    return;
+  }
+  if (typeof body === 'object' && body !== null && !Array.isArray(body)) {
+    const fields = Object.keys(body);
+    if (fields.length === 0) {
+      return;
+    }
+    throw new DomainError({
+      message: 'The completion command does not accept a request body.',
+      code: 'UNKNOWN_FIELD',
+      statusCode: 400,
+      fieldErrors: Object.fromEntries(fields.map((field) => [field, ['UNKNOWN_FIELD']])),
+    });
+  }
+  throw new DomainError({
+    message: 'The completion command does not accept a request body.',
+    code: 'VALIDATION_FAILED',
+    statusCode: 400,
+  });
+}
 
 /** Rotas de tarefas — SPEC-007 e consulta pessoal diária da SPEC-009 Fase 1. */
 export function registerTaskRoutes(app: FastifyInstance, container: ApplicationContainer): void {
@@ -213,6 +267,44 @@ export function registerTaskRoutes(app: FastifyInstance, container: ApplicationC
           .send(
             await container.getTaskUseCase.execute(requireActor(request), request.params.taskId),
           ),
+    );
+
+    scope.post<{ Params: TaskParams; Body: unknown }>(
+      '/tasks/:taskId/completion',
+      {
+        schema: {
+          tags: ['Tasks'],
+          summary: 'Complete an eligible task with final assignee credits',
+          security: [{ bearerAuth: [] }],
+          params: {
+            type: 'object',
+            required: ['taskId'],
+            additionalProperties: false,
+            properties: { taskId: { type: 'string' } },
+          },
+          response: {
+            200: taskMutationResultSchema,
+            400: problemResponseSchema,
+            401: problemResponseSchema,
+            403: problemResponseSchema,
+            404: problemResponseSchema,
+            409: problemResponseSchema,
+            503: problemResponseSchema,
+          },
+        },
+      },
+      async (request, reply) => {
+        requireEmptyCompletionBody(request.body);
+        return reply
+          .status(200)
+          .header('Cache-Control', 'no-store')
+          .send(
+            await container.completeTaskUseCase.execute(
+              requireActor(request),
+              request.params.taskId,
+            ),
+          );
+      },
     );
 
     scope.patch<{ Params: TaskParams; Body: TaskBody }>(
