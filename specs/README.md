@@ -112,7 +112,7 @@ posterior por Administradores em TEL-053/MOD-012; não há uma SPEC-021 separada
 |---|---|---|---|---|
 | [`SPEC-018-visualizar-carga`](SPEC-018-visualizar-carga.md) - Visualizar carga diária ou semanal | UC13 | ambos | SPEC-010, SPEC-013 | aprovada |
 | [`SPEC-019-gerar-relatorio-semanal-pdf`](SPEC-019-gerar-relatorio-semanal-pdf.md) - Gerar relatório semanal em PDF | UC18 | ambos | SPEC-018 | aprovada |
-| `SPEC-020-destaque-semanal` - Apurar e compartilhar destaque semanal | UC19 | ambos | SPEC-018 | não criada |
+| [`SPEC-020-destaque-semanal`](SPEC-020-destaque-semanal.md) - Apurar e compartilhar destaque semanal | UC19 | ambos | SPEC-018 | aprovada |
 
 ## Índice de arquivos
 
@@ -140,6 +140,7 @@ status e resumo; mantenha esta tabela como o panorama do backlog.
 | [SPEC-017-resgatar-recompensa](SPEC-017-resgatar-recompensa.md) | [UX-017-resgatar-recompensa.md](UX-017-resgatar-recompensa.md) | aprovada | ambos | Roleta local e aceite único de recompensa por Administrador, com validação transacional, concorrência e recuperação segura de resultado incerto. |
 | [SPEC-018-visualizar-carga](SPEC-018-visualizar-carga.md) | [UX-018-visualizar-carga.md](UX-018-visualizar-carga.md) | aprovada | ambos | Carga familiar Dia/Semana integrada à Família, com distribuição sem ranking, períodos efetivos e crédito histórico de membro removido. |
 | [SPEC-019-gerar-relatorio-semanal-pdf](SPEC-019-gerar-relatorio-semanal-pdf.md) | [UX-019-gerar-relatorio-semanal-pdf.md](UX-019-gerar-relatorio-semanal-pdf.md) | aprovada | ambos | Snapshot semanal autorizado e PDF local com gráficos, tabela, dados parciais e crédito histórico preservado. |
+| [SPEC-020-destaque-semanal](SPEC-020-destaque-semanal.md) | [UX-020-destaque-semanal.md](UX-020-destaque-semanal.md) | aprovada | ambos | Apuração semanal única, reconhecimento de empates, consulta própria, notificação opcional e compartilhamento local. |
 
 ## Templates
 

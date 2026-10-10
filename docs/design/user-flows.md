@@ -597,6 +597,7 @@ Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imedi
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.13 | 1.17 | 1.12 | 2026-10-10 | UF-15 detalha variante Kids, consulta interna e compartilhamento cancelável. Para SPEC-020. |
 | 1.12 | 1.17 | 1.11 | 2026-10-10 | UF-14 define semana por data de referência e crédito histórico como “Membro removido”. Para SPEC-019. |
 | 1.11 | 1.16 | 1.11 | 2026-10-10 | UF-09 integra carga Dia/Semana e preserva crédito histórico de removido sem ranking. Para SPEC-018. |
 | 1.10 | 1.15 | 1.10 | 2026-10-10 | UF-10 alinha Kids a RF36: recompensa aceita é consultável; participações e resgate seguem indisponíveis. Para SPEC-016. |
