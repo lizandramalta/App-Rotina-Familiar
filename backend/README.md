@@ -181,10 +181,12 @@ O comando lê a `DATABASE_URL` do `.env`, aplica os arquivos pendentes em ordem 
 nome (cada um em sua própria transação) e registra versão e hash em
 `app.schema_migrations`. Rodar de novo sem mudanças não faz nada.
 
-Arquivos seguem `NNNN_descricao_em_ingles.sql`, com número sequencial nunca
-reaproveitado. Editar uma migration já aplicada é erro: o hash deixa de bater e o
-comando aborta antes de tocar no banco, porque quem já aplicou não receberia a
-alteração.
+Arquivos seguem `NNNN_descricao_em_ingles.sql` e são identificados pelo nome completo
+no registro de migrations. Há prefixos históricos repetidos (`0005` e `0007`), que
+não devem ser renomeados após aplicação; para novos arquivos, use o próximo prefixo
+ainda não usado (atualmente `0008`). Editar uma migration já aplicada é erro: o hash
+deixa de bater e o comando aborta antes de tocar no banco, porque quem já aplicou não
+receberia a alteração.
 
 Detalhes da convenção em [`database/migrations/README.md`](database/migrations/README.md).
 

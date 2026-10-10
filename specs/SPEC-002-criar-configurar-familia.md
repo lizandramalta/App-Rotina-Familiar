@@ -275,10 +275,12 @@ Segredos, tokens, `creationGrant`, cabeçalhos de instalação e dados de autent
 
 | Fase | Objetivo | CAs | Prontidão | Status |
 |---|---|---|---|---|
-| 1 | Onboarding seguro: grant, rascunho local de perfil, transação de criação, sessão, foto opcional, validação, isolamento e TEL-055/TEL-002 | CA-01 a CA-04, CA-09, CA-10 | Testes unitários, integração e UI verdes | a fazer |
+| 1 | Onboarding seguro: grant, rascunho local de perfil, transação de criação, sessão, foto opcional, validação, isolamento e TEL-055/TEL-002 | CA-01 a CA-04, CA-09, CA-10 | Testes unitários, integração e UI verdes | em andamento — backend concluído (SCRUM-18); Mobile pendente (SCRUM-20) |
 | 2 | Orquestração de membros iniciais: TEL-056 integra criação normal e convite explícito sem alterar seus contratos | CA-11 | Testes de UI/iPhone/iPad e integração com SPEC-003/SPEC-004 verdes | a fazer |
-| 3 | Configuração de fuso: leitura, prévia, confirmação, RBAC e TEL-053/MOD-012 | CA-05 a CA-08 | Testes de integração temporal e UX-spec verificada | a fazer |
+| 3 | Configuração de fuso: leitura, prévia, confirmação, RBAC e TEL-053/MOD-012 | CA-05 a CA-08 | Testes de integração temporal e UX-spec verificada | em andamento — backend concluído (SCRUM-21); Mobile pendente (SCRUM-22) |
 | 4 | Auditoria, telemetria segura e regressão de transições | CA-03, CA-08 a CA-11 | Regressão verde e QA | a fazer |
+
+**Registro de execução (2026-10-10):** SCRUM-18 entregou a transação de criação no backend e SCRUM-21 entregou leitura, prévia e alteração de fuso no backend. As telas Mobile que compõem as Fases 1 e 3 ainda não foram concluídas; por isso as fases permanecem em andamento.
 
 - **Fase 1:** não publica a alteração posterior de fuso; a família nasce com o fuso escolhido. Não deve ser publicada isoladamente sem a fase necessária de SPEC-001 que emite grant e sessão.
 - **Fase 2:** não altera os contratos de membros ou convites; somente orquestra fluxos já especificados e pode avançar sem membro.

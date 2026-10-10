@@ -221,9 +221,11 @@ Não há esclarecimentos pendentes.
 
 | Fase | Objetivo | CAs | Prontidão | Status |
 |---|---|---|---|---|
-| 1 | Núcleo seguro de acesso: inspeção, validação, consumo, sessão, isolamento, concorrência e recuperação | CA-01 a CA-05, CA-07, CA-08 | Testes unitários e integração com PostgreSQL real verdes; segredos ausentes de logs | a fazer |
+| 1 | Núcleo seguro de acesso: inspeção, validação, consumo, sessão, isolamento, concorrência e recuperação | CA-01 a CA-05, CA-07, CA-08 | Testes unitários e integração com PostgreSQL real verdes; segredos ausentes de logs | concluída — SCRUM-32 |
 | 2 | Jornada mobile: Universal Link, TEL-003/004, MOD-013, Keychain, troca e destinos por perfil | CA-06, CA-08, CA-09 | Testes de UI e integração em iPhone/iPad; UX-spec verificada | a fazer |
 | 3 | Regressão e resiliência | CA-03 a CA-08 | Cenários de timeout, recuperação, revogação e acessibilidade verificados | a fazer |
+
+**Registro de execução (2026-10-10):** SCRUM-32 concluiu a Fase 1 no backend. Universal Link, troca de acesso e destinos Mobile permanecem na Fase 2 (SCRUM-33).
 
 - **Fase 1:** não expõe ingresso produtivo sem consumo atômico, sessão, limites e recuperação segura. Não é publicável isoladamente, pois ainda não há jornada de deep link e senha.
 - **Fase 2:** não emite convites nem altera o perfil existente; usa somente as credenciais de SPEC-004. Pode ser publicada junto da Fase 1.

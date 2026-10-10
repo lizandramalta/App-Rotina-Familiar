@@ -113,9 +113,11 @@ Erros seguem `application/problem+json`. `409 TASK_ALREADY_COMPLETED` não é ex
 
 | Fase | CAs | Prontidão | Status |
 |---|---|---|---|
-| 1 | CA-01, CA-02, CA-04 a CA-07 | API, transação, RBAC/isolation e testes verdes | a fazer |
+| 1 | CA-01, CA-02, CA-04 a CA-07 | API, transação, RBAC/isolation e testes verdes | concluída — SCRUM-40 |
 | 2 | CA-01, CA-02, CA-04 a CA-06 | TEL-012 integrado, UX e UI tests verdes | a fazer |
 | 3 | CA-08 | Falhas/telemetria verificadas | a fazer |
+
+**Registro de execução (2026-10-10):** SCRUM-40 concluiu a Fase 1 no backend. A integração Mobile e a reconciliação de interface permanecem na Fase 2 (SCRUM-41).
 
 ## 11. Checklist
 

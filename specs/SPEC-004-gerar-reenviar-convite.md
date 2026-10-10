@@ -203,9 +203,11 @@ Não há esclarecimentos pendentes para este recorte.
 
 | Fase | Objetivo | CAs | Prontidão | Status |
 |---|---|---|---|---|
-| 1 | Emissão segura: endpoint, geração protegida, transação de revogação, RBAC, isolamento e tratamento de falhas | CA-01 a CA-07 | Testes unitários e de integração verdes, incluindo concorrência e ausência de segredos em logs | a fazer |
+| 1 | Emissão segura: endpoint, geração protegida, transação de revogação, RBAC, isolamento e tratamento de falhas | CA-01 a CA-07 | Testes unitários e de integração verdes, incluindo concorrência e ausência de segredos em logs | concluída — SCRUM-30 |
 | 2 | Jornada mobile: entrada autorizada, confirmação, folha nativa de compartilhamento e estados de erro | CA-07, CA-08 | Testes de UI e integração verdes; UX-spec verificada em iPhone e iPad | a fazer |
 | 3 | Regressão e auditoria | CA-02, CA-05 a CA-08 | Regressão de sessão revogada, resposta incerta, acessibilidade e telemetria segura concluída | a fazer |
+
+**Registro de execução (2026-10-10):** SCRUM-30 concluiu a Fase 1 no backend. A jornada Mobile de emissão e compartilhamento continua planejada na Fase 2 (SCRUM-31).
 
 - **Fase 1:** não expõe o botão de emissão no app antes de a transação segura existir. Pode ser publicada somente junto à experiência mínima da Fase 2, pois credenciais não têm canal de entrega alternativo.
 - **Fase 2:** não implementa ingresso, troca de acesso ou recuperação de resposta perdida do ingresso; esses comportamentos pertencem à `SPEC-005`.

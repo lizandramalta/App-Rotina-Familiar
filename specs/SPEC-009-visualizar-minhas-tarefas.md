@@ -117,9 +117,11 @@ Não registrar título, observação, foto, tokens ou conteúdo de outra famíli
 
 | Fase | Objetivo | CAs | Prontidão | Status |
 |---|---|---|---|---|
-| 1 | Consulta própria diária, validação, autorização e isolamento | CA-01 a CA-04, CA-08 | Testes unitários, integração e interface por perfil verdes | a fazer |
+| 1 | Consulta própria diária, validação, autorização e isolamento | CA-01 a CA-04, CA-08 | Testes unitários, integração e interface por perfil verdes | em andamento — backend concluído (SCRUM-38); Mobile pendente (SCRUM-39) |
 | 2 | Consulta familiar adulta, filtros, contexto e detalhe de membro | CA-05 a CA-07, CA-10 | Testes de período, filtros e navegação verdes | a fazer |
 | 3 | Falhas, acessibilidade e observabilidade | CA-09 | Estados de erro e telemetria verificados | a fazer |
+
+**Registro de execução (2026-10-10):** SCRUM-38 concluiu a consulta própria diária no backend. A Fase 1 segue em andamento até a entrega e validação da interface Mobile por perfil (SCRUM-39).
 
 ## 10. Checklist de aprovação
 

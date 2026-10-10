@@ -205,9 +205,11 @@ Segredos, tokens, provas de instalação, hashes, apelido privado configurável 
 
 | Fase | Objetivo | CAs | Prontidão | Status |
 |---|---|---|---|---|
-| 1 | Consulta e criação segura: projeções adultas, criação e validação de perfil, RBAC e isolamento | CA-01 a CA-03, CA-07 | Testes unitários, integração e UI dos fluxos publicados verdes | a fazer |
+| 1 | Consulta e criação segura: projeções adultas, criação e validação de perfil, RBAC e isolamento | CA-01 a CA-03, CA-07 | Testes unitários, integração e UI dos fluxos publicados verdes | em andamento — backend concluído (SCRUM-27); Mobile pendente (SCRUM-29) |
 | 2 | Administração de papel e modo Kids, incluindo saída voluntária | CA-04, CA-05, CA-07 | Transições e recusas por papel/Criador cobertas por testes de integração e UI | a fazer |
 | 3 | Remoção consistente, revogação e regressão | CA-06, CA-07 | Transação de remoção, sessão revogada e regressão de responsabilidades verificadas | a fazer |
+
+**Registro de execução (2026-10-10):** SCRUM-27 concluiu a criação e consulta de membros no backend. A Fase 1 não é considerada concluída porque a interface Mobile correspondente (SCRUM-29) ainda não foi entregue.
 
 - **Fase 1:** não expõe mudança de papel, saída voluntária ou remoção; o perfil recém-criado permanece sem convite, que pertence à SPEC-004.
 - **Fase 2:** não emite convite nem implementa edição de foto/apelido; pode ser publicada depois da Fase 1.
