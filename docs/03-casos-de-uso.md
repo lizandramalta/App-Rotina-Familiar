@@ -1,7 +1,7 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.13\
+**Versão:** 1.14\
 **Data:** 2026-10-10\
 **Situação:** base documental consolidada
 
@@ -588,6 +588,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 - A reabertura autorizada retira o peso de todos os responsáveis do dia e da semana da conclusão desfeita, inclusive se for uma semana anterior.
 - Uma tarefa concluída não pode ser excluída diretamente. A exclusão depois da reabertura não produz nova subtração de carga.
 - Sem carga no período, o sistema informa a ausência de conclusões e não divide por zero.
+- Crédito válido de perfil removido permanece na carga histórica em linha “Membro removido”, sem expor dados pessoais.
 - Kids não podem acessar esta visualização.
 - Gerar relatório abre UC18 com a semana correspondente à data selecionada, mesmo se a consulta estava em Dia.
 - O primeiro lugar semanal é apurado e consultado separadamente em UC19.
@@ -839,6 +840,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.14 | 2026-10-10 | UC13 preserva crédito histórico de perfil removido como “Membro removido”. Para SPEC-018. |
 | 1.13 | 2026-10-10 | UC06 passa a detalhar título obrigatório, descrição opcional, limites e unicidade de item personalizado; catálogo inicial definido em RN42. Para SPEC-015. |
 | 1.12 | 2026-10-07 | UC01 passa a cobrir perfil do Criador, família, adição opcional de membros e convite explícito antes da área principal; UC02 e UC04 registram a variação de onboarding. |
 | 1.11 | 2026-10-07 | UC05 passa a admitir observação opcional na missão (RF71/RN68), atalho de criação de tarefa durante a vinculação e consulta explícita por todos os perfis, inclusive Kids. Para SPEC-014. |

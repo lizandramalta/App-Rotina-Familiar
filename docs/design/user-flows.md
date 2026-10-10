@@ -362,7 +362,7 @@ flowchart TD
     G -->|Voltar| A
 ```
 
-Cada responsável recebe o peso integral; o total soma cargas individuais. Pendentes e Aguardando confirmação não entram. Reaberturas ajustam o dia e a semana originais. Sem carga, não dividir por zero. A semana vai de segunda a domingo; a consulta ocorre na própria TEL-050 e mantém a referência selecionada. Kids não acessam esta tela. O destaque semanal é consultado separadamente em UF-15.
+Cada responsável recebe o peso integral; o total soma cargas individuais. Pendentes e Aguardando confirmação não entram. Reaberturas ajustam o dia e a semana originais. Crédito histórico de perfil removido aparece como “Membro removido”, sem dado pessoal. Sem carga, não dividir por zero. A semana vai de segunda a domingo; a consulta ocorre na própria TEL-050 e mantém a referência selecionada. Kids não acessam esta tela. O destaque semanal é consultado separadamente em UF-15.
 
 <a id="uf-10"></a>
 
@@ -597,6 +597,7 @@ Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imedi
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.11 | 1.16 | 1.11 | 2026-10-10 | UF-09 integra carga Dia/Semana e preserva crédito histórico de removido sem ranking. Para SPEC-018. |
 | 1.10 | 1.15 | 1.10 | 2026-10-10 | UF-10 alinha Kids a RF36: recompensa aceita é consultável; participações e resgate seguem indisponíveis. Para SPEC-016. |
 | 1.9 | 1.15 | 1.9 | 2026-10-10 | UF-11 detalha título, descrição, limites e unicidade do item personalizado. Para SPEC-015. |
 | 1.8 | 1.14 | 1.8 | 2026-10-07 | UF-01 passa a configurar o perfil do Criador, criar a família e permitir zero ou mais membros com convite explícito antes da área principal. |

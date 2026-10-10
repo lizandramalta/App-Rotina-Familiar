@@ -1,7 +1,7 @@
-# Documentação do projeto — versão 1.15
+# Documentação do projeto — versão 1.16
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.15\
+**Versão:** 1.16\
 **Data:** 2026-10-10\
 **Situação:** base documental consolidada
 
@@ -14,12 +14,12 @@
 | [Apresentação do projeto](../README.md)                    | Propósito, público, jornada e escopo do MVP.                                                                                            |
 | [Visão do produto](00-visao-do-produto.md)                 | Contexto, objetivos, princípios, escopo e critérios de sucesso.                                                                         |
 | [Índice e versões](DOCUMENTACAO.md)                        | Organização documental, rastreabilidade e política de versões.                                                                          |
-| [Regras de negócio](01-regras-de-negocio.md)               | Regras vigentes e suas relações com RF, RNF e UC; base funcional 1.15.                                                                  |
-| [Requisitos](02-requisitos.md)                             | 71 requisitos funcionais e 27 não funcionais, com vínculos às regras e aos casos de uso; base funcional 1.15.                         |
-| [Especificação dos casos de uso](03-casos-de-uso.md)       | 19 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições; base funcional 1.15.                      |
+| [Regras de negócio](01-regras-de-negocio.md)               | Regras vigentes e suas relações com RF, RNF e UC; base funcional 1.16.                                                                  |
+| [Requisitos](02-requisitos.md)                             | 71 requisitos funcionais e 27 não funcionais, com vínculos às regras e aos casos de uso; base funcional 1.16.                         |
+| [Especificação dos casos de uso](03-casos-de-uso.md)       | 19 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições; base funcional 1.16.                      |
 | [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) | Visão geral e cinco recortes UML, com fontes PlantUML e imagens SVG.                                                                    |
-| [Screen map](design/screen-map.md)                         | Mapa 1.9: navegação, catálogo de telas, modais, estados e cobertura de UC01–UC19; base funcional 1.15.                                  |
-| [User flows](design/user-flows.md)                         | Fluxos 1.9: 16 percursos que cobrem UC01–UC19, com decisões, alternativas e retornos; base funcional 1.15 e screen map 1.9. |
+| [Screen map](design/screen-map.md)                         | Mapa 1.11: navegação, catálogo de telas, modais, estados e cobertura de UC01–UC19; base funcional 1.16.                                  |
+| [User flows](design/user-flows.md)                         | Fluxos 1.11: 16 percursos que cobrem UC01–UC19, com decisões, alternativas e retornos; base funcional 1.16 e screen map 1.11. |
 | [Modelo de dados (DER)](05-modelo-de-dados.md)             | Diagrama entidade-relacionamento em Mermaid: entidades, atributos, chaves e cardinalidades; base funcional 1.15.                         |
 | [Diagrama de classes](06-diagrama-de-classes.md) | Modelo de classes 1.8: contratos, diagramas por domínio e rastreabilidade UC–RF–RN/RNF–tipos; base funcional 1.15. |
 | [Arquitetura mobile](architecture/mobile-architecture.md) | Arquitetura 1.3: Swift + SwiftUI, View + ViewModel e Clean Architecture; estrutura, dependências, estado, sessão, navegação, integrações e verificação. |
@@ -80,7 +80,7 @@ As relações RN–UC são derivadas de RN–RF–UC. As relações de RNF repre
 - Kids podem sinalizar a realização com foto opcional. A sinalização não produz conclusão parcial. Confirmação do Administrador ou conclusão manual por adulto conclui a tarefa para todos os responsáveis.
 - Adultos podem concluir tarefa de outras pessoas mantendo os responsáveis ou assumindo-a, com aviso sobre o crédito. Assumir substitui todos os responsáveis pelo usuário que conclui.
 - Cada responsável recebe o peso integral da tarefa compartilhada. A carga total soma as cargas individuais; o progresso de uma missão conta cada tarefa apenas uma vez.
-- Todos os perfis visualizam o próprio progresso diário. Somente Administradores e Membros acessam consultas familiares por dia ou semana e, na SPEC-018, a carga diária ou semanal.
+- Todos os perfis visualizam o próprio progresso diário. Somente Administradores e Membros acessam consultas familiares por dia ou semana e a carga diária ou semanal.
 - O carrossel vai da criação da família até o último dia do mês corrente, incluindo dias futuros dentro desse mês.
 - Missões não têm prazo nem expiram. A missão permanece em andamento enquanto houver tarefas não concluídas.
 - Administradores podem adicionar itens personalizados à roleta. A recompensa é vinculada à missão somente após sorteio e aceitação, com resgate único.
@@ -88,7 +88,7 @@ As relações RN–UC são derivadas de RN–RF–UC. As relações de RNF repre
 - Reabrir retira a contribuição da conclusão anterior da carga e do progresso. A exclusão posterior não desconta o peso novamente.
 - Missões concluídas preservam dados e vínculos contra edição/exclusão. A exceção é a reabertura confirmada de tarefa vinculada, que retorna a missão para Em andamento e remove recompensa, participações e badges derivados. A exclusão de tarefa não pode deixar uma missão sem tarefas.
 
-A tela Família apresenta diretamente o progresso por dia/semana, lista de membros, botão Gerar relatório PDF e, para Administradores, Adicionar membro. Selecionar uma pessoa abre seu detalhe com tarefas por dia/semana; edição de perfil e reenvio de convite ficam nesse detalhe, quando permitidos. A consulta da lista e das tarefas é adulta; a gestão continua exclusiva dos Administradores. A carga será integrada pela SPEC-018 e o relatório permanece semanal. Referências: RN60–61, RF60–61/RF66, UC02/11/13/18.
+A tela Família apresenta diretamente progresso e carga por dia/semana, lista de membros, botão Gerar relatório PDF e, para Administradores, Adicionar membro. Selecionar uma pessoa abre seu detalhe com tarefas por dia/semana; edição de perfil e reenvio de convite ficam nesse detalhe, quando permitidos. A consulta da lista e das tarefas é adulta; a gestão continua exclusiva dos Administradores. Crédito histórico removido aparece sem dado pessoal; o relatório permanece semanal. Referências: RN30–31/RN60–61, RF18–21/RF60–61/RF66, UC02/11/13/18.
 
 ## Decisões de produto consolidadas em 2026-10-05
 
@@ -146,6 +146,7 @@ A fundação backend adota Node.js, TypeScript, Fastify e `pg`; API de produto, 
 
 | Versão | Data       | Alteração                                                                                                                                                                                                         |
 | ------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.16 | 2026-10-10 | Carga histórica de perfil removido é preservada como “Membro removido”; TEL-050/UF-09 e contrato de `GET /family/load` detalhados para SPEC-018. |
 | 1.15 | 2026-10-10 | RN42/RF34/UC06 definem catálogo inicial, título personalizado único por família e descrição opcional; modelo, classes, design e contratos atualizados. Para SPEC-015. |
 | 1.14 | 2026-10-07 | Onboarding inicial revisado: perfil do Criador antes da família, membros opcionais e convite explícito antes da área principal. RN01/RN07/RN09/RN44/RN63; RF01/RF02/RF38/RF41/RF48; UC01/UC02/UC04; visão, screen map e user flows 1.8. |
 | 1.13 | 2026-10-07 | RN63/RF48 passam a definir o limite do apelido: até 20 caracteres não-espaço após trim, sem caracteres de controle; vazio/nulo remove a configuração. Para SPEC-006. |

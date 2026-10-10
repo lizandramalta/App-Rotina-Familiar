@@ -1,6 +1,6 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.11 · **Base funcional:** 1.15 · **Arquitetura backend:** 1.0\
+**Versão:** 1.12 · **Base funcional:** 1.16 · **Arquitetura backend:** 1.0\
 **Data:** 2026-10-10\
 **Situação:** contrato arquitetural para detalhamento OpenAPI na implementação
 
@@ -107,6 +107,8 @@ Preview de fuso é apenas leitura de suporte a MOD-012. A gravação pode reflet
 | `GET /family/load` | `GetFamilyLoad` | Distribuição por membro e totais, sem ranking | Adulto |
 
 Nas rotas familiares, `period` aceita `day` ou `week`; `referenceDate` é a data selecionada, validada pelo limite de consulta RN49. As rotas pessoais são sempre diárias e não aceitam `period`. `memberId` restringe a lista familiar a um membro da família do ator; `includeUnassigned` inclui ou exclui tarefas sem responsável. O servidor devolve intervalo nominal e efetivo nas consultas familiares. `GET /tasks/{id}` resolve criação fora do carrossel quando o ator pode consultar aquela tarefa; isso não cria novo calendário de navegação. Cadastro/edição não bloqueiam passado, meses futuros ou datas anteriores à família.
+
+`GET /family/load?period=day|week&referenceDate=YYYY-MM-DD` exige sessão adulta e retorna `200 OK` com `{ period, referenceDate, effectivePeriod: { startsOn, endsOn, timeZoneId, isTransition }, totalLoad, members }`. Cada entrada de `members` contém `memberId` ou `null` para crédito histórico removido, `displayName` ("Membro removido" quando `memberId` é nulo), `load` e `participationPercent` (nulo se `totalLoad` for zero). A consulta soma crédito válido pela data da conclusão, sem multiplicar joins; tarefas pendentes/aguardando confirmação não entram e reabertura remove o crédito original. `401 SESSION_EXPIRED`, `403 INSUFFICIENT_PERMISSIONS` para Kids, `422 VALIDATION_FAILED` para `period`/`referenceDate` inválidos ou fora do intervalo e `503 DEPENDENCY_UNAVAILABLE` para snapshot não confirmado. Não aceita `familyId`, ordenação de ranking nem limiar de sobrecarga.
 
 O servidor não aceita perfil responsável, autor da conclusão ou escolha de atribuição no comando. O ator vem da sessão; a conclusão mantém responsáveis existentes ou atribui o ator adulto se não houver nenhum. Tarefa com ao menos um responsável Kids só aceita conclusão manual de Administrador; Membro recebe `403 ACTION_NOT_ALLOWED`. Se já estiver concluída, a transação não duplica créditos e responde `409 TASK_ALREADY_COMPLETED`; o cliente reconcilia silenciosamente consultando o estado canônico. Reabrir missão concluída remove recompensa aceita, participações e badges derivados no mesmo commit. Conclusão manual administrativa encerra a pendência Kids e preserva sinalização/foto para auditoria acessível apenas a Administradores. `signalId` é identidade de domínio que protege uma decisão contra outra sinalização mais recente, não versão geral de edição.
 
@@ -215,6 +217,7 @@ O OpenAPI futuro deve materializar schemas e exemplos de sucesso/erro dessas rot
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.12 | 2026-10-10 | `GetFamilyLoad` detalhado: snapshot Dia/Semana, período efetivo/fuso, membros removidos históricos, totais, percentuais e erros estáveis. Para SPEC-018. |
 | 1.11 | 2026-10-10 | `AcceptMissionReward` detalhado: `200` canônico, validações transacionais, códigos estáveis de conflito e de item inelegível, e recuperação por consulta após resposta perdida. Para SPEC-017. |
 | 1.10 | 2026-10-10 | `ListRewardItems` e `AddRewardItem` detalhados: catálogo inicial, título normalizado único por família, descrição opcional (≤255) e recuperação por consulta após resposta perdida. Para SPEC-015. |
 | 1.9 | 2026-10-08 | `GetKidsReviewQueue`, `GetKidsSignal` e `DecideKidsSignal` detalhados: fila pendente ordenada por antiguidade, foto privada de sinalização corrente, decisão atômica e retorno canônico silencioso (`applied: false`) para decisão/conclusão concorrente já resolvida. Para SPEC-013. |

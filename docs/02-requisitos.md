@@ -1,7 +1,7 @@
 # Requisitos funcionais e não funcionais
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.15\
+**Versão:** 1.16\
 **Data:** 2026-10-10\
 **Situação:** base documental consolidada
 
@@ -139,7 +139,7 @@ O sistema deve abrir o checklist no dia atual, exibir o estado único de cada ta
 
 ### RF18
 
-O sistema deve calcular a carga por dia ou semana (segunda a domingo), somando, para cada membro, os pesos integrais das tarefas com conclusão válida no período em que ele figure como responsável da conclusão. Deve ajustar o dia e a semana originais quando uma conclusão for desfeita por reabertura autorizada.
+O sistema deve calcular a carga por dia ou semana (segunda a domingo), somando, para cada membro, os pesos integrais das tarefas com conclusão válida no período em que ele figure como responsável da conclusão. Crédito válido de membro removido deve permanecer no período histórico, identificado como “Membro removido”. Deve ajustar o dia e a semana originais quando uma conclusão for desfeita por reabertura autorizada.
 
 **Regras de negócio:** [RN28](01-regras-de-negocio.md#rn28), [RN30](01-regras-de-negocio.md#rn30), [RN55](01-regras-de-negocio.md#rn55), [RN57](01-regras-de-negocio.md#rn57), [RN61](01-regras-de-negocio.md#rn61)  
 **Casos de uso:** [UC13](03-casos-de-uso.md#uc13)
@@ -153,7 +153,7 @@ O sistema deve excluir da carga tarefas Pendentes ou Aguardando confirmação e 
 
 ### RF20
 
-O sistema deve apresentar a Administradores e Membros a carga de todos e a participação de cada um na soma das cargas individuais, sem ranking e sem divisão por zero.
+O sistema deve apresentar a Administradores e Membros a carga de todos e a participação de cada um na soma das cargas individuais, incluindo linha histórica “Membro removido” quando aplicável, sem ranking e sem divisão por zero.
 
 **Regras de negócio:** [RN30](01-regras-de-negocio.md#rn30), [RN31](01-regras-de-negocio.md#rn31), [RN33](01-regras-de-negocio.md#rn33), [RN34](01-regras-de-negocio.md#rn34)  
 **Casos de uso:** [UC13](03-casos-de-uso.md#uc13)
@@ -773,6 +773,7 @@ A configuração de apelido deve ser protegida por titularidade no backend, incl
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.16 | 2026-10-10 | RF18 e RF20 preservam e identificam carga histórica de membro removido. Para SPEC-018. |
 | 1.15 | 2026-10-10 | RF34 passa a detalhar título, descrição, unicidade e catálogo inicial dos itens de recompensa coletiva. Para SPEC-015. |
 | 1.14 | 2026-10-07 | RF01, RF02, RF38, RF41 e RF48 passam a cobrir o onboarding do Criador: rascunho de perfil, criação da família, adição opcional de membros e emissão explícita de convite antes da área principal. |
 | 1.13 | 2026-10-07 | RF48 passa a definir o limite do apelido: até 20 caracteres não-espaço após trim, sem caracteres de controle; vazio/nulo remove a configuração. Para SPEC-006. |

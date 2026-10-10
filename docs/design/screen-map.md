@@ -116,7 +116,7 @@ flowchart TD
     T016 --> T012
 ```
 
-**TEL-050 — Família:** apresenta o progresso total da família, com seletor Dia/Semana, além da lista de membros. Cada item abre TEL-032 para aquele membro. O botão Adicionar membro fica nesta tela e é exclusivo do Administrador; Gerar relatório PDF fica nesta tela para Administradores e Membros e abre TEL-051. Confirmações Kids continuam exclusivas do Administrador. A carga/sobrecarga será integrada nesta tela pela SPEC-018; lista de membros permanece conteúdo de TEL-050, sem passagem por TEL-031.
+**TEL-050 — Família:** apresenta progresso e carga total da família, com seletor Dia/Semana, distribuição sem ranking e lista de membros. Crédito histórico de perfil removido aparece como “Membro removido”, sem atalho ou dado pessoal. Cada item ativo abre TEL-032. O botão Adicionar membro fica nesta tela e é exclusivo do Administrador; Gerar relatório PDF fica nesta tela para Administradores e Membros e abre TEL-051. Confirmações Kids continuam exclusivas do Administrador.
 
 **TEL-032 — Detalhe do membro:** Administradores e Membros consultam as tarefas da pessoa selecionada por dia ou semana. A tela identifica o membro, preserva o filtro por pessoa ao alternar período e permite abrir a tarefa em TEL-012. As ações Editar perfil e Reenviar convite ficam aqui, somente para Administradores e quando permitidas pelas regras do perfil; visualizar tarefas não concede gestão de membros. A configuração de apelido permanece exclusiva do titular em Meu perfil. O Criador retorna por Apple, sem convite de recuperação.
 
@@ -262,7 +262,7 @@ A = Administrador (inclui Criador); M = Membro; K = Kids. Códigos RF e RNF são
 | TEL-034 | Convite do membro | A | Confirmar emissão/reenvio com revogação de convites e sessão anteriores; exibir novo link e senha do mesmo perfil | [UC02](../03-casos-de-uso.md#uc02); RF41, RF54 |
 | TEL-040 | Minhas tarefas Kids | K | Aba inicial; próprias tarefas e progresso diários; abrir tarefa, perfil ou destaque recebido | [UC11](../03-casos-de-uso.md#uc11); RF11, RF17, RF22, RF49 |
 | TEL-041 | Detalhe da minha tarefa | K responsável | Informações da tarefa e estado; sinalizar se pendente | [UC15](../03-casos-de-uso.md#uc15); RF23–24, RF55–56 |
-| TEL-050 | Família | A, M | Tela principal; progresso familiar e lista de membros por dia/semana, Gerar relatório PDF e Todas as tarefas; a carga é integrada posteriormente por UC13/SPEC-018; Adicionar membro e confirmações Kids somente A | [UC02](../03-casos-de-uso.md#uc02), [UC03](../03-casos-de-uso.md#uc03), [UC13](../03-casos-de-uso.md#uc13); [UC11](../03-casos-de-uso.md#uc11); RF60, RN60 |
+| TEL-050 | Família | A, M | Tela principal; progresso e carga familiar Dia/Semana, distribuição sem ranking e linha histórica de removido quando aplicável; Gerar relatório PDF e Todas as tarefas; Adicionar membro e confirmações Kids somente A | [UC02](../03-casos-de-uso.md#uc02), [UC03](../03-casos-de-uso.md#uc03), [UC13](../03-casos-de-uso.md#uc13); [UC11](../03-casos-de-uso.md#uc11); RF18–21, RF60, RN60–61 |
 | TEL-051 | Relatório semanal PDF | A, M | Selecionar semana, gerar gráficos e tabela, visualizar/salvar/compartilhar; semana atual parcial | [UC18](../03-casos-de-uso.md#uc18); RF61, RN62 |
 | TEL-052 | Meu destaque semanal | A, M, K reconhecido | Semana encerrada, pontos, tarefas realizadas, convite e compartilhar no WhatsApp ou copiar mensagem | [UC19](../03-casos-de-uso.md#uc19); RF63–64, RN65 |
 | TEL-053 | Configurações da família | A | Fuso vigente/programado; selecionar novo fuso e confirmar aplicação imediata ou próximo ciclo em MOD-012 | [UC01](../03-casos-de-uso.md#uc01); RF67, RN28 |
@@ -326,6 +326,7 @@ Campos funcionais de data/fuso e seleção de foto estão definidos; o layout vi
 
 | Versão do mapa | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.11 | 1.16 | 2026-10-10 | TEL-050 integra carga Dia/Semana sem ranking e preserva crédito histórico como “Membro removido”. Para SPEC-018. |
 | 1.10 | 1.15 | 2026-10-10 | TEL-021 alinha Kids a RF36: recompensa aceita é consultável, mas participações e resgate continuam restritos. Para SPEC-016. |
 | 1.9 | 1.15 | 2026-10-10 | TEL-023 passa a explicitar cadastro de título e descrição opcional para item personalizado. Para SPEC-015. |
 | 1.7 | 1.12 | 2026-10-07 | TEL-022 ganha observação opcional; MOD-007 ganha atalho "+ Nova tarefa"; TEL-021 explicita consulta básica por todos os perfis, inclusive Kids. Para SPEC-014. |
