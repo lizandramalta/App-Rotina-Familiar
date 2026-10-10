@@ -1,8 +1,8 @@
-# Documentação do projeto — versão 1.15
+# Documentação do projeto — versão 1.16
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.15\
-**Data:** 2026-10-08\
+**Versão:** 1.16\
+**Data:** 2026-10-09\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Modelo de dados](05-modelo-de-dados.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -27,7 +27,7 @@
 | [Decisões da arquitetura mobile](architecture/mobile-decisions.md)       | MA-01–MA-17 e P-01–P-09 consolidadas, ajustes de modelagem e temas fora desta etapa.                                                                    |
 | [Convenções de código mobile](architecture/mobile-code-conventions.md)   | Convenções de Swift/SwiftUI, camadas, concorrência, segurança, testes e revisão.                                                                        |
 | [Arquitetura backend](architecture/backend-architecture.md)              | Backend 1.3: Node.js, Clean Architecture, monólito modular, Supabase/R2, transações, acesso e jobs.                                                     |
-| [Contratos backend](architecture/backend-contracts.md)                   | Contratos 1.13 da API `/v1`, documentação OpenAPI, permissões, erros, projeções e cobertura dos 19 UC e 27 RNF; base funcional 1.14.                    |
+| [Contratos backend](architecture/backend-contracts.md)                   | Contratos 1.14 da API `/v1`, documentação OpenAPI, permissões, erros, projeções e cobertura dos 19 UC e 27 RNF; base funcional 1.14.                    |
 | [Decisões backend](architecture/backend-decisions.md)                    | BA-01–BA-34: escolhas confirmadas, propostas técnicas, alternativas e limites.                                                                          |
 | [Convenções de código backend](architecture/backend-code-conventions.md) | Convenções de TypeScript/Fastify, camadas, contratos, SQL, segurança, testes e revisão.                                                                 |
 | [Specs de entrega](../specs/README.md)                                   | Recortes aprovados de implementação compartilhados entre mobile e backend.                                                                              |
@@ -145,6 +145,7 @@ A fundação backend adota Node.js, TypeScript, Fastify e `pg`; API de produto, 
 
 | Versão | Data       | Alteração                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | ------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.16   | 2026-10-09 | Contrato de conclusão de tarefa materializado: `POST /v1/tasks/{taskId}/completion` retorna tarefa canônica e invalidações de tarefa/consultas próprias, sem aceitar ator, créditos ou instante do cliente. SPEC-010 Fase 1 / SCRUM-40. |
 | 1.15   | 2026-10-08 | Contrato de consulta de membros: cursor opaco, páginas de até 20 itens e `{items, nextCursor}`; listas Mobile usam rolagem infinita, preservando conteúdo confirmado quando falha nova página. SPEC-003, UX-003, Screen map e user flows atualizados. |
 | 1.14   | 2026-10-07 | Onboarding inicial revisado: perfil do Criador antes da família, membros opcionais e convite explícito antes da área principal. RN01/RN07/RN09/RN44/RN63; RF01/RF02/RF38/RF41/RF48; UC01/UC02/UC04; visão, screen map e user flows 1.8.                                                                                                                                                                                         |
 | 1.13   | 2026-10-07 | RN63/RF48 passam a definir o limite do apelido: até 20 caracteres não-espaço após trim, sem caracteres de controle; vazio/nulo remove a configuração. Para SPEC-006.                                                                                                                                                                                                                                                            |

@@ -11,8 +11,8 @@ export class TaskManagementNotAllowedError extends ForbiddenError {
 }
 
 export class TaskAlreadyCompletedError extends ConflictError {
-  constructor() {
-    super('Completed tasks cannot be deleted directly.', 'TASK_ALREADY_COMPLETED');
+  constructor(message = 'Completed tasks cannot be deleted directly.') {
+    super(message, 'TASK_ALREADY_COMPLETED');
   }
 }
 

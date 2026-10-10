@@ -32,6 +32,15 @@ export interface TaskResponse {
   readonly createdAt: string;
 }
 
+export type AffectedResource =
+  | { readonly type: 'task'; readonly id: string }
+  | { readonly type: 'ownTasks' | 'ownProgress'; readonly referenceDate: string };
+
+export interface TaskMutationResult {
+  readonly task: TaskResponse;
+  readonly affectedResources: readonly AffectedResource[];
+}
+
 export interface CreateTaskCommand {
   readonly actor: ActorContext;
   readonly title: unknown;
@@ -260,6 +269,61 @@ export class DeleteTaskUseCase {
         now: this.deps.clock.now(),
       });
       return { id: task.id };
+    });
+  }
+}
+
+/** Completa uma ocorrência no lock da família — SPEC-010 Fase 1 / SCRUM-40. */
+export class CompleteTaskUseCase {
+  constructor(
+    private readonly deps: {
+      readonly repository: TaskRepositoryPort;
+      readonly transactionRunner: TransactionRunner;
+      readonly clock: Clock;
+    },
+  ) {}
+
+  public async execute(actor: ActorContext, taskId: string): Promise<TaskMutationResult> {
+    return this.deps.transactionRunner.forFamily(actor.familyId, async (tx) => {
+      // O papel é lido novamente depois de adquirir o lock: a sessão autenticou a
+      // chamada, mas uma troca de papel concorrente não pode ampliar privilégios.
+      const role = await this.deps.repository.findMemberRole(tx, actor.familyId, actor.memberId);
+      if (role === undefined) {
+        throw new NotFoundError('Task not found.');
+      }
+      if (role === MemberRole.KIDS) {
+        throw new TaskManagementNotAllowedError();
+      }
+
+      const task = await this.deps.repository.findTask(tx, actor.familyId, taskId, true);
+      if (task === undefined) {
+        throw new NotFoundError('Task not found.');
+      }
+      if (task.status === 'completed') {
+        throw new TaskAlreadyCompletedError('Task is already completed.');
+      }
+      const hasKidsAssignee = await this.deps.repository.hasKidsAssignee(
+        tx,
+        task.familyId,
+        task.id,
+      );
+      if (hasKidsAssignee && role !== MemberRole.ADMINISTRATOR) {
+        throw new TaskManagementNotAllowedError();
+      }
+
+      const completed = await this.deps.repository.completeTask(tx, {
+        task,
+        actorId: actor.memberId,
+        now: this.deps.clock.now(),
+      });
+      return {
+        task: toResponse(completed),
+        affectedResources: [
+          { type: 'task', id: completed.id },
+          { type: 'ownTasks', referenceDate: completed.scheduledDate },
+          { type: 'ownProgress', referenceDate: completed.scheduledDate },
+        ],
+      };
     });
   }
 }

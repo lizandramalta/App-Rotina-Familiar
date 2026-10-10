@@ -1,4 +1,5 @@
 import type { TransactionContext } from '../../../shared/application/transaction-runner.js';
+import type { MemberRole } from '../../../shared/domain/member-role.js';
 
 export type TaskStatus = 'pending' | 'awaitingConfirmation' | 'completed';
 
@@ -37,6 +38,11 @@ export interface TaskRepositoryPort {
     taskId: string,
     forUpdate?: boolean,
   ): Promise<TaskRecord | undefined>;
+  findMemberRole(
+    tx: TransactionContext,
+    familyId: string,
+    memberId: string,
+  ): Promise<MemberRole | undefined>;
   countFamilyMembers(
     tx: TransactionContext,
     familyId: string,
@@ -49,6 +55,15 @@ export interface TaskRepositoryPort {
     taskId: string,
   ): Promise<boolean>;
   hasCurrentSignal(tx: TransactionContext, familyId: string, taskId: string): Promise<boolean>;
+  hasKidsAssignee(tx: TransactionContext, familyId: string, taskId: string): Promise<boolean>;
+  completeTask(
+    tx: TransactionContext,
+    params: {
+      readonly task: TaskRecord;
+      readonly actorId: string;
+      readonly now: Date;
+    },
+  ): Promise<TaskRecord>;
   updateTask(
     tx: TransactionContext,
     params: {

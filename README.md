@@ -3,8 +3,8 @@
 Organização colaborativa das responsabilidades domésticas, com tarefas compartilhadas, participação infantil e conquistas coletivas.
 
 **Escopo:** MVP  
-**Versão da base do projeto:** 1.15\
-**Data:** 2026-10-08
+**Versão da base do projeto:** 1.16\
+**Data:** 2026-10-09
 
 ## Por que este projeto existe
 
@@ -224,6 +224,7 @@ A arquitetura backend 1.0 está em [backend-architecture.md](docs/architecture/b
 
 | Versão | Data | Marco |
 |---|---|---|
+| 1.16 | 2026-10-09 | Contrato de conclusão de tarefa materializado: `POST /v1/tasks/{taskId}/completion` retorna tarefa canônica e invalidações de tarefa/consultas próprias, sem aceitar ator, créditos ou instante do cliente. SPEC-010 Fase 1 / SCRUM-40. |
 | 1.15 | 2026-10-08 | Consulta de membros formalizada com cursor opaco, páginas de até 20 itens e rolagem infinita no Mobile. Para SPEC-003 / SCRUM-27. |
 | 1.14 | 2026-10-07 | Onboarding do Criador: perfil antes da família, membros opcionais e convite explícito antes da área principal. Base funcional 1.14. |
 | 1.13 | 2026-10-07 | Apelido do perfil ganha limite explícito: até 20 caracteres não-espaço após trim, sem caracteres de controle. Para SPEC-006. |

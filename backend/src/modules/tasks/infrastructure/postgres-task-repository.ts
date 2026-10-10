@@ -6,6 +6,7 @@ import type {
   TaskRepositoryPort,
   TaskStatus,
 } from '../application/task-repository-port.js';
+import { isValidMemberRole, type MemberRole } from '../../../shared/domain/member-role.js';
 import type {
   FamilyCalendarRecord,
   OwnTaskPageCursor,
@@ -132,6 +133,19 @@ export class PostgresTaskRepository implements TaskRepositoryPort, TaskQueryRepo
     const result = await client.query<TaskRow>(taskSelect, [familyId, taskId]);
     const row = result.rows[0];
     return row === undefined ? undefined : toTask(row);
+  }
+
+  public async findMemberRole(
+    tx: TransactionContext,
+    familyId: string,
+    memberId: string,
+  ): Promise<MemberRole | undefined> {
+    const result = await asPostgresClient(tx).query<{ role: string }>(
+      `select role from app.members where family_id = $1 and id = $2`,
+      [familyId, memberId],
+    );
+    const role = result.rows[0]?.role;
+    return role !== undefined && isValidMemberRole(role) ? role : undefined;
   }
 
   public async findFamilyCalendar(
@@ -295,6 +309,70 @@ export class PostgresTaskRepository implements TaskRepositoryPort, TaskQueryRepo
     return (result.rowCount ?? 0) > 0;
   }
 
+  public async hasKidsAssignee(
+    tx: TransactionContext,
+    familyId: string,
+    taskId: string,
+  ): Promise<boolean> {
+    const result = await asPostgresClient(tx).query(
+      `select 1
+         from app.task_assignees a
+         join app.members m on m.family_id = a.family_id and m.id = a.member_id
+        where a.family_id = $1 and a.task_id = $2 and m.role = 'kids'
+        limit 1`,
+      [familyId, taskId],
+    );
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  public async completeTask(
+    tx: TransactionContext,
+    params: {
+      readonly task: TaskRecord;
+      readonly actorId: string;
+      readonly now: Date;
+    },
+  ): Promise<TaskRecord> {
+    const client = asPostgresClient(tx);
+    const finalAssigneeIds =
+      params.task.assigneeIds.length === 0 ? [params.actorId] : params.task.assigneeIds;
+
+    if (params.task.assigneeIds.length === 0) {
+      await this.replaceAssignees(tx, params.task.familyId, params.task.id, finalAssigneeIds);
+    }
+
+    await client.query(
+      `update app.task_occurrences
+          set status = 'completed', updated_at = $3
+        where family_id = $1 and id = $2`,
+      [params.task.familyId, params.task.id, params.now],
+    );
+
+    const completionId = randomUUID();
+    await client.query(
+      `insert into app.completions (id, family_id, task_id, performed_by_id, completed_at)
+       values ($1, $2, $3, $4, $5)`,
+      [completionId, params.task.familyId, params.task.id, params.actorId, params.now],
+    );
+    for (const memberId of finalAssigneeIds) {
+      await client.query(
+        `insert into app.completion_credits (completion_id, family_id, member_id, weight)
+         values ($1, $2, $3, $4)`,
+        [completionId, params.task.familyId, memberId, params.task.weight],
+      );
+    }
+    await this.insertEvent(tx, {
+      familyId: params.task.familyId,
+      taskId: params.task.id,
+      actorId: params.actorId,
+      eventType: 'completed',
+      oldValues: { status: params.task.status, assigneeIds: params.task.assigneeIds },
+      newValues: { status: 'completed', assigneeIds: finalAssigneeIds, completionId },
+      now: params.now,
+    });
+    return this.requireTask(tx, params.task.familyId, params.task.id);
+  }
+
   public async updateTask(
     tx: TransactionContext,
     params: {
@@ -456,7 +534,7 @@ export class PostgresTaskRepository implements TaskRepositoryPort, TaskQueryRepo
       readonly familyId: string;
       readonly taskId: string;
       readonly actorId: string;
-      readonly eventType: 'created' | 'edited' | 'deleted';
+      readonly eventType: 'created' | 'edited' | 'deleted' | 'completed';
       readonly oldValues: object | null;
       readonly newValues: object | null;
       readonly now: Date;
