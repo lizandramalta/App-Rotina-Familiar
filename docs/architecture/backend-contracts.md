@@ -1,7 +1,7 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.9 · **Base funcional:** 1.14 · **Arquitetura backend:** 1.0\
-**Data:** 2026-10-08\
+**Versão:** 1.10 · **Base funcional:** 1.15 · **Arquitetura backend:** 1.0\
+**Data:** 2026-10-10\
 **Situação:** contrato arquitetural para detalhamento OpenAPI na implementação
 
 [Arquitetura](backend-architecture.md) · [Decisões](backend-decisions.md) · [Catálogo mobile](mobile-feature-catalog.md) · [UC](../03-casos-de-uso.md) · [Índice](../DOCUMENTACAO.md)
@@ -131,14 +131,16 @@ Consultas paginadas usam ordenação estável com ID como desempate e cursor opa
 | `GET /missions/task-options` | `GetMissionTaskOptions` | Ocorrências persistidas, filtros e paginação; sem selecionar rotina inteira | Admin |
 | `POST /missions` | `CreateMission` | Título, `note` opcional (≤250 car.) e `taskIds` não vazio; sem prazo nem selo | Admin |
 | `PATCH /missions/{missionId}` | `EditMission` | Título, `note` e/ou conjunto completo de `taskIds`; pode encerrar missão; rejeita `taskIds` vazio | Admin; em andamento |
-| `GET /reward-items` | `ListRewardItems` | Catálogo predefinido + personalizado da família | Admin |
-| `POST /reward-items` | `AddRewardItem` | Título da recompensa coletiva → item elegível | Admin |
+| `GET /reward-items` | `ListRewardItems` | Catálogo predefinido + itens personalizados da família, com título, descrição e origem | Admin |
+| `POST /reward-items` | `AddRewardItem` | `title` obrigatório + `details` opcional → item elegível | Admin |
 | `POST /missions/{missionId}/reward-acceptance` | `AcceptMissionReward` | `rewardItemId` → aceite único com snapshot do item | Admin; concluída/sem resgate |
 | `GET /reports/weekly-snapshot` | `GetWeeklyReportSnapshot` | Data/semana ou ciclo selecionado → JSON consistente, nunca PDF binário | Adulto |
 | `GET /me/weekly-recognitions` | `ListOwnWeeklyRecognitions` | Lista de resultados finalizados próprios | Titular, inclusive Kids |
 | `GET /me/weekly-recognitions/{recognitionId}` | `GetOwnWeeklyRecognition` | Pontos, contagem, empate, período/fuso preservados | Titular reconhecido |
 | `PUT /me/push-device` | `RegisterPushDevice` | Token APNs/ambiente → dispositivo da sessão atual | Sessão ativa |
 | `POST /me/weekly-recognitions/{recognitionId}/opening` | `RecordRecognitionOpening` | Registra primeira abertura de forma monotônica | Titular; não comprova leitura/envio |
+
+`GET /reward-items` devolve os seis itens predefinidos de RN42 e somente os personalizados da família da sessão. `POST /reward-items` aceita `{ "title": string, "details"?: string }`: normaliza o título com `trim`, rejeita vazio, caracteres de controle e mais de 60 caracteres não-espaço; aceita descrição opcional de até 255 caracteres contando espaços. A unicidade é por família sobre o título normalizado, sem distinguir maiúsculas/minúsculas; colisão retorna `422 REWARD_TITLE_ALREADY_EXISTS`. Os demais erros de campo usam `422 VALIDATION_FAILED` com `fieldErrors` estáveis (`title` ou `details`). Sucesso retorna `201 Created` com o item canônico e sua origem `custom`. Uma resposta perdida é recuperável por nova consulta do catálogo, sem criar outro item quando o título normalizado já existir.
 
 Registrar rota estática `task-options` sem ambiguidade com `{missionId}`. Não há endpoints de sorteio, recusa de resultado da roleta, concessão manual de badge, edição de missão concluída ou envio de WhatsApp. Ausência de endpoints de editar/excluir item de recompensa respeita o escopo de consulta/adição do UC06. Nenhum endpoint permite um cliente comum disparar/finalizar apuração.
 
@@ -172,7 +174,7 @@ Cada linha cobre um objetivo funcional completo, não apenas uma rota. RF/RN per
 | <a id="backend-uc03"></a>[UC03](../03-casos-de-uso.md#uc03) | `DecideKidsSignal` / Kids, Tasks, Missions | Primeira decisão válida, confirmação creditada a todos os responsáveis | RF25/26/55/56; RN22–26/54/55 |
 | <a id="backend-uc04"></a>[UC04](../03-casos-de-uso.md#uc04) | `SignInWithApple` / Access | Prova validada; sessão única do Criador ou grant restrito | RF37/39; RN44; RNF15/16/22 |
 | <a id="backend-uc05"></a>[UC05](../03-casos-de-uso.md#uc05) | `CreateMission`, `EditMission`, `CloseEligibleMissions` | Ao menos uma tarefa, participação e marcos na transação | RF28/29/31/32/50/58; RN35–40/50/51/58/64 |
-| <a id="backend-uc06"></a>[UC06](../03-casos-de-uso.md#uc06) | `ListRewardItems`, `AddRewardItem` / Rewards | Predefinidas + família; só Admin adiciona | RF33/34; RN41/42 |
+| <a id="backend-uc06"></a>[UC06](../03-casos-de-uso.md#uc06) | `ListRewardItems`, `AddRewardItem` / Rewards | Predefinidas + família; só Admin adiciona; título normalizado único e descrição opcional | RF33/34; RN41/42 |
 | <a id="backend-uc07"></a>[UC07](../03-casos-de-uso.md#uc07) | `CreateTask`, `EditTask`, `DeleteTask` / Tasks | Datas livres, título ≤60, observação ≤250, edição de concluída não protegida, resolução de sinalização pendente, auditoria e missão não vazia | RF07–10/15/16/27/58/59/69/70; RN11–13/17–20/50/58/59/66/67 |
 | <a id="backend-uc08"></a>[UC08](../03-casos-de-uso.md#uc08) | `CreateRoutine`, `UpdateFutureRoutine`, `MaterializeRoutineOccurrences` | Frequências fixas, observação opcional, horizonte e origem estável; proteger passado/conquistas | RF13/14/70; RN14/16–18/67 |
 | <a id="backend-uc09"></a>[UC09](../03-casos-de-uso.md#uc09) | `InspectInvite`, `JoinFamilyByInvite`, `RecoverInviteJoin`, `RefreshSession` | Consumo único, prova de instalação e troca sem remoção | RF42–46/54/68; RN09/10/45–47 |
@@ -211,6 +213,7 @@ O OpenAPI futuro deve materializar schemas e exemplos de sucesso/erro dessas rot
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.10 | 2026-10-10 | `ListRewardItems` e `AddRewardItem` detalhados: catálogo inicial, título normalizado único por família, descrição opcional (≤255) e recuperação por consulta após resposta perdida. Para SPEC-015. |
 | 1.9 | 2026-10-08 | `GetKidsReviewQueue`, `GetKidsSignal` e `DecideKidsSignal` detalhados: fila pendente ordenada por antiguidade, foto privada de sinalização corrente, decisão atômica e retorno canônico silencioso (`applied: false`) para decisão/conclusão concorrente já resolvida. Para SPEC-013. |
 | 1.8 | 2026-10-07 | `SignalTask` detalhado: ator Kids, revalidação de titularidade/estado (`403 ACTION_NOT_ALLOWED`, `404 RESOURCE_NOT_FOUND`, `409 TASK_NOT_PENDING`), resposta `201 Created` com `signal.id`. `POST /media` com `purpose: taskSignal` passa a ser aceito, validando somente o papel Kids no upload; contexto de tarefa é revalidado só no vínculo. Para SPEC-012. |
 | 1.7 | 2026-10-07 | `CreateMission`/`EditMission` ganham `note` opcional (≤250 car.); `GetMissionDetail` expõe `note`; `EditMission` explicita rejeição de `taskIds` vazio. Para SPEC-014. |

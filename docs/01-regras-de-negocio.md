@@ -1,13 +1,13 @@
 # Regras de negócio
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.14\
-**Data:** 2026-10-07\
+**Versão:** 1.15\
+**Data:** 2026-10-10\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
 
-Este documento contém todas as regras vigentes da versão 1.14. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
+Este documento contém todas as regras vigentes da versão 1.15. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
 
 **Identificadores preservados:** RN15, RN29 e RN32 não estavam definidos na base recebida e permanecem não utilizados. Não representam conteúdo faltante desta versão.
 
@@ -323,7 +323,7 @@ Recompensas são coletivas e beneficiam a família inteira.
 
 ## RN42
 
-A roleta oferece itens predefinidos e itens personalizados adicionados por Administradores. Somente Administradores podem adicionar itens, sortear e aceitar recompensas. Adicionar um item o torna elegível para sorteios, sem vinculá-lo automaticamente a uma missão.
+A roleta oferece os itens predefinidos “Escolher o filme da noite”, “Escolher o jantar em família”, “Noite de jogos em família”, “Sobremesa especial”, “Piquenique ou passeio no parque” e “Escolher uma atividade em família”, além de itens personalizados adicionados por Administradores. O título de item personalizado é obrigatório, não pode conter caracteres de controle e admite até 60 caracteres não-espaço após `trim`; sua descrição é opcional e admite até 255 caracteres, contando espaços. Na mesma família, títulos personalizados são únicos após `trim`, sem distinguir maiúsculas de minúsculas. Somente Administradores podem adicionar itens, sortear e aceitar recompensas. Adicionar um item o torna elegível para sorteios, sem vinculá-lo automaticamente a uma missão.
 
 **Requisitos funcionais:** [RF34](02-requisitos.md#rf34), [RF51](02-requisitos.md#rf51), [RF52](02-requisitos.md#rf52)  
 **Requisitos não funcionais específicos:** [RNF07](02-requisitos.md#rnf07)  
@@ -570,6 +570,7 @@ A missão admite uma observação opcional de até 250 caracteres, contando espa
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.15 | 2026-10-10 | RN42 passa a definir o catálogo predefinido e o cadastro de item personalizado: título obrigatório com até 60 caracteres não-espaço após `trim`, unicidade por família sem distinguir maiúsculas/minúsculas e descrição opcional de até 255 caracteres. Para SPEC-015. |
 | 1.14 | 2026-10-07 | Onboarding do Criador passa a coletar rascunho de nome, foto opcional e etiqueta opcional antes da criação da família; após a criação, permite adicionar zero ou mais membros e gerar convite explicitamente antes da área principal. RN01, RN07, RN09, RN44 e RN63 revisadas. |
 | 1.12 | 2026-10-07 | RN63 passa a definir o limite do apelido: até 20 caracteres não-espaço após trim, sem caracteres de controle; vazio/nulo remove a configuração. Para SPEC-006. |
 | 1.11 | 2026-10-07 | RN68 (novo) permite observação opcional de até 250 caracteres por missão, espelhando RN67. Para SPEC-014. |

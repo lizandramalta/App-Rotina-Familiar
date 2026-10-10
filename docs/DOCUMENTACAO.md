@@ -1,8 +1,8 @@
-# Documentação do projeto — versão 1.14
+# Documentação do projeto — versão 1.15
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.14\
-**Data:** 2026-10-07\
+**Versão:** 1.15\
+**Data:** 2026-10-10\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Modelo de dados](05-modelo-de-dados.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -14,20 +14,20 @@
 | [Apresentação do projeto](../README.md)                    | Propósito, público, jornada e escopo do MVP.                                                                                            |
 | [Visão do produto](00-visao-do-produto.md)                 | Contexto, objetivos, princípios, escopo e critérios de sucesso.                                                                         |
 | [Índice e versões](DOCUMENTACAO.md)                        | Organização documental, rastreabilidade e política de versões.                                                                          |
-| [Regras de negócio](01-regras-de-negocio.md)               | Regras vigentes e suas relações com RF, RNF e UC; base funcional 1.14.                                                                  |
-| [Requisitos](02-requisitos.md)                             | 71 requisitos funcionais e 27 não funcionais, com vínculos às regras e aos casos de uso; base funcional 1.14.                         |
-| [Especificação dos casos de uso](03-casos-de-uso.md)       | 19 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições; base funcional 1.12.                      |
+| [Regras de negócio](01-regras-de-negocio.md)               | Regras vigentes e suas relações com RF, RNF e UC; base funcional 1.15.                                                                  |
+| [Requisitos](02-requisitos.md)                             | 71 requisitos funcionais e 27 não funcionais, com vínculos às regras e aos casos de uso; base funcional 1.15.                         |
+| [Especificação dos casos de uso](03-casos-de-uso.md)       | 19 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições; base funcional 1.15.                      |
 | [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) | Visão geral e cinco recortes UML, com fontes PlantUML e imagens SVG.                                                                    |
-| [Screen map](design/screen-map.md)                         | Mapa 1.8: navegação, catálogo de telas, modais, estados e cobertura de UC01–UC19; base funcional 1.14.                                  |
-| [User flows](design/user-flows.md)                         | Fluxos 1.8: 16 percursos que cobrem UC01–UC19, com decisões, alternativas e retornos; base funcional 1.14 e screen map 1.8. |
-| [Modelo de dados (DER)](05-modelo-de-dados.md)             | Diagrama entidade-relacionamento em Mermaid: entidades, atributos, chaves e cardinalidades; base funcional 1.12.                         |
-| [Diagrama de classes](06-diagrama-de-classes.md) | Modelo de classes 1.7: contratos, diagramas por domínio e rastreabilidade UC–RF–RN/RNF–tipos; base funcional 1.12. |
+| [Screen map](design/screen-map.md)                         | Mapa 1.9: navegação, catálogo de telas, modais, estados e cobertura de UC01–UC19; base funcional 1.15.                                  |
+| [User flows](design/user-flows.md)                         | Fluxos 1.9: 16 percursos que cobrem UC01–UC19, com decisões, alternativas e retornos; base funcional 1.15 e screen map 1.9. |
+| [Modelo de dados (DER)](05-modelo-de-dados.md)             | Diagrama entidade-relacionamento em Mermaid: entidades, atributos, chaves e cardinalidades; base funcional 1.15.                         |
+| [Diagrama de classes](06-diagrama-de-classes.md) | Modelo de classes 1.8: contratos, diagramas por domínio e rastreabilidade UC–RF–RN/RNF–tipos; base funcional 1.15. |
 | [Arquitetura mobile](architecture/mobile-architecture.md) | Arquitetura 1.3: Swift + SwiftUI, View + ViewModel e Clean Architecture; estrutura, dependências, estado, sessão, navegação, integrações e verificação. |
-| [Catálogo mobile](architecture/mobile-feature-catalog.md) | Catálogo 1.5: funcionalidades, nomes de arquivos em inglês e cobertura das 26 telas, 14 modais, UC01–UC19, UF-01–UF-16 e RNF01–27; base funcional 1.9. |
+| [Catálogo mobile](architecture/mobile-feature-catalog.md) | Catálogo 1.7: funcionalidades, nomes de arquivos em inglês e cobertura das 26 telas, 14 modais, UC01–UC19, UF-01–UF-16 e RNF01–27; base funcional 1.15. |
 | [Decisões da arquitetura mobile](architecture/mobile-decisions.md) | MA-01–MA-17 e P-01–P-09 consolidadas, ajustes de modelagem e temas fora desta etapa. |
 | [Convenções de código mobile](architecture/mobile-code-conventions.md) | Convenções de Swift/SwiftUI, camadas, concorrência, segurança, testes e revisão. |
 | [Arquitetura backend](architecture/backend-architecture.md) | Backend 1.0: Node.js, Clean Architecture, monólito modular, Supabase/R2, transações, acesso e jobs. |
-| [Contratos backend](architecture/backend-contracts.md) | Contratos 1.9 da API `/v1`, permissões, erros, projeções e cobertura dos 19 UC e 27 RNF; base funcional 1.14. |
+| [Contratos backend](architecture/backend-contracts.md) | Contratos 1.10 da API `/v1`, permissões, erros, projeções e cobertura dos 19 UC e 27 RNF; base funcional 1.15. |
 | [Decisões backend](architecture/backend-decisions.md) | BA-01–BA-20: escolhas confirmadas, propostas técnicas, alternativas e limites. |
 | [Convenções de código backend](architecture/backend-code-conventions.md) | Convenções de TypeScript/Fastify, camadas, contratos, SQL, segurança, testes e revisão. |
 | [Specs de entrega](../specs/README.md) | Recortes aprovados de implementação compartilhados entre mobile e backend. |
@@ -146,6 +146,7 @@ A fundação backend adota Node.js, TypeScript, Fastify e `pg`; API de produto, 
 
 | Versão | Data       | Alteração                                                                                                                                                                                                         |
 | ------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.15 | 2026-10-10 | RN42/RF34/UC06 definem catálogo inicial, título personalizado único por família e descrição opcional; modelo, classes, design e contratos atualizados. Para SPEC-015. |
 | 1.14 | 2026-10-07 | Onboarding inicial revisado: perfil do Criador antes da família, membros opcionais e convite explícito antes da área principal. RN01/RN07/RN09/RN44/RN63; RF01/RF02/RF38/RF41/RF48; UC01/UC02/UC04; visão, screen map e user flows 1.8. |
 | 1.13 | 2026-10-07 | RN63/RF48 passam a definir o limite do apelido: até 20 caracteres não-espaço após trim, sem caracteres de controle; vazio/nulo remove a configuração. Para SPEC-006. |
 | 1.12 | 2026-10-07 | RN68/RF71 definem observação opcional (até 250 caracteres) na missão; UC05 passa a cobrir o atalho de criação de tarefa durante a vinculação e a consulta explícita por todos os perfis, inclusive Kids; modelo de dados e diagrama de classes atualizados. Para SPEC-014. |

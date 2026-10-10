@@ -56,7 +56,7 @@ da experiência. Isso permite evoluir o visual sem perder decisões, estados e t
 
 ## Mapa de implementação
 
-**Base funcional:** 1.14 (2026-10-07)
+**Base funcional:** 1.15 (2026-10-10)
 
 **Convenção de status:** `não criada` indica apenas uma entrega planejada; os status
 do template passam a valer depois que o arquivo da spec existir.
@@ -102,7 +102,7 @@ posterior por Administradores em TEL-053/MOD-012; não há uma SPEC-021 separada
 | Spec planejada | UC principal | Projetos | Depende de | Status |
 |---|---|---|---|---|
 | [`SPEC-014-gerenciar-missoes`](SPEC-014-gerenciar-missoes.md) - Gerenciar missões | UC05 | ambos | SPEC-007 | aprovada |
-| `SPEC-015-gerenciar-recompensas-coletivas` - Gerenciar itens de recompensas coletivas | UC06 | ambos | SPEC-002 | não criada |
+| [`SPEC-015-gerenciar-recompensas-coletivas`](SPEC-015-gerenciar-recompensas-coletivas.md) - Gerenciar itens de recompensas coletivas | UC06 | ambos | SPEC-002 | aprovada |
 | `SPEC-016-acompanhar-missoes-recompensas` - Acompanhar missões e recompensas | UC14 | ambos | SPEC-014 | não criada |
 | `SPEC-017-resgatar-recompensa` - Resgatar recompensa da missão | UC16 | ambos | SPEC-014, SPEC-015 | não criada |
 

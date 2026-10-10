@@ -1,8 +1,8 @@
 # Requisitos funcionais e não funcionais
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.14\
-**Data:** 2026-10-07\
+**Versão:** 1.15\
+**Data:** 2026-10-10\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -251,7 +251,7 @@ O sistema deve disponibilizar recompensas de caráter coletivo, vinculadas às c
 
 ### RF34
 
-O sistema deve oferecer itens predefinidos para a roleta e permitir somente a Administradores adicionar itens personalizados que passarão a participar dos sorteios. Adicionar um item não deve atribuí-lo automaticamente a uma missão.
+O sistema deve oferecer para a roleta os seis itens predefinidos definidos em RN42 e permitir somente a Administradores adicionar itens personalizados que passarão a participar dos sorteios. O título personalizado é obrigatório, sem caracteres de controle e limitado a 60 caracteres não-espaço após `trim`; a descrição é opcional e limitada a 255 caracteres, contando espaços. Títulos personalizados devem ser únicos na família após `trim`, sem distinção entre maiúsculas e minúsculas. Adicionar um item não deve atribuí-lo automaticamente a uma missão.
 
 **Regras de negócio:** [RN41](01-regras-de-negocio.md#rn41), [RN42](01-regras-de-negocio.md#rn42)  
 **Casos de uso:** [UC06](03-casos-de-uso.md#uc06)
@@ -773,6 +773,7 @@ A configuração de apelido deve ser protegida por titularidade no backend, incl
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.15 | 2026-10-10 | RF34 passa a detalhar título, descrição, unicidade e catálogo inicial dos itens de recompensa coletiva. Para SPEC-015. |
 | 1.14 | 2026-10-07 | RF01, RF02, RF38, RF41 e RF48 passam a cobrir o onboarding do Criador: rascunho de perfil, criação da família, adição opcional de membros e emissão explícita de convite antes da área principal. |
 | 1.13 | 2026-10-07 | RF48 passa a definir o limite do apelido: até 20 caracteres não-espaço após trim, sem caracteres de controle; vazio/nulo remove a configuração. Para SPEC-006. |
 | 1.12 | 2026-10-07 | RF71 (novo) define observação opcional de até 250 caracteres na missão, espelhando RF70. Para SPEC-014. |

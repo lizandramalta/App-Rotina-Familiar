@@ -1,10 +1,10 @@
-# User flows — versão 1.8
+# User flows — versão 1.9
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão dos fluxos:** 1.8\
-**Base funcional:** 1.14\
-**Screen map:** 1.8 — revisão de 2026-10-07\
-**Data:** 2026-10-07\
+**Versão dos fluxos:** 1.9\
+**Base funcional:** 1.15\
+**Screen map:** 1.9 — revisão de 2026-10-10\
+**Data:** 2026-10-10\
 **Situação:** primeira versão para revisão de design
 
 [Projeto](../../README.md) · [Índice documental](../DOCUMENTACAO.md) · [Screen map](screen-map.md) · [Regras](../01-regras-de-negocio.md) · [Requisitos](../02-requisitos.md) · [Casos de uso](../03-casos-de-uso.md) · [Diagrama de classes](../06-diagrama-de-classes.md)
@@ -436,7 +436,7 @@ flowchart TD
     O --> H
 ```
 
-Cadastrar um item é opcional e independente: a roleta já dispõe dos itens predefinidos. Salvar um item o inclui em próximos sorteios, sem vinculá-lo a missão. Cancelar MOD-008 volta a TEL-023 sem adicionar. A origem de TEL-023 determina o retorno: lista de missões ou roleta.
+Cadastrar um item é opcional e independente: a roleta já dispõe dos itens predefinidos. No MOD-008, o título é obrigatório, sem caracteres de controle, tem até 60 caracteres não-espaço após `trim` e deve ser único na família sem distinguir maiúsculas/minúsculas; a descrição é opcional e tem até 255 caracteres contando espaços. Salvar um item o inclui em próximos sorteios, sem vinculá-lo a missão. Cancelar MOD-008 volta a TEL-023 sem adicionar. A origem de TEL-023 determina o retorno: lista de missões ou roleta.
 
 **Resultado:** aceitação salva encerra o resgate para toda a família e acrescenta a recompensa à conquista sem alterar suas tarefas, progresso ou participações. Consultar itens, sortear ou sair sem aceitar não consome o resgate. Após falha ou concorrência, consultar a situação corrente antes de tentar aceitar novamente.
 
@@ -597,6 +597,7 @@ Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imedi
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.9 | 1.15 | 1.9 | 2026-10-10 | UF-11 detalha título, descrição, limites e unicidade do item personalizado. Para SPEC-015. |
 | 1.8 | 1.14 | 1.8 | 2026-10-07 | UF-01 passa a configurar o perfil do Criador, criar a família e permitir zero ou mais membros com convite explícito antes da área principal. |
 | 1.7 | 1.12 | 1.7 | 2026-10-07 | UF-10 ganha atalho "+ Nova tarefa" em MOD-007, bloqueio local de salvar sem tarefas e consulta explícita por todos os perfis, inclusive Kids. Para SPEC-014. |
 | 1.6 | 1.11 | 1.6 | 2026-10-07 | UF-06 conclui diretamente sem modal; UF-08 permite reabrir missão concluída com confirmação e reversão de recompensa, participações e badges. |

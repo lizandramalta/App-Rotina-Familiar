@@ -1,7 +1,7 @@
 # Catálogo de funcionalidades e rastreabilidade mobile
 
-**Versão:** 1.6 · **Base funcional:** 1.11 · **Design:** 1.6\
-**Data:** 2026-10-07 · **Situação:** especificação para implementação futura
+**Versão:** 1.7 · **Base funcional:** 1.15 · **Design:** 1.9\
+**Data:** 2026-10-10 · **Situação:** especificação para implementação futura
 
 [Arquitetura mobile](mobile-architecture.md) · [Decisões](mobile-decisions.md) · [Índice documental](../DOCUMENTACAO.md) · [Screen map](../design/screen-map.md) · [User flows](../design/user-flows.md)
 
@@ -46,7 +46,7 @@ Para cada par abaixo, os arquivos são `<View>.swift` e `<ViewModel>.swift`, den
 | TEL-020 | `Missions` | `MissionsView` | `MissionsViewModel` | Aba independente adulta/Kids; lista em andamento e concluída |
 | TEL-021 | `Missions` | `MissionDetailView` | `MissionDetailViewModel` | Progresso, participações e recompensa; detalhe operacional de tarefa limitado por perfil |
 | TEL-022 | `Missions` | `MissionEditorView` | `MissionEditorViewModel` | Administrador, ao menos uma tarefa e nenhum prazo |
-| TEL-023 | `Rewards` | `RewardItemsView` | `RewardItemsViewModel` | Catálogo e itens personalizados, com origem preservada |
+| TEL-023 | `Rewards` | `RewardItemsView` | `RewardItemsViewModel` | Catálogo e itens personalizados, com origem, título e descrição preservados |
 | TEL-024 | `Rewards` | `RewardWheelView` | `RewardWheelViewModel` | Resultado, novo sorteio, aceitação ou saída sem resgate |
 | TEL-030 | `Profile` | `ProfileView` | `ProfileViewModel` | Aba adulta ou avatar Kids; foto, apelido e badges; saída do papel Admin quando permitida |
 | TEL-032 | `Family` | `MemberDetailView` | `MemberDetailViewModel` | Consulta adulta Dia/Semana das tarefas do membro; gestão só Admin |
@@ -77,7 +77,7 @@ Modais não se tornam automaticamente novos casos de uso ou novas ViewModels. Se
 | MOD-005 | `TaskDeletionConfirmationView.swift` | `TaskDetailViewModel`; confirma alcance autorizado |
 | MOD-006 | `TaskReopeningConfirmationView.swift` | `TaskDetailViewModel`; exibido quando reabrir afetar missão concluída/recompensa e informa reversão dos dados derivados |
 | MOD-007 | `MissionTaskPickerView.swift` | Rascunho de `MissionEditorViewModel`; IDs individuais, sem selecionar rotina inteira |
-| MOD-008 | `RewardItemEditorView.swift` | `RewardItemEditorViewModel`; gravação independente do resgate |
+| MOD-008 | `RewardItemEditorView.swift` | `RewardItemEditorViewModel`; título validado, descrição opcional e gravação independente do resgate |
 | MOD-009 | `OwnProfileEditorView.swift` | `OwnProfileEditorViewModel`; foto/apelido do titular e upload |
 | MOD-010 | `MemberChangeConfirmationView.swift` | Fluxo chamador: `ProfileViewModel`, `MemberDetailViewModel` ou `MemberEditorViewModel` |
 | MOD-011 | `KidsSignalComposerView.swift` | `KidsSignalComposerViewModel`; captura, revisão, upload e sinalização |
@@ -166,6 +166,7 @@ Os contratos remotos e sua cobertura por UC estão no [catálogo backend](backen
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.7 | 2026-10-10 | TEL-023/MOD-008 passam a transportar título normalizado único e descrição opcional de item de recompensa. Para SPEC-015. |
 | 1.5 | 2026-10-06 | Consulta própria passa a ser diária; consultas familiares adultas usam Dia/Semana, com `memberId` e tarefas sem responsável; carga fica para SPEC-018. Para SPEC-009; base funcional 1.9, design 1.4. |
 | 1.4 | 2026-10-06 | Rotina passa a aceitar observação; MOD-002 não exige data final e MOD-003 inclui a ocorrência de origem no alcance futuro. Para SPEC-008; base funcional 1.8, design 1.3. |
 | 1.3 | 2026-10-06 | MOD-014 (novo) resolve sinalização Kids pendente ao editar tarefa; TEL-013 ganha campo de observação; título limitado a 60 caracteres. Para SPEC-007; base funcional 1.7, design 1.2. |

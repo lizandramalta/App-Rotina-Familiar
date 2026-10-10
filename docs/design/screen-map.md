@@ -1,9 +1,9 @@
-# Screen map — versão 1.8
+# Screen map — versão 1.9
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do mapa:** 1.8\
-**Base funcional:** 1.14\
-**Data:** 2026-10-07\
+**Versão do mapa:** 1.9\
+**Base funcional:** 1.15\
+**Data:** 2026-10-10\
 **Situação:** referência inicial para design; organização de navegação proposta
 
 [Projeto](../../README.md) · [Índice e versões](../DOCUMENTACAO.md) · [Visão](../00-visao-do-produto.md) · [Regras](../01-regras-de-negocio.md) · [Requisitos](../02-requisitos.md) · [Casos de uso](../03-casos-de-uso.md) · [Diagrama de classes](../06-diagrama-de-classes.md)
@@ -253,7 +253,7 @@ A = Administrador (inclui Criador); M = Membro; K = Kids. Códigos RF e RNF são
 | TEL-020 | Missões e conquistas | A, M, K | Aba independente para adultos e Kids; listas em andamento/concluídas; abrir detalhe; criar e gerenciar itens somente A | [UC05](../03-casos-de-uso.md#uc05), [UC14](../03-casos-de-uso.md#uc14); RF28–32, RF36 |
 | TEL-021 | Detalhe da missão | A, M, K | Título, observação, tarefas e status visíveis a todos (Kids em versão simplificada); progresso, participações e recompensa completos ficam para UC14; edição somente A e conforme estado | [UC05](../03-casos-de-uso.md#uc05), [UC14](../03-casos-de-uso.md#uc14); RF29–32, RF36, RF50, RF58, RF71 |
 | TEL-022 | Criar/editar missão | A | Título, observação opcional (≤250 car.) e tarefas individuais, com atalho para criar tarefa nova; sem prazo | [UC05](../03-casos-de-uso.md#uc05); RF28–29, RF31–32, RF50, RF58, RF71 |
-| TEL-023 | Itens de recompensa | A | Consultar predefinidos e personalizados; adicionar item | [UC06](../03-casos-de-uso.md#uc06); RF33–34 |
+| TEL-023 | Itens de recompensa | A | Consultar predefinidos e personalizados; adicionar item com título e descrição opcional | [UC06](../03-casos-de-uso.md#uc06); RF33–34 |
 | TEL-024 | Roleta da missão | A | Sortear, ver resultado, aceitar ou sortear novamente; sair sem consumir resgate | [UC16](../03-casos-de-uso.md#uc16); RF35, RF51–53 |
 | TEL-030 | Meu perfil | A, M, K | Principal adulta; avatar/cabeçalho para Kids; foto por câmera/galeria, apelido só do titular, badges cumulativos e detalhe dos marcos; deixar papel Admin quando permitido | [UC10](../03-casos-de-uso.md#uc10), [UC02](../03-casos-de-uso.md#uc02); RF48, RF62, RF65, RF03, RF05 |
 | TEL-031 | Retirada — lista incorporada à Família | — | Lista e botão Adicionar membro incorporados à TEL-050; ID preservado, sem destino navegável | [UC02](../03-casos-de-uso.md#uc02); RF02–06, RF40 |
@@ -326,6 +326,7 @@ Campos funcionais de data/fuso e seleção de foto estão definidos; o layout vi
 
 | Versão do mapa | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.9 | 1.15 | 2026-10-10 | TEL-023 passa a explicitar cadastro de título e descrição opcional para item personalizado. Para SPEC-015. |
 | 1.7 | 1.12 | 2026-10-07 | TEL-022 ganha observação opcional; MOD-007 ganha atalho "+ Nova tarefa"; TEL-021 explicita consulta básica por todos os perfis, inclusive Kids. Para SPEC-014. |
 | 1.6 | 1.11 | 2026-10-07 | Conclusão direta sem MOD-004; MOD-006 confirma reabertura de missão concluída e reversão de recompensa, participações e badges. |
 | 1.5 | 1.10 | 2026-10-06 | MOD-004 oculta conclusão de tarefa com responsável Kids para Membro; evidência Kids permanece administrativa. Para SPEC-010. |

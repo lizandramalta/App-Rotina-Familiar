@@ -1,9 +1,9 @@
-# Diagrama de classes — versão 1.7
+# Diagrama de classes — versão 1.8
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.7\
-**Base funcional:** 1.12\
-**Data:** 2026-10-07
+**Versão:** 1.8\
+**Base funcional:** 1.15\
+**Data:** 2026-10-10
 **Situação:** referência de modelagem da base funcional
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Modelo de dados](05-modelo-de-dados.md)
@@ -917,8 +917,10 @@ case completed
 + createdBy: UUID?
 // ---
 + static predefined: [RewardItem]
-+ static custom(title: String, by admin: Member) throws -> Self
++ static custom(title: String, details: String?, by admin: Member) throws -> Self
 ```
+
+**Restrições:** para item personalizado, `title` é obrigatório, sem caracteres de controle e limitado a 60 caracteres não-espaço após `trim`; `details` é opcional e limitado a 255 caracteres contando espaços. O título normalizado por `trim` sem distinção entre maiúsculas/minúsculas é único dentro da família. Itens predefinidos são os seis definidos em RN42.
 
 <a id="classe-rewarditemsource"></a>
 ### RewardItemSource: String, Codable «enum»
@@ -1331,7 +1333,7 @@ O quadro relaciona conceitos com o [modelo de dados](05-modelo-de-dados.md#diagr
 | `Completion`, `KidsSignal`, `CompletionSource`, `ValidationDecision` | `CONCLUSAO`, `CREDITO_CONCLUSAO` e `OCORRENCIA_EVENTO` | Conclusão, responsáveis/peso creditados, sinalização, decisão e reabertura. O mapeamento de persistência deve conservar esses dados do contrato; o DER distingue crédito vigente e auditoria das correções. |
 | `Mission`, `MissionStatus` | `MISSAO`, `MISSAO_OCORRENCIA` | Missão e vínculos individuais; estado decorrente das tarefas. |
 | `Badge`, `BadgeAward`, `MissionParticipation` | `BADGE`, `MEMBRO_BADGE`, `PARTICIPACAO_MISSAO`, `BADGE_PARTICIPACAO` | Catálogo fixo, concessão por membro/marco e participações únicas, com missões contribuintes preservadas. |
-| `RewardItem`, `RewardItemSource`, `RedeemedReward` | `RECOMPENSA`, aceitação em `MISSAO` | Item elegível e registro da aceitação única. Título/autor da aceitação são dados do contrato cuja persistência deve preservar a conquista. |
+| `RewardItem`, `RewardItemSource`, `RedeemedReward` | `RECOMPENSA`, aceitação em `MISSAO` | Item elegível e registro da aceitação única. Título, descrição, origem e autor da aceitação são dados do contrato cuja persistência deve preservar a conquista. |
 | `WeeklyHighlight`, `WeeklyRecognition` | `APURACAO_SEMANAL`, `DESTAQUE_SEMANAL` | Processamento por família/semana, com resultado e notificação por reconhecido. |
 | `PeriodProgress`, `PeriodLoad`, `WeeklyReport`, `MemberReportLine` | Tarefas, conclusões e membros | Cálculos derivados e projeção consistente para PDF, sem duplicação de créditos. |
 | `WeeklyCycle`, `TimeZoneChange`, `NotificationDelivery` | `CICLO_SEMANAL`, `ALTERACAO_FUSO`, `NOTIFICACAO` | Limites de apuração, alterações de fuso e estado de envio externo. |
@@ -1349,6 +1351,7 @@ A âncora anterior desta seção foi preservada para compatibilidade. O backend 
 
 | Versão | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.8 | 1.15 | 2026-10-10 | `RewardItem.custom` passa a receber descrição opcional; limites, unicidade por família e catálogo inicial ficam explícitos. Para SPEC-015. |
 | 1.7 | 1.12 | 2026-10-07 | `Mission` ganha `note` opcional (até 250 caracteres); `unlink` sem substituição é rejeitado quando deixaria a missão sem tarefas. Para SPEC-014. |
 | 1.6 | 1.11 | 2026-10-07 | Conclusão direta sem escolha de atribuição; reabertura reverte dados derivados de missão concluída. |
 | 1.5 | 1.9 | 2026-10-06 | Restrições de UC11 distinguem consulta própria diária e consulta familiar adulta por Dia/Semana. Para SPEC-009. |
