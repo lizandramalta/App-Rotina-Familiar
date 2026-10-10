@@ -1,7 +1,7 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.14\
+**Versão:** 1.15\
 **Data:** 2026-10-10\
 **Situação:** base documental consolidada
 
@@ -777,10 +777,10 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 **Fluxo principal:**
 
 1. O adulto aciona Gerar relatório PDF na própria tela Minha família (TEL-050) e abre TEL-051.
-2. Seleciona uma semana de segunda a domingo; a data da origem sugere a semana correspondente.
+2. Seleciona uma `referenceDate`; o servidor resolve a semana de segunda a domingo no fuso da família, e a data da origem sugere a semana correspondente.
 3. O sistema identifica o período e, se atual, indica que o relatório é parcial até o momento da geração.
 4. O adulto confirma gerar. O backend fornece um snapshot consistente; o aplicativo gera o PDF e monta gráficos de carga semanal por membro e progresso total da família, com concluídas/total e percentual.
-5. Inclui tabela com o peso total creditado e o número de tarefas realizadas por membro, período, família, geração e explicação das métricas e do crédito compartilhado (RN62).
+5. Inclui tabela com o peso total creditado e o número de tarefas realizadas por membro, período, família, geração e explicação das métricas e do crédito compartilhado; crédito de removido aparece como “Membro removido” (RN62).
 6. Disponibiliza o PDF para visualizar, salvar ou compartilhar por ação do usuário.
 
 **Alternativas e exceções:**
@@ -840,6 +840,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.15 | 2026-10-10 | UC18 adota `referenceDate` para semana e identifica crédito histórico como “Membro removido”. Para SPEC-019. |
 | 1.14 | 2026-10-10 | UC13 preserva crédito histórico de perfil removido como “Membro removido”. Para SPEC-018. |
 | 1.13 | 2026-10-10 | UC06 passa a detalhar título obrigatório, descrição opcional, limites e unicidade de item personalizado; catálogo inicial definido em RN42. Para SPEC-015. |
 | 1.12 | 2026-10-07 | UC01 passa a cobrir perfil do Criador, família, adição opcional de membros e convite explícito antes da área principal; UC02 e UC04 registram a variação de onboarding. |

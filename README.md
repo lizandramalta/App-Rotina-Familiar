@@ -3,7 +3,7 @@
 Organização colaborativa das responsabilidades domésticas, com tarefas compartilhadas, participação infantil e conquistas coletivas.
 
 **Escopo:** MVP  
-**Versão da base do projeto:** 1.16\
+**Versão da base do projeto:** 1.17\
 **Data:** 2026-10-10
 
 ## Por que este projeto existe

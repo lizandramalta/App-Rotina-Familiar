@@ -525,7 +525,7 @@ flowchart TD
     G -->|Voltar| I(["Retornar à origem preservando período"])
 ```
 
-O PDF contém gráficos de carga semanal e progresso total da família e, por membro, peso creditado e número de tarefas realizadas. Identifica período, geração e métricas de RN62; compartilhadas não duplicam o total familiar de tarefas. Ausência de dados permite PDF com indicação apropriada. Falha de geração não disponibiliza arquivo incompleto. Abrir compartilhamento não comprova envio. Kids não têm acesso.
+O PDF contém gráficos de carga semanal e progresso total da família e, por membro, peso creditado e número de tarefas realizadas. A semana é resolvida pela data de referência no fuso familiar; identifica período, geração e métricas de RN62; compartilhadas não duplicam o total familiar de tarefas. Crédito histórico usa “Membro removido”, sem dado pessoal. Ausência de dados permite PDF com indicação apropriada. Falha de geração não disponibiliza arquivo incompleto. Abrir compartilhamento não comprova envio. Kids não têm acesso.
 
 <a id="uf-15"></a>
 
@@ -597,6 +597,7 @@ Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imedi
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.12 | 1.17 | 1.11 | 2026-10-10 | UF-14 define semana por data de referência e crédito histórico como “Membro removido”. Para SPEC-019. |
 | 1.11 | 1.16 | 1.11 | 2026-10-10 | UF-09 integra carga Dia/Semana e preserva crédito histórico de removido sem ranking. Para SPEC-018. |
 | 1.10 | 1.15 | 1.10 | 2026-10-10 | UF-10 alinha Kids a RF36: recompensa aceita é consultável; participações e resgate seguem indisponíveis. Para SPEC-016. |
 | 1.9 | 1.15 | 1.9 | 2026-10-10 | UF-11 detalha título, descrição, limites e unicidade do item personalizado. Para SPEC-015. |

@@ -111,7 +111,7 @@ posterior por Administradores em TEL-053/MOD-012; não há uma SPEC-021 separada
 | Spec planejada | UC principal | Projetos | Depende de | Status |
 |---|---|---|---|---|
 | [`SPEC-018-visualizar-carga`](SPEC-018-visualizar-carga.md) - Visualizar carga diária ou semanal | UC13 | ambos | SPEC-010, SPEC-013 | aprovada |
-| `SPEC-019-gerar-relatorio-semanal-pdf` - Gerar relatório semanal em PDF | UC18 | ambos | SPEC-018 | não criada |
+| [`SPEC-019-gerar-relatorio-semanal-pdf`](SPEC-019-gerar-relatorio-semanal-pdf.md) - Gerar relatório semanal em PDF | UC18 | ambos | SPEC-018 | aprovada |
 | `SPEC-020-destaque-semanal` - Apurar e compartilhar destaque semanal | UC19 | ambos | SPEC-018 | não criada |
 
 ## Índice de arquivos
@@ -139,6 +139,7 @@ status e resumo; mantenha esta tabela como o panorama do backlog.
 | [SPEC-016-acompanhar-missoes-recompensas](SPEC-016-acompanhar-missoes-recompensas.md) | [UX-016-acompanhar-missoes-recompensas.md](UX-016-acompanhar-missoes-recompensas.md) | aprovada | ambos | Consulta segura de progresso, tarefas, participações autorizadas e situação/recompensa aceita da missão; Kids visualiza recompensa aceita, sem participações ou resgate. |
 | [SPEC-017-resgatar-recompensa](SPEC-017-resgatar-recompensa.md) | [UX-017-resgatar-recompensa.md](UX-017-resgatar-recompensa.md) | aprovada | ambos | Roleta local e aceite único de recompensa por Administrador, com validação transacional, concorrência e recuperação segura de resultado incerto. |
 | [SPEC-018-visualizar-carga](SPEC-018-visualizar-carga.md) | [UX-018-visualizar-carga.md](UX-018-visualizar-carga.md) | aprovada | ambos | Carga familiar Dia/Semana integrada à Família, com distribuição sem ranking, períodos efetivos e crédito histórico de membro removido. |
+| [SPEC-019-gerar-relatorio-semanal-pdf](SPEC-019-gerar-relatorio-semanal-pdf.md) | [UX-019-gerar-relatorio-semanal-pdf.md](UX-019-gerar-relatorio-semanal-pdf.md) | aprovada | ambos | Snapshot semanal autorizado e PDF local com gráficos, tabela, dados parciais e crédito histórico preservado. |
 
 ## Templates
 

@@ -1,7 +1,7 @@
 # Regras de negócio
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.16\
+**Versão:** 1.17\
 **Data:** 2026-10-10\
 **Situação:** base documental consolidada
 
@@ -496,7 +496,7 @@ A carga/sobrecarga usa a data da conclusão válida, enquanto o progresso usa as
 
 O backend fornece um snapshot consistente e o aplicativo gera o arquivo. Administradores e Membros podem gerar um relatório familiar em PDF para uma semana selecionada de segunda a domingo. O documento identifica família, período e momento de geração, inclui gráficos da distribuição de carga semanal por membro e do progresso total da família, além do peso total creditado e número de tarefas realizadas por membro. O gráfico de progresso usa concluídas/total de tarefas previstas para a semana (RN60); peso e quantidade realizada por membro usam conclusões válidas naquela semana (RN30).
 
-Uma tarefa compartilhada conta uma vez para cada responsável no número individual e credita o peso integral a cada um; o total familiar de tarefas realizadas conta tarefas distintas, sem somar contagens individuais. O relatório explica essa diferença. Semana atual é identificada como parcial até o momento da geração; semanas futuras não geram relatório. Na semana de criação, manter o intervalo explícito e considerar as tarefas retroativas cadastradas; não presumir ausência de dados apenas por uma data prevista anteceder a criação da família. Semana sem dados pode gerar relatório com zeros e indicação “Sem tarefas” onde aplicável. O PDF reflete os dados no momento de geração; reabrir uma tarefa exige gerar novo arquivo para obter valores atualizados. Não incluir fotos de validação, credenciais ou configuração privada de perfil.
+Uma tarefa compartilhada conta uma vez para cada responsável no número individual e credita o peso integral a cada um; o total familiar de tarefas realizadas conta tarefas distintas, sem somar contagens individuais. O relatório explica essa diferença. Crédito histórico de perfil removido é identificado como “Membro removido”, sem dado pessoal. A semana é selecionada por data de referência e resolvida de segunda a domingo no fuso da família. Semana atual é identificada como parcial até o momento da geração; semanas futuras não geram relatório. Na semana de criação, manter o intervalo explícito e considerar as tarefas retroativas cadastradas; não presumir ausência de dados apenas por uma data prevista anteceder a criação da família. Semana sem dados pode gerar relatório com zeros e indicação “Sem tarefas” onde aplicável. O PDF reflete os dados no momento de geração; reabrir uma tarefa exige gerar novo arquivo para obter valores atualizados. Não incluir fotos de validação, credenciais ou configuração privada de perfil.
 
 **Requisitos funcionais:** [RF61](02-requisitos.md#rf61)  
 **Requisitos não funcionais específicos:** [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF10](02-requisitos.md#rnf10), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF26](02-requisitos.md#rnf26), [RNF27](02-requisitos.md#rnf27)  
@@ -570,6 +570,7 @@ A missão admite uma observação opcional de até 250 caracteres, contando espa
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.17 | 2026-10-10 | RN62 define `referenceDate` para resolver a semana do PDF e identifica crédito histórico como “Membro removido”. Para SPEC-019. |
 | 1.16 | 2026-10-10 | RN30, RN31 e RN61 preservam carga histórica de perfil removido em linha “Membro removido”, sem expor dados pessoais. Para SPEC-018. |
 | 1.15 | 2026-10-10 | RN42 passa a definir o catálogo predefinido e o cadastro de item personalizado: título obrigatório com até 60 caracteres não-espaço após `trim`, unicidade por família sem distinguir maiúsculas/minúsculas e descrição opcional de até 255 caracteres. Para SPEC-015. |
 | 1.14 | 2026-10-07 | Onboarding do Criador passa a coletar rascunho de nome, foto opcional e etiqueta opcional antes da criação da família; após a criação, permite adicionar zero ou mais membros e gerar convite explicitamente antes da área principal. RN01, RN07, RN09, RN44 e RN63 revisadas. |

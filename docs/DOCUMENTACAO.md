@@ -1,7 +1,7 @@
-# Documentação do projeto — versão 1.16
+# Documentação do projeto — versão 1.17
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.16\
+**Versão:** 1.17\
 **Data:** 2026-10-10\
 **Situação:** base documental consolidada
 
@@ -146,6 +146,7 @@ A fundação backend adota Node.js, TypeScript, Fastify e `pg`; API de produto, 
 
 | Versão | Data       | Alteração                                                                                                                                                                                                         |
 | ------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.17 | 2026-10-10 | RN62/UC18 definem `referenceDate` para o PDF e identificam crédito histórico como “Membro removido”; contrato do snapshot detalhado. Para SPEC-019. |
 | 1.16 | 2026-10-10 | Carga histórica de perfil removido é preservada como “Membro removido”; TEL-050/UF-09 e contrato de `GET /family/load` detalhados para SPEC-018. |
 | 1.15 | 2026-10-10 | RN42/RF34/UC06 definem catálogo inicial, título personalizado único por família e descrição opcional; modelo, classes, design e contratos atualizados. Para SPEC-015. |
 | 1.14 | 2026-10-07 | Onboarding inicial revisado: perfil do Criador antes da família, membros opcionais e convite explícito antes da área principal. RN01/RN07/RN09/RN44/RN63; RF01/RF02/RF38/RF41/RF48; UC01/UC02/UC04; visão, screen map e user flows 1.8. |

@@ -1,6 +1,6 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.12 · **Base funcional:** 1.16 · **Arquitetura backend:** 1.0\
+**Versão:** 1.13 · **Base funcional:** 1.17 · **Arquitetura backend:** 1.0\
 **Data:** 2026-10-10\
 **Situação:** contrato arquitetural para detalhamento OpenAPI na implementação
 
@@ -150,7 +150,7 @@ Registrar rota estática `task-options` sem ambiguidade com `{missionId}`. Não 
 
 Resumo Kids de missão pode mostrar títulos/estados coletivos necessários ao UC14, mas não carga, PDF, dados administrativos nem mídia Kids de outro titular. Link para detalhe de tarefa permanece autorizado separadamente.
 
-O snapshot de relatório inclui `period`, `timeZoneId`, `isTransition`, `generatedAt`, `isPartial`, totais e linhas. Datas/pontos do reconhecimento vêm do snapshot final, não de nova soma. Mensagem editável e abertura WhatsApp são locais; o backend não registra “enviado” por abrir o aplicativo externo.
+`GET /reports/weekly-snapshot?referenceDate=YYYY-MM-DD` exige sessão adulta; resolve a semana segunda–domingo no fuso da família e retorna `period`, `timeZoneId`, `isTransition`, `generatedAt`, `isPartial`, totais e linhas. Rejeita semana futura ou sem interseção com a família com `422 VALIDATION_FAILED`; Kids recebem `403 INSUFFICIENT_PERMISSIONS`; indisponibilidade retorna `503 DEPENDENCY_UNAVAILABLE`. Linhas históricas de perfil removido usam `memberId: null` e `displayName: "Membro removido"`, sem dados pessoais. Datas/pontos do reconhecimento vêm do snapshot final, não de nova soma. Mensagem editável e abertura WhatsApp são locais; o backend não registra “enviado” por abrir o aplicativo externo.
 
 ## 6. Mídia e rotas operacionais
 
@@ -217,6 +217,7 @@ O OpenAPI futuro deve materializar schemas e exemplos de sucesso/erro dessas rot
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.13 | 2026-10-10 | `GetWeeklyReportSnapshot` detalhado: `referenceDate`, validação de semana, projeção de removido e erros estáveis. Para SPEC-019. |
 | 1.12 | 2026-10-10 | `GetFamilyLoad` detalhado: snapshot Dia/Semana, período efetivo/fuso, membros removidos históricos, totais, percentuais e erros estáveis. Para SPEC-018. |
 | 1.11 | 2026-10-10 | `AcceptMissionReward` detalhado: `200` canônico, validações transacionais, códigos estáveis de conflito e de item inelegível, e recuperação por consulta após resposta perdida. Para SPEC-017. |
 | 1.10 | 2026-10-10 | `ListRewardItems` e `AddRewardItem` detalhados: catálogo inicial, título normalizado único por família, descrição opcional (≤255) e recuperação por consulta após resposta perdida. Para SPEC-015. |
