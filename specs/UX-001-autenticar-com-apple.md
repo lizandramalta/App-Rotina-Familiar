@@ -51,7 +51,7 @@
   - **Corpo da Tela:** título/ilustração de boas-vindas; botão nativo `Sign in with Apple` centralizado; texto de apoio orientando quem já tem convite a usar o link recebido (ação que leva a TEL-003/TEL-004, fora desta spec).
   - **Rodapé:** nenhum controle fixo adicional; o botão Apple é a única ação primária desta spec.
 - **Componentes do Design System Utilizados:**
-  - `SignInWithAppleButton` / `ASAuthorizationAppleIDButton` nativo, com rótulo `.signIn` e estilo `.black`; texto livre, ícone e fonte não são customizados.
+  - `SignInWithAppleButton` / `ASAuthorizationAppleIDButton` nativo, com rótulo `.continue` e estilo `.black`; texto livre, ícone e fonte não são customizados.
   - `InlineFeedback` não bloqueante, acima do botão Apple, com ícone e texto localizável para os erros que o app pode apresentar.
   - Indicador de carregamento acoplado ao próprio botão nativo durante `Submitting`.
 - **Apresentação por Perfil de Acesso:** não há variação por perfil nesta tela — ela antecede qualquer perfil resolvido.
@@ -73,8 +73,9 @@ Não há estados `Loading (Carga Inicial)`, `Refreshing` ou `Empty State` nesta 
 
 | Elemento de UI | Tipo de Componente | Chave de Localização (`i18n key`) | Texto Padrão (pt-BR) | Cenário de Exibição / Validação | Rastreabilidade (CA / RN da SPEC) |
 |---|---|---|---|---|---|
-| Título da tela | `Text` | `access.entry.title` | "Organize a rotina da família" | Estado inicial | TEL-001 |
-| Texto de apoio | `Text` | `access.entry.subtitle` | "Entre com Apple para criar ou acessar sua família" | Estado inicial | CA-01, CA-02 |
+| Ilustração de boas-vindas | `Image` | `access.entry.illustration_label` | "Ilustração de uma casa com porta e janelas, representando o lar da família" | Estado inicial; conteúdo significativo | TEL-001 |
+| Título da tela | `Text` | `access.entry.title` | "Bem-vindo ao App Família" | Estado inicial | TEL-001 |
+| Texto de apoio | `Text` | `access.entry.subtitle` | "Entre para organizar sua família" | Estado inicial | CA-01, CA-02 |
 | Orientação a convidados | `Text` | `access.entry.invite_hint` | "Recebeu um convite? Abra o link que a sua família enviou." | Estado inicial, sempre visível | Fora do escopo (referência a TEL-003/004) |
 | Erro de prova inválida | `InlineFeedback` | `access.entry.error_apple_proof_invalid` | "Não foi possível confirmar sua conta Apple. Tente novamente." | Resposta `401 APPLE_PROOF_INVALID` | CA-04 |
 | Erro de rede | `InlineFeedback` | `access.common.error_network` | "Não foi possível conectar. Verifique sua internet." | Timeout ou falha de rede após login nativo | CA-10 |
@@ -85,8 +86,8 @@ Não há estados `Loading (Carga Inicial)`, `Refreshing` ou `Empty State` nesta 
 ## 8. Acessibilidade (A11y) e Adaptação de Dispositivo
 
 ### 8.1. VoiceOver e Tecnologias Assistivas (iOS)
-- **Ordem de Foco Lógico:** Título → Texto de apoio → Botão Apple → Orientação a convidados.
-- **Rótulos Acessíveis:** o botão `ASAuthorizationAppleIDButton` já fornece rótulo e papel acessíveis nativos da Apple; nenhum rótulo customizado é necessário ou permitido para esse componente.
+- **Ordem de Foco Lógico:** Ilustração → Título → Texto de apoio → Botão Apple → Orientação a convidados.
+- **Rótulos Acessíveis:** a ilustração é conteúdo significativo e usa `access.entry.illustration_label`. O botão `ASAuthorizationAppleIDButton` já fornece rótulo e papel acessíveis nativos da Apple; nenhum rótulo customizado é necessário ou permitido para esse componente.
 - **Mensagens de erro:** `InlineFeedback` usa rótulo de alerta e é anunciado pelo VoiceOver quando aparece; em seguida, o foco lógico permanece no botão Apple para nova tentativa. Cancelamento ou falha nativa não anuncia mensagem adicional; o foco retorna ao botão Apple.
 
 ### 8.2. Dynamic Type (Escala de Fontes)
@@ -104,7 +105,7 @@ Não há estados `Loading (Carga Inicial)`, `Refreshing` ou `Empty State` nesta 
 
 ## 9. Referências Visuais e Design Tokens
 
-- **Wireframes e Protótipos:** ainda não produzidos; a tela segue o layout mínimo descrito na seção 5.1 até haver material visual dedicado.
+- **Wireframes e Protótipos:** média fidelidade disponível no [Figma — TEL-001](https://www.figma.com/design/CuxXOp9tKivMbELeeB6mHw/APP-FAM%C3%8DLIA-%7C-C18?node-id=54-426). A implementação usa o layout de iPhone e iPad, os estados inicial, envio e falhas inline desse recorte.
 - **Cores Semânticas:** Fundo principal `BackgroundPrimary`; Erro/Alerta `SemanticDestructive`.
 - **Tipografia:** Tipografia do sistema (San Francisco) com estilos semânticos (`.largeTitle` para o título, `.body` para o texto de apoio).
 
@@ -112,12 +113,13 @@ Não há estados `Loading (Carga Inicial)`, `Refreshing` ou `Empty State` nesta 
 
 | # | Dúvida ou Cenário de UX | Decisão de Design Adotada | Responsável / Data | Altera a SPEC funcional ou docs/? |
 |---|---|---|---|---|
-| UX-01 | O botão Apple deve ter alguma personalização de texto/cor? | Não — mantém o componente nativo `ASAuthorizationAppleIDButton` sem customização, para preservar a conformidade com as diretrizes da Apple. | Ana Luísa Coleone / 2026-10-06 | Não |
+| UX-01 | O botão Apple deve ter alguma personalização de texto/cor? | Não — mantém o componente nativo `ASAuthorizationAppleIDButton` sem customização, com rótulo `.continue` e estilo `.black`, para preservar a conformidade com as diretrizes da Apple. | Produto / 2026-10-09 | Não |
 | UX-02 | O que a tela mostra enquanto aguarda a resposta de `POST /access/apple`? | Indicador de carregamento acoplado ao próprio botão nativo, com o restante da tela estável (sem skeleton, pois não há lista/dado remoto a carregar). | Ana Luísa Coleone / 2026-10-06 | Não |
 | UX-03 | O que ocorre quando o sheet Apple é cancelado ou devolve erro sem prova? | TEL-001 retorna a `Idle` sem mensagem do app; o foco do VoiceOver volta ao botão Apple. | Produto / 2026-10-07 | Não |
 | UX-04 | Quais falhas aparecem em tela? | `APPLE_PROOF_INVALID`, rede e `RATE_LIMIT_EXCEEDED` usam mensagem inline acima do botão. Cancelamento e falha nativa não aparecem como erro no app. | Produto / 2026-10-07 | Não |
 | UX-05 | Como a pessoa tenta novamente após rede ou erro de backend? | Um novo toque no botão Apple inicia novo login; o app não reenvia a prova anterior automaticamente. | Produto / 2026-10-07 | Não |
-| UX-06 | Quais escopos e configuração usa o botão Apple? | Nenhum escopo adicional; botão nativo com rótulo `.signIn` e estilo `.black`. | Produto / 2026-10-07 | Não |
+| UX-06 | Quais escopos e configuração usa o botão Apple? | Nenhum escopo adicional; botão nativo com rótulo `.continue` e estilo `.black`. | Produto / 2026-10-09 | Não |
+| UX-07 | Qual conteúdo e semântica de acessibilidade se aplicam à entrada? | Adota a média fidelidade do Figma: título "Bem-vindo ao App Família", subtítulo "Entre para organizar sua família" e ilustração significativa, anunciada antes do título pelo VoiceOver. Não muda comportamento, contrato ou permissão. | Produto / 2026-10-09 | Não |
 
 ## 11. Checklist de Aprovação da UX-Spec (Definition of Ready)
 

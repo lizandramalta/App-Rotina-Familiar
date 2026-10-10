@@ -1,6 +1,106 @@
 {
   "sourceLanguage" : "pt-BR",
   "strings" : {
+    "access.common.error_network" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível conectar. Verifique sua internet."
+          }
+        }
+      }
+    },
+    "access.entry.error_apple_proof_invalid" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível confirmar sua conta Apple. Tente novamente."
+          }
+        }
+      }
+    },
+    "access.entry.error_rate_limited" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muitas tentativas. Aguarde alguns minutos e tente novamente."
+          }
+        }
+      }
+    },
+    "access.entry.illustration_label" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ilustração de uma casa com porta e janelas, representando o lar da família"
+          }
+        }
+      }
+    },
+    "access.entry.invite_hint" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recebeu um convite? Abra o link que a sua família enviou."
+          }
+        }
+      }
+    },
+    "access.entry.submitting" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrando com Apple"
+          }
+        }
+      }
+    },
+    "access.entry.subtitle" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entre para organizar sua família"
+          }
+        }
+      }
+    },
+    "access.entry.title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bem-vindo ao App Família"
+          }
+        }
+      }
+    },
+    "access.initial_profile.description" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A configuração do perfil inicial será exibida aqui."
+          }
+        }
+      }
+    },
+    "access.initial_profile.title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurar perfil inicial"
+          }
+        }
+      }
+    },
     "foundation.placeholder.action" : {
       "localizations" : {
         "pt-BR" : {
