@@ -1,9 +1,9 @@
-# User flows — versão 1.9
+# User flows — versão 1.10
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão dos fluxos:** 1.9\
+**Versão dos fluxos:** 1.10\
 **Base funcional:** 1.15\
-**Screen map:** 1.9 — revisão de 2026-10-10\
+**Screen map:** 1.10 — revisão de 2026-10-10\
 **Data:** 2026-10-10\
 **Situação:** primeira versão para revisão de design
 
@@ -402,7 +402,7 @@ Salvar retorna à origem que abriu o formulário: à lista em criação e ao det
 
 Cada tarefa vinculada conta uma vez, sem incluir a rotina inteira implicitamente. Remover vínculos de missão em andamento pode concluí-la se todas as restantes estiverem concluídas; desmarcar a última tarefa restante sem substituição é bloqueado no próprio MOD-007, com mensagem explicando que uma missão precisa de ao menos uma tarefa. Progresso também é recalculado por conclusões e reaberturas autorizadas fora deste fluxo. Missão concluída não aceita edição; a única exceção é a reabertura confirmada de tarefa vinculada, que remove os dados derivados do encerramento. Não existe expiração por tempo.
 
-**Consulta de tarefas:** adultos podem abrir TEL-012 a partir do detalhe da missão. Kids podem abrir TEL-041 somente para tarefas próprias; acompanhar as demais tarefas da missão não concede ações operacionais. Kids consultam título, observação, tarefas vinculadas e status em TEL-020/021 numa apresentação simplificada, sem ações de gestão, participações ou recompensa. Voltar retorna a TEL-021.
+**Consulta de tarefas:** adultos podem abrir TEL-012 a partir do detalhe da missão. Kids podem abrir TEL-041 somente para tarefas próprias; acompanhar as demais tarefas da missão não concede ações operacionais. Kids consultam título, observação, tarefas vinculadas, status e recompensa aceita em TEL-020/021 numa apresentação simplificada, sem ações de gestão, participações ou resgate. Voltar retorna a TEL-021.
 
 <a id="uf-11"></a>
 
@@ -591,12 +591,13 @@ Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imedi
 - As quatro telas principais adultas são entradas independentes; Minhas tarefas continua como inicial.
 - Fluxos Kids não concedem carga, relatório familiar, gestão ou conclusão direta. Perfil próprio e reconhecimento recebido são permitidos.
 - Toda alteração só é apresentada como concluída após confirmação da gravação.
-- TEL/MOD preservam o screen map 1.8; UF-01–UF-16 cobrem UC01–UC19, incluindo TEL-051/052/053/054/055/056 e MOD-012/013.
+- TEL/MOD preservam o screen map 1.10; UF-01–UF-16 cobrem UC01–UC19, incluindo TEL-051/052/053/054/055/056 e MOD-012/013.
 
 ## Histórico
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.10 | 1.15 | 1.10 | 2026-10-10 | UF-10 alinha Kids a RF36: recompensa aceita é consultável; participações e resgate seguem indisponíveis. Para SPEC-016. |
 | 1.9 | 1.15 | 1.9 | 2026-10-10 | UF-11 detalha título, descrição, limites e unicidade do item personalizado. Para SPEC-015. |
 | 1.8 | 1.14 | 1.8 | 2026-10-07 | UF-01 passa a configurar o perfil do Criador, criar a família e permitir zero ou mais membros com convite explícito antes da área principal. |
 | 1.7 | 1.12 | 1.7 | 2026-10-07 | UF-10 ganha atalho "+ Nova tarefa" em MOD-007, bloqueio local de salvar sem tarefas e consulta explícita por todos os perfis, inclusive Kids. Para SPEC-014. |

@@ -58,7 +58,7 @@
 - Sem `Idempotency-Key` nem controle de versão otimista (BA-07/MA-08); última gravação válida vence.
 - Nenhuma gravação offline no mobile (MA-07).
 - O atalho "+ Nova tarefa" não adiciona `missionId` à tarefa nem muda o contrato de `POST /v1/tasks`: o vínculo é sempre lido/gravado do lado da missão (`taskIds`), nunca da tarefa.
-- Kids não têm ação de criar, editar, vincular/desvincular tarefas, nem veem participações ou recompensa.
+- Kids não têm ação de criar, editar, vincular/desvincular tarefas, nem veem participações. A recompensa aceita é consultável por todos os perfis conforme RF36; a ação de resgate permanece exclusiva de Administrador.
 
 ## 4. Perfis, Atores e Regras de Autorização (RBAC)
 
@@ -66,7 +66,7 @@
 |---|---|---|---|
 | Administrador | Criar, editar e consultar qualquer missão da família | Alterar dados/vínculos de missão concluída (exceto por reabertura de tarefa, fora desta spec) | `409 MISSION_COMPLETED_PROTECTED` |
 | Membro | Consultar missões (leitura mínima) | Criar ou editar missão | `403 ACTION_NOT_ALLOWED` / ação oculta na UI |
-| Kids | Consultar título, observação, tarefas vinculadas e status, em apresentação simplificada | Criar, editar, vincular/desvincular tarefas; ver participações ou recompensa | `403 ACTION_NOT_ALLOWED` / ação oculta na UI |
+| Kids | Consultar título, observação, tarefas vinculadas, status e recompensa aceita, em apresentação simplificada | Criar, editar, vincular/desvincular tarefas; ver participações ou resgatar recompensa | `403 ACTION_NOT_ALLOWED` / ação oculta na UI |
 
 - **Isolamento familiar (RNF06):** missão de outra família responde `404 RESOURCE_NOT_FOUND`, sem revelar metadados.
 - **Autorização no backend (RNF07):** o backend revalida o perfil em toda chamada, independentemente da ocultação visual no mobile.
