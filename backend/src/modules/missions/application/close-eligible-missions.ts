@@ -2,7 +2,7 @@ import type { Logger } from '../../../shared/infrastructure/observability/logger
 import type { TransactionContext } from '../../../shared/application/transaction-runner.js';
 import type { MissionRepositoryPort } from './mission-repository-port.js';
 
-export type MissionCloseTrigger = 'create' | 'edit' | 'completeTask';
+export type MissionCloseTrigger = 'create' | 'edit' | 'completeTask' | 'deleteTask';
 
 /**
  * Serviço de aplicação `CloseEligibleMissions` (SPEC-014, UC05): chamado por
@@ -44,6 +44,18 @@ export class CloseEligibleMissions {
       });
     }
     return closed.length;
+  }
+
+  /** Gancho de `DeleteTask`: reavalia as missões que perderam o vínculo (CA-21). */
+  public async closeAfterTaskDeletion(
+    tx: TransactionContext,
+    params: {
+      readonly familyId: string;
+      readonly missionIds: readonly string[];
+      readonly now: Date;
+    },
+  ): Promise<void> {
+    await this.closeByIds(tx, { ...params, trigger: 'deleteTask' });
   }
 
   /** Gancho de `CompleteTask`: reavalia as missões que vinculam a tarefa. */

@@ -470,17 +470,18 @@ export class PostgresTaskRepository implements TaskRepositoryPort, TaskQueryRepo
   public async deleteTask(
     tx: TransactionContext,
     params: { readonly task: TaskRecord; readonly actorId: string; readonly now: Date },
-  ): Promise<void> {
+  ): Promise<readonly string[]> {
     const client = asPostgresClient(tx);
     await client.query(
       `update app.kids_signals set discarded_at = $3
         where family_id = $1 and task_id = $2 and discarded_at is null`,
       [params.task.familyId, params.task.id, params.now],
     );
-    await client.query(`delete from app.mission_tasks where family_id = $1 and task_id = $2`, [
-      params.task.familyId,
-      params.task.id,
-    ]);
+    // Missões que perderam o vínculo precisam ser reavaliadas (SPEC-014 CA-21).
+    const unlinked = await client.query<{ mission_id: string }>(
+      `delete from app.mission_tasks where family_id = $1 and task_id = $2 returning mission_id`,
+      [params.task.familyId, params.task.id],
+    );
     await client.query(
       `update app.task_occurrences set deleted_at = $3, updated_at = $3
         where family_id = $1 and id = $2`,
@@ -495,6 +496,7 @@ export class PostgresTaskRepository implements TaskRepositoryPort, TaskQueryRepo
       newValues: null,
       now: params.now,
     });
+    return unlinked.rows.map((row) => row.mission_id);
   }
 
   private async replaceAssignees(

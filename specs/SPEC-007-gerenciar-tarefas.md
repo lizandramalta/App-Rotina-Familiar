@@ -2,7 +2,7 @@
 
 **Status:** aprovada
 **Autor:** Claude | **Criada em:** 2026-10-06 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-06
-**Base funcional:** 1.7
+**Base funcional:** 1.18
 **UX-spec:** [UX-007-gerenciar-tarefas.md](UX-007-gerenciar-tarefas.md)
 **Projetos envolvidos:** ambos
 **Tema do backlog:** Tema 2 - Tarefas e rotina
@@ -34,7 +34,7 @@
 - `POST /v1/tasks`: criar tarefa única (não recorrente) com `title`, `weight`, `scheduledDate`, `assigneeIds` opcional e `note` opcional.
 - `GET /v1/tasks/{taskId}`: detalhe da tarefa, suporte às telas de edição e exclusão.
 - `PATCH /v1/tasks/{taskId}`: editar título, peso, data prevista, responsáveis e observação de uma ocorrência, inclusive quando `completed` e não protegida por missão concluída (RN17); exige `signalResolution` quando o estado atual é `awaitingConfirmation`.
-- `DELETE /v1/tasks/{taskId}`: excluir tarefa não concluída; remove vínculo com missão em andamento e recalcula progresso (RF59); remove sinalização Kids corrente sem registrar decisão quando o estado é `awaitingConfirmation`.
+- `DELETE /v1/tasks/{taskId}`: excluir tarefa não concluída; remove vínculo com missão em andamento e recalcula progresso (RF59), concluindo a missão na mesma transação se restarem apenas tarefas concluídas (RN38); remove sinalização Kids corrente sem registrar decisão quando o estado é `awaitingConfirmation`.
 - Autorização exclusiva de Administrador/Membro (RN20); Kids bloqueados (RF27/RN19/RNF07).
 - Isolamento multitenant (RNF06) em todas as operações.
 - TEL-011, TEL-012 (somente as ações Editar e Excluir), TEL-013 (somente o bloco de tarefa única), MOD-001, MOD-005, MOD-014.
@@ -120,7 +120,7 @@
 |---|---|---|---|
 | `GET /v1/tasks/{taskId}` | Detalhe da tarefa | Estado atual, origem, campos e capacidades autorizadas | Administrador, Membro |
 | `PATCH /v1/tasks/{taskId}` | Editar campos de uma ocorrência | Campos presentes no dicionário 5.1, incluindo `signalResolution` quando aplicável; campos omitidos são preservados | Administrador, Membro; respeita proteção de missão concluída |
-| `DELETE /v1/tasks/{taskId}` | Excluir tarefa não concluída | Remove vínculos de missão em andamento e recalcula progresso; remove sinalização corrente se houver | Administrador, Membro; não concluída/não protegida |
+| `DELETE /v1/tasks/{taskId}` | Excluir tarefa não concluída | Remove vínculos de missão em andamento e recalcula progresso, fechando a missão se restarem só tarefas concluídas; remove sinalização corrente se houver | Administrador, Membro; não concluída/não protegida |
 
 `PATCH` segue a convenção comum: campos omitidos são preservados, `null` remove apenas campos opcionais (`assigneeIds`, `note`), e a lista de `assigneeIds` enviada substitui a anterior por completo.
 
@@ -147,7 +147,7 @@
 | Estado de | Evento | Estado para | Autor | Garantias |
 |---|---|---|---|---|
 | — | `CreateTask` | `pending` | Administrador/Membro | Título, peso e data válidos; sem rotina |
-| `pending` ou `awaitingConfirmation` | `DeleteTask` | excluída (lógica) | Administrador/Membro | Remove vínculos de missão em andamento e recalcula progresso; remove sinalização corrente sem decisão se `awaitingConfirmation` |
+| `pending` ou `awaitingConfirmation` | `DeleteTask` | excluída (lógica) | Administrador/Membro | Remove vínculos de missão em andamento e recalcula progresso; se restarem só tarefas concluídas, `CloseEligibleMissions` (SPEC-014) fecha a missão no mesmo commit; remove sinalização corrente sem decisão se `awaitingConfirmation` |
 | `completed` | `DeleteTask` | — | — | Bloqueada com `409 TASK_ALREADY_COMPLETED` (RN18) |
 | `pending`, `awaitingConfirmation` ou `completed` não protegida | `EditTask` | mesmo estado (exceto abaixo) | Administrador/Membro | Título/peso/data/responsáveis/observação atualizados; se `completed`, recrédita e recalcula progresso preservando o instante original de conclusão (RN17) |
 | `awaitingConfirmation` | `EditTask` com `signalResolution: resetToPending` | `pending` | Administrador/Membro | Descarta a sinalização corrente; a criança pode sinalizar novamente (RN66) |
@@ -243,13 +243,19 @@
   - **ENTÃO O SISTEMA DEVE** persistir a observação,
   - **E** recusar com `422 VALIDATION_FAILED`/`NOTE_TOO_LONG` quando exceder 250 caracteres. *(RN67, RF70)*
 
+- **CA-17: exclusão que deixa apenas tarefas concluídas fecha a missão**
+  - **DADO QUE** uma missão em andamento tem tarefas concluídas e uma única tarefa pendente,
+  - **QUANDO** um adulto excluir essa tarefa pendente,
+  - **ENTÃO O SISTEMA DEVE** remover o vínculo e concluir a missão na mesma transação,
+  - **E** registrar participações e badges conforme SPEC-014. *(RN38, RF59)*
+
 ## 8. Observabilidade, métricas e auditoria
 
 | Evento | Gatilho | Dados permitidos |
 |---|---|---|
 | `task_created` | Tarefa criada com sucesso | `taskId`, `familyId`, `hasAssignee`, `hasNote` |
 | `task_edited` | Edição persistida | `taskId`, `familyId`, `wasCompleted`, `signalResolution` quando aplicável |
-| `task_deleted` | Exclusão confirmada | `taskId`, `familyId`, `hadPendingSignal` |
+| `task_deleted` | Exclusão confirmada | `taskId`, `familyId`, `hadPendingSignal`, `closedMissionCount` |
 | `task_management_denied` | Tentativa bloqueada por permissão ou proteção | `requestId`, `actorId`, `targetFamilyId`, `code` |
 
 Segredos, tokens e dados de autenticação nunca entram em logs ou telemetria. `note` não é registrado em telemetria, apenas sua presença (`hasNote`).
@@ -261,6 +267,7 @@ Segredos, tokens e dados de autenticação nunca entram em logs ou telemetria. `
 | E-01 | Título da tarefa: 1 a 60 caracteres Unicode visíveis após trim, sem caracteres de controle, no mesmo padrão do nome da família. | Decidida em 2026-10-06 | Sim — `docs/01-regras-de-negocio.md` (RN11) 1.6, `docs/02-requisitos.md` (RF07) 1.7 |
 | E-02 | Editar tarefa `awaitingConfirmation` exige escolher entre `resetToPending` (descarta sinalização) e `keepAwaitingConfirmation` (mantém); excluir remove a sinalização sem decisão. Exigido em toda edição salva nesse estado, mesmo que só a observação mude. | Decidida em 2026-10-06 | Sim — RN66/RF69 (novos) |
 | E-03 | IDs duplicados em `assigneeIds` no mesmo payload são deduplicados silenciosamente pelo servidor, sem erro de validação. | Decidida em 2026-10-06 | Não — comportamento de implementação desta spec |
+| E-05 | A exclusão de tarefa não concluída que deixa a missão em andamento apenas com tarefas concluídas conclui a missão na mesma transação, invocando `CloseEligibleMissions` (SPEC-014). | Decidida em 2026-10-19 | Sim — RN38 (1.18), RF59 (1.17), UC07 (1.16) |
 | E-04 | Tarefa ganha campo `note` opcional, até 250 caracteres contando espaços, com as mesmas proteções de edição dos demais campos. | Decidida em 2026-10-06 | Sim — RN67/RF70 (novos), `docs/05-modelo-de-dados.md` 1.3, `docs/06-diagrama-de-classes.md` 1.3 |
 
 ## 10. Fases de implementação e conclusão
@@ -268,7 +275,7 @@ Segredos, tokens e dados de autenticação nunca entram em logs ou telemetria. `
 | Fase | Objetivo | CAs | Prontidão | Status |
 |---|---|---|---|---|
 | 1 | Núcleo: criar e consultar com autorização, isolamento e validação | CA-01, CA-02, CA-03, CA-04, CA-16 | Testes unitários e de integração verdes | em andamento — backend concluído (SCRUM-35); Mobile pendente (SCRUM-37) |
-| 2 | Editar e excluir com proteções de missão/conclusão e resolução de sinalização pendente | CA-05 a CA-10, CA-12 a CA-15 | Testes de integração e UX-spec verificada | em andamento — backend concluído (SCRUM-35); Mobile pendente (SCRUM-37) |
+| 2 | Editar e excluir com proteções de missão/conclusão e resolução de sinalização pendente | CA-05 a CA-10, CA-12 a CA-15, CA-17 | Testes de integração e UX-spec verificada | em andamento — backend concluído (SCRUM-35); Mobile pendente (SCRUM-37) |
 | 3 | Resiliência de rede | CA-11 | Regressão verde | a fazer |
 
 **Registro de execução (2026-10-10):** SCRUM-35 concluiu o escopo backend das Fases 1 e 2. As fases permanecem em andamento até a entrega Mobile correspondente (SCRUM-37) e sua validação de interface.

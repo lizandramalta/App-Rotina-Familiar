@@ -341,7 +341,10 @@ export function createContainer(config: Configuration): ApplicationContainer {
   const getOwnTasksUseCase = new GetOwnTasksUseCase(taskQueryDependencies);
   const getOwnProgressUseCase = new GetOwnProgressUseCase(taskQueryDependencies);
   const editTaskUseCase = new EditTaskUseCase(taskDependencies);
-  const deleteTaskUseCase = new DeleteTaskUseCase(taskDependencies);
+  const deleteTaskUseCase = new DeleteTaskUseCase({
+    ...taskDependencies,
+    missionCloser: closeEligibleMissions,
+  });
 
   return {
     config,

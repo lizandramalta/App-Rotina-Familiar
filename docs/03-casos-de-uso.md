@@ -1,8 +1,8 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.15\
-**Data:** 2026-10-10\
+**Versão:** 1.16\
+**Data:** 2026-10-19\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -334,7 +334,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 - A atribuição pode ser alterada para um ou mais responsáveis ou removida, respeitando as proteções das tarefas vinculadas a missões concluídas.
 - Na exclusão de tarefa de rotina, o usuário escolhe somente a selecionada ou ela e as futuras. O sistema preserva as ocorrências concluídas e informa quais registros não podem ser excluídos.
 - Uma tarefa concluída não pode ser excluída diretamente. O sistema informa que, se vinculada a missão em andamento e não protegida por missão concluída, somente um Administrador pode retorná-la a Pendente pelo [UC17](03-casos-de-uso.md#uc17) antes da exclusão.
-- Ao excluir tarefa não concluída vinculada a missão em andamento, o sistema remove o vínculo e recalcula o progresso. Se ela for a única tarefa da missão, bloqueia a exclusão até que outra tarefa seja vinculada.
+- Ao excluir tarefa não concluída vinculada a missão em andamento, o sistema remove o vínculo e recalcula o progresso. Se restarem apenas tarefas concluídas, a missão é concluída na mesma operação, conforme [RN38](01-regras-de-negocio.md#rn38), com participações, badges e resgate habilitado. Se ela for a única tarefa da missão, bloqueia a exclusão até que outra tarefa seja vinculada.
 - O sistema impede excluir ou alterar uma tarefa quando isso modificar dados preservados de uma missão concluída.
 - Título ausente, com mais de 60 caracteres visíveis ou peso fora de 1 a 3 e operações de gerenciamento por Kids são rejeitados.
 - Concluída sem proteção admite edição individual de título, peso, data, responsáveis e observação. Informar os efeitos: créditos e progresso são recalculados, instante original da conclusão e auditoria são preservados. Sem responsáveis, não há crédito individual. Última edição válida efetivada no servidor prevalece, sem comparação de versão antiga (RN17).
@@ -840,6 +840,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.16 | 2026-10-19 | UC07: a exclusão que deixa só tarefas concluídas fecha a missão (RN38/RF59). Para SPEC-014/SPEC-007. |
 | 1.15 | 2026-10-10 | UC18 adota `referenceDate` para semana e identifica crédito histórico como “Membro removido”. Para SPEC-019. |
 | 1.14 | 2026-10-10 | UC13 preserva crédito histórico de perfil removido como “Membro removido”. Para SPEC-018. |
 | 1.13 | 2026-10-10 | UC06 passa a detalhar título obrigatório, descrição opcional, limites e unicidade de item personalizado; catálogo inicial definido em RN42. Para SPEC-015. |

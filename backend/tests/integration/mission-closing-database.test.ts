@@ -292,6 +292,47 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
       expect(badges.rows).toEqual([{ badge_code: 'bronze', contributing: 5 }]);
     });
 
+    it('CA-21 deleting the last pending task closes the mission with participations', async () => {
+      const family = await seedFamily();
+      const done = await seedTask(family, [family.memberId]);
+      const pending = await seedTask(family, [family.otherMemberId]);
+      await completeTask(family, done);
+      const mission = await createMission(family, [done, pending]);
+      expect(mission.status).toBe('inProgress');
+
+      await container.deleteTaskUseCase.execute(admin(family), pending);
+
+      const closed = await container.getMissionDetailUseCase.execute(admin(family), mission.id);
+      expect(closed).toMatchObject({ status: 'completed', taskIds: [done] });
+      expect(await participants(mission.id)).toEqual([family.memberId]);
+    });
+
+    it('CA-09 deleting a pending task keeps the mission in progress while others remain', async () => {
+      const family = await seedFamily();
+      const done = await seedTask(family, [family.memberId]);
+      const pendingA = await seedTask(family, [family.otherMemberId]);
+      const pendingB = await seedTask(family, [family.otherMemberId]);
+      await completeTask(family, done);
+      const mission = await createMission(family, [done, pendingA, pendingB]);
+
+      await container.deleteTaskUseCase.execute(admin(family), pendingA);
+
+      expect(
+        (await container.getMissionDetailUseCase.execute(admin(family), mission.id)).status,
+      ).toBe('inProgress');
+      expect(await participants(mission.id)).toEqual([]);
+    });
+
+    it('RN50 deleting the only task of a mission is still refused', async () => {
+      const family = await seedFamily();
+      const only = await seedTask(family, [family.memberId]);
+      await createMission(family, [only]);
+
+      await expect(container.deleteTaskUseCase.execute(admin(family), only)).rejects.toMatchObject({
+        code: 'MISSION_WOULD_HAVE_NO_TASKS',
+      });
+    });
+
     it('CA-16 two concurrent completions of the last two tasks close the mission exactly once', async () => {
       const family = await seedFamily();
       const taskA = await seedTask(family, [family.memberId]);

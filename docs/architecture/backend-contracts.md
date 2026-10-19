@@ -1,7 +1,7 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.15 · **Base funcional:** 1.17 · **Arquitetura backend:** 1.3\
-**Data:** 2026-10-10\
+**Versão:** 1.16 · **Base funcional:** 1.18 · **Arquitetura backend:** 1.3\
+**Data:** 2026-10-19\
 **Situação:** contrato arquitetural consolidado e materializado pela documentação OpenAPI da API
 
 [Arquitetura](backend-architecture.md) · [Decisões](backend-decisions.md) · [Catálogo mobile](mobile-feature-catalog.md) · [UC](../03-casos-de-uso.md) · [Índice](../DOCUMENTACAO.md)
@@ -181,7 +181,7 @@ Cada linha cobre um objetivo funcional completo, não apenas uma rota. RF/RN per
 | <a id="backend-uc04"></a>[UC04](../03-casos-de-uso.md#uc04) | `SignInWithApple` / Access | Prova validada; sessão única do Criador ou grant restrito | RF37/39; RN44; RNF15/16/22 |
 | <a id="backend-uc05"></a>[UC05](../03-casos-de-uso.md#uc05) | `CreateMission`, `EditMission`, `CloseEligibleMissions` | Ao menos uma tarefa, participação e marcos na transação | RF28/29/31/32/50/58; RN35–40/50/51/58/64 |
 | <a id="backend-uc06"></a>[UC06](../03-casos-de-uso.md#uc06) | `ListRewardItems`, `AddRewardItem` / Rewards | Predefinidas + família; só Admin adiciona; título normalizado único e descrição opcional | RF33/34; RN41/42 |
-| <a id="backend-uc07"></a>[UC07](../03-casos-de-uso.md#uc07) | `CreateTask`, `EditTask`, `DeleteTask` / Tasks | Datas livres, título ≤60, observação ≤250, edição de concluída não protegida, resolução de sinalização pendente, auditoria e missão não vazia | RF07–10/15/16/27/58/59/69/70; RN11–13/17–20/50/58/59/66/67 |
+| <a id="backend-uc07"></a>[UC07](../03-casos-de-uso.md#uc07) | `CreateTask`, `EditTask`, `DeleteTask` / Tasks | Datas livres, título ≤60, observação ≤250, edição de concluída não protegida, resolução de sinalização pendente, auditoria, missão não vazia e fechamento da missão (`CloseEligibleMissions`) quando a exclusão deixa só tarefas concluídas | RF07–10/15/16/27/58/59/69/70; RN11–13/17–20/50/58/59/66/67 |
 | <a id="backend-uc08"></a>[UC08](../03-casos-de-uso.md#uc08) | `CreateRoutine`, `UpdateFutureRoutine`, `MaterializeRoutineOccurrences` | Frequências fixas, observação opcional, horizonte e origem estável; proteger passado/conquistas | RF13/14/70; RN14/16–18/67 |
 | <a id="backend-uc09"></a>[UC09](../03-casos-de-uso.md#uc09) | `InspectInvite`, `JoinFamilyByInvite`, `RecoverInviteJoin`, `RefreshSession` | Consumo único, prova de instalação e troca sem remoção | RF42–46/54/68; RN09/10/45–47 |
 | <a id="backend-uc10"></a>[UC10](../03-casos-de-uso.md#uc10) | `UpdateOwnProfile`, `GetOwnBadges`, `GetBadgeContributions` | Titularidade, câmera/galeria na UI e marcos por participação | RF48/62/65; RN63/64 |
@@ -219,6 +219,7 @@ O documento OpenAPI 3.1 é gerado pelos schemas HTTP em `/docs/json`, e a interf
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.16 | 2026-10-19 | UC07: `DeleteTask` fecha a missão via `CloseEligibleMissions` quando restam só tarefas concluídas (RN38/RF59). Base funcional 1.18. Para SPEC-014/SPEC-007. |
 | 1.15 | 2026-10-10 | Consolida os contratos de SPEC-015 a SPEC-020 com as rotas materializadas de família, convites, sessão e tarefas, incluindo OpenAPI executável, paginação de membros e `CompleteTask`. |
 | 1.14 | 2026-10-10 | `FinalizeWeeklyHighlight` e as consultas próprias de reconhecimento detalhados: resultado único, empate, outbox e titularidade. Para SPEC-020. |
 | 1.13 | 2026-10-10 | `GetWeeklyReportSnapshot` detalhado: `referenceDate`, validação de semana, projeção de removido e erros estáveis. Para SPEC-019. |

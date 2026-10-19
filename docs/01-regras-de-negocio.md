@@ -1,8 +1,8 @@
 # Regras de negócio
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.17\
-**Data:** 2026-10-10\
+**Versão:** 1.18\
+**Data:** 2026-10-19\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -291,7 +291,7 @@ Apenas Administradores criam missões, de forma personalizada.
 
 ## RN38
 
-Quando todas as tarefas vinculadas estiverem concluídas, o servidor conclui a missão, registra uma participação por membro elegível conforme RN64, concede os badges cujos marcos forem atingidos e habilita o resgate. Participação e badges independem do resgate. Uma reabertura confirmada de tarefa vinculada pode retornar a missão para Em andamento conforme RN57, revertendo suas participações, badges e recompensa aceita na mesma transação.
+Quando todas as tarefas vinculadas estiverem concluídas, o servidor conclui a missão, registra uma participação por membro elegível conforme RN64, concede os badges cujos marcos forem atingidos e habilita o resgate. Participação e badges independem do resgate. Uma reabertura confirmada de tarefa vinculada pode retornar a missão para Em andamento conforme RN57, revertendo suas participações, badges e recompensa aceita na mesma transação. O mesmo fechamento ocorre quando a exclusão de uma tarefa não concluída vinculada deixa a missão em andamento apenas com tarefas concluídas, na mesma transação da exclusão (RF59).
 
 **Requisitos funcionais:** [RF31](02-requisitos.md#rf31), [RF32](02-requisitos.md#rf32), [RF35](02-requisitos.md#rf35), [RF36](02-requisitos.md#rf36), [RF51](02-requisitos.md#rf51), [RF52](02-requisitos.md#rf52), [RF58](02-requisitos.md#rf58)  
 **Requisitos não funcionais específicos:** Sem vínculo específico; requisitos transversais se aplicam conforme a operação.\
@@ -570,6 +570,7 @@ A missão admite uma observação opcional de até 250 caracteres, contando espa
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.18 | 2026-10-19 | RN38 passa a fechar a missão também quando a exclusão de tarefa não concluída deixa apenas tarefas concluídas. Para SPEC-014/SPEC-007. |
 | 1.17 | 2026-10-10 | RN62 define `referenceDate` para resolver a semana do PDF e identifica crédito histórico como “Membro removido”. Para SPEC-019. |
 | 1.16 | 2026-10-10 | RN30, RN31 e RN61 preservam carga histórica de perfil removido em linha “Membro removido”, sem expor dados pessoais. Para SPEC-018. |
 | 1.15 | 2026-10-10 | RN42 passa a definir o catálogo predefinido e o cadastro de item personalizado: título obrigatório com até 60 caracteres não-espaço após `trim`, unicidade por família sem distinguir maiúsculas/minúsculas e descrição opcional de até 255 caracteres. Para SPEC-015. |

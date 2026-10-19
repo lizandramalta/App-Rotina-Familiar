@@ -245,6 +245,7 @@ export class DeleteTaskUseCase {
       readonly repository: TaskRepositoryPort;
       readonly transactionRunner: TransactionRunner;
       readonly clock: Clock;
+      readonly missionCloser: MissionClosurePort;
     },
   ) {}
 
@@ -264,10 +265,17 @@ export class DeleteTaskUseCase {
       if (await this.deps.repository.isOnlyTaskOfAnActiveMission(tx, task.familyId, task.id)) {
         throw new MissionWouldHaveNoTasksError();
       }
-      await this.deps.repository.deleteTask(tx, {
+      const now = this.deps.clock.now();
+      const unlinkedMissionIds = await this.deps.repository.deleteTask(tx, {
         task,
         actorId: actor.memberId,
-        now: this.deps.clock.now(),
+        now,
+      });
+      // SPEC-014 CA-21: restando só tarefas concluídas, a missão fecha no mesmo commit.
+      await this.deps.missionCloser.closeAfterTaskDeletion(tx, {
+        familyId: task.familyId,
+        missionIds: unlinkedMissionIds,
+        now,
       });
       return { id: task.id };
     });
