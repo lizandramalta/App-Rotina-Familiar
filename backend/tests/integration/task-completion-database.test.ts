@@ -71,6 +71,7 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
         repository,
         transactionRunner: container.transactionRunner,
         clock,
+        missionCloser: { closeForCompletedTask: async () => undefined },
       });
 
     async function seedFamily(): Promise<SeededFamily> {

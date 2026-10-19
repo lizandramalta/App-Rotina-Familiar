@@ -64,6 +64,15 @@ import {
   GetOwnTasksUseCase,
 } from '../modules/tasks/application/get-own-tasks-use-cases.js';
 import { PostgresTaskRepository } from '../modules/tasks/infrastructure/postgres-task-repository.js';
+import { CloseEligibleMissions } from '../modules/missions/application/close-eligible-missions.js';
+import {
+  CreateMissionUseCase,
+  EditMissionUseCase,
+  GetMissionDetailUseCase,
+  GetMissionTaskOptionsUseCase,
+  ListMissionsUseCase,
+} from '../modules/missions/application/mission-use-cases.js';
+import { PostgresMissionRepository } from '../modules/missions/infrastructure/postgres-mission-repository.js';
 
 export interface ApplicationContainer {
   readonly config: Configuration;
@@ -99,6 +108,11 @@ export interface ApplicationContainer {
   readonly getOwnProgressUseCase: GetOwnProgressUseCase;
   readonly editTaskUseCase: EditTaskUseCase;
   readonly deleteTaskUseCase: DeleteTaskUseCase;
+  readonly createMissionUseCase: CreateMissionUseCase;
+  readonly editMissionUseCase: EditMissionUseCase;
+  readonly listMissionsUseCase: ListMissionsUseCase;
+  readonly getMissionDetailUseCase: GetMissionDetailUseCase;
+  readonly getMissionTaskOptionsUseCase: GetMissionTaskOptionsUseCase;
   dispose(): Promise<void>;
 }
 
@@ -297,10 +311,31 @@ export function createContainer(config: Configuration): ApplicationContainer {
     clock,
   });
 
+  const missionRepository = new PostgresMissionRepository();
+  const missionDependencies = { repository: missionRepository, transactionRunner, clock, logger };
+  const closeEligibleMissions = new CloseEligibleMissions({
+    repository: missionRepository,
+    logger,
+  });
+  const createMissionUseCase = new CreateMissionUseCase({
+    ...missionDependencies,
+    closer: closeEligibleMissions,
+  });
+  const editMissionUseCase = new EditMissionUseCase({
+    ...missionDependencies,
+    closer: closeEligibleMissions,
+  });
+  const listMissionsUseCase = new ListMissionsUseCase(missionDependencies);
+  const getMissionDetailUseCase = new GetMissionDetailUseCase(missionDependencies);
+  const getMissionTaskOptionsUseCase = new GetMissionTaskOptionsUseCase(missionDependencies);
+
   const taskRepository = new PostgresTaskRepository();
   const taskDependencies = { repository: taskRepository, transactionRunner, clock };
   const createTaskUseCase = new CreateTaskUseCase(taskDependencies);
-  const completeTaskUseCase = new CompleteTaskUseCase(taskDependencies);
+  const completeTaskUseCase = new CompleteTaskUseCase({
+    ...taskDependencies,
+    missionCloser: closeEligibleMissions,
+  });
   const getTaskUseCase = new GetTaskUseCase({ repository: taskRepository, transactionRunner });
   const taskQueryDependencies = { repository: taskRepository, transactionRunner, clock };
   const getOwnTasksUseCase = new GetOwnTasksUseCase(taskQueryDependencies);
@@ -342,6 +377,11 @@ export function createContainer(config: Configuration): ApplicationContainer {
     getOwnProgressUseCase,
     editTaskUseCase,
     deleteTaskUseCase,
+    createMissionUseCase,
+    editMissionUseCase,
+    listMissionsUseCase,
+    getMissionDetailUseCase,
+    getMissionTaskOptionsUseCase,
     async dispose(): Promise<void> {
       logger.info('Disposing application container...');
       await dbPool.close();

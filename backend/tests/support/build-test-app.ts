@@ -33,6 +33,11 @@ export interface TestApp {
   readonly getOwnProgress: UseCaseMock;
   readonly editTask: UseCaseMock;
   readonly deleteTask: UseCaseMock;
+  readonly createMission: UseCaseMock;
+  readonly editMission: UseCaseMock;
+  readonly listMissions: UseCaseMock;
+  readonly getMissionDetail: UseCaseMock;
+  readonly getMissionTaskOptions: UseCaseMock;
 }
 
 export const TEST_ACTOR: ActorContext = {
@@ -75,6 +80,11 @@ export function buildTestApp(): TestApp {
   const getOwnProgress: UseCaseMock = { execute: vi.fn() };
   const editTask: UseCaseMock = { execute: vi.fn() };
   const deleteTask: UseCaseMock = { execute: vi.fn() };
+  const createMission: UseCaseMock = { execute: vi.fn() };
+  const editMission: UseCaseMock = { execute: vi.fn() };
+  const listMissions: UseCaseMock = { execute: vi.fn() };
+  const getMissionDetail: UseCaseMock = { execute: vi.fn() };
+  const getMissionTaskOptions: UseCaseMock = { execute: vi.fn() };
 
   const container = {
     config,
@@ -104,6 +114,11 @@ export function buildTestApp(): TestApp {
     getOwnProgressUseCase: getOwnProgress,
     editTaskUseCase: editTask,
     deleteTaskUseCase: deleteTask,
+    createMissionUseCase: createMission,
+    editMissionUseCase: editMission,
+    listMissionsUseCase: listMissions,
+    getMissionDetailUseCase: getMissionDetail,
+    getMissionTaskOptionsUseCase: getMissionTaskOptions,
     dispose: vi.fn(),
   } as unknown as ApplicationContainer;
 
@@ -130,5 +145,10 @@ export function buildTestApp(): TestApp {
     getOwnProgress,
     editTask,
     deleteTask,
+    createMission,
+    editMission,
+    listMissions,
+    getMissionDetail,
+    getMissionTaskOptions,
   };
 }

@@ -19,6 +19,7 @@ import {
   validateWeight,
 } from '../domain/task-validation.js';
 import type { TaskRecord, TaskRepositoryPort, TaskStatus } from './task-repository-port.js';
+import type { MissionClosurePort } from './mission-closure-port.js';
 
 export interface TaskResponse {
   readonly id: string;
@@ -280,6 +281,7 @@ export class CompleteTaskUseCase {
       readonly repository: TaskRepositoryPort;
       readonly transactionRunner: TransactionRunner;
       readonly clock: Clock;
+      readonly missionCloser: MissionClosurePort;
     },
   ) {}
 
@@ -311,10 +313,17 @@ export class CompleteTaskUseCase {
         throw new TaskManagementNotAllowedError();
       }
 
+      const now = this.deps.clock.now();
       const completed = await this.deps.repository.completeTask(tx, {
         task,
         actorId: actor.memberId,
-        now: this.deps.clock.now(),
+        now,
+      });
+      // SPEC-014 CA-15: a missão fecha no mesmo commit da conclusão.
+      await this.deps.missionCloser.closeForCompletedTask(tx, {
+        familyId: completed.familyId,
+        taskId: completed.id,
+        now,
       });
       return {
         task: toResponse(completed),
