@@ -13,6 +13,8 @@ type UseCaseMock = { execute: ReturnType<typeof vi.fn> };
 export interface TestApp {
   readonly app: FastifyInstance;
   readonly createFamily: UseCaseMock;
+  readonly getFamily: UseCaseMock;
+  readonly updateFamily: UseCaseMock;
   readonly getFamilySettings: UseCaseMock;
   readonly previewTimeZoneChange: UseCaseMock;
   readonly changeTimeZone: UseCaseMock;
@@ -21,6 +23,7 @@ export interface TestApp {
   readonly createMember: UseCaseMock;
   readonly issueMemberInvite: UseCaseMock;
   readonly uploadMedia: UseCaseMock;
+  readonly uploadOnboardingMedia: UseCaseMock;
   readonly updateOwnProfile: UseCaseMock;
   readonly authenticateSession: UseCaseMock;
   readonly inspectInvite: UseCaseMock;
@@ -60,6 +63,8 @@ export function buildTestApp(): TestApp {
   });
 
   const createFamily: UseCaseMock = { execute: vi.fn() };
+  const getFamily: UseCaseMock = { execute: vi.fn() };
+  const updateFamily: UseCaseMock = { execute: vi.fn() };
   const getFamilySettings: UseCaseMock = { execute: vi.fn() };
   const previewTimeZoneChange: UseCaseMock = { execute: vi.fn() };
   const changeTimeZone: UseCaseMock = { execute: vi.fn() };
@@ -68,6 +73,7 @@ export function buildTestApp(): TestApp {
   const createMember: UseCaseMock = { execute: vi.fn() };
   const issueMemberInvite: UseCaseMock = { execute: vi.fn() };
   const uploadMedia: UseCaseMock = { execute: vi.fn() };
+  const uploadOnboardingMedia: UseCaseMock = { execute: vi.fn() };
   const updateOwnProfile: UseCaseMock = { execute: vi.fn() };
   const authenticateSession: UseCaseMock = { execute: vi.fn().mockResolvedValue(TEST_ACTOR) };
   const inspectInvite: UseCaseMock = { execute: vi.fn() };
@@ -98,6 +104,8 @@ export function buildTestApp(): TestApp {
     joinFamilyByInviteUseCase: joinFamilyByInvite,
     recoverInviteJoinUseCase: recoverInviteJoin,
     createFamilyUseCase: createFamily,
+    getFamilyUseCase: getFamily,
+    updateFamilyUseCase: updateFamily,
     getFamilySettingsUseCase: getFamilySettings,
     previewFamilyTimeZoneChangeUseCase: previewTimeZoneChange,
     changeFamilyTimeZoneUseCase: changeTimeZone,
@@ -106,6 +114,7 @@ export function buildTestApp(): TestApp {
     createMemberUseCase: createMember,
     issueMemberInviteUseCase: issueMemberInvite,
     uploadMediaUseCase: uploadMedia,
+    uploadOnboardingMediaUseCase: uploadOnboardingMedia,
     updateOwnProfileUseCase: updateOwnProfile,
     createTaskUseCase: createTask,
     completeTaskUseCase: completeTask,
@@ -125,6 +134,8 @@ export function buildTestApp(): TestApp {
   return {
     app: buildHttpApp(container, config),
     createFamily,
+    getFamily,
+    updateFamily,
     getFamilySettings,
     previewTimeZoneChange,
     changeTimeZone,
@@ -133,6 +144,7 @@ export function buildTestApp(): TestApp {
     createMember,
     issueMemberInvite,
     uploadMedia,
+    uploadOnboardingMedia,
     updateOwnProfile,
     authenticateSession,
     inspectInvite,

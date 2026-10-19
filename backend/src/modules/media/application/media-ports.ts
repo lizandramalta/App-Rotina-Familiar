@@ -37,6 +37,10 @@ export interface ObjectStoragePort {
   }): Promise<void>;
 }
 
+export interface ObjectStorageMaintenancePort extends ObjectStoragePort {
+  delete(key: string): Promise<void>;
+}
+
 export interface MediaRecord {
   readonly id: string;
   readonly ownerMemberId: string;

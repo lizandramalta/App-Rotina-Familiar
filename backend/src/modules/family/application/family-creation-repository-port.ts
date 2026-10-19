@@ -62,6 +62,17 @@ export interface FamilyCreationRepositoryPort {
     },
   ): Promise<void>;
 
+  insertInitialMember(
+    tx: TransactionContext,
+    params: {
+      readonly id: string;
+      readonly familyId: string;
+      readonly name: string;
+      readonly role: string;
+      readonly createdAt: Date;
+    },
+  ): Promise<void>;
+
   insertWeeklyCycle(
     tx: TransactionContext,
     params: {

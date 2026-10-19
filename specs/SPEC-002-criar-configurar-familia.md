@@ -99,7 +99,7 @@ A escolha da foto em TEL-055 inicia `POST /v1/onboarding/media` multipart com `c
 |---|---|---|
 | Foto do onboarding | Imagem do próprio futuro Criador, opcional, protegida antes da família; processamento segue os limites de foto de perfil vigentes | Falha de envio permite repetir ou seguir sem foto; mídia alheia não pode ser vinculada |
 
-No retorno de TEL-056, `GET /v1/family` e `GET /v1/family/members` carregam a versão confirmada. Rascunho sem diferenças não envia comando. Nome alterado usa `PATCH /v1/family`; inclusões e alterações de membros usam as rotas da SPEC-003, e fuso posterior usa as rotas de Configurações. Cada comando posterior tem resultado próprio e exige sessão de Administrador; `POST /v1/families` nunca é repetido.
+No retorno de TEL-056, `GET /v1/family` e `GET /v1/family/members` carregam a versão confirmada. As leituras são permitidas a adultos da própria família. Rascunho sem diferenças não envia comando. Nome alterado usa `PATCH /v1/family`; inclusões e alterações de membros usam as rotas da SPEC-003, e fuso posterior usa as rotas de Configurações. Cada comando posterior tem resultado próprio e exige sessão de Administrador; `POST /v1/families` nunca é repetido.
 
 O mobile não trata o envio como confirmação de criação, não repete automaticamente uma escrita incerta e permite continuar sem foto. Falha da criação não deixa perfis parcialmente persistidos; eventual mídia antecipada não concede acesso a dados familiares.
 
@@ -243,6 +243,7 @@ Segredos, tokens, `creationGrant`, cabeçalhos de instalação e dados de autent
 | E-09 | Pedir o fuso já vigente é recusado com `TIME_ZONE_UNCHANGED`. Uma mudança programada só é substituída por outra solicitação válida de fuso diferente, e não há cancelamento sem novo fuso. | Pessoa usuária / 2026-10-08 | Sim — `backend-contracts.md` §3 |
 | E-10 | TEL-002 prepara membros antes da criação; família, Criador e membros iniciais são criados juntos. TEL-056 apenas oferece convite após a criação. | Pessoa usuária / 2026-10-19 | Sim — RN01/RN07/RN45, RF01/RF02/RF38/RF40 e UC01/UC02. |
 | E-11 | Voltar de TEL-056 abre TEL-002 em edição da família existente; sem mudanças não há gravação, e o fuso posterior segue Configurações. | Pessoa usuária / 2026-10-19 | Sim — RN01, RF01/RF03/RF67 e UC01/UC02. |
+| E-12 | `GET /v1/family` permite leitura a Administrador e Membro da própria família; `PATCH /v1/family` permanece exclusivo de Administrador. A frase do SCRUM-106 sobre GET administrativo não restringe a leitura do contrato vigente. | Pessoa usuária / 2026-10-19 | Não — preserva RF01/UC01 e `backend-contracts.md` §3. |
 
 **Contrato técnico revisado:** `backend-contracts.md` 1.16 e BA-35/BA-36 definem upload com grant, criação conjunta e comandos posteriores de edição. As rotas e o schema anteriores ainda precisam ser ampliados no backend; esta revisão não os declara implementados.
 

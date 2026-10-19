@@ -11,8 +11,8 @@ import { RateLimitedError } from '../../modules/access/domain/invite-errors.js';
 import { createProblemDetails } from './problem-details.js';
 import { registerAccessRoutes } from './access-routes.js';
 import { registerSessionRoutes } from './session-routes.js';
-import { registerFamilyRoutes } from './family-routes.js';
-import { registerMediaRoutes } from './media-routes.js';
+import { createFamilyBodyDocumentation, registerFamilyRoutes } from './family-routes.js';
+import { onboardingUploadBodyDocumentation, registerMediaRoutes } from './media-routes.js';
 import { registerProfileRoutes } from './profile-routes.js';
 import { registerTaskRoutes } from './task-routes.js';
 import { registerMissionRoutes } from './mission-routes.js';
@@ -54,6 +54,15 @@ export function buildHttpApp(
   // teste alinhada ao contrato realmente validado e serializado pelo Fastify.
   // Estes plugins precisam ser registrados antes das rotas para descobri-las.
   app.register(swagger, {
+    transform: ({ schema, url }) => ({
+      schema:
+        url === '/v1/onboarding/media'
+          ? { ...schema, body: onboardingUploadBodyDocumentation }
+          : url === '/v1/families'
+            ? { ...schema, body: createFamilyBodyDocumentation }
+            : schema,
+      url,
+    }),
     openapi: {
       openapi: '3.1.0',
       info: {

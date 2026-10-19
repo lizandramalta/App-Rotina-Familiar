@@ -80,6 +80,10 @@ describe('HTTP Presentation Layer (Fastify)', () => {
       createFamilyUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['createFamilyUseCase'],
+      getFamilyUseCase: { execute: vi.fn() } as unknown as ApplicationContainer['getFamilyUseCase'],
+      updateFamilyUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['updateFamilyUseCase'],
       getFamilySettingsUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['getFamilySettingsUseCase'],
@@ -104,6 +108,12 @@ describe('HTTP Presentation Layer (Fastify)', () => {
       uploadMediaUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['uploadMediaUseCase'],
+      uploadOnboardingMediaUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['uploadOnboardingMediaUseCase'],
+      cleanOrphanOnboardingMedia: {
+        run: vi.fn(),
+      } as unknown as ApplicationContainer['cleanOrphanOnboardingMedia'],
       updateOwnProfileUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['updateOwnProfileUseCase'],

@@ -30,6 +30,11 @@ import { ScryptInvitePasswordVerifier } from '../modules/access/infrastructure/s
 import { AesGcmInviteJoinEnvelope } from '../modules/access/infrastructure/aes-gcm-invite-join-envelope.js';
 import { CreateFamilyUseCase } from '../modules/family/application/create-family-use-case.js';
 import { PostgresFamilyCreationRepository } from '../modules/family/infrastructure/postgres-family-creation-repository.js';
+import {
+  GetFamilyUseCase,
+  UpdateFamilyUseCase,
+} from '../modules/family/application/family-profile-use-cases.js';
+import { PostgresFamilyProfileRepository } from '../modules/family/infrastructure/postgres-family-profile-repository.js';
 import { ChangeFamilyTimeZoneUseCase } from '../modules/family/application/change-family-time-zone-use-case.js';
 import { GetFamilySettingsUseCase } from '../modules/family/application/get-family-settings-use-case.js';
 import { PreviewFamilyTimeZoneChangeUseCase } from '../modules/family/application/preview-family-time-zone-change-use-case.js';
@@ -44,7 +49,10 @@ import { CryptoInviteCredentials } from '../modules/family/infrastructure/crypto
 import { PostgresMemberInviteRepository } from '../modules/family/infrastructure/postgres-member-invite-repository.js';
 import { PostgresMemberManagementRepository } from '../modules/family/infrastructure/postgres-member-management-repository.js';
 import { UploadMediaUseCase } from '../modules/media/application/upload-media-use-case.js';
-import type { ObjectStoragePort } from '../modules/media/application/media-ports.js';
+import { UploadOnboardingMediaUseCase } from '../modules/media/application/upload-onboarding-media-use-case.js';
+import { CleanOrphanOnboardingMedia } from '../modules/media/application/clean-orphan-onboarding-media.js';
+import type { ObjectStorageMaintenancePort } from '../modules/media/application/media-ports.js';
+import { PostgresOnboardingMediaRepository } from '../modules/media/infrastructure/postgres-onboarding-media-repository.js';
 import { PostgresMediaRepository } from '../modules/media/infrastructure/postgres-media-repository.js';
 import { R2ObjectStorage } from '../modules/media/infrastructure/r2-object-storage.js';
 import { SharpImageProcessor } from '../modules/media/infrastructure/sharp-image-processor.js';
@@ -92,6 +100,8 @@ export interface ApplicationContainer {
   readonly joinFamilyByInviteUseCase: JoinFamilyByInviteUseCase;
   readonly recoverInviteJoinUseCase: RecoverInviteJoinUseCase;
   readonly createFamilyUseCase: CreateFamilyUseCase;
+  readonly getFamilyUseCase: GetFamilyUseCase;
+  readonly updateFamilyUseCase: UpdateFamilyUseCase;
   readonly getFamilySettingsUseCase: GetFamilySettingsUseCase;
   readonly previewFamilyTimeZoneChangeUseCase: PreviewFamilyTimeZoneChangeUseCase;
   readonly changeFamilyTimeZoneUseCase: ChangeFamilyTimeZoneUseCase;
@@ -100,6 +110,8 @@ export interface ApplicationContainer {
   readonly createMemberUseCase: CreateMemberUseCase;
   readonly issueMemberInviteUseCase: IssueMemberInviteUseCase;
   readonly uploadMediaUseCase: UploadMediaUseCase;
+  readonly uploadOnboardingMediaUseCase: UploadOnboardingMediaUseCase;
+  readonly cleanOrphanOnboardingMedia: CleanOrphanOnboardingMedia;
   readonly updateOwnProfileUseCase: UpdateOwnProfileUseCase;
   readonly createTaskUseCase: CreateTaskUseCase;
   readonly completeTaskUseCase: CompleteTaskUseCase;
@@ -228,8 +240,10 @@ export function createContainer(config: Configuration): ApplicationContainer {
     policy: inviteAttemptPolicy,
   });
 
+  const onboardingMediaRepository = new PostgresOnboardingMediaRepository();
   const createFamilyUseCase = new CreateFamilyUseCase({
     repository: new PostgresFamilyCreationRepository(),
+    onboardingMedia: onboardingMediaRepository,
     sessionIssuer: new SessionIssuer({
       repository: accessRepository,
       crypto: accessCrypto,
@@ -239,6 +253,17 @@ export function createContainer(config: Configuration): ApplicationContainer {
     transactionRunner,
     clock,
     logger,
+  });
+
+  const familyProfileRepository = new PostgresFamilyProfileRepository();
+  const getFamilyUseCase = new GetFamilyUseCase({
+    repository: familyProfileRepository,
+    transactionRunner,
+  });
+  const updateFamilyUseCase = new UpdateFamilyUseCase({
+    repository: familyProfileRepository,
+    transactionRunner,
+    clock,
   });
 
   const familySettingsRepository = new PostgresFamilySettingsRepository();
@@ -304,6 +329,24 @@ export function createContainer(config: Configuration): ApplicationContainer {
     keyPrefix: config.NODE_ENV,
   });
 
+  const uploadOnboardingMediaUseCase = new UploadOnboardingMediaUseCase({
+    repository: onboardingMediaRepository,
+    storage: objectStorage,
+    imageProcessor: new SharpImageProcessor(),
+    crypto: accessCrypto,
+    transactionRunner,
+    clock,
+    logger,
+    keyPrefix: config.NODE_ENV,
+  });
+  const cleanOrphanOnboardingMedia = new CleanOrphanOnboardingMedia({
+    repository: onboardingMediaRepository,
+    storage: objectStorage,
+    transactionRunner,
+    clock,
+    logger,
+  });
+
   const updateOwnProfileUseCase = new UpdateOwnProfileUseCase({
     profileRepository: new PostgresProfileRepository(),
     mediaRepository,
@@ -364,6 +407,8 @@ export function createContainer(config: Configuration): ApplicationContainer {
     joinFamilyByInviteUseCase,
     recoverInviteJoinUseCase,
     createFamilyUseCase,
+    getFamilyUseCase,
+    updateFamilyUseCase,
     getFamilySettingsUseCase,
     previewFamilyTimeZoneChangeUseCase,
     changeFamilyTimeZoneUseCase,
@@ -372,6 +417,8 @@ export function createContainer(config: Configuration): ApplicationContainer {
     createMemberUseCase,
     issueMemberInviteUseCase,
     uploadMediaUseCase,
+    uploadOnboardingMediaUseCase,
+    cleanOrphanOnboardingMedia,
     updateOwnProfileUseCase,
     createTaskUseCase,
     completeTaskUseCase,
@@ -393,7 +440,7 @@ export function createContainer(config: Configuration): ApplicationContainer {
   };
 }
 
-function createObjectStorage(config: Configuration, logger: Logger): ObjectStoragePort {
+function createObjectStorage(config: Configuration, logger: Logger): ObjectStorageMaintenancePort {
   const { R2_ENDPOINT, R2_BUCKET_NAME, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY } = config;
 
   if (

@@ -14,6 +14,8 @@ export interface CreateFamilyCommand {
   readonly creatorNickname: unknown;
   readonly name: unknown;
   readonly timeZoneId: unknown;
+  readonly initialMembers?: unknown;
+  readonly creatorPhotoMediaId?: unknown;
   readonly installationProof: string;
 }
 
@@ -31,6 +33,11 @@ export interface CreateFamilyResult {
     readonly role: MemberRole;
     readonly isFamilyCreator: boolean;
   };
+  readonly initialMembers: readonly {
+    readonly id: string;
+    readonly name: string;
+    readonly role: MemberRole;
+  }[];
   readonly session: {
     readonly sessionId: string;
     readonly memberId: string;

@@ -8,6 +8,12 @@ interface CreateFamilyBody {
   readonly creatorNickname?: unknown;
   readonly name?: unknown;
   readonly timeZoneId?: unknown;
+  readonly initialMembers?: unknown;
+  readonly creatorPhotoMediaId?: unknown;
+}
+
+interface UpdateFamilyBody {
+  readonly name?: unknown;
 }
 
 interface CreateFamilyHeaders {
@@ -38,6 +44,49 @@ const sessionResponseSchema = {
   },
 } as const;
 
+const problemResponseSchema = {
+  type: 'object',
+  required: ['type', 'title', 'status', 'code', 'requestId'],
+  properties: {
+    type: { type: 'string' },
+    title: { type: 'string' },
+    status: { type: 'integer' },
+    code: { type: 'string' },
+    requestId: { type: 'string' },
+    fieldErrors: {
+      type: 'object',
+      additionalProperties: { type: 'array', items: { type: 'string' } },
+    },
+  },
+} as const;
+
+/** OpenAPI-only shape; runtime validation keeps semantic errors in the use case. */
+export const createFamilyBodyDocumentation = {
+  type: 'object',
+  required: ['creationGrant', 'creatorName', 'name'],
+  additionalProperties: false,
+  properties: {
+    creationGrant: { type: 'string' },
+    creatorName: { type: 'string' },
+    creatorNickname: { type: ['string', 'null'] },
+    name: { type: 'string' },
+    timeZoneId: { type: 'string', default: 'America/Sao_Paulo' },
+    initialMembers: {
+      type: 'array',
+      items: {
+        type: 'object',
+        required: ['name', 'role'],
+        additionalProperties: false,
+        properties: {
+          name: { type: 'string' },
+          role: { type: 'string', enum: ['administrator', 'member', 'kids'] },
+        },
+      },
+    },
+    creatorPhotoMediaId: { type: 'string', format: 'uuid' },
+  },
+} as const;
+
 /**
  * Schema de `POST /v1/families` (SPEC-002 §5.2).
  *
@@ -63,17 +112,19 @@ const createFamilySchema = {
     type: 'object',
     additionalProperties: false,
     properties: {
-      creationGrant: { type: 'string' },
-      creatorName: { type: 'string' },
-      creatorNickname: { type: ['string', 'null'] },
-      name: { type: 'string' },
-      timeZoneId: { type: ['string', 'null'] },
+      creationGrant: {},
+      creatorName: {},
+      creatorNickname: {},
+      name: {},
+      timeZoneId: {},
+      initialMembers: {},
+      creatorPhotoMediaId: {},
     },
   },
   response: {
     201: {
       type: 'object',
-      required: ['family', 'member', 'session'],
+      required: ['family', 'member', 'initialMembers', 'session'],
       properties: {
         family: {
           type: 'object',
@@ -96,9 +147,25 @@ const createFamilySchema = {
             isFamilyCreator: { type: 'boolean' },
           },
         },
+        initialMembers: {
+          type: 'array',
+          items: {
+            type: 'object',
+            required: ['id', 'name', 'role'],
+            properties: {
+              id: { type: 'string' },
+              name: { type: 'string' },
+              role: { type: 'string' },
+            },
+          },
+        },
         session: sessionResponseSchema,
       },
     },
+    400: problemResponseSchema,
+    401: problemResponseSchema,
+    422: problemResponseSchema,
+    503: problemResponseSchema,
   },
 } as const;
 
@@ -190,6 +257,8 @@ export function registerFamilyRoutes(app: FastifyInstance, container: Applicatio
         creatorNickname: request.body.creatorNickname,
         name: request.body.name,
         timeZoneId: request.body.timeZoneId,
+        initialMembers: request.body.initialMembers,
+        creatorPhotoMediaId: request.body.creatorPhotoMediaId,
         installationProof: request.headers['x-installation-proof'],
       });
 
@@ -205,6 +274,66 @@ export function registerFamilyRoutes(app: FastifyInstance, container: Applicatio
   // Configurações exclusivas de Administrador: o papel vem da sessão (RNF07).
   app.register(async (scope) => {
     scope.addHook('onRequest', createAuthenticationHook(container));
+
+    const familyResponse = {
+      type: 'object',
+      required: ['id', 'name', 'timeZoneId'],
+      properties: {
+        id: { type: 'string' },
+        name: { type: 'string' },
+        timeZoneId: { type: 'string' },
+      },
+    } as const;
+
+    scope.get(
+      '/family',
+      {
+        schema: {
+          tags: ['Family'],
+          summary: 'Get the current family',
+          security: [{ bearerAuth: [] }],
+          response: {
+            200: familyResponse,
+            401: problemResponseSchema,
+            403: problemResponseSchema,
+            404: problemResponseSchema,
+            503: problemResponseSchema,
+          },
+        },
+      },
+      async (request, reply) => {
+        const result = await container.getFamilyUseCase.execute(requireActor(request));
+        return reply.status(200).header('Cache-Control', 'no-store').send(result);
+      },
+    );
+
+    scope.patch<{ Body: UpdateFamilyBody }>(
+      '/family',
+      {
+        schema: {
+          tags: ['Family'],
+          summary: 'Update the family name',
+          security: [{ bearerAuth: [] }],
+          body: { type: 'object', additionalProperties: false, properties: { name: {} } },
+          response: {
+            200: familyResponse,
+            400: problemResponseSchema,
+            401: problemResponseSchema,
+            403: problemResponseSchema,
+            404: problemResponseSchema,
+            422: problemResponseSchema,
+            503: problemResponseSchema,
+          },
+        },
+      },
+      async (request, reply) => {
+        const result = await container.updateFamilyUseCase.execute(
+          requireActor(request),
+          request.body.name,
+        );
+        return reply.status(200).header('Cache-Control', 'no-store').send(result);
+      },
+    );
 
     scope.get('/family/settings', async (request, reply) => {
       const result = await container.getFamilySettingsUseCase.execute({

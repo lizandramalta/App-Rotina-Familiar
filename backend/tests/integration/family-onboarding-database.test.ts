@@ -23,7 +23,15 @@ import { PostgresSessionLookup } from '../../src/modules/access/infrastructure/p
 import { CreateFamilyUseCase } from '../../src/modules/family/application/create-family-use-case.js';
 import type { CreateFamilyCommand } from '../../src/modules/family/application/create-family-dto.js';
 import { PostgresFamilyCreationRepository } from '../../src/modules/family/infrastructure/postgres-family-creation-repository.js';
+import {
+  GetFamilyUseCase,
+  UpdateFamilyUseCase,
+} from '../../src/modules/family/application/family-profile-use-cases.js';
+import { PostgresFamilyProfileRepository } from '../../src/modules/family/infrastructure/postgres-family-profile-repository.js';
+import { PostgresOnboardingMediaRepository } from '../../src/modules/media/infrastructure/postgres-onboarding-media-repository.js';
 import type { ObjectStoragePort } from '../../src/modules/media/application/media-ports.js';
+import { UploadOnboardingMediaUseCase } from '../../src/modules/media/application/upload-onboarding-media-use-case.js';
+import { CleanOrphanOnboardingMedia } from '../../src/modules/media/application/clean-orphan-onboarding-media.js';
 import { UploadMediaUseCase } from '../../src/modules/media/application/upload-media-use-case.js';
 import {
   PhotoMediaNotOwnedError,
@@ -69,6 +77,11 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
         const pool = container.dbPool;
         for (const identityId of createdIdentityIds) {
           await pool.query(
+            `delete from app.onboarding_media where grant_id in
+               (select id from app.family_creation_grants where creator_identity_id = $1)`,
+            [identityId],
+          );
+          await pool.query(
             `delete from app.families where id in
                (select family_id from app.members where creator_identity_id = $1)`,
             [identityId],
@@ -84,6 +97,7 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
     ): CreateFamilyUseCase =>
       new CreateFamilyUseCase({
         repository,
+        onboardingMedia: new PostgresOnboardingMediaRepository(),
         sessionIssuer: new SessionIssuer({ repository: accessRepository, crypto, logger }),
         crypto,
         transactionRunner: container.transactionRunner,
@@ -148,6 +162,75 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
       ]);
 
     describe('CA-01: atomic creation', () => {
+      it('persists multiple initial members without creating invites', async () => {
+        const seed = await seedIdentityWithGrants();
+        const result = await createFamilyUseCase().execute(
+          commandFor(seed, {
+            initialMembers: [
+              { name: 'Ana', role: 'member' },
+              { name: 'Leo', role: 'kids' },
+            ],
+          }),
+        );
+        expect(result.initialMembers).toEqual([
+          { id: expect.any(String), name: 'Ana', role: 'member' },
+          { id: expect.any(String), name: 'Leo', role: 'kids' },
+        ]);
+        expect(
+          await count(`select count(*) as total from app.members where family_id = $1`, [
+            result.family.id,
+          ]),
+        ).toBe(3);
+        expect(
+          await count(`select count(*) as total from app.member_invites where family_id = $1`, [
+            result.family.id,
+          ]),
+        ).toBe(0);
+      });
+
+      it('moves a READY photo to the creator only on confirmed creation', async () => {
+        const seed = await seedIdentityWithGrants();
+        const photoId = randomUUID();
+        await container.dbPool.query(
+          `insert into app.onboarding_media (id, grant_id, object_key, purpose, state, size_bytes, content_type)
+           values ($1, (select id from app.family_creation_grants where grant_token_hash = $2), $3, 'PROFILE_PHOTO', 'READY', 4, 'image/jpeg')`,
+          [photoId, crypto.hashToken(seed.grants[0]!), `test/onboarding/${photoId}.jpg`],
+        );
+        const result = await createFamilyUseCase().execute(
+          commandFor(seed, { creatorPhotoMediaId: photoId }),
+        );
+        const member = await container.dbPool.query<{ photo_media_id: string }>(
+          `select photo_media_id from app.members where id = $1`,
+          [result.member.id],
+        );
+        expect(member.rows[0]?.photo_media_id).toBe(photoId);
+        expect(
+          await count(`select count(*) as total from app.onboarding_media where id = $1`, [
+            photoId,
+          ]),
+        ).toBe(0);
+        expect(
+          await count(
+            `select count(*) as total from app.media_assets where id = $1 and family_id = $2 and owner_member_id = $3`,
+            [photoId, result.family.id, result.member.id],
+          ),
+        ).toBe(1);
+      });
+
+      it('rolls back all rows for an invalid member before writing', async () => {
+        const seed = await seedIdentityWithGrants();
+        await expect(
+          createFamilyUseCase().execute(
+            commandFor(seed, {
+              initialMembers: [
+                { name: 'Ana', role: 'member' },
+                { name: '', role: 'kids' },
+              ],
+            }),
+          ),
+        ).rejects.toMatchObject({ code: 'VALIDATION_FAILED' });
+        expect(await familiesOf(seed.identityId)).toBe(0);
+      });
       it('persists family, creator, initial cycle and session together', async () => {
         const seed = await seedIdentityWithGrants();
 
@@ -249,6 +332,65 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
 
         // E a nova tentativa, sem a falha, funciona.
         await expect(createFamilyUseCase().execute(commandFor(seed))).resolves.toBeDefined();
+      });
+    });
+
+    describe('CA-12: existing family access', () => {
+      it('allows adult reading, restricts editing to the administrator and isolates families', async () => {
+        const seed = await seedIdentityWithGrants();
+        const result = await createFamilyUseCase().execute(
+          commandFor(seed, {
+            initialMembers: [
+              { name: 'Adulto', role: 'member' },
+              { name: 'Crianca', role: 'kids' },
+            ],
+          }),
+        );
+        const repo = new PostgresFamilyProfileRepository();
+        const get = new GetFamilyUseCase({
+          repository: repo,
+          transactionRunner: container.transactionRunner,
+        });
+        const update = new UpdateFamilyUseCase({
+          repository: repo,
+          transactionRunner: container.transactionRunner,
+          clock,
+        });
+        const creator = {
+          sessionId: result.session.sessionId,
+          familyId: result.family.id,
+          memberId: result.member.id,
+          role: 'administrator' as const,
+          isFamilyCreator: true,
+        };
+        const adult = {
+          ...creator,
+          memberId: result.initialMembers[0]!.id,
+          role: 'member' as const,
+          isFamilyCreator: false,
+        };
+        const kid = {
+          ...creator,
+          memberId: result.initialMembers[1]!.id,
+          role: 'kids' as const,
+          isFamilyCreator: false,
+        };
+
+        await expect(get.execute(adult)).resolves.toEqual({
+          id: result.family.id,
+          name: 'Casa Silva',
+          timeZoneId: 'America/Sao_Paulo',
+        });
+        await expect(get.execute(kid)).rejects.toMatchObject({ code: 'ACTION_NOT_ALLOWED' });
+        await expect(update.execute(adult, 'Outra Casa')).rejects.toMatchObject({
+          code: 'ACTION_NOT_ALLOWED',
+        });
+        await expect(update.execute(creator, 'Nova Casa')).resolves.toMatchObject({
+          name: 'Nova Casa',
+        });
+        await expect(get.execute({ ...adult, familyId: randomUUID() })).rejects.toMatchObject({
+          code: 'RESOURCE_NOT_FOUND',
+        });
       });
     });
 
@@ -403,6 +545,110 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
     });
 
     describe('CA-10: optional initial photo', () => {
+      const onboardingRepository = new PostgresOnboardingMediaRepository();
+
+      it('uploads before family creation and links only in the creation commit', async () => {
+        const seed = await seedIdentityWithGrants();
+        const objects = new Map<string, Buffer>();
+        const storage = {
+          async put({ key, body }: { key: string; body: Buffer }) {
+            objects.set(key, body);
+          },
+          async delete(key: string) {
+            objects.delete(key);
+          },
+        };
+        const upload = new UploadOnboardingMediaUseCase({
+          repository: onboardingRepository,
+          storage,
+          imageProcessor: new SharpImageProcessor(),
+          crypto,
+          transactionRunner: container.transactionRunner,
+          clock,
+          logger,
+          keyPrefix: 'integration',
+        });
+        const content = await sharp({
+          create: { width: 8, height: 8, channels: 3, background: '#0a84ff' },
+        })
+          .png()
+          .toBuffer();
+        const media = await upload.execute({
+          creationGrant: seed.grants[0],
+          installationProof: seed.installationProof,
+          purpose: 'profilePhoto',
+          content,
+        });
+        expect(await familiesOf(seed.identityId)).toBe(0);
+        expect(
+          await count(
+            `select count(*) as total from app.onboarding_media where id = $1 and state = 'READY'`,
+            [media.mediaId],
+          ),
+        ).toBe(1);
+        const created = await createFamilyUseCase().execute(
+          commandFor(seed, { creatorPhotoMediaId: media.mediaId }),
+        );
+        expect(
+          await count(`select count(*) as total from app.onboarding_media where id = $1`, [
+            media.mediaId,
+          ]),
+        ).toBe(0);
+        expect(
+          await count(
+            `select count(*) as total from app.media_assets where id = $1 and owner_member_id = $2`,
+            [media.mediaId, created.member.id],
+          ),
+        ).toBe(1);
+        expect(objects.size).toBe(1);
+      });
+
+      it('rejects a photo prepared for another grant and leaves both identities unassociated', async () => {
+        const owner = await seedIdentityWithGrants();
+        const other = await seedIdentityWithGrants();
+        const photoId = randomUUID();
+        await container.dbPool.query(
+          `insert into app.onboarding_media (id, grant_id, object_key, purpose, state, size_bytes, content_type)
+           values ($1, (select id from app.family_creation_grants where grant_token_hash = $2), $3, 'PROFILE_PHOTO', 'READY', 4, 'image/jpeg')`,
+          [photoId, crypto.hashToken(owner.grants[0]!), `integration/onboarding/${photoId}.jpg`],
+        );
+        await expect(
+          createFamilyUseCase().execute(commandFor(other, { creatorPhotoMediaId: photoId })),
+        ).rejects.toMatchObject({
+          fieldErrors: { creatorPhotoMediaId: ['PHOTO_MEDIA_NOT_OWNED'] },
+        });
+        expect(await familiesOf(owner.identityId)).toBe(0);
+        expect(await familiesOf(other.identityId)).toBe(0);
+      });
+
+      it('cleans an abandoned reservation after 24 hours', async () => {
+        const seed = await seedIdentityWithGrants();
+        const id = randomUUID();
+        await container.dbPool.query(
+          `insert into app.onboarding_media (id, grant_id, object_key, purpose, state, created_at)
+           values ($1, (select id from app.family_creation_grants where grant_token_hash = $2), $3, 'PROFILE_PHOTO', 'FAILED', now() - interval '25 hours')`,
+          [id, crypto.hashToken(seed.grants[0]!), `integration/onboarding/${id}.jpg`],
+        );
+        const deleted: string[] = [];
+        const cleaner = new CleanOrphanOnboardingMedia({
+          repository: onboardingRepository,
+          storage: {
+            async put() {},
+            async delete(key) {
+              deleted.push(key);
+            },
+          },
+          transactionRunner: container.transactionRunner,
+          clock,
+          logger,
+        });
+        await cleaner.run();
+        expect(deleted).toContain(`integration/onboarding/${id}.jpg`);
+        expect(
+          await count(`select count(*) as total from app.onboarding_media where id = $1`, [id]),
+        ).toBe(0);
+      });
+
       const profileUseCase = () =>
         new UpdateOwnProfileUseCase({
           profileRepository: new PostgresProfileRepository(),

@@ -6,7 +6,7 @@
  * A unicidade e os locks do banco são provados em tests/integration.
  */
 import { createHash } from 'node:crypto';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AccessCryptoPort } from '../../src/modules/access/application/access-crypto-port.js';
 import type {
   AccessRepositoryPort,
@@ -21,6 +21,7 @@ import type {
   FamilyCreationRepositoryPort,
 } from '../../src/modules/family/application/family-creation-repository-port.js';
 import { CreationGrantInvalidError } from '../../src/modules/family/domain/family-errors.js';
+import type { OnboardingMediaPort } from '../../src/modules/media/application/onboarding-media-port.js';
 import type { Clock } from '../../src/shared/application/clock.js';
 import type {
   TransactionContext,
@@ -83,7 +84,7 @@ class InMemoryDatabase implements FamilyCreationRepositoryPort, AccessRepository
   public sessions: InsertSessionParams[] = [];
   public accessTokens: InsertAccessTokenParams[] = [];
   public lockedIdentities: string[] = [];
-  public failOn?: 'insertFamily' | 'insertSession';
+  public failOn?: 'insertFamily' | 'insertInitialMember' | 'insertSession';
   public seenContexts = new Set<TransactionContext>();
 
   public snapshot(): Snapshot {
@@ -219,6 +220,21 @@ class InMemoryDatabase implements FamilyCreationRepositoryPort, AccessRepository
     });
   }
 
+  public async insertInitialMember(
+    tx: TransactionContext,
+    params: { id: string; familyId: string; name: string; role: string },
+  ): Promise<void> {
+    this.seenContexts.add(tx);
+    if (this.failOn === 'insertInitialMember') throw new Error('member insert failed');
+    this.members.push({
+      id: params.id,
+      familyId: params.familyId,
+      creatorIdentityId: '',
+      name: params.name,
+      nickname: null,
+    });
+  }
+
   // --- AccessRepositoryPort: só o que o SessionIssuer usa ---------------------
   public async revokeActiveSessionsForMember(tx: TransactionContext): Promise<string[]> {
     this.seenContexts.add(tx);
@@ -315,6 +331,11 @@ describe('CreateFamilyUseCase', () => {
   let runner: RollbackTransactionRunner;
   let useCase: CreateFamilyUseCase;
   let logCalls: unknown[][];
+  let onboardingMedia: {
+    findForGrant: ReturnType<typeof vi.fn>;
+    findById: ReturnType<typeof vi.fn>;
+    transferToCreator: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     counter = 0;
@@ -324,9 +345,15 @@ describe('CreateFamilyUseCase', () => {
 
     const { logger, calls } = createRecordingLogger();
     logCalls = calls;
+    onboardingMedia = {
+      findForGrant: vi.fn().mockResolvedValue(undefined),
+      findById: vi.fn().mockResolvedValue(undefined),
+      transferToCreator: vi.fn(),
+    };
 
     useCase = new CreateFamilyUseCase({
       repository: database,
+      onboardingMedia: onboardingMedia as unknown as OnboardingMediaPort,
       sessionIssuer: new SessionIssuer({ repository: database, crypto, logger }),
       crypto,
       transactionRunner: runner,
@@ -336,6 +363,109 @@ describe('CreateFamilyUseCase', () => {
   });
 
   describe('CA-01: creation with a valid grant', () => {
+    const photoId = '9f1c2b0e-5b8a-4d0f-9d6e-1f7a8b9c0d1e';
+
+    it('links only a READY photo of the same grant in the creation transaction', async () => {
+      const photo = {
+        id: photoId,
+        grantId: 'grant-1',
+        purpose: 'PROFILE_PHOTO',
+        state: 'READY',
+        objectKey: 'private/photo.jpg',
+        sizeBytes: 4,
+        contentType: 'image/jpeg',
+      };
+      onboardingMedia.findForGrant.mockResolvedValue(photo);
+      const result = await useCase.execute({ ...VALID_COMMAND, creatorPhotoMediaId: photoId });
+      expect(onboardingMedia.findForGrant).toHaveBeenCalledWith(
+        expect.anything(),
+        photoId,
+        'grant-1',
+      );
+      expect(onboardingMedia.transferToCreator).toHaveBeenCalledWith(expect.anything(), {
+        media: photo,
+        familyId: result.family.id,
+        memberId: result.member.id,
+        now: FIXED_NOW,
+      });
+    });
+
+    it('rejects a photo from another grant without persisting a family', async () => {
+      onboardingMedia.findById.mockResolvedValue({ id: photoId, grantId: 'other-grant' });
+      await expect(
+        useCase.execute({ ...VALID_COMMAND, creatorPhotoMediaId: photoId }),
+      ).rejects.toMatchObject({
+        code: 'VALIDATION_FAILED',
+        fieldErrors: { creatorPhotoMediaId: ['PHOTO_MEDIA_NOT_OWNED'] },
+      });
+      expect(database.families).toHaveLength(0);
+      expect(database.grants[0]?.consumedAt).toBeUndefined();
+    });
+
+    it('rejects an uploading photo but allows creation when photo is omitted', async () => {
+      onboardingMedia.findForGrant.mockResolvedValue({
+        id: photoId,
+        grantId: 'grant-1',
+        purpose: 'PROFILE_PHOTO',
+        state: 'UPLOADING',
+      });
+      await expect(
+        useCase.execute({ ...VALID_COMMAND, creatorPhotoMediaId: photoId }),
+      ).rejects.toMatchObject({
+        fieldErrors: { creatorPhotoMediaId: ['PHOTO_MEDIA_NOT_READY'] },
+      });
+      await expect(useCase.execute(VALID_COMMAND)).resolves.toMatchObject({
+        family: { name: 'Casa Silva' },
+      });
+    });
+    it('creates zero initial members by default and returns an empty list', async () => {
+      const result = await useCase.execute(VALID_COMMAND);
+      expect(result.initialMembers).toEqual([]);
+      expect(database.members).toHaveLength(1);
+    });
+
+    it('creates multiple members in request order with server ids and no invite', async () => {
+      const result = await useCase.execute({
+        ...VALID_COMMAND,
+        initialMembers: [
+          { name: '  Ana ', role: 'member' },
+          { name: 'Leo', role: 'kids' },
+        ],
+      });
+      expect(result.initialMembers).toEqual([
+        { id: expect.any(String), name: 'Ana', role: 'member' },
+        { id: expect.any(String), name: 'Leo', role: 'kids' },
+      ]);
+      expect(database.members).toHaveLength(3);
+      expect(runner.runs).toBe(1);
+    });
+
+    it('rolls back creator and all members when one insert fails', async () => {
+      database.failOn = 'insertInitialMember';
+      await expect(
+        useCase.execute({ ...VALID_COMMAND, initialMembers: [{ name: 'Ana', role: 'member' }] }),
+      ).rejects.toBeInstanceOf(DependencyUnavailableError);
+      expect(database.families).toHaveLength(0);
+      expect(database.members).toHaveLength(0);
+      expect(database.sessions).toHaveLength(0);
+      expect(database.grants[0]?.consumedAt).toBeUndefined();
+    });
+
+    it('rejects an invalid member without opening a transaction', async () => {
+      await expect(
+        useCase.execute({
+          ...VALID_COMMAND,
+          initialMembers: [
+            { name: 'Ana', role: 'member' },
+            { name: '', role: 'kids' },
+          ],
+        }),
+      ).rejects.toMatchObject({
+        code: 'VALIDATION_FAILED',
+        fieldErrors: { 'initialMembers[1].name': ['MEMBER_NAME_REQUIRED'] },
+      });
+      expect(runner.runs).toBe(0);
+    });
     it('creates family, creator administrator, initial cycle and session in one transaction', async () => {
       const result = await useCase.execute(VALID_COMMAND);
 

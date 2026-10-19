@@ -5,10 +5,11 @@ import {
   DomainError,
   ValidationError,
 } from '../../../shared/domain/domain-error.js';
-import { MemberRole } from '../../../shared/domain/member-role.js';
+import { isValidMemberRole, MemberRole } from '../../../shared/domain/member-role.js';
 import type { Logger } from '../../../shared/infrastructure/observability/logger.js';
 import type { AccessCryptoPort } from '../../access/application/access-crypto-port.js';
 import type { SessionIssuer } from '../../access/application/session-issuer.js';
+import type { OnboardingMediaPort } from '../../media/application/onboarding-media-port.js';
 import { CreationGrantInvalidError } from '../domain/family-errors.js';
 import { normalizeName, normalizeNickname } from '../domain/text-rules.js';
 import { DEFAULT_TIME_ZONE_ID, isValidTimeZoneId } from '../domain/time-zone.js';
@@ -21,20 +22,21 @@ interface ValidatedInput {
   readonly creatorNickname: string | null;
   readonly familyName: string;
   readonly timeZoneId: string;
+  readonly initialMembers: readonly { name: string; role: MemberRole }[];
+  readonly creatorPhotoMediaId: string | undefined;
 }
 
 /**
  * `CreateFamily` (UC01, SPEC-002 Fase 1).
  *
  * Consome o `creationGrant` e cria, numa única transação, a família, o Criador
- * Administrador, o ciclo semanal inicial e a sessão. A foto de perfil não passa
- * por aqui: ela é enviada depois, já com a sessão, e pode falhar sem desfazer a
- * família (CA-10).
+ * Administrador, membros iniciais, ciclo, foto opcional e sessão (CA-01/CA-10).
  */
 export class CreateFamilyUseCase {
   constructor(
     private readonly deps: {
       readonly repository: FamilyCreationRepositoryPort;
+      readonly onboardingMedia: OnboardingMediaPort;
       readonly sessionIssuer: SessionIssuer;
       readonly crypto: Pick<AccessCryptoPort, 'newId' | 'hashToken'>;
       readonly transactionRunner: TransactionRunner;
@@ -88,6 +90,52 @@ export class CreateFamilyUseCase {
       fieldErrors['timeZoneId'] = ['TIME_ZONE_ID_INVALID'];
     }
 
+    const initialMembers: { name: string; role: MemberRole }[] = [];
+    if (command.initialMembers !== undefined) {
+      if (!Array.isArray(command.initialMembers)) {
+        fieldErrors['initialMembers'] = ['INITIAL_MEMBERS_INVALID'];
+      } else {
+        for (const [index, item] of command.initialMembers.entries()) {
+          if (typeof item !== 'object' || item === null || Array.isArray(item)) {
+            fieldErrors[`initialMembers[${index}]`] = ['INITIAL_MEMBER_INVALID'];
+            continue;
+          }
+          const member = item as Record<string, unknown>;
+          for (const key of Object.keys(member)) {
+            if (key !== 'name' && key !== 'role') {
+              throw new DomainError({
+                message: 'The request contains an unknown field.',
+                code: 'UNKNOWN_FIELD',
+                statusCode: 400,
+                fieldErrors: { [`initialMembers[${index}].${key}`]: ['UNKNOWN_FIELD'] },
+              });
+            }
+          }
+          const name = normalizeName(member['name']);
+          if ('problem' in name)
+            fieldErrors[`initialMembers[${index}].name`] = [`MEMBER_NAME_${name.problem}`];
+          const role = member['role'];
+          if (typeof role !== 'string' || !isValidMemberRole(role)) {
+            fieldErrors[`initialMembers[${index}].role`] = ['MEMBER_ROLE_INVALID'];
+          }
+          if (!('problem' in name) && typeof role === 'string' && isValidMemberRole(role)) {
+            initialMembers.push({ name: name.value, role });
+          }
+        }
+      }
+    }
+
+    const creatorPhotoMediaId = command.creatorPhotoMediaId;
+    if (
+      creatorPhotoMediaId !== undefined &&
+      (typeof creatorPhotoMediaId !== 'string' ||
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+          creatorPhotoMediaId,
+        ))
+    ) {
+      fieldErrors['creatorPhotoMediaId'] = ['PHOTO_MEDIA_NOT_READY'];
+    }
+
     if (
       'problem' in creatorName ||
       'problem' in creatorNickname ||
@@ -103,6 +151,9 @@ export class CreateFamilyUseCase {
       creatorNickname: creatorNickname.value,
       familyName: familyName.value,
       timeZoneId,
+      initialMembers,
+      creatorPhotoMediaId:
+        typeof creatorPhotoMediaId === 'string' ? creatorPhotoMediaId : undefined,
     };
   }
 
@@ -143,6 +194,38 @@ export class CreateFamilyUseCase {
         throw new CreationGrantInvalidError();
       }
 
+      let photo;
+      if (input.creatorPhotoMediaId !== undefined) {
+        photo = await this.deps.onboardingMedia.findForGrant(
+          tx,
+          input.creatorPhotoMediaId,
+          grant.id,
+        );
+        if (photo === undefined) {
+          const anyPhoto = await this.deps.onboardingMedia.findById(tx, input.creatorPhotoMediaId);
+          throw new ValidationError('The photo is unavailable for this onboarding.', {
+            creatorPhotoMediaId: [
+              anyPhoto === undefined ? 'PHOTO_MEDIA_NOT_READY' : 'PHOTO_MEDIA_NOT_OWNED',
+            ],
+          });
+        }
+        if (photo.purpose !== 'PROFILE_PHOTO') {
+          throw new ValidationError('The photo purpose is invalid.', {
+            creatorPhotoMediaId: ['PHOTO_MEDIA_PURPOSE_MISMATCH'],
+          });
+        }
+        if (photo.state !== 'READY') {
+          throw new ValidationError('The photo is not ready.', {
+            creatorPhotoMediaId: ['PHOTO_MEDIA_NOT_READY'],
+          });
+        }
+        if (photo.sizeBytes === null || photo.contentType !== 'image/jpeg') {
+          throw new ValidationError('The photo is not ready.', {
+            creatorPhotoMediaId: ['PHOTO_MEDIA_NOT_READY'],
+          });
+        }
+      }
+
       await repository.revokeOpenCreationGrants(tx, {
         creatorIdentityId: grant.creatorIdentityId,
         now,
@@ -168,6 +251,19 @@ export class CreateFamilyUseCase {
         createdAt: now,
       });
 
+      const initialMembers = [];
+      for (const initial of input.initialMembers) {
+        const id = crypto.newId();
+        await repository.insertInitialMember(tx, {
+          id,
+          familyId,
+          name: initial.name,
+          role: initial.role,
+          createdAt: now,
+        });
+        initialMembers.push({ id, name: initial.name, role: initial.role });
+      }
+
       await repository.insertWeeklyCycle(tx, {
         cycleId: crypto.newId(),
         familyId,
@@ -176,6 +272,15 @@ export class CreateFamilyUseCase {
         timeZoneId: cycle.timeZoneId,
         referenceWeek: cycle.referenceWeek,
       });
+
+      if (photo !== undefined) {
+        await this.deps.onboardingMedia.transferToCreator(tx, {
+          media: photo,
+          familyId,
+          memberId,
+          now,
+        });
+      }
 
       const session = await this.deps.sessionIssuer.issue(tx, {
         familyId,
@@ -186,7 +291,7 @@ export class CreateFamilyUseCase {
         now,
       });
 
-      return { familyId, memberId, session };
+      return { familyId, memberId, initialMembers, session };
     });
 
     this.deps.logger.info('family_created', {
@@ -208,6 +313,7 @@ export class CreateFamilyUseCase {
         role: MemberRole.ADMINISTRATOR,
         isFamilyCreator: true,
       },
+      initialMembers: result.initialMembers,
       session: result.session,
     };
   }
