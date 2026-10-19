@@ -3,6 +3,7 @@ import {
   MissionCompletedProtectedError,
   MissionManagementNotAllowedError,
 } from '../../src/modules/missions/domain/mission-errors.js';
+import { ValidationError } from '../../src/shared/domain/domain-error.js';
 import { buildTestApp, type TestApp } from '../support/build-test-app.js';
 
 const AUTH = { authorization: 'Bearer opaque-access-token' };
@@ -61,6 +62,42 @@ describe('Mission routes — SPEC-014 phase 1', () => {
       expect(test.createMission.execute).not.toHaveBeenCalled();
     },
   );
+
+  it('CA-05/CA-07 serializes validation failures as 422 with stable fieldErrors', async () => {
+    test.createMission.execute.mockRejectedValue(
+      new ValidationError('Each task must belong to the active family.', {
+        taskIds: ['TASK_NOT_IN_FAMILY'],
+      }),
+    );
+
+    const response = await test.app.inject({
+      method: 'POST',
+      url: '/v1/missions',
+      headers: AUTH,
+      payload: { title: 'X', taskIds: MISSION.taskIds },
+    });
+
+    expect(response.statusCode).toBe(422);
+    expect(response.headers['content-type']).toContain('application/problem+json');
+    expect(response.json()).toMatchObject({
+      code: 'VALIDATION_FAILED',
+      fieldErrors: { taskIds: ['TASK_NOT_IN_FAMILY'] },
+    });
+  });
+
+  it('CA-19 serializes the Kids projection without redemption or family data', async () => {
+    const { familyId: _familyId, isRedemptionAvailable: _redemption, ...kids } = MISSION;
+    test.getMissionDetail.execute.mockResolvedValue({ ...kids, reward: 'secret' });
+
+    const response = await test.app.inject({
+      method: 'GET',
+      url: `/v1/missions/${MISSION_ID}`,
+      headers: AUTH,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual(kids);
+  });
 
   it('CA-02 maps a denied creation to 403 ACTION_NOT_ALLOWED', async () => {
     test.createMission.execute.mockRejectedValue(new MissionManagementNotAllowedError());

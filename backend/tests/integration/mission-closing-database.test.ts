@@ -292,6 +292,45 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
       expect(badges.rows).toEqual([{ badge_code: 'bronze', contributing: 5 }]);
     });
 
+    it('CA-16 two concurrent completions of the last two tasks close the mission exactly once', async () => {
+      const family = await seedFamily();
+      const taskA = await seedTask(family, [family.memberId]);
+      const taskB = await seedTask(family, [family.otherMemberId]);
+      const mission = await createMission(family, [taskA, taskB]);
+
+      const results = await Promise.allSettled([
+        completeTask(family, taskA),
+        completeTask(family, taskB),
+      ]);
+
+      expect(results.every((result) => result.status === 'fulfilled')).toBe(true);
+      expect(
+        (await container.getMissionDetailUseCase.execute(admin(family), mission.id)).status,
+      ).toBe('completed');
+      expect(await participants(mission.id)).toEqual(
+        [family.memberId, family.otherMemberId].sort(),
+      );
+    });
+
+    it('CA-02 a demoted administrator session cannot create a mission', async () => {
+      const family = await seedFamily();
+      const task = await seedTask(family, [family.memberId]);
+      await container.dbPool.query(`update app.members set role = 'member' where id = $1`, [
+        family.adminId,
+      ]);
+
+      await expect(createMission(family, [task])).rejects.toMatchObject({
+        code: 'ACTION_NOT_ALLOWED',
+      });
+      expect(
+        (
+          await container.dbPool.query(`select 1 from app.missions where family_id = $1`, [
+            family.familyId,
+          ])
+        ).rowCount,
+      ).toBe(0);
+    });
+
     it('CA-04/CA-07 hides foreign missions and tasks across families', async () => {
       const family = await seedFamily();
       const foreign = await seedFamily();
