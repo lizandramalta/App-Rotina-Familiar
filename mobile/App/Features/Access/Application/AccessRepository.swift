@@ -1,6 +1,6 @@
 import Foundation
 
-protocol AccessRepository: Sendable {
+nonisolated protocol AccessRepository: Sendable {
     func signIn(
         proof: AppleAuthorizationProof,
         installationProof: String

@@ -6,26 +6,44 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		5A000011307607650025D147 /* FamilyRoutine.app in Frameworks */ = {isa = PBXBuildFile; fileRef = 559C5206307607650025D147 /* FamilyRoutine.app */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		5A00000D307607650025D147 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 559C51FE307607650025D147 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 559C5205307607650025D147;
+			remoteInfo = FamilyRoutine;
+		};
+		5A00001B307607650025D147 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 559C51FE307607650025D147 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 559C5205307607650025D147;
+			remoteInfo = FamilyRoutine;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		559C5206307607650025D147 /* FamilyRoutine.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FamilyRoutine.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A000001307607650025D147 /* FamilyRoutineTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FamilyRoutineTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		5A000014307607650025D147 /* FamilyRoutineUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FamilyRoutineUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		5A000002307607650025D147 /* AppConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfigurationTests.swift; sourceTree = "<group>"; };
-		5A000012307607650025D147 /* EntryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Access/EntryViewModelTests.swift; sourceTree = "<group>"; };
 		5A00000E307607650025D147 /* Development.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Development.xcconfig; sourceTree = "<group>"; };
 		5A00000F307607650025D147 /* Production.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Production.xcconfig; sourceTree = "<group>"; };
+		5A000014307607650025D147 /* FamilyRoutineUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FamilyRoutineUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
-
-/* Begin PBXBuildFile section */
-		5A000004307607650025D147 /* AppConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A000002307607650025D147 /* AppConfigurationTests.swift */; };
-		5A000013307607650025D147 /* EntryViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A000012307607650025D147 /* EntryViewModelTests.swift */; };
-		5A000011307607650025D147 /* FamilyRoutine.app in Frameworks */ = {isa = PBXBuildFile; fileRef = 559C5206307607650025D147 /* FamilyRoutine.app */; };
-/* End PBXBuildFile section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		559C5208307607650025D147 /* App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = App;
+			sourceTree = "<group>";
+		};
+		5A000003307607650025D147 /* FoundationTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = FoundationTests;
 			sourceTree = "<group>";
 		};
 		5A000015307607650025D147 /* FamilyRoutineUITests */ = {
@@ -65,7 +83,7 @@
 			isa = PBXGroup;
 			children = (
 				559C5208307607650025D147 /* App */,
-				5A000003307607650025D147 /* FamilyRoutineTests */,
+				5A000003307607650025D147 /* FoundationTests */,
 				5A000015307607650025D147 /* FamilyRoutineUITests */,
 				5A000010307607650025D147 /* Configuration */,
 				559C5207307607650025D147 /* Products */,
@@ -80,15 +98,6 @@
 				5A000014307607650025D147 /* FamilyRoutineUITests.xctest */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		5A000003307607650025D147 /* FamilyRoutineTests */ = {
-			isa = PBXGroup;
-			children = (
-				5A000002307607650025D147 /* AppConfigurationTests.swift */,
-				5A000012307607650025D147 /* EntryViewModelTests.swift */,
-			);
-			path = FoundationTests;
 			sourceTree = "<group>";
 		};
 		5A000010307607650025D147 /* Configuration */ = {
@@ -138,6 +147,9 @@
 			dependencies = (
 				5A00000C307607650025D147 /* PBXTargetDependency */,
 			);
+			fileSystemSynchronizedGroups = (
+				5A000003307607650025D147 /* FoundationTests */,
+			);
 			name = FamilyRoutineTests;
 			packageProductDependencies = (
 			);
@@ -169,36 +181,6 @@
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
-
-/* Begin PBXContainerItemProxy section */
-		5A00000D307607650025D147 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 559C51FE307607650025D147 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 559C5205307607650025D147;
-			remoteInfo = FamilyRoutine;
-		};
-		5A00001B307607650025D147 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 559C51FE307607650025D147 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 559C5205307607650025D147;
-			remoteInfo = FamilyRoutine;
-		};
-/* End PBXContainerItemProxy section */
-
-/* Begin PBXTargetDependency section */
-		5A00000C307607650025D147 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 559C5205307607650025D147 /* FamilyRoutine */;
-			targetProxy = 5A00000D307607650025D147 /* PBXContainerItemProxy */;
-		};
-		5A00001A307607650025D147 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 559C5205307607650025D147 /* FamilyRoutine */;
-			targetProxy = 5A00001B307607650025D147 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXProject section */
 		559C51FE307607650025D147 /* Project object */ = {
@@ -271,8 +253,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5A000004307607650025D147 /* AppConfigurationTests.swift in Sources */,
-				5A000013307607650025D147 /* EntryViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -284,6 +264,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		5A00000C307607650025D147 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 559C5205307607650025D147 /* FamilyRoutine */;
+			targetProxy = 5A00000D307607650025D147 /* PBXContainerItemProxy */;
+		};
+		5A00001A307607650025D147 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 559C5205307607650025D147 /* FamilyRoutine */;
+			targetProxy = 5A00001B307607650025D147 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		559C520F307607650025D147 /* Debug */ = {
@@ -416,14 +409,14 @@
 				CODE_SIGN_ENTITLEMENTS = App/FamilyRoutine.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 55Z24S2H7V;
 				DEVELOPMENT_LANGUAGE = "pt-BR";
+				DEVELOPMENT_TEAM = 55Z24S2H7V;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Configuration/Info.plist;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_APIBaseURL = "$(API_BASE_URL)";
 				INFOPLIST_KEY_AppEnvironment = "$(APP_ENVIRONMENT)";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -454,14 +447,14 @@
 				CODE_SIGN_ENTITLEMENTS = App/FamilyRoutine.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 55Z24S2H7V;
 				DEVELOPMENT_LANGUAGE = "pt-BR";
+				DEVELOPMENT_TEAM = 55Z24S2H7V;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Configuration/Info.plist;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_APIBaseURL = "$(API_BASE_URL)";
 				INFOPLIST_KEY_AppEnvironment = "$(APP_ENVIRONMENT)";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";

@@ -3,16 +3,37 @@ import Foundation
 @MainActor
 final class AppContainer {
     private let accessRepository: any AccessRepository
+    private let familyRepository: any FamilyRepository
     private let credentialStore: any SessionCredentialStoring
     private let installationProofStore: any InstallationProofProviding
     private let appleAuthenticator: any AppleAuthenticating
+    private let photoNormalizer: any ProfilePhotoNormalizing
 
-    init(configuration: AppConfiguration) {
+    init(
+        accessRepository: any AccessRepository,
+        familyRepository: any FamilyRepository,
+        credentialStore: any SessionCredentialStoring,
+        installationProofStore: any InstallationProofProviding,
+        appleAuthenticator: any AppleAuthenticating,
+        photoNormalizer: any ProfilePhotoNormalizing = ProfilePhotoNormalizer()
+    ) {
+        self.accessRepository = accessRepository
+        self.familyRepository = familyRepository
+        self.credentialStore = credentialStore
+        self.installationProofStore = installationProofStore
+        self.appleAuthenticator = appleAuthenticator
+        self.photoNormalizer = photoNormalizer
+    }
+
+    convenience init(configuration: AppConfiguration) {
         let secrets = KeychainSecretStore()
-        accessRepository = HTTPAccessRepository(baseURL: configuration.apiBaseURL)
-        credentialStore = KeychainSessionCredentialStore(secrets: secrets)
-        installationProofStore = KeychainInstallationProofStore(secrets: secrets)
-        appleAuthenticator = AppleSignInAdapter()
+        self.init(
+            accessRepository: HTTPAccessRepository(baseURL: configuration.apiBaseURL),
+            familyRepository: HTTPFamilyRepository(baseURL: configuration.apiBaseURL),
+            credentialStore: KeychainSessionCredentialStore(secrets: secrets),
+            installationProofStore: KeychainInstallationProofStore(secrets: secrets),
+            appleAuthenticator: AppleSignInAdapter()
+        )
     }
 
     func makeSessionStore() -> AppSessionStore {
@@ -30,6 +51,19 @@ final class AppContainer {
                 repository: accessRepository,
                 installationProofProvider: installationProofStore
             ),
+            sessionStore: sessionStore
+        )
+    }
+
+    func makeOnboardingViewModel(
+        grant: CreationGrant,
+        sessionStore: AppSessionStore
+    ) -> InitialOnboardingViewModel {
+        InitialOnboardingViewModel(
+            grant: grant,
+            repository: familyRepository,
+            installationProofProvider: installationProofStore,
+            photoNormalizer: photoNormalizer,
             sessionStore: sessionStore
         )
     }
