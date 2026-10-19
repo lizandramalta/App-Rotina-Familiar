@@ -1,8 +1,8 @@
 # Requisitos funcionais e não funcionais
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.16\
-**Data:** 2026-10-10\
+**Versão:** 1.17\
+**Data:** 2026-10-19\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -426,7 +426,7 @@ O sistema deve impedir edição, exclusão ou mudança de vínculos da missão c
 
 ### RF59
 
-Ao excluir uma tarefa não concluída, o sistema deve remover seus vínculos de missões em andamento e recalcular o progresso. Deve impedir a operação quando afetar missão concluída ou deixar missão sem tarefas. A exclusão após reabertura não deve retirar carga novamente.
+Ao excluir uma tarefa não concluída, o sistema deve remover seus vínculos de missões em andamento e recalcular o progresso. Deve impedir a operação quando afetar missão concluída ou deixar missão sem tarefas. A exclusão após reabertura não deve retirar carga novamente. Se, após remover o vínculo, restarem apenas tarefas concluídas, o sistema deve concluir a missão na mesma transação, conforme RN38.
 
 **Regras de negócio:** [RN50](01-regras-de-negocio.md#rn50), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59)  
 **Casos de uso:** [UC07](03-casos-de-uso.md#uc07), [UC17](03-casos-de-uso.md#uc17)
@@ -773,6 +773,7 @@ A configuração de apelido deve ser protegida por titularidade no backend, incl
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.17 | 2026-10-19 | RF59: a exclusão que deixa apenas tarefas concluídas conclui a missão na mesma transação (RN38). Para SPEC-014/SPEC-007. |
 | 1.16 | 2026-10-10 | RF18 e RF20 preservam e identificam carga histórica de membro removido. Para SPEC-018. |
 | 1.15 | 2026-10-10 | RF34 passa a detalhar título, descrição, unicidade e catálogo inicial dos itens de recompensa coletiva. Para SPEC-015. |
 | 1.14 | 2026-10-07 | RF01, RF02, RF38, RF41 e RF48 passam a cobrir o onboarding do Criador: rascunho de perfil, criação da família, adição opcional de membros e emissão explícita de convite antes da área principal. |

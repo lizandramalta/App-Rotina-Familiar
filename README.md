@@ -3,7 +3,7 @@
 Organização colaborativa das responsabilidades domésticas, com tarefas compartilhadas, participação infantil e conquistas coletivas.
 
 **Escopo:** MVP  
-**Versão da base do projeto:** 1.18\
+**Versão da base do projeto:** 1.19\
 **Data:** 2026-10-10
 
 ## Por que este projeto existe
@@ -224,6 +224,7 @@ A arquitetura backend 1.0 está em [backend-architecture.md](docs/architecture/b
 
 | Versão | Data | Marco |
 |---|---|---|
+| 1.19 | 2026-10-19 | RN38, RF59 e UC07: a exclusão de tarefa que deixa a missão apenas com tarefas concluídas a conclui na mesma transação. Para SPEC-014/SPEC-007. |
 | 1.18 | 2026-10-10 | Consolidação das SPECs 015–020 com as implementações de acesso, família, convites, tarefas e sessão do `develop`; registros técnicos preservados na documentação de arquitetura. |
 | 1.17 | 2026-10-10 | Snapshot semanal passa a usar `referenceDate` e identifica crédito histórico como “Membro removido”. Para SPEC-019. |
 | 1.16 | 2026-10-10 | Carga histórica preserva crédito de perfil removido como “Membro removido”. Para SPEC-018. |

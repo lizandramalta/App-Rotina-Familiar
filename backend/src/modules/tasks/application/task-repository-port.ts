@@ -82,5 +82,5 @@ export interface TaskRepositoryPort {
   deleteTask(
     tx: TransactionContext,
     params: { readonly task: TaskRecord; readonly actorId: string; readonly now: Date },
-  ): Promise<void>;
+  ): Promise<readonly string[]>;
 }

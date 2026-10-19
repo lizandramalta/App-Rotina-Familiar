@@ -56,7 +56,7 @@ da experiência. Isso permite evoluir o visual sem perder decisões, estados e t
 
 ## Mapa de implementação
 
-**Base funcional:** 1.15 (2026-10-10)
+**Base funcional:** 1.18 (2026-10-19)
 
 **Convenção de status:** `não criada` indica apenas uma entrega planejada; os status
 do template passam a valer depois que o arquivo da spec existir.

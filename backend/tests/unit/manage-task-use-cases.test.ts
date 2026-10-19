@@ -5,6 +5,7 @@ import {
   DeleteTaskUseCase,
   EditTaskUseCase,
 } from '../../src/modules/tasks/application/manage-task-use-cases.js';
+import type { MissionClosurePort } from '../../src/modules/tasks/application/mission-closure-port.js';
 import type {
   TaskRecord,
   TaskRepositoryPort,
@@ -39,8 +40,16 @@ const TASK: TaskRecord = {
 describe('Task management use cases — SPEC-007', () => {
   let repository: Record<keyof TaskRepositoryPort, ReturnType<typeof vi.fn>>;
   let transactionRunner: TransactionRunner;
+  let missionCloser: {
+    closeForCompletedTask: ReturnType<typeof vi.fn>;
+    closeAfterTaskDeletion: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
+    missionCloser = {
+      closeForCompletedTask: vi.fn().mockResolvedValue(undefined),
+      closeAfterTaskDeletion: vi.fn().mockResolvedValue(undefined),
+    };
     repository = {
       insertSingleTask: vi.fn().mockResolvedValue(TASK),
       findTask: vi.fn().mockResolvedValue(TASK),
@@ -52,7 +61,7 @@ describe('Task management use cases — SPEC-007', () => {
       hasKidsAssignee: vi.fn().mockResolvedValue(false),
       completeTask: vi.fn().mockResolvedValue({ ...TASK, status: 'completed' }),
       updateTask: vi.fn().mockResolvedValue(TASK),
-      deleteTask: vi.fn(),
+      deleteTask: vi.fn().mockResolvedValue([]),
     };
     transactionRunner = {
       run: vi.fn(async (work: (tx: TransactionContext) => Promise<unknown>) =>
@@ -69,6 +78,7 @@ describe('Task management use cases — SPEC-007', () => {
     repository: repository as unknown as TaskRepositoryPort,
     transactionRunner,
     clock: { now: () => NOW, nowIsoString: () => NOW.toISOString() },
+    missionCloser: missionCloser as unknown as MissionClosurePort,
   });
 
   it('CA-01 creates a pending single task under the family lock', async () => {
@@ -178,6 +188,28 @@ describe('Task management use cases — SPEC-007', () => {
     expect(repository.deleteTask).not.toHaveBeenCalled();
   });
 
+  it('SCRUM-66 CA-21 closes the missions unlinked by the deletion in the same transaction', async () => {
+    const missionId = 'e4f5a6b7-c8d9-4123-8567-89abcdef0123';
+    repository.deleteTask.mockResolvedValue([missionId]);
+
+    await new DeleteTaskUseCase(dependencies()).execute(TEST_ACTOR, TASK.id);
+
+    expect(missionCloser.closeAfterTaskDeletion).toHaveBeenCalledWith(expect.anything(), {
+      familyId: TASK.familyId,
+      missionIds: [missionId],
+      now: NOW,
+    });
+  });
+
+  it('SCRUM-66 CA-21 does not close missions when the deletion is refused', async () => {
+    repository.isOnlyTaskOfAnActiveMission.mockResolvedValue(true);
+
+    await expect(
+      new DeleteTaskUseCase(dependencies()).execute(TEST_ACTOR, TASK.id),
+    ).rejects.toBeInstanceOf(MissionWouldHaveNoTasksError);
+    expect(missionCloser.closeAfterTaskDeletion).not.toHaveBeenCalled();
+  });
+
   it('SCRUM-40 CA-01 maintains final assignees and credits under the family lock', async () => {
     const result = await new CompleteTaskUseCase(dependencies()).execute(TEST_ACTOR, TASK.id);
 
@@ -201,6 +233,16 @@ describe('Task management use cases — SPEC-007', () => {
         { type: 'ownTasks', referenceDate: TASK.scheduledDate },
         { type: 'ownProgress', referenceDate: TASK.scheduledDate },
       ],
+    });
+  });
+
+  it('SCRUM-66 CA-15 closes eligible missions in the same transaction as the completion', async () => {
+    await new CompleteTaskUseCase(dependencies()).execute(TEST_ACTOR, TASK.id);
+
+    expect(missionCloser.closeForCompletedTask).toHaveBeenCalledWith(expect.anything(), {
+      familyId: TASK.familyId,
+      taskId: TASK.id,
+      now: NOW,
     });
   });
 
