@@ -1,10 +1,10 @@
 # UX Spec 003: Gerenciar membros
 
-**Status:** aprovada  
-**Autor:** Codex | **Criada em:** 2026-10-06 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-06  
+**Status:** aprovada\
+**Autor:** Codex | **Criada em:** 2026-10-06 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-19
 **Spec funcional vinculada:** [SPEC-003-gerenciar-membros.md](SPEC-003-gerenciar-membros.md)  
-**Base funcional:** 1.14\
-**Superfícies de interface:** TEL-030, TEL-032, TEL-033, TEL-050, TEL-056, MOD-010, UF-01, UF-12
+**Base funcional:** RN 1.18 / RF 1.17 / UC 1.16\
+**Superfícies de interface:** TEL-002 (retorno), TEL-030, TEL-032, TEL-033, TEL-050, MOD-010, UF-01, UF-12
 
 ## 1. Objetivo da experiência e jornada
 
@@ -16,13 +16,13 @@
 | Referência | Código / documento |
 |---|---|
 | Spec funcional vinculada | `SPEC-003-gerenciar-membros.md` |
-| Telas e modal | TEL-030, TEL-032, TEL-033, TEL-050, TEL-056, MOD-010 |
+| Telas e modal | TEL-002 (retorno), TEL-030, TEL-032, TEL-033, TEL-050, MOD-010 |
 | Fluxo | UF-01, UF-12 |
 | Design consultado | `docs/design/screen-map.md`, `docs/design/user-flows.md` |
 
 ## 3. Escopo da experiência
 
-- **Dentro:** entrada “Adicionar membro” em TEL-050 ou TEL-056 para Admin; criação e edição administrativa em TEL-033; ações autorizadas no detalhe TEL-032; confirmação de papel, modo Kids, remoção e saída de administração em MOD-010; retorno coerente à origem.
+- **Dentro:** inclusão persistente por Admin após criar a família, inclusive no retorno de TEL-056 a TEL-002; entrada “Adicionar membro” em TEL-050; criação e edição administrativa em TEL-033 quando aberta pela gestão normal; ações autorizadas em TEL-032 e MOD-010.
 - **Fora:** credenciais e compartilhamento de convite em TEL-034; entrada por convite; formulário de apelido/foto próprio; conteúdo das tarefas do detalhe, seus filtros e sua consulta funcional.
 
 ## 4. Jornada, navegação e preservação de contexto
@@ -31,8 +31,7 @@
 |---|---|---|---|---|
 | TEL-050 | Admin toca em “Adicionar membro” | TEL-033 | Cancelar retorna à Família | Período e rolagem da Família permanecem |
 | TEL-033 | Salva nome e papel válidos | TEL-032 | — | Exibe somente estado confirmado; não abre TEL-034 |
-| TEL-056 | Criador toca em “Adicionar membro” | TEL-033 | Cancelar retorna ao onboarding | Lista de integrantes iniciais permanece |
-| TEL-033 | Salva membro iniciado em TEL-056 | TEL-056 | — | A orquestração oferece convite explícito ou “Avançar”; não cria convite automaticamente |
+| TEL-056 | Criador volta para alterar os dados da família | TEL-002 em edição | Prosseguir sem mudanças retorna sem gravar | Família e membros iniciais já existem; nova inclusão usa persistência normal autorizada |
 | TEL-032 | Admin toca em editar | TEL-033 | Cancelar retorna ao detalhe | Membro e período selecionados permanecem |
 | TEL-033 / TEL-032 | Alterar papel/modo ou remover | MOD-010 | Cancelar retorna sem gravar | Campos e detalhe permanecem íntegros |
 | MOD-010 | Confirma mudança | TEL-032 | — | Recarrega capacidades e perfil confirmados |
@@ -48,7 +47,7 @@
 
 - **Objetivo nesta entrega:** iniciar a criação para Administradores e abrir o detalhe de qualquer membro para adultos.
 - **Anatomia:** a lista de membros continua como conteúdo existente e carrega a próxima página de até 20 perfis ao se aproximar do fim da rolagem; o botão “Adicionar membro” aparece apenas quando a capacidade `manageMembers` estiver confirmada.
-- **Transição:** criar não gera credenciais. Pela origem TEL-050, abre TEL-032; pela origem TEL-056, retorna ao onboarding, que pode oferecer TEL-034 por ação explícita.
+- **Transição:** criar não gera credenciais. Pela origem TEL-050, abre TEL-032; no retorno de TEL-056 a TEL-002, uma nova inclusão após a criação usa as mesmas permissões de gestão, sem recriar a família.
 
 ### 5.2. TEL-032 — Detalhe e tarefas do membro
 
@@ -117,7 +116,7 @@ As mensagens recebem o código de erro estável da API como chave de decisão; t
 | UX-02 | Controles proibidos são ocultos, enquanto a API permanece a autoridade. | Não; aplica RNF07. |
 | UX-03 | MOD-010 é obrigatório para remover, mudar papel/modo e sair da administração. | Não; apresenta efeitos já definidos. |
 | UX-04 | Ao falhar ou haver resposta incerta, formulário e contexto são preservados e a tela recarrega o estado confirmado antes de nova ação. | Não; aplica RNF12. |
-| UX-05 | No onboarding, TEL-033 preserva os campos e retorna a TEL-056 após criação confirmada; não abre o convite automaticamente. | Não; aplica RF02 e RF41. |
+| UX-05 | Revisada: os membros iniciais são preparados em TEL-002 antes da criação; TEL-056 recebe a lista já persistida e só oferece convites. Novos membros após a criação usam a gestão normal. | Sim; decisão da pessoa usuária em 2026-10-19, registrada em RN01/RN07, RF02/RF40 e UC01/UC02. |
 | UX-06 | Listas paginadas carregam continuamente a próxima página durante a rolagem; falha ao carregar uma página preserva os itens confirmados e oferece nova tentativa. | Não; aplica o contrato de consulta da SPEC-003 e RNF12. |
 
 ## 10. Checklist de aprovação
@@ -127,4 +126,5 @@ As mensagens recebem o código de erro estável da API como chave de decisão; t
 - [x] Estados de interface, i18n e acessibilidade definidos.
 - [x] Ações proibidas ficam ocultas sem substituir autorização no backend.
 - [x] Não cria convite, edição de perfil próprio ou comportamento de tarefas.
-- [x] Status autorizado explicitamente como `aprovada` pela pessoa usuária em 2026-10-06.
+- [x] Revisão de 2026-10-19 aprovada; aprovação anterior de 2026-10-06 preservada no histórico.
+- [x] Aprovação anterior registrada em 2026-10-06.

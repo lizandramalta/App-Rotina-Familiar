@@ -1,7 +1,7 @@
-# Documentação do projeto — versão 1.19
+# Documentação do projeto — versão 1.22
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.19\
+**Versão:** 1.22\
 **Data:** 2026-10-19\
 **Situação:** base documental consolidada
 
@@ -14,21 +14,21 @@
 | [Apresentação do projeto](../README.md) | Propósito, público, jornada e escopo do MVP. |
 | [Visão do produto](00-visao-do-produto.md) | Contexto, objetivos, princípios, escopo e critérios de sucesso. |
 | [Índice e versões](DOCUMENTACAO.md) | Organização documental, rastreabilidade e política de versões. |
-| [Regras de negócio](01-regras-de-negocio.md) | Regras vigentes e suas relações com RF, RNF e UC; base funcional 1.16. |
-| [Requisitos](02-requisitos.md) | 71 requisitos funcionais e 27 não funcionais, com vínculos às regras e aos casos de uso; base funcional 1.16. |
-| [Especificação dos casos de uso](03-casos-de-uso.md) | 19 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições; base funcional 1.16. |
+| [Regras de negócio](01-regras-de-negocio.md) | Regras vigentes e suas relações com RF, RNF e UC; versão 1.18. |
+| [Requisitos](02-requisitos.md) | 71 requisitos funcionais e 27 não funcionais, com vínculos às regras e aos casos de uso; versão 1.17. |
+| [Especificação dos casos de uso](03-casos-de-uso.md) | 19 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições; versão 1.16. |
 | [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) | Visão geral e cinco recortes UML, com fontes PlantUML e imagens SVG. |
-| [Screen map](design/screen-map.md) | Mapa 1.13: navegação, catálogo de telas, modais, estados e cobertura de UC01–UC19; base funcional 1.17. |
-| [User flows](design/user-flows.md) | Fluxos 1.14: 16 percursos que cobrem UC01–UC19, com decisões, alternativas e retornos; base funcional 1.17 e screen map 1.13. |
-| [Modelo de dados (DER)](05-modelo-de-dados.md) | Diagrama entidade-relacionamento em Mermaid: entidades, atributos, chaves e cardinalidades; base funcional 1.17. |
-| [Diagrama de classes](06-diagrama-de-classes.md) | Modelo de classes 1.8: contratos, diagramas por domínio e rastreabilidade UC–RF–RN/RNF–tipos; base funcional 1.15. |
-| [Arquitetura mobile](architecture/mobile-architecture.md) | Arquitetura 1.3: Swift + SwiftUI, View + ViewModel e Clean Architecture; estrutura, dependências, estado, sessão, navegação, integrações e verificação. |
-| [Catálogo mobile](architecture/mobile-feature-catalog.md) | Catálogo 1.7: funcionalidades, nomes de arquivos em inglês e cobertura das 26 telas, 14 modais, UC01–UC19, UF-01–UF-16 e RNF01–27; base funcional 1.15. |
-| [Decisões da arquitetura mobile](architecture/mobile-decisions.md) | MA-01–MA-17 e P-01–P-09 consolidadas, ajustes de modelagem e temas fora desta etapa. |
+| [Screen map](design/screen-map.md) | Mapa 1.14: navegação, catálogo de telas, modais, estados e cobertura de UC01–UC19; base RN 1.18 / RF 1.17 / UC 1.16. |
+| [User flows](design/user-flows.md) | Fluxos 1.15: 16 percursos que cobrem UC01–UC19, com decisões, alternativas e retornos; base RN 1.18 / RF 1.17 / UC 1.16 e screen map 1.14. |
+| [Modelo de dados (DER)](05-modelo-de-dados.md) | Modelo 1.9: preparação de foto por grant antes da família, criação conjunta de membros e estado visual apenas projetado; base RN 1.18 / RF 1.17 / UC 1.16. |
+| [Diagrama de classes](06-diagrama-de-classes.md) | Modelo 1.9: rascunho de membros, resultado de criação, foto antecipada e item pessoal com estado efetivo/exibido; base RN 1.18 / RF 1.17 / UC 1.16. |
+| [Arquitetura mobile](architecture/mobile-architecture.md) | Arquitetura 1.6: Swift + SwiftUI, View + ViewModel, integração do onboarding e projeção pessoal de tarefas. |
+| [Catálogo mobile](architecture/mobile-feature-catalog.md) | Catálogo 1.8: funcionalidades, nomes de arquivos em inglês e cobertura das 28 telas ativas, 14 modais, UC01–UC19 e UF-01–UF-16. |
+| [Decisões da arquitetura mobile](architecture/mobile-decisions.md) | MA-01–MA-19 e P-01–P-09, incluindo criação conjunta, retorno sem recriação e estado exibido por perfil. |
 | [Convenções de código mobile](architecture/mobile-code-conventions.md) | Convenções de Swift/SwiftUI, camadas, concorrência, segurança, testes e revisão. |
-| [Arquitetura backend](architecture/backend-architecture.md) | Backend 1.3: Node.js, Clean Architecture, monólito modular, Supabase/R2, transações, acesso e jobs. |
-| [Contratos backend](architecture/backend-contracts.md) | Contratos 1.16 da API `/v1`, documentação OpenAPI, permissões, erros, projeções e cobertura dos 19 UC e 27 RNF; base funcional 1.17. |
-| [Decisões backend](architecture/backend-decisions.md) | BA-01–BA-34: escolhas confirmadas, propostas técnicas, alternativas e limites. |
+| [Arquitetura backend](architecture/backend-architecture.md) | Backend 1.4: Node.js, Clean Architecture, monólito modular, Supabase/R2 e criação conjunta com foto antecipada. |
+| [Contratos backend](architecture/backend-contracts.md) | Contratos 1.16 da API `/v1`: rotas existentes materializadas na OpenAPI; criação com membros/foto, edição posterior e `displayStatus` são ampliações ainda pendentes de implementação e OpenAPI. |
+| [Decisões backend](architecture/backend-decisions.md) | BA-01–BA-37: escolhas confirmadas e propostas técnicas, inclusive preparação de foto e projeção pessoal. |
 | [Convenções de código backend](architecture/backend-code-conventions.md) | Convenções de TypeScript/Fastify, camadas, contratos, SQL, segurança, testes e revisão. |
 | [Specs de entrega](../specs/README.md) | Recortes aprovados de implementação compartilhados entre mobile e backend. |
 
@@ -139,13 +139,16 @@ TEL-014 e TEL-031 foram incorporadas à TEL-050 e retiradas da navegação; os i
 5. Preserve os IDs para design e user flows e registre as alterações no Git. Revisões do screen map e dos user flows são versionadas em conjunto. Se alterarem comportamento, atualize e versione a base funcional correspondente; a versão de design é independente.
 6. As arquiteturas em `docs/architecture/` têm versionamento independente da base funcional. A Sprint 0 implementa somente a fundação técnica de mobile, backend, migrations e CI; árvores e exemplos de funcionalidades continuam sendo direcionamento para entregas futuras. Decisões técnicas não alteram requisitos implicitamente; mudanças funcionais exigem revisão da base e das referências afetadas.
 
-A fundação backend adota Node.js, TypeScript, Fastify e `pg`; API de produto, worker funcional e integrações permanecem dependentes das SPECs aprovadas.
+A fundação backend adota Node.js, TypeScript, Fastify e `pg`. Parte da API de produto já foi implementada; os contratos alvo desta revisão ainda exigem código e migração antes de aparecerem na OpenAPI executável.
 
 ## Histórico de versões
 
 | Versão | Data | Alteração |
 | --- | --- | --- |
-| 1.19 | 2026-10-19 | RN38, RF59 e UC07: a exclusão de tarefa que deixa a missão apenas com tarefas concluídas a conclui na mesma transação. Base funcional 1.18. Para SPEC-014/SPEC-007. |
+| 1.22 | 2026-10-19 | Revisão dos pares SPEC/UX-002, 003, 004 e 009 concluída e aprovada; dependências e índice de entregas atualizados. README alinhado à criação conjunta dos membros com a família. |
+| 1.21 | 2026-10-19 | DER e diagrama de classes 1.9 alinhados à foto anterior à família, criação conjunta de membros, retorno sem recriação e estado pessoal apenas projetado. |
+| 1.20 | 2026-10-19 | Contratos backend 1.16, decisões BA-35–BA-37/MA-18–MA-19, arquiteturas e catálogo mobile alinhados a onboarding, convites e projeção pessoal; SPEC-002/009 reconciliadas tecnicamente. |
+| 1.19 | 2026-10-19 | RN38/RF59/UC07: exclusão que deixa a missão apenas com tarefas concluídas a conclui na mesma transação (SPEC-014/SPEC-007). Regras 1.18, requisitos 1.17 e casos de uso 1.16 também alinhados a onboarding, convites e estado pessoal; screen map 1.14 e user flows 1.15 atualizados. SPEC/UX-002, 003, 004 e 009 em revisão nessa etapa. |
 | 1.18 | 2026-10-10 | Consolidação da documentação das SPECs 015–020 com a implementação de acesso, família, convites, tarefas e sessão do `develop`; índices e versões técnicas reconciliados. |
 | 1.17 | 2026-10-10 | RN62/UC18 definem `referenceDate` para o PDF e identificam crédito histórico como “Membro removido”; contrato do snapshot detalhado. Para SPEC-019. |
 | 1.16 | 2026-10-10 | Carga histórica de perfil removido é preservada como “Membro removido”; TEL-050/UF-09 e contrato de `GET /family/load` detalhados para SPEC-018. |

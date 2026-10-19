@@ -1,7 +1,7 @@
 # Decisões consolidadas da arquitetura mobile
 
-**Versão:** 1.3 · **Base funcional:** 1.5\
-**Data:** 2026-10-08 · **Situação:** fundação técnica da Sprint 0 implementada; decisões de produto preservadas
+**Versão:** 1.4 · **Base funcional:** RN 1.18 / RF 1.17 / UC 1.16\
+**Data:** 2026-10-19 · **Situação:** decisões vigentes e integração alvo revisada; jornadas recentes ainda não implementadas
 
 [Arquitetura](mobile-architecture.md) · [Catálogo](mobile-feature-catalog.md) · [Índice](../DOCUMENTACAO.md)
 
@@ -30,6 +30,8 @@ Este registro substitui as propostas e pendências da arquitetura 1.0 pelas deci
 | MA-15 | Consolidada | Atualizar ao abrir/retomar, manualmente e após alterações; sem dependência de tempo real |
 | MA-16 | Confirmada | Backend único com banco PostgreSQL no Supabase; backend salva fotos no R2 e URL estável no Supabase; acesso privado autenticado |
 | MA-17 | Confirmada | Somente desenvolvimento e produção; sem rotina própria de backup do banco; distribuição adiada |
+| MA-18 | Proposta técnica para SPEC-002/003 | TEL-055 envia foto opcional com grant antes da criação; TEL-002 mantém rascunho de família e membros. Após `201`, persiste sessão e usa os IDs de membros devolvidos para TEL-056. Ao voltar, TEL-002 carrega família existente e só envia comandos para alterações efetivas, sem repetir criação. |
+| MA-19 | Proposta técnica para SPEC-009 | DTO pessoal preserva `status` efetivo e `displayStatus` do backend; a View usa `displayStatus` para o rótulo e `status`/capacidades para ações. Nenhum estado de tarefa adicional é guardado no app. |
 
 ## 3. Resolução das pendências
 
@@ -48,7 +50,7 @@ Participa de uma missão quem foi responsável creditado em uma ou mais tarefas 
 <a id="p-03"></a>
 ### P-03 — Convites: resolvida
 
-Gerar ou reenviar sempre cria novo link e senha, invalida os anteriores e revoga a sessão anterior no ato da emissão, preservando perfil e histórico. Mostrar efeitos antes de confirmar. Convite não expira por tempo, mas deixa de valer por consumo ou revogação/substituição. Exibir credenciais transitoriamente; guardar verificadores, sem reconstrução de senha a partir de hash.
+Gerar ou reenviar sempre cria novo link e senha, invalida os anteriores e revoga a sessão anterior no ato da emissão, preservando perfil e histórico. A primeira emissão explícita em TEL-056 abre diretamente a folha nativa após sucesso; a confirmação dos efeitos é exigida antes de **reemitir**, inclusive se a primeira resposta foi perdida. Convite não expira por tempo, mas deixa de valer por consumo ou revogação/substituição. Exibir credenciais transitoriamente; guardar verificadores, sem reconstrução de senha a partir de hash.
 
 <a id="p-04"></a>
 ### P-04 — Datas, rotinas e concluídas: resolvida
@@ -106,6 +108,7 @@ As propostas substituídas (iOS 17, sorteio remoto, controle de versão otimista
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.4 | 2026-10-19 | MA-18/19 e P-03 alinham onboarding, retorno sem recriação, estado pessoal por perfil e primeira emissão direta de convite. |
 | 1.3 | 2026-10-08 | Registra a fundação mobile da Sprint 0 sem alterar decisões funcionais ou implementar jornadas de produto. |
 | 1.2 | 2026-10-05 | Integração com arquitetura backend 1.0 em Node.js, contratos `/v1`, bootstrap, preparação de rotinas e referências; base funcional 1.5 preservada. |
 | 1.1 | 2026-10-05 | Consolidação das respostas do usuário, fechamento de P-01–P-09 e registro de MA-16/17; propostas anteriores substituídas. |

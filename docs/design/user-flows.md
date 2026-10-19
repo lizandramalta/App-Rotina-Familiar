@@ -1,10 +1,10 @@
-# User flows — versão 1.14
+# User flows — versão 1.15
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão dos fluxos:** 1.14\
-**Base funcional:** 1.17\
-**Screen map:** 1.13 — revisão de 2026-10-10\
-**Data:** 2026-10-10\
+**Versão dos fluxos:** 1.15\
+**Base funcional:** RN 1.18 / RF 1.17 / UC 1.16\
+**Screen map:** 1.14 — revisão de 2026-10-19\
+**Data:** 2026-10-19\
 **Situação:** primeira versão para revisão de design
 
 [Projeto](../../README.md) · [Índice documental](../DOCUMENTACAO.md) · [Screen map](screen-map.md) · [Regras](../01-regras-de-negocio.md) · [Requisitos](../02-requisitos.md) · [Casos de uso](../03-casos-de-uso.md) · [Diagrama de classes](../06-diagrama-de-classes.md)
@@ -65,7 +65,7 @@ Referências transversais: RNF01, RNF05–13 e RNF17–25, conforme a operação
 
 **Objetivo:** acessar a família do Criador, criando-a somente quando ainda não existir.  
 **Entrada:** TEL-001, sem sessão válida.  
-**Referências:** [UC01](../03-casos-de-uso.md#uc01), [UC04](../03-casos-de-uso.md#uc04); RN28, RN44; RF01, RF37–39, RF67.
+**Referências:** [UC01](../03-casos-de-uso.md#uc01), [UC02](../03-casos-de-uso.md#uc02), [UC04](../03-casos-de-uso.md#uc04); RN01, RN07, RN28, RN44–46, RN63; RF01–03, RF37–41, RF48, RF67.
 
 ```mermaid
 flowchart TD
@@ -74,22 +74,27 @@ flowchart TD
     C -->|Cancelada ou falhou| A
     C -->|Sim| D{"Família já vinculada?"}
     D -->|Sim| H["TEL-010 · Minhas tarefas"]
-    D -->|Não| E["TEL-055 · Perfil: nome obrigatório, foto e etiqueta opcionais"]
+    D -->|Não| E["TEL-055 · Perfil: nome obrigatório, foto e etiqueta opcionais; enviar foto antes da criação"]
+    E -->|Falha na foto · repetir ou seguir sem foto| E
     E --> F{"Dados válidos?"}
     F -->|Não · corrigir| E
-    F -->|Sim| G["TEL-002 · Nome e fuso / padrão America/Sao_Paulo"]
+    F -->|Sim| G["TEL-002 · Nome, fuso e zero ou mais membros em rascunho"]
+    G -->|Adicionar, editar ou retirar membro| G
     G --> I{"Criação confirmada?"}
     I -->|Não · informar falha| G
-    I -->|Sim| J["TEL-056 · Adicionar membros iniciais"]
-    J -->|Adicionar membro| K["TEL-033 · Criar membro"]
-    K -->|Salvar| L{"Gerar convite agora?"}
-    L -->|Sim| M["TEL-034 · Confirmar e compartilhar convite"]
+    I -->|Sim · família, Criador e membros criados juntos| COUNT{"Há membros iniciais?"}
+    COUNT -->|Não| H
+    COUNT -->|Sim| J["TEL-056 · Convites para membros já criados"]
+    J -->|Gerar primeiro convite explicitamente| M["TEL-034 · Folha nativa direta, sem confirmação"]
+    J -->|Reemitir| R["Confirmar invalidação de convite e sessão anteriores"]
+    R --> M
     M --> J
-    L -->|Não| J
-    J -->|Avançar, inclusive sem membro| H
+    J -->|Voltar| EDIT["TEL-002 · Editar família existente; salvar só mudanças autorizadas"]
+    EDIT -->|Sem mudanças ou após salvar| J
+    J -->|Adiar convites / Avançar| H
 ```
 
-**Resultado:** família acessível ao Criador, com perfil Administrador e identificação protegida. O rascunho de perfil não existe antes da criação; a foto é opcional e pode ser enviada depois que a sessão for aberta, sem impedir a entrada. Retorno a uma família existente não cria outra. Cancelar antes da criação encerra o onboarding sem salvar; depois da criação, a pessoa pode avançar de TEL-056 sem adicionar membro.
+**Resultado:** família acessível ao Criador, com perfil Administrador e identificação protegida, e membros iniciais persistidos na mesma operação. A foto opcional é enviada antes da criação; falha permite repetir ou seguir sem foto. Antes da confirmação, perfil e membros são apenas rascunhos. Retorno a uma família existente não cria outra. Cancelar antes da criação encerra o onboarding sem criar família; depois da criação, TEL-056 oferece apenas os convites, que podem ser adiados. Voltar a TEL-002 abre edição da família existente, sem nova criação ou gravação sem mudanças; mudança posterior de fuso usa TEL-053/MOD-012.
 
 <a id="uf-02"></a>
 
@@ -106,8 +111,11 @@ flowchart TD
       C --> D{"Dados e perfil válidos?"}
       D -->|Não · corrigir| C
       D -->|Sim · salvar| E["TEL-032 · Perfil salvo"]
-      E --> F["Confirmar emissão: revogar convites e sessão anteriores"]
-      F --> G["TEL-034 · Link e senha disponíveis"]
+      E --> ISSUE{"Primeira emissão ou reemissão?"}
+      INIT["TEL-056 · Membro já criado com a família"] --> ISSUE
+      ISSUE -->|Primeira · ação explícita| G["TEL-034 · Gerar e abrir folha nativa diretamente"]
+      ISSUE -->|Reemissão| F["Informar efeitos e confirmar invalidação de convites e sessão anteriores"]
+      F --> G
       G --> H["Compartilhar link e senha juntos"]
     end
     subgraph Convidado["Pessoa convidada"]
@@ -130,7 +138,7 @@ flowchart TD
     end
 ```
 
-**Exceções e retornos:** falha ao salvar perfil permanece em TEL-033; falha ao gerar convite retorna à ação em TEL-032 sem exibir credenciais fictícias. Perfil já salvo não é recriado para tentar gerar o convite novamente. Cancelar o compartilhamento mantém o perfil criado. Senha incorreta não consome o convite; controles de tentativas abusivas continuam aplicáveis. Convite consumido não permite outro ingresso; recuperação segue UF-03. Falha de rede no ingresso exige conferir o estado corrente antes de repetir.
+**Exceções e retornos:** falha ao salvar perfil permanece em TEL-033; falha ao gerar convite retorna à ação em TEL-032 ou TEL-056 sem exibir credenciais fictícias. Perfil já salvo não é recriado para tentar gerar o convite novamente. Cancelar o compartilhamento mantém o perfil criado e a emissão já confirmada. Senha incorreta não consome o convite; controles de tentativas abusivas continuam aplicáveis. Convite consumido não permite outro ingresso; recuperação segue UF-03. Falha de rede no ingresso exige conferir o estado corrente antes de repetir.
 
 **Resultado:** acesso ao perfil correto em sessão única e convite consumido uma vez. Troca não remove o perfil da família anterior nem migra histórico. Sem app, direcionar à loja e reabrir convite depois de instalar. Resposta perdida no ingresso tem recuperação específica comprovada por dez minutos; depois exige novo convite. Compartilhar o convite, sozinho, não significa que o convidado ingressou.
 
@@ -193,7 +201,7 @@ flowchart TD
     P --> N
 ```
 
-Em Minhas tarefas, todos os perfis consultam somente o dia de referência e seu progresso diário. Dia/Semana mantém a data de referência nas superfícies familiares adultas. A semana vai de segunda a domingo; semanas de borda indicam os dias disponíveis. Progresso semanal familiar usa concluídas/total da semana, não a média dos percentuais diários. O intervalo vai da criação da família ao último dia do mês corrente, incluindo dias futuros desse mês. Na visão familiar, cada tarefa prevista no período conta uma vez no total e, se concluída, uma vez no numerador; peso e quantidade de responsáveis não multiplicam o progresso. Tarefas sem responsável entram no total. Aguardando confirmação não conta como concluída.
+Em Minhas tarefas, todos os perfis consultam somente o dia de referência e seu progresso diário. TEL-010 mostra ao adulto apenas tarefas em que é responsável ou corresponsável. Após Kids sinalizar uma tarefa compartilhada, a lista pessoal do adulto corresponsável a apresenta como Pendente e a visualização pessoal Kids como Aguardando confirmação; o estado efetivo continua Aguardando confirmação, sem alterar permissões ou progresso. Dia/Semana mantém a data de referência nas superfícies familiares adultas. A semana vai de segunda a domingo; semanas de borda indicam os dias disponíveis. Progresso semanal familiar usa concluídas/total da semana, não a média dos percentuais diários. O intervalo vai da criação da família ao último dia do mês corrente, incluindo dias futuros desse mês. Na visão familiar, cada tarefa prevista no período conta uma vez no total e, se concluída, uma vez no numerador; peso e quantidade de responsáveis não multiplicam o progresso. Tarefas sem responsável entram no total. Aguardando confirmação não conta como concluída.
 
 TEL-032 mantém o membro selecionado ao alternar Dia/Semana e abre TEL-012 para uma tarefa. Herdar o período da Família não liga os seletores: voltar restaura a seleção anterior de TEL-050. Membro sem tarefas mostra estado vazio; falha de consulta não é apresentada como ausência de tarefas. A carga não integra TEL-050 nesta entrega e fica para SPEC-018. Ações administrativas no detalhe seguem UF-12.
 
@@ -467,10 +475,11 @@ flowchart TD
     K -->|Não| M["MOD-010 · Explicar efeitos e confirmar remoção"]
     M -->|Cancelar| C
     M -->|Confirmar e salvar| N(["TEL-050 · Lista atualizada após remoção"])
-    D -->|Gerar ou reenviar convite| O(["TEL-034 · UF-02 ou UF-03"])
+    D -->|Primeiro convite| O(["Gerar e abrir folha nativa · UF-02"])
+    D -->|Reemitir| P(["TEL-034 · Confirmar efeitos · UF-02 ou UF-03"])
 ```
 
-Administradores e Membros podem consultar as tarefas em TEL-032; somente Administradores acessam ações de gestão quando permitidas. Reenviar abre TEL-034 para confirmar emissão de novo link e senha, invalidando convites anteriores e revogando a sessão anterior do mesmo perfil. Cancelar volta ao detalhe preservando membro/período; falha não cria membro duplicado. O Criador recupera acesso por Apple.
+Administradores e Membros podem consultar as tarefas em TEL-032; somente Administradores acessam ações de gestão quando permitidas. A primeira emissão abre diretamente o compartilhamento após a ação explícita; reenviar exige confirmação prévia da invalidação de convites e revogação da sessão anterior do mesmo perfil. Cancelar volta ao detalhe preservando membro/período; falha não cria membro duplicado. O Criador recupera acesso por Apple. No onboarding, membros são preparados em TEL-002 e criados com a família; TEL-056 apenas oferece seus convites. Novos membros após a criação usam TEL-033.
 
 **Restrições:** o Criador não pode ser removido, rebaixado nem sair. Um Administrador não pode permanecer em modo Kids; Kids devem sair desse modo antes da promoção. Alterações obedecem à permissão corrente de quem executa.
 
@@ -592,12 +601,13 @@ Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imedi
 - As quatro telas principais adultas são entradas independentes; Minhas tarefas continua como inicial.
 - Fluxos Kids não concedem carga, relatório familiar, gestão ou conclusão direta. Perfil próprio e reconhecimento recebido são permitidos.
 - Toda alteração só é apresentada como concluída após confirmação da gravação.
-- TEL/MOD preservam o screen map 1.10; UF-01–UF-16 cobrem UC01–UC19, incluindo TEL-051/052/053/054/055/056 e MOD-012/013.
+- TEL/MOD preservam o screen map 1.14; UF-01–UF-16 cobrem UC01–UC19, incluindo TEL-051/052/053/054/055/056 e MOD-012/013.
 
 ## Histórico
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.15 | RN 1.18 / RF 1.17 / UC 1.16 | 1.14 | 2026-10-19 | UF-01 cria família e membros iniciais juntos em TEL-002, mantém TEL-056 para convites e retorna à edição sem nova criação; foto antecipada. UF-02/12 separam emissão direta de reemissão confirmada; UF-04 apresenta estado pessoal por perfil. |
 | 1.14 | 1.17 | 1.13 | 2026-10-10 | Consolida UF-09/10/11/14/15 com listas paginadas de até 20 itens, rolagem infinita e nova tentativa sem perder itens confirmados. Para SPEC-003, SPEC-015, SPEC-016, SPEC-018, SPEC-019 e SPEC-020. |
 | 1.13 | 1.17 | 1.12 | 2026-10-10 | UF-15 detalha variante Kids, consulta interna e compartilhamento cancelável. Para SPEC-020. |
 | 1.12 | 1.17 | 1.11 | 2026-10-10 | UF-14 define semana por data de referência e crédito histórico como “Membro removido”. Para SPEC-019. |

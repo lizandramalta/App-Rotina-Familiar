@@ -1,15 +1,15 @@
 # Spec 003: Gerenciar membros
 
-**Status:** aprovada  
-**Autor:** Codex | **Criada em:** 2026-10-06 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-06  
-**Base funcional:** 1.14\
+**Status:** aprovada\
+**Autor:** Codex | **Criada em:** 2026-10-06 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-19
+**Base funcional:** RN 1.18 / RF 1.17 / UC 1.16\
 **UX-spec:** [UX-003-gerenciar-membros.md](UX-003-gerenciar-membros.md)  
 **Projetos envolvidos:** ambos  
 **Tema do backlog:** Tema 1 - Acesso, família e perfis
 
 ## 1. Contexto e objetivo
 
-- **Problema / necessidade:** após a criação da família, Administradores precisam formar e manter o grupo de pessoas que participa da rotina, sem conceder gestão a quem não a possui, expor dados entre famílias ou perder o histórico quando alguém sai.
+- **Problema / necessidade:** membros iniciais já podem nascer com a família em SPEC-002; após a criação, Administradores precisam incluir outros e manter os perfis sem conceder gestão indevida, expor dados entre famílias ou perder histórico.
 - **Objetivo da entrega:** permitir que um Administrador crie, consulte e administre perfis da própria família — inclusive papel, modo Kids e remoção — preservando as proteções do Criador, a revogação de acesso e os vínculos históricos.
 
 ## 2. Rastreabilidade e dependências
@@ -20,11 +20,11 @@
 | Regras de negócio | RN01–RN08, RN10 |
 | Requisitos funcionais | RF02–RF06, RF38, RF40 |
 | Requisitos não funcionais | RNF01, RNF05–RNF09, RNF12–RNF14, RNF22 |
-| Telas e fluxos | TEL-030 (saída da administração), TEL-032, TEL-033, TEL-050, MOD-010, UF-12 |
-| Decisões arquiteturais | MA-07–MA-11, MA-15; BA-07, BA-08, BA-10, BA-20 |
+| Telas e fluxos | TEL-002 (retorno em edição), TEL-030 (saída da administração), TEL-032, TEL-033, TEL-050, MOD-010, UF-01, UF-12 |
+| Decisões arquiteturais | MA-07–MA-11, MA-15, MA-18; BA-07, BA-08, BA-10, BA-20, BA-36 |
 
 - **Documentos consultados:** `docs/01-regras-de-negocio.md`, `docs/02-requisitos.md`, `docs/03-casos-de-uso.md`, `docs/05-modelo-de-dados.md`, `docs/06-diagrama-de-classes.md`, `docs/design/screen-map.md`, `docs/design/user-flows.md`, `docs/architecture/mobile-feature-catalog.md`, `docs/architecture/mobile-decisions.md`, `docs/architecture/backend-contracts.md` e `docs/architecture/backend-decisions.md`.
-- **Depende de:** [SPEC-002-criar-configurar-familia.md](SPEC-002-criar-configurar-familia.md), aprovada. A sessão criada para o Criador delimita a família e o ator de todas as operações desta entrega.
+- **Depende de:** [SPEC-002-criar-configurar-familia.md](SPEC-002-criar-configurar-familia.md), aprovada na revisão de 2026-10-19. A sessão criada para o Criador delimita a família e o ator das operações persistentes desta entrega.
 - **Dependências externas e infraestrutura:** sessão própria do backend, banco transacional e prova de instalação já previstos para sessões. Não depende de Sign in with Apple, geração de convite ou envio externo nesta entrega.
 
 ## 3. Escopo da entrega
@@ -32,7 +32,7 @@
 ### 3.1. Dentro do escopo
 
 - Consultar a projeção de membros e o detalhe administrativo da própria família, para adultos, em `GET /v1/family/members` e `GET /v1/family/members/{memberId}`.
-- Criar, por Administrador, perfil sem sessão nos papéis `administrator`, `member` ou `kids`, inclusive quando o Criador usa o mesmo fluxo em TEL-056 durante o onboarding.
+- Criar, por Administrador, perfil sem sessão nos papéis `administrator`, `member` ou `kids` depois que a família existir, inclusive se o Criador retornar de TEL-056 a TEL-002 e adicionar novo membro.
 - Editar exclusivamente o nome administrativo de outro membro; apelido, foto e identidade Apple continuam fora do comando administrativo.
 - Alterar papel entre `administrator`, `member` e `kids`, aplicando as restrições de Criador e de modo Kids.
 - Permitir que Administrador que não seja Criador deixe a administração e se torne Membro.
@@ -46,6 +46,7 @@
 - Editar apelido, foto, badges ou outros dados pessoais do titular: `SPEC-006`.
 - Consulta e detalhes das tarefas de um membro; TEL-032 apenas preserva o ponto de entrada e o contexto visual necessários à gestão. A capacidade funcional de tarefas é entregue nas specs de tarefas.
 - Remoção física, transferência de histórico, troca de família ou reativação de membro removido.
+- Preparação em rascunho e criação atômica dos membros iniciais com a família: SPEC-002.
 
 ### 3.3. Fora de questão
 
@@ -198,7 +199,7 @@ Segredos, tokens, provas de instalação, hashes, apelido privado configurável 
 | E-02 | Os papéis permitidos na criação são `administrator`, `member` e `kids`; `kids` não possui booleano separado. | Aprovação da prévia em 2026-10-06 | Sim — RF40 e base 1.7 atualizadas |
 | E-03 | A saída voluntária de Administrador não-Criador pertence a esta entrega, embora sua entrada visual exista em TEL-030. | Aprovação da prévia em 2026-10-06 | Não — aplica UC02/RN04 existentes |
 | E-04 | A emissão e o reenvio de convite não integram esta entrega; criação de perfil e convite continuam comandos distintos. | Mapa de specs e contrato backend | Não |
-| E-05 | TEL-056 reutiliza a criação de membro sem alterar payload, autorização ou estados desta SPEC; após salvar, a orquestração decide oferecer convite explícito ou avançar. | Pessoa usuária / 2026-10-07 | Não |
+| E-05 | Revisada: membros iniciais são preparados em TEL-002 e criados com a família por SPEC-002; TEL-056 só oferece convite. Inclusões após a criação usam a gestão persistente desta SPEC. | Pessoa usuária / 2026-10-19 | Sim — RN01/RN07, RF02/RF40 e UC01/UC02. |
 | E-06 | A lista de membros usa cursor opaco, ordenação estável e páginas de até 20 perfis; `nextCursor: null` encerra a consulta. O Mobile carrega as páginas seguintes por rolagem infinita. | Pessoa usuária / 2026-10-08 | Não — detalha o contrato e a experiência de consulta, sem alterar RN/RF. |
 
 ## 10. Fases de implementação e conclusão
@@ -209,7 +210,7 @@ Segredos, tokens, provas de instalação, hashes, apelido privado configurável 
 | 2 | Administração de papel e modo Kids, incluindo saída voluntária | CA-04, CA-05, CA-07 | Transições e recusas por papel/Criador cobertas por testes de integração e UI | a fazer |
 | 3 | Remoção consistente, revogação e regressão | CA-06, CA-07 | Transação de remoção, sessão revogada e regressão de responsabilidades verificadas | a fazer |
 
-**Registro de execução (2026-10-10):** SCRUM-27 concluiu a criação e consulta de membros no backend. A Fase 1 não é considerada concluída porque a interface Mobile correspondente (SCRUM-29) ainda não foi entregue.
+**Registro de execução (2026-10-19):** SCRUM-27 concluiu a criação e consulta posterior de membros no backend. A criação atômica dos membros iniciais pertence à revisão de SPEC-002. A Fase 1 desta SPEC não é considerada concluída porque a interface Mobile correspondente (SCRUM-29) ainda não foi entregue.
 
 - **Fase 1:** não expõe mudança de papel, saída voluntária ou remoção; o perfil recém-criado permanece sem convite, que pertence à SPEC-004.
 - **Fase 2:** não emite convite nem implementa edição de foto/apelido; pode ser publicada depois da Fase 1.
@@ -218,9 +219,9 @@ Segredos, tokens, provas de instalação, hashes, apelido privado configurável 
 ## 11. Checklist de aprovação
 
 - [x] Códigos funcionais, UX e arquiteturais pesquisados e existentes.
-- [x] Dependência SPEC-002 validada como aprovada e mapa de specs corrigido.
+- [x] Revisão de SPEC-002 e deste par SPEC/UX aprovada para o novo onboarding.
 - [x] Autorização, isolamento e validação fazem parte da primeira fase exposta.
 - [x] Contratos, validações, erros e política de falha definidos.
 - [x] UX-spec vinculada.
 - [x] Decisões E-01 a E-04 registradas e alterações de base efetuadas quando necessárias.
-- [x] Status autorizado explicitamente como `aprovada` pela pessoa usuária em 2026-10-06.
+- [x] Revisão de 2026-10-19 aprovada; aprovação anterior de 2026-10-06 preservada no histórico.

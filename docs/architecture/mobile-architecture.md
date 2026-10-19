@@ -1,10 +1,10 @@
 # Arquitetura mobile — Swift, SwiftUI e Clean Architecture
 
 **Projeto:** App de Organização Familiar — MVP\
-**Versão da arquitetura:** 1.5\
-**Base funcional:** 1.9 · Design: 1.4 · Modelo de classes: 1.5\
-**Data:** 2026-10-08\
-**Situação:** fundação técnica da Sprint 0 implementada; decisões de produto permanecem para implementação incremental
+**Versão da arquitetura:** 1.6\
+**Base funcional:** RN 1.18 / RF 1.17 / UC 1.16 · Design: screen map 1.14 / fluxos 1.15\
+**Data:** 2026-10-19\
+**Situação:** integração alvo revisada; onboarding e projeção pessoal ainda exigem implementação
 
 [Projeto](../../README.md) · [Índice](../DOCUMENTACAO.md) · [Catálogo mobile](mobile-feature-catalog.md) · [Decisões](mobile-decisions.md)
 
@@ -247,7 +247,7 @@ Uma sessão ativa por perfil é vinculada à instalação e a uma credencial pro
 
 Apple usa AuthenticationServices e prova associada à tentativa (`nonce`/`state`), validada pelo backend. Universal Links usam domínio controlado e AASA; parser aceita somente hosts/paths esperados. Senha não vai na URL. Sem app, página direciona à loja e orienta reabrir o link depois de instalar. Credenciais do R2/Supabase e segredos Apple ficam no backend.
 
-Gerar/reenviar convite sempre gera novo link e senha, com confirmação dos efeitos; não recupera senha de hash. Não existe expiração temporal do convite, mas consumo/revogação o invalidam. TEL-034 disponibiliza credenciais transitoriamente para envio conjunto explícito.
+Gerar/reenviar convite sempre gera novo link e senha; a primeira emissão explícita de TEL-056 abre a folha nativa após sucesso, e a reemissão pede confirmação prévia dos efeitos. Não recupera senha de hash. Não existe expiração temporal do convite, mas consumo/revogação o invalidam. TEL-034 disponibiliza credenciais transitoriamente para envio conjunto explícito.
 
 Ingresso com resposta perdida tem recuperação específica por dez minutos, comprovando a tentativa e a instalação original, sem segundo ingresso. Identificador público não permite recuperar credenciais. Após a janela, obter novo convite. Esse protocolo é exceção limitada ao acesso, não um mecanismo geral de `operationID` para todas as gravações.
 
@@ -311,6 +311,8 @@ Totais semanais não são média de percentuais diários. Carga de tarefa peso 3
 
 Sinalização Kids abre diretamente câmera, com revisão/refazer/descartar; negar, cancelar ou falhar permite seguir sem foto por escolha explícita. Perfil de todos, inclusive Kids, oferece câmera e galeria. Upload isolado não sinaliza tarefa nem substitui a foto antiga: essas mudanças dependem da gravação confirmada.
 
+No onboarding, TEL-055 envia a foto opcional com `creationGrant` antes de `CreateFamily`; a imagem local serve de prévia e o `mediaId` só é vinculado no commit de criação. TEL-002 envia nomes/papéis dos membros iniciais no mesmo comando. Após `201`, o app guarda a sessão, usa os IDs devolvidos para TEL-056 e não repete a criação ao voltar. TEL-002 em modo de edição compara o rascunho com a família/membros confirmados e envia apenas comandos de alteração; fuso posterior segue TEL-053. Falha da foto permite continuar sem ela; falha incerta da criação exige nova consulta via Apple antes de qualquer nova tentativa.
+
 Backend salva foto em bucket privado no R2; Supabase guarda URL estável sem credenciais. O aplicativo busca conteúdo pelo backend autenticado, que confere perfil, família e finalidade em cada leitura. Não persistir URL assinada temporária como referência permanente nem tornar o bucket público apenas para ter URL. Política de revogação também vale para fotos. [R2: URLs assinadas](https://developers.cloudflare.com/r2/api/s3/presigned-urls/).
 
 Parâmetros operacionais aceitos: JPEG processado, lado maior até 1.600 pixels e até 5 MB; remover metadados desnecessários. Upload sem vínculo é limpo após 24 horas. Retenção das fotos vinculadas não é definida nesta etapa. Imagens locais temporárias são protegidas e limpas no descarte/revogação.
@@ -363,6 +365,8 @@ Doubles de repositório, relógio e aleatoriedade tornam testes determinísticos
 
 A API `/v1` é descrita em [backend-contracts.md](backend-contracts.md). Cada repository mobile adapta esses DTOs e erros, sem importar detalhes de PostgreSQL/R2. `creationGrant` representa Criador validado ainda sem família; não abre o shell de um membro. Access tokens são opacos e subordinados à sessão única. A prova secreta da instalação acompanha chamadas protegidas; credenciais anteriores são descartadas somente após ingresso confirmado/recuperado.
 
+Em `GET /me/tasks`, `status` permanece canônico e determina ações/progresso; `displayStatus` determina somente o rótulo da lista pessoal. TEL-010 apresenta `pending` para adulto corresponsável mesmo quando o status efetivo é `awaitingConfirmation`; TEL-040 apresenta `awaitingConfirmation` para Kids. O app não persiste nem recalcula outro estado de domínio.
+
 `202 preparing` em consultas identifica materialização incompleta: apresentar carregamento/preparação e repetir a consulta, sem percentuais falsos. Rotina criada com `materializationState: pending` já teve sua configuração salva, mas não promete todas as ocorrências imediatamente. IDs de sinalização identificam a decisão Kids; preview de fuso não reserva configuração. `TaskMutationResult` conduz invalidações sem substituir autorização de cada consulta.
 
 ## 17. Ambientes e continuidade
@@ -377,6 +381,7 @@ A sequência futura permanece: composição/acesso → família/membros → tare
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.6 | 2026-10-19 | Fluxo técnico da foto/membros antes da criação, retorno de TEL-056 sem recriação, primeira emissão de convite e DTO pessoal com estado exibido. |
 | 1.5 | 2026-10-08 | Registra a fundação mobile da Sprint 0: projeto SwiftUI, configuração por ambiente, navegação neutra e testes básicos; funcionalidades de produto permanecem futuras. |
 | 1.4 | 2026-10-07 | `CompleteTaskCommand` não transporta escolha de responsáveis; conclusão é direta e o servidor resolve a atribuição automática. |
 | 1.3 | 2026-10-06 | `TaskQueryContext` distingue escopo pessoal diário dos períodos Dia/Semana familiares adultos. Para SPEC-009. |

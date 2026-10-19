@@ -32,7 +32,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 | Caso de uso | Objetivo | Requisitos funcionais |
 |---|---|---|
-| [UC01](#uc01) | Gerenciar família | [RF01](02-requisitos.md#rf01), [RF02](02-requisitos.md#rf02), [RF38](02-requisitos.md#rf38), [RF39](02-requisitos.md#rf39), [RF41](02-requisitos.md#rf41), [RF48](02-requisitos.md#rf48), [RF67](02-requisitos.md#rf67) |
+| [UC01](#uc01) | Gerenciar família | [RF01](02-requisitos.md#rf01), [RF02](02-requisitos.md#rf02), [RF38](02-requisitos.md#rf38), [RF39](02-requisitos.md#rf39), [RF40](02-requisitos.md#rf40), [RF41](02-requisitos.md#rf41), [RF48](02-requisitos.md#rf48), [RF67](02-requisitos.md#rf67) |
 | [UC02](#uc02) | Gerenciar membros | [RF02](02-requisitos.md#rf02), [RF03](02-requisitos.md#rf03), [RF04](02-requisitos.md#rf04), [RF05](02-requisitos.md#rf05), [RF06](02-requisitos.md#rf06), [RF40](02-requisitos.md#rf40), [RF41](02-requisitos.md#rf41), [RF54](02-requisitos.md#rf54) |
 | [UC03](#uc03) | Validar conclusão de tarefa Kids | [RF25](02-requisitos.md#rf25), [RF26](02-requisitos.md#rf26), [RF55](02-requisitos.md#rf55), [RF56](02-requisitos.md#rf56) |
 | [UC04](#uc04) | Autenticar com Apple | [RF37](02-requisitos.md#rf37), [RF39](02-requisitos.md#rf39) |
@@ -62,8 +62,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Acesso, família e perfis](04-diagramas-de-caso-de-uso.md#02-acesso-familia-perfis)
 
-**Requisitos funcionais:** [RF01](02-requisitos.md#rf01), [RF02](02-requisitos.md#rf02), [RF38](02-requisitos.md#rf38), [RF39](02-requisitos.md#rf39), [RF41](02-requisitos.md#rf41), [RF48](02-requisitos.md#rf48), [RF67](02-requisitos.md#rf67)\
-**Regras relacionadas:** [RN01](01-regras-de-negocio.md#rn01), [RN07](01-regras-de-negocio.md#rn07), [RN09](01-regras-de-negocio.md#rn09), [RN28](01-regras-de-negocio.md#rn28), [RN44](01-regras-de-negocio.md#rn44), [RN45](01-regras-de-negocio.md#rn45), [RN63](01-regras-de-negocio.md#rn63), [RN65](01-regras-de-negocio.md#rn65)\
+**Requisitos funcionais:** [RF01](02-requisitos.md#rf01), [RF02](02-requisitos.md#rf02), [RF38](02-requisitos.md#rf38), [RF39](02-requisitos.md#rf39), [RF40](02-requisitos.md#rf40), [RF41](02-requisitos.md#rf41), [RF48](02-requisitos.md#rf48), [RF67](02-requisitos.md#rf67)\
+**Regras relacionadas:** [RN01](01-regras-de-negocio.md#rn01), [RN07](01-regras-de-negocio.md#rn07), [RN09](01-regras-de-negocio.md#rn09), [RN28](01-regras-de-negocio.md#rn28), [RN44](01-regras-de-negocio.md#rn44), [RN45](01-regras-de-negocio.md#rn45), [RN46](01-regras-de-negocio.md#rn46), [RN63](01-regras-de-negocio.md#rn63), [RN65](01-regras-de-negocio.md#rn65)\
 **Requisitos não funcionais:** [RNF01](02-requisitos.md#rnf01), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF08](02-requisitos.md#rnf08), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF14](02-requisitos.md#rnf14), [RNF15](02-requisitos.md#rnf15), [RNF16](02-requisitos.md#rnf16)
 
 **Objetivo:** criar/acessar a família pelo onboarding do Criador e permitir aos Administradores configurar seu fuso.
@@ -77,18 +77,20 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 1. O usuário conclui a autenticação.
 2. O sistema verifica se há uma família vinculada ao seu identificador Apple.
-3. Não havendo vínculo, o usuário informa o nome administrativo obrigatório e pode configurar foto e etiqueta/apelido opcionais para o próprio perfil.
-4. O usuário informa o nome e escolhe o fuso da família, inicialmente `America/Sao_Paulo`.
-5. O sistema valida os dados e cria a família com o perfil do usuário como Administrador e Criador da Família.
-6. O sistema registra a data de criação da família, abre a sessão do Criador e oferece a adição de membros.
-7. O Criador pode adicionar e salvar zero ou mais membros pelo fluxo normal de UC02; após cada criação, pode escolher explicitamente gerar o convite correspondente.
-8. Quando selecionar avançar, o sistema apresenta a área principal do aplicativo.
+3. Não havendo vínculo, o usuário informa o nome administrativo obrigatório e pode configurar foto e etiqueta/apelido opcionais para o próprio perfil. Ao escolher a foto, o sistema tenta enviá-la antes da criação, sem conceder acesso familiar; falha permite repetir ou continuar sem foto.
+4. O usuário informa o nome e escolhe o fuso da família, inicialmente `America/Sao_Paulo`, e pode preparar zero ou mais membros com nome e papel no mesmo formulário. Adicionar, editar e retirar integrantes nesta etapa altera apenas o rascunho.
+5. O sistema valida os dados e cria, na mesma operação, a família, o perfil do usuário como Administrador e Criador da Família e todos os membros preparados. A foto enviada só é vinculada ao próprio Criador após a criação confirmada; nenhum convite é gerado automaticamente.
+6. O sistema registra a data de criação da família e abre a sessão do Criador. Sem membros iniciais, apresenta diretamente a área principal. Com membros, apresenta a etapa de convites para os perfis já criados.
+7. Na etapa de convites, o Criador pode gerar explicitamente o primeiro convite de cada perfil, com compartilhamento direto e sem confirmação intermediária; pode também adiar os convites. Uma reemissão exige confirmação prévia dos efeitos sobre convite e sessão anteriores.
+8. Ao concluir ou adiar os convites, o sistema apresenta a área principal do aplicativo.
 
 **Alternativas e exceções:**
 
 - Se já existir uma família vinculada, o sistema redireciona o usuário para ela, sem criar outra família.
-- Nome do Criador ou da família inválido deve ser corrigido antes da criação. Foto e etiqueta/apelido são opcionais e não impedem o avanço.
-- O Criador pode avançar sem adicionar membro. Cancelar a emissão ou o compartilhamento de um convite não desfaz o perfil de membro já criado.
+- Nome do Criador, da família ou de membro inicial inválido deve ser corrigido antes da criação. Foto e etiqueta/apelido são opcionais; falha no envio da foto não impede o avanço.
+- Falha em qualquer parte da criação não deixa família, Criador ou membros iniciais parcialmente persistidos. O conteúdo do formulário permanece disponível para corrigir ou tentar novamente, sem anunciar sucesso incerto como confirmado.
+- O Criador pode criar a família sem adicionar membro e seguir diretamente à área principal. Cancelar o compartilhamento de um convite já emitido não desfaz o perfil de membro criado nem a emissão confirmada.
+- Voltar da etapa de convites aos dados da família abre a família já criada em modo de edição, sem nova criação. Prosseguir sem mudanças não grava novamente; mudanças autorizadas são salvas na família e nos membros conforme as permissões administrativas, antes de retornar aos convites. Novos membros são incluídos pelo fluxo persistente normal. Alterar o fuso depois da criação segue Configurações da família e sua confirmação específica.
 
 **Fluxo complementar — Configurar fuso:** Administrador abre Família → Configurações da família (TEL-053), escolhe o fuso e lê o informativo (MOD-012). Escolhe aplicação imediata ou no próximo ciclo, confirma e aguarda persistência. A tela informa fuso vigente e eventual alteração programada. Cancelamento não salva; falha preserva a configuração anterior. Transições e apuração seguem RN28 e RF67.
 
@@ -113,20 +115,20 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 **Ator:** Administrador.
 
 
-**Pré-condição:** família existente e permissão de Administrador.
+**Pré-condição:** família existente e permissão de Administrador para operações persistentes de gestão e convite. A preparação de membros em UC01 ocorre antes da criação, como rascunho do futuro Criador, sem perfil ou sessão de Administrador e sem persistência própria.
 
-**Entrada de edição/convite:** Família → selecionar item da lista → TEL-032. Consultar o detalhe e suas tarefas é permitido aos adultos por UC11; as ações administrativas seguem este caso de uso. Reenviar exige confirmação, emite novo link e senha, invalida os convites anteriores e revoga a sessão anterior do mesmo perfil, sem recriar o membro. O Criador retorna por Apple; a configuração de apelido só pode ser alterada pelo titular em UC10.
+**Entrada de edição/convite:** Família → selecionar item da lista → TEL-032; no onboarding, a etapa de convites apresenta os membros criados com a família. Consultar o detalhe e suas tarefas é permitido aos adultos por UC11; as ações administrativas seguem este caso de uso. A primeira emissão abre diretamente o compartilhamento após a ação explícita. Reenviar exige confirmação, emite novo link e senha, invalida os convites anteriores e revoga a sessão anterior do mesmo perfil, sem recriar o membro. O Criador retorna por Apple; a configuração de apelido só pode ser alterada pelo titular em UC10.
 
 **Fluxo principal — Adicionar membro:**
 
 1. O Administrador acessa Família (TEL-050) e aciona o botão Adicionar membro na própria tela.
 2. Informa os dados do perfil e define sua configuração, incluindo o Modo Kids quando aplicável.
 3. O sistema valida e salva o perfil na família.
-4. O Administrador solicita o convite.
-5. Após confirmação dos efeitos, o sistema gera novo link e senha e invalida convites e sessão anteriores daquele perfil, em operação consistente.
+4. O Administrador solicita explicitamente o convite para o perfil ativo.
+5. Na primeira emissão, o sistema gera link e senha sem confirmação intermediária; na reemissão, informa os efeitos e exige confirmação antes de gerar as novas credenciais. Convites e sessão anteriores do perfil são invalidados na mesma operação da reemissão.
 6. O sistema disponibiliza o link e a senha para envio conjunto à pessoa convidada.
 
-**Variação — Onboarding inicial:** depois de criar a família em UC01, o Criador retorna a este fluxo quantas vezes desejar. Pode encerrar o onboarding sem membro adicional; a geração do convite de cada perfil continua explícita, com confirmação, e pode ser feita imediatamente após seu cadastro ou posteriormente.
+**Variação — Onboarding inicial:** o futuro Criador prepara zero ou mais membros antes da criação da família em UC01; os perfis são persistidos junto com a família, sem convite automático. Com membros, a etapa seguinte oferece a primeira emissão por ação explícita e compartilhamento direto, ou permite adiar. Sem membros, UC01 segue diretamente à área principal. Voltar da etapa de convites aos dados da família permite editar a família existente e gerenciar seus membros conforme as permissões administrativas; não cria outra família nem repete gravação sem mudanças. Novos membros incluídos após a criação seguem o fluxo persistente normal.
 
 **Alternativas e exceções:**
 
@@ -472,7 +474,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Tarefas e rotina](04-diagramas-de-caso-de-uso.md#03-tarefas-rotina) · [Participação Kids](04-diagramas-de-caso-de-uso.md#04-participacao-kids)
 
 **Requisitos funcionais:** [RF11](02-requisitos.md#rf11), [RF17](02-requisitos.md#rf17), [RF22](02-requisitos.md#rf22), [RF49](02-requisitos.md#rf49), [RF60](02-requisitos.md#rf60), [RF65](02-requisitos.md#rf65), [RF66](02-requisitos.md#rf66)\
-**Regras relacionadas:** [RN16](01-regras-de-negocio.md#rn16), [RN22](01-regras-de-negocio.md#rn22), [RN26](01-regras-de-negocio.md#rn26), [RN27](01-regras-de-negocio.md#rn27), [RN28](01-regras-de-negocio.md#rn28), [RN33](01-regras-de-negocio.md#rn33), [RN49](01-regras-de-negocio.md#rn49), [RN55](01-regras-de-negocio.md#rn55), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61), [RN63](01-regras-de-negocio.md#rn63)\
+**Regras relacionadas:** [RN16](01-regras-de-negocio.md#rn16), [RN22](01-regras-de-negocio.md#rn22), [RN23](01-regras-de-negocio.md#rn23), [RN26](01-regras-de-negocio.md#rn26), [RN27](01-regras-de-negocio.md#rn27), [RN28](01-regras-de-negocio.md#rn28), [RN33](01-regras-de-negocio.md#rn33), [RN49](01-regras-de-negocio.md#rn49), [RN55](01-regras-de-negocio.md#rn55), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61), [RN63](01-regras-de-negocio.md#rn63)\
 **Requisitos não funcionais:** [RNF01](02-requisitos.md#rnf01), [RNF02](02-requisitos.md#rnf02), [RNF04](02-requisitos.md#rnf04), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF08](02-requisitos.md#rnf08), [RNF09](02-requisitos.md#rnf09), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF14](02-requisitos.md#rnf14), [RNF22](02-requisitos.md#rnf22)
 
 **Objetivo:** consultar as próprias tarefas e o próprio progresso diário; para adultos, também consultar tarefas e progresso coletivo pela área Família, por dia ou semana.
@@ -486,7 +488,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 1. O usuário abre o checklist.
 2. O sistema seleciona o dia atual por padrão.
-3. Apresenta as tarefas e os respectivos estados, respeitando as permissões do perfil.
+3. Apresenta apenas as tarefas próprias e seus estados conforme a visualização do perfil, sem mudar o estado efetivo nem as permissões da tarefa.
 4. Apresenta o progresso diário do usuário.
 5. O usuário escolhe a data de referência, navegando entre dias permitidos.
 6. O sistema apresenta tarefas e progresso daquele dia, contando concluídas sobre o total previsto conforme RN61.
@@ -498,6 +500,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 - Kids alternam diretamente entre Minhas tarefas e Missões e conquistas pelo tab bar de duas abas (RF65).
 - Dias sem tarefas são apresentados como tal, sem registros fictícios de conclusão.
 - Na mudança de dia, o checklist passa a abrir no novo dia; tarefas não realizadas não geram penalidades.
+- Na tarefa compartilhada entre adulto e Kids, a sinalização Kids muda o estado único para Aguardando confirmação. A lista pessoal do adulto corresponsável apresenta Pendente; a visualização pessoal Kids apresenta Aguardando confirmação. O progresso continua sem contar a tarefa como concluída, e as ações adultas seguem as permissões do estado efetivo.
 - Kids visualizam somente seu próprio progresso diário e não acessam a área, o progresso nem a carga familiar.
 
 **Consulta complementar — Família (Administrador e Membro):**
@@ -840,7 +843,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 | Versão | Data | Alteração |
 |---|---|---|
-| 1.16 | 2026-10-19 | UC07: a exclusão que deixa só tarefas concluídas fecha a missão (RN38/RF59). Para SPEC-014/SPEC-007. |
+| 1.16 | 2026-10-19 | UC07: exclusão que deixa só tarefas concluídas fecha a missão (RN38/RF59; SPEC-014/SPEC-007). UC01/UC02: foto antecipada, membros criados com a família, convites posteriores e edição sem segunda criação. UC11: apresentação por perfil da tarefa sinalizada, preservando estado único. |
 | 1.15 | 2026-10-10 | UC18 adota `referenceDate` para semana e identifica crédito histórico como “Membro removido”. Para SPEC-019. |
 | 1.14 | 2026-10-10 | UC13 preserva crédito histórico de perfil removido como “Membro removido”. Para SPEC-018. |
 | 1.13 | 2026-10-10 | UC06 passa a detalhar título obrigatório, descrição opcional, limites e unicidade de item personalizado; catálogo inicial definido em RN42. Para SPEC-015. |

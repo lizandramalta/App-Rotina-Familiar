@@ -1,10 +1,10 @@
-# Diagrama de classes — versão 1.8
+# Diagrama de classes — versão 1.9
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.8\
-**Base funcional:** 1.15\
-**Data:** 2026-10-10
-**Situação:** referência de modelagem da base funcional
+**Versão:** 1.9\
+**Base funcional:** RN 1.18 / RF 1.17 / UC 1.16\
+**Data:** 2026-10-19
+**Situação:** referência de modelagem e projeções do contrato alvo; implementação posterior
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Modelo de dados](05-modelo-de-dados.md)
 
@@ -13,6 +13,8 @@
 A [arquitetura backend](architecture/backend-architecture.md) traduz estes conceitos para módulos e casos de uso Node.js/TypeScript. A notação Swift abaixo continua apoiando a leitura mobile; o backend usa nomes de domínio equivalentes, sem compartilhar arquivos/classes executáveis entre linguagens. As transações e restrições são implementadas no servidor conforme os [contratos backend](architecture/backend-contracts.md).
 
 A tradução deste modelo do sistema para o aplicativo está na [arquitetura mobile](architecture/mobile-architecture.md#7-tradução-do-modelo-de-classes-para-o-mobile). Ela distingue valores e casos de uso do cliente das operações autoritativas do backend. Os [ajustes de modelagem aplicados](architecture/mobile-decisions.md#4-ajustes-de-modelagem-aplicados) consolidam as decisões desta revisão.
+
+[CreatorAccessResult](#classe-creatoraccessresult) distingue sessão existente de grant de criação na resposta Apple; o token do grant é transitório e não compõe o perfil persistido.
 
 - Os diagramas Mermaid mostram os tipos e relacionamentos de cada domínio. O catálogo detalha atributos e operações; os identificadores em inglês são preservados para uso em Swift.
 - `class`, `struct`, `enum` e `protocol` indicam o tipo do modelo. Nos diagramas, classes usam a declaração padrão, sem estereótipo; os demais tipos são identificados por estereótipos. `+` significa público e `-`, privado. Os blocos são pseudocódigo com notação UML e tipos Swift, não código compilável.
@@ -44,7 +46,7 @@ Os RF e RN são os vínculos declarados em cada UC na base funcional. A lista de
 
 | Caso de uso | Tipos responsáveis ou de apoio | Requisitos funcionais | Regras de negócio |
 |---|---|---|---|
-| <a id="rastreio-uc01"></a>[UC01](03-casos-de-uso.md#uc01) — Gerenciar família | [Family](#classe-family), [Member](#classe-member), [AccessService](#classe-accessservice), [AppleAuthenticating](#classe-appleauthenticating) , [TimeZoneChange](#classe-timezonechange) | [RF01](02-requisitos.md#rf01), [RF38](02-requisitos.md#rf38), [RF39](02-requisitos.md#rf39), [RF67](02-requisitos.md#rf67) | [RN01](01-regras-de-negocio.md#rn01), [RN09](01-regras-de-negocio.md#rn09), [RN28](01-regras-de-negocio.md#rn28), [RN44](01-regras-de-negocio.md#rn44), [RN65](01-regras-de-negocio.md#rn65) |
+| <a id="rastreio-uc01"></a>[UC01](03-casos-de-uso.md#uc01) — Gerenciar família | [Family](#classe-family), [Member](#classe-member), [CreationGrant](#classe-creationgrant), [OnboardingPhoto](#classe-onboardingphoto), [InitialMemberDraft](#classe-initialmemberdraft), [FamilyCreationResult](#classe-familycreationresult), [AccessService](#classe-accessservice), [TimeZoneChange](#classe-timezonechange) | [RF01](02-requisitos.md#rf01), [RF02](02-requisitos.md#rf02), [RF38](02-requisitos.md#rf38), [RF39](02-requisitos.md#rf39), [RF40](02-requisitos.md#rf40), [RF48](02-requisitos.md#rf48), [RF67](02-requisitos.md#rf67) | [RN01](01-regras-de-negocio.md#rn01), [RN07](01-regras-de-negocio.md#rn07), [RN09](01-regras-de-negocio.md#rn09), [RN28](01-regras-de-negocio.md#rn28), [RN44](01-regras-de-negocio.md#rn44), [RN63](01-regras-de-negocio.md#rn63), [RN65](01-regras-de-negocio.md#rn65) |
 | <a id="rastreio-uc02"></a>[UC02](03-casos-de-uso.md#uc02) — Gerenciar membros | [Family](#classe-family), [Member](#classe-member), [MemberRole](#classe-memberrole), [Invite](#classe-invite), [InviteStatus](#classe-invitestatus), [Session](#classe-session), [AccessService](#classe-accessservice), [AccessControl](#classe-accesscontrol), [MemberService](#classe-memberservice), [InviteCredentials](#classe-invitecredentials) | [RF02](02-requisitos.md#rf02), [RF03](02-requisitos.md#rf03), [RF04](02-requisitos.md#rf04), [RF05](02-requisitos.md#rf05), [RF06](02-requisitos.md#rf06), [RF40](02-requisitos.md#rf40), [RF41](02-requisitos.md#rf41), [RF54](02-requisitos.md#rf54) | [RN01](01-regras-de-negocio.md#rn01), [RN02](01-regras-de-negocio.md#rn02), [RN03](01-regras-de-negocio.md#rn03), [RN04](01-regras-de-negocio.md#rn04), [RN05](01-regras-de-negocio.md#rn05), [RN06](01-regras-de-negocio.md#rn06), [RN07](01-regras-de-negocio.md#rn07), [RN08](01-regras-de-negocio.md#rn08), [RN10](01-regras-de-negocio.md#rn10), [RN45](01-regras-de-negocio.md#rn45), [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47) |
 | <a id="rastreio-uc03"></a>[UC03](03-casos-de-uso.md#uc03) — Validar conclusão de tarefa Kids | [FamilyTask](#classe-familytask), [KidsSignal](#classe-kidssignal), [ValidationDecision](#classe-validationdecision), [Completion](#classe-completion), [TaskService](#classe-taskservice), [MissionService](#classe-missionservice) | [RF25](02-requisitos.md#rf25), [RF26](02-requisitos.md#rf26), [RF55](02-requisitos.md#rf55), [RF56](02-requisitos.md#rf56) | [RN22](01-regras-de-negocio.md#rn22), [RN23](01-regras-de-negocio.md#rn23), [RN24](01-regras-de-negocio.md#rn24), [RN25](01-regras-de-negocio.md#rn25), [RN26](01-regras-de-negocio.md#rn26), [RN30](01-regras-de-negocio.md#rn30), [RN35](01-regras-de-negocio.md#rn35), [RN54](01-regras-de-negocio.md#rn54), [RN55](01-regras-de-negocio.md#rn55), [RN56](01-regras-de-negocio.md#rn56) |
 | <a id="rastreio-uc04"></a>[UC04](03-casos-de-uso.md#uc04) — Autenticar com Apple | [AppleAuthenticating](#classe-appleauthenticating), [AccessService](#classe-accessservice), [Family](#classe-family), [Member](#classe-member) , [AppleAuthorizationProof](#classe-appleauthorizationproof) | [RF37](02-requisitos.md#rf37), [RF39](02-requisitos.md#rf39) | [RN44](01-regras-de-negocio.md#rn44) |
@@ -54,7 +56,7 @@ Os RF e RN são os vínculos declarados em cada UC na base funcional. A lista de
 | <a id="rastreio-uc08"></a>[UC08](03-casos-de-uso.md#uc08) — Definir recorrência de rotina | [Routine](#classe-routine), [RoutineFrequency](#classe-routinefrequency), [FamilyTask](#classe-familytask), [TaskService](#classe-taskservice), [ChangeScope](#classe-changescope) | [RF13](02-requisitos.md#rf13), [RF14](02-requisitos.md#rf14), [RF70](02-requisitos.md#rf70) | [RN11](01-regras-de-negocio.md#rn11), [RN14](01-regras-de-negocio.md#rn14), [RN16](01-regras-de-negocio.md#rn16), [RN17](01-regras-de-negocio.md#rn17), [RN67](01-regras-de-negocio.md#rn67) |
 | <a id="rastreio-uc09"></a>[UC09](03-casos-de-uso.md#uc09) — Ingressar por convite | [Invite](#classe-invite), [InviteStatus](#classe-invitestatus), [Session](#classe-session), [AccessService](#classe-accessservice), [InviteCredentials](#classe-invitecredentials) | [RF42](02-requisitos.md#rf42), [RF43](02-requisitos.md#rf43), [RF44](02-requisitos.md#rf44), [RF45](02-requisitos.md#rf45), [RF46](02-requisitos.md#rf46), [RF54](02-requisitos.md#rf54), [RF68](02-requisitos.md#rf68) | [RN09](01-regras-de-negocio.md#rn09), [RN10](01-regras-de-negocio.md#rn10), [RN45](01-regras-de-negocio.md#rn45), [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47) |
 | <a id="rastreio-uc10"></a>[UC10](03-casos-de-uso.md#uc10) — Editar perfil | [Member](#classe-member), [BadgeAward](#classe-badgeaward), [Badge](#classe-badge), [MemberService](#classe-memberservice), [MissionService](#classe-missionservice) , [BadgeTier](#classe-badgetier) | [RF48](02-requisitos.md#rf48), [RF62](02-requisitos.md#rf62), [RF65](02-requisitos.md#rf65) | [RN33](01-regras-de-negocio.md#rn33), [RN63](01-regras-de-negocio.md#rn63), [RN64](01-regras-de-negocio.md#rn64) |
-| <a id="rastreio-uc11"></a>[UC11](03-casos-de-uso.md#uc11) — Visualizar minhas tarefas | [FamilyArea](#classe-familyarea), [FamilyTask](#classe-familytask), [CarouselRange](#classe-carouselrange), [ViewPeriod](#classe-viewperiod), [PeriodProgress](#classe-periodprogress), [Member](#classe-member), [PersonalTasks](#classe-personaltasks), [WeeklyRecognition](#classe-weeklyrecognition), [PeriodCalculator](#classe-periodcalculator) | [RF11](02-requisitos.md#rf11), [RF17](02-requisitos.md#rf17), [RF22](02-requisitos.md#rf22), [RF49](02-requisitos.md#rf49), [RF60](02-requisitos.md#rf60), [RF65](02-requisitos.md#rf65), [RF66](02-requisitos.md#rf66) | [RN16](01-regras-de-negocio.md#rn16), [RN22](01-regras-de-negocio.md#rn22), [RN26](01-regras-de-negocio.md#rn26), [RN27](01-regras-de-negocio.md#rn27), [RN28](01-regras-de-negocio.md#rn28), [RN33](01-regras-de-negocio.md#rn33), [RN49](01-regras-de-negocio.md#rn49), [RN55](01-regras-de-negocio.md#rn55), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61), [RN63](01-regras-de-negocio.md#rn63) |
+| <a id="rastreio-uc11"></a>[UC11](03-casos-de-uso.md#uc11) — Visualizar minhas tarefas | [FamilyArea](#classe-familyarea), [FamilyTask](#classe-familytask), [PersonalTaskItem](#classe-personaltaskitem), [PersonalTasks](#classe-personaltasks), [CarouselRange](#classe-carouselrange), [PeriodProgress](#classe-periodprogress), [Member](#classe-member), [PeriodCalculator](#classe-periodcalculator) | [RF11](02-requisitos.md#rf11), [RF17](02-requisitos.md#rf17), [RF22](02-requisitos.md#rf22), [RF24](02-requisitos.md#rf24), [RF49](02-requisitos.md#rf49), [RF60](02-requisitos.md#rf60), [RF65](02-requisitos.md#rf65), [RF66](02-requisitos.md#rf66) | [RN16](01-regras-de-negocio.md#rn16), [RN22](01-regras-de-negocio.md#rn22), [RN23](01-regras-de-negocio.md#rn23), [RN26](01-regras-de-negocio.md#rn26), [RN27](01-regras-de-negocio.md#rn27), [RN33](01-regras-de-negocio.md#rn33), [RN49](01-regras-de-negocio.md#rn49), [RN55](01-regras-de-negocio.md#rn55), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61) |
 | <a id="rastreio-uc12"></a>[UC12](03-casos-de-uso.md#uc12) — Concluir tarefa | [FamilyTask](#classe-familytask), [Completion](#classe-completion), [CompletionSource](#classe-completionsource), [TaskService](#classe-taskservice), [MissionService](#classe-missionservice) | [RF12](02-requisitos.md#rf12), [RF47](02-requisitos.md#rf47), [RF56](02-requisitos.md#rf56) | [RN21](01-regras-de-negocio.md#rn21), [RN22](01-regras-de-negocio.md#rn22), [RN30](01-regras-de-negocio.md#rn30), [RN35](01-regras-de-negocio.md#rn35), [RN48](01-regras-de-negocio.md#rn48), [RN55](01-regras-de-negocio.md#rn55), [RN56](01-regras-de-negocio.md#rn56) |
 | <a id="rastreio-uc13"></a>[UC13](03-casos-de-uso.md#uc13) — Visualizar carga diária ou semanal | [FamilyArea](#classe-familyarea), [PeriodCalculator](#classe-periodcalculator), [PeriodLoad](#classe-periodload), [Completion](#classe-completion), [ViewPeriod](#classe-viewperiod) | [RF18](02-requisitos.md#rf18), [RF19](02-requisitos.md#rf19), [RF20](02-requisitos.md#rf20), [RF21](02-requisitos.md#rf21), [RF56](02-requisitos.md#rf56), [RF57](02-requisitos.md#rf57), [RF66](02-requisitos.md#rf66) | [RN26](01-regras-de-negocio.md#rn26), [RN28](01-regras-de-negocio.md#rn28), [RN30](01-regras-de-negocio.md#rn30), [RN31](01-regras-de-negocio.md#rn31), [RN33](01-regras-de-negocio.md#rn33), [RN34](01-regras-de-negocio.md#rn34), [RN35](01-regras-de-negocio.md#rn35), [RN55](01-regras-de-negocio.md#rn55), [RN56](01-regras-de-negocio.md#rn56), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61) |
 | <a id="rastreio-uc14"></a>[UC14](03-casos-de-uso.md#uc14) — Acompanhar missões e recompensas | [Mission](#classe-mission), [MissionStatus](#classe-missionstatus), [BadgeAward](#classe-badgeaward), [Badge](#classe-badge), [RedeemedReward](#classe-redeemedreward), [MissionService](#classe-missionservice) | [RF30](02-requisitos.md#rf30), [RF31](02-requisitos.md#rf31), [RF36](02-requisitos.md#rf36), [RF58](02-requisitos.md#rf58), [RF62](02-requisitos.md#rf62), [RF65](02-requisitos.md#rf65) | [RN26](01-regras-de-negocio.md#rn26), [RN33](01-regras-de-negocio.md#rn33), [RN35](01-regras-de-negocio.md#rn35), [RN36](01-regras-de-negocio.md#rn36), [RN38](01-regras-de-negocio.md#rn38), [RN39](01-regras-de-negocio.md#rn39), [RN43](01-regras-de-negocio.md#rn43), [RN51](01-regras-de-negocio.md#rn51), [RN52](01-regras-de-negocio.md#rn52), [RN53](01-regras-de-negocio.md#rn53), [RN55](01-regras-de-negocio.md#rn55), [RN58](01-regras-de-negocio.md#rn58), [RN63](01-regras-de-negocio.md#rn63), [RN64](01-regras-de-negocio.md#rn64) |
@@ -92,6 +94,14 @@ classDiagram
     class InviteStatus
     <<enum>> InviteStatus
     class Session
+    class CreationGrant
+    class OnboardingPhoto
+    class InitialMemberDraft
+    <<struct>> InitialMemberDraft
+    class FamilyCreationResult
+    <<struct>> FamilyCreationResult
+    class CreatorAccessResult
+    <<enum>> CreatorAccessResult
     class AppleAuthenticating
     <<protocol>> AppleAuthenticating
     class AccessService
@@ -109,6 +119,14 @@ classDiagram
     Invite "0..*" --> "1" Member : for
     Invite --> InviteStatus : status
     Session "0..*" --> "1" Member : of
+    CreationGrant "1" --> "0..*" OnboardingPhoto : authorizes
+    AccessService ..> CreationGrant : consumes
+    AccessService ..> InitialMemberDraft : creates
+    AccessService ..> FamilyCreationResult : returns
+    AccessService ..> CreatorAccessResult : returns
+    FamilyCreationResult --> Family : family
+    FamilyCreationResult --> Member : creatorAndMembers
+    FamilyCreationResult --> Session : session
     AccessService ..> AppleAuthenticating : use
     AccessService ..> Invite : create
     AccessService ..> AccessControl : use
@@ -145,7 +163,7 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 + carouselRange(today: Date, calendar: Calendar) -> CarouselRange
 ```
 
-**Restrições:** Um Criador protegido por família. Fuso padrão `America/Sao_Paulo`, selecionável na criação e editável somente por Administradores, imediatamente ou no próximo ciclo após informativo. Configuração e ciclos seguem RN28/RF67; troca de acesso por convite não remove o perfil anterior (RN09/RF68).
+**Restrições:** Um Criador protegido por família. Antes da criação, nomes/papéis dos membros são rascunho; família, Criador e membros iniciais passam a existir juntos. Após TEL-056, atualizar a família existente não repete a criação. Fuso padrão `America/Sao_Paulo`, selecionável na criação e editável somente por Administradores, imediatamente ou no próximo ciclo após informativo. Configuração e ciclos seguem RN28/RF67; troca de acesso por convite não remove o perfil anterior (RN09/RF68).
 
 <a id="classe-member"></a>
 ### Member «class»
@@ -175,6 +193,77 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 ```
 
 **Restrições:** Nome de identificação e apelido são campos separados. Gestão administrativa não altera foto/apelido pessoais; edição pessoal não muda família, papel ou modo Kids. Apelido é visível à família, mas sua configuração é exclusiva do titular. Promoção exige adulto; Criador não pode ser rebaixado, removido ou deixar a administração; Administrador não pode ser Kids ([RN02](01-regras-de-negocio.md#rn02), [RN03](01-regras-de-negocio.md#rn03), [RN04](01-regras-de-negocio.md#rn04), [RN05](01-regras-de-negocio.md#rn05), [RN06](01-regras-de-negocio.md#rn06), [RN07](01-regras-de-negocio.md#rn07), [RN08](01-regras-de-negocio.md#rn08), [RN44](01-regras-de-negocio.md#rn44), [RN63](01-regras-de-negocio.md#rn63)).
+
+<a id="classe-creationgrant"></a>
+### CreationGrant «class»
+
+**Rastreabilidade:** [UC01](#rastreio-uc01), [UC04](#rastreio-uc04).
+
+```swift
++ id: UUID
++ creatorIdentityID: UUID
+- tokenVerifier: Data
+- installationVerifier: Data
++ expiresAt: Date
++ consumedAt: Date?
++ isUsable(at: Date, installationProof: Data) -> Bool
+```
+
+**Restrições:** Representa a autorização transitória da identidade Apple antes da família; não é sessão nem perfil. O token legível é entregue uma vez e não persiste no modelo. Grant vencido, consumido ou de outra instalação não autoriza upload ou criação. BA-21/BA-35.
+
+<a id="classe-onboardingphoto"></a>
+### OnboardingPhoto «class»
+
+**Rastreabilidade:** [UC01](#rastreio-uc01).
+
+```swift
++ id: UUID
++ creationGrantID: UUID
++ privateObjectKey: String
++ state: String  // UPLOADING, READY, DELETING, DELETED, FAILED
++ createdAt: Date
++ isReady: Bool { get }
+```
+
+**Restrições:** Preparação protegida com finalidade fixa `profilePhoto`, sem `familyID` ou `memberID`. O backend a vincula somente ao próprio Criador no commit de criação; antes disso, o app usa a imagem local para prévia. O registro sem vínculo é limpo após 24 horas. BA-35/RNF24.
+
+<a id="classe-initialmemberdraft"></a>
+### InitialMemberDraft «struct»
+
+**Rastreabilidade:** [UC01](#rastreio-uc01), [UC02](#rastreio-uc02).
+
+```swift
++ name: String
++ role: MemberRole
+```
+
+**Restrições:** Valor transitório de TEL-002, sem ID, sessão ou convite. Zero ou mais rascunhos válidos são criados no mesmo commit da família; após a criação, alterações usam gestão administrativa de membros.
+
+<a id="classe-familycreationresult"></a>
+### FamilyCreationResult «struct»
+
+**Rastreabilidade:** [UC01](#rastreio-uc01).
+
+```swift
++ family: Family
++ creator: Member
++ initialMembers: [Member]
++ session: Session
+```
+
+**Restrições:** Resultado confirmado de uma criação única. TEL-056 usa os IDs dos membros já criados; a sessão abre a família. Resposta perdida é reconciliada pelo novo acesso Apple antes de qualquer tentativa de criar novamente.
+
+<a id="classe-creatoraccessresult"></a>
+### CreatorAccessResult «enum»
+
+**Rastreabilidade:** [UC01](#rastreio-uc01), [UC04](#rastreio-uc04).
+
+```swift
+case existingSession(Session)
+case creationGrant(token: String, expiresAt: Date)
+```
+
+**Restrições:** A resposta Apple com família existente traz sessão; sem família, traz somente o grant transitório para o onboarding. O token legível fica protegido no cliente e não é persistido no registro `CreationGrant` do servidor.
 
 <a id="classe-memberrole"></a>
 ### MemberRole: String, Codable «enum»
@@ -259,8 +348,15 @@ case invalidated
 
 ```swift
 - apple: AppleAuthenticating
-+ signInWithApple() async throws -> Family?
-+ createFamily(name: String, timeZoneID: String) async throws -> Family
++ signInWithApple() async throws -> CreatorAccessResult
++ uploadOnboardingPhoto(creationGrant: String, installationProof: Data,
+      image: Data) async throws -> UUID
++ createFamily(creationGrant: String, installationProof: Data,
+      creatorName: String, creatorNickname: String?, creatorPhotoMediaID: UUID?,
+      name: String, timeZoneID: String, initialMembers: [InitialMemberDraft])
+      async throws -> FamilyCreationResult
++ getFamily() async throws -> Family
++ updateFamilyName(_ name: String, by admin: Member) async throws -> Family
 + changeFamilyTimeZone(_ familyID: UUID, to timeZoneID: String,
       application: TimeZoneChangeApplication, by admin: Member) async throws
 + generateInvite(for memberID: UUID, by admin: Member) async throws
@@ -272,7 +368,7 @@ case invalidated
 + revokeAccess(of memberID: UUID, by admin: Member) async throws
 ```
 
-**Restrições:** Apple exclusivo do Criador. Gerar/reenviar convite revoga convites e sessão anteriores e retorna novas credenciais transitórias. Ingresso consome convite e cria sessão única atomicamente; recuperação de resposta perdida por dez minutos exige prova da mesma instalação/tentativa. Troca confirmada só substitui acesso local após sucesso, sem remover perfil anterior. Não há recuperação geral de comandos por operationID. UC01/02/04/09, RN46/47, RF68.
+**Restrições:** Apple exclusivo do Criador. Foto antecipada é opcional e protegida por grant/prova; upload não cria membro nem família. `createFamily` confirma família, Criador, membros iniciais, ciclo, foto opcional e sessão juntos. Depois de TEL-056, `getFamily`/`updateFamilyName` e `MemberService` editam recursos já persistidos; rascunho igual não gera escrita. Gerar/reenviar convite revoga convites e sessão anteriores e retorna novas credenciais transitórias. Ingresso consome convite e cria sessão única atomicamente; recuperação de resposta perdida por dez minutos exige prova da mesma instalação/tentativa. Troca confirmada só substitui acesso local após sucesso, sem remover perfil anterior. Não há recuperação geral de comandos por operationID. UC01/02/04/09, RN01/46/47, RF01/02/68.
 
 <a id="classe-invitecredentials"></a>
 ### InviteCredentials «struct»
@@ -599,6 +695,11 @@ case thisAndFuture
 ```mermaid
 classDiagram
     class PersonalTasks
+    class PersonalTaskItem
+    <<struct>> PersonalTaskItem
+    class FamilyTask
+    class TaskStatus
+    <<enum>> TaskStatus
     class FamilyArea
     class CarouselRange
     <<struct>> CarouselRange
@@ -616,7 +717,9 @@ classDiagram
     PeriodCalculator ..> PeriodLoad : create
     FamilyArea --> ViewPeriod : period
     PersonalTasks --> CarouselRange : range
-    PersonalTasks --> ViewPeriod : period
+    PersonalTasks "1" --> "0..*" PersonalTaskItem : projects
+    PersonalTaskItem --> FamilyTask : viewOf
+    PersonalTaskItem --> TaskStatus : statusAndDisplay
     PersonalTasks ..> PeriodProgress : create
     PeriodLoad --> ViewPeriod : period
     PeriodProgress --> ViewPeriod : period
@@ -633,16 +736,31 @@ O recorte mostra as relações internas deste domínio; as relações entre dom�
 ```swift
 + user: Member
 + selectedDate: Date
-+ period: ViewPeriod
 + range: CarouselRange
 + init(user: Member, today: Date, calendar: Calendar) throws
-+ select(date: Date, period: ViewPeriod) throws
-+ tasks() async throws -> [FamilyTask]
++ select(date: Date) throws
++ tasks() async throws -> [PersonalTaskItem]
 + progress() async throws -> PeriodProgress
 + ownHighlight(week: DateInterval) async throws -> WeeklyRecognition?
 ```
 
-**Restrições:** Todos os perfis consultam suas tarefas e progresso próprios diariamente, com início no dia atual e limites do carrossel. Dia/Semana é reservado às consultas familiares adultas. Kids têm duas abas, Minhas tarefas e Missões e conquistas; perfil pelo avatar/cabeçalho. Sinalização com foto abre diretamente a câmera, permite revisar/refazer/descartar e continuar sem foto em caso de cancelamento ou indisponibilidade. Reconhecimento próprio não libera carga familiar ([RN27](01-regras-de-negocio.md#rn27), [RN33](01-regras-de-negocio.md#rn33), [RN54](01-regras-de-negocio.md#rn54), [RN61](01-regras-de-negocio.md#rn61), [RN63](01-regras-de-negocio.md#rn63), [RN65](01-regras-de-negocio.md#rn65); [RF55](02-requisitos.md#rf55), [RF65](02-requisitos.md#rf65)).
+**Restrições:** Todos os perfis consultam somente tarefas em que são responsáveis ou corresponsáveis e seu progresso próprio diariamente, com início no dia atual e limites do carrossel. Dia/Semana é reservado às consultas familiares adultas. Kids têm duas abas, Minhas tarefas e Missões e conquistas; perfil pelo avatar/cabeçalho. Sinalização com foto abre diretamente a câmera, permite revisar/refazer/descartar e continuar sem foto em caso de cancelamento ou indisponibilidade. Reconhecimento próprio não libera carga familiar ([RN23](01-regras-de-negocio.md#rn23), [RN27](01-regras-de-negocio.md#rn27), [RN33](01-regras-de-negocio.md#rn33), [RN54](01-regras-de-negocio.md#rn54), [RN55](01-regras-de-negocio.md#rn55), [RN61](01-regras-de-negocio.md#rn61); [RF11](02-requisitos.md#rf11), [RF22](02-requisitos.md#rf22)).
+
+<a id="classe-personaltaskitem"></a>
+### PersonalTaskItem «struct»
+
+**Rastreabilidade:** [UC11](#rastreio-uc11).
+
+```swift
++ taskID: UUID
++ title: String
++ scheduledDate: LocalDate
++ assigneeIDs: Set<UUID>
++ status: TaskStatus          // estado efetivo
++ displayStatus: TaskStatus   // rótulo da lista pessoal
+```
+
+**Restrições:** Projeção retornada por `GET /me/tasks`, sem persistência própria. Se `status == .awaitingConfirmation`, `displayStatus` é `.pending` para adulto responsável/corresponsável e `.awaitingConfirmation` para Kids responsável; nos demais casos coincidem. Ações, fila Kids e progresso usam `status`, nunca `displayStatus`. RN23/RN55, RF11/RF22/RF24.
 
 <a id="classe-familyarea"></a>
 ### FamilyArea «class»
@@ -1238,6 +1356,14 @@ Prova transitória da tentativa, validada pelo backend, sem logs (RNF15).
 | Invite | associação → | Member | for | 0..* → 1 |
 | Invite | associação → | InviteStatus | status | – → 1 |
 | Session | associação → | Member | of | 0..* → 1 |
+| CreationGrant | associação → | OnboardingPhoto | authorizes | 1 → 0..* |
+| AccessService | dependência ⇢ | CreationGrant | consumes | – → – |
+| AccessService | dependência ⇢ | InitialMemberDraft | creates | – → – |
+| AccessService | dependência ⇢ | FamilyCreationResult | returns | – → – |
+| AccessService | dependência ⇢ | CreatorAccessResult | returns | – → – |
+| FamilyCreationResult | associação → | Family | family | – → 1 |
+| FamilyCreationResult | associação → | Member | creatorAndMembers | – → 1..* |
+| FamilyCreationResult | associação → | Session | session | – → 1 |
 | AccessService | dependência ⇢ | AppleAuthenticating | «use» | – → – |
 | AccessService | dependência ⇢ | Invite | «create» | – → – |
 | AccessService | dependência ⇢ | AccessControl | «use» | – → – |
@@ -1282,7 +1408,9 @@ Prova transitória da tentativa, validada pelo backend, sem logs (RNF15).
 | TaskService | dependência ⇢ | MissionService | update | – → – |
 | FamilyTask | associação → | EffortWeight | weight | – → 1 |
 | PersonalTasks | associação → | CarouselRange | range | – → 1 |
-| PersonalTasks | associação → | ViewPeriod | period | – → 1 |
+| PersonalTasks | associação → | PersonalTaskItem | projects | 1 → 0..* |
+| PersonalTaskItem | associação → | FamilyTask | viewOf | – → 1 |
+| PersonalTaskItem | associação → | TaskStatus | statusAndDisplay | – → 1 |
 | PersonalTasks | dependência ⇢ | PeriodProgress | create | – → – |
 | PersonalTasks | dependência ⇢ | WeeklyHighlightService | ownRecognition | – → – |
 | PeriodLoad | associação → | ViewPeriod | period | – → 1 |
@@ -1310,6 +1438,8 @@ Prova transitória da tentativa, validada pelo backend, sem logs (RNF15).
 
 | Tipos | Invariantes de comportamento | Base |
 |---|---|---|
+| `CreationGrant`, `OnboardingPhoto`, `InitialMemberDraft`, `FamilyCreationResult` | Foto antecipada permanece ligada ao grant/instalação; família, Criador, membros iniciais, sessão e vínculo opcional da foto confirmam juntos. TEL-056 recebe membros persistidos e retorno a TEL-002 não recria família. | [RN01](01-regras-de-negocio.md#rn01), [RN07](01-regras-de-negocio.md#rn07), [RF01](02-requisitos.md#rf01), [RF02](02-requisitos.md#rf02) |
+| `PersonalTasks`, `PersonalTaskItem`, `FamilyTask` | Lista pessoal filtra responsáveis do ator. Estado canônico único permanece; a lista adulta pode exibir Pendente para tarefa sinalizada sem alterar permissões, fila ou progresso. | [RN23](01-regras-de-negocio.md#rn23), [RN55](01-regras-de-negocio.md#rn55), [RF11](02-requisitos.md#rf11), [RF22](02-requisitos.md#rf22) |
 | `FamilyTask`, `KidsSignal`, `Completion` | Uma tarefa tem estado único para todos os responsáveis. Sinalização Kids, com foto opcional, não conclui parcialmente. A primeira decisão válida prevalece; conclusão manual encerra a validação. | [RN23](01-regras-de-negocio.md#rn23), [RN24](01-regras-de-negocio.md#rn24), [RN54](01-regras-de-negocio.md#rn54), [RN55](01-regras-de-negocio.md#rn55) |
 | `FamilyTask`, `Completion` | Cada responsável final recebe o peso integral. Quem executa a ação pode não receber crédito; assumir substitui todos os responsáveis, e concluir sem responsável atribui a tarefa ao adulto que conclui. | [RN30](01-regras-de-negocio.md#rn30), [RN48](01-regras-de-negocio.md#rn48), [RN56](01-regras-de-negocio.md#rn56) |
 | `PeriodProgress`, `PeriodLoad`, `PeriodCalculator` | Progresso conta tarefas distintas pela data prevista; carga soma créditos válidos pela data de conclusão, nos períodos Dia/Semana. Total de carga é a soma das cargas individuais; ausência de dados não permite divisão por zero. | [RN28](01-regras-de-negocio.md#rn28), [RN30](01-regras-de-negocio.md#rn30), [RN31](01-regras-de-negocio.md#rn31), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61) |
@@ -1327,9 +1457,12 @@ O quadro relaciona conceitos com o [modelo de dados](05-modelo-de-dados.md#diagr
 | Tipos | Entidades ou origem dos dados | Correspondência |
 |---|---|---|
 | `Family`, `Member`, `MemberRole` | `FAMILIA`, `MEMBRO` | Família, perfil, papel e identificação Apple projetada apenas para o Criador, persistida em `IDENTIDADE_CRIADOR`; grant de criação precede a família. |
+| `CreationGrant`, `CreatorAccessResult`, `OnboardingPhoto` | `GRANT_CRIACAO`, `MIDIA_ONBOARDING` e resposta transitória Apple | Preparação protegida sem família/titular, vinculada ao grant e à instalação. No commit, o mesmo ID/chave do objeto passa à `MIDIA` do Criador; reserva temporária é removida. |
+| `InitialMemberDraft`, `FamilyCreationResult` | Rascunho sem tabela; `FAMILIA`, `MEMBRO`, `SESSAO`, `CICLO_SEMANAL` e eventual `MIDIA` após commit | Membros iniciais e Criador surgem atomicamente; resultado retorna IDs para TEL-056. Alterações posteriores usam as entidades persistidas. |
 | `Invite`, `InviteStatus`, `Session` | `CONVITE`, `SESSAO`, `TOKEN_ACESSO` | Vínculos, credenciais protegidas, consumo e revogação. `InviteCredentials` é transitório. |
 | `Routine`, `RoutineFrequency` | `TAREFA`, `RECORRENCIA`, `TAREFA_RESPONSAVEL` | Configuração recorrente e responsáveis padrão; ocorrências passadas preservam seus dados. Versões de recorrência são um mecanismo de persistência do DER. |
 | `FamilyTask`, `TaskStatus`, `EffortWeight` | `OCORRENCIA_TAREFA`, `OCORRENCIA_RESPONSAVEL` | Tarefa individual prevista e responsáveis. Tarefa única também tem `TAREFA` no DER, sem `Routine` no modelo de domínio. |
+| `PersonalTaskItem` | Projeção de `OCORRENCIA_TAREFA` filtrada por `OCORRENCIA_RESPONSAVEL` | `status` vem da tarefa; `displayStatus` é calculado conforme ator. Não existe coluna ou tabela de estado visual. |
 | `Completion`, `KidsSignal`, `CompletionSource`, `ValidationDecision` | `CONCLUSAO`, `CREDITO_CONCLUSAO` e `OCORRENCIA_EVENTO` | Conclusão, responsáveis/peso creditados, sinalização, decisão e reabertura. O mapeamento de persistência deve conservar esses dados do contrato; o DER distingue crédito vigente e auditoria das correções. |
 | `Mission`, `MissionStatus` | `MISSAO`, `MISSAO_OCORRENCIA` | Missão e vínculos individuais; estado decorrente das tarefas. |
 | `Badge`, `BadgeAward`, `MissionParticipation` | `BADGE`, `MEMBRO_BADGE`, `PARTICIPACAO_MISSAO`, `BADGE_PARTICIPACAO` | Catálogo fixo, concessão por membro/marco e participações únicas, com missões contribuintes preservadas. |
@@ -1351,6 +1484,7 @@ A âncora anterior desta seção foi preservada para compatibilidade. O backend 
 
 | Versão | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.9 | RN 1.18 / RF 1.17 / UC 1.16 | 2026-10-19 | Criação conjunta de família/membros com foto antecipada vinculada ao grant, retorno sem recriação e item pessoal com `status`/`displayStatus` sem segundo estado. |
 | 1.8 | 1.15 | 2026-10-10 | `RewardItem.custom` passa a receber descrição opcional; limites, unicidade por família e catálogo inicial ficam explícitos. Para SPEC-015. |
 | 1.7 | 1.12 | 2026-10-07 | `Mission` ganha `note` opcional (até 250 caracteres); `unlink` sem substituição é rejeitado quando deixaria a missão sem tarefas. Para SPEC-014. |
 | 1.6 | 1.11 | 2026-10-07 | Conclusão direta sem escolha de atribuição; reabertura reverte dados derivados de missão concluída. |

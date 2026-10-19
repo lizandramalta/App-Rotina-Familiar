@@ -24,7 +24,7 @@
 | Decisões arquiteturais aplicáveis | MA-07, MA-08, MA-11, MA-15, MA-16; BA-08, BA-16 |
 
 - **Documentos consultados:** `docs/01-regras-de-negocio.md` (RN01/33/63/64), `docs/02-requisitos.md` (RF01/48/62/65 e RNF citadas), `docs/03-casos-de-uso.md` (UC01, UC10), `docs/05-modelo-de-dados.md` (MEMBRO, MIDIA, BADGE, MEMBRO_BADGE, BADGE_PARTICIPACAO), `docs/06-diagrama-de-classes.md` (Member, MemberService, Badge, BadgeAward, BadgeTier, rastreio-uc10), `docs/design/screen-map.md` (TEL-030/054, MOD-009), `docs/design/user-flows.md` (UF-13), `docs/architecture/backend-contracts.md` (§1, §3, §6, §7), `docs/architecture/backend-architecture.md` (processamento de mídia), `docs/architecture/backend-decisions.md` (BA-16), `docs/architecture/mobile-decisions.md` (P-04), `docs/architecture/mobile-feature-catalog.md`.
-- **Depende de (specs pré-requisito):** [SPEC-002-criar-configurar-familia](SPEC-002-criar-configurar-familia.md) (aprovada) — estabelece a capacidade de mídia `profilePhoto` necessária ao onboarding. [SPEC-003-gerenciar-membros](SPEC-003-gerenciar-membros.md) (aprovada) — define `Member` e a rota administrativa que já exclui apelido/foto. [SPEC-014-gerenciar-missoes](SPEC-014-gerenciar-missoes.md) (aprovada) — `CloseEligibleMissions` já registra `MissionParticipation` e concede `BadgeAward`.
+- **Depende de (specs pré-requisito):** [SPEC-002-criar-configurar-familia](SPEC-002-criar-configurar-familia.md) e [SPEC-003-gerenciar-membros](SPEC-003-gerenciar-membros.md), aprovadas na revisão do onboarding de 2026-10-19. A foto inicial é enviada antes da criação conforme SPEC-002. Esta SPEC mantém as rotas autenticadas para edição posterior do próprio perfil. [SPEC-014-gerenciar-missoes](SPEC-014-gerenciar-missoes.md) (aprovada) fornece participações e badges.
 - **Dependências externas e infraestrutura:** Cloudflare R2 (armazenamento privado de mídia), conforme BA-16. Nenhuma dependência de Apple Sign-In, APNs ou serviços externos novos.
 
 ## 3. Escopo da Entrega
@@ -35,7 +35,7 @@
 - `PATCH /v1/me/profile` (`UpdateOwnProfile`): atualizar `nickname` e/ou `photoMediaId`, ambos opcionais e nuláveis; rejeitar qualquer campo protegido (papel, família, modo Kids, identidade Apple).
 - `GET /v1/me/badges` (`GetOwnBadges`): lista de badges cumulativos concedidos ao titular (bronze/prata/ouro/diamante).
 - `GET /v1/me/badges/{awardId}` (`GetBadgeContributions`): marco, data de concessão e missões que contribuíram para ele, restrito ao titular do marco.
-- Reutilizar `POST /v1/media` e `GET /v1/media/{mediaId}/content`, introduzidos por SPEC-002 para `purpose: profilePhoto`, na edição posterior do próprio perfil. A infraestrutura continua reservada para `purpose: taskSignal` em SPEC-012/UC15.
+- Usar `POST /v1/media` e `GET /v1/media/{mediaId}/content` com sessão ativa e `purpose: profilePhoto` na edição posterior do próprio perfil. O envio anterior à criação pertence à SPEC-002 e não altera a titularidade exclusiva desta experiência. A infraestrutura continua reservada para `purpose: taskSignal` em SPEC-012/UC15.
 - TEL-030 (recorte de dados pessoais e badges — a ação "deixar administração" já entregue por SPEC-003 permanece inalterada), MOD-009 (Editar meu perfil) e TEL-054 (Detalhe do marco) no mobile.
 - Autorização por titularidade exclusiva, isolamento multitenant/entre membros e validação de entrada, desde a Fase 1.
 
@@ -281,7 +281,7 @@ Campos não reconhecidos ou protegidos (`role`, `familyId`, `kidsMode`, `isFamil
 | # | Pergunta / Dúvida | Decisão Tomada | Decidido por / Data | Altera a documentação em `docs/`? |
 |---|---|---|---|---|
 | E-01 | Não havia limite de caracteres/charset definido para `nickname` em nenhuma fonte (RN63, RF48, modelo de dados). | Até 20 caracteres não-espaço após trim, sem caracteres de controle; vazio/nulo remove a configuração. | Pessoa usuária / 2026-10-07 | Sim — RN63 e RF48 atualizados (base funcional 1.13). |
-| E-02 | A tabela de rastreabilidade UC→backend associa `UploadMedia` explicitamente a UC15 (SPEC-012, ainda não criada), não a UC10. Quem implementa a infraestrutura compartilhada de mídia primeiro? | SPEC-002 implementa `POST /media`/`GET /media/{id}/content` restritos a `purpose: profilePhoto` para não bloquear o onboarding; esta SPEC os reutiliza e `taskSignal` continua reservado para SPEC-012. | Pessoa usuária / 2026-10-07 | Não — replanejamento técnico, sem mudança de regra. |
+| E-02 | A infraestrutura compartilhada de mídia foi atribuída originalmente a SPEC-002. | As rotas autenticadas de foto do próprio perfil continuam nesta experiência; o envio antes da criação e sua autorização serão reconciliados na revisão de SPEC-002. `taskSignal` continua reservado para SPEC-012. | Pessoa usuária / 2026-10-07; revisão de dependência em 2026-10-19 | Não altera UC10; dependência técnica atualizada. |
 
 ## 10. Fases de Implementação e Critérios de Conclusão
 

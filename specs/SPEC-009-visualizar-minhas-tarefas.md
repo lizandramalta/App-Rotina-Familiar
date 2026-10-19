@@ -1,8 +1,8 @@
 # Spec 009: Visualizar minhas tarefas
 
 **Status:** aprovada
-**Autor:** Codex | **Criada em:** 2026-10-06 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-06
-**Base funcional:** 1.9
+**Autor:** Codex | **Criada em:** 2026-10-06 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-19
+**Base funcional:** RN 1.18 / RF 1.17 / UC 1.16
 **UX-spec:** [UX-009-visualizar-minhas-tarefas.md](UX-009-visualizar-minhas-tarefas.md)
 **Projetos envolvidos:** ambos
 **Tema do backlog:** Tema 2 — Tarefas e rotina
@@ -17,20 +17,21 @@
 | Categoria | Códigos incluídos nesta entrega |
 |---|---|
 | Caso de uso | UC11 |
-| Regras de negócio | RN16, RN22, RN26, RN27, RN28, RN33, RN49, RN60, RN61 |
+| Regras de negócio | RN16, RN22, RN23, RN26, RN27, RN28, RN33, RN49, RN55, RN60, RN61 |
 | Requisitos funcionais | RF11, RF17, RF22, RF49, RF60, RF65, RF66 |
 | Requisitos não funcionais | RNF01, RNF02, RNF04, RNF05, RNF06, RNF07, RNF08, RNF09, RNF12, RNF13, RNF14, RNF22 |
 | Telas e fluxo | TEL-010, TEL-011, TEL-032, TEL-040, TEL-050, UF-04 |
-| Decisões arquiteturais | MA-07; BA-07 |
+| Decisões arquiteturais | MA-07, MA-19; BA-07, BA-37 |
 
-- **Documentos consultados:** `docs/01-regras-de-negocio.md`, `docs/02-requisitos.md`, `docs/03-casos-de-uso.md`, `docs/design/screen-map.md`, `docs/design/user-flows.md`, `docs/architecture/mobile-feature-catalog.md` e `docs/architecture/backend-contracts.md`.
+- **Documentos consultados:** `docs/01-regras-de-negocio.md`, `docs/02-requisitos.md`, `docs/03-casos-de-uso.md`, `docs/design/screen-map.md`, `docs/design/user-flows.md`, `docs/architecture/mobile-feature-catalog.md`, `docs/architecture/mobile-decisions.md`, `docs/architecture/backend-contracts.md` e `docs/architecture/backend-decisions.md`.
 - **Depende de:** [SPEC-007-gerenciar-tarefas.md](SPEC-007-gerenciar-tarefas.md), aprovada. Ela fornece a tarefa, os estados e o detalhe consultado.
 
 ## 3. Escopo da entrega
 
 ### 3.1. Dentro do escopo
 
-- Minhas tarefas em TEL-010 e TEL-040: lista e progresso próprios exclusivamente do dia de referência.
+- Minhas tarefas em TEL-010 e TEL-040: lista e progresso próprios exclusivamente do dia de referência. TEL-010 inclui apenas tarefas em que o adulto é responsável ou corresponsável.
+- Tarefa compartilhada sinalizada por Kids: estado efetivo único `awaitingConfirmation`; na lista pessoal do adulto corresponsável aparece Pendente e na visualização pessoal Kids, Aguardando confirmação, sem alterar progresso, fila administrativa ou ações permitidas.
 - Navegação pessoal por data entre a criação da família e o último dia do mês corrente, incluindo dias futuros do mês atual.
 - Área Família adulta em TEL-050: progresso familiar e membros por Dia/Semana; detalhe de membro em TEL-032 e lista complementar em TEL-011 preservam o contexto.
 - Filtros familiares `memberId` e `includeUnassigned`, incluindo tarefas sem responsável quando solicitado.
@@ -73,6 +74,7 @@
 - `referenceDate` respeita RN49. Nas rotas familiares, `period` é `day` ou `week`; a semana é segunda–domingo e informa bordas efetivas.
 - Nas rotas pessoais, `period` é campo desconhecido e deve ser recusado; a consulta é sempre diária.
 - `memberId` deve identificar membro da família do ator. `includeUnassigned=true` inclui tarefas sem responsável; omitido ou `false` não as inclui além do filtro solicitado.
+- `GET /v1/me/tasks` filtra pelo ator responsável/corresponsável. Cada item devolve `status` canônico e `displayStatus` calculado para a lista pessoal: quando `status` é `awaitingConfirmation`, adulto recebe `displayStatus: pending` e Kids recebe `displayStatus: awaitingConfirmation`; nos demais estados os dois coincidem. Ações, progresso e fila usam `status`, sem segundo estado persistido.
 
 | HTTP | Código | Situação |
 |---:|---|---|
@@ -84,7 +86,7 @@
 
 ## 6. Critérios de aceitação
 
-- **CA-01: consulta pessoal diária** — **DADO QUE** qualquer perfil possui sessão válida, **QUANDO** abrir Minhas tarefas, **ENTÃO** o sistema mostra o dia atual, tarefas próprias e progresso diário, **E NÃO** oferece Semana. *(UC11, RN33, RN61)*
+- **CA-01: consulta pessoal diária** — **DADO QUE** qualquer perfil possui sessão válida, **QUANDO** abrir Minhas tarefas, **ENTÃO** o sistema mostra o dia atual, somente tarefas em que a pessoa é responsável ou corresponsável e seu progresso diário, **E NÃO** oferece Semana. *(UC11, RN23/RN33/RN61, RF11/RF22)*
 - **CA-02: mudança de data pessoal** — **DADO QUE** a pessoa navega no carrossel pessoal, **QUANDO** selecionar data dentro de RN49, **ENTÃO** atualiza apenas lista e progresso daquele dia. *(RN49, RF11, RF17)*
 - **CA-03: limites e vazio pessoal** — **DADO QUE** a data está fora do intervalo ou não há tarefas no dia, **QUANDO** a consulta ocorrer, **ENTÃO** a seleção inválida é bloqueada ou é mostrado “Sem tarefas”, sem percentual fictício. *(RN49, RF49)*
 - **CA-04: Kids restrito ao próprio dia** — **DADO QUE** a sessão é Kids, **QUANDO** acessar a aba inicial, **ENTÃO** consulta somente suas tarefas/progresso diários, **E** não recebe dados nem caminhos familiares. *(RN27, RF22, RF65)*
@@ -94,6 +96,11 @@
 - **CA-08: isolamento familiar** — **DADO QUE** a rota recebe ID de outra família, **QUANDO** o backend validar a requisição, **ENTÃO** responde `404 RESOURCE_NOT_FOUND`, **E** não vaza qualquer dado. *(RNF06, RNF07)*
 - **CA-09: erro distinto de vazio** — **DADO QUE** a consulta falha ou retorna indisponível, **QUANDO** a interface tratar a resposta, **ENTÃO** mostra falha recuperável e não “Sem tarefas”. *(RNF12, RNF13)*
 - **CA-10: overview sem carga** — **DADO QUE** um adulto consulta `GET /family/overview`, **QUANDO** recebe sucesso, **ENTÃO** a resposta contém somente progresso familiar e membros definidos nesta entrega, **E NÃO** simula distribuição de carga. *(E-02)*
+
+- **CA-11: estado apresentado por perfil sem segundo estado** — **DADO QUE** Kids sinalizou tarefa compartilhada com um adulto,
+  - **QUANDO** adulto corresponsável e Kids abrirem suas listas pessoais,
+  - **ENTÃO** TEL-010 do adulto DEVE apresentar Pendente e a visualização Kids DEVE apresentar Aguardando confirmação,
+  - **E** estado efetivo `awaitingConfirmation`, progresso, fila de validação e permissões permanecem os mesmos. *(RN23/RN55, RF11/RF22/RF24, UC11)*
 
 ## 7. Observabilidade
 
@@ -112,22 +119,25 @@ Não registrar título, observação, foto, tokens ou conteúdo de outra famíli
 | E-01 | Filtros da lista familiar chamam-se `memberId` e `includeUnassigned`. | Decidida pela pessoa usuária em 2026-10-06 | Sim |
 | E-02 | `GET /family/overview` entrega progresso e membros; carga fica para SPEC-018. | Decidida pela pessoa usuária em 2026-10-06 | Sim |
 | E-03 | Minhas tarefas é diária para todos os perfis; Dia/Semana é exclusivo das consultas familiares adultas. | Decidida pela pessoa usuária em 2026-10-06 | Sim |
+| E-04 | Para tarefa compartilhada sinalizada por Kids, a lista do adulto corresponsável apresenta Pendente e a visualização Kids apresenta Aguardando confirmação; o estado efetivo permanece único. | Pessoa usuária / 2026-10-19 | Sim — RN23/RN55, RF11/RF22 e UC11. |
+
+**Contrato técnico revisado:** `backend-contracts.md` 1.16 e BA-37/MA-19 definem `status` e `displayStatus`. O backend e o mobile anteriores ainda precisam implementar a projeção; permissões e fila permanecem pelo estado efetivo.
 
 ## 9. Fases de implementação
 
 | Fase | Objetivo | CAs | Prontidão | Status |
 |---|---|---|---|---|
-| 1 | Consulta própria diária, validação, autorização e isolamento | CA-01 a CA-04, CA-08 | Testes unitários, integração e interface por perfil verdes | em andamento — backend concluído (SCRUM-38); Mobile pendente (SCRUM-39) |
+| 1 | Consulta própria diária, estado por perfil, validação, autorização e isolamento | CA-01 a CA-04, CA-08, CA-11 | Contrato de projeção reconciliado e testes unitários, integração e interface por perfil verdes | em andamento — backend anterior SCRUM-38 concluído; Mobile pendente (SCRUM-39) |
 | 2 | Consulta familiar adulta, filtros, contexto e detalhe de membro | CA-05 a CA-07, CA-10 | Testes de período, filtros e navegação verdes | a fazer |
 | 3 | Falhas, acessibilidade e observabilidade | CA-09 | Estados de erro e telemetria verificados | a fazer |
 
-**Registro de execução (2026-10-10):** SCRUM-38 concluiu a consulta própria diária no backend. A Fase 1 segue em andamento até a entrega e validação da interface Mobile por perfil (SCRUM-39).
+**Registro de execução (2026-10-19):** SCRUM-38 concluiu a consulta própria diária anterior no backend. A Fase 1 requer verificar a projeção do estado por perfil e a interface Mobile (SCRUM-39).
 
 ## 10. Checklist de aprovação
 
 - [x] Dependência SPEC-007 aprovada.
 - [x] Regras de acesso, isolamento e validação atribuídas à Fase 1.
-- [x] Contratos e filtros sustentados pela base funcional 1.9.
+- [x] Contratos e filtros sustentados pela base funcional RN 1.18 / RF 1.17 / UC 1.16.
 - [x] UX-spec vinculada.
 - [x] Decisões E-01 a E-03 refletidas em `docs/`.
-- [x] Status `aprovada` autorizado explicitamente pela pessoa usuária em 2026-10-06.
+- [x] Revisão de 2026-10-19 aprovada com contrato de projeção definido; aprovação anterior de 2026-10-06 preservada no histórico.

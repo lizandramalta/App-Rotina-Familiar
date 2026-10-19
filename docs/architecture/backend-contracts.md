@@ -1,8 +1,8 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.16 · **Base funcional:** 1.18 · **Arquitetura backend:** 1.3\
+**Versão:** 1.16 · **Base funcional:** RN 1.18 / RF 1.17 / UC 1.16 · **Arquitetura backend:** 1.4\
 **Data:** 2026-10-19\
-**Situação:** contrato arquitetural consolidado e materializado pela documentação OpenAPI da API
+**Situação:** rotas existentes materializadas na OpenAPI; ampliações de onboarding e projeção pessoal ainda exigem implementação e atualização da OpenAPI
 
 [Arquitetura](backend-architecture.md) · [Decisões](backend-decisions.md) · [Catálogo mobile](mobile-feature-catalog.md) · [UC](../03-casos-de-uso.md) · [Índice](../DOCUMENTACAO.md)
 
@@ -43,7 +43,7 @@ Rotas públicas não autorizam leitura geral do perfil; respostas de inspeção 
 | Método e caminho | Caso de uso de aplicação | Entrada / resultado | Acesso |
 |---|---|---|---|
 | `POST /access/apple` | `SignInWithApple` | Prova Apple, contexto da tentativa e instalação → sessão do Criador ou `creationGrant` | Prova Apple válida |
-| `POST /families` | `CreateFamily` | `creationGrant`, `creatorName`, `creatorNickname` opcional, `name`, `timeZoneId` opcional (padrão `America/Sao_Paulo`) e prova da instalação no header → família, Criador, ciclo semanal inicial e sessão. O grant só vale para a instalação que o recebeu | Grant restrito à criação |
+| `POST /families` | `CreateFamily` | `creationGrant`, `creatorName`, `creatorNickname` opcional, `name`, `timeZoneId` opcional (padrão `America/Sao_Paulo`), `initialMembers` opcional e `creatorPhotoMediaId` opcional; prova da instalação no header → família, Criador, membros iniciais, ciclo semanal inicial e sessão | Grant restrito à criação |
 | `POST /access/invites/inspect` | `InspectInvite` | Token → disponibilidade e contexto mínimo para ingresso, sem senha/dados privados | Posse do token e limites de tentativas |
 | `POST /access/invite-joins` | `JoinFamilyByInvite` | Token, senha, provas de instalação/tentativa; sessão anterior opcional e troca confirmada → sessão nova | Convite válido; antiga só é encerrada com sucesso |
 | `POST /access/invite-joins/recover` | `RecoverInviteJoin` | `attemptId`, segredo da tentativa e prova original → credenciais daquele ingresso | Janela de dez minutos e sessão ainda ativa |
@@ -52,6 +52,8 @@ Rotas públicas não autorizam leitura geral do perfil; respostas de inspeção 
 | `DELETE /me/session` | `RevokeOwnSession` | Revoga sessão e dispositivo push; sem remover membro | Sessão ativa; contrato técnico de encerramento |
 
 `creationGrant` não cria um quarto perfil. Seu prazo técnico não altera a ausência de expiração temporal de convite/refresh. Para criação concorrente, associação única à identidade Apple impede segunda família; retomar Apple permite descobrir a família criada após resposta perdida.
+
+`initialMembers` é uma lista completa, possivelmente vazia, de `{name, role}`. `role` aceita somente `administrator`, `member` ou `kids`; IDs, convite, sessão e flag de Criador não vêm do cliente. O servidor valida todos os itens antes da escrita e cria família, Criador, membros iniciais, ciclo, eventual vínculo da foto e sessão em um único commit. Falha em qualquer item não deixa família ou perfis parciais. A resposta `201` preserva `family`, `member` (Criador) e `session`, e acrescenta `initialMembers: [{id, name, role}]`; não emite convites. `creatorPhotoMediaId` referencia somente mídia antecipada `READY`, de finalidade `profilePhoto`, vinculada ao mesmo grant e instalação. O grant consumido impede novo vínculo; em caso de resposta perdida, o cliente consulta a identidade pelo Apple, sem repetir a criação.
 
 `SessionResult` contém `sessionId`, `memberId`, `familyId`, `role`, `isFamilyCreator`, `accessToken`, `accessTokenExpiresAt` e `refreshToken` no ingresso/recuperação. `GetCurrentSession` devolve `memberId`, `familyId`, `role` e `isFamilyCreator`, sem credenciais. Refresh não precisa devolver novamente o segredo estável.
 
@@ -63,6 +65,8 @@ Troca confirmada não é endpoint para transferir membro. Uma sessão anterior d
 
 | Método e caminho | Caso de uso de aplicação | Campos / resposta | Permissão |
 |---|---|---|---|
+| `GET /family` | `GetFamily` | `id`, `name`, `timeZoneId` confirmados | Adulto da família |
+| `PATCH /family` | `UpdateFamily` | `name` → família confirmada; campo omitido não grava | Admin |
 | `GET /family/settings` | `GetFamilySettings` | `timeZoneId`, `scheduledTimeZoneChange` (`{timeZoneId, effectiveAt}` ou `null`) e `limits` (`{startsAt, endsAt, timeZoneId, isTransition}`) | Admin |
 | `POST /family/time-zone-changes/preview` | `PreviewFamilyTimeZoneChange` | `timeZoneId`, `application` → `proposedTimeZoneId`, `application`, `effectiveAt`, `effectiveLimits` e `isTransition`; recusa o fuso já vigente com `422 TIME_ZONE_UNCHANGED` | Admin; só lê, a liquidação de ciclos vencidos é feita em memória |
 | `POST /family/time-zone-changes` | `ChangeFamilyTimeZone` | `timeZoneId`, `application: immediate \| nextCycle` → mesmo formato de `GET /family/settings`; recusa o fuso já vigente com `422 TIME_ZONE_UNCHANGED`; nova solicitação válida substitui a programada | Admin; revalidar papel e limites no commit |
@@ -81,13 +85,17 @@ Troca confirmada não é endpoint para transferir membro. Uma sessão anterior d
 
 Consulta de apelido público não expõe seu formulário/configuração a outros membros. `CreateMember` não gera convite automaticamente: criação do perfil e emissão são passos distintos do UC02, evitando duplicar membro ao repetir emissão. Reenviar é a mesma operação de emissão de novas credenciais, não leitura das anteriores.
 
+Ao voltar de TEL-056 para TEL-002, o cliente carrega a família existente e seus membros. Prosseguir sem diferenças não chama rota de escrita. Se o nome mudou, usa `PATCH /family`; inclusões posteriores usam `POST /family/members`, ajustes de membros usam as rotas de SPEC-003 e fuso posterior usa a prévia/confirmação de `/family/time-zone-changes`. Essas operações exigem sessão de Administrador e revalidação após lock; nenhuma volta chama `POST /families`. Cada comando confirmado é independente, e o cliente consulta o estado após falha incerta antes de oferecer nova ação.
+
+`PATCH /family` aceita somente `name`, com a mesma validação do nome na criação, e retorna `200` com `id`, `name` e `timeZoneId` confirmados. `familyId`, fuso, Criador e membros no corpo são campos protegidos/desconhecidos. O cliente não envia o PATCH quando o nome não mudou.
+
 Preview de fuso é apenas leitura de suporte a MOD-012. A gravação pode refletir novo ciclo se o limite temporal avançar; devolver limites efetivos, sem assumir que preview reservou estado.
 
 ## 4. Tarefas, rotinas, Kids e indicadores
 
 | Método e caminho | Caso de uso de aplicação | Campos / resposta | Permissão |
 |---|---|---|---|
-| `GET /me/tasks` | `GetOwnTasks` | `referenceDate`, cursor → tarefas próprias do dia | Todos |
+| `GET /me/tasks` | `GetOwnTasks` | `referenceDate`, cursor → tarefas do dia em que o ator é responsável ou corresponsável, com `status` canônico e `displayStatus` da lista pessoal | Todos |
 | `GET /family/tasks` | `GetFamilyTasks` | `period`, `referenceDate`, `memberId` opcional, `includeUnassigned` opcional, cursor | Adulto |
 | `GET /family/members/{memberId}/tasks` | `GetMemberTasks` | Período da origem e cursor | Adulto |
 | `GET /tasks/{taskId}` | `GetTaskDetail` | Estado atual, origem, capacidades e detalhes autorizados | Adulto; Kids apenas responsável |
@@ -109,6 +117,8 @@ Preview de fuso é apenas leitura de suporte a MOD-012. A gravação pode reflet
 | `GET /family/load` | `GetFamilyLoad` | Distribuição por membro e totais, sem ranking | Adulto |
 
 Nas rotas familiares, `period` aceita `day` ou `week`; `referenceDate` é a data selecionada, validada pelo limite de consulta RN49. As rotas pessoais são sempre diárias e não aceitam `period`. `memberId` restringe a lista familiar a um membro da família do ator; `includeUnassigned` inclui ou exclui tarefas sem responsável. O servidor devolve intervalo nominal e efetivo nas consultas familiares. `GET /tasks/{id}` resolve criação fora do carrossel quando o ator pode consultar aquela tarefa; isso não cria novo calendário de navegação. Cadastro/edição não bloqueiam passado, meses futuros ou datas anteriores à família.
+
+Em `GET /me/tasks`, cada item mantém `status: pending | awaitingConfirmation | completed` como estado efetivo. `displayStatus` usa os mesmos três valores: quando `status` é `awaitingConfirmation`, retorna `pending` para adulto responsável/corresponsável e `awaitingConfirmation` para Kids responsável; nos demais casos coincide com `status`. É projeção calculada para a lista pessoal, sem segundo estado persistido. Detalhe, fila de avaliação, permissões e progresso continuam usando `status` canônico. A consulta pessoal não inclui tarefas de outros responsáveis nem tarefas sem responsável.
 
 `GET /family/load?period=day|week&referenceDate=YYYY-MM-DD` exige sessão adulta e retorna `200 OK` com `{ period, referenceDate, effectivePeriod: { startsOn, endsOn, timeZoneId, isTransition }, totalLoad, members }`. Cada entrada de `members` contém `memberId` ou `null` para crédito histórico removido, `displayName` ("Membro removido" quando `memberId` é nulo), `load` e `participationPercent` (nulo se `totalLoad` for zero). A consulta soma crédito válido pela data da conclusão, sem multiplicar joins; tarefas pendentes/aguardando confirmação não entram e reabertura remove o crédito original. `401 SESSION_EXPIRED`, `403 INSUFFICIENT_PERMISSIONS` para Kids, `422 VALIDATION_FAILED` para `period`/`referenceDate` inválidos ou fora do intervalo e `503 DEPENDENCY_UNAVAILABLE` para snapshot não confirmado. Não aceita `familyId`, ordenação de ranking nem limiar de sobrecarga.
 
@@ -158,12 +168,17 @@ Resumo Kids de missão pode mostrar títulos/estados coletivos necessários ao U
 
 | Método e caminho | Contrato | Acesso |
 |---|---|---|
+| `POST /onboarding/media` | Upload multipart de foto inicial com `creationGrant`, `purpose: profilePhoto` e arquivo → `mediaId`, estado e dimensões; prova de instalação no header | Grant válido da identidade Apple sem família, vinculado à instalação; sem Bearer de membro |
 | `POST /media` | Upload multipart, `purpose: profilePhoto \| taskSignal` → `mediaId`, estado e dimensões | Titular; `taskSignal` exige somente que o ator tenha papel Kids — o upload não recebe nem valida `taskId` |
 | `GET /media/{mediaId}/content` | Streaming privado, tipo/tamanho corretos e sem cache compartilhado | Sessão ativa e leitura permitida pela finalidade/vínculo |
 | `GET /health/live` | Estado mínimo do processo | Operação; sem detalhes internos |
 | `GET /health/ready` | Prontidão da função API/worker | Infraestrutura autorizada |
 
 Perfil recebe `photoMediaId`; sinalização recebe `photoMediaId` opcional. Ambos revalidam que a mídia está pronta, é do titular/da família e tem finalidade compatível. URL arbitrária no body não substitui esse contrato. Antes de vínculo, só quem enviou pode consultar sua mídia. R2 é privado e credenciais S3 nunca aparecem no retorno.
+
+`POST /onboarding/media` reserva mídia privada sem `familyId` ou `memberId`: associa o registro ao grant válido e à prova da instalação, sem criar perfil/sessão nem permitir leitura familiar. O upload respeita o processamento e os limites da foto de perfil. `POST /families` revalida esse vínculo antes e dentro da transação; mídia ausente, não pronta, de outro grant/instalação ou de outra finalidade recebe `422 VALIDATION_FAILED`, com `fieldErrors.creatorPhotoMediaId` (`PHOTO_MEDIA_NOT_READY`, `PHOTO_MEDIA_NOT_OWNED` ou `PHOTO_MEDIA_PURPOSE_MISMATCH`, conforme o caso). Omitir a referência cria a família sem foto. Grant vencido ou substituído exige novo upload para o novo grant; mídia sem vínculo entra na limpeza após 24 horas. A imagem escolhida permanece localmente para prévia até a criação confirmada.
+
+O grant e a prova de instalação do upload são segredos: não entram em logs, URLs ou telemetria; resposta usa `Cache-Control: no-store`. A rota retorna `401 CREATION_GRANT_INVALID` para grant ausente, vencido ou não associado à instalação e mantém `413 MEDIA_TOO_LARGE`/`415 MEDIA_FORMAT_UNSUPPORTED` para arquivo inválido. `GET /media/{mediaId}/content` só passa a servir a foto antecipada depois do vínculo e da autorização por sessão.
 
 A revalidação de contexto de tarefa (estado `pending`, titularidade do responsável) acontece exclusivamente no vínculo via `SignalTask`, nunca no upload: `POST /media` com `purpose: taskSignal` não amarra a mídia a um `taskId` (SPEC-012). Reutilizar em outra sinalização uma mídia já vinculada não é um fluxo válido: cada sinalização recebe seu próprio `photoMediaId`, revalidado no momento do vínculo.
 
@@ -175,7 +190,7 @@ Cada linha cobre um objetivo funcional completo, não apenas uma rota. RF/RN per
 
 | UC | Aplicação / módulos | Garantia principal | Base funcional |
 |---|---|---|---|
-| <a id="backend-uc01"></a>[UC01](../03-casos-de-uso.md#uc01) | `CreateFamily`, `ChangeFamilyTimeZone` / Access, Family, Recognition | Criador único, fuso selecionável e aplicação imediata/próximo ciclo | RF01/38/39/67; RN01/09/28/44/65 |
+| <a id="backend-uc01"></a>[UC01](../03-casos-de-uso.md#uc01) | `UploadOnboardingPhoto`, `CreateFamily`, `GetFamily`, `UpdateFamily`, `ChangeFamilyTimeZone` / Access, Family, Media, Recognition | Criação conjunta do Criador e membros iniciais, foto antecipada protegida, edição posterior sem recriação e fuso selecionável | RF01/02/38/39/40/48/67; RN01/07/09/28/44/63/65 |
 | <a id="backend-uc02"></a>[UC02](../03-casos-de-uso.md#uc02) | `CreateMember`, `UpdateMember`, `ChangeMemberRole`, `LeaveAdministration`, `RemoveMember`, `IssueMemberInvite` | Proteção do Criador, remoção seletiva, novas credenciais e revogação | RF02–06/40/41/54; RN01–10/45–47 |
 | <a id="backend-uc03"></a>[UC03](../03-casos-de-uso.md#uc03) | `DecideKidsSignal` / Kids, Tasks, Missions | Primeira decisão válida, confirmação creditada a todos os responsáveis | RF25/26/55/56; RN22–26/54/55 |
 | <a id="backend-uc04"></a>[UC04](../03-casos-de-uso.md#uc04) | `SignInWithApple` / Access | Prova validada; sessão única do Criador ou grant restrito | RF37/39; RN44; RNF15/16/22 |
@@ -185,7 +200,7 @@ Cada linha cobre um objetivo funcional completo, não apenas uma rota. RF/RN per
 | <a id="backend-uc08"></a>[UC08](../03-casos-de-uso.md#uc08) | `CreateRoutine`, `UpdateFutureRoutine`, `MaterializeRoutineOccurrences` | Frequências fixas, observação opcional, horizonte e origem estável; proteger passado/conquistas | RF13/14/70; RN14/16–18/67 |
 | <a id="backend-uc09"></a>[UC09](../03-casos-de-uso.md#uc09) | `InspectInvite`, `JoinFamilyByInvite`, `RecoverInviteJoin`, `RefreshSession` | Consumo único, prova de instalação e troca sem remoção | RF42–46/54/68; RN09/10/45–47 |
 | <a id="backend-uc10"></a>[UC10](../03-casos-de-uso.md#uc10) | `UpdateOwnProfile`, `GetOwnBadges`, `GetBadgeContributions` | Titularidade, câmera/galeria na UI e marcos por participação | RF48/62/65; RN63/64 |
-| <a id="backend-uc11"></a>[UC11](../03-casos-de-uso.md#uc11) | `GetOwnTasks`, `GetFamilyTasks`, `GetMemberTasks`, `GetOwnProgress`, `GetFamilyOverview` | Consulta própria diária; Dia/Semana familiar adulta e carrossel; Kids só projeção própria | RF11/17/22/49/60/65/66; RN26/27/33/49/60/61 |
+| <a id="backend-uc11"></a>[UC11](../03-casos-de-uso.md#uc11) | `GetOwnTasks`, `GetFamilyTasks`, `GetMemberTasks`, `GetOwnProgress`, `GetFamilyOverview` | Consulta própria diária apenas de responsáveis, com apresentação do estado por perfil; Dia/Semana familiar adulta e carrossel | RF11/17/22/24/49/60/65/66; RN23/26/27/33/49/55/60/61 |
 | <a id="backend-uc12"></a>[UC12](../03-casos-de-uso.md#uc12) | `CompleteTask` / Tasks, Kids, Missions | Direta, mantém responsáveis ou atribui adulto sem responsável; crédito integral e tarefa Kids só Admin | RF12/26/47/56; RN21–23/30/48/55/56 |
 | <a id="backend-uc13"></a>[UC13](../03-casos-de-uso.md#uc13) | `GetFamilyLoad` / Insights | Carga pelo instante da conclusão, sem duplicação por joins | RF18–21/56/57/66; RN28/30/31/33/34/57/61 |
 | <a id="backend-uc14"></a>[UC14](../03-casos-de-uso.md#uc14) | `ListMissions`, `GetMissionDetail` / Missions | Tarefas distintas; reabertura confirmada remove recompensa e dados derivados; projeção Kids | RF30/31/36/58/62/65; RN35–39/43/51–53/58/64 |
@@ -213,13 +228,13 @@ Cada linha cobre um objetivo funcional completo, não apenas uma rota. RF/RN per
 | RNF26 | Snapshot para PDF, resultado semanal único e fila persistente |
 | RNF27 | Perfil por titularidade, PDF adulto e compartilhamento explícito no cliente |
 
-O documento OpenAPI 3.1 é gerado pelos schemas HTTP em `/docs/json`, e a interface interativa fica em `/docs`. Cada rota implementada mantém schema, segurança e respostas compatíveis com este contrato; a documentação executável não substitui esta fonte para comportamento, autorização ou regras de domínio.
+O documento OpenAPI 3.1 é gerado pelos schemas HTTP em `/docs/json`, e a interface interativa fica em `/docs`. As ampliações aqui descritas só constarão da OpenAPI depois de implementadas; até lá, `/docs/json` reflete as rotas vigentes. Cada rota implementada mantém schema, segurança e respostas compatíveis com o recorte entregue.
 
 ## Histórico
 
 | Versão | Data | Alteração |
 |---|---|---|
-| 1.16 | 2026-10-19 | UC07: `DeleteTask` fecha a missão via `CloseEligibleMissions` quando restam só tarefas concluídas (RN38/RF59). Base funcional 1.18. Para SPEC-014/SPEC-007. |
+| 1.16 | 2026-10-19 | UC07: `DeleteTask` fecha a missão via `CloseEligibleMissions` quando restam só tarefas concluídas (RN38/RF59; SPEC-014/SPEC-007). Contrato alvo de criação atômica com membros/foto antecipada, edição da família existente e `displayStatus` pessoal; distingue essas ampliações das rotas já implementadas. |
 | 1.15 | 2026-10-10 | Consolida os contratos de SPEC-015 a SPEC-020 com as rotas materializadas de família, convites, sessão e tarefas, incluindo OpenAPI executável, paginação de membros e `CompleteTask`. |
 | 1.14 | 2026-10-10 | `FinalizeWeeklyHighlight` e as consultas próprias de reconhecimento detalhados: resultado único, empate, outbox e titularidade. Para SPEC-020. |
 | 1.13 | 2026-10-10 | `GetWeeklyReportSnapshot` detalhado: `referenceDate`, validação de semana, projeção de removido e erros estáveis. Para SPEC-019. |

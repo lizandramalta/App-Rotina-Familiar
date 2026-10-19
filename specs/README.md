@@ -1,6 +1,6 @@
 # Specs de entrega
 
-Esta pasta contém as especificações aprovadas que transformam a base documental em
+Esta pasta contém especificações aprovadas e revisões em andamento que transformam a base documental em
 entregas pequenas, testáveis e rastreáveis entre `mobile/` e `backend/`.
 
 As specs são contratos de trabalho, não uma nova fonte de verdade para o produto. Elas
@@ -56,10 +56,11 @@ da experiência. Isso permite evoluir o visual sem perder decisões, estados e t
 
 ## Mapa de implementação
 
-**Base funcional:** 1.18 (2026-10-19)
+**Base funcional vigente:** RN 1.18 / RF 1.17 / UC 1.16 (2026-10-19)
 
-**Convenção de status:** `não criada` indica apenas uma entrega planejada; os status
-do template passam a valer depois que o arquivo da spec existir.
+**Convenção de status:** `não criada` indica apenas uma entrega planejada; `em revisão`
+indica que o par existente foi atualizado após decisões de produto e ainda requer
+reconciliação e aprovação da nova versão. Os demais status seguem o template.
 
 O mapa organiza as entregas por tema e preserva a numeração estável dos futuros pares
 `SPEC-NNN` e `UX-NNN`. Dependências são funcionais: uma spec posterior pode ser
@@ -77,8 +78,9 @@ planejada antes, mas não deve depender de comportamento ainda indisponível.
 | [`SPEC-006-editar-perfil`](SPEC-006-editar-perfil.md) - Editar perfil e consultar badges | UC10 | ambos | SPEC-002, SPEC-003, SPEC-014 | aprovada |
 
 `SPEC-002` inclui o onboarding do Criador e o fuso da família: perfil inicial em
-TEL-055, criação em TEL-002, membros iniciais opcionais em TEL-056 e configuração
-posterior por Administradores em TEL-053/MOD-012; não há uma SPEC-021 separada.
+TEL-055, criação conjunta da família e membros iniciais preparados em TEL-002,
+convites após a criação em TEL-056 quando houver membros e configuração posterior
+por Administradores em TEL-053/MOD-012; não há uma SPEC-021 separada.
 
 ### Tema 2 - Tarefas e rotina
 
@@ -122,16 +124,16 @@ status e resumo; mantenha esta tabela como o panorama do backlog.
 | Spec | UX-spec | Status | Projetos | Resumo |
 |---|---|---|---|---|
 | [SPEC-001-autenticar-com-apple](SPEC-001-autenticar-com-apple.md) | [UX-001-autenticar-com-apple.md](UX-001-autenticar-com-apple.md) | aprovada | ambos | Login nativo Apple do Criador, emissão de sessão ou `creationGrant` e encaminhamento seguro ao onboarding. |
-| [SPEC-002-criar-configurar-familia](SPEC-002-criar-configurar-familia.md) | [UX-002-criar-configurar-familia.md](UX-002-criar-configurar-familia.md) | aprovada | ambos | Perfil inicial do Criador, criação atômica da família, foto opcional pós-sessão, membros opcionais e configuração autorizada do fuso. |
-| [SPEC-003-gerenciar-membros](SPEC-003-gerenciar-membros.md) | [UX-003-gerenciar-membros](UX-003-gerenciar-membros.md) | aprovada | ambos | Criação e gestão autorizada de membros, reutilizada no onboarding, com papéis, modo Kids e remoção preservando histórico. |
-| [SPEC-004-gerar-reenviar-convite](SPEC-004-gerar-reenviar-convite.md) | [UX-004-gerar-reenviar-convite](UX-004-gerar-reenviar-convite.md) | aprovada | ambos | Emissão e reemissão explícita de link e senha, inclusive logo após criar membro, com revogação segura e compartilhamento nativo único. |
+| [SPEC-002-criar-configurar-familia](SPEC-002-criar-configurar-familia.md) | [UX-002-criar-configurar-familia.md](UX-002-criar-configurar-familia.md) | aprovada | ambos | Foto inicial antecipada; família, Criador e membros iniciais criados juntos em TEL-002; TEL-056 só oferece convites; fuso posterior configurado por Administrador. |
+| [SPEC-003-gerenciar-membros](SPEC-003-gerenciar-membros.md) | [UX-003-gerenciar-membros](UX-003-gerenciar-membros.md) | aprovada | ambos | Gestão persistente de membros após a criação, inclusive no retorno de TEL-056 a TEL-002; papéis, modo Kids e remoção preservam histórico. |
+| [SPEC-004-gerar-reenviar-convite](SPEC-004-gerar-reenviar-convite.md) | [UX-004-gerar-reenviar-convite](UX-004-gerar-reenviar-convite.md) | aprovada | ambos | Convite inicial explícito com folha nativa direta; reemissão com aviso e confirmação prévios, preservando revogação segura. |
 | [SPEC-005-ingressar-por-convite](SPEC-005-ingressar-por-convite.md) | [UX-005-ingressar-por-convite](UX-005-ingressar-por-convite.md) | aprovada | ambos | Inspeção neutra e consumo único do convite, sessão vinculada à instalação, troca segura de acesso e recuperação limitada de resposta perdida. |
 | [SPEC-007-gerenciar-tarefas](SPEC-007-gerenciar-tarefas.md) | [UX-007-gerenciar-tarefas.md](UX-007-gerenciar-tarefas.md) | aprovada | ambos | CRUD da tarefa única (título, peso, data, responsáveis, observação), com proteções de missão/conclusão e resolução obrigatória de sinalização Kids pendente ao editar/excluir. |
 | [SPEC-008-definir-recorrencia](SPEC-008-definir-recorrencia.md) | [UX-008-definir-recorrencia.md](UX-008-definir-recorrencia.md) | aprovada | ambos | Rotina com observação opcional, início sem data final obrigatória, frequências fixas, materialização segura e alcance inclusivo “selecionada e futuras”. |
-| [SPEC-009-visualizar-minhas-tarefas](SPEC-009-visualizar-minhas-tarefas.md) | [UX-009-visualizar-minhas-tarefas.md](UX-009-visualizar-minhas-tarefas.md) | aprovada | ambos | Consulta própria diária para todos; tarefas e progresso familiares adultos por Dia/Semana, com filtros de membro e tarefas sem responsável. |
+| [SPEC-009-visualizar-minhas-tarefas](SPEC-009-visualizar-minhas-tarefas.md) | [UX-009-visualizar-minhas-tarefas.md](UX-009-visualizar-minhas-tarefas.md) | aprovada | ambos | Consulta pessoal diária por responsável; tarefa compartilhada sinalizada aparece Pendente ao adulto corresponsável e Aguardando confirmação a Kids, com estado único. |
 | [SPEC-010-concluir-tarefa](SPEC-010-concluir-tarefa.md) | [UX-010-concluir-tarefa.md](UX-010-concluir-tarefa.md) | aprovada | ambos | Conclusão atômica com crédito explícito; tarefa com responsável Kids somente por Administrador e reconciliação silenciosa de concorrência. |
 | [SPEC-014-gerenciar-missoes](SPEC-014-gerenciar-missoes.md) | [UX-014-gerenciar-missoes.md](UX-014-gerenciar-missoes.md) | aprovada | ambos | Criação e edição de missões coletivas sem prazo com observação opcional, atalho de criação de tarefa, fechamento automático com participações/badges, e consulta básica por todos os perfis, inclusive Kids. |
-| [SPEC-006-editar-perfil](SPEC-006-editar-perfil.md) | [UX-006-editar-perfil.md](UX-006-editar-perfil.md) | aprovada | ambos | Edição posterior do próprio apelido e foto opcional, reutilizando a mídia iniciada no onboarding, com titularidade exclusiva; consulta de badges cumulativos e missões contribuintes por marco. |
+| [SPEC-006-editar-perfil](SPEC-006-editar-perfil.md) | [UX-006-editar-perfil.md](UX-006-editar-perfil.md) | aprovada | ambos | Edição posterior do próprio apelido e foto opcional com sessão ativa e titularidade exclusiva; consulta de badges cumulativos e missões contribuintes por marco. |
 | [SPEC-011-reabrir-tarefa](SPEC-011-reabrir-tarefa.md) | [UX-011-reabrir-tarefa.md](UX-011-reabrir-tarefa.md) | aprovada | ambos | Retorno de tarefa concluída para Pendente por Admin/Membro (qualquer tarefa acessível) ou Kids (própria), com reversão de crédito e confirmação explícita quando afeta missão concluída e/ou recompensa aceita. |
 | [SPEC-012-sinalizar-tarefa-kids](SPEC-012-sinalizar-tarefa-kids.md) | [UX-012-sinalizar-tarefa-kids.md](UX-012-sinalizar-tarefa-kids.md) | aprovada | ambos | Kids sinaliza tarefa própria pendente com foto opcional por câmera direta, movendo-a para Aguardando confirmação sem crédito; habilita `purpose: taskSignal` reservado por SPEC-006. |
 | [SPEC-013-validar-conclusao-kids](SPEC-013-validar-conclusao-kids.md) | [UX-013-validar-conclusao-kids.md](UX-013-validar-conclusao-kids.md) | aprovada | ambos | Fila administrativa de sinalizações Kids, avaliação com foto privada opcional e decisão atômica, incluindo reconciliação silenciosa de ações concorrentes. |

@@ -4,7 +4,7 @@ Organização colaborativa das responsabilidades domésticas, com tarefas compar
 
 **Escopo:** MVP  
 **Versão da base do projeto:** 1.19\
-**Data:** 2026-10-10
+**Data:** 2026-10-19
 
 ## Por que este projeto existe
 
@@ -19,7 +19,7 @@ Famílias que compartilham a rotina doméstica e desejam organizar melhor suas r
 ## Como funciona
 
 1. O Criador entra com Apple e acessa a família já vinculada ou configura seu perfil — nome obrigatório, foto e etiqueta opcionais — antes de criar uma nova família.
-2. Após criar a família, o Criador pode adicionar zero ou mais membros e gerar explicitamente um convite com link e senha para cada perfil. Depois, a sessão válida permite continuar acessando o aplicativo.
+2. Na criação da família, o Criador pode preparar zero ou mais membros, que são criados junto com ela. Depois, pode gerar explicitamente um convite com link e senha para cada perfil ou adiar os convites. A sessão válida permite continuar acessando o aplicativo.
 3. Administradores e Membros criam tarefas únicas ou rotinas, definem o esforço e escolhem nenhum, um ou vários responsáveis.
 4. Todos acompanham suas tarefas e seu progresso diário. Adultos também consultam tarefas e progresso familiares por dia ou semana. Kids sinalizam a realização com foto opcional; um Administrador confirma ou recusa, ou um adulto conclui manualmente.
 5. A conclusão vale para todos os responsáveis finais. Adultos acompanham a distribuição da carga diária ou semanal, sem ranking.
@@ -224,7 +224,7 @@ A arquitetura backend 1.0 está em [backend-architecture.md](docs/architecture/b
 
 | Versão | Data | Marco |
 |---|---|---|
-| 1.19 | 2026-10-19 | RN38, RF59 e UC07: a exclusão de tarefa que deixa a missão apenas com tarefas concluídas a conclui na mesma transação. Para SPEC-014/SPEC-007. |
+| 1.19 | 2026-10-19 | RN38, RF59 e UC07: exclusão de tarefa que deixa a missão apenas com tarefas concluídas a conclui na mesma transação (SPEC-014/SPEC-007). Onboarding alinhado à criação conjunta de família e membros; revisão dos pares SPEC/UX-002, 003, 004 e 009 aprovada. |
 | 1.18 | 2026-10-10 | Consolidação das SPECs 015–020 com as implementações de acesso, família, convites, tarefas e sessão do `develop`; registros técnicos preservados na documentação de arquitetura. |
 | 1.17 | 2026-10-10 | Snapshot semanal passa a usar `referenceDate` e identifica crédito histórico como “Membro removido”. Para SPEC-019. |
 | 1.16 | 2026-10-10 | Carga histórica preserva crédito de perfil removido como “Membro removido”. Para SPEC-018. |

@@ -7,7 +7,7 @@
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
 
-Este documento contém todas as regras vigentes da versão 1.15. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
+Este documento contém as regras vigentes da versão 1.18. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
 
 **Identificadores preservados:** RN15, RN29 e RN32 não estavam definidos na base recebida e permanecem não utilizados. Não representam conteúdo faltante desta versão.
 
@@ -19,9 +19,13 @@ Este documento contém todas as regras vigentes da versão 1.15. Os requisitos c
 
 Quem cria a família se torna automaticamente Administrador e Criador da Família, identificado pela flag isFamilyCreator. A família pode ter mais de um Administrador, todos com as mesmas permissões, exceto as proteções exclusivas do Criador.
 
-Quando a identidade Apple ainda não possui família, a pessoa primeiro configura o rascunho do próprio perfil: nome administrativo obrigatório, etiqueta/apelido opcional e foto opcional. Esse rascunho não constitui perfil persistido nem concede acesso; seus dados passam a compor o perfil do Criador somente na criação confirmada da família. Depois de criada a família e a sessão do Criador, o onboarding permite adicionar zero ou mais membros antes da entrada na área principal.
+Quando a identidade Apple ainda não possui família, a pessoa primeiro configura o rascunho do próprio perfil: nome administrativo obrigatório, etiqueta/apelido opcional e foto opcional. A foto escolhida é enviada enquanto a pessoa configura esse perfil; a falha do envio permite tentar novamente ou continuar sem foto e não impede a criação da família. A mídia enviada antes da criação permanece protegida e só pode ser vinculada ao perfil do próprio Criador quando a criação for confirmada. Nem o rascunho nem o envio da foto criam perfil ou concedem acesso aos dados familiares.
 
-**Requisitos funcionais:** [RF01](02-requisitos.md#rf01), [RF05](02-requisitos.md#rf05), [RF38](02-requisitos.md#rf38), [RF48](02-requisitos.md#rf48)\
+Antes de criar a família, o futuro Criador informa seu nome, escolhe o fuso e pode preparar zero ou mais membros com nome e papel, incluindo alterações e remoções desse rascunho. A criação confirmada persiste a família, o perfil do Criador e todos os membros preparados em uma única operação: falha em qualquer parte não deixa família ou membro parcialmente criado. Nenhum convite é emitido automaticamente. Se houver membros, o onboarding oferece o convite explícito para cada um após a criação; sem membros, segue diretamente à área principal. O convite pode ser adiado.
+
+Depois da criação, voltar da etapa de convites aos dados da família abre a família existente para edição, sem executar outra criação. Sem alterações, prosseguir não grava novamente; com alterações, somente mudanças autorizadas são salvas. A alteração posterior do fuso é encaminhada ao fluxo de Configurações da família e segue a prévia e a confirmação de RN28.
+
+**Requisitos funcionais:** [RF01](02-requisitos.md#rf01), [RF02](02-requisitos.md#rf02), [RF05](02-requisitos.md#rf05), [RF38](02-requisitos.md#rf38), [RF40](02-requisitos.md#rf40), [RF48](02-requisitos.md#rf48)\
 **Requisitos não funcionais específicos:** Sem vínculo específico; requisitos transversais se aplicam conforme a operação.\
 **Casos de uso relacionados:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02)
 
@@ -67,11 +71,11 @@ Existem três perfis: Administrador, Membro e Kids. O Criador da Família é um 
 
 ## RN07
 
-Apenas Administradores podem adicionar, editar e remover membros administrativamente. A edição do próprio perfil é permitida a todos conforme RN63; a configuração de etiqueta/apelido pertence exclusivamente ao titular, inclusive quando o titular é Kids. No onboarding de uma família recém-criada, o Criador já autenticado atua como Administrador e pode repetir a adição normal de membros ou avançar sem adicionar nenhum.
+Apenas Administradores podem adicionar, editar e remover membros administrativamente. A edição do próprio perfil é permitida a todos conforme RN63; a configuração de etiqueta/apelido pertence exclusivamente ao titular, inclusive quando o titular é Kids. Antes de existir família ou sessão de Administrador, o futuro Criador pode apenas preparar a lista de membros do próprio onboarding, sem persistir perfis ou exercer outras capacidades administrativas. Os perfis preparados são criados junto com a família conforme RN01. Depois da criação, o Criador atua como Administrador; alterações na lista ao voltar da etapa de convites obedecem às permissões e proteções normais de gestão de membros.
 
 **Requisitos funcionais:** [RF02](02-requisitos.md#rf02), [RF03](02-requisitos.md#rf03), [RF04](02-requisitos.md#rf04), [RF40](02-requisitos.md#rf40)  
 **Requisitos não funcionais específicos:** [RNF07](02-requisitos.md#rnf07)  
-**Casos de uso relacionados:** [UC02](03-casos-de-uso.md#uc02)
+**Casos de uso relacionados:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02)
 
 ## RN08
 
@@ -187,11 +191,11 @@ Administradores e Membros podem concluir uma tarefa Pendente ou Aguardando confi
 
 ## RN23
 
-A sinalização de um perfil Kids altera a tarefa de Pendente para Aguardando confirmação, sem gerar conclusão parcial. A confirmação por Administrador ou a conclusão manual por Administrador torna a tarefa Concluída para todos os responsáveis. A conclusão manual encerra a pendência e preserva a sinalização e a foto opcional exclusivamente para auditoria administrativa.
+A sinalização de um perfil Kids altera a tarefa de Pendente para Aguardando confirmação, sem gerar conclusão parcial. Na lista pessoal diária de um adulto corresponsável, a tarefa sinalizada é apresentada como Pendente; na visualização pessoal Kids, aparece como Aguardando confirmação. Essa diferença de apresentação não altera o estado único da tarefa, a sinalização pendente, o cálculo de progresso, a fila administrativa nem as permissões de ação. A confirmação por Administrador ou a conclusão manual por Administrador torna a tarefa Concluída para todos os responsáveis. A conclusão manual encerra a pendência e preserva a sinalização e a foto opcional exclusivamente para auditoria administrativa.
 
-**Requisitos funcionais:** [RF23](02-requisitos.md#rf23), [RF24](02-requisitos.md#rf24), [RF26](02-requisitos.md#rf26)  
+**Requisitos funcionais:** [RF11](02-requisitos.md#rf11), [RF22](02-requisitos.md#rf22), [RF23](02-requisitos.md#rf23), [RF24](02-requisitos.md#rf24), [RF26](02-requisitos.md#rf26)\
 **Requisitos não funcionais específicos:** [RNF11](02-requisitos.md#rnf11)  
-**Casos de uso relacionados:** [UC03](03-casos-de-uso.md#uc03), [UC15](03-casos-de-uso.md#uc15)
+**Casos de uso relacionados:** [UC03](03-casos-de-uso.md#uc03), [UC11](03-casos-de-uso.md#uc11), [UC15](03-casos-de-uso.md#uc15)
 
 ## RN24
 
@@ -347,19 +351,19 @@ Apenas o Criador da Família se autentica via Sign in with Apple, e a família �
 
 ## RN45
 
-Os demais perfis, inclusive Administradores promovidos e Kids, ingressam pelo link do perfil criado por um Administrador e pela senha de ingresso gerada pelo sistema e enviada junto com esse link.
+Os demais perfis, inclusive Administradores promovidos e Kids, ingressam pelo link do perfil criado junto com a família ou posteriormente por um Administrador e pela senha de ingresso gerada pelo sistema e enviada junto com esse link.
 
 **Requisitos funcionais:** [RF40](02-requisitos.md#rf40), [RF41](02-requisitos.md#rf41), [RF42](02-requisitos.md#rf42), [RF43](02-requisitos.md#rf43), [RF54](02-requisitos.md#rf54)  
 **Requisitos não funcionais específicos:** [RNF17](02-requisitos.md#rnf17), [RNF18](02-requisitos.md#rnf18), [RNF20](02-requisitos.md#rnf20)  
-**Casos de uso relacionados:** [UC02](03-casos-de-uso.md#uc02), [UC09](03-casos-de-uso.md#uc09)
+**Casos de uso relacionados:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC09](03-casos-de-uso.md#uc09)
 
 ## RN46
 
-Link e senha vinculam uma família e um perfil e admitem um ingresso bem-sucedido, sem expiração temporal. Gerar ou reenviar convite sempre produz novo link e nova senha, invalida os convites anteriores ainda disponíveis e revoga a sessão anterior do perfil, na mesma operação. As credenciais são exibidas transitoriamente para envio conjunto; somente verificadores protegidos são persistidos. Senha incorreta não consome o convite. Consumo, ingresso e sessão são consistentes sob concorrência.
+Link e senha vinculam uma família e um perfil e admitem um ingresso bem-sucedido, sem expiração temporal. A emissão inicial depende de ação explícita do Administrador e abre diretamente o compartilhamento após a geração, sem confirmação intermediária. Reemitir exige informar e confirmar previamente que o novo convite invalidará os anteriores e revogará a sessão anterior do perfil. Cada emissão produz novo link e nova senha; a invalidação de convites anteriores disponíveis e a revogação da sessão anterior ocorrem na mesma operação. As credenciais são exibidas transitoriamente para envio conjunto; somente verificadores protegidos são persistidos. Senha incorreta não consome o convite. Consumo, ingresso e sessão são consistentes sob concorrência.
 
 **Requisitos funcionais:** [RF41](02-requisitos.md#rf41), [RF42](02-requisitos.md#rf42), [RF43](02-requisitos.md#rf43), [RF44](02-requisitos.md#rf44), [RF46](02-requisitos.md#rf46), [RF54](02-requisitos.md#rf54), [RF68](02-requisitos.md#rf68)\
 **Requisitos não funcionais específicos:** [RNF17](02-requisitos.md#rnf17), [RNF18](02-requisitos.md#rnf18), [RNF19](02-requisitos.md#rnf19), [RNF20](02-requisitos.md#rnf20), [RNF21](02-requisitos.md#rnf21)  
-**Casos de uso relacionados:** [UC02](03-casos-de-uso.md#uc02), [UC09](03-casos-de-uso.md#uc09)
+**Casos de uso relacionados:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC09](03-casos-de-uso.md#uc09)
 
 ## RN47
 
@@ -427,9 +431,9 @@ O perfil Kids pode anexar uma foto à sinalização da tarefa. Ao tocar em adici
 
 ## RN55
 
-Uma tarefa possui estado único para todos os responsáveis. Sua conclusão vale para todos, sem divisão do peso e sem conclusões parciais individuais. A reabertura autorizada também vale para todos.
+Uma tarefa possui estado único para todos os responsáveis. A apresentação como Pendente na lista pessoal de um adulto corresponsável, enquanto a tarefa sinalizada por Kids aguarda confirmação, não cria um segundo estado nem habilita uma ação proibida; o estado efetivo permanece Aguardando confirmação conforme RN23. Sua conclusão vale para todos, sem divisão do peso e sem conclusões parciais individuais. A reabertura autorizada também vale para todos.
 
-**Requisitos funcionais:** [RF12](02-requisitos.md#rf12), [RF17](02-requisitos.md#rf17), [RF18](02-requisitos.md#rf18), [RF23](02-requisitos.md#rf23), [RF25](02-requisitos.md#rf25), [RF26](02-requisitos.md#rf26), [RF30](02-requisitos.md#rf30), [RF56](02-requisitos.md#rf56), [RF57](02-requisitos.md#rf57)  
+**Requisitos funcionais:** [RF11](02-requisitos.md#rf11), [RF12](02-requisitos.md#rf12), [RF17](02-requisitos.md#rf17), [RF18](02-requisitos.md#rf18), [RF22](02-requisitos.md#rf22), [RF23](02-requisitos.md#rf23), [RF25](02-requisitos.md#rf25), [RF26](02-requisitos.md#rf26), [RF30](02-requisitos.md#rf30), [RF56](02-requisitos.md#rf56), [RF57](02-requisitos.md#rf57)\
 **Requisitos não funcionais específicos:** [RNF02](02-requisitos.md#rnf02), [RNF09](02-requisitos.md#rnf09), [RNF10](02-requisitos.md#rnf10), [RNF11](02-requisitos.md#rnf11), [RNF25](02-requisitos.md#rnf25)  
 **Casos de uso relacionados:** [UC03](03-casos-de-uso.md#uc03), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC17](03-casos-de-uso.md#uc17)
 
@@ -472,7 +476,7 @@ Administradores e Membros acessam a área Família (Minha família), que apresen
 
 O progresso familiar é a quantidade de tarefas concluídas dentre as tarefas previstas para o período dividida pelo total de tarefas previstas para esse período. Cada tarefa conta uma vez, independentemente do peso ou dos responsáveis, incluindo as sem responsável no total. Pendentes e Aguardando confirmação não entram no numerador. Sem tarefas, apresentar “Sem tarefas”, sem divisão por zero. Alterações válidas atualizam o indicador.
 
-Gerar relatório semanal em PDF fica na própria tela Família para adultos. Adicionar membro também fica nessa tela, exclusivamente para Administradores. Editar perfil e gerar/reenviar convite ficam no detalhe do membro, exclusivamente para Administradores e conforme as restrições do perfil; não permitem editar apelido de terceiros. Gerar ou reenviar emite novo link e senha para o mesmo perfil, invalida convites anteriores e revoga a sessão anterior; informar esses efeitos antes de confirmar. O Criador retorna por Apple. Confirmações Kids permanecem exclusivas dos Administradores. Kids não acessam esta área.
+Gerar relatório semanal em PDF fica na própria tela Família para adultos. Adicionar membro também fica nessa tela, exclusivamente para Administradores. Editar perfil e gerar/reenviar convite ficam no detalhe do membro, exclusivamente para Administradores e conforme as restrições do perfil; não permitem editar apelido de terceiros. A emissão inicial ocorre por ação explícita; na reemissão, informar os efeitos sobre convites e sessão anteriores antes de confirmar. O Criador retorna por Apple. Confirmações Kids permanecem exclusivas dos Administradores. Kids não acessam esta área.
 
 **Requisitos funcionais:** [RF60](02-requisitos.md#rf60), [RF66](02-requisitos.md#rf66)  
 **Requisitos não funcionais específicos:** [RNF01](02-requisitos.md#rnf01), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF09](02-requisitos.md#rnf09)  
@@ -506,7 +510,7 @@ Uma tarefa compartilhada conta uma vez para cada responsável no número individ
 
 **Tema:** Foto e etiqueta/apelido do perfil
 
-Todos os perfis, inclusive Kids, podem adicionar, substituir ou remover a própria foto, que é opcional. Sem foto, exibir identificação padrão. Todos podem configurar a própria etiqueta/apelido; outras pessoas, inclusive Administradores, não acessam sua configuração nem podem alterá-la. O nome de identificação permanece separado do apelido. A pessoa que ainda criará a família informa esses mesmos dados no rascunho inicial; a foto e a etiqueta permanecem opcionais e não impedem a criação.
+Todos os perfis, inclusive Kids, podem adicionar, substituir ou remover a própria foto, que é opcional. Sem foto, exibir identificação padrão. Todos podem configurar a própria etiqueta/apelido; outras pessoas, inclusive Administradores, não acessam sua configuração nem podem alterá-la. O nome de identificação permanece separado do apelido. A pessoa que ainda criará a família informa esses mesmos dados no rascunho inicial e, ao escolher uma foto, inicia seu envio antes da criação, sem criar um perfil ou obter acesso aos dados familiares. A foto enviada só é vinculada ao próprio Criador após a criação confirmada; a foto e a etiqueta permanecem opcionais e uma falha de envio não impede criar a família.
 
 O apelido é opcional: vazio ou nulo remove a configuração vigente. Admite até 20 caracteres não-espaço após remover espaços nas extremidades; espaços internos não contam para esse limite. Não admite caracteres de controle.
 
@@ -570,7 +574,7 @@ A missão admite uma observação opcional de até 250 caracteres, contando espa
 
 | Versão | Data | Alteração |
 |---|---|---|
-| 1.18 | 2026-10-19 | RN38 passa a fechar a missão também quando a exclusão de tarefa não concluída deixa apenas tarefas concluídas. Para SPEC-014/SPEC-007. |
+| 1.18 | 2026-10-19 | RN38 fecha a missão quando a exclusão de tarefa não concluída deixa apenas tarefas concluídas (SPEC-014/SPEC-007). RN01/RN07/RN45/RN63: foto antecipada, membros antes da criação atômica e retorno à família existente. RN46/RN60: convite inicial direto e confirmação de reemissão. RN23/RN55: apresentação por perfil da tarefa sinalizada por Kids, preservando estado único. |
 | 1.17 | 2026-10-10 | RN62 define `referenceDate` para resolver a semana do PDF e identifica crédito histórico como “Membro removido”. Para SPEC-019. |
 | 1.16 | 2026-10-10 | RN30, RN31 e RN61 preservam carga histórica de perfil removido em linha “Membro removido”, sem expor dados pessoais. Para SPEC-018. |
 | 1.15 | 2026-10-10 | RN42 passa a definir o catálogo predefinido e o cadastro de item personalizado: título obrigatório com até 60 caracteres não-espaço após `trim`, unicidade por família sem distinguir maiúsculas/minúsculas e descrição opcional de até 255 caracteres. Para SPEC-015. |

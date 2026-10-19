@@ -1,7 +1,7 @@
 # Decisões da arquitetura backend
 
-**Versão:** 1.4 · **Base funcional:** 1.5\
-**Data:** 2026-10-09 · **Situação:** fundação técnica da Sprint 0 implementada; referência para entregas incrementais
+**Versão:** 1.5 · **Base funcional:** RN 1.18 / RF 1.17 / UC 1.16\
+**Data:** 2026-10-19 · **Situação:** decisões vigentes e contrato alvo revisado; ampliações recentes ainda não implementadas
 
 [Arquitetura](backend-architecture.md) · [Contratos](backend-contracts.md) · [Decisões mobile](mobile-decisions.md) · [Índice](../DOCUMENTACAO.md)
 
@@ -36,6 +36,9 @@ Node.js passa a ser a plataforma backend definida pelo usuário. Hospedagem, dis
 | BA-19 | Proposta técnica adotada no desenho | Supabase só como PostgreSQL gerenciado; sessão própria, schema privado/Data API desabilitada, sem dependência de Auth/Storage/Realtime/Edge Functions |
 | BA-20 | Proposta técnica adotada no desenho | API `/v1`, schemas em inglês, DTO por permissão e erros estáveis; contrato HTTP separado das entidades |
 | BA-21 | Confirmada (`SPEC-001`) | `creationGrant` emitido por `SignInWithApple` quando a identidade não tem família expira em 10 minutos; grant expirado exige nova autenticação Apple |
+| BA-35 | Proposta técnica para SPEC-002 | A foto de TEL-055 usa upload separado autorizado por `creationGrant` e prova de instalação. Registro de preparação fica ligado ao grant, sem membro/família, e só pode ser vinculado pelo `CreateFamily` confirmado; mídia abandonada segue limpeza em 24 horas. O schema atual de mídia exige família/membro, então esta decisão exige migração antes da implementação. |
+| BA-36 | Proposta técnica para SPEC-002/003 | `CreateFamily` insere família, Criador, membros iniciais, ciclo, sessão e vínculo opcional de foto em um commit sob proteção da identidade Apple. Edição após retorno de TEL-056 usa sessão, leitura e comandos próprios de família/membros; não consome outro grant nem repete `CreateFamily`. |
+| BA-37 | Proposta técnica para SPEC-009 | `GetOwnTasks` devolve `status` canônico e `displayStatus` calculado para o ator. Apenas a lista pessoal adulta projeta `awaitingConfirmation` como `pending`; decisões, autorização, fila e progresso permanecem ligados ao estado canônico. Não há coluna de estado visual. |
 
 ## 3. Alternativas consideradas
 
@@ -107,6 +110,7 @@ Sequência sugerida: composição e persistência → Apple/bootstrap/sessões/c
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.5 | 2026-10-19 | BA-35–BA-37: preparação de foto vinculada ao grant, criação conjunta e edição posterior da família, projeção pessoal de tarefa. Registra migração e código ainda necessários. |
 | 1.4 | 2026-10-09 | BA-29–BA-34: decisões de implementação do ingresso por convite (SPEC-005 Fase 1), com limites de tentativas, envelope de recuperação e tratamento de falhas. Sem mudança funcional. |
 | 1.3 | 2026-10-09 | BA-22–BA-28: decisões de implementação da emissão de convite (SPEC-004 Fase 1), com justificativas. Sem mudança funcional. |
 | 1.2 | 2026-10-08 | Registra a fundação backend da Sprint 0 sem alterar decisões funcionais ou introduzir capacidades de produto. |
