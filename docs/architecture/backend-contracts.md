@@ -1,8 +1,8 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.16 · **Base funcional:** RN 1.18 / RF 1.17 / UC 1.16 · **Arquitetura backend:** 1.4\
+**Versão:** 1.17 · **Base funcional:** RN 1.18 / RF 1.17 / UC 1.16 · **Arquitetura backend:** 1.4\
 **Data:** 2026-10-19\
-**Situação:** rotas existentes materializadas na OpenAPI; ampliações de onboarding e projeção pessoal ainda exigem implementação e atualização da OpenAPI
+**Situação:** `displayStatus` pessoal materializado na API e OpenAPI; ampliações de onboarding ainda exigem implementação e atualização da OpenAPI
 
 [Arquitetura](backend-architecture.md) · [Decisões](backend-decisions.md) · [Catálogo mobile](mobile-feature-catalog.md) · [UC](../03-casos-de-uso.md) · [Índice](../DOCUMENTACAO.md)
 
@@ -228,12 +228,13 @@ Cada linha cobre um objetivo funcional completo, não apenas uma rota. RF/RN per
 | RNF26 | Snapshot para PDF, resultado semanal único e fila persistente |
 | RNF27 | Perfil por titularidade, PDF adulto e compartilhamento explícito no cliente |
 
-O documento OpenAPI 3.1 é gerado pelos schemas HTTP em `/docs/json`, e a interface interativa fica em `/docs`. As ampliações aqui descritas só constarão da OpenAPI depois de implementadas; até lá, `/docs/json` reflete as rotas vigentes. Cada rota implementada mantém schema, segurança e respostas compatíveis com o recorte entregue.
+O documento OpenAPI 3.1 é gerado pelos schemas HTTP em `/docs/json`, e a interface interativa fica em `/docs`. A projeção `displayStatus` de `GET /me/tasks` já consta da OpenAPI; as demais ampliações aqui descritas só constarão depois de implementadas. Cada rota implementada mantém schema, segurança e respostas compatíveis com o recorte entregue.
 
 ## Histórico
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.17 | 2026-10-19 | `GET /me/tasks` passa a devolver `status` e `displayStatus` por perfil na resposta e na OpenAPI (SPEC-009 Fase 1, CA-01/04/08/11; SCRUM-107). As ampliações de onboarding continuam pendentes. |
 | 1.16 | 2026-10-19 | UC07: `DeleteTask` fecha a missão via `CloseEligibleMissions` quando restam só tarefas concluídas (RN38/RF59; SPEC-014/SPEC-007). Contrato alvo de criação atômica com membros/foto antecipada, edição da família existente e `displayStatus` pessoal; distingue essas ampliações das rotas já implementadas. |
 | 1.15 | 2026-10-10 | Consolida os contratos de SPEC-015 a SPEC-020 com as rotas materializadas de família, convites, sessão e tarefas, incluindo OpenAPI executável, paginação de membros e `CompleteTask`. |
 | 1.14 | 2026-10-10 | `FinalizeWeeklyHighlight` e as consultas próprias de reconhecimento detalhados: resultado único, empate, outbox e titularidade. Para SPEC-020. |

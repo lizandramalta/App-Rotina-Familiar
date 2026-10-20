@@ -22,6 +22,7 @@ interface SeededFamily {
   readonly familyId: string;
   readonly memberId: string;
   readonly otherMemberId: string;
+  readonly kidsMemberId: string;
 }
 
 describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
@@ -64,6 +65,7 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
         familyId: randomUUID(),
         memberId: randomUUID(),
         otherMemberId: randomUUID(),
+        kidsMemberId: randomUUID(),
       };
       await container.dbPool.query(
         `insert into app.families (id, name, timezone, created_at, updated_at)
@@ -73,6 +75,7 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
       for (const [memberId, role, isCreator, name] of [
         [family.memberId, 'administrator', true, 'Admin'],
         [family.otherMemberId, 'member', false, 'Outro membro'],
+        [family.kidsMemberId, 'kids', false, 'Kids'],
       ] as const) {
         await container.dbPool.query(
           `insert into app.members
@@ -87,7 +90,10 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
 
     async function seedTask(
       family: SeededFamily,
-      params: { readonly status: 'pending' | 'completed'; readonly assigneeIds: readonly string[] },
+      params: {
+        readonly status: 'pending' | 'awaitingConfirmation' | 'completed';
+        readonly assigneeIds: readonly string[];
+      },
     ): Promise<string> {
       const templateId = randomUUID();
       const taskId = randomUUID();
@@ -157,6 +163,66 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
       );
 
       expect(tasks.items.map((task) => task.id).sort()).toEqual([ownPending, ownCompleted].sort());
+      expect(progress).toEqual({ total: 2, completed: 1, percentage: 50 });
+    });
+
+    it('SCRUM-107 / SPEC-009 CA-01, CA-04, CA-08 and CA-11 projects per actor and preserves own progress and family isolation', async () => {
+      const family = await seedFamily();
+      const shared = await seedTask(family, {
+        status: 'awaitingConfirmation',
+        assigneeIds: [family.memberId, family.kidsMemberId],
+      });
+      const adultOnly = await seedTask(family, {
+        status: 'completed',
+        assigneeIds: [family.memberId],
+      });
+      await seedTask(family, { status: 'pending', assigneeIds: [family.otherMemberId] });
+      await seedTask(family, { status: 'pending', assigneeIds: [] });
+
+      const foreignFamily = await seedFamily();
+      await seedTask(foreignFamily, {
+        status: 'completed',
+        assigneeIds: [foreignFamily.memberId],
+      });
+
+      const dependencies = { repository, transactionRunner: container.transactionRunner, clock };
+      const getTasks = new GetOwnTasksUseCase(dependencies);
+      const adult = actorOf(family);
+      const kids = {
+        ...adult,
+        memberId: family.kidsMemberId,
+        role: MemberRole.KIDS,
+        isFamilyCreator: false,
+      };
+      const otherAdult = {
+        ...adult,
+        memberId: family.otherMemberId,
+        role: MemberRole.MEMBER,
+        isFamilyCreator: false,
+      };
+
+      const adultTasks = await getTasks.execute(adult, REFERENCE_DATE, undefined);
+      const kidsTasks = await getTasks.execute(kids, REFERENCE_DATE, undefined);
+      const otherAdultTasks = await getTasks.execute(otherAdult, REFERENCE_DATE, undefined);
+      const progress = await new GetOwnProgressUseCase(dependencies).execute(adult, REFERENCE_DATE);
+
+      expect(adultTasks.items.map((task) => task.id).sort()).toEqual([shared, adultOnly].sort());
+      expect(adultTasks.items.find((task) => task.id === shared)).toMatchObject({
+        status: 'awaitingConfirmation',
+        displayStatus: 'pending',
+      });
+      expect(adultTasks.items.find((task) => task.id === adultOnly)).toMatchObject({
+        status: 'completed',
+        displayStatus: 'completed',
+      });
+      expect(kidsTasks.items).toEqual([
+        expect.objectContaining({
+          id: shared,
+          status: 'awaitingConfirmation',
+          displayStatus: 'awaitingConfirmation',
+        }),
+      ]);
+      expect(otherAdultTasks.items).toHaveLength(1);
       expect(progress).toEqual({ total: 2, completed: 1, percentage: 50 });
     });
   },

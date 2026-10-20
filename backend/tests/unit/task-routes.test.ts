@@ -21,7 +21,7 @@ const TASK = {
   createdAt: '2026-10-08T12:00:00.000Z',
 };
 
-const OWN_TASKS = { items: [TASK], nextCursor: null };
+const OWN_TASKS = { items: [{ ...TASK, displayStatus: 'pending' }], nextCursor: null };
 const OWN_PROGRESS = { total: 1, completed: 0, percentage: 0 };
 const COMPLETION_RESULT = {
   task: { ...TASK, status: 'completed' },
@@ -48,7 +48,7 @@ describe('Task routes — SPEC-007 phases 1 and 2', () => {
 
   afterEach(async () => test.app.close());
 
-  it('SCRUM-38 CA-01 lists only the authenticated member daily tasks', async () => {
+  it('SCRUM-107 / SPEC-009 CA-01 and CA-11 returns canonical and displayed status for personal tasks', async () => {
     const response = await test.app.inject({
       method: 'GET',
       url: '/v1/me/tasks?referenceDate=2026-10-10',
@@ -88,15 +88,33 @@ describe('Task routes — SPEC-007 phases 1 and 2', () => {
     expect(test.getOwnTasks.execute).not.toHaveBeenCalled();
   });
 
-  it('documents the personal task and progress contracts in OpenAPI', async () => {
+  it('SCRUM-107 / SPEC-009 CA-11 documents the personal status projection and security in OpenAPI', async () => {
     const response = await test.app.inject({ method: 'GET', url: '/docs/json' });
     const document = response.json() as {
-      paths: Record<string, { get: { security: unknown[]; responses: Record<string, unknown> } }>;
+      paths: Record<
+        string,
+        {
+          get: {
+            security: unknown[];
+            responses: Record<string, { content?: { 'application/json'?: { schema?: unknown } } }>;
+          };
+        }
+      >;
     };
 
     expect(response.statusCode).toBe(200);
     expect(document.paths['/v1/me/tasks']?.get.security).toEqual([{ bearerAuth: [] }]);
     expect(document.paths['/v1/me/tasks']?.get.responses).toHaveProperty('422');
+    const taskResponse = document.paths['/v1/me/tasks']?.get.responses['200']?.content?.[
+      'application/json'
+    ]?.schema as {
+      properties?: { items?: { items?: { required?: string[]; properties?: object } } };
+    };
+    expect(taskResponse.properties?.items?.items?.required).toContain('displayStatus');
+    expect(taskResponse.properties?.items?.items?.properties).toMatchObject({
+      status: { enum: ['pending', 'awaitingConfirmation', 'completed'] },
+      displayStatus: { enum: ['pending', 'awaitingConfirmation', 'completed'] },
+    });
     expect(document.paths['/v1/me/progress']?.get.security).toEqual([{ bearerAuth: [] }]);
     expect(document.paths['/v1/me/progress']?.get.responses).toHaveProperty('503');
   });
