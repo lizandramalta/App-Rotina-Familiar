@@ -1,7 +1,7 @@
-# Documentação do projeto — versão 1.22
+# Documentação do projeto — versão 1.23
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.22\
+**Versão:** 1.23\
 **Data:** 2026-10-19\
 **Situação:** base documental consolidada
 
@@ -27,7 +27,7 @@
 | [Decisões da arquitetura mobile](architecture/mobile-decisions.md) | MA-01–MA-19 e P-01–P-09, incluindo criação conjunta, retorno sem recriação e estado exibido por perfil. |
 | [Convenções de código mobile](architecture/mobile-code-conventions.md) | Convenções de Swift/SwiftUI, camadas, concorrência, segurança, testes e revisão. |
 | [Arquitetura backend](architecture/backend-architecture.md) | Backend 1.4: Node.js, Clean Architecture, monólito modular, Supabase/R2 e criação conjunta com foto antecipada. |
-| [Contratos backend](architecture/backend-contracts.md) | Contratos 1.16 da API `/v1`: rotas existentes materializadas na OpenAPI; criação com membros/foto, edição posterior e `displayStatus` são ampliações ainda pendentes de implementação e OpenAPI. |
+| [Contratos backend](architecture/backend-contracts.md) | Contratos 1.17 da API `/v1`: `displayStatus` pessoal materializado na API e OpenAPI; criação com membros/foto e edição posterior ainda pendentes. |
 | [Decisões backend](architecture/backend-decisions.md) | BA-01–BA-37: escolhas confirmadas e propostas técnicas, inclusive preparação de foto e projeção pessoal. |
 | [Convenções de código backend](architecture/backend-code-conventions.md) | Convenções de TypeScript/Fastify, camadas, contratos, SQL, segurança, testes e revisão. |
 | [Specs de entrega](../specs/README.md) | Recortes aprovados de implementação compartilhados entre mobile e backend. |
@@ -132,7 +132,7 @@ TEL-014 e TEL-031 foram incorporadas à TEL-050 e retiradas da navegação; os i
 
 ## Política de versionamento
 
-1. A base funcional vigente está na versão **1.18**. O índice documental está na versão **1.19** por consolidar também registros técnicos de implementação. Screen map e user flows têm versionamento independente; as arquiteturas mobile e backend também. Documentos alinhados a uma versão funcional anterior devem ser atualizados quando o comportamento que descrevem for afetado.
+1. A base funcional vigente está na versão **1.18**. O índice documental está na versão **1.23** por consolidar também registros técnicos de implementação. Screen map e user flows têm versionamento independente; as arquiteturas mobile e backend também. Documentos alinhados a uma versão funcional anterior devem ser atualizados quando o comportamento que descrevem for afetado.
 2. Preserve os identificadores RN, RF, RNF, UC, TEL, MOD e UF. Novos itens recebem novos códigos; códigos retirados não são reutilizados.
 3. A edição vigente fica na raiz e em `docs/`. O Git mantém o histórico e permite comparar ou recuperar versões anteriores por commits e, quando adotadas, tags. Não mantenha cópias da documentação em pastas de versões.
 4. Alterações funcionais e suas referências devem evoluir juntas, com versão, data e histórico dos códigos e comportamentos afetados. Use 1.1, 1.2... para revisões incrementais e 2.0 para mudanças substanciais da base funcional.
@@ -145,6 +145,7 @@ A fundação backend adota Node.js, TypeScript, Fastify e `pg`. Parte da API de 
 
 | Versão | Data | Alteração |
 | --- | --- | --- |
+| 1.23 | 2026-10-19 | Contratos backend 1.17 e OpenAPI refletem `displayStatus` pessoal implementado na SPEC-009 Fase 1 (SCRUM-107). |
 | 1.22 | 2026-10-19 | Revisão dos pares SPEC/UX-002, 003, 004 e 009 concluída e aprovada; dependências e índice de entregas atualizados. README alinhado à criação conjunta dos membros com a família. |
 | 1.21 | 2026-10-19 | DER e diagrama de classes 1.9 alinhados à foto anterior à família, criação conjunta de membros, retorno sem recriação e estado pessoal apenas projetado. |
 | 1.20 | 2026-10-19 | Contratos backend 1.16, decisões BA-35–BA-37/MA-18–MA-19, arquiteturas e catálogo mobile alinhados a onboarding, convites e projeção pessoal; SPEC-002/009 reconciliadas tecnicamente. |

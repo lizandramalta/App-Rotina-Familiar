@@ -75,6 +75,33 @@ describe('Own daily task queries — SPEC-009 phase 1 / SCRUM-38', () => {
     );
   });
 
+  it.each([
+    [MemberRole.ADMINISTRATOR, 'pending'],
+    [MemberRole.MEMBER, 'pending'],
+    [MemberRole.KIDS, 'awaitingConfirmation'],
+  ] as const)(
+    'SCRUM-107 / SPEC-009 CA-11 projects awaiting confirmation for %s without changing the canonical status',
+    async (role, displayStatus) => {
+      repository.findOwnTasksPage.mockResolvedValue([
+        { ...TASK, status: 'awaitingConfirmation' },
+        { ...TASK, id: '79b5ebaf-b271-47be-a267-3dc9e06483aa', status: 'pending' },
+        { ...TASK, id: '62d8bd51-b512-47fa-81fa-10e664a79e36', status: 'completed' },
+      ]);
+
+      const result = await new GetOwnTasksUseCase(dependencies()).execute(
+        { ...TEST_ACTOR, role },
+        '2026-10-09',
+        undefined,
+      );
+
+      expect(result.items.map(({ status, displayStatus: shown }) => [status, shown])).toEqual([
+        ['awaitingConfirmation', displayStatus],
+        ['pending', 'pending'],
+        ['completed', 'completed'],
+      ]);
+    },
+  );
+
   it('CA-02 binds a pagination cursor to the selected personal day', async () => {
     repository.findOwnTasksPage.mockResolvedValue([
       ...Array.from({ length: 20 }, () => TASK),

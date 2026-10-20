@@ -80,7 +80,18 @@ const ownTasksResponseSchema = {
   type: 'object',
   required: ['items', 'nextCursor'],
   properties: {
-    items: { type: 'array', items: taskResponseSchema },
+    items: {
+      type: 'array',
+      items: {
+        ...taskResponseSchema,
+        required: [...taskResponseSchema.required, 'displayStatus'],
+        properties: {
+          ...taskResponseSchema.properties,
+          status: { enum: ['pending', 'awaitingConfirmation', 'completed'] },
+          displayStatus: { enum: ['pending', 'awaitingConfirmation', 'completed'] },
+        },
+      },
+    },
     nextCursor: { type: ['string', 'null'] },
   },
 } as const;

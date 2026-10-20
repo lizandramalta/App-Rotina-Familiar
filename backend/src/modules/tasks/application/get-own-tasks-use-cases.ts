@@ -1,6 +1,7 @@
 import type { ActorContext } from '../../../shared/application/actor-context.js';
 import type { Clock } from '../../../shared/application/clock.js';
 import type { TransactionRunner } from '../../../shared/application/transaction-runner.js';
+import { MemberRole } from '../../../shared/domain/member-role.js';
 import { toLocalDateTime } from '../../family/domain/time-zone.js';
 import {
   DependencyUnavailableError,
@@ -25,6 +26,7 @@ export interface OwnTaskView {
   readonly assigneeIds: readonly string[];
   readonly note: string | null;
   readonly status: TaskRecord['status'];
+  readonly displayStatus: TaskRecord['status'];
   readonly routineId: string | null;
   readonly createdAt: string;
 }
@@ -48,7 +50,7 @@ interface OwnTasksCursorPayload {
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-function toOwnTaskView(task: TaskRecord): OwnTaskView {
+function toOwnTaskView(task: TaskRecord, actorRole: ActorContext['role']): OwnTaskView {
   return {
     id: task.id,
     title: task.title,
@@ -57,6 +59,10 @@ function toOwnTaskView(task: TaskRecord): OwnTaskView {
     assigneeIds: task.assigneeIds,
     note: task.note,
     status: task.status,
+    displayStatus:
+      task.status === 'awaitingConfirmation' && actorRole !== MemberRole.KIDS
+        ? 'pending'
+        : task.status,
     routineId: task.routineId,
     createdAt: task.createdAt.toISOString(),
   };
@@ -217,7 +223,7 @@ export class GetOwnTasksUseCase {
     const items = records.slice(0, OWN_TASKS_PAGE_SIZE);
     const last = items.at(-1);
     return {
-      items: items.map(toOwnTaskView),
+      items: items.map((task) => toOwnTaskView(task, actor.role)),
       nextCursor: hasNextPage && last !== undefined ? encodeCursor(referenceDate, last) : null,
     };
   }
