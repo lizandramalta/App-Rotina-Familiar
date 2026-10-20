@@ -2,69 +2,140 @@ import PhotosUI
 import SwiftUI
 import UIKit
 
-/// TEL-055 — local draft of the creator profile.
+/// TEL-055 — Perfil inicial do Criador (Figma node 268:1362).
 struct InitialProfileView: View {
     @Bindable var viewModel: InitialOnboardingViewModel
     @State private var pickerItem: PhotosPickerItem?
+    @State private var isPhotosPickerPresented = false
+    @FocusState private var focusedField: Field?
+
+    private enum Field {
+        case name
+        case nickname
+    }
 
     var body: some View {
-        Form {
-            Section {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 28) {
+                // Header: Título Grande + Subtítulo explicativo
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("onboarding.profile.title")
+                        .font(.system(size: 22, weight: .bold))
+                        .foregroundStyle(Color(uiColor: .label))
+
+                    Text("onboarding.profile.subtitle")
+                        .font(.subheadline)
+                        .foregroundStyle(Color(uiColor: .secondaryLabel))
+                }
+                .padding(.horizontal, 4)
+
+                // Foto de perfil com ações
                 avatarSection
                     .frame(maxWidth: .infinity)
-                    .listRowBackground(Color.clear)
-            }
 
-            Section {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("onboarding.profile.name.label")
+                // Campo: Seu nome (obrigatório)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("onboarding.profile.name.section")
                         .font(.footnote)
-                        .foregroundStyle(.secondary)
-                    TextField("onboarding.profile.name.placeholder", text: $viewModel.name)
-                        .textContentType(.name)
-                        .accessibilityIdentifier("profile.initial.name")
-                    if let error = viewModel.nameError {
-                        FieldErrorText(
-                            key: error == .required
-                                ? "onboarding.profile.name.error_required"
-                                : "onboarding.profile.name.error_invalid",
-                            identifier: "profile.initial.name_error"
-                        )
+                        .foregroundStyle(Color(uiColor: .secondaryLabel))
+                        .padding(.horizontal, 4)
+
+                    HStack {
+                        TextField("onboarding.profile.name.placeholder", text: $viewModel.name)
+                            .font(.body)
+                            .textContentType(.name)
+                            .focused($focusedField, equals: .name)
+                            .accessibilityIdentifier("profile.initial.name")
+
+                        if viewModel.nameError != nil {
+                            Image(systemName: "exclamationmark.circle.fill")
+                                .foregroundStyle(.red)
+                        }
                     }
+                    .padding(.horizontal, 20)
+                    .frame(height: 52)
+                    .background(Color(uiColor: .secondarySystemGroupedBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+
+                    HStack {
+                        if let error = viewModel.nameError {
+                            Label {
+                                Text(error == .required ? "onboarding.profile.name.error_required" : "onboarding.profile.name.error_invalid")
+                            } icon: {
+                                Image(systemName: "exclamationmark.circle")
+                            }
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                            .accessibilityIdentifier("profile.initial.name_error")
+                        }
+                        Spacer()
+                        Text("\(viewModel.name.count)/60")
+                            .font(.footnote)
+                            .foregroundStyle(Color(uiColor: .tertiaryLabel))
+                    }
+                    .padding(.horizontal, 8)
                 }
 
-                VStack(alignment: .leading, spacing: 4) {
+                // Campo: Etiqueta (opcional)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("onboarding.profile.nickname.section")
+                        .font(.footnote)
+                        .foregroundStyle(Color(uiColor: .secondaryLabel))
+                        .padding(.horizontal, 4)
+
                     HStack {
-                        Text("onboarding.profile.nickname.label")
+                        TextField("onboarding.profile.nickname.placeholder", text: $viewModel.nickname)
+                            .font(.body)
+                            .focused($focusedField, equals: .nickname)
+                            .accessibilityIdentifier("profile.initial.nickname")
+
+                        if viewModel.nicknameError {
+                            Image(systemName: "exclamationmark.circle.fill")
+                                .foregroundStyle(.red)
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .frame(height: 52)
+                    .background(Color(uiColor: .secondarySystemGroupedBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+
+                    HStack {
+                        if viewModel.nicknameError {
+                            Label {
+                                Text("onboarding.profile.nickname.error_invalid")
+                            } icon: {
+                                Image(systemName: "exclamationmark.circle")
+                            }
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                            .accessibilityIdentifier("profile.initial.nickname_error")
+                        }
                         Spacer()
-                        Text("onboarding.profile.nickname.optional")
-                            .foregroundStyle(.secondary)
+                        Text("\(viewModel.nickname.filter { !$0.isWhitespace }.count)/20")
+                            .font(.footnote)
+                            .foregroundStyle(Color(uiColor: .tertiaryLabel))
                     }
-                    .font(.footnote)
-                    TextField("onboarding.profile.nickname.placeholder", text: $viewModel.nickname)
-                        .accessibilityIdentifier("profile.initial.nickname")
-                    if viewModel.nicknameError {
-                        FieldErrorText(
-                            key: "onboarding.profile.nickname.error_invalid",
-                            identifier: "profile.initial.nickname_error"
-                        )
-                    }
+                    .padding(.horizontal, 8)
                 }
-            } header: {
-                Text("onboarding.profile.section")
-            } footer: {
-                Text("onboarding.profile.nickname.footer")
             }
+            .padding(.horizontal, 16)
+            .padding(.top, 16)
+            .padding(.bottom, 120)
+            .onboardingColumn()
         }
-        .onboardingColumn()
-        .background(Color(.systemGroupedBackground))
-        .navigationTitle("onboarding.profile.title")
+        .background(Color(uiColor: .systemGroupedBackground).ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("onboarding.profile.cancel") {
                     viewModel.requestDiscard()
                 }
+                .font(.body)
+                .foregroundStyle(Color(uiColor: .label))
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(Color(uiColor: .secondarySystemGroupedBackground))
+                .clipShape(Capsule())
                 .accessibilityIdentifier("profile.initial.cancel")
             }
         }
@@ -82,14 +153,24 @@ struct InitialProfileView: View {
             Text("onboarding.discard.message")
         }
         .safeAreaInset(edge: .bottom) {
-            OnboardingPrimaryButton(title: "onboarding.profile.continue", identifier: "profile.initial.continue") {
+            Button {
                 viewModel.continueFromProfile()
+            } label: {
+                Text("onboarding.profile.continue")
+                    .font(.body.weight(.semibold))
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
             }
+            .buttonStyle(.borderedProminent)
+            .clipShape(Capsule())
+            .accessibilityIdentifier("profile.initial.continue")
+            .padding(.horizontal, 16)
+            .padding(.bottom, 8)
+            .onboardingColumn()
         }
+        .photosPicker(isPresented: $isPhotosPickerPresented, selection: $pickerItem, matching: .images)
         .onChange(of: pickerItem) { _, item in
-            guard let item else {
-                return
-            }
+            guard let item else { return }
             Task {
                 if let data = try? await item.loadTransferable(type: Data.self) {
                     await viewModel.selectPhoto(from: data)
@@ -102,26 +183,41 @@ struct InitialProfileView: View {
     }
 
     private var avatarSection: some View {
-        VStack(spacing: 12) {
-            PhotosPicker(selection: $pickerItem, matching: .images) {
-                avatar
-            }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("profile.initial.photo")
-            .accessibilityLabel(Text(photoActionKey))
+        VStack(spacing: 8) {
+            Menu {
+                Button {
+                    isPhotosPickerPresented = true
+                } label: {
+                    Label("onboarding.profile.photo.choose", systemImage: "photo.on.rectangle")
+                }
 
-            HStack(spacing: 16) {
-                PhotosPicker(selection: $pickerItem, matching: .images) {
-                    Text(photoActionKey)
-                }
                 if viewModel.photo != nil {
-                    Button("onboarding.profile.photo.remove", role: .destructive) {
+                    Button(role: .destructive) {
                         viewModel.removePhoto()
+                    } label: {
+                        Label("onboarding.profile.photo.remove", systemImage: "trash")
                     }
-                    .accessibilityIdentifier("profile.initial.photo_remove")
+                }
+            } label: {
+                VStack(spacing: 6) {
+                    avatar
+                        .frame(width: 96, height: 96)
+                        .clipShape(Circle())
+                        .overlay(
+                            Circle()
+                                .stroke(Color(uiColor: .separator), lineWidth: 1)
+                        )
+
+                    Text(viewModel.photo == nil ? "onboarding.profile.photo.add" : "onboarding.profile.photo.change")
+                        .font(.body.weight(.medium))
+                        .foregroundStyle(Color.accentColor)
+
+                    Text("onboarding.profile.photo.optional")
+                        .font(.footnote)
+                        .foregroundStyle(Color(uiColor: .secondaryLabel))
                 }
             }
-            .font(.subheadline)
+            .accessibilityIdentifier("profile.initial.photo")
 
             if viewModel.photoSelectionFailed {
                 FieldErrorText(
@@ -132,24 +228,22 @@ struct InitialProfileView: View {
         }
     }
 
-    private var photoActionKey: LocalizedStringKey {
-        viewModel.photo == nil ? "onboarding.profile.photo.add" : "onboarding.profile.photo.change"
-    }
-
     @ViewBuilder
     private var avatar: some View {
-        Group {
-            if let data = viewModel.photo, let image = UIImage(data: data) {
-                Image(uiImage: image)
+        if let data = viewModel.photo, let image = UIImage(data: data) {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFill()
+        } else {
+            ZStack {
+                Circle()
+                    .fill(Color(uiColor: .tertiarySystemFill))
+                Image(systemName: "person.fill")
                     .resizable()
-                    .scaledToFill()
-            } else {
-                Image(systemName: "person.crop.circle.fill")
-                    .resizable()
-                    .foregroundStyle(.secondary)
+                    .scaledToFit()
+                    .padding(26)
+                    .foregroundStyle(Color(uiColor: .secondaryLabel))
             }
         }
-        .frame(width: 88, height: 88)
-        .clipShape(Circle())
     }
 }

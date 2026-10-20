@@ -62,6 +62,16 @@ final class InitialOnboardingViewModel {
 
     private var uploadedMediaID: String?
 
+    var isProfileValid: Bool {
+        guard case .success = FamilyCreationValidation.validatedName(name) else {
+            return false
+        }
+        guard case .success = FamilyCreationValidation.validatedNickname(nickname) else {
+            return false
+        }
+        return true
+    }
+
     init(
         grant: CreationGrant,
         repository: any FamilyRepository,
