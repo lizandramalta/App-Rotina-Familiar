@@ -15,6 +15,7 @@ import { createFamilyBodyDocumentation, registerFamilyRoutes } from './family-ro
 import { onboardingUploadBodyDocumentation, registerMediaRoutes } from './media-routes.js';
 import { registerProfileRoutes } from './profile-routes.js';
 import { registerTaskRoutes } from './task-routes.js';
+import { MissionReopenRequiresConfirmationError } from '../../modules/tasks/domain/task-reopening-errors.js';
 import { registerMissionRoutes } from './mission-routes.js';
 import { registerMemberRoutes } from './member-routes.js';
 
@@ -131,7 +132,14 @@ export function buildHttpApp(
       const problem = createProblemDetails({
         status: error.statusCode,
         code: error.code,
-        title: error.name,
+        title:
+          error instanceof MissionReopenRequiresConfirmationError
+            ? 'Confirmação necessária'
+            : error.name,
+        type:
+          error instanceof MissionReopenRequiresConfirmationError
+            ? 'https://api.rotinafamiliar.app/problems/mission-reopen-requires-confirmation'
+            : undefined,
         detail: error.message,
         requestId,
         fieldErrors: error.fieldErrors,
@@ -144,7 +152,15 @@ export function buildHttpApp(
       return reply
         .status(error.statusCode)
         .header('Content-Type', 'application/problem+json')
-        .send(problem);
+        .send(
+          error instanceof MissionReopenRequiresConfirmationError
+            ? {
+                ...problem,
+                missionsAffected: error.missionsAffected,
+                hasAcceptedReward: error.hasAcceptedReward,
+              }
+            : problem,
+        );
     }
 
     // Fastify schema validation error

@@ -123,6 +123,9 @@ describe('HTTP Presentation Layer (Fastify)', () => {
       completeTaskUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['completeTaskUseCase'],
+      reopenTaskUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['reopenTaskUseCase'],
       getTaskUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['getTaskUseCase'],

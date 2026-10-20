@@ -72,6 +72,7 @@ import {
   GetOwnTasksUseCase,
 } from '../modules/tasks/application/get-own-tasks-use-cases.js';
 import { PostgresTaskRepository } from '../modules/tasks/infrastructure/postgres-task-repository.js';
+import { ReopenTaskUseCase } from '../modules/tasks/application/reopen-task-use-case.js';
 import { CloseEligibleMissions } from '../modules/missions/application/close-eligible-missions.js';
 import {
   CreateMissionUseCase,
@@ -115,6 +116,7 @@ export interface ApplicationContainer {
   readonly updateOwnProfileUseCase: UpdateOwnProfileUseCase;
   readonly createTaskUseCase: CreateTaskUseCase;
   readonly completeTaskUseCase: CompleteTaskUseCase;
+  readonly reopenTaskUseCase: ReopenTaskUseCase;
   readonly getTaskUseCase: GetTaskUseCase;
   readonly getOwnTasksUseCase: GetOwnTasksUseCase;
   readonly getOwnProgressUseCase: GetOwnProgressUseCase;
@@ -379,6 +381,13 @@ export function createContainer(config: Configuration): ApplicationContainer {
     ...taskDependencies,
     missionCloser: closeEligibleMissions,
   });
+  const reopenTaskUseCase = new ReopenTaskUseCase({
+    tasks: taskRepository,
+    missions: missionRepository,
+    transactionRunner,
+    clock,
+    logger,
+  });
   const getTaskUseCase = new GetTaskUseCase({ repository: taskRepository, transactionRunner });
   const taskQueryDependencies = { repository: taskRepository, transactionRunner, clock };
   const getOwnTasksUseCase = new GetOwnTasksUseCase(taskQueryDependencies);
@@ -422,6 +431,7 @@ export function createContainer(config: Configuration): ApplicationContainer {
     updateOwnProfileUseCase,
     createTaskUseCase,
     completeTaskUseCase,
+    reopenTaskUseCase,
     getTaskUseCase,
     getOwnTasksUseCase,
     getOwnProgressUseCase,

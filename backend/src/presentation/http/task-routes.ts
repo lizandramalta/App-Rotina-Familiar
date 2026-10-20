@@ -25,6 +25,10 @@ interface TaskBody {
   readonly signalResolution?: unknown;
 }
 
+interface ReopeningBody {
+  readonly confirm?: boolean;
+}
+
 const taskProperties = {
   title: {},
   weight: {},
@@ -133,6 +137,63 @@ const taskMutationResultSchema = {
   properties: {
     task: taskResponseSchema,
     affectedResources: { type: 'array', items: affectedResourceSchema },
+  },
+} as const;
+
+const taskReopeningResultSchema = {
+  type: 'object',
+  required: ['task', 'affectedResources'],
+  additionalProperties: false,
+  properties: {
+    task: taskResponseSchema,
+    affectedResources: {
+      type: 'object',
+      required: ['missionsReopened', 'participationsRemoved', 'badgesRemoved', 'rewardRemoved'],
+      additionalProperties: false,
+      properties: {
+        missionsReopened: {
+          type: 'array',
+          items: {
+            type: 'object',
+            required: ['id', 'title', 'status'],
+            properties: {
+              id: { type: 'string' },
+              title: { type: 'string' },
+              status: { const: 'inProgress' },
+            },
+          },
+        },
+        participationsRemoved: { type: 'integer', minimum: 0 },
+        badgesRemoved: {
+          type: 'array',
+          items: {
+            type: 'object',
+            required: ['memberId', 'tier'],
+            properties: {
+              memberId: { type: 'string' },
+              tier: { enum: ['bronze', 'silver', 'gold', 'diamond'] },
+            },
+          },
+        },
+        rewardRemoved: { type: 'boolean' },
+      },
+    },
+  },
+} as const;
+
+const reopeningConflictSchema = {
+  ...problemResponseSchema,
+  properties: {
+    ...problemResponseSchema.properties,
+    missionsAffected: {
+      type: 'array',
+      items: {
+        type: 'object',
+        required: ['id', 'title'],
+        properties: { id: { type: 'string' }, title: { type: 'string' } },
+      },
+    },
+    hasAcceptedReward: { type: 'boolean' },
   },
 } as const;
 
@@ -316,6 +377,55 @@ export function registerTaskRoutes(app: FastifyInstance, container: ApplicationC
             ),
           );
       },
+    );
+
+    scope.post<{ Params: TaskParams; Body: ReopeningBody }>(
+      '/tasks/:taskId/reopening',
+      {
+        schema: {
+          tags: ['Tasks'],
+          summary: 'Reopen a completed task and reverse its mission effects',
+          security: [{ bearerAuth: [] }],
+          params: {
+            type: 'object',
+            required: ['taskId'],
+            additionalProperties: false,
+            properties: { taskId: { type: 'string' } },
+          },
+          body: {
+            type: 'object',
+            additionalProperties: false,
+            properties: { confirm: { type: 'boolean' } },
+          },
+          response: {
+            200: taskReopeningResultSchema,
+            400: problemResponseSchema,
+            401: problemResponseSchema,
+            403: problemResponseSchema,
+            404: problemResponseSchema,
+            409: reopeningConflictSchema,
+            503: problemResponseSchema,
+          },
+        },
+        preValidation(request, _reply, done) {
+          if (request.body === undefined) {
+            request.body = {};
+          }
+          done();
+        },
+      },
+      async (request, reply) =>
+        reply
+          .status(200)
+          .header('Cache-Control', 'no-store')
+          .send(
+            await container.reopenTaskUseCase.execute(
+              requireActor(request),
+              request.params.taskId,
+              request.body.confirm === true,
+              request.id,
+            ),
+          ),
     );
 
     scope.patch<{ Params: TaskParams; Body: TaskBody }>(

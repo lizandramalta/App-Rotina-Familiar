@@ -31,6 +31,7 @@ export interface TestApp {
   readonly recoverInviteJoin: UseCaseMock;
   readonly createTask: UseCaseMock;
   readonly completeTask: UseCaseMock;
+  readonly reopenTask: UseCaseMock;
   readonly getTask: UseCaseMock;
   readonly getOwnTasks: UseCaseMock;
   readonly getOwnProgress: UseCaseMock;
@@ -81,6 +82,7 @@ export function buildTestApp(): TestApp {
   const recoverInviteJoin: UseCaseMock = { execute: vi.fn() };
   const createTask: UseCaseMock = { execute: vi.fn() };
   const completeTask: UseCaseMock = { execute: vi.fn() };
+  const reopenTask: UseCaseMock = { execute: vi.fn() };
   const getTask: UseCaseMock = { execute: vi.fn() };
   const getOwnTasks: UseCaseMock = { execute: vi.fn() };
   const getOwnProgress: UseCaseMock = { execute: vi.fn() };
@@ -118,6 +120,7 @@ export function buildTestApp(): TestApp {
     updateOwnProfileUseCase: updateOwnProfile,
     createTaskUseCase: createTask,
     completeTaskUseCase: completeTask,
+    reopenTaskUseCase: reopenTask,
     getTaskUseCase: getTask,
     getOwnTasksUseCase: getOwnTasks,
     getOwnProgressUseCase: getOwnProgress,
@@ -152,6 +155,7 @@ export function buildTestApp(): TestApp {
     recoverInviteJoin,
     createTask,
     completeTask,
+    reopenTask,
     getTask,
     getOwnTasks,
     getOwnProgress,
