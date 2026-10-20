@@ -158,4 +158,21 @@ export class PostgresFamilyCreationRepository implements FamilyCreationRepositor
       ],
     );
   }
+
+  public async insertInitialMember(
+    tx: TransactionContext,
+    params: {
+      readonly id: string;
+      readonly familyId: string;
+      readonly name: string;
+      readonly role: string;
+      readonly createdAt: Date;
+    },
+  ): Promise<void> {
+    await asPostgresClient(tx).query(
+      `insert into app.members (id, family_id, role, is_family_creator, display_name, created_at, updated_at)
+       values ($1, $2, $3, false, $4, $5, $5)`,
+      [params.id, params.familyId, params.role, params.name, params.createdAt],
+    );
+  }
 }

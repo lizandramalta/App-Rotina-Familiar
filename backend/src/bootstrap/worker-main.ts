@@ -30,11 +30,28 @@ async function bootstrapWorker(): Promise<void> {
 
   let isRunning = true;
 
+  const clean = async () => {
+    if (!isRunning) return;
+    try {
+      await container.cleanOrphanOnboardingMedia.run();
+    } catch (error) {
+      logger.error('onboarding_media_cleanup_run_failed', error);
+    }
+  };
+  void clean();
+  const cleanupTimer = setInterval(
+    () => {
+      void clean();
+    },
+    15 * 60 * 1000,
+  );
+
   const handleShutdown = async (signal: string) => {
     if (!isRunning) {
       return;
     }
     isRunning = false;
+    clearInterval(cleanupTimer);
     logger.info(`Received ${signal}. Shutting down worker process...`);
 
     try {

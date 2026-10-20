@@ -34,6 +34,7 @@ const RESULT = {
     role: 'administrator',
     isFamilyCreator: true,
   },
+  initialMembers: [],
   session: {
     sessionId: 's-1',
     memberId: 'm-1',
@@ -62,6 +63,20 @@ describe('POST /v1/families', () => {
     test.app.inject({ method: 'POST', url: '/v1/families', headers, payload: body as object });
 
   describe('CA-01: success', () => {
+    it('documents initial members, optional photo and response in OpenAPI', async () => {
+      const docs = await test.app.inject({ method: 'GET', url: '/docs/json' });
+      const operation = docs.json().paths['/v1/families'].post;
+      const body = operation.requestBody.content['application/json'].schema;
+      expect(body.properties.initialMembers.items.properties.role.enum).toEqual([
+        'administrator',
+        'member',
+        'kids',
+      ]);
+      expect(body.properties.creatorPhotoMediaId.format).toBe('uuid');
+      expect(
+        operation.responses['201'].content['application/json'].schema.properties.initialMembers,
+      ).toBeDefined();
+    });
     it('answers 201 with Location, no-store and the family, member and session', async () => {
       const response = await post(BODY);
 
