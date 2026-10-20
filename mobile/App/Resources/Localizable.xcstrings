@@ -456,7 +456,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gere um convite para cada pessoa que quiser chamar agora. Você também pode fazer isso depois."
+            "value": "O convite tem link e senha e é enviado pela folha de compartilhamento."
           }
         }
       }
@@ -467,6 +467,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gerar convite"
+          }
+        }
+      }
+    },
+    "family.onboarding.invite_header_subtitle": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gere um convite para cada pessoa entrar no app. Você também pode fazer isso depois, em Família."
+          }
+        }
+      }
+    },
+    "family.onboarding.invite_header_title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Convide sua família"
           }
         }
       }
@@ -501,6 +521,26 @@
         }
       }
     },
+    "family.onboarding.invite_regenerate_confirm_message": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Os convites anteriores de %@ deixam de funcionar e o acesso atual dessa pessoa é encerrado."
+          }
+        }
+      }
+    },
+    "family.onboarding.invite_regenerate_confirm_title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gerar novo convite?"
+          }
+        }
+      }
+    },
     "family.onboarding.invite_share": {
       "localizations": {
         "pt-BR": {
@@ -527,6 +567,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Convite"
+          }
+        }
+      }
+    },
+    "family.onboarding.invite_status_generated": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · convite gerado"
           }
         }
       }

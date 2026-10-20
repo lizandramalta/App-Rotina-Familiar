@@ -93,6 +93,15 @@ final class InitialOnboardingViewModel {
             timeZoneID = draft.timeZoneID
             members = draft.members
         }
+
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"] == "onboarding-invite" {
+            path = [.family, .inviteMembers]
+            for member in members {
+                createdMembers[member.id] = CreatedMember(id: UUID(), name: member.name, role: member.role)
+            }
+        }
+        #endif
     }
 
     var draft: OnboardingDraft {

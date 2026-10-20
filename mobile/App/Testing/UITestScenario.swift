@@ -7,6 +7,7 @@ enum UITestScenario: String {
     case onboarding = "onboarding"
     case onboardingUncertain = "onboarding-uncertain"
     case onboardingPhotoFailure = "onboarding-photo-failure"
+    case onboardingInvite = "onboarding-invite"
 
     static var current: UITestScenario? {
         ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"].flatMap(UITestScenario.init(rawValue:))
@@ -28,6 +29,10 @@ enum UITestScenario: String {
         if self == .onboardingPhotoFailure {
             // Seeds a restored draft so the photo path runs without driving the system photo picker.
             sessionStore.returnToEntry(preserving: OnboardingDraft(name: "Maria Silva", photo: Self.samplePhoto))
+        } else if self == .onboardingInvite {
+            let member1 = DraftMember(id: UUID(), name: "Marina Silva", role: .administrator)
+            let member2 = DraftMember(id: UUID(), name: "Lucas Silva", role: .kid)
+            sessionStore.returnToEntry(preserving: OnboardingDraft(name: "João Silva", familyName: "Família Silva", members: [member1, member2]))
         }
         sessionStore.apply(.creationGrant(CreationGrant(value: "ui-test-grant", expiresAt: .distantFuture)))
     }
