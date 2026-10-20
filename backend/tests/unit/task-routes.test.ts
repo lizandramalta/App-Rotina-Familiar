@@ -5,6 +5,7 @@ import {
   TaskAlreadyCompletedError,
   TaskManagementNotAllowedError,
 } from '../../src/modules/tasks/domain/task-errors.js';
+import { MissionReopenRequiresConfirmationError } from '../../src/modules/tasks/domain/task-reopening-errors.js';
 import { buildTestApp, TEST_ACTOR, type TestApp } from '../support/build-test-app.js';
 
 const AUTH = { authorization: 'Bearer opaque-access-token' };
@@ -31,6 +32,15 @@ const COMPLETION_RESULT = {
     { type: 'ownProgress', referenceDate: TASK.scheduledDate },
   ],
 };
+const REOPENING_RESULT = {
+  task: TASK,
+  affectedResources: {
+    missionsReopened: [],
+    participationsRemoved: 0,
+    badgesRemoved: [],
+    rewardRemoved: false,
+  },
+};
 
 describe('Task routes — SPEC-007 phases 1 and 2', () => {
   let test: TestApp;
@@ -39,6 +49,7 @@ describe('Task routes — SPEC-007 phases 1 and 2', () => {
     test = buildTestApp();
     test.createTask.execute.mockResolvedValue(TASK);
     test.completeTask.execute.mockResolvedValue(COMPLETION_RESULT);
+    test.reopenTask.execute.mockResolvedValue(REOPENING_RESULT);
     test.getTask.execute.mockResolvedValue(TASK);
     test.getOwnTasks.execute.mockResolvedValue(OWN_TASKS);
     test.getOwnProgress.execute.mockResolvedValue(OWN_PROGRESS);
@@ -47,6 +58,101 @@ describe('Task routes — SPEC-007 phases 1 and 2', () => {
   });
 
   afterEach(async () => test.app.close());
+
+  it('SCRUM-56 / SPEC-011 CA-01 accepts a missing body and returns canonical effects', async () => {
+    const response = await test.app.inject({
+      method: 'POST',
+      url: `/v1/tasks/${TASK_ID}/reopening`,
+      headers: AUTH,
+    });
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual(REOPENING_RESULT);
+    expect(test.reopenTask.execute).toHaveBeenCalledWith(
+      TEST_ACTOR,
+      TASK_ID,
+      false,
+      expect.any(String),
+    );
+  });
+
+  it('SCRUM-56 / SPEC-011 CA-07 requires an active session', async () => {
+    const response = await test.app.inject({
+      method: 'POST',
+      url: `/v1/tasks/${TASK_ID}/reopening`,
+    });
+    expect(response.statusCode).toBe(401);
+    expect(test.reopenTask.execute).not.toHaveBeenCalled();
+  });
+
+  it('SCRUM-56 / SPEC-011 CA-02 returns confirmation details in problem+json', async () => {
+    test.reopenTask.execute.mockRejectedValue(
+      new MissionReopenRequiresConfirmationError([{ id: 'mission-id', title: 'Mission' }], false),
+    );
+    const response = await test.app.inject({
+      method: 'POST',
+      url: `/v1/tasks/${TASK_ID}/reopening`,
+      headers: AUTH,
+      payload: {},
+    });
+    expect(response.statusCode).toBe(409);
+    expect(response.headers['content-type']).toContain('application/problem+json');
+    expect(response.json()).toMatchObject({
+      type: 'https://api.rotinafamiliar.app/problems/mission-reopen-requires-confirmation',
+      title: 'Confirmação necessária',
+      code: 'MISSION_REOPEN_REQUIRES_CONFIRMATION',
+      missionsAffected: [{ id: 'mission-id', title: 'Mission' }],
+      hasAcceptedReward: false,
+    });
+  });
+
+  it('SCRUM-56 / SPEC-011 CA-03 accepts only confirm in the reopening body', async () => {
+    const confirmed = await test.app.inject({
+      method: 'POST',
+      url: `/v1/tasks/${TASK_ID}/reopening`,
+      headers: AUTH,
+      payload: { confirm: true },
+    });
+    expect(confirmed.statusCode).toBe(200);
+    expect(test.reopenTask.execute).toHaveBeenCalledWith(
+      TEST_ACTOR,
+      TASK_ID,
+      true,
+      expect.any(String),
+    );
+
+    for (const payload of [{ confirm: 'yes' }, { confirm: true, familyId: TEST_ACTOR.familyId }]) {
+      const invalid = await test.app.inject({
+        method: 'POST',
+        url: `/v1/tasks/${TASK_ID}/reopening`,
+        headers: AUTH,
+        payload,
+      });
+      expect(invalid.statusCode).toBe(400);
+    }
+    expect(test.reopenTask.execute).toHaveBeenCalledTimes(1);
+  });
+
+  it('SCRUM-56 / SPEC-011 CA-01 to CA-08 documents the secured route in OpenAPI', async () => {
+    const response = await test.app.inject({ method: 'GET', url: '/docs/json' });
+    const document = response.json() as {
+      paths: Record<
+        string,
+        {
+          post?: {
+            security?: unknown[];
+            requestBody?: unknown;
+            responses?: Record<string, unknown>;
+          };
+        }
+      >;
+    };
+    const operation = document.paths['/v1/tasks/{taskId}/reopening']?.post;
+    expect(operation?.security).toEqual([{ bearerAuth: [] }]);
+    expect(operation?.requestBody).toBeDefined();
+    for (const status of ['200', '400', '401', '403', '404', '409', '503']) {
+      expect(operation?.responses).toHaveProperty(status);
+    }
+  });
 
   it('SCRUM-107 / SPEC-009 CA-01 and CA-11 returns canonical and displayed status for personal tasks', async () => {
     const response = await test.app.inject({

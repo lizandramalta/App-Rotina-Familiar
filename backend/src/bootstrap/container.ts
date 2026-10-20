@@ -75,6 +75,7 @@ import { PostgresTaskRepository } from '../modules/tasks/infrastructure/postgres
 import { CreateRoutineUseCase } from '../modules/routines/application/create-routine-use-case.js';
 import { GetRoutineUseCase } from '../modules/routines/application/get-routine-use-case.js';
 import { PostgresRoutineRepository } from '../modules/routines/infrastructure/postgres-routine-repository.js';
+import { ReopenTaskUseCase } from '../modules/tasks/application/reopen-task-use-case.js';
 import { CloseEligibleMissions } from '../modules/missions/application/close-eligible-missions.js';
 import {
   CreateMissionUseCase,
@@ -84,6 +85,11 @@ import {
   ListMissionsUseCase,
 } from '../modules/missions/application/mission-use-cases.js';
 import { PostgresMissionRepository } from '../modules/missions/infrastructure/postgres-mission-repository.js';
+import {
+  AddRewardItemUseCase,
+  ListRewardItemsUseCase,
+} from '../modules/rewards/application/reward-use-cases.js';
+import { PostgresRewardRepository } from '../modules/rewards/infrastructure/postgres-reward-repository.js';
 
 export interface ApplicationContainer {
   readonly config: Configuration;
@@ -118,6 +124,7 @@ export interface ApplicationContainer {
   readonly updateOwnProfileUseCase: UpdateOwnProfileUseCase;
   readonly createTaskUseCase: CreateTaskUseCase;
   readonly completeTaskUseCase: CompleteTaskUseCase;
+  readonly reopenTaskUseCase: ReopenTaskUseCase;
   readonly getTaskUseCase: GetTaskUseCase;
   readonly getOwnTasksUseCase: GetOwnTasksUseCase;
   readonly getOwnProgressUseCase: GetOwnProgressUseCase;
@@ -130,6 +137,8 @@ export interface ApplicationContainer {
   readonly listMissionsUseCase: ListMissionsUseCase;
   readonly getMissionDetailUseCase: GetMissionDetailUseCase;
   readonly getMissionTaskOptionsUseCase: GetMissionTaskOptionsUseCase;
+  readonly listRewardItemsUseCase: ListRewardItemsUseCase;
+  readonly addRewardItemUseCase: AddRewardItemUseCase;
   dispose(): Promise<void>;
 }
 
@@ -377,12 +386,24 @@ export function createContainer(config: Configuration): ApplicationContainer {
   const getMissionDetailUseCase = new GetMissionDetailUseCase(missionDependencies);
   const getMissionTaskOptionsUseCase = new GetMissionTaskOptionsUseCase(missionDependencies);
 
+  const rewardRepository = new PostgresRewardRepository();
+  const rewardDependencies = { repository: rewardRepository, transactionRunner, logger };
+  const listRewardItemsUseCase = new ListRewardItemsUseCase(rewardDependencies);
+  const addRewardItemUseCase = new AddRewardItemUseCase({ ...rewardDependencies, clock });
+
   const taskRepository = new PostgresTaskRepository();
   const taskDependencies = { repository: taskRepository, transactionRunner, clock };
   const createTaskUseCase = new CreateTaskUseCase(taskDependencies);
   const completeTaskUseCase = new CompleteTaskUseCase({
     ...taskDependencies,
     missionCloser: closeEligibleMissions,
+  });
+  const reopenTaskUseCase = new ReopenTaskUseCase({
+    tasks: taskRepository,
+    missions: missionRepository,
+    transactionRunner,
+    clock,
+    logger,
   });
   const getTaskUseCase = new GetTaskUseCase({ repository: taskRepository, transactionRunner });
   const taskQueryDependencies = { repository: taskRepository, transactionRunner, clock };
@@ -443,6 +464,7 @@ export function createContainer(config: Configuration): ApplicationContainer {
     updateOwnProfileUseCase,
     createTaskUseCase,
     completeTaskUseCase,
+    reopenTaskUseCase,
     getTaskUseCase,
     getOwnTasksUseCase,
     getOwnProgressUseCase,
@@ -455,6 +477,8 @@ export function createContainer(config: Configuration): ApplicationContainer {
     listMissionsUseCase,
     getMissionDetailUseCase,
     getMissionTaskOptionsUseCase,
+    listRewardItemsUseCase,
+    addRewardItemUseCase,
     async dispose(): Promise<void> {
       logger.info('Disposing application container...');
       await dbPool.close();

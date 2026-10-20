@@ -76,6 +76,14 @@ export interface TaskRepositoryPort {
       readonly now: Date;
     },
   ): Promise<TaskRecord>;
+  reopenTask(
+    tx: TransactionContext,
+    params: {
+      readonly task: TaskRecord;
+      readonly actorId: string;
+      readonly now: Date;
+    },
+  ): Promise<TaskRecord>;
   updateTask(
     tx: TransactionContext,
     params: {

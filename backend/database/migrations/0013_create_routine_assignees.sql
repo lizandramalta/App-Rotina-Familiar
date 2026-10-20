@@ -1,4 +1,4 @@
--- 0011 — Responsáveis padrão da rotina (SPEC-008 Fase 1 / SCRUM-43).
+-- 0013 — Responsáveis padrão da rotina (SPEC-008 Fase 1 / SCRUM-43).
 --
 -- `assigneeIds` é um campo de configuração da própria rotina (dicionário de
 -- campos da SPEC-008 §5.1), devolvido mesmo antes de qualquer ocorrência ser

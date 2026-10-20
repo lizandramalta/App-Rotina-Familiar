@@ -1,4 +1,4 @@
--- 0010 — Rotinas (SPEC-008 Fase 1 / SCRUM-43).
+-- 0012 — Rotinas (SPEC-008 Fase 1 / SCRUM-43).
 --
 -- Configuração de recorrência: frequências fixas (1/7/14/21/28 dias), início
 -- livre, sem data final. Reaproveita app.task_templates para título/peso/

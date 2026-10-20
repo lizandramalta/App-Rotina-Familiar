@@ -16,8 +16,10 @@ import { onboardingUploadBodyDocumentation, registerMediaRoutes } from './media-
 import { registerProfileRoutes } from './profile-routes.js';
 import { registerTaskRoutes } from './task-routes.js';
 import { registerRoutineRoutes } from './routine-routes.js';
+import { MissionReopenRequiresConfirmationError } from '../../modules/tasks/domain/task-reopening-errors.js';
 import { registerMissionRoutes } from './mission-routes.js';
 import { registerMemberRoutes } from './member-routes.js';
+import { registerRewardRoutes } from './reward-routes.js';
 
 export function buildHttpApp(
   container: ApplicationContainer,
@@ -85,6 +87,7 @@ export function buildHttpApp(
           description: 'Configuração de recorrência e materialização de ocorrências.',
         },
         { name: 'Missions', description: 'Missões coletivas, participações e badges.' },
+        { name: 'Rewards', description: 'Catálogo de recompensas coletivas.' },
       ],
       components: {
         securitySchemes: {
@@ -136,7 +139,14 @@ export function buildHttpApp(
       const problem = createProblemDetails({
         status: error.statusCode,
         code: error.code,
-        title: error.name,
+        title:
+          error instanceof MissionReopenRequiresConfirmationError
+            ? 'Confirmação necessária'
+            : error.name,
+        type:
+          error instanceof MissionReopenRequiresConfirmationError
+            ? 'https://api.rotinafamiliar.app/problems/mission-reopen-requires-confirmation'
+            : undefined,
         detail: error.message,
         requestId,
         fieldErrors: error.fieldErrors,
@@ -149,7 +159,15 @@ export function buildHttpApp(
       return reply
         .status(error.statusCode)
         .header('Content-Type', 'application/problem+json')
-        .send(problem);
+        .send(
+          error instanceof MissionReopenRequiresConfirmationError
+            ? {
+                ...problem,
+                missionsAffected: error.missionsAffected,
+                hasAcceptedReward: error.hasAcceptedReward,
+              }
+            : problem,
+        );
     }
 
     // Fastify schema validation error
@@ -306,6 +324,7 @@ export function buildHttpApp(
       registerTaskRoutes(scope, container);
       registerRoutineRoutes(scope, container);
       registerMissionRoutes(scope, container);
+      registerRewardRoutes(scope, container);
     },
     { prefix: '/v1' },
   );

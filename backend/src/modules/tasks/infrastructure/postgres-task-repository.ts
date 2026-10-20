@@ -394,6 +394,40 @@ export class PostgresTaskRepository implements TaskRepositoryPort, TaskQueryRepo
     return this.requireTask(tx, params.task.familyId, params.task.id);
   }
 
+  public async reopenTask(
+    tx: TransactionContext,
+    params: { readonly task: TaskRecord; readonly actorId: string; readonly now: Date },
+  ): Promise<TaskRecord> {
+    const client = asPostgresClient(tx);
+    const completion = await client.query<{ id: string }>(
+      `update app.completions
+          set undone_at = $3, undone_by_id = $4
+        where family_id = $1 and task_id = $2 and undone_at is null
+        returning id`,
+      [params.task.familyId, params.task.id, params.now, params.actorId],
+    );
+    const completionId = completion.rows[0]?.id;
+    if (completionId === undefined || completion.rowCount !== 1) {
+      throw new Error('A completed task has no single current completion.');
+    }
+    await client.query(
+      `update app.task_occurrences
+          set status = 'pending', updated_at = $3
+        where family_id = $1 and id = $2 and status = 'completed'`,
+      [params.task.familyId, params.task.id, params.now],
+    );
+    await this.insertEvent(tx, {
+      familyId: params.task.familyId,
+      taskId: params.task.id,
+      actorId: params.actorId,
+      eventType: 'reopened',
+      oldValues: { status: 'completed', completionId },
+      newValues: { status: 'pending', assigneeIds: params.task.assigneeIds },
+      now: params.now,
+    });
+    return this.requireTask(tx, params.task.familyId, params.task.id);
+  }
+
   public async updateTask(
     tx: TransactionContext,
     params: {
@@ -557,7 +591,7 @@ export class PostgresTaskRepository implements TaskRepositoryPort, TaskQueryRepo
       readonly familyId: string;
       readonly taskId: string;
       readonly actorId: string;
-      readonly eventType: 'created' | 'edited' | 'deleted' | 'completed';
+      readonly eventType: 'created' | 'edited' | 'deleted' | 'completed' | 'reopened';
       readonly oldValues: object | null;
       readonly newValues: object | null;
       readonly now: Date;
