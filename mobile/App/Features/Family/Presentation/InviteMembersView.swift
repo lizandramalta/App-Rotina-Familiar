@@ -163,8 +163,11 @@ struct InviteMembersView: View {
             .padding(.vertical, 8)
             .background(Color(.systemGroupedBackground))
         }
-        .sheet(item: $viewModel.generatedInvite) { generated in
-            InviteCredentialsSheet(generated: generated)
+        .background {
+            ActivityViewPresenter(
+                generatedInvite: $viewModel.generatedInvite,
+                messageBuilder: shareMessage(for:)
+            )
         }
         .alert(
             "family.onboarding.invite_regenerate_confirm_title",
@@ -195,7 +198,7 @@ struct InviteMembersView: View {
     // MARK: Member Row
 
     private func memberRow(for member: DraftMember) -> some View {
-        HStack(alignment: .center, spacing: 12) {
+        HStack(alignment: .center, spacing: 10) {
             // Initial Avatar (36x36)
             Circle()
                 .fill(Color(.systemGray5))
@@ -212,16 +215,14 @@ struct InviteMembersView: View {
                     .font(.system(size: 17))
                     .foregroundStyle(Color(.label))
 
-                HStack(spacing: 4) {
-                    Text(member.role.onboardingTitleKey)
-                    if viewModel.invites[member.id] != nil {
-                        Text("·")
-                        Text("convite gerado")
-                    }
-                }
-                .font(.system(size: 13))
-                .foregroundStyle(Color(.secondaryLabel))
+                Text(roleDescription(for: member))
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color(.secondaryLabel))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                    .allowsTightening(true)
             }
+            .layoutPriority(1)
 
             Spacer()
 
@@ -230,7 +231,7 @@ struct InviteMembersView: View {
                 inviteButton(for: member)
             }
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 14)
         .padding(.vertical, 10)
     }
 
@@ -250,14 +251,17 @@ struct InviteMembersView: View {
                     ProgressView()
                         .scaleEffect(0.8)
                     Text("Gerando...")
+                        .lineLimit(1)
                 } else {
                     Text(hasInvite ? "family.onboarding.invite_regenerate" : "family.onboarding.invite_generate")
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
                 }
             }
             .font(.system(size: 15, weight: .medium))
             .foregroundStyle(Color(.label))
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
             .background(Color(.systemGray6))
             .clipShape(Capsule())
             .overlay(
@@ -280,49 +284,68 @@ struct InviteMembersView: View {
         }
         return String(first).uppercased()
     }
-}
 
-private struct InviteCredentialsSheet: View {
-    let generated: GeneratedInvite
-    @Environment(\.dismiss) private var dismiss
+    private func roleDescription(for member: DraftMember) -> String {
+        let roleName: String
+        switch member.role {
+        case .administrator:
+            roleName = String(localized: "family.members.role.admin", defaultValue: "Administrador")
+        case .member:
+            roleName = String(localized: "family.members.role.member", defaultValue: "Membro")
+        case .kid:
+            roleName = String(localized: "family.members.role.kid", defaultValue: "Kids")
+        }
 
-    var body: some View {
-        NavigationStack {
-            Form {
-                Section {
-                    LabeledContent("family.onboarding.invite_link") {
-                        Text(generated.invite.link)
-                            .textSelection(.enabled)
-                    }
-                    LabeledContent("family.onboarding.invite_password") {
-                        Text(generated.invite.password)
-                            .textSelection(.enabled)
-                    }
-                } header: {
-                    Text(generated.memberName)
-                } footer: {
-                    Text("family.onboarding.invite_sheet_footer")
-                }
-
-                Section {
-                    ShareLink(item: shareText) {
-                        Label("family.onboarding.invite_share", systemImage: "square.and.arrow.up")
-                    }
-                }
-            }
-            .navigationTitle("family.onboarding.invite_sheet_title")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("family.onboarding.invite_close") {
-                        dismiss()
-                    }
-                }
-            }
+        if viewModel.invites[member.id] != nil {
+            return "\(roleName) · convite gerado"
+        } else {
+            return roleName
         }
     }
 
-    private var shareText: String {
-        "\(generated.invite.link)\n\(generated.invite.password)"
+    private func shareMessage(for generated: GeneratedInvite) -> String {
+        let template = String(
+            localized: "family.onboarding.invite_share_message",
+            defaultValue: "Convite para entrar na família no Rotina Familiar:\n\nLink: %@\nSenha: %@"
+        )
+        return String(format: template, generated.invite.link, generated.invite.password)
+    }
+}
+
+private struct ActivityViewPresenter: UIViewControllerRepresentable {
+    @Binding var generatedInvite: GeneratedInvite?
+    let messageBuilder: (GeneratedInvite) -> String
+
+    func makeUIViewController(context: Context) -> UIViewController {
+        UIViewController()
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
+        guard let generated = generatedInvite else {
+            return
+        }
+
+        if uiViewController.presentedViewController != nil {
+            return
+        }
+
+        let message = messageBuilder(generated)
+        let activityVC = UIActivityViewController(activityItems: [message], applicationActivities: nil)
+
+        activityVC.completionWithItemsHandler = { _, _, _, _ in
+            DispatchQueue.main.async {
+                self.generatedInvite = nil
+            }
+        }
+
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = uiViewController.view
+            popover.sourceRect = CGRect(x: uiViewController.view.bounds.midX, y: uiViewController.view.bounds.midY, width: 0, height: 0)
+            popover.permittedArrowDirections = []
+        }
+
+        DispatchQueue.main.async {
+            uiViewController.present(activityVC, animated: true)
+        }
     }
 }

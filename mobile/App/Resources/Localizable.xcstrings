@@ -551,6 +551,16 @@
         }
       }
     },
+    "family.onboarding.invite_share_message": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Convite para entrar na família no Rotina Familiar:\n\nLink: %@\nSenha: %@"
+          }
+        }
+      }
+    },
     "family.onboarding.invite_sheet_footer": {
       "localizations": {
         "pt-BR": {

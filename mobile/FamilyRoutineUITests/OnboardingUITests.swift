@@ -138,9 +138,13 @@ final class OnboardingUITests: XCTestCase {
         XCTAssertFalse(app.buttons["family.onboarding.finish_invites"].isEnabled)
 
         app.buttons["family.onboarding.invite_button"].tap()
-        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "ABC-123")).firstMatch.waitForExistence(timeout: 5))
-        app.buttons["Fechar"].tap()
 
+        let closeButton = app.buttons["Close"].exists ? app.buttons["Close"] : app.buttons["Fechar"]
+        if closeButton.waitForExistence(timeout: 3) {
+            closeButton.tap()
+        }
+
+        XCTAssertTrue(app.buttons["family.onboarding.finish_invites"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["family.onboarding.finish_invites"].isEnabled)
         app.buttons["family.onboarding.finish_invites"].tap()
         assertMainAppOpened()
