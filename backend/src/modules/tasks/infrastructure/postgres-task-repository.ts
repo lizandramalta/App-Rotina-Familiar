@@ -53,6 +53,32 @@ const taskSelect = `
    group by t.id`;
 
 export class PostgresTaskRepository implements TaskRepositoryPort, TaskQueryRepositoryPort {
+  public async insertTaskTemplate(
+    tx: TransactionContext,
+    params: {
+      readonly taskTemplateId: string;
+      readonly familyId: string;
+      readonly title: string;
+      readonly weight: number;
+      readonly note: string | null;
+      readonly now: Date;
+    },
+  ): Promise<void> {
+    await asPostgresClient(tx).query(
+      `insert into app.task_templates
+        (id, family_id, title, weight, note, created_at, updated_at)
+       values ($1, $2, $3, $4, $5, $6, $6)`,
+      [
+        params.taskTemplateId,
+        params.familyId,
+        params.title,
+        params.weight,
+        params.note,
+        params.now,
+      ],
+    );
+  }
+
   public async insertSingleTask(
     tx: TransactionContext,
     params: {
@@ -69,19 +95,14 @@ export class PostgresTaskRepository implements TaskRepositoryPort, TaskQueryRepo
     },
   ): Promise<TaskRecord> {
     const client = asPostgresClient(tx);
-    await client.query(
-      `insert into app.task_templates
-        (id, family_id, title, weight, note, created_at, updated_at)
-       values ($1, $2, $3, $4, $5, $6, $6)`,
-      [
-        params.taskTemplateId,
-        params.familyId,
-        params.title,
-        params.weight,
-        params.note,
-        params.now,
-      ],
-    );
+    await this.insertTaskTemplate(tx, {
+      taskTemplateId: params.taskTemplateId,
+      familyId: params.familyId,
+      title: params.title,
+      weight: params.weight,
+      note: params.note,
+      now: params.now,
+    });
     await client.query(
       `insert into app.task_occurrences
         (id, family_id, task_template_id, routine_id, origin_key, original_date, scheduled_date,

@@ -38,6 +38,7 @@ describe('SCRUM-56 / SPEC-011 phase 1 — ReopenTask', () => {
 
   beforeEach(() => {
     tasks = {
+      insertTaskTemplate: vi.fn(),
       insertSingleTask: vi.fn(),
       findTask: vi.fn().mockResolvedValue(TASK),
       findMemberRole: vi.fn().mockResolvedValue(MemberRole.ADMINISTRATOR),

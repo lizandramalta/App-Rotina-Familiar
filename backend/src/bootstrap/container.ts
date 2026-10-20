@@ -72,6 +72,9 @@ import {
   GetOwnTasksUseCase,
 } from '../modules/tasks/application/get-own-tasks-use-cases.js';
 import { PostgresTaskRepository } from '../modules/tasks/infrastructure/postgres-task-repository.js';
+import { CreateRoutineUseCase } from '../modules/routines/application/create-routine-use-case.js';
+import { GetRoutineUseCase } from '../modules/routines/application/get-routine-use-case.js';
+import { PostgresRoutineRepository } from '../modules/routines/infrastructure/postgres-routine-repository.js';
 import { ReopenTaskUseCase } from '../modules/tasks/application/reopen-task-use-case.js';
 import { CloseEligibleMissions } from '../modules/missions/application/close-eligible-missions.js';
 import {
@@ -127,6 +130,8 @@ export interface ApplicationContainer {
   readonly getOwnProgressUseCase: GetOwnProgressUseCase;
   readonly editTaskUseCase: EditTaskUseCase;
   readonly deleteTaskUseCase: DeleteTaskUseCase;
+  readonly createRoutineUseCase: CreateRoutineUseCase;
+  readonly getRoutineUseCase: GetRoutineUseCase;
   readonly createMissionUseCase: CreateMissionUseCase;
   readonly editMissionUseCase: EditMissionUseCase;
   readonly listMissionsUseCase: ListMissionsUseCase;
@@ -410,6 +415,22 @@ export function createContainer(config: Configuration): ApplicationContainer {
     missionCloser: closeEligibleMissions,
   });
 
+  const routineRepository = new PostgresRoutineRepository();
+  const routineDependencies = {
+    taskRepository,
+    routineRepository,
+    familySettingsRepository,
+    transactionRunner,
+    clock,
+  };
+  const createRoutineUseCase = new CreateRoutineUseCase(routineDependencies);
+  const getRoutineUseCase = new GetRoutineUseCase({
+    routineRepository,
+    familySettingsRepository,
+    transactionRunner,
+    clock,
+  });
+
   return {
     config,
     logger,
@@ -449,6 +470,8 @@ export function createContainer(config: Configuration): ApplicationContainer {
     getOwnProgressUseCase,
     editTaskUseCase,
     deleteTaskUseCase,
+    createRoutineUseCase,
+    getRoutineUseCase,
     createMissionUseCase,
     editMissionUseCase,
     listMissionsUseCase,
