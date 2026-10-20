@@ -15,6 +15,7 @@ import { createFamilyBodyDocumentation, registerFamilyRoutes } from './family-ro
 import { onboardingUploadBodyDocumentation, registerMediaRoutes } from './media-routes.js';
 import { registerProfileRoutes } from './profile-routes.js';
 import { registerTaskRoutes } from './task-routes.js';
+import { registerRoutineRoutes } from './routine-routes.js';
 import { registerMissionRoutes } from './mission-routes.js';
 import { registerMemberRoutes } from './member-routes.js';
 
@@ -79,6 +80,10 @@ export function buildHttpApp(
         { name: 'Media', description: 'Upload de mídia privada.' },
         { name: 'Profile', description: 'Dados do próprio perfil.' },
         { name: 'Tasks', description: 'Gestão de tarefas únicas.' },
+        {
+          name: 'Routines',
+          description: 'Configuração de recorrência e materialização de ocorrências.',
+        },
         { name: 'Missions', description: 'Missões coletivas, participações e badges.' },
       ],
       components: {
@@ -299,6 +304,7 @@ export function buildHttpApp(
       registerMediaRoutes(scope, container);
       registerProfileRoutes(scope, container);
       registerTaskRoutes(scope, container);
+      registerRoutineRoutes(scope, container);
       registerMissionRoutes(scope, container);
     },
     { prefix: '/v1' },

@@ -51,6 +51,7 @@ describe('Task management use cases — SPEC-007', () => {
       closeAfterTaskDeletion: vi.fn().mockResolvedValue(undefined),
     };
     repository = {
+      insertTaskTemplate: vi.fn(),
       insertSingleTask: vi.fn().mockResolvedValue(TASK),
       findTask: vi.fn().mockResolvedValue(TASK),
       findMemberRole: vi.fn().mockResolvedValue(MemberRole.ADMINISTRATOR),

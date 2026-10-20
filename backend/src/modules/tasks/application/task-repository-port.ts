@@ -17,6 +17,18 @@ export interface TaskRecord {
 }
 
 export interface TaskRepositoryPort {
+  /** Cria só o registro de `app.task_templates` (sem ocorrência) — reaproveitado por rotinas. */
+  insertTaskTemplate(
+    tx: TransactionContext,
+    params: {
+      readonly taskTemplateId: string;
+      readonly familyId: string;
+      readonly title: string;
+      readonly weight: number;
+      readonly note: string | null;
+      readonly now: Date;
+    },
+  ): Promise<void>;
   insertSingleTask(
     tx: TransactionContext,
     params: {

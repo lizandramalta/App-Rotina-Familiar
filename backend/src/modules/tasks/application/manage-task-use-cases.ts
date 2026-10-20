@@ -82,7 +82,7 @@ function toResponse(task: TaskRecord): TaskResponse {
   };
 }
 
-function normalizeAssigneeIds(input: unknown): readonly string[] {
+export function normalizeAssigneeIds(input: unknown): readonly string[] {
   if (input === undefined || input === null) {
     return [];
   }
@@ -94,7 +94,7 @@ function normalizeAssigneeIds(input: unknown): readonly string[] {
   return [...new Set(input)];
 }
 
-async function validateAssignees(
+export async function validateAssignees(
   repository: TaskRepositoryPort,
   tx: Parameters<TaskRepositoryPort['countFamilyMembers']>[0],
   familyId: string,
