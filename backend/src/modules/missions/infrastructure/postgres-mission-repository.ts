@@ -3,6 +3,12 @@ import type { TransactionContext } from '../../../shared/application/transaction
 import { isValidMemberRole, type MemberRole } from '../../../shared/domain/member-role.js';
 import { asPostgresClient } from '../../../shared/infrastructure/postgres/postgres-transaction-runner.js';
 import type {
+  LinkedMission,
+  MissionReopeningPort,
+  MissionReopeningResult,
+  RemovedBadge,
+} from '../../tasks/application/mission-reopening-port.js';
+import type {
   ClosedMission,
   MissionRecord,
   MissionRepositoryPort,
@@ -43,7 +49,97 @@ function escapeLike(value: string): string {
   return value.replace(/[\\%_]/g, (character) => `\\${character}`);
 }
 
-export class PostgresMissionRepository implements MissionRepositoryPort {
+export class PostgresMissionRepository implements MissionRepositoryPort, MissionReopeningPort {
+  public async findLinkedMissions(
+    tx: TransactionContext,
+    familyId: string,
+    taskId: string,
+  ): Promise<readonly LinkedMission[]> {
+    const result = await asPostgresClient(tx).query<{
+      id: string;
+      title: string;
+      completed: boolean;
+    }>(
+      `select m.id, m.title, (m.completed_at is not null) as completed
+         from app.mission_tasks mt
+         join app.missions m on m.family_id = mt.family_id and m.id = mt.mission_id
+        where mt.family_id = $1 and mt.task_id = $2
+        order by m.id`,
+      [familyId, taskId],
+    );
+    // Reward acceptance is introduced by SPEC-017; no accepted-reward record exists yet.
+    return result.rows.map((row) => ({ ...row, hasAcceptedReward: false }));
+  }
+
+  public async reopenCompletedMissions(
+    tx: TransactionContext,
+    params: {
+      readonly familyId: string;
+      readonly missionIds: readonly string[];
+      readonly now: Date;
+    },
+  ): Promise<MissionReopeningResult> {
+    if (params.missionIds.length === 0) {
+      return { participationsRemoved: 0, badgesRemoved: [], rewardRemoved: false };
+    }
+    const client = asPostgresClient(tx);
+    const participants = await client.query<{ member_id: string }>(
+      `delete from app.mission_participations
+        where family_id = $1 and mission_id = any($2::uuid[])
+        returning member_id`,
+      [params.familyId, params.missionIds],
+    );
+    await client.query(
+      `update app.missions set completed_at = null, updated_at = $3
+        where family_id = $1 and id = any($2::uuid[]) and completed_at is not null`,
+      [params.familyId, params.missionIds, params.now],
+    );
+
+    const badgesRemoved: RemovedBadge[] = [];
+    for (const memberId of new Set(participants.rows.map((row) => row.member_id))) {
+      const removed = await client.query<{ badge_code: RemovedBadge['tier'] }>(
+        `delete from app.member_badges mb
+          using app.badges b
+         where mb.family_id = $1 and mb.member_id = $2
+           and b.code = mb.badge_code
+           and b.min_missions > (
+             select count(*) from app.mission_participations p
+              where p.family_id = $1 and p.member_id = $2
+           )
+        returning mb.badge_code`,
+        [params.familyId, memberId],
+      );
+      badgesRemoved.push(...removed.rows.map((row) => ({ memberId, tier: row.badge_code })));
+      // Retained badges still point to the first N current participations.
+      await client.query(
+        `delete from app.badge_participations bp
+          using app.member_badges mb
+         where bp.member_badge_id = mb.id
+           and mb.family_id = $1 and mb.member_id = $2`,
+        [params.familyId, memberId],
+      );
+      await client.query(
+        `insert into app.badge_participations (member_badge_id, mission_id, member_id)
+         select mb.id, p.mission_id, p.member_id
+           from app.member_badges mb
+           join app.badges b on b.code = mb.badge_code
+           cross join lateral (
+             select p.mission_id, p.member_id
+               from app.mission_participations p
+              where p.family_id = $1 and p.member_id = $2
+              order by p.recorded_at, p.mission_id
+              limit b.min_missions
+           ) p
+          where mb.family_id = $1 and mb.member_id = $2`,
+        [params.familyId, memberId],
+      );
+    }
+    return {
+      participationsRemoved: participants.rowCount ?? 0,
+      badgesRemoved,
+      rewardRemoved: false,
+    };
+  }
   public async findMemberRole(
     tx: TransactionContext,
     familyId: string,
