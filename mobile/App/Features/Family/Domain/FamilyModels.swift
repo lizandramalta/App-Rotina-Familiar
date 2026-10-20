@@ -1,6 +1,6 @@
 import Foundation
 
-nonisolated struct DraftMember: Identifiable, Equatable, Sendable {
+nonisolated struct DraftMember: Identifiable, Equatable, Hashable, Sendable {
     let id: UUID
     var name: String
     var role: MemberRole

@@ -1,876 +1,1071 @@
 {
-  "sourceLanguage" : "pt-BR",
-  "strings" : {
-    "access.common.error_network" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Não foi possível conectar. Verifique sua internet."
+  "sourceLanguage": "pt-BR",
+  "strings": {
+    "access.common.error_network": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível conectar. Verifique sua internet."
           }
         }
       }
     },
-    "access.entry.error_apple_proof_invalid" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Não foi possível confirmar sua conta Apple. Tente novamente."
+    "access.entry.error_apple_proof_invalid": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível confirmar sua conta Apple. Tente novamente."
           }
         }
       }
     },
-    "access.entry.error_rate_limited" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Muitas tentativas. Aguarde alguns minutos e tente novamente."
+    "access.entry.error_rate_limited": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muitas tentativas. Aguarde alguns minutos e tente novamente."
           }
         }
       }
     },
-    "access.entry.illustration_label" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ilustração de uma casa com porta e janelas, representando o lar da família"
+    "access.entry.illustration_label": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ilustração de uma casa com porta e janelas, representando o lar da família"
           }
         }
       }
     },
-    "access.entry.invite_hint" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recebeu um convite? Abra o link que a sua família enviou."
+    "access.entry.invite_hint": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recebeu um convite? Abra o link que a sua família enviou."
           }
         }
       }
     },
-    "access.entry.submitting" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Entrando com Apple"
+    "access.entry.submitting": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrando com Apple"
           }
         }
       }
     },
-    "access.entry.subtitle" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Entre para organizar sua família"
+    "access.entry.subtitle": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entre para organizar sua família"
           }
         }
       }
     },
-    "access.entry.title" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bem-vindo ao App Família"
+    "access.entry.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bem-vindo ao App Família"
           }
         }
       }
     },
-    "family.create.back" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Voltar"
+    "family.create.back": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voltar"
           }
         }
       }
     },
-    "family.create.error_grant_invalid" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sua autorização para criar a família expirou. Entre com a Apple novamente para continuar."
+    "family.create.error_grant_invalid": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sua autorização para criar a família expirou. Entre com a Apple novamente para continuar."
           }
         }
       }
     },
-    "family.create.error_rate_limited" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Muitas tentativas. Aguarde um instante e tente de novo."
+    "family.create.error_rate_limited": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muitas tentativas. Aguarde um instante e tente de novo."
           }
         }
       }
     },
-    "family.create.error_unavailable" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Não foi possível criar a família agora. Tente de novo."
+    "family.create.error_unavailable": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível criar a família agora. Tente de novo."
           }
         }
       }
     },
-    "family.create.error_uncertain" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Não foi possível confirmar se a família foi criada. Verifique seu acesso com a Apple antes de tentar novamente."
+    "family.create.error_uncertain": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível confirmar se sua família\nfoi criada. Entre com Apple novamente\npara verificar seu acesso."
           }
         }
       }
     },
-    "family.create.name.error_invalid" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Use no máximo 60 caracteres sem quebras de linha."
+    "family.create.name.error_invalid": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informe um nome de família válido."
           }
         }
       }
     },
-    "family.create.name.error_required" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Informe o nome da família para continuar."
+    "family.create.name.error_required": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informe o nome da família para continuar."
           }
         }
       }
     },
-    "family.create.name.label" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nome da família"
+    "family.create.name.label": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome da família"
           }
         }
       }
     },
-    "family.create.name.placeholder" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ex.: Família Silva"
+    "family.create.name.placeholder": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ex.: Casa Lima"
           }
         }
       }
     },
-    "family.create.section.identification" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "IDENTIFICAÇÃO DA FAMÍLIA"
+    "family.create.section.identification": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IDENTIFICAÇÃO DA FAMÍLIA"
           }
         }
       }
     },
-    "family.create.section.time_zone" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "FUSO HORÁRIO DA ROTINA"
+    "family.create.section.time_zone": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fuso horário"
           }
         }
       }
     },
-    "family.create.submit" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Criar família"
+    "family.create.submit": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Criar família"
           }
         }
       }
     },
-    "family.create.submitting" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Criando família..."
+    "family.create.submitting": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Criando família…"
           }
         }
       }
     },
-    "family.create.time_zone.close" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fechar"
+    "family.create.time_zone.close": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fechar"
           }
         }
       }
     },
-    "family.create.time_zone.footer" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A semana da família começa na segunda-feira às 00:00 e termina no domingo às 23:59:59 neste fuso."
+    "family.create.time_zone.footer": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Você pode mudar depois em Família › Configurações."
           }
         }
       }
     },
-    "family.create.time_zone.label" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fuso horário"
+    "family.create.time_zone.label": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fuso horário"
           }
         }
       }
     },
-    "family.create.time_zone.search" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Buscar fuso horário"
+    "family.create.time_zone.search": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar fuso horário"
           }
         }
       }
     },
-    "family.create.title" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Criar família"
+    "family.create.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crie sua família"
           }
         }
       }
     },
-    "family.create.verify_access" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Verificar acesso"
+    "family.create.verify_access": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verificar acesso"
           }
         }
       }
     },
-    "family.member.role.administrator" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Administrador"
+    "family.member.role.administrator": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Administrador"
           }
         }
       }
     },
-    "family.member.role.kids" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kids"
+    "family.member.role.kids": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kids"
           }
         }
       }
     },
-    "family.member.role.member" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Membro"
+    "family.member.role.member": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Membro"
           }
         }
       }
     },
-    "family.members.add" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Adicionar membro"
+    "family.members.add": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar membro"
           }
         }
       }
     },
-    "family.members.draft.cancel" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancelar"
+    "family.members.draft.cancel": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar"
           }
         }
       }
     },
-    "family.members.draft.error_invalid" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Use no máximo 60 caracteres sem quebras de linha."
+    "family.members.draft.error_invalid": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informe um nome válido."
           }
         }
       }
     },
-    "family.members.draft.error_required" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Informe o nome do membro."
+    "family.members.draft.error_required": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informe o nome do membro."
           }
         }
       }
     },
-    "family.members.draft.name_label" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nome"
+    "family.members.draft.name_label": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome"
           }
         }
       }
     },
-    "family.members.draft.remove" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remover da lista"
+    "family.members.draft.remove": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remover membro"
           }
         }
       }
     },
-    "family.members.draft.role_label" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Perfil"
+    "family.members.draft.role_label": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Papel na família"
           }
         }
       }
     },
-    "family.members.draft.save" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Salvar"
+    "family.members.draft.save": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salvar"
           }
         }
       }
     },
-    "family.members.draft.title_edit" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Editar membro"
+    "family.members.draft.title_edit": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar membro"
           }
         }
       }
     },
-    "family.members.draft.title_new" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Novo membro"
+    "family.members.draft.title_new": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar membro"
           }
         }
       }
     },
-    "family.members.empty_footer" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Você já será adicionado como administrador. Adicione outras pessoas agora ou depois."
+    "family.members.empty_footer": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Você já será adicionado como administrador. Adicione outras pessoas agora ou depois."
           }
         }
       }
     },
-    "family.members.section" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "MEMBROS"
+    "family.members.section": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Membros"
           }
         }
       }
     },
-    "family.onboarding.finish" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Concluir"
+    "family.onboarding.finish": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concluir"
           }
         }
       }
     },
-    "family.onboarding.invite_close" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fechar"
+    "family.onboarding.invite_close": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fechar"
           }
         }
       }
     },
-    "family.onboarding.invite_error" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Não foi possível gerar o convite. Tente de novo."
+    "family.onboarding.invite_error": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível gerar o convite. Tente de novo."
           }
         }
       }
     },
-    "family.onboarding.invite_footer" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gere um convite para cada pessoa que quiser chamar agora. Você também pode fazer isso depois."
+    "family.onboarding.invite_footer": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gere um convite para cada pessoa que quiser chamar agora. Você também pode fazer isso depois."
           }
         }
       }
     },
-    "family.onboarding.invite_generate" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gerar convite"
+    "family.onboarding.invite_generate": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gerar convite"
           }
         }
       }
     },
-    "family.onboarding.invite_link" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Link"
+    "family.onboarding.invite_link": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Link"
           }
         }
       }
     },
-    "family.onboarding.invite_password" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Senha"
+    "family.onboarding.invite_password": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Senha"
           }
         }
       }
     },
-    "family.onboarding.invite_regenerate" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gerar novo"
+    "family.onboarding.invite_regenerate": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gerar novo"
           }
         }
       }
     },
-    "family.onboarding.invite_share" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Compartilhar"
+    "family.onboarding.invite_share": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compartilhar"
           }
         }
       }
     },
-    "family.onboarding.invite_sheet_footer" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Compartilhe o link e a senha com a pessoa convidada."
+    "family.onboarding.invite_sheet_footer": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compartilhe o link e a senha com a pessoa convidada."
           }
         }
       }
     },
-    "family.onboarding.invite_sheet_title" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Convite"
+    "family.onboarding.invite_sheet_title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Convite"
           }
         }
       }
     },
-    "family.onboarding.members_pending" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Não foi possível adicionar alguns membros."
+    "family.onboarding.members_pending": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível adicionar alguns membros."
           }
         }
       }
     },
-    "family.onboarding.members_retry" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tentar novamente"
+    "family.onboarding.members_retry": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tentar novamente"
           }
         }
       }
     },
-    "family.onboarding.skip" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pular por agora"
+    "family.onboarding.skip": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pular por agora"
           }
         }
       }
     },
-    "family.onboarding.title" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Convidar membros"
+    "family.onboarding.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Convidar membros"
           }
         }
       }
     },
-    "foundation.placeholder.action" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abrir destino de exemplo"
+    "foundation.placeholder.action": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir destino de exemplo"
           }
         }
       }
     },
-    "foundation.placeholder.description" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Estrutura de navegação temporária para validar a fundação do aplicativo."
+    "foundation.placeholder.description": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estrutura de navegação temporária para validar a fundação do aplicativo."
           }
         }
       }
     },
-    "foundation.tab.explore" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Explorar"
+    "foundation.tab.explore": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Explorar"
           }
         }
       }
     },
-    "foundation.tab.home" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Início"
+    "foundation.tab.home": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Início"
           }
         }
       }
     },
-    "foundation.tab.settings" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Configurações"
+    "foundation.tab.settings": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configurações"
           }
         }
       }
     },
-    "onboarding.discard.confirm" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Descartar"
+    "onboarding.discard.confirm": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descartar"
           }
         }
       }
     },
-    "onboarding.discard.keep_editing" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Continuar editando"
+    "onboarding.discard.keep_editing": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar editando"
           }
         }
       }
     },
-    "onboarding.discard.message" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Se você sair agora, os dados preenchidos neste passo serão perdidos."
+    "onboarding.discard.message": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se você sair agora, os dados preenchidos neste passo serão perdidos."
           }
         }
       }
     },
-    "onboarding.discard.title" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Descartar criação?"
+    "onboarding.discard.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descartar criação?"
           }
         }
       }
     },
-    "onboarding.profile.cancel" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancelar"
+    "onboarding.profile.cancel": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar"
           }
         }
       }
     },
-    "onboarding.profile.continue" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Continuar"
+    "onboarding.profile.continue": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar"
           }
         }
       }
     },
-    "onboarding.profile.name.error_invalid" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Use no máximo 60 caracteres sem quebras de linha."
+    "onboarding.profile.name.error_invalid": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informe um nome válido."
           }
         }
       }
     },
-    "onboarding.profile.name.error_required" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Informe seu nome para continuar."
+    "onboarding.profile.name.error_required": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informe seu nome para continuar."
           }
         }
       }
     },
-    "onboarding.profile.name.label" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Seu nome"
+    "onboarding.profile.name.label": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seu nome"
           }
         }
       }
     },
-    "onboarding.profile.name.placeholder" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Como você quer aparecer"
+    "onboarding.profile.name.placeholder": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome"
           }
         }
       }
     },
-    "onboarding.profile.nickname.error_invalid" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Use no máximo 20 caracteres visíveis no apelido."
+    "onboarding.profile.nickname.error_invalid": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O apelido pode ter até 20 caracteres\n(sem contar espaços)."
           }
         }
       }
     },
-    "onboarding.profile.nickname.footer" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aparece ao lado do seu nome para facilitar a identificação na família."
+    "onboarding.profile.nickname.footer": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aparece ao lado do seu nome para facilitar a identificação na família."
           }
         }
       }
     },
-    "onboarding.profile.nickname.label" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Apelido ou etiqueta"
+    "onboarding.profile.nickname.label": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apelido ou etiqueta"
           }
         }
       }
     },
-    "onboarding.profile.nickname.optional" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opcional"
+    "onboarding.profile.nickname.optional": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcional"
           }
         }
       }
     },
-    "onboarding.profile.nickname.placeholder" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ex.: Pai, Mãe, Tia Ana"
+    "onboarding.profile.nickname.placeholder": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Como a família vai te chamar?"
           }
         }
       }
     },
-    "onboarding.profile.photo.add" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Adicionar foto"
+    "onboarding.profile.photo.add": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar foto"
           }
         }
       }
     },
-    "onboarding.profile.photo.change" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trocar foto"
+    "onboarding.profile.photo.change": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alterar foto"
           }
         }
       }
     },
-    "onboarding.profile.photo.error_selection" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Não foi possível usar essa imagem. Escolha outra foto."
+    "onboarding.profile.photo.error_selection": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível usar essa imagem. Escolha outra foto."
           }
         }
       }
     },
-    "onboarding.profile.photo.error_upload" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Não foi possível enviar a foto. Tente de novo ou continue sem ela."
+    "onboarding.profile.photo.error_upload": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível enviar a foto. Tente de novo ou continue sem ela."
           }
         }
       }
     },
-    "onboarding.profile.photo.remove" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remover foto"
+    "onboarding.profile.photo.remove": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remover foto"
           }
         }
       }
     },
-    "onboarding.profile.photo.retry" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tentar novamente"
+    "onboarding.profile.photo.retry": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tentar novamente"
           }
         }
       }
     },
-    "onboarding.profile.photo.skip" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Continuar sem foto"
+    "onboarding.profile.photo.skip": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar sem foto"
           }
         }
       }
     },
-    "onboarding.profile.photo.uploading" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enviando foto…"
+    "onboarding.profile.photo.uploading": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enviando foto…"
           }
         }
       }
     },
-    "onboarding.profile.section" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "COMO SUA FAMÍLIA VAI VER VOCÊ"
+    "onboarding.profile.section": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "COMO SUA FAMÍLIA VAI VER VOCÊ"
           }
         }
       }
     },
-    "onboarding.profile.title" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Seu perfil"
+    "onboarding.profile.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seu perfil"
+          }
+        }
+      }
+    },
+    "onboarding.profile.subtitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "É assim que a família vai ver você.\nFoto e etiqueta são opcionais."
+          }
+        }
+      }
+    },
+    "onboarding.profile.name.section": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seu nome"
+          }
+        }
+      }
+    },
+    "onboarding.profile.nickname.section": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Etiqueta (opcional)"
+          }
+        }
+      }
+    },
+    "onboarding.profile.photo.optional": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto (opcional)"
+          }
+        }
+      }
+    },
+    "onboarding.profile.photo.take": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tirar foto"
+          }
+        }
+      }
+    },
+    "onboarding.profile.photo.choose": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolher da galeria"
+          }
+        }
+      }
+    },
+    "family.create.subtitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dê um nome à família e confira o fuso horário."
+          }
+        }
+      }
+    },
+    "family.create.name.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O fuso horário define quando cada dia e cada\nsemana começam."
+          }
+        }
+      }
+    },
+    "family.members.subtitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Você pode adicionar pessoas agora ou fazer isso depois."
+          }
+        }
+      }
+    },
+    "family.create.error_network": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível conectar.\nVerifique sua internet."
+          }
+        }
+      }
+    },
+    "family.members.draft.name_placeholder": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome do membro"
+          }
+        }
+      }
+    },
+    "family.members.draft.name_footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use de 1 a 60 caracteres."
+          }
+        }
+      }
+    },
+    "family.members.draft.role_footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Administradores gerenciam a família. Membros cuidam das tarefas. Kids participam de forma simplificada."
+          }
+        }
+      }
+    },
+    "family.members.discard.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descartar alterações?"
+          }
+        }
+      }
+    },
+    "family.members.discard.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As alterações feitas neste membro serão perdidas."
+          }
+        }
+      }
+    },
+    "family.members.discard.confirm": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descartar alterações"
+          }
+        }
+      }
+    },
+    "family.members.discard.keep_editing": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar editando"
           }
         }
       }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }
