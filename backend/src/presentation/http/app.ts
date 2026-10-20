@@ -18,6 +18,7 @@ import { registerTaskRoutes } from './task-routes.js';
 import { MissionReopenRequiresConfirmationError } from '../../modules/tasks/domain/task-reopening-errors.js';
 import { registerMissionRoutes } from './mission-routes.js';
 import { registerMemberRoutes } from './member-routes.js';
+import { registerRewardRoutes } from './reward-routes.js';
 
 export function buildHttpApp(
   container: ApplicationContainer,
@@ -81,6 +82,7 @@ export function buildHttpApp(
         { name: 'Profile', description: 'Dados do próprio perfil.' },
         { name: 'Tasks', description: 'Gestão de tarefas únicas.' },
         { name: 'Missions', description: 'Missões coletivas, participações e badges.' },
+        { name: 'Rewards', description: 'Catálogo de recompensas coletivas.' },
       ],
       components: {
         securitySchemes: {
@@ -316,6 +318,7 @@ export function buildHttpApp(
       registerProfileRoutes(scope, container);
       registerTaskRoutes(scope, container);
       registerMissionRoutes(scope, container);
+      registerRewardRoutes(scope, container);
     },
     { prefix: '/v1' },
   );

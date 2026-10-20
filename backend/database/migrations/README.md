@@ -9,7 +9,7 @@ Arquivos `NNNN_descricao_em_ingles.sql`, aplicados em ordem crescente do nome. O
 identificador persistido em `app.schema_migrations` é o **nome completo do arquivo**,
 não apenas o prefixo numérico. Há prefixos históricos repetidos (`0005` e `0007`), que
 não podem ser renomeados depois de aplicados. Para novas migrations, use o próximo
-prefixo ainda não usado (atualmente `0011`) e não reutilize prefixos daqui em diante.
+prefixo ainda não usado (atualmente `0012`) e não reutilize prefixos daqui em diante.
 
 Cada arquivo roda dentro de uma transação. Se falhar, nada daquele arquivo é
 aplicado e o processo para — as migrations seguintes não rodam.

@@ -82,6 +82,11 @@ import {
   ListMissionsUseCase,
 } from '../modules/missions/application/mission-use-cases.js';
 import { PostgresMissionRepository } from '../modules/missions/infrastructure/postgres-mission-repository.js';
+import {
+  AddRewardItemUseCase,
+  ListRewardItemsUseCase,
+} from '../modules/rewards/application/reward-use-cases.js';
+import { PostgresRewardRepository } from '../modules/rewards/infrastructure/postgres-reward-repository.js';
 
 export interface ApplicationContainer {
   readonly config: Configuration;
@@ -127,6 +132,8 @@ export interface ApplicationContainer {
   readonly listMissionsUseCase: ListMissionsUseCase;
   readonly getMissionDetailUseCase: GetMissionDetailUseCase;
   readonly getMissionTaskOptionsUseCase: GetMissionTaskOptionsUseCase;
+  readonly listRewardItemsUseCase: ListRewardItemsUseCase;
+  readonly addRewardItemUseCase: AddRewardItemUseCase;
   dispose(): Promise<void>;
 }
 
@@ -374,6 +381,11 @@ export function createContainer(config: Configuration): ApplicationContainer {
   const getMissionDetailUseCase = new GetMissionDetailUseCase(missionDependencies);
   const getMissionTaskOptionsUseCase = new GetMissionTaskOptionsUseCase(missionDependencies);
 
+  const rewardRepository = new PostgresRewardRepository();
+  const rewardDependencies = { repository: rewardRepository, transactionRunner, logger };
+  const listRewardItemsUseCase = new ListRewardItemsUseCase(rewardDependencies);
+  const addRewardItemUseCase = new AddRewardItemUseCase({ ...rewardDependencies, clock });
+
   const taskRepository = new PostgresTaskRepository();
   const taskDependencies = { repository: taskRepository, transactionRunner, clock };
   const createTaskUseCase = new CreateTaskUseCase(taskDependencies);
@@ -442,6 +454,8 @@ export function createContainer(config: Configuration): ApplicationContainer {
     listMissionsUseCase,
     getMissionDetailUseCase,
     getMissionTaskOptionsUseCase,
+    listRewardItemsUseCase,
+    addRewardItemUseCase,
     async dispose(): Promise<void> {
       logger.info('Disposing application container...');
       await dbPool.close();
