@@ -1,4 +1,4 @@
-/** `PATCH /v1/me/profile` e `POST /v1/media` na borda HTTP (SPEC-002 §5.2/§5.3). */
+/** `PATCH /v1/me/profile` e `POST /v1/media` na borda HTTP (SPEC-002 §5.2/§5.3, SPEC-006 CA-02/03/06/07). */
 import sharp from 'sharp';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
@@ -7,8 +7,21 @@ import {
   PhotoMediaNotOwnedError,
 } from '../../src/modules/media/domain/media-errors.js';
 import { MAX_UPLOAD_INPUT_BYTES } from '../../src/presentation/http/media-routes.js';
-import { DependencyUnavailableError, NotFoundError } from '../../src/shared/domain/domain-error.js';
+import {
+  DependencyUnavailableError,
+  NotFoundError,
+  ValidationError,
+} from '../../src/shared/domain/domain-error.js';
 import { buildTestApp, TEST_ACTOR, type TestApp } from '../support/build-test-app.js';
+
+const OWN_PROFILE_RESULT = {
+  memberId: TEST_ACTOR.memberId,
+  name: 'Maria Silva',
+  nickname: 'Mari',
+  photoMediaId: null as string | null,
+  totalParticipations: 7,
+  nextTier: { code: 'silver', requiredMissionCount: 10, remaining: 3 },
+};
 
 const AUTH = { authorization: 'Bearer opaque-access-token' };
 const MEDIA_ID = '9f1c2b0e-5b8a-4d0f-9d6e-1f7a8b9c0d1e';
@@ -37,7 +50,10 @@ describe('PATCH /v1/me/profile', () => {
 
   beforeEach(() => {
     test = buildTestApp();
-    test.updateOwnProfile.execute.mockResolvedValue({ photoMediaId: MEDIA_ID });
+    test.updateOwnProfile.execute.mockResolvedValue({
+      ...OWN_PROFILE_RESULT,
+      photoMediaId: MEDIA_ID,
+    });
   });
   afterEach(async () => {
     await test.app.close();
@@ -51,29 +67,65 @@ describe('PATCH /v1/me/profile', () => {
       payload: payload as object,
     });
 
-  it('links the photo and answers 200 with no-store', async () => {
+  it('links the photo and answers 200 with no-store, with the canonical profile', async () => {
     const response = await patch({ photoMediaId: MEDIA_ID });
 
     expect(response.statusCode).toBe(200);
     expect(response.headers['cache-control']).toBe('no-store');
-    expect(response.json()).toEqual({ photoMediaId: MEDIA_ID });
+    expect(response.json()).toEqual({ ...OWN_PROFILE_RESULT, photoMediaId: MEDIA_ID });
     expect(test.updateOwnProfile.execute).toHaveBeenCalledWith({
       actor: TEST_ACTOR,
+      nickname: undefined,
       photoMediaId: MEDIA_ID,
     });
   });
 
   it('removes the photo with null', async () => {
-    test.updateOwnProfile.execute.mockResolvedValue({ photoMediaId: null });
+    test.updateOwnProfile.execute.mockResolvedValue(OWN_PROFILE_RESULT);
 
     const response = await patch({ photoMediaId: null });
 
     expect(response.statusCode).toBe(200);
-    expect(response.json()).toEqual({ photoMediaId: null });
+    expect(response.json()).toEqual(OWN_PROFILE_RESULT);
   });
 
-  it.each(['familyId', 'memberId', 'role', 'appleSubject', 'nickname'])(
-    'rejects %s with 400 UNKNOWN_FIELD: the actor comes only from the session',
+  it('CA-02 sends only nickname, leaving photoMediaId out of the command entirely', async () => {
+    test.updateOwnProfile.execute.mockResolvedValue({ ...OWN_PROFILE_RESULT, nickname: 'Mi' });
+
+    const response = await patch({ nickname: 'Mi' });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().nickname).toBe('Mi');
+    expect(test.updateOwnProfile.execute).toHaveBeenCalledWith({
+      actor: TEST_ACTOR,
+      nickname: 'Mi',
+      photoMediaId: undefined,
+    });
+  });
+
+  it('CA-02 accepts an empty body: both fields stay omitted, preserving current values', async () => {
+    const response = await patch({});
+
+    expect(response.statusCode).toBe(200);
+    expect(test.updateOwnProfile.execute).toHaveBeenCalledWith({
+      actor: TEST_ACTOR,
+      nickname: undefined,
+      photoMediaId: undefined,
+    });
+  });
+
+  it.each([
+    'familyId',
+    'memberId',
+    'role',
+    'kidsMode',
+    'isFamilyCreator',
+    'appleUserID',
+    'status',
+    'concededAt',
+    'contributingMissionIds',
+  ])(
+    'CA-03 rejects protected field %s with 400 UNKNOWN_FIELD, without persisting',
     async (field) => {
       const response = await patch({ photoMediaId: MEDIA_ID, [field]: 'x' });
 
@@ -86,15 +138,26 @@ describe('PATCH /v1/me/profile', () => {
     },
   );
 
-  it.each([[{}], [{ photoMediaId: 'not-a-uuid' }]])(
-    'rejects %j with 400 VALIDATION_FAILED',
-    async (payload) => {
-      const response = await patch(payload);
+  it('rejects an invalid photoMediaId format with 400 VALIDATION_FAILED', async () => {
+    const response = await patch({ photoMediaId: 'not-a-uuid' });
 
-      expect(response.statusCode).toBe(400);
-      expect(response.json().code).toBe('VALIDATION_FAILED');
-    },
-  );
+    expect(response.statusCode).toBe(400);
+    expect(response.json().code).toBe('VALIDATION_FAILED');
+  });
+
+  it('CA-06 maps NICKNAME_INVALID_LENGTH to 422 VALIDATION_FAILED', async () => {
+    test.updateOwnProfile.execute.mockRejectedValueOnce(
+      new ValidationError('The nickname is invalid.', { nickname: ['NICKNAME_INVALID_LENGTH'] }),
+    );
+
+    const response = await patch({ nickname: 'a'.repeat(21) });
+
+    expect(response.statusCode).toBe(422);
+    expect(response.json()).toMatchObject({
+      code: 'VALIDATION_FAILED',
+      fieldErrors: { nickname: ['NICKNAME_INVALID_LENGTH'] },
+    });
+  });
 
   it('maps domain errors to their contract status', async () => {
     test.updateOwnProfile.execute.mockRejectedValueOnce(new PhotoMediaNotOwnedError());

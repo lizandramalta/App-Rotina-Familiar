@@ -25,6 +25,9 @@ export interface TestApp {
   readonly uploadMedia: UseCaseMock;
   readonly uploadOnboardingMedia: UseCaseMock;
   readonly updateOwnProfile: UseCaseMock;
+  readonly getOwnProfile: UseCaseMock;
+  readonly getOwnBadges: UseCaseMock;
+  readonly getBadgeContributions: UseCaseMock;
   readonly authenticateSession: UseCaseMock;
   readonly inspectInvite: UseCaseMock;
   readonly joinFamilyByInvite: UseCaseMock;
@@ -80,6 +83,9 @@ export function buildTestApp(): TestApp {
   const uploadMedia: UseCaseMock = { execute: vi.fn() };
   const uploadOnboardingMedia: UseCaseMock = { execute: vi.fn() };
   const updateOwnProfile: UseCaseMock = { execute: vi.fn() };
+  const getOwnProfile: UseCaseMock = { execute: vi.fn() };
+  const getOwnBadges: UseCaseMock = { execute: vi.fn() };
+  const getBadgeContributions: UseCaseMock = { execute: vi.fn() };
   const authenticateSession: UseCaseMock = { execute: vi.fn().mockResolvedValue(TEST_ACTOR) };
   const inspectInvite: UseCaseMock = { execute: vi.fn() };
   const joinFamilyByInvite: UseCaseMock = { execute: vi.fn() };
@@ -126,6 +132,9 @@ export function buildTestApp(): TestApp {
     uploadMediaUseCase: uploadMedia,
     uploadOnboardingMediaUseCase: uploadOnboardingMedia,
     updateOwnProfileUseCase: updateOwnProfile,
+    getOwnProfileUseCase: getOwnProfile,
+    getOwnBadgesUseCase: getOwnBadges,
+    getBadgeContributionsUseCase: getBadgeContributions,
     createTaskUseCase: createTask,
     completeTaskUseCase: completeTask,
     reopenTaskUseCase: reopenTask,
@@ -161,6 +170,9 @@ export function buildTestApp(): TestApp {
     uploadMedia,
     uploadOnboardingMedia,
     updateOwnProfile,
+    getOwnProfile,
+    getOwnBadges,
+    getBadgeContributions,
     authenticateSession,
     inspectInvite,
     joinFamilyByInvite,

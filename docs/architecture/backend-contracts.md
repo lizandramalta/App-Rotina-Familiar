@@ -1,8 +1,8 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.17 · **Base funcional:** RN 1.18 / RF 1.17 / UC 1.16 · **Arquitetura backend:** 1.4\
-**Data:** 2026-10-19\
-**Situação:** `displayStatus` pessoal materializado na API e OpenAPI; ampliações de onboarding ainda exigem implementação e atualização da OpenAPI
+**Versão:** 1.18 · **Base funcional:** RN 1.18 / RF 1.17 / UC 1.16 · **Arquitetura backend:** 1.4\
+**Data:** 2026-10-21\
+**Situação:** `GetOwnProfile`/`UpdateOwnProfile`/`GetOwnBadges`/`GetBadgeContributions` materializados na API e OpenAPI (SPEC-006 Fase 1); ampliações de onboarding ainda exigem implementação e atualização da OpenAPI
 
 [Arquitetura](backend-architecture.md) · [Decisões](backend-decisions.md) · [Catálogo mobile](mobile-feature-catalog.md) · [UC](../03-casos-de-uso.md) · [Índice](../DOCUMENTACAO.md)
 
@@ -90,6 +90,8 @@ Ao voltar de TEL-056 para TEL-002, o cliente carrega a família existente e seus
 `PATCH /family` aceita somente `name`, com a mesma validação do nome na criação, e retorna `200` com `id`, `name` e `timeZoneId` confirmados. `familyId`, fuso, Criador e membros no corpo são campos protegidos/desconhecidos. O cliente não envia o PATCH quando o nome não mudou.
 
 Preview de fuso é apenas leitura de suporte a MOD-012. A gravação pode refletir novo ciclo se o limite temporal avançar; devolver limites efetivos, sem assumir que preview reservou estado.
+
+`GetOwnProfile`/`UpdateOwnProfile`/`GetOwnBadges`/`GetBadgeContributions` operam exclusivamente sobre o titular da sessão; nenhuma das quatro rotas aceita `memberId`. `UpdateOwnProfile` trata `nickname` e `photoMediaId` como campos independentes e opcionais — omitir um preserva seu valor vigente, `null` remove a configuração; os dois podem ser enviados juntos na mesma transação (se a foto for inválida, nenhuma das duas alterações persiste). `nickname` segue RN63 (até 20 caracteres não-espaço após trim, sem caracteres de controle) e responde `422 VALIDATION_FAILED`/`NICKNAME_INVALID_LENGTH` quando excede o limite — por consistência com os demais campos de comprimento do contrato (`TITLE_INVALID_LENGTH`, `WEIGHT_INVALID`, `FREQUENCY_DAYS_INVALID`), não `400` como uma versão anterior da SPEC-006 chegou a registrar. `photoMediaId`, quando enviado, é revalidado como `READY`, do titular e com `finalidade: profilePhoto`, usando os mesmos códigos `PHOTO_MEDIA_NOT_READY`/`PHOTO_MEDIA_NOT_OWNED`/`PHOTO_MEDIA_PURPOSE_MISMATCH` de `SignalTask`. Campos protegidos (`role`, `familyId`, `kidsMode`, `isFamilyCreator`, `appleUserID`, `status`, `concededAt`, `contributingMissionIds`) respondem `400 UNKNOWN_FIELD`, sem persistir — a rota administrativa `PATCH /family/members/{memberId}` já recusa `nickname`/`photoMediaId` pelo mesmo motivo, sem alteração nesta entrega. `GetOwnBadges`/`GetBadgeContributions` leem `app.mission_participations`/`app.badges`/`app.member_badges`/`app.badge_participations` (escritos exclusivamente por `CloseEligibleMissions`, SPEC-014); `totalParticipations: 0` devolve `nextTier` apontando para `bronze` (5), sem conceder badge simulado, e `nextTier` é `null` ao atingir `diamond` (50). `GetBadgeContributions` com `awardId` de outro titular — da mesma família ou de outra — responde `404 RESOURCE_NOT_FOUND`, sem distinguir os casos (RNF06). Kids opera as quatro rotas nos mesmos termos de um adulto (RF65), sem exposição administrativa. Para SPEC-006.
 
 ## 4. Tarefas, rotinas, Kids e indicadores
 
@@ -199,7 +201,7 @@ Cada linha cobre um objetivo funcional completo, não apenas uma rota. RF/RN per
 | <a id="backend-uc07"></a>[UC07](../03-casos-de-uso.md#uc07) | `CreateTask`, `EditTask`, `DeleteTask` / Tasks | Datas livres, título ≤60, observação ≤250, edição de concluída não protegida, resolução de sinalização pendente, auditoria, missão não vazia e fechamento da missão (`CloseEligibleMissions`) quando a exclusão deixa só tarefas concluídas | RF07–10/15/16/27/58/59/69/70; RN11–13/17–20/50/58/59/66/67 |
 | <a id="backend-uc08"></a>[UC08](../03-casos-de-uso.md#uc08) | `CreateRoutine`, `UpdateFutureRoutine`, `MaterializeRoutineOccurrences` | Frequências fixas, observação opcional, horizonte e origem estável; proteger passado/conquistas | RF13/14/70; RN14/16–18/67 |
 | <a id="backend-uc09"></a>[UC09](../03-casos-de-uso.md#uc09) | `InspectInvite`, `JoinFamilyByInvite`, `RecoverInviteJoin`, `RefreshSession` | Consumo único, prova de instalação e troca sem remoção | RF42–46/54/68; RN09/10/45–47 |
-| <a id="backend-uc10"></a>[UC10](../03-casos-de-uso.md#uc10) | `UpdateOwnProfile`, `GetOwnBadges`, `GetBadgeContributions` | Titularidade, câmera/galeria na UI e marcos por participação | RF48/62/65; RN63/64 |
+| <a id="backend-uc10"></a>[UC10](../03-casos-de-uso.md#uc10) | `GetOwnProfile`, `UpdateOwnProfile`, `GetOwnBadges`, `GetBadgeContributions` | Titularidade, câmera/galeria na UI e marcos por participação | RF48/62/65; RN63/64 |
 | <a id="backend-uc11"></a>[UC11](../03-casos-de-uso.md#uc11) | `GetOwnTasks`, `GetFamilyTasks`, `GetMemberTasks`, `GetOwnProgress`, `GetFamilyOverview` | Consulta própria diária apenas de responsáveis, com apresentação do estado por perfil; Dia/Semana familiar adulta e carrossel | RF11/17/22/24/49/60/65/66; RN23/26/27/33/49/55/60/61 |
 | <a id="backend-uc12"></a>[UC12](../03-casos-de-uso.md#uc12) | `CompleteTask` / Tasks, Kids, Missions | Direta, mantém responsáveis ou atribui adulto sem responsável; crédito integral e tarefa Kids só Admin | RF12/26/47/56; RN21–23/30/48/55/56 |
 | <a id="backend-uc13"></a>[UC13](../03-casos-de-uso.md#uc13) | `GetFamilyLoad` / Insights | Carga pelo instante da conclusão, sem duplicação por joins | RF18–21/56/57/66; RN28/30/31/33/34/57/61 |
@@ -234,6 +236,7 @@ O documento OpenAPI 3.1 é gerado pelos schemas HTTP em `/docs/json`, e a interf
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.18 | 2026-10-21 | `GetOwnProfile`, `UpdateOwnProfile` (com `nickname`), `GetOwnBadges` e `GetBadgeContributions` materializados na API e OpenAPI (SPEC-006 Fase 1, CA-01 a CA-12; SCRUM-51). `NICKNAME_INVALID_LENGTH` corrigido para `422` (E-03 da SPEC-006), por consistência com os demais campos de comprimento do contrato. |
 | 1.17 | 2026-10-19 | `GET /me/tasks` passa a devolver `status` e `displayStatus` por perfil na resposta e na OpenAPI (SPEC-009 Fase 1, CA-01/04/08/11; SCRUM-107). As ampliações de onboarding continuam pendentes. |
 | 1.16 | 2026-10-19 | UC07: `DeleteTask` fecha a missão via `CloseEligibleMissions` quando restam só tarefas concluídas (RN38/RF59; SPEC-014/SPEC-007). Contrato alvo de criação atômica com membros/foto antecipada, edição da família existente e `displayStatus` pessoal; distingue essas ampliações das rotas já implementadas. |
 | 1.15 | 2026-10-10 | Consolida os contratos de SPEC-015 a SPEC-020 com as rotas materializadas de família, convites, sessão e tarefas, incluindo OpenAPI executável, paginação de membros e `CompleteTask`. |

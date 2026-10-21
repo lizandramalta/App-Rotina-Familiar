@@ -1,8 +1,8 @@
-# Documentação do projeto — versão 1.23
+# Documentação do projeto — versão 1.24
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.23\
-**Data:** 2026-10-19\
+**Versão:** 1.24\
+**Data:** 2026-10-21\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Modelo de dados](05-modelo-de-dados.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -27,7 +27,7 @@
 | [Decisões da arquitetura mobile](architecture/mobile-decisions.md) | MA-01–MA-19 e P-01–P-09, incluindo criação conjunta, retorno sem recriação e estado exibido por perfil. |
 | [Convenções de código mobile](architecture/mobile-code-conventions.md) | Convenções de Swift/SwiftUI, camadas, concorrência, segurança, testes e revisão. |
 | [Arquitetura backend](architecture/backend-architecture.md) | Backend 1.4: Node.js, Clean Architecture, monólito modular, Supabase/R2 e criação conjunta com foto antecipada. |
-| [Contratos backend](architecture/backend-contracts.md) | Contratos 1.17 da API `/v1`: `displayStatus` pessoal materializado na API e OpenAPI; criação com membros/foto e edição posterior ainda pendentes. |
+| [Contratos backend](architecture/backend-contracts.md) | Contratos 1.18 da API `/v1`: `displayStatus` pessoal, edição de perfil próprio (`nickname`/foto) e consulta de badges materializados na API e OpenAPI; criação com membros/foto antecipada ainda pendente. |
 | [Decisões backend](architecture/backend-decisions.md) | BA-01–BA-37: escolhas confirmadas e propostas técnicas, inclusive preparação de foto e projeção pessoal. |
 | [Convenções de código backend](architecture/backend-code-conventions.md) | Convenções de TypeScript/Fastify, camadas, contratos, SQL, segurança, testes e revisão. |
 | [Specs de entrega](../specs/README.md) | Recortes aprovados de implementação compartilhados entre mobile e backend. |
@@ -145,6 +145,7 @@ A fundação backend adota Node.js, TypeScript, Fastify e `pg`. Parte da API de 
 
 | Versão | Data | Alteração |
 | --- | --- | --- |
+| 1.24 | 2026-10-21 | Contratos backend 1.18 e OpenAPI refletem perfil próprio (`nickname`/foto) e consulta de badges implementados na SPEC-006 Fase 1 (SCRUM-51). SPEC-006 CA-06/§5.3 corrigidos de `400` para `422` em `NICKNAME_INVALID_LENGTH` (E-03), por consistência com o restante do contrato. |
 | 1.23 | 2026-10-19 | Contratos backend 1.17 e OpenAPI refletem `displayStatus` pessoal implementado na SPEC-009 Fase 1 (SCRUM-107). |
 | 1.22 | 2026-10-19 | Revisão dos pares SPEC/UX-002, 003, 004 e 009 concluída e aprovada; dependências e índice de entregas atualizados. README alinhado à criação conjunta dos membros com a família. |
 | 1.21 | 2026-10-19 | DER e diagrama de classes 1.9 alinhados à foto anterior à família, criação conjunta de membros, retorno sem recriação e estado pessoal apenas projetado. |
