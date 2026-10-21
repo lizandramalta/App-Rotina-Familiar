@@ -58,6 +58,11 @@ import { R2ObjectStorage } from '../modules/media/infrastructure/r2-object-stora
 import { SharpImageProcessor } from '../modules/media/infrastructure/sharp-image-processor.js';
 import { UnavailableObjectStorage } from '../modules/media/infrastructure/unavailable-object-storage.js';
 import { UpdateOwnProfileUseCase } from '../modules/profile/application/update-own-profile-use-case.js';
+import { GetOwnProfileUseCase } from '../modules/profile/application/get-own-profile-use-case.js';
+import {
+  GetBadgeContributionsUseCase,
+  GetOwnBadgesUseCase,
+} from '../modules/profile/application/get-own-badges-use-cases.js';
 import { PostgresProfileRepository } from '../modules/profile/infrastructure/postgres-profile-repository.js';
 import type { AppleTokenVerifierPort } from '../integrations/apple/apple-token-verifier-port.js';
 import {
@@ -122,6 +127,9 @@ export interface ApplicationContainer {
   readonly uploadOnboardingMediaUseCase: UploadOnboardingMediaUseCase;
   readonly cleanOrphanOnboardingMedia: CleanOrphanOnboardingMedia;
   readonly updateOwnProfileUseCase: UpdateOwnProfileUseCase;
+  readonly getOwnProfileUseCase: GetOwnProfileUseCase;
+  readonly getOwnBadgesUseCase: GetOwnBadgesUseCase;
+  readonly getBadgeContributionsUseCase: GetBadgeContributionsUseCase;
   readonly createTaskUseCase: CreateTaskUseCase;
   readonly completeTaskUseCase: CompleteTaskUseCase;
   readonly reopenTaskUseCase: ReopenTaskUseCase;
@@ -361,11 +369,18 @@ export function createContainer(config: Configuration): ApplicationContainer {
     logger,
   });
 
+  const profileRepository = new PostgresProfileRepository();
   const updateOwnProfileUseCase = new UpdateOwnProfileUseCase({
-    profileRepository: new PostgresProfileRepository(),
+    profileRepository,
     mediaRepository,
     transactionRunner,
     clock,
+  });
+  const getOwnProfileUseCase = new GetOwnProfileUseCase({ profileRepository, transactionRunner });
+  const getOwnBadgesUseCase = new GetOwnBadgesUseCase({ profileRepository, transactionRunner });
+  const getBadgeContributionsUseCase = new GetBadgeContributionsUseCase({
+    profileRepository,
+    transactionRunner,
   });
 
   const missionRepository = new PostgresMissionRepository();
@@ -462,6 +477,9 @@ export function createContainer(config: Configuration): ApplicationContainer {
     uploadOnboardingMediaUseCase,
     cleanOrphanOnboardingMedia,
     updateOwnProfileUseCase,
+    getOwnProfileUseCase,
+    getOwnBadgesUseCase,
+    getBadgeContributionsUseCase,
     createTaskUseCase,
     completeTaskUseCase,
     reopenTaskUseCase,

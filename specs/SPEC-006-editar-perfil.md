@@ -150,12 +150,12 @@ Campos não reconhecidos ou protegidos (`role`, `familyId`, `kidsMode`, `isFamil
 | HTTP Status | `code` estável | Cenário / Causa |
 |---|---|---|
 | `400 Bad Request` | `UNKNOWN_FIELD` | Campo não reconhecido ou protegido em `PATCH /me/profile` |
-| `400 Bad Request` | `VALIDATION_FAILED` | `fieldErrors` com `NICKNAME_INVALID_LENGTH` |
 | `401 Unauthorized` | `SESSION_EXPIRED` | Token ausente, inválido ou expirado |
 | `403 Forbidden` | `ACTION_NOT_ALLOWED` | Tentativa de ação administrativa pelo fluxo pessoal (ex.: Kids alterando modo) |
 | `404 Not Found` | `RESOURCE_NOT_FOUND` | `awardId` que não pertence ao titular, de qualquer família |
 | `413 Payload Too Large` | `MEDIA_TOO_LARGE` | Upload acima do limite de entrada aceito pelo servidor |
 | `415 Unsupported Media Type` | `MEDIA_FORMAT_UNSUPPORTED` | Formato de imagem não reconhecido |
+| `422 Unprocessable Entity` | `VALIDATION_FAILED` | `fieldErrors` com `NICKNAME_INVALID_LENGTH` (ver E-03) |
 | `422 Unprocessable Entity` | `PHOTO_MEDIA_NOT_READY` / `PHOTO_MEDIA_NOT_OWNED` / `PHOTO_MEDIA_PURPOSE_MISMATCH` | `photoMediaId` ainda processando, de outro titular, ou com finalidade incompatível |
 | `422 Unprocessable Entity` | `MEDIA_PURPOSE_NOT_SUPPORTED` | Finalidade fora das finalidades reconhecidas pelo contrato de mídia |
 | `429 Too Many Requests` | `RATE_LIMIT_EXCEEDED` | Excesso de requisições de edição/upload por janela |
@@ -211,7 +211,7 @@ Campos não reconhecidos ou protegidos (`role`, `familyId`, `kidsMode`, `isFamil
 - **CA-06: [Validação — Apelido acima do limite]**
   - **DADO QUE** o usuário envia `nickname` com mais de 20 caracteres não-espaço após trim,
   - **QUANDO** a requisição for processada,
-  - **ENTÃO O SISTEMA DEVE** recusar com HTTP `400 Bad Request`,
+  - **ENTÃO O SISTEMA DEVE** recusar com HTTP `422 Unprocessable Entity` (ver E-03),
   - **E** retornar `fieldErrors` contendo o campo `nickname` e o código `NICKNAME_INVALID_LENGTH`. *(RN63)*
 
 - **CA-07: [Validação — Mídia não pronta ou não própria]**
@@ -282,12 +282,13 @@ Campos não reconhecidos ou protegidos (`role`, `familyId`, `kidsMode`, `isFamil
 |---|---|---|---|---|
 | E-01 | Não havia limite de caracteres/charset definido para `nickname` em nenhuma fonte (RN63, RF48, modelo de dados). | Até 20 caracteres não-espaço após trim, sem caracteres de controle; vazio/nulo remove a configuração. | Pessoa usuária / 2026-10-07 | Sim — RN63 e RF48 atualizados (base funcional 1.13). |
 | E-02 | A infraestrutura compartilhada de mídia foi atribuída originalmente a SPEC-002. | As rotas autenticadas de foto do próprio perfil continuam nesta experiência; o envio antes da criação e sua autorização serão reconciliados na revisão de SPEC-002. `taskSignal` continua reservado para SPEC-012. | Pessoa usuária / 2026-10-07; revisão de dependência em 2026-10-19 | Não altera UC10; dependência técnica atualizada. |
+| E-03 | O texto original do CA-06 e da tabela §5.3 definia `400 Bad Request` para `NICKNAME_INVALID_LENGTH`, divergindo da convenção geral do contrato (`backend-contracts.md` §1: `400` é formato/campo desconhecido, `422` é valor semanticamente inválido) e de todo código equivalente já implementado (`TITLE_INVALID_LENGTH`, `WEIGHT_INVALID`, `FREQUENCY_DAYS_INVALID`, `NOTE_TOO_LONG`), todos `422`. | Inconsistência de redação corrigida: `NICKNAME_INVALID_LENGTH` responde `422 Unprocessable Entity`, por consistência com o restante do contrato. Decidido na implementação do SCRUM-51, sem objeção explícita à recomendação técnica. | Pessoa usuária / 2026-10-21 | Sim — CA-06 e tabela §5.3 corrigidos nesta revisão. |
 
 ## 10. Fases de Implementação e Critérios de Conclusão
 
 | Fase | Objetivo da Entrega | Critérios de Aceite Atendidos | Critério de Prontidão (Definition of Done) | Status |
 |---|---|---|---|---|
-| **1** | **Núcleo Mínimo (Core API + Isolamento):** `GetOwnProfile`, `UpdateOwnProfile`, `GetOwnBadges`, `GetBadgeContributions` e reutilização segura de `POST /media`/`GET /media/{id}/content` (`purpose: profilePhoto`) entregues por SPEC-002; titularidade, isolamento e validação. | CA-01 a CA-12 | Testes unitários e de integração verdes cobrindo os CAs listados. | a fazer |
+| **1** | **Núcleo Mínimo (Core API + Isolamento):** `GetOwnProfile`, `UpdateOwnProfile`, `GetOwnBadges`, `GetBadgeContributions` e reutilização segura de `POST /media`/`GET /media/{id}/content` (`purpose: profilePhoto`) entregues por SPEC-002; titularidade, isolamento e validação. | CA-01 a CA-12 | Testes unitários e de integração verdes cobrindo os CAs listados. | concluída (SCRUM-51) |
 | **2** | **Experiência Mobile + Integração:** TEL-030 (recorte), MOD-009, TEL-054; câmera/galeria; estados de carregamento/erro/falha de upload. | CA-02, CA-06 a CA-10 integrados à UI | Telas integradas com a API, testes de UI/E2E e UX-spec verificada. | a fazer |
 | **3** | **Polimento e Casos Raros:** acessibilidade fina, transições de badge, textos de borda, animação de marco conquistado. | — (refinamento, sem novo CA) | Suíte de regressão verde e validação de QA concluída. | a fazer |
 
@@ -295,6 +296,8 @@ Campos não reconhecidos ou protegidos (`role`, `familyId`, `kidsMode`, `isFamil
 - **Fase 1 — Fora desta fase:** nenhuma tela; capacidade exposta apenas via API. **Pode ser publicada de forma independente em produção?** Não — requer Fase 2 para ser utilizável.
 - **Fase 2 — Fora desta fase:** polimento visual fino de TEL-054 e animações. **Pode ser publicada de forma independente em produção?** Sim.
 - **Fase 3 — Fora desta fase:** nada; é refinamento da Fase 2. **Pode ser publicada de forma independente em produção?** Sim, após a Fase 2.
+
+**Registro de execução (2026-10-21):** SCRUM-51 concluiu a Fase 1 no backend — `GET`/`PATCH /v1/me/profile`, `GET /v1/me/badges` e `GET /v1/me/badges/{awardId}`, cobrindo CA-01 a CA-12 com testes unitários e de integração. A Fase 1 não expõe tela (capacidade só via API); a Fase 2 (Mobile) permanece pendente em card futuro.
 
 ## 11. Checklist de Aprovação da Spec (Definition of Ready)
 

@@ -13,7 +13,14 @@ describe('Bearer authentication on protected routes', () => {
 
   beforeEach(() => {
     test = buildTestApp();
-    test.updateOwnProfile.execute.mockResolvedValue({ photoMediaId: PROFILE_BODY.photoMediaId });
+    test.updateOwnProfile.execute.mockResolvedValue({
+      memberId: TEST_ACTOR.memberId,
+      name: 'Maria Silva',
+      nickname: null,
+      photoMediaId: PROFILE_BODY.photoMediaId,
+      totalParticipations: 0,
+      nextTier: { code: 'bronze', requiredMissionCount: 5, remaining: 5 },
+    });
   });
 
   afterEach(async () => {
@@ -30,6 +37,7 @@ describe('Bearer authentication on protected routes', () => {
     expect(test.authenticateSession.execute).toHaveBeenCalledWith('opaque-access-token');
     expect(test.updateOwnProfile.execute).toHaveBeenCalledWith({
       actor: TEST_ACTOR,
+      nickname: undefined,
       photoMediaId: PROFILE_BODY.photoMediaId,
     });
   });
