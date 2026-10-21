@@ -116,12 +116,8 @@ struct InviteMembersView: View {
                         _ = viewModel.path.popLast()
                     }
                 } label: {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(Color(.label))
-                        .frame(width: 44, height: 44)
-                        .background(Color(.secondarySystemFill))
-                        .clipShape(Circle())
+                    Image(systemName: "chevron.backward")
+                        .font(.body.weight(.semibold))
                 }
                 .accessibilityLabel("Voltar")
                 .accessibilityIdentifier("family.onboarding.back")

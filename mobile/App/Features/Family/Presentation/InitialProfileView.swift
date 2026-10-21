@@ -130,12 +130,6 @@ struct InitialProfileView: View {
                 Button("onboarding.profile.cancel") {
                     viewModel.requestDiscard()
                 }
-                .font(.body)
-                .foregroundStyle(Color(uiColor: .label))
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .background(Color(uiColor: .secondarySystemGroupedBackground))
-                .clipShape(Capsule())
                 .accessibilityIdentifier("profile.initial.cancel")
             }
         }
@@ -158,11 +152,13 @@ struct InitialProfileView: View {
             } label: {
                 Text("onboarding.profile.continue")
                     .font(.body.weight(.semibold))
+                    .foregroundStyle(isNameValid ? Color(uiColor: .systemBackground) : Color(uiColor: .secondaryLabel))
                     .frame(maxWidth: .infinity)
                     .frame(height: 50)
+                    .background(isNameValid ? Color.primary : Color(.systemGray5))
+                    .clipShape(Capsule())
             }
-            .buttonStyle(.borderedProminent)
-            .clipShape(Capsule())
+            .disabled(!isNameValid)
             .accessibilityIdentifier("profile.initial.continue")
             .padding(.horizontal, 16)
             .padding(.bottom, 8)
@@ -180,6 +176,11 @@ struct InitialProfileView: View {
                 pickerItem = nil
             }
         }
+    }
+
+    private var isNameValid: Bool {
+        if case .success = FamilyCreationValidation.validatedName(viewModel.name) { return true }
+        return false
     }
 
     private var avatarSection: some View {
@@ -210,7 +211,7 @@ struct InitialProfileView: View {
 
                     Text(viewModel.photo == nil ? "onboarding.profile.photo.add" : "onboarding.profile.photo.change")
                         .font(.body.weight(.medium))
-                        .foregroundStyle(Color.accentColor)
+                        .foregroundStyle(Color.primary)
 
                     Text("onboarding.profile.photo.optional")
                         .font(.footnote)

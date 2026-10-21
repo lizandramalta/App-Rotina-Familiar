@@ -234,10 +234,6 @@ struct CreateFamilyView: View {
                 } label: {
                     Image(systemName: "chevron.backward")
                         .font(.body.weight(.semibold))
-                        .foregroundStyle(Color(uiColor: .label))
-                        .frame(width: 44, height: 44)
-                        .background(Color(uiColor: .secondarySystemGroupedBackground))
-                        .clipShape(Circle())
                 }
                 .disabled(viewModel.isFamilyCreated || viewModel.isCreating)
                 .accessibilityIdentifier("family.create.back")

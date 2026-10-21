@@ -103,7 +103,7 @@ struct InitialMemberDraftFormView: View {
                                     if role == option {
                                         Image(systemName: "checkmark")
                                             .font(.body.weight(.semibold))
-                                            .foregroundStyle(Color.accentColor)
+                                            .foregroundStyle(Color.primary)
                                     }
                                 }
                                 .padding(.horizontal, 20)
@@ -178,10 +178,6 @@ struct InitialMemberDraftFormView: View {
                 } label: {
                     Image(systemName: "chevron.backward")
                         .font(.body.weight(.semibold))
-                        .foregroundStyle(Color(uiColor: .label))
-                        .frame(width: 44, height: 44)
-                        .background(Color(uiColor: .secondarySystemGroupedBackground))
-                        .clipShape(Circle())
                 }
                 .accessibilityIdentifier("family.members.draft.back")
                 .accessibilityLabel("Voltar")
@@ -196,10 +192,6 @@ struct InitialMemberDraftFormView: View {
                 } label: {
                     Image(systemName: "checkmark")
                         .font(.body.weight(.semibold))
-                        .foregroundStyle(Color(uiColor: .label))
-                        .frame(width: 44, height: 44)
-                        .background(Color(uiColor: .secondarySystemGroupedBackground))
-                        .clipShape(Circle())
                 }
                 .accessibilityIdentifier("family.members.draft.save")
                 .accessibilityLabel("Salvar")
