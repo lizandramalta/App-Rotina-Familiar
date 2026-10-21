@@ -316,27 +316,49 @@ private struct ActivityViewPresenter: UIViewControllerRepresentable {
     @Binding var generatedInvite: GeneratedInvite?
     let messageBuilder: (GeneratedInvite) -> String
 
+    final class Coordinator {
+        var lastPresentedInviteID: UUID?
+        var isPresenting = false
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+
     func makeUIViewController(context: Context) -> UIViewController {
         UIViewController()
     }
 
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
         guard let generated = generatedInvite else {
+            context.coordinator.lastPresentedInviteID = nil
+            context.coordinator.isPresenting = false
             return
         }
+
+        // Se este convite específico já foi ou está sendo apresentado, ignora ciclos repetidos do SwiftUI
+        if context.coordinator.lastPresentedInviteID == generated.invite.inviteID || context.coordinator.isPresenting {
+            return
+        }
+
+        context.coordinator.lastPresentedInviteID = generated.invite.inviteID
+        context.coordinator.isPresenting = true
 
         let message = messageBuilder(generated)
         let activityVC = UIActivityViewController(activityItems: [message], applicationActivities: nil)
 
-        activityVC.completionWithItemsHandler = { _, _, _, _ in
+        activityVC.completionWithItemsHandler = { [weak coordinator = context.coordinator] _, _, _, _ in
             DispatchQueue.main.async {
+                coordinator?.isPresenting = false
+                coordinator?.lastPresentedInviteID = nil
                 self.generatedInvite = nil
             }
         }
 
         DispatchQueue.main.async {
             let presenter = self.topViewController(from: uiViewController)
-            if presenter.presentedViewController is UIActivityViewController {
+            if presenter.presentedViewController != nil {
+                context.coordinator.isPresenting = false
                 return
             }
 
