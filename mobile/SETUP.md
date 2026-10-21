@@ -22,9 +22,21 @@ este documento detalha a parte mobile.
 
 2. Preencha `API_BASE_URL` com o endpoint apropriado ao ambiente. Com o backend rodando
    localmente conforme o README, use `http://localhost:3000/v1` no simulador — em
-   dispositivo físico, troque `localhost` pelo IP da máquina na mesma rede. Esses arquivos
-   são ignorados pelo Git; não inclua segredos, pois o app não armazena credenciais de
-   infraestrutura.
+   dispositivo físico, troque `localhost` pelo IP da máquina na mesma rede. O template
+   `Production.xcconfig.example` já aponta o build Release para
+   `https://app-rotina-familiar.onrender.com/v1`. Para ingressar
+   por convite via Universal Link, configure `INVITE_LINK_HOST` e `INVITE_LINK_BASE_URL`
+   com o mesmo domínio HTTPS de `INVITE_LINK_BASE_URL` no backend. Esse domínio precisa
+   servir o arquivo de associação do aplicativo (AASA) e corresponder ao entitlement
+   `applinks`. O host configurado é `convites.rotina-familiar.workers.dev`;
+   o Worker e seu código estão em `cloudflare/invite-links/`.
+   Esses arquivos são ignorados pelo Git; não inclua segredos, pois o app não armazena
+   credenciais de infraestrutura.
+
+   Para testar um convite real no simulador com o backend publicado, configure
+   `API_BASE_URL = https:/$()/app-rotina-familiar.onrender.com/v1` no arquivo local
+   `Development.xcconfig`. Esse build Debug passa a usar os dados do ambiente de
+   produção no Render; ao voltar a testar o backend local, restaure a URL local.
 3. Abra `mobile.xcodeproj` no Xcode, escolha o scheme `FamilyRoutine` e um simulador iOS/iPadOS 26.
 4. Execute o aplicativo ou os testes pelo Xcode.
 
@@ -53,8 +65,8 @@ xcodebuild test \
 O nome do simulador varia por máquina e por versão do Xcode, por isso a CI resolve o UDID
 do primeiro iPhone disponível em vez de fixar um modelo.
 
-## Limites da fundação
+## Destinos ainda não implementados
 
-As abas e destinos atuais são placeholders neutros. Não representam telas de produto, sessão,
-autorização, perfis ou a navegação Kids; essas responsabilidades serão introduzidas pelos cards
-vinculados às SPECs aprovadas.
+O ingresso por convite usa a sessão validada para abrir a navegação de Kids ou de adultos.
+O conteúdo de tarefas, família, missões e perfil ainda é placeholder até a implementação
+dos respectivos cards; as opções de navegação já respeitam o papel recebido na sessão.
