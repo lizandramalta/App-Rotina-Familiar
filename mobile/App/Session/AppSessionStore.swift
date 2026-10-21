@@ -17,7 +17,11 @@ final class AppSessionStore {
     private let refreshCoordinator: SessionRefreshCoordinator
 
     private(set) var state: AppRootState = .restoring
-    private var accessToken: String?
+    private(set) var accessToken: String?
+    /// In-memory onboarding draft kept while the person re-authenticates after an uncertain creation (CA-09).
+    private(set) var onboardingDraft: OnboardingDraft?
+    /// Refresh token of a just-created family whose Keychain write failed; persisted again on completion.
+    private var pendingRefreshToken: String?
 
     init(
         repository: any AccessRepository,
@@ -62,6 +66,7 @@ final class AppSessionStore {
             do {
                 try credentialStore.save(refreshToken: session.credentials.refreshToken)
                 accessToken = session.credentials.token.accessToken
+                onboardingDraft = nil
                 state = .authenticated(session.profile)
             } catch {
                 clearCredentials()
@@ -73,8 +78,42 @@ final class AppSessionStore {
         }
     }
 
+    /// Stores the session returned by `POST /v1/families` without leaving onboarding yet.
+    /// Never throws: the family already exists, so a Keychain failure must not abort the flow (CA-10).
+    func establishOnboardingSession(_ session: AuthenticatedSession) {
+        accessToken = session.credentials.token.accessToken
+        do {
+            try credentialStore.save(refreshToken: session.credentials.refreshToken)
+            pendingRefreshToken = nil
+        } catch {
+            pendingRefreshToken = session.credentials.refreshToken
+        }
+    }
+
+    func completeOnboarding(profile: ActiveFamilySession) {
+        if let pendingRefreshToken {
+            // Best effort: without it the next launch falls back to Apple sign-in, which finds the family.
+            try? credentialStore.save(refreshToken: pendingRefreshToken)
+            self.pendingRefreshToken = nil
+        }
+        onboardingDraft = nil
+        state = .authenticated(profile)
+    }
+
+    /// Returns to TEL-001 keeping the draft, so a new `creationGrant` can resume the form.
+    func returnToEntry(preserving draft: OnboardingDraft) {
+        onboardingDraft = draft
+        state = .entry
+    }
+
+    func discardOnboarding() {
+        onboardingDraft = nil
+        state = .entry
+    }
+
     func signOut() async {
         defer {
+            onboardingDraft = nil
             clearCredentials()
             state = .entry
         }

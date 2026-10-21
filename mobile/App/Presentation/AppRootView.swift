@@ -13,18 +13,10 @@ struct AppRootView: View {
             EntryView(viewModel: container.makeEntryViewModel(sessionStore: sessionStore))
         case .authenticated:
             FoundationTabView()
-        case .initialProfile:
-            InitialProfileHandoffView()
-        }
-    }
-}
-
-private struct InitialProfileHandoffView: View {
-    var body: some View {
-        ContentUnavailableView {
-            Label("access.initial_profile.title", systemImage: "person.crop.circle")
-        } description: {
-            Text("access.initial_profile.description")
+        case let .initialProfile(grant):
+            InitialOnboardingFlowView(
+                viewModel: container.makeOnboardingViewModel(grant: grant, sessionStore: sessionStore)
+            )
         }
     }
 }

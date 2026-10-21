@@ -1,16 +1,16 @@
 import Foundation
 
-private struct AppleSignInRequestDTO: Encodable {
+nonisolated private struct AppleSignInRequestDTO: Encodable {
     let identityToken: String
     let authorizationCode: String
     let rawNonce: String
 }
 
-private struct RefreshSessionRequestDTO: Encodable {
+nonisolated private struct RefreshSessionRequestDTO: Encodable {
     let refreshToken: String
 }
 
-private struct SessionResponseDTO: Decodable {
+nonisolated private struct SessionResponseDTO: Decodable {
     let sessionId: UUID
     let memberId: UUID
     let familyId: UUID
@@ -21,28 +21,28 @@ private struct SessionResponseDTO: Decodable {
     let refreshToken: String
 }
 
-private struct CreationGrantResponseDTO: Decodable {
+nonisolated private struct CreationGrantResponseDTO: Decodable {
     let creationGrant: String
     let expiresAt: Date
 }
 
-private struct CurrentSessionResponseDTO: Decodable {
+nonisolated private struct CurrentSessionResponseDTO: Decodable {
     let memberId: UUID
     let familyId: UUID
     let role: MemberRole
     let isFamilyCreator: Bool
 }
 
-private struct RefreshSessionResponseDTO: Decodable {
+nonisolated private struct RefreshSessionResponseDTO: Decodable {
     let accessToken: String
     let accessTokenExpiresAt: Date
 }
 
-private struct ProblemDetailsDTO: Decodable {
+nonisolated private struct ProblemDetailsDTO: Decodable {
     let code: String?
 }
 
-struct HTTPAccessRepository: AccessRepository {
+nonisolated struct HTTPAccessRepository: AccessRepository {
     private let baseURL: URL
     private let session: URLSession
 
