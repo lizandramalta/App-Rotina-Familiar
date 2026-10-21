@@ -325,10 +325,6 @@ private struct ActivityViewPresenter: UIViewControllerRepresentable {
             return
         }
 
-        if uiViewController.presentedViewController != nil {
-            return
-        }
-
         let message = messageBuilder(generated)
         let activityVC = UIActivityViewController(activityItems: [message], applicationActivities: nil)
 
@@ -338,14 +334,35 @@ private struct ActivityViewPresenter: UIViewControllerRepresentable {
             }
         }
 
-        if let popover = activityVC.popoverPresentationController {
-            popover.sourceView = uiViewController.view
-            popover.sourceRect = CGRect(x: uiViewController.view.bounds.midX, y: uiViewController.view.bounds.midY, width: 0, height: 0)
-            popover.permittedArrowDirections = []
-        }
-
         DispatchQueue.main.async {
-            uiViewController.present(activityVC, animated: true)
+            let presenter = self.topViewController(from: uiViewController)
+            if presenter.presentedViewController is UIActivityViewController {
+                return
+            }
+
+            if let popover = activityVC.popoverPresentationController {
+                popover.sourceView = presenter.view
+                popover.sourceRect = CGRect(x: presenter.view.bounds.midX, y: presenter.view.bounds.midY, width: 0, height: 0)
+                popover.permittedArrowDirections = []
+            }
+
+            presenter.present(activityVC, animated: true)
         }
+    }
+
+    private func topViewController(from controller: UIViewController) -> UIViewController {
+        if let windowScene = controller.view.window?.windowScene ?? UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first,
+           let root = windowScene.windows.first(where: \.isKeyWindow)?.rootViewController ?? controller.view.window?.rootViewController {
+            var current = root
+            while let presented = current.presentedViewController, !presented.isBeingDismissed {
+                current = presented
+            }
+            return current
+        }
+        var current = controller
+        while let presented = current.presentedViewController, !presented.isBeingDismissed {
+            current = presented
+        }
+        return current
     }
 }

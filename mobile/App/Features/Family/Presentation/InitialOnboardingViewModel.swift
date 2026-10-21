@@ -100,6 +100,26 @@ final class InitialOnboardingViewModel {
             for member in members {
                 createdMembers[member.id] = CreatedMember(id: UUID(), name: member.name, role: member.role)
             }
+            if createdFamily == nil {
+                createdFamily = CreatedFamily(
+                    familyID: UUID(),
+                    name: familyName,
+                    timeZoneID: timeZoneID,
+                    session: AuthenticatedSession(
+                        sessionID: UUID(),
+                        profile: ActiveFamilySession(
+                            memberID: UUID(),
+                            familyID: UUID(),
+                            role: .administrator,
+                            isFamilyCreator: true
+                        ),
+                        credentials: SessionCredentials(
+                            token: SessionToken(accessToken: "ui-test-access", expiresAt: .distantFuture),
+                            refreshToken: "ui-test-refresh"
+                        )
+                    )
+                )
+            }
         }
         #endif
     }

@@ -33,6 +33,21 @@ enum UITestScenario: String {
             let member1 = DraftMember(id: UUID(), name: "Marina Silva", role: .administrator)
             let member2 = DraftMember(id: UUID(), name: "Lucas Silva", role: .kid)
             sessionStore.returnToEntry(preserving: OnboardingDraft(name: "João Silva", familyName: "Família Silva", members: [member1, member2]))
+            sessionStore.apply(.creationGrant(CreationGrant(value: "ui-test-grant", expiresAt: .distantFuture)))
+            sessionStore.establishOnboardingSession(AuthenticatedSession(
+                sessionID: UUID(),
+                profile: ActiveFamilySession(
+                    memberID: UUID(),
+                    familyID: UUID(),
+                    role: .administrator,
+                    isFamilyCreator: true
+                ),
+                credentials: SessionCredentials(
+                    token: SessionToken(accessToken: "ui-test-access", expiresAt: .distantFuture),
+                    refreshToken: "ui-test-refresh"
+                )
+            ))
+            return
         }
         sessionStore.apply(.creationGrant(CreationGrant(value: "ui-test-grant", expiresAt: .distantFuture)))
     }
