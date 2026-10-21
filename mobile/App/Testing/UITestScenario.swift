@@ -8,6 +8,7 @@ enum UITestScenario: String {
     case onboardingUncertain = "onboarding-uncertain"
     case onboardingPhotoFailure = "onboarding-photo-failure"
     case onboardingInvite = "onboarding-invite"
+    case fullFlow = "full-flow"
 
     static var current: UITestScenario? {
         ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"].flatMap(UITestScenario.init(rawValue:))
@@ -26,6 +27,10 @@ enum UITestScenario: String {
 
     @MainActor
     func bootstrap(_ sessionStore: AppSessionStore) {
+        if self == .fullFlow {
+            sessionStore.discardOnboarding()
+            return
+        }
         if self == .onboardingPhotoFailure {
             // Seeds a restored draft so the photo path runs without driving the system photo picker.
             sessionStore.returnToEntry(preserving: OnboardingDraft(name: "Maria Silva", photo: Self.samplePhoto))
@@ -62,7 +67,7 @@ enum UITestScenario: String {
 
 private struct UITestAccessRepository: AccessRepository {
     func signIn(proof: AppleAuthorizationProof, installationProof: String) async throws -> AppleSignInOutcome {
-        throw AccessError.unavailable
+        .creationGrant(CreationGrant(value: "ui-test-grant", expiresAt: .distantFuture))
     }
 
     func currentSession(accessToken: String) async throws -> ActiveFamilySession {
@@ -144,7 +149,11 @@ private struct UITestInstallationProof: InstallationProofProviding {
 @MainActor
 private final class UITestAppleAuthenticator: AppleAuthenticating {
     func authorize() async throws -> AppleAuthorizationProof {
-        throw AppleAuthenticationError.cancelled
+        AppleAuthorizationProof(
+            identityToken: "ui-test-identity-token",
+            authorizationCode: "ui-test-auth-code",
+            rawNonce: "ui-test-nonce"
+        )
     }
 }
 #endif
