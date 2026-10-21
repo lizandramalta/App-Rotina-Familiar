@@ -9,6 +9,13 @@ enum UITestScenario: String {
     case onboardingPhotoFailure = "onboarding-photo-failure"
     case onboardingInvite = "onboarding-invite"
     case fullFlow = "full-flow"
+    case inviteEntry = "invite-entry"
+    case inviteSwitch = "invite-switch"
+    case inviteKids = "invite-kids"
+    case inviteAdult = "invite-adult"
+    case inviteInvalidPassword = "invite-invalid-password"
+    case inviteRecovery = "invite-recovery"
+    case inviteRecoveryUnavailable = "invite-recovery-unavailable"
 
     static var current: UITestScenario? {
         ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"].flatMap(UITestScenario.init(rawValue:))
@@ -18,6 +25,9 @@ enum UITestScenario: String {
     func makeContainer() -> AppContainer {
         AppContainer(
             accessRepository: UITestAccessRepository(),
+            inviteJoinRepository: UITestInviteJoinRepository(scenario: self),
+            inviteJoinAttemptStore: UITestInviteJoinAttemptStore(),
+            inviteLinkParser: InviteLinkParser(baseURL: URL(string: "https://example.invalid")!),
             familyRepository: UITestFamilyRepository(scenario: self),
             credentialStore: UITestCredentialStore(),
             installationProofStore: UITestInstallationProof(),
@@ -27,6 +37,14 @@ enum UITestScenario: String {
 
     @MainActor
     func bootstrap(_ sessionStore: AppSessionStore) {
+        if self == .inviteSwitch {
+            sessionStore.apply(.session(Self.inviteSession(role: .administrator, refreshToken: "old-refresh")))
+            return
+        }
+        if [.inviteEntry, .inviteKids, .inviteAdult, .inviteInvalidPassword, .inviteRecovery, .inviteRecoveryUnavailable].contains(self) {
+            sessionStore.discardOnboarding()
+            return
+        }
         if self == .fullFlow {
             sessionStore.discardOnboarding()
             return
@@ -63,6 +81,63 @@ enum UITestScenario: String {
             context.fill(CGRect(x: 0, y: 0, width: 64, height: 64))
         }
     }
+
+    nonisolated static func inviteSession(role: MemberRole, refreshToken: String = "new-refresh") -> AuthenticatedSession {
+        AuthenticatedSession(
+            sessionID: UUID(),
+            profile: ActiveFamilySession(
+                memberID: UUID(),
+                familyID: UUID(),
+                role: role,
+                isFamilyCreator: false
+            ),
+            credentials: SessionCredentials(
+                token: SessionToken(accessToken: "ui-test-access", expiresAt: .distantFuture),
+                refreshToken: refreshToken
+            )
+        )
+    }
+}
+
+private struct UITestInviteJoinRepository: InviteJoinRepository {
+    let scenario: UITestScenario
+
+    func inspect(token: String) async throws {}
+
+    func join(
+        token: String,
+        password: String,
+        attempt: InviteJoinAttempt,
+        switchConfirmed: Bool,
+        previousAccessToken: String?
+    ) async throws -> AuthenticatedSession {
+        switch scenario {
+        case .inviteInvalidPassword:
+            throw InviteJoinError.invalidPassword
+        case .inviteRecovery, .inviteRecoveryUnavailable:
+            throw InviteJoinError.resultUncertain
+        case .inviteAdult:
+            return UITestScenario.inviteSession(role: .member)
+        case .inviteKids:
+            return UITestScenario.inviteSession(role: .kid)
+        default:
+            throw InviteJoinError.inviteUnavailable
+        }
+    }
+
+    func recover(attempt: InviteJoinAttempt) async throws -> AuthenticatedSession {
+        if scenario == .inviteRecovery {
+            return UITestScenario.inviteSession(role: .kid)
+        }
+        throw InviteJoinError.recoveryUnavailable
+    }
+}
+
+private final class UITestInviteJoinAttemptStore: InviteJoinAttemptStoring, @unchecked Sendable {
+    private var value: InviteJoinAttempt?
+    func pendingAttempt() throws -> InviteJoinAttempt? { value }
+    func save(_ attempt: InviteJoinAttempt) throws { value = attempt }
+    func clear() throws { value = nil }
 }
 
 private struct UITestAccessRepository: AccessRepository {
@@ -75,7 +150,7 @@ private struct UITestAccessRepository: AccessRepository {
     }
 
     func refresh(refreshToken: String, installationProof: String) async throws -> SessionToken {
-        throw AccessError.unavailable
+        SessionToken(accessToken: "ui-test-refreshed-access", expiresAt: .distantFuture)
     }
 
     func revokeSession(accessToken: String) async throws {}

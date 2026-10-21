@@ -78,6 +78,36 @@ final class AppSessionStore {
         }
     }
 
+    /// Replaces local credentials only after the invite join was confirmed by the server (SPEC-005 CA-06).
+    func applyInviteSession(_ session: AuthenticatedSession) throws {
+        // A confirmed remote switch may have revoked the previous session. Hide its protected UI
+        // even when the new refresh token cannot yet be written to Keychain.
+        state = .restoring
+        accessToken = nil
+        try credentialStore.save(refreshToken: session.credentials.refreshToken)
+        onboardingDraft = nil
+        pendingRefreshToken = nil
+        accessToken = session.credentials.token.accessToken
+        state = .authenticated(session.profile)
+    }
+
+    func accessTokenForConfirmedSwitch() async throws -> String? {
+        guard case .authenticated = state else {
+            return nil
+        }
+        guard let refreshToken = try credentialStore.refreshToken() else {
+            throw AccessError.sessionExpired
+        }
+        let installationProof = try installationProofProvider.installationProof()
+        let token = try await refreshCoordinator.refresh(
+            repository: repository,
+            refreshToken: refreshToken,
+            installationProof: installationProof
+        )
+        accessToken = token.accessToken
+        return token.accessToken
+    }
+
     /// Stores the session returned by `POST /v1/families` without leaving onboarding yet.
     /// Never throws: the family already exists, so a Keychain failure must not abort the flow (CA-10).
     func establishOnboardingSession(_ session: AuthenticatedSession) {

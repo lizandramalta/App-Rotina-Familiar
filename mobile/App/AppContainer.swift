@@ -3,6 +3,9 @@ import Foundation
 @MainActor
 final class AppContainer {
     private let accessRepository: any AccessRepository
+    private let inviteJoinRepository: any InviteJoinRepository
+    private let inviteJoinAttemptStore: any InviteJoinAttemptStoring
+    private let inviteLinkParser: InviteLinkParser
     private let familyRepository: any FamilyRepository
     private let credentialStore: any SessionCredentialStoring
     private let installationProofStore: any InstallationProofProviding
@@ -11,6 +14,9 @@ final class AppContainer {
 
     init(
         accessRepository: any AccessRepository,
+        inviteJoinRepository: any InviteJoinRepository,
+        inviteJoinAttemptStore: any InviteJoinAttemptStoring,
+        inviteLinkParser: InviteLinkParser,
         familyRepository: any FamilyRepository,
         credentialStore: any SessionCredentialStoring,
         installationProofStore: any InstallationProofProviding,
@@ -18,6 +24,9 @@ final class AppContainer {
         photoNormalizer: any ProfilePhotoNormalizing = ProfilePhotoNormalizer()
     ) {
         self.accessRepository = accessRepository
+        self.inviteJoinRepository = inviteJoinRepository
+        self.inviteJoinAttemptStore = inviteJoinAttemptStore
+        self.inviteLinkParser = inviteLinkParser
         self.familyRepository = familyRepository
         self.credentialStore = credentialStore
         self.installationProofStore = installationProofStore
@@ -29,6 +38,9 @@ final class AppContainer {
         let secrets = KeychainSecretStore()
         self.init(
             accessRepository: HTTPAccessRepository(baseURL: configuration.apiBaseURL),
+            inviteJoinRepository: HTTPInviteJoinRepository(baseURL: configuration.apiBaseURL),
+            inviteJoinAttemptStore: KeychainInviteJoinAttemptStore(secrets: secrets),
+            inviteLinkParser: InviteLinkParser(baseURL: configuration.inviteLinkBaseURL),
             familyRepository: HTTPFamilyRepository(baseURL: configuration.apiBaseURL),
             credentialStore: KeychainSessionCredentialStore(secrets: secrets),
             installationProofStore: KeychainInstallationProofStore(secrets: secrets),
@@ -51,6 +63,16 @@ final class AppContainer {
                 repository: accessRepository,
                 installationProofProvider: installationProofStore
             ),
+            sessionStore: sessionStore
+        )
+    }
+
+    func makeInviteJoinCoordinator(sessionStore: AppSessionStore) -> InviteJoinCoordinator {
+        InviteJoinCoordinator(
+            repository: inviteJoinRepository,
+            attempts: inviteJoinAttemptStore,
+            installationProofProvider: installationProofStore,
+            parser: inviteLinkParser,
             sessionStore: sessionStore
         )
     }

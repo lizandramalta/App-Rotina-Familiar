@@ -1,6 +1,6 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.18 · **Base funcional:** RN 1.18 / RF 1.17 / UC 1.16 · **Arquitetura backend:** 1.4\
+**Versão:** 1.19 · **Base funcional:** RN 1.18 / RF 1.17 / UC 1.16 · **Arquitetura backend:** 1.4\
 **Data:** 2026-10-21\
 **Situação:** `GetOwnProfile`/`UpdateOwnProfile`/`GetOwnBadges`/`GetBadgeContributions` materializados na API e OpenAPI (SPEC-006 Fase 1); ampliações de onboarding ainda exigem implementação e atualização da OpenAPI
 
@@ -184,7 +184,7 @@ O grant e a prova de instalação do upload são segredos: não entram em logs, 
 
 A revalidação de contexto de tarefa (estado `pending`, titularidade do responsável) acontece exclusivamente no vínculo via `SignalTask`, nunca no upload: `POST /media` com `purpose: taskSignal` não amarra a mídia a um `taskId` (SPEC-012). Reutilizar em outra sinalização uma mídia já vinculada não é um fluxo válido: cada sinalização recebe seu próprio `photoMediaId`, revalidado no momento do vínculo.
 
-Página de Universal Link e `/.well-known/apple-app-site-association` são artefatos HTTP de integração, fora do prefixo da API. Não consomem convite nem autenticam o visitante. Página orienta loja e nova abertura do link após instalar, sem prometer deferred deep linking. URLs/domínio reais serão configuração de implantação.
+Página de Universal Link e `/.well-known/apple-app-site-association` são artefatos HTTP de integração, fora do prefixo da API. Não consomem convite nem autenticam o visitante. A implantação atual usa `https://convites.rotina-familiar.workers.dev`, com código em `cloudflare/invite-links/`. O backend deve configurar `INVITE_LINK_BASE_URL` com essa base e gerar `/invite/<token>`; o app deve usar o mesmo host no entitlement. A página orienta instalação pela versão distribuída ou pela loja quando disponível e nova abertura do link após instalar, sem prometer deferred deep linking.
 
 ## 7. Rastreabilidade UC para backend
 
@@ -236,6 +236,7 @@ O documento OpenAPI 3.1 é gerado pelos schemas HTTP em `/docs/json`, e a interf
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.19 | 2026-10-21 | Registra o host gratuito Cloudflare Workers para Universal Links, AASA e página de fallback; configurações de backend e mobile devem coincidir. |
 | 1.18 | 2026-10-21 | `GetOwnProfile`, `UpdateOwnProfile` (com `nickname`), `GetOwnBadges` e `GetBadgeContributions` materializados na API e OpenAPI (SPEC-006 Fase 1, CA-01 a CA-12; SCRUM-51). `NICKNAME_INVALID_LENGTH` corrigido para `422` (E-03 da SPEC-006), por consistência com os demais campos de comprimento do contrato. |
 | 1.17 | 2026-10-19 | `GET /me/tasks` passa a devolver `status` e `displayStatus` por perfil na resposta e na OpenAPI (SPEC-009 Fase 1, CA-01/04/08/11; SCRUM-107). As ampliações de onboarding continuam pendentes. |
 | 1.16 | 2026-10-19 | UC07: `DeleteTask` fecha a missão via `CloseEligibleMissions` quando restam só tarefas concluídas (RN38/RF59; SPEC-014/SPEC-007). Contrato alvo de criação atômica com membros/foto antecipada, edição da família existente e `displayStatus` pessoal; distingue essas ampliações das rotas já implementadas. |

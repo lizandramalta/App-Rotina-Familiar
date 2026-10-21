@@ -20,10 +20,12 @@ struct AppConfigurationTests {
         let configuration = try AppConfiguration(infoDictionary: [
             "AppEnvironment": "development",
             "APIBaseURL": "https://api.example.test/v1",
+            "InviteLinkBaseURL": "https://links.example.test",
         ])
 
         #expect(configuration.environment == "development")
         #expect(configuration.apiBaseURL.absoluteString == "https://api.example.test/v1")
+        #expect(configuration.inviteLinkBaseURL.absoluteString == "https://links.example.test")
     }
 
     @Test("rejects a missing Info.plist value")

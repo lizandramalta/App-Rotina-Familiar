@@ -1,6 +1,9 @@
 {
   "sourceLanguage": "pt-BR",
   "strings": {
+    "": {},
+    "%lld/20": {},
+    "%lld/60": {},
     "access.common.error_network": {
       "localizations": {
         "pt-BR": {
@@ -81,6 +84,127 @@
         }
       }
     },
+    "accessRecovery.backToEntry": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voltar à entrada"
+          }
+        }
+      }
+    },
+    "accessRecovery.invite.description": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peça a um Administrador da sua família um novo convite para este perfil."
+          }
+        }
+      }
+    },
+    "accessRecovery.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recuperar acesso"
+          }
+        }
+      }
+    },
+    "accessSwitch.cancel": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar"
+          }
+        }
+      }
+    },
+    "accessSwitch.confirm": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar"
+          }
+        }
+      }
+    },
+    "accessSwitch.description": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vamos manter seu acesso atual até confirmar o novo ingresso."
+          }
+        }
+      }
+    },
+    "accessSwitch.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trocar de acesso?"
+          }
+        }
+      }
+    },
+    "Cancelar": {},
+    "destination.contentPending": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conteúdo em preparação."
+          }
+        }
+      }
+    },
+    "destination.family": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Família"
+          }
+        }
+      }
+    },
+    "destination.missions": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Missões e conquistas"
+          }
+        }
+      }
+    },
+    "destination.myProfile": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meu perfil"
+          }
+        }
+      }
+    },
+    "destination.myTasks": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minhas tarefas"
+          }
+        }
+      }
+    },
     "family.create.back": {
       "localizations": {
         "pt-BR": {
@@ -97,6 +221,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sua autorização para criar a família expirou. Entre com a Apple novamente para continuar."
+          }
+        }
+      }
+    },
+    "family.create.error_network": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível conectar.\nVerifique sua internet."
           }
         }
       }
@@ -147,6 +282,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Informe o nome da família para continuar."
+          }
+        }
+      }
+    },
+    "family.create.name.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O fuso horário define quando cada dia e cada\nsemana começam."
           }
         }
       }
@@ -207,6 +353,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Criando família…"
+          }
+        }
+      }
+    },
+    "family.create.subtitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dê um nome à família e confira o fuso horário."
           }
         }
       }
@@ -311,6 +468,50 @@
         }
       }
     },
+    "family.members.discard.confirm": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descartar alterações"
+          }
+        }
+      }
+    },
+    "family.members.discard.keep_editing": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar editando"
+          }
+        }
+      }
+    },
+    "family.members.discard.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As alterações feitas neste membro serão perdidas."
+          }
+        }
+      }
+    },
+    "family.members.discard.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descartar alterações?"
+          }
+        }
+      }
+    },
     "family.members.draft.cancel": {
       "localizations": {
         "pt-BR": {
@@ -341,6 +542,17 @@
         }
       }
     },
+    "family.members.draft.name_footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use de 1 a 60 caracteres."
+          }
+        }
+      }
+    },
     "family.members.draft.name_label": {
       "localizations": {
         "pt-BR": {
@@ -351,12 +563,34 @@
         }
       }
     },
+    "family.members.draft.name_placeholder": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome do membro"
+          }
+        }
+      }
+    },
     "family.members.draft.remove": {
       "localizations": {
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Remover membro"
+          }
+        }
+      }
+    },
+    "family.members.draft.role_footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Administradores gerenciam a família. Membros cuidam das tarefas. Kids participam de forma simplificada."
           }
         }
       }
@@ -411,12 +645,56 @@
         }
       }
     },
+    "family.members.role.admin": {
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Administrador"
+          }
+        }
+      }
+    },
+    "family.members.role.kid": {
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Kids"
+          }
+        }
+      }
+    },
+    "family.members.role.member": {
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Membro"
+          }
+        }
+      }
+    },
     "family.members.section": {
       "localizations": {
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Membros"
+          }
+        }
+      }
+    },
+    "family.members.subtitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Você pode adicionar pessoas agora ou fazer isso depois."
           }
         }
       }
@@ -681,6 +959,161 @@
         }
       }
     },
+    "Gerando...": {},
+    "Gerar convite para %@": {},
+    "Gerar novo convite para %@": {},
+    "Indisponível - gere um convite primeiro": {},
+    "inviteJoin.back": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voltar"
+          }
+        }
+      }
+    },
+    "inviteJoin.description": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informe a senha recebida junto com o convite para continuar."
+          }
+        }
+      }
+    },
+    "inviteJoin.error.invalidPassword": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A senha não confere. Revise e tente novamente."
+          }
+        }
+      }
+    },
+    "inviteJoin.error.rateLimited": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tente novamente mais tarde."
+          }
+        }
+      }
+    },
+    "inviteJoin.error.unavailable": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível usar este convite."
+          }
+        }
+      }
+    },
+    "inviteJoin.help.action": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preciso de ajuda para acessar"
+          }
+        }
+      }
+    },
+    "inviteJoin.inspecting": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conferindo convite…"
+          }
+        }
+      }
+    },
+    "inviteJoin.password.accessibility": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Senha do convite, campo seguro"
+          }
+        }
+      }
+    },
+    "inviteJoin.password.label": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Senha do convite"
+          }
+        }
+      }
+    },
+    "inviteJoin.recovery.inProgress": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estamos conferindo seu acesso. Aguarde um momento."
+          }
+        }
+      }
+    },
+    "inviteJoin.recovery.unavailable": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível concluir o acesso por este convite."
+          }
+        }
+      }
+    },
+    "inviteJoin.retry": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tentar novamente"
+          }
+        }
+      }
+    },
+    "inviteJoin.submit": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrar"
+          }
+        }
+      }
+    },
+    "inviteJoin.submitting": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrando…"
+          }
+        }
+      }
+    },
+    "inviteJoin.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrar com convite"
+          }
+        }
+      }
+    },
+    "Membros": {},
     "onboarding.discard.confirm": {
       "localizations": {
         "pt-BR": {
@@ -783,6 +1216,17 @@
         }
       }
     },
+    "onboarding.profile.name.section": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seu nome"
+          }
+        }
+      }
+    },
     "onboarding.profile.nickname.error_invalid": {
       "extractionState": "manual",
       "localizations": {
@@ -835,6 +1279,17 @@
         }
       }
     },
+    "onboarding.profile.nickname.section": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Etiqueta (opcional)"
+          }
+        }
+      }
+    },
     "onboarding.profile.photo.add": {
       "extractionState": "manual",
       "localizations": {
@@ -857,6 +1312,17 @@
         }
       }
     },
+    "onboarding.profile.photo.choose": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolher da galeria"
+          }
+        }
+      }
+    },
     "onboarding.profile.photo.error_selection": {
       "localizations": {
         "pt-BR": {
@@ -873,6 +1339,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Não foi possível enviar a foto. Tente de novo ou continue sem ela."
+          }
+        }
+      }
+    },
+    "onboarding.profile.photo.optional": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto (opcional)"
           }
         }
       }
@@ -908,6 +1385,17 @@
         }
       }
     },
+    "onboarding.profile.photo.take": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tirar foto"
+          }
+        }
+      }
+    },
     "onboarding.profile.photo.uploading": {
       "localizations": {
         "pt-BR": {
@@ -928,17 +1416,6 @@
         }
       }
     },
-    "onboarding.profile.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Seu perfil"
-          }
-        }
-      }
-    },
     "onboarding.profile.subtitle": {
       "extractionState": "manual",
       "localizations": {
@@ -950,182 +1427,19 @@
         }
       }
     },
-    "onboarding.profile.name.section": {
+    "onboarding.profile.title": {
       "extractionState": "manual",
       "localizations": {
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Seu nome"
+            "value": "Seu perfil"
           }
         }
       }
     },
-    "onboarding.profile.nickname.section": {
-      "extractionState": "manual",
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Etiqueta (opcional)"
-          }
-        }
-      }
-    },
-    "onboarding.profile.photo.optional": {
-      "extractionState": "manual",
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Foto (opcional)"
-          }
-        }
-      }
-    },
-    "onboarding.profile.photo.take": {
-      "extractionState": "manual",
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tirar foto"
-          }
-        }
-      }
-    },
-    "onboarding.profile.photo.choose": {
-      "extractionState": "manual",
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Escolher da galeria"
-          }
-        }
-      }
-    },
-    "family.create.subtitle": {
-      "extractionState": "manual",
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dê um nome à família e confira o fuso horário."
-          }
-        }
-      }
-    },
-    "family.create.name.footer": {
-      "extractionState": "manual",
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O fuso horário define quando cada dia e cada\nsemana começam."
-          }
-        }
-      }
-    },
-    "family.members.subtitle": {
-      "extractionState": "manual",
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Você pode adicionar pessoas agora ou fazer isso depois."
-          }
-        }
-      }
-    },
-    "family.create.error_network": {
-      "extractionState": "manual",
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Não foi possível conectar.\nVerifique sua internet."
-          }
-        }
-      }
-    },
-    "family.members.draft.name_placeholder": {
-      "extractionState": "manual",
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nome do membro"
-          }
-        }
-      }
-    },
-    "family.members.draft.name_footer": {
-      "extractionState": "manual",
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Use de 1 a 60 caracteres."
-          }
-        }
-      }
-    },
-    "family.members.draft.role_footer": {
-      "extractionState": "manual",
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Administradores gerenciam a família. Membros cuidam das tarefas. Kids participam de forma simplificada."
-          }
-        }
-      }
-    },
-    "family.members.discard.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Descartar alterações?"
-          }
-        }
-      }
-    },
-    "family.members.discard.message": {
-      "extractionState": "manual",
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "As alterações feitas neste membro serão perdidas."
-          }
-        }
-      }
-    },
-    "family.members.discard.confirm": {
-      "extractionState": "manual",
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Descartar alterações"
-          }
-        }
-      }
-    },
-    "family.members.discard.keep_editing": {
-      "extractionState": "manual",
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Continuar editando"
-          }
-        }
-      }
-    }
+    "Salvar": {},
+    "Voltar": {}
   },
   "version": "1.0"
 }

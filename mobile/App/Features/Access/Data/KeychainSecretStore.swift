@@ -118,3 +118,36 @@ struct KeychainInstallationProofStore: InstallationProofProviding {
         return proof
     }
 }
+
+struct KeychainInviteJoinAttemptStore: InviteJoinAttemptStoring {
+    private let secrets: any SecretStoring
+    private let attemptKey = "pending-invite-join"
+
+    init(secrets: any SecretStoring) {
+        self.secrets = secrets
+    }
+
+    func pendingAttempt() throws -> InviteJoinAttempt? {
+        guard let value = try secrets.read(key: attemptKey),
+              let data = value.data(using: .utf8) else {
+            return nil
+        }
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode(InviteJoinAttempt.self, from: data)
+    }
+
+    func save(_ attempt: InviteJoinAttempt) throws {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let data = try encoder.encode(attempt)
+        guard let value = String(data: data, encoding: .utf8) else {
+            throw KeychainSecretStoreError.invalidValue
+        }
+        try secrets.save(value, key: attemptKey)
+    }
+
+    func clear() throws {
+        try secrets.remove(key: attemptKey)
+    }
+}

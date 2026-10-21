@@ -27,15 +27,6 @@ struct FamilyRoutineApp: App {
     var body: some Scene {
         WindowGroup {
             AppRootView(container: container, sessionStore: sessionStore)
-                .task {
-                    #if DEBUG
-                    if let scenario = UITestScenario.current {
-                        scenario.bootstrap(sessionStore)
-                        return
-                    }
-                    #endif
-                    await sessionStore.restore()
-                }
         }
     }
 }

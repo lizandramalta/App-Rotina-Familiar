@@ -244,6 +244,15 @@ npm run test:coverage
 
 No ambiente de produção, o TypeScript é compilado para JavaScript ESM puro no diretório `dist/`:
 
+O serviço público existente usa `https://app-rotina-familiar.onrender.com` como
+`API_BASE_URL` no backend. O app Release usa essa origem com `/v1` em
+`mobile/Configuration/Production.xcconfig`. Para a emissão de convites, configure
+`INVITE_LINK_BASE_URL=https://convites.rotina-familiar.workers.dev` no ambiente do
+serviço; o Worker do Cloudflare serve o Universal Link e o arquivo AASA, enquanto
+as chamadas de ingresso vão diretamente à API no Render. As duas URLs têm funções
+diferentes. Mantenha as credenciais de banco, sessão e Apple nas variáveis privadas
+do serviço, nunca no repositório.
+
 1. **Compilar a aplicação:**
    ```bash
    npm run build
