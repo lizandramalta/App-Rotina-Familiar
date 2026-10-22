@@ -21,8 +21,11 @@ struct AppRootView: View {
             case .entry:
                 EntryView(viewModel: container.makeEntryViewModel(sessionStore: sessionStore))
             case let .authenticated(profile):
-                AuthenticatedHomeView(role: profile.role)
-                    .id(profile.memberID)
+                AuthenticatedHomeView(
+                    role: profile.role,
+                    myTasksTab: sessionStore.accessToken.map(container.makeMyTasksTabView)
+                )
+                .id(profile.memberID)
             case let .initialProfile(grant):
                 InitialOnboardingFlowView(
                     viewModel: container.makeOnboardingViewModel(grant: grant, sessionStore: sessionStore)

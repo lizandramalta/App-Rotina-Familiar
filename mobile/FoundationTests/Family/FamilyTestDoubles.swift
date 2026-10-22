@@ -90,6 +90,10 @@ actor FamilyRepositorySpy: FamilyRepository {
         inviteCalls += 1
         return MemberInvite(inviteID: UUID(), link: "https://example.test/invite", password: "PW")
     }
+
+    func listMembers(accessToken: String, cursor: String?) async throws -> FamilyMemberPage {
+        FamilyMemberPage(items: [], nextCursor: nil)
+    }
 }
 
 struct PhotoNormalizerStub: ProfilePhotoNormalizing {

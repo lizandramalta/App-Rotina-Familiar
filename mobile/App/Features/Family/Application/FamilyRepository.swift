@@ -6,6 +6,8 @@ nonisolated protocol FamilyRepository: Sendable {
     func setProfilePhoto(mediaID: String, accessToken: String) async throws
     func createMember(name: String, role: MemberRole, accessToken: String) async throws -> CreatedMember
     func issueInvite(memberID: UUID, accessToken: String) async throws -> MemberInvite
+    /// Consumed by Tasks' assignee picker (MOD-001); not paginated further there — families are small.
+    func listMembers(accessToken: String, cursor: String?) async throws -> FamilyMemberPage
 }
 
 nonisolated protocol ProfilePhotoNormalizing: Sendable {
