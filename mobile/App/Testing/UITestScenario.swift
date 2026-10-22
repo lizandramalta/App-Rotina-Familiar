@@ -29,6 +29,7 @@ enum UITestScenario: String {
             inviteJoinAttemptStore: UITestInviteJoinAttemptStore(),
             inviteLinkParser: InviteLinkParser(baseURL: URL(string: "https://example.invalid")!),
             familyRepository: UITestFamilyRepository(scenario: self),
+            profileRepository: UITestProfileRepository(),
             credentialStore: UITestCredentialStore(),
             installationProofStore: UITestInstallationProof(),
             appleAuthenticator: UITestAppleAuthenticator()
@@ -207,6 +208,43 @@ private actor UITestFamilyRepository: FamilyRepository {
     func issueInvite(memberID: UUID, accessToken: String) async throws -> MemberInvite {
         MemberInvite(inviteID: UUID(), link: "https://example.invalid/invite/test", password: "ABC-123")
     }
+}
+
+/// Fixed profile so every UI scenario reaches TEL-030 without a network.
+private struct UITestProfileRepository: ProfileRepository {
+    private let profile = OwnProfile(
+        memberID: UUID(),
+        name: "Maria Silva",
+        familyName: "Família Silva",
+        nickname: nil,
+        photoMediaID: nil,
+        totalParticipations: 7,
+        nextTier: NextBadgeTier(code: .silver, requiredMissionCount: 10, remaining: 3)
+    )
+
+    func getOwnProfile(accessToken: String) async throws -> OwnProfile { profile }
+
+    func updateOwnProfile(_ command: UpdateOwnProfileCommand, accessToken: String) async throws -> OwnProfile {
+        profile
+    }
+
+    func getOwnBadges(accessToken: String) async throws -> BadgesOverview {
+        BadgesOverview(
+            totalParticipations: 7,
+            nextTier: NextBadgeTier(code: .silver, requiredMissionCount: 10, remaining: 3),
+            awards: [
+                BadgeAward(awardID: UUID(), tier: .bronze, requiredMissionCount: 5, awardedAt: Date(timeIntervalSince1970: 1_790_000_000)),
+            ]
+        )
+    }
+
+    func getBadgeDetail(awardID: UUID, accessToken: String) async throws -> BadgeDetail {
+        BadgeDetail(awardID: awardID, tier: .bronze, awardedAt: Date(timeIntervalSince1970: 1_790_000_000), contributingMissions: [])
+    }
+
+    func uploadProfilePhoto(_ jpeg: Data, accessToken: String) async throws -> String { "ui-test-media" }
+
+    func getMediaContent(mediaID: String, accessToken: String) async throws -> Data { Data() }
 }
 
 private final class UITestCredentialStore: SessionCredentialStoring, @unchecked Sendable {

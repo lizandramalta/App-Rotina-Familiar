@@ -1113,6 +1113,16 @@
         }
       }
     },
+    "kids.home.profile_button": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir perfil"
+          }
+        }
+      }
+    },
     "Membros": {},
     "onboarding.discard.confirm": {
       "localizations": {
@@ -1434,6 +1444,416 @@
           "stringUnit": {
             "state": "translated",
             "value": "Seu perfil"
+          }
+        }
+      }
+    },
+    "profile.avatar.default": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem foto de perfil, identificação padrão"
+          }
+        }
+      }
+    },
+    "profile.avatar.photo": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto de perfil"
+          }
+        }
+      }
+    },
+    "profile.badge.a11y_conquered": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Badge %@ conquistado"
+          }
+        }
+      }
+    },
+    "profile.badge.a11y_hint": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dê dois toques para ver as missões"
+          }
+        }
+      }
+    },
+    "profile.badge.a11y_pending": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Badge %1$@, faltam %2$lld missões, botão desabilitado"
+          }
+        }
+      }
+    },
+    "profile.badge.conquered": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conquistado"
+          }
+        }
+      }
+    },
+    "profile.badge.missions": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld missões"
+          }
+        }
+      }
+    },
+    "profile.badge.remaining": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faltam %lld"
+          }
+        }
+      }
+    },
+    "profile.badges.all_conquered": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todos os marcos conquistados"
+          }
+        }
+      }
+    },
+    "profile.badges.footer": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada missão encerrada com a sua participação conta uma vez. Os marcos são cumulativos."
+          }
+        }
+      }
+    },
+    "profile.badges.footer_empty": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Participe de uma missão da família para começar. Cada missão encerrada com a sua participação conta uma vez."
+          }
+        }
+      }
+    },
+    "profile.badges.footer_kids": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada missão da família em que você ajudou conta uma vez."
+          }
+        }
+      }
+    },
+    "profile.badges.next_tier": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faltam %1$lld para %2$@"
+          }
+        }
+      }
+    },
+    "profile.badges.section": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conquistas"
+          }
+        }
+      }
+    },
+    "profile.badges.total": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld missões com participação"
+          }
+        }
+      }
+    },
+    "profile.badges.total_kids": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld missões com você"
+          }
+        }
+      }
+    },
+    "profile.badges.total_kids_one": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 missão com você"
+          }
+        }
+      }
+    },
+    "profile.badges.total_one": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 missão com participação"
+          }
+        }
+      }
+    },
+    "profile.common.close": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fechar"
+          }
+        }
+      }
+    },
+    "profile.common.retry": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tentar novamente"
+          }
+        }
+      }
+    },
+    "profile.edit_button": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar"
+          }
+        }
+      }
+    },
+    "profile.error_load": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível carregar seu perfil. Tente novamente."
+          }
+        }
+      }
+    },
+    "profile.identity.subtitle_name_role": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "profile.identity.subtitle_role_family": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "profile.loading": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carregando perfil"
+          }
+        }
+      }
+    },
+    "profile.role.footer_admin": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ao deixar a administração, você passa a ser Membro. Para voltar, outro Administrador precisa promover você."
+          }
+        }
+      }
+    },
+    "profile.role.footer_creator": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Criador da família não pode deixar a administração."
+          }
+        }
+      }
+    },
+    "profile.role.footer_member": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A gestão de membros e das configurações da família fica com os Administradores."
+          }
+        }
+      }
+    },
+    "profile.role.label": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Papel"
+          }
+        }
+      }
+    },
+    "profile.role.leave_administration": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deixar a administração"
+          }
+        }
+      }
+    },
+    "profile.role.leave_placeholder.message": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta ação ainda está em preparação."
+          }
+        }
+      }
+    },
+    "profile.role.section": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PAPEL NA FAMÍLIA"
+          }
+        }
+      }
+    },
+    "profile.tier.bronze": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bronze"
+          }
+        }
+      }
+    },
+    "profile.tier.bronze.target": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "o bronze"
+          }
+        }
+      }
+    },
+    "profile.tier.diamond": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diamante"
+          }
+        }
+      }
+    },
+    "profile.tier.diamond.target": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "o diamante"
+          }
+        }
+      }
+    },
+    "profile.tier.gold": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouro"
+          }
+        }
+      }
+    },
+    "profile.tier.gold.target": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "o ouro"
+          }
+        }
+      }
+    },
+    "profile.tier.silver": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prata"
+          }
+        }
+      }
+    },
+    "profile.tier.silver.target": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "a prata"
+          }
+        }
+      }
+    },
+    "profile.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meu perfil"
           }
         }
       }

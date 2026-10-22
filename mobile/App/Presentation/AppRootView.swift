@@ -21,7 +21,9 @@ struct AppRootView: View {
             case .entry:
                 EntryView(viewModel: container.makeEntryViewModel(sessionStore: sessionStore))
             case let .authenticated(profile):
-                AuthenticatedHomeView(role: profile.role)
+                AuthenticatedHomeView(session: profile) {
+                    container.makeProfileViewModel(session: profile, sessionStore: sessionStore)
+                }
                     .id(profile.memberID)
             case let .initialProfile(grant):
                 InitialOnboardingFlowView(
