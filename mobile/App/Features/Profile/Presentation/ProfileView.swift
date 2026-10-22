@@ -32,6 +32,11 @@ struct ProfileView: View {
             }
         }
         .task { await viewModel.load() }
+        .navigationDestination(item: $viewModel.selectedBadgeForDetail) { item in
+            if let detailViewModel = viewModel.makeBadgeDetailViewModel(for: item) {
+                BadgeDetailView(viewModel: detailViewModel)
+            }
+        }
         .sheet(isPresented: $viewModel.isShowingLeaveAdminPlaceholder) { leaveAdministrationPlaceholder }
         .sheet(
             item: Binding(get: { viewModel.editor }, set: { if $0 == nil { viewModel.dismissEditor() } })
@@ -104,7 +109,6 @@ struct ProfileView: View {
         .frame(maxWidth: .infinity)
         .padding(20)
         .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 22))
-        .accessibilityElement(children: .combine)
     }
 
     @ViewBuilder
@@ -154,8 +158,7 @@ struct ProfileView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(18)
             .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 22))
-            .accessibilityElement(children: .combine)
-
+    
             LazyVGrid(
                 columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: isRegular ? 4 : 2),
                 spacing: 12
@@ -182,7 +185,7 @@ struct ProfileView: View {
                 HStack {
                     Image(systemName: item.isConquered ? "medal.fill" : "medal")
                         .font(.system(size: 28))
-                        .foregroundStyle(item.isConquered ? item.tier.tint : Color(uiColor: .tertiaryLabel))
+                        .foregroundStyle(item.isConquered ? item.tier.badgeTint : Color(uiColor: .tertiaryLabel))
                         .frame(width: 40, height: 40)
                     Spacer()
                     if item.isConquered {
@@ -334,16 +337,5 @@ struct ProfileView: View {
         .padding(16)
         .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 22))
         .accessibilityElement(children: .contain)
-    }
-}
-
-private extension BadgeTier {
-    var tint: Color {
-        switch self {
-        case .bronze: .brown
-        case .silver: .gray
-        case .gold: .yellow
-        case .diamond: .cyan
-        }
     }
 }

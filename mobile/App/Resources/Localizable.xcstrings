@@ -1528,6 +1528,76 @@
         }
       }
     },
+    "profile.badge_detail.awarded_at": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conquistado em %@"
+          }
+        }
+      }
+    },
+    "profile.badge_detail.completed_at": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concluída em %@"
+          }
+        }
+      }
+    },
+    "profile.badge_detail.error": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível carregar este marco. Tente novamente."
+          }
+        }
+      }
+    },
+    "profile.badge_detail.loading_date": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carregando…"
+          }
+        }
+      }
+    },
+    "profile.badge_detail.section": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Missões que contaram"
+          }
+        }
+      }
+    },
+    "profile.badge_detail.section_kids": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Missões em que você ajudou"
+          }
+        }
+      }
+    },
+    "profile.badge_detail.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · %2$lld missões"
+          }
+        }
+      }
+    },
     "profile.badges.all_conquered": {
       "localizations": {
         "pt-BR": {

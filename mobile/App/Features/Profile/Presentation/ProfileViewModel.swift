@@ -70,6 +70,17 @@ final class ProfileViewModel {
         )
     }
 
+    func makeBadgeDetailViewModel(for item: BadgeDisplayItem) -> BadgeDetailViewModel? {
+        guard let awardID = item.awardID else { return nil }
+        return BadgeDetailViewModel(
+            item: item,
+            awardID: awardID,
+            role: session.role,
+            repository: repository,
+            sessionStore: sessionStore
+        )
+    }
+
     func dismissEditor() {
         editor = nil
     }
