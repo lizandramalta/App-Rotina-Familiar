@@ -25,7 +25,7 @@ struct ProfileView: View {
         .toolbar {
             if viewModel.state == .loaded {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("profile.edit_button") { viewModel.isShowingEditor = true }
+                    Button("profile.edit_button") { viewModel.startEditing() }
                         .frame(minWidth: minimumTarget, minHeight: minimumTarget)
                         .accessibilityIdentifier("profile.edit.button")
                 }
@@ -33,6 +33,11 @@ struct ProfileView: View {
         }
         .task { await viewModel.load() }
         .sheet(isPresented: $viewModel.isShowingLeaveAdminPlaceholder) { leaveAdministrationPlaceholder }
+        .sheet(
+            item: Binding(get: { viewModel.editor }, set: { if $0 == nil { viewModel.dismissEditor() } })
+        ) { editor in
+            OwnProfileEditorView(viewModel: editor)
+        }
     }
 
     /// Typed stand-in for MOD-010 (SPEC-003), which owns the real confirmation.

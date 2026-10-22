@@ -82,7 +82,12 @@ final class AppContainer {
     }
 
     func makeProfileViewModel(session: ActiveFamilySession, sessionStore: AppSessionStore) -> ProfileViewModel {
-        ProfileViewModel(repository: profileRepository, sessionStore: sessionStore, session: session)
+        ProfileViewModel(
+            repository: profileRepository,
+            sessionStore: sessionStore,
+            session: session,
+            photoNormalizer: photoNormalizer
+        )
     }
 
     func makeOnboardingViewModel(

@@ -1648,6 +1648,386 @@
         }
       }
     },
+    "profile.edit.close": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fechar"
+          }
+        }
+      }
+    },
+    "profile.edit.discard_cancel": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar editando"
+          }
+        }
+      }
+    },
+    "profile.edit.discard_confirm": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descartar alterações"
+          }
+        }
+      }
+    },
+    "profile.edit.discard_message": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O que você editou não será salvo."
+          }
+        }
+      }
+    },
+    "profile.edit.discard_title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descartar alterações?"
+          }
+        }
+      }
+    },
+    "profile.edit.error_network": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível conectar. Verifique sua internet. Seus dados continuam aqui."
+          }
+        }
+      }
+    },
+    "profile.edit.error_photo_format": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esse arquivo não é uma imagem compatível."
+          }
+        }
+      }
+    },
+    "profile.edit.error_photo_processing": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sua foto ainda está sendo processada. Tente novamente em um instante."
+          }
+        }
+      }
+    },
+    "profile.edit.error_photo_too_large": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Essa foto é muito grande. Tente outra."
+          }
+        }
+      }
+    },
+    "profile.edit.error_photo_upload": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível enviar a foto. Sua foto atual continua."
+          }
+        }
+      }
+    },
+    "profile.edit.error_unavailable": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível salvar agora. Seus dados continuam aqui. Tente novamente."
+          }
+        }
+      }
+    },
+    "profile.edit.name_label": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seu nome"
+          }
+        }
+      }
+    },
+    "profile.edit.nickname_error": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A etiqueta pode ter até 20 caracteres (sem contar espaços)."
+          }
+        }
+      }
+    },
+    "profile.edit.nickname_error_kids": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O apelido pode ter até 20 caracteres (sem contar espaços)."
+          }
+        }
+      }
+    },
+    "profile.edit.nickname_help": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visível para a família. Só você pode alterar."
+          }
+        }
+      }
+    },
+    "profile.edit.nickname_help_kids": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A família vai ver esse nome."
+          }
+        }
+      }
+    },
+    "profile.edit.nickname_label": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Etiqueta (opcional)"
+          }
+        }
+      }
+    },
+    "profile.edit.nickname_label_kids": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seu apelido"
+          }
+        }
+      }
+    },
+    "profile.edit.nickname_placeholder": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ex.: Pai, vó, filha mais velha, caçula"
+          }
+        }
+      }
+    },
+    "profile.edit.photo_add": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar foto"
+          }
+        }
+      }
+    },
+    "profile.edit.photo_cancel_upload": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar envio"
+          }
+        }
+      }
+    },
+    "profile.edit.photo_caption": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto (opcional) · câmera ou galeria"
+          }
+        }
+      }
+    },
+    "profile.edit.photo_caption_kids": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Câmera ou galeria"
+          }
+        }
+      }
+    },
+    "profile.edit.photo_change": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alterar foto"
+          }
+        }
+      }
+    },
+    "profile.edit.photo_choose_another": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolher outra foto"
+          }
+        }
+      }
+    },
+    "profile.edit.photo_dialog_cancel": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar"
+          }
+        }
+      }
+    },
+    "profile.edit.photo_dialog_title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto do perfil"
+          }
+        }
+      }
+    },
+    "profile.edit.photo_keep": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manter foto atual"
+          }
+        }
+      }
+    },
+    "profile.edit.photo_pick": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolher da galeria"
+          }
+        }
+      }
+    },
+    "profile.edit.photo_remove": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remover foto"
+          }
+        }
+      }
+    },
+    "profile.edit.photo_retry": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tentar novamente"
+          }
+        }
+      }
+    },
+    "profile.edit.photo_take": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tirar foto"
+          }
+        }
+      }
+    },
+    "profile.edit.photo_uploading": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enviando foto…"
+          }
+        }
+      }
+    },
+    "profile.edit.save": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salvar"
+          }
+        }
+      }
+    },
+    "profile.edit.save_hint": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dê dois toques para salvar suas alterações"
+          }
+        }
+      }
+    },
+    "profile.edit.saving": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salvando…"
+          }
+        }
+      }
+    },
+    "profile.edit.subtitle": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "É assim que a família vai ver você.\nFoto e etiqueta são opcionais."
+          }
+        }
+      }
+    },
+    "profile.edit.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar perfil"
+          }
+        }
+      }
+    },
     "profile.edit_button": {
       "localizations": {
         "pt-BR": {

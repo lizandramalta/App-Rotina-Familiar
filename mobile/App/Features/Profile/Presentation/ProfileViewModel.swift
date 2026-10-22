@@ -14,6 +14,7 @@ final class ProfileViewModel {
 
     private let repository: any ProfileRepository
     private let sessionStore: AppSessionStore
+    private let photoNormalizer: any ProfilePhotoNormalizing
     let session: ActiveFamilySession
 
     private(set) var state: State = .loading
@@ -23,18 +24,55 @@ final class ProfileViewModel {
     private(set) var badgeItems: [BadgeDisplayItem] = []
 
     var selectedBadgeForDetail: BadgeDisplayItem?
-    var isShowingEditor = false
+    /// MOD-009 is presented while this is set (`.sheet(item:)`).
+    private(set) var editor: OwnProfileEditorViewModel?
     var isShowingLeaveAdminPlaceholder = false
 
     private var avatarMediaID: String?
 
-    init(repository: any ProfileRepository, sessionStore: AppSessionStore, session: ActiveFamilySession) {
+    init(
+        repository: any ProfileRepository,
+        sessionStore: AppSessionStore,
+        session: ActiveFamilySession,
+        photoNormalizer: any ProfilePhotoNormalizing = ProfilePhotoNormalizer()
+    ) {
         self.repository = repository
         self.sessionStore = sessionStore
+        self.photoNormalizer = photoNormalizer
         self.session = session
     }
 
     var isKid: Bool { session.role == .kid }
+
+    var isShowingEditor: Bool {
+        get { editor != nil }
+        set {
+            if newValue { startEditing() } else { editor = nil }
+        }
+    }
+
+    /// Opens MOD-009 with the data on screen; saving updates this screen at once (UX-006 §4).
+    func startEditing() {
+        guard let profile, editor == nil else { return }
+        editor = OwnProfileEditorViewModel(
+            initialProfile: profile,
+            initialAvatarData: avatarData,
+            role: session.role,
+            repository: repository,
+            photoNormalizer: photoNormalizer,
+            sessionStore: sessionStore,
+            onSaved: { [weak self] updated, avatar in
+                self?.applyUpdatedProfile(updated, avatarData: avatar)
+            },
+            onDismiss: { [weak self] in
+                self?.editor = nil
+            }
+        )
+    }
+
+    func dismissEditor() {
+        editor = nil
+    }
 
     // MARK: Loading
 
