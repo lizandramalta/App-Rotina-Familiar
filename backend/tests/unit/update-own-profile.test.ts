@@ -34,6 +34,7 @@ const readyOwnPhoto: MediaRecord = {
 
 const CURRENT_PROFILE: OwnProfileRecord = {
   name: 'Maria Silva',
+  familyName: 'Família Silva',
   nickname: 'Mari',
   photoMediaId: null,
 };
@@ -44,6 +45,7 @@ describe('UpdateOwnProfileUseCase — SPEC-002 + SPEC-006', () => {
   let markLinked: ReturnType<typeof vi.fn>;
   let setPhoto: ReturnType<typeof vi.fn>;
   let setNickname: ReturnType<typeof vi.fn>;
+  let setName: ReturnType<typeof vi.fn>;
   let findBadgeProgress: ReturnType<typeof vi.fn>;
   let forFamily: ReturnType<typeof vi.fn>;
   let useCase: UpdateOwnProfileUseCase;
@@ -54,6 +56,7 @@ describe('UpdateOwnProfileUseCase — SPEC-002 + SPEC-006', () => {
     markLinked = vi.fn();
     setPhoto = vi.fn();
     setNickname = vi.fn();
+    setName = vi.fn();
     findBadgeProgress = vi.fn().mockResolvedValue({
       totalParticipations: 7,
       nextTier: { code: 'silver', requiredMissionCount: 10 },
@@ -67,6 +70,7 @@ describe('UpdateOwnProfileUseCase — SPEC-002 + SPEC-006', () => {
         findOwnProfile,
         setPhoto,
         setNickname,
+        setName,
         findBadgeProgress,
       } as unknown as ProfileRepositoryPort,
       mediaRepository: { findInFamily, markLinked } as unknown as MediaRepositoryPort,
@@ -75,14 +79,20 @@ describe('UpdateOwnProfileUseCase — SPEC-002 + SPEC-006', () => {
     });
   });
 
-  const update = (overrides: { nickname?: string | null; photoMediaId?: string | null } = {}) =>
-    useCase.execute({ actor: TEST_ACTOR, ...overrides });
+  const update = (
+    overrides: {
+      name?: string | null;
+      nickname?: string | null;
+      photoMediaId?: string | null;
+    } = {},
+  ) => useCase.execute({ actor: TEST_ACTOR, ...overrides });
 
   const link = (photoMediaId: string | null = MEDIA_ID) => update({ photoMediaId });
 
   const expectedProfile = (overrides: Partial<Record<string, unknown>> = {}) => ({
     memberId: TEST_ACTOR.memberId,
     name: 'Maria Silva',
+    familyName: 'Família Silva',
     nickname: 'Mari',
     photoMediaId: null,
     totalParticipations: 7,
@@ -197,6 +207,73 @@ describe('UpdateOwnProfileUseCase — SPEC-002 + SPEC-006', () => {
     expect(setNickname).toHaveBeenCalled(); // nickname is validated/applied first...
     expect(setPhoto).not.toHaveBeenCalled(); // ...but the photo failure happens in the same forFamily transaction,
     // so a real Postgres rollback (covered by the integration test) discards both writes together.
+  });
+
+  it('CA-02 sets a trimmed name for an adult and persists it with the same timestamp', async () => {
+    const result = await update({ name: '  Maria S.  ' });
+
+    expect(result.name).toBe('Maria S.');
+    expect(result.familyName).toBe('Família Silva');
+    expect(setName).toHaveBeenCalledWith(expect.anything(), {
+      familyId: TEST_ACTOR.familyId,
+      memberId: TEST_ACTOR.memberId,
+      name: 'Maria S.',
+      updatedAt: NOW,
+    });
+  });
+
+  it('CA-02 preserves the name when the command omits it', async () => {
+    const result = await update({ nickname: 'Mi' });
+
+    expect(result.name).toBe('Maria Silva');
+    expect(setName).not.toHaveBeenCalled();
+  });
+
+  it('CA-02 accepts a 60-visible-character name', async () => {
+    const result = await update({ name: 'a'.repeat(60) });
+
+    expect(result.name).toBe('a'.repeat(60));
+  });
+
+  it.each([
+    ['null', null],
+    ['empty', ''],
+    ['blank after trim', '   '],
+    ['61 visible characters', 'a'.repeat(61)],
+    ['a control character', 'Maria\u0007'],
+    ['a trailing newline', 'Maria\n'],
+  ])('CA-13 rejects a name that is %s with 422 NAME_INVALID_LENGTH', async (_label, name) => {
+    const error = await update({ name, nickname: 'Mi' }).catch((e) => e);
+
+    expect(error).toBeInstanceOf(ValidationError);
+    expect(error).toMatchObject({
+      statusCode: 422,
+      code: 'VALIDATION_FAILED',
+      fieldErrors: { name: ['NAME_INVALID_LENGTH'] },
+    });
+    expect(setName).not.toHaveBeenCalled();
+    expect(setNickname).not.toHaveBeenCalled();
+    expect(setPhoto).not.toHaveBeenCalled();
+  });
+
+  it('CA-14 rejects a Kids session sending name with 403 ACTION_NOT_ALLOWED before any write', async () => {
+    const error = await useCase
+      .execute({ actor: { ...TEST_ACTOR, role: MemberRole.KIDS }, name: 'Kid', nickname: 'K' })
+      .catch((e) => e);
+
+    expect(error).toMatchObject({ statusCode: 403, code: 'ACTION_NOT_ALLOWED' });
+    expect(forFamily).not.toHaveBeenCalled();
+    expect(setName).not.toHaveBeenCalled();
+    expect(setNickname).not.toHaveBeenCalled();
+  });
+
+  it('CA-02 lets a Member session edit its own name', async () => {
+    const result = await useCase.execute({
+      actor: { ...TEST_ACTOR, role: MemberRole.MEMBER },
+      name: 'Maria',
+    });
+
+    expect(result.name).toBe('Maria');
   });
 
   it('CA-12 allows a Kids session to edit its own nickname/photo like an adult', async () => {

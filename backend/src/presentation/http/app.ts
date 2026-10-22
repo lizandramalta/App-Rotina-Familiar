@@ -310,9 +310,13 @@ export function buildHttpApp(
       // §1): `POST /access/apple` e `POST /access/refresh` emitem credenciais no
       // corpo, e uma resposta de `/me/session` guardada em cache prolongaria uma
       // sessão já revogada (SPEC-001 §5.3). O hook cobre também as respostas de
-      // erro, que um header posto em cada handler deixaria de fora.
+      // erro, que um header posto em cada handler deixaria de fora. Um handler
+      // que já definiu uma política mais específica (ex.: `private, no-store` do
+      // conteúdo de mídia, SPEC-006 CA-15) a mantém.
       scope.addHook('onSend', async (_request, reply) => {
-        reply.header('Cache-Control', 'no-store');
+        if (!reply.hasHeader('Cache-Control')) {
+          reply.header('Cache-Control', 'no-store');
+        }
       });
 
       registerAccessRoutes(scope, container);

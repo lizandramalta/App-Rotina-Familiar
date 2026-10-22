@@ -4,6 +4,7 @@ export type BadgeTier = 'bronze' | 'silver' | 'gold' | 'diamond';
 
 export interface OwnProfileRecord {
   readonly name: string;
+  readonly familyName: string;
   readonly nickname: string | null;
   readonly photoMediaId: string | null;
 }
@@ -45,6 +46,17 @@ export interface ProfileRepositoryPort {
       readonly familyId: string;
       readonly memberId: string;
       readonly photoMediaId: string | null;
+      readonly updatedAt: Date;
+    },
+  ): Promise<void>;
+
+  /** Define o nome de identificação do próprio membro adulto (SPEC-006 E-05, RF02). */
+  setName(
+    tx: TransactionContext,
+    params: {
+      readonly familyId: string;
+      readonly memberId: string;
+      readonly name: string;
       readonly updatedAt: Date;
     },
   ): Promise<void>;

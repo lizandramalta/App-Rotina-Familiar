@@ -143,6 +143,40 @@ export function registerMediaRoutes(app: FastifyInstance, container: Application
 
     scope.addHook('onRequest', createAuthenticationHook(container));
 
+    scope.get<{ Params: { mediaId: string } }>(
+      '/media/:mediaId/content',
+      {
+        schema: {
+          tags: ['Media'],
+          summary: 'Download the bytes of a READY media of the actor family',
+          security: [{ bearerAuth: [] }],
+          params: {
+            type: 'object',
+            required: ['mediaId'],
+            additionalProperties: false,
+            properties: { mediaId: { type: 'string' } },
+          },
+          response: {
+            401: problemResponseSchema,
+            404: problemResponseSchema,
+            503: problemResponseSchema,
+          },
+        },
+      },
+      async (request, reply) => {
+        const content = await container.getMediaContentUseCase.execute(
+          requireActor(request),
+          request.params.mediaId,
+        );
+
+        return reply
+          .status(200)
+          .header('Content-Type', content.contentType)
+          .header('Cache-Control', 'private, no-store')
+          .send(content.body);
+      },
+    );
+
     scope.post(
       '/media',
       {

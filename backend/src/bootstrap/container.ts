@@ -48,6 +48,7 @@ import { IssueMemberInviteUseCase } from '../modules/family/application/issue-me
 import { CryptoInviteCredentials } from '../modules/family/infrastructure/crypto-invite-credentials.js';
 import { PostgresMemberInviteRepository } from '../modules/family/infrastructure/postgres-member-invite-repository.js';
 import { PostgresMemberManagementRepository } from '../modules/family/infrastructure/postgres-member-management-repository.js';
+import { GetMediaContentUseCase } from '../modules/media/application/get-media-content-use-case.js';
 import { UploadMediaUseCase } from '../modules/media/application/upload-media-use-case.js';
 import { UploadOnboardingMediaUseCase } from '../modules/media/application/upload-onboarding-media-use-case.js';
 import { CleanOrphanOnboardingMedia } from '../modules/media/application/clean-orphan-onboarding-media.js';
@@ -124,6 +125,7 @@ export interface ApplicationContainer {
   readonly createMemberUseCase: CreateMemberUseCase;
   readonly issueMemberInviteUseCase: IssueMemberInviteUseCase;
   readonly uploadMediaUseCase: UploadMediaUseCase;
+  readonly getMediaContentUseCase: GetMediaContentUseCase;
   readonly uploadOnboardingMediaUseCase: UploadOnboardingMediaUseCase;
   readonly cleanOrphanOnboardingMedia: CleanOrphanOnboardingMedia;
   readonly updateOwnProfileUseCase: UpdateOwnProfileUseCase;
@@ -351,6 +353,12 @@ export function createContainer(config: Configuration): ApplicationContainer {
     keyPrefix: config.NODE_ENV,
   });
 
+  const getMediaContentUseCase = new GetMediaContentUseCase({
+    repository: mediaRepository,
+    storage: objectStorage,
+    transactionRunner,
+  });
+
   const uploadOnboardingMediaUseCase = new UploadOnboardingMediaUseCase({
     repository: onboardingMediaRepository,
     storage: objectStorage,
@@ -474,6 +482,7 @@ export function createContainer(config: Configuration): ApplicationContainer {
     createMemberUseCase,
     issueMemberInviteUseCase,
     uploadMediaUseCase,
+    getMediaContentUseCase,
     uploadOnboardingMediaUseCase,
     cleanOrphanOnboardingMedia,
     updateOwnProfileUseCase,

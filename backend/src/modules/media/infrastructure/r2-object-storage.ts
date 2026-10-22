@@ -1,4 +1,10 @@
-import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  NoSuchKey,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import type { ObjectStorageMaintenancePort } from '../application/media-ports.js';
 
 export interface R2Settings {
@@ -10,7 +16,7 @@ export interface R2Settings {
 
 /**
  * Adaptador do Cloudflare R2 pela API compatível com S3 (BA-01). O bucket é
- * privado: o adaptador só grava, e a leitura passa pelo backend.
+ * privado: a leitura dos bytes passa sempre pelo backend.
  */
 export class R2ObjectStorage implements ObjectStorageMaintenancePort {
   private readonly client: S3Client;
@@ -40,6 +46,22 @@ export class R2ObjectStorage implements ObjectStorageMaintenancePort {
         CacheControl: 'private, no-store',
       }),
     );
+  }
+
+  public async get(key: string): Promise<Buffer | undefined> {
+    try {
+      const result = await this.client.send(
+        new GetObjectCommand({ Bucket: this.settings.bucketName, Key: key }),
+      );
+      return result.Body === undefined
+        ? undefined
+        : Buffer.from(await result.Body.transformToByteArray());
+    } catch (error) {
+      if (error instanceof NoSuchKey) {
+        return undefined;
+      }
+      throw error;
+    }
   }
 
   public async delete(key: string): Promise<void> {

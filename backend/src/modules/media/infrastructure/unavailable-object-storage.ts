@@ -10,6 +10,10 @@ export class UnavailableObjectStorage implements ObjectStorageMaintenancePort {
     throw new DependencyUnavailableError('Object storage is not configured.');
   }
 
+  public async get(): Promise<Buffer | undefined> {
+    throw new DependencyUnavailableError('Object storage is not configured.');
+  }
+
   public async delete(): Promise<void> {
     throw new DependencyUnavailableError('Object storage is not configured.');
   }
