@@ -4,6 +4,20 @@
     "": {},
     "%lld/20": {},
     "%lld/60": {},
+    "Cancelar": {},
+    "Confirmar": {},
+    "Data": {},
+    "Editar": {},
+    "Excluir": {},
+    "Gerando...": {},
+    "Gerar convite para %@": {},
+    "Gerar novo convite para %@": {},
+    "Indisponível - gere um convite primeiro": {},
+    "Membros": {},
+    "OK": {},
+    "Salvar": {},
+    "Tentar novamente": {},
+    "Voltar": {},
     "access.common.error_network": {
       "localizations": {
         "pt-BR": {
@@ -154,7 +168,6 @@
         }
       }
     },
-    "Cancelar": {},
     "destination.contentPending": {
       "localizations": {
         "pt-BR": {
@@ -959,10 +972,6 @@
         }
       }
     },
-    "Gerando...": {},
-    "Gerar convite para %@": {},
-    "Gerar novo convite para %@": {},
-    "Indisponível - gere um convite primeiro": {},
     "inviteJoin.back": {
       "localizations": {
         "pt-BR": {
@@ -1113,7 +1122,6 @@
         }
       }
     },
-    "Membros": {},
     "onboarding.discard.confirm": {
       "localizations": {
         "pt-BR": {
@@ -1438,8 +1446,416 @@
         }
       }
     },
-    "Salvar": {},
-    "Voltar": {}
+    "tasks.common.error_action_not_allowed": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta ação não está disponível para o seu perfil."
+          }
+        }
+      }
+    },
+    "tasks.common.error_network": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível conectar. Verifique sua internet."
+          }
+        }
+      }
+    },
+    "tasks.common.error_unavailable": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Algo não funcionou. Tente novamente."
+          }
+        }
+      }
+    },
+    "tasks.common.error_uncertain": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível confirmar se a tarefa foi salva. Verifique antes de tentar novamente."
+          }
+        }
+      }
+    },
+    "tasks.create.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nova tarefa"
+          }
+        }
+      }
+    },
+    "tasks.delete.confirm_message": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excluir esta tarefa?"
+          }
+        }
+      }
+    },
+    "tasks.delete.error_already_completed": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tarefas concluídas não podem ser excluídas diretamente"
+          }
+        }
+      }
+    },
+    "tasks.delete.error_mission_protected": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta tarefa faz parte de uma missão concluída e não pode ser alterada"
+          }
+        }
+      }
+    },
+    "tasks.delete.error_mission_would_be_empty": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vincule outra tarefa à missão antes de excluir esta"
+          }
+        }
+      }
+    },
+    "tasks.delete.pending_signal_notice": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A sinalização da criança para esta tarefa será removida."
+          }
+        }
+      }
+    },
+    "tasks.detail.load_error": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível carregar a tarefa."
+          }
+        }
+      }
+    },
+    "tasks.detail.mission_protected_title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não é possível excluir"
+          }
+        }
+      }
+    },
+    "tasks.detail.note_label": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Observação"
+          }
+        }
+      }
+    },
+    "tasks.detail.status_awaiting_confirmation": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aguardando confirmação"
+          }
+        }
+      }
+    },
+    "tasks.detail.status_completed": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concluída"
+          }
+        }
+      }
+    },
+    "tasks.detail.status_pending": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pendente"
+          }
+        }
+      }
+    },
+    "tasks.edit.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar tarefa"
+          }
+        }
+      }
+    },
+    "tasks.form.assignees_footer": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolha nenhum, um ou vários responsáveis. Cada responsável recebe o esforço inteiro quando a tarefa é concluída."
+          }
+        }
+      }
+    },
+    "tasks.form.assignees_label": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Responsáveis"
+          }
+        }
+      }
+    },
+    "tasks.form.assignees_none": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum responsável"
+          }
+        }
+      }
+    },
+    "tasks.form.discard_message": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Os dados não salvos serão perdidos."
+          }
+        }
+      }
+    },
+    "tasks.form.discard_title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descartar alterações?"
+          }
+        }
+      }
+    },
+    "tasks.form.error_note_too_long": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A observação pode ter no máximo 250 caracteres"
+          }
+        }
+      }
+    },
+    "tasks.form.error_title_required": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informe um título para a tarefa"
+          }
+        }
+      }
+    },
+    "tasks.form.error_title_too_long": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O título pode ter no máximo 60 caracteres"
+          }
+        }
+      }
+    },
+    "tasks.form.note_counter": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld/250 caracteres"
+          }
+        }
+      }
+    },
+    "tasks.form.note_placeholder": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Observação (opcional)"
+          }
+        }
+      }
+    },
+    "tasks.form.scheduled_date_label": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Data"
+          }
+        }
+      }
+    },
+    "tasks.form.submit": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salvar tarefa"
+          }
+        }
+      }
+    },
+    "tasks.form.submitting": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salvando..."
+          }
+        }
+      }
+    },
+    "tasks.form.title_counter": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld/60 caracteres"
+          }
+        }
+      }
+    },
+    "tasks.form.title_placeholder": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ex.: Arrumar a cama"
+          }
+        }
+      }
+    },
+    "tasks.form.weight_label": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esforço"
+          }
+        }
+      }
+    },
+    "tasks.form.weight_option_high": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alto esforço"
+          }
+        }
+      }
+    },
+    "tasks.form.weight_option_low": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pouco esforço"
+          }
+        }
+      }
+    },
+    "tasks.form.weight_option_medium": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esforço médio"
+          }
+        }
+      }
+    },
+    "tasks.signal_resolution.option_keep": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manter Aguardando confirmação"
+          }
+        }
+      }
+    },
+    "tasks.signal_resolution.option_keep_hint": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A sinalização continua aguardando sua confirmação, já com os dados atualizados."
+          }
+        }
+      }
+    },
+    "tasks.signal_resolution.option_reset": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retornar para Pendente"
+          }
+        }
+      }
+    },
+    "tasks.signal_resolution.option_reset_hint": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A sinalização atual será descartada e a criança poderá sinalizar novamente."
+          }
+        }
+      }
+    },
+    "tasks.signal_resolution.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta tarefa tem uma sinalização aguardando confirmação"
+          }
+        }
+      }
+    }
   },
   "version": "1.0"
 }
