@@ -78,6 +78,7 @@ struct FamilySettingsHubView: View {
                     } label: {
                         Label("family.members.add.action", systemImage: "plus.circle.fill")
                     }
+                    .foregroundStyle(.primary)
                     .accessibilityIdentifier("family.members.add.action")
                 }
             } header: {
