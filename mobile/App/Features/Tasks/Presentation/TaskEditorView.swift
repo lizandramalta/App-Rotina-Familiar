@@ -1,10 +1,11 @@
 import SwiftUI
 
-/// TEL-013 (single-task fields only). Pushed onto the "Minhas tarefas" stack — never a sheet,
+/// TEL-013 (task or routine creation). Pushed onto the "Minhas tarefas" stack — never a sheet,
 /// per the 2026-10-19 design decision: chevron back, inline title, ✓ Salvar trailing.
 struct TaskEditorView: View {
     @State private var viewModel: TaskEditorViewModel
     let onSaved: () -> Void
+    let onRoutineSaved: (Routine) -> Void
 
     @State private var isDiscardConfirmationPresented = false
     @Environment(\.dismiss) private var dismiss
@@ -16,17 +17,21 @@ struct TaskEditorView: View {
     init(
         mode: TaskEditorMode,
         repository: any TaskRepository,
+        routineRepository: any RoutineRepository,
         familyRepository: any FamilyRepository,
         accessToken: String,
-        onSaved: @escaping () -> Void
+        onSaved: @escaping () -> Void,
+        onRoutineSaved: @escaping (Routine) -> Void
     ) {
         _viewModel = State(initialValue: TaskEditorViewModel(
             mode: mode,
             repository: repository,
+            routineRepository: routineRepository,
             familyRepository: familyRepository,
             accessToken: accessToken
         ))
         self.onSaved = onSaved
+        self.onRoutineSaved = onRoutineSaved
     }
 
     var body: some View {
@@ -92,6 +97,11 @@ struct TaskEditorView: View {
         .sheet(isPresented: $viewModel.isSignalResolutionPresented) {
             SignalResolutionView(viewModel: viewModel)
         }
+        .sheet(isPresented: $viewModel.isRecurrencePickerPresented) {
+            RecurrencePickerView(startDate: viewModel.scheduledDate, frequency: viewModel.frequency) { date, frequency in
+                viewModel.setRecurrence(startDate: date, frequency: frequency)
+            }
+        }
         .task {
             await viewModel.load()
         }
@@ -99,6 +109,9 @@ struct TaskEditorView: View {
             if savedTask != nil {
                 onSaved()
             }
+        }
+        .onChange(of: viewModel.savedRoutine) { _, savedRoutine in
+            if let savedRoutine { onRoutineSaved(savedRoutine) }
         }
     }
 
@@ -135,6 +148,37 @@ struct TaskEditorView: View {
                 DatePicker("tasks.form.scheduled_date_label", selection: $viewModel.scheduledDate, displayedComponents: .date)
                     .datePickerStyle(.compact)
                     .accessibilityIdentifier("tasks.editor.scheduled_date")
+                if !viewModel.isEditing {
+                    Button {
+                        Task { await viewModel.prepareRecurrencePicker() }
+                    } label: {
+                        HStack {
+                            Text("routines.recurrence.title")
+                                .foregroundStyle(.primary)
+                            Spacer()
+                            Text(viewModel.recurrenceSummary)
+                                .foregroundStyle(.secondary)
+                            Image(systemName: "chevron.right")
+                                .font(.footnote)
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                    .accessibilityLabel("routines.recurrence.title")
+                    .accessibilityValue(Text(viewModel.recurrenceSummary))
+                    .accessibilityIdentifier("tasks.editor.recurrence")
+                }
+                if viewModel.startDateError {
+                    Text("routines.error_start_date_invalid")
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                        .accessibilityIdentifier("tasks.editor.start_date_error")
+                }
+                if viewModel.frequencyError {
+                    Text("routines.error_frequency_invalid")
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                        .accessibilityIdentifier("tasks.editor.frequency_error")
+                }
             }
 
             Section {
@@ -210,6 +254,10 @@ struct TaskEditorView: View {
             "tasks.delete.error_mission_protected"
         case .rejected:
             "tasks.common.error_unavailable"
+        case .routineUnavailable:
+            "routines.error_unavailable"
+        case .routineUncertainOutcome:
+            "routines.error_result_uncertain"
         }
     }
 }

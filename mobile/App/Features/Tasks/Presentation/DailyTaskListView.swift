@@ -5,8 +5,13 @@ import SwiftUI
 /// requires Kids to reach their own completed task to reopen it (TEL-012/MOD-006).
 struct DailyTaskListView: View {
     @State private var viewModel: DailyTaskListViewModel
+    let refreshRevision: Int
+    let routineFeedback: Routine?
+    let isRefreshingRoutine: Bool
+    let routineRefreshFailed: Bool
     let onSelectTask: (UUID) -> Void
     let onCreateTask: () -> Void
+    let onRefreshRoutine: () -> Void
 
     /// UX-009 §5: on period change, focus follows the updated header; on failure, it follows the
     /// error message and retry action. Same mechanism already used in EntryView.
@@ -17,22 +22,35 @@ struct DailyTaskListView: View {
         audience: TaskAudience,
         repository: any TaskRepository,
         accessToken: String,
+        refreshRevision: Int = 0,
+        routineFeedback: Routine? = nil,
+        isRefreshingRoutine: Bool = false,
+        routineRefreshFailed: Bool = false,
         onSelectTask: @escaping (UUID) -> Void,
-        onCreateTask: @escaping () -> Void
+        onCreateTask: @escaping () -> Void,
+        onRefreshRoutine: @escaping () -> Void = {}
     ) {
         _viewModel = State(initialValue: DailyTaskListViewModel(
             audience: audience,
             repository: repository,
             accessToken: accessToken
         ))
+        self.refreshRevision = refreshRevision
+        self.routineFeedback = routineFeedback
+        self.isRefreshingRoutine = isRefreshingRoutine
+        self.routineRefreshFailed = routineRefreshFailed
         self.onSelectTask = onSelectTask
         self.onCreateTask = onCreateTask
+        self.onRefreshRoutine = onRefreshRoutine
     }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 header
+                if let routineFeedback, viewModel.audience == .adult {
+                    routineStatus(routineFeedback)
+                }
                 carousel
                 Group {
                     if viewModel.isLoading, viewModel.items.isEmpty, viewModel.progress == nil {
@@ -72,7 +90,7 @@ struct DailyTaskListView: View {
                 }
             }
         }
-        .task {
+        .task(id: refreshRevision) {
             await viewModel.load()
         }
         .onChange(of: viewModel.selectedDate) { _, _ in
@@ -83,6 +101,36 @@ struct DailyTaskListView: View {
                 isErrorFocused = true
             }
         }
+    }
+
+    private func routineStatus(_ routine: Routine) -> some View {
+        let statusKey: LocalizedStringKey = routine.materializationState == .pending
+            ? "routines.materialization.preparing"
+            : "routines.materialization.complete"
+        return VStack(alignment: .leading, spacing: 8) {
+            Label(statusKey, systemImage: routine.materializationState == .pending ? "clock" : "checkmark.circle")
+            .accessibilityIdentifier("routines.list.status")
+            if routineRefreshFailed {
+                Text("routines.error_unavailable")
+                    .font(.footnote)
+            }
+            if routine.materializationState == .pending || routineRefreshFailed {
+                Button {
+                    onRefreshRoutine()
+                } label: {
+                    if isRefreshingRoutine {
+                        ProgressView()
+                    } else {
+                        Text("routines.materialization.refresh")
+                    }
+                }
+                .disabled(isRefreshingRoutine)
+                .accessibilityIdentifier("routines.list.refresh")
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(.background.secondary, in: RoundedRectangle(cornerRadius: 16))
     }
 
     // MARK: Header

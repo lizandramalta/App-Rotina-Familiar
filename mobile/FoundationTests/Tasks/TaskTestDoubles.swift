@@ -160,3 +160,49 @@ struct FamilyMembersStub: FamilyRepository {
         throw FamilyError.unavailable
     }
 }
+
+let routineRepositorySpyFixture = Routine(
+    id: UUID(uuidString: "00000000-0000-0000-0000-0000000000a8")!,
+    title: "Regar as plantas",
+    weight: .low,
+    assigneeIDs: [],
+    note: nil,
+    startDate: "2026-10-10",
+    frequency: .everySevenDays,
+    isActive: true,
+    materializationState: .pending
+)
+
+final class RoutineRepositorySpy: RoutineRepository, @unchecked Sendable {
+    private let lock = NSLock()
+    private let timeZoneResult: Result<String, Error>
+    private let createResult: Result<Routine, Error>
+    private let getResult: Result<Routine, Error>
+    private var _createCalls: [CreateRoutineCommand] = []
+    private var _getCalls: [UUID] = []
+
+    var createCalls: [CreateRoutineCommand] { lock.withLock { _createCalls } }
+    var getCalls: [UUID] { lock.withLock { _getCalls } }
+
+    init(
+        timeZoneResult: Result<String, Error> = .success("America/Sao_Paulo"),
+        createResult: Result<Routine, Error> = .success(routineRepositorySpyFixture),
+        getResult: Result<Routine, Error> = .success(routineRepositorySpyFixture)
+    ) {
+        self.timeZoneResult = timeZoneResult
+        self.createResult = createResult
+        self.getResult = getResult
+    }
+
+    func familyTimeZoneID(accessToken: String) async throws -> String { try timeZoneResult.get() }
+
+    func createRoutine(_ command: CreateRoutineCommand, accessToken: String) async throws -> Routine {
+        lock.withLock { _createCalls.append(command) }
+        return try createResult.get()
+    }
+
+    func routine(id: UUID, accessToken: String) async throws -> Routine {
+        lock.withLock { _getCalls.append(id) }
+        return try getResult.get()
+    }
+}

@@ -1,7 +1,8 @@
 import SwiftUI
 
 /// TEL-012 — Editar/Excluir (Admin/Membro only) and Reabrir (Admin/Membro always, Kids on
-/// their own task — SPEC-011). Concluir stays hidden entirely, out of this card's scope (SPEC-010).
+/// their own task — SPEC-011). Adult routine occurrences show their origin and materialization
+/// state; routine management waits for MOD-003 in SPEC-008 Fase 2.
 struct TaskDetailView: View {
     @State private var viewModel: TaskDetailViewModel
     @AccessibilityFocusState private var isMissionWarningFocused: Bool
@@ -17,6 +18,7 @@ struct TaskDetailView: View {
         role: MemberRole,
         currentMemberID: UUID,
         repository: any TaskRepository,
+        routineRepository: any RoutineRepository,
         accessToken: String,
         onRequestEdit: @escaping () -> Void,
         onDeleted: @escaping () -> Void
@@ -26,6 +28,7 @@ struct TaskDetailView: View {
             role: role,
             currentMemberID: currentMemberID,
             repository: repository,
+            routineRepository: routineRepository,
             accessToken: accessToken
         ))
         self.onRequestEdit = onRequestEdit
@@ -52,7 +55,7 @@ struct TaskDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                if viewModel.task != nil, viewModel.canManageTask {
+                if viewModel.task != nil, viewModel.canManageTask, viewModel.task?.routineID == nil {
                     Button("Editar", action: onRequestEdit)
                         .accessibilityIdentifier("tasks.detail.edit")
                 }
@@ -122,6 +125,25 @@ struct TaskDetailView: View {
                 row(label: "tasks.form.weight_label", value: weightLabel(task.weight))
                 row(label: "tasks.form.scheduled_date_label", value: task.scheduledDate)
                 row(label: "tasks.form.assignees_label", value: assigneeSummary(task))
+                if let routine = viewModel.routine {
+                    row(label: "routines.recurrence.title", value: frequencyLabel(routine.frequency))
+                }
+            }
+
+            if viewModel.role != .kid, task.routineID != nil {
+                Section {
+                    if viewModel.routine?.materializationState == .pending {
+                        Label("routines.materialization.preparing", systemImage: "clock")
+                            .accessibilityIdentifier("routines.detail.preparing")
+                    }
+                    if viewModel.routineLoadFailed {
+                        Label("routines.error_unavailable", systemImage: "exclamationmark.triangle")
+                        Button("tasks.error.retry") { Task { await viewModel.refreshRoutine() } }
+                    }
+                    Text("routines.detail.origin_hint")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             if let note = task.note, !note.isEmpty {
@@ -165,7 +187,7 @@ struct TaskDetailView: View {
                 }
             }
 
-            if viewModel.canManageTask {
+            if viewModel.canManageTask, task.routineID == nil {
                 Section {
                     if viewModel.canDeleteDirectly {
                         Button("Excluir", role: .destructive) { viewModel.requestDelete() }
@@ -218,6 +240,11 @@ struct TaskDetailView: View {
         case .medium: String(localized: "tasks.form.weight_option_medium")
         case .high: String(localized: "tasks.form.weight_option_high")
         }
+    }
+
+    private func frequencyLabel(_ frequency: RoutineFrequency) -> String {
+        if frequency == .daily { return String(localized: "routines.recurrence.daily") }
+        return String(format: String(localized: "routines.recurrence.every_days"), frequency.rawValue)
     }
 
     private func assigneeSummary(_ task: FamilyTask) -> String {
