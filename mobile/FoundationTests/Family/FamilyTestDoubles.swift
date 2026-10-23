@@ -1,34 +1,77 @@
 import Foundation
 @testable import FamilyRoutine
 
-actor FamilyRepositorySpy: FamilyRepository {
+final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
+    private let lock = NSLock()
     private var createResult: Result<CreatedFamily, Error>
     private var uploadResults: [Result<String, Error>]
     private var linkResults: [Result<Void, Error>]
     private var memberResults: [Result<CreatedMember, Error>]
+    private var settingsResult: Result<FamilySettings, Error>
+    private var previewResults: [Result<TimeZoneChangePreview, Error>]
+    private var changeTimeZoneResults: [Result<FamilySettings, Error>]
     private let createDelay: Duration?
 
-    private(set) var createFamilyCalls = 0
-    private(set) var uploadCalls = 0
-    private(set) var inviteCalls = 0
-    private(set) var lastCommand: CreateFamilyCommand?
-    private(set) var uploadedPhotos: [Data] = []
-    private(set) var linkedMediaIDs: [String] = []
-    private(set) var createdMembers: [CreatedMember] = []
+    private var _createFamilyCalls = 0
+    private var _uploadCalls = 0
+    private var _inviteCalls = 0
+    private var _getSettingsCalls = 0
+    private var _previewCalls = 0
+    private var _changeTimeZoneCalls = 0
+    private var _lastCommand: CreateFamilyCommand?
+    private var _uploadedPhotos: [Data] = []
+    private var _linkedMediaIDs: [String] = []
+    private var _createdMembers: [CreatedMember] = []
+    private var _lastPreviewTimeZoneID: String?
+    private var _lastPreviewApplication: TimeZoneApplication?
+    private var _lastChangeTimeZoneID: String?
+    private var _lastChangeApplication: TimeZoneApplication?
+
+    var createFamilyCalls: Int { lock.withLock { _createFamilyCalls } }
+    var uploadCalls: Int { lock.withLock { _uploadCalls } }
+    var inviteCalls: Int { lock.withLock { _inviteCalls } }
+    var getSettingsCalls: Int { lock.withLock { _getSettingsCalls } }
+    var previewCalls: Int { lock.withLock { _previewCalls } }
+    var changeTimeZoneCalls: Int { lock.withLock { _changeTimeZoneCalls } }
+    var lastCommand: CreateFamilyCommand? { lock.withLock { _lastCommand } }
+    var uploadedPhotos: [Data] { lock.withLock { _uploadedPhotos } }
+    var linkedMediaIDs: [String] { lock.withLock { _linkedMediaIDs } }
+    var createdMembers: [CreatedMember] { lock.withLock { _createdMembers } }
+    var lastPreviewTimeZoneID: String? { lock.withLock { _lastPreviewTimeZoneID } }
+    var lastPreviewApplication: TimeZoneApplication? { lock.withLock { _lastPreviewApplication } }
+    var lastChangeTimeZoneID: String? { lock.withLock { _lastChangeTimeZoneID } }
+    var lastChangeApplication: TimeZoneApplication? { lock.withLock { _lastChangeApplication } }
 
     init(
         createResult: Result<CreatedFamily, Error> = .success(FamilyRepositorySpy.createdFamily),
         uploadResults: [Result<String, Error>] = [],
         linkResults: [Result<Void, Error>] = [],
         memberResults: [Result<CreatedMember, Error>] = [],
+        settingsResult: Result<FamilySettings, Error> = .success(FamilyRepositorySpy.defaultSettings),
+        previewResults: [Result<TimeZoneChangePreview, Error>] = [],
+        changeTimeZoneResults: [Result<FamilySettings, Error>] = [],
         createDelay: Duration? = nil
     ) {
         self.createResult = createResult
         self.uploadResults = uploadResults
         self.linkResults = linkResults
         self.memberResults = memberResults
+        self.settingsResult = settingsResult
+        self.previewResults = previewResults
+        self.changeTimeZoneResults = changeTimeZoneResults
         self.createDelay = createDelay
     }
+
+    static let defaultSettings = FamilySettings(
+        timeZoneID: "America/Sao_Paulo",
+        scheduledTimeZoneChange: nil,
+        limits: CycleLimits(
+            startsAt: "2026-10-19T03:00:00.000Z",
+            endsAt: "2026-10-26T03:00:00.000Z",
+            timeZoneID: "America/Sao_Paulo",
+            isTransition: false
+        )
+    )
 
     static let createdFamily = CreatedFamily(
         familyID: UUID(uuidString: "00000000-0000-0000-0000-000000000003")!,
@@ -50,49 +93,121 @@ actor FamilyRepositorySpy: FamilyRepository {
     )
 
     func createFamily(_ command: CreateFamilyCommand, installationProof: String) async throws -> CreatedFamily {
-        createFamilyCalls += 1
-        lastCommand = command
+        lock.withLock {
+            _createFamilyCalls += 1
+            _lastCommand = command
+        }
         if let createDelay {
             try await Task.sleep(for: createDelay)
         }
-        return try createResult.get()
+        return try lock.withLock { createResult }.get()
     }
 
     func uploadProfilePhoto(_ jpeg: Data, accessToken: String) async throws -> String {
-        uploadCalls += 1
-        uploadedPhotos.append(jpeg)
-        guard !uploadResults.isEmpty else {
-            return "media-1"
+        try lock.withLock {
+            _uploadCalls += 1
+            _uploadedPhotos.append(jpeg)
+            guard !uploadResults.isEmpty else {
+                return "media-1"
+            }
+            return try uploadResults.removeFirst().get()
         }
-        return try uploadResults.removeFirst().get()
     }
 
     func setProfilePhoto(mediaID: String, accessToken: String) async throws {
-        linkedMediaIDs.append(mediaID)
-        guard !linkResults.isEmpty else {
-            return
+        try lock.withLock {
+            _linkedMediaIDs.append(mediaID)
+            guard !linkResults.isEmpty else {
+                return
+            }
+            try linkResults.removeFirst().get()
         }
-        try linkResults.removeFirst().get()
     }
 
     func createMember(name: String, role: MemberRole, accessToken: String) async throws -> CreatedMember {
-        if !memberResults.isEmpty {
-            let member = try memberResults.removeFirst().get()
-            createdMembers.append(member)
+        try lock.withLock {
+            if !memberResults.isEmpty {
+                let member = try memberResults.removeFirst().get()
+                _createdMembers.append(member)
+                return member
+            }
+            let member = CreatedMember(id: UUID(), name: name, role: role)
+            _createdMembers.append(member)
             return member
         }
-        let member = CreatedMember(id: UUID(), name: name, role: role)
-        createdMembers.append(member)
-        return member
     }
 
     func issueInvite(memberID: UUID, accessToken: String) async throws -> MemberInvite {
-        inviteCalls += 1
-        return MemberInvite(inviteID: UUID(), link: "https://example.test/invite", password: "PW")
+        lock.withLock {
+            _inviteCalls += 1
+            return MemberInvite(inviteID: UUID(), link: "https://example.test/invite", password: "PW")
+        }
     }
 
     func listMembers(accessToken: String, cursor: String?) async throws -> FamilyMemberPage {
         FamilyMemberPage(items: [], nextCursor: nil)
+    }
+
+    func getFamilySettings(accessToken: String) async throws -> FamilySettings {
+        try lock.withLock {
+            _getSettingsCalls += 1
+            return try settingsResult.get()
+        }
+    }
+
+    func previewFamilyTimeZoneChange(
+        timeZoneID: String,
+        application: TimeZoneApplication,
+        accessToken: String
+    ) async throws -> TimeZoneChangePreview {
+        try lock.withLock {
+            _previewCalls += 1
+            _lastPreviewTimeZoneID = timeZoneID
+            _lastPreviewApplication = application
+            if !previewResults.isEmpty {
+                return try previewResults.removeFirst().get()
+            }
+            return TimeZoneChangePreview(
+                proposedTimeZoneID: timeZoneID,
+                application: application,
+                effectiveAt: "2026-10-26T03:00:00.000Z",
+                effectiveLimits: CycleLimits(
+                    startsAt: "2026-10-19T03:00:00.000Z",
+                    endsAt: "2026-10-26T03:00:00.000Z",
+                    timeZoneID: timeZoneID,
+                    isTransition: application == .immediate
+                ),
+                isTransition: application == .immediate
+            )
+        }
+    }
+
+    func changeFamilyTimeZone(
+        timeZoneID: String,
+        application: TimeZoneApplication,
+        accessToken: String
+    ) async throws -> FamilySettings {
+        try lock.withLock {
+            _changeTimeZoneCalls += 1
+            _lastChangeTimeZoneID = timeZoneID
+            _lastChangeApplication = application
+            if !changeTimeZoneResults.isEmpty {
+                return try changeTimeZoneResults.removeFirst().get()
+            }
+            return FamilySettings(
+                timeZoneID: application == .immediate ? timeZoneID : "America/Sao_Paulo",
+                scheduledTimeZoneChange: application == .nextCycle ? ScheduledTimeZoneChange(
+                    timeZoneID: timeZoneID,
+                    effectiveAt: "2026-10-26T03:00:00.000Z"
+                ) : nil,
+                limits: CycleLimits(
+                    startsAt: "2026-10-19T03:00:00.000Z",
+                    endsAt: "2026-10-26T03:00:00.000Z",
+                    timeZoneID: application == .immediate ? timeZoneID : "America/Sao_Paulo",
+                    isTransition: application == .immediate
+                )
+            )
+        }
     }
 }
 

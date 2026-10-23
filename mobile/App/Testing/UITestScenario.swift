@@ -20,6 +20,7 @@ enum UITestScenario: String {
     case profileKids = "profile-kids"
     case profileSaveNetworkError = "profile-save-network-error"
     case taskManagement = "task-management"
+    case familySettings = "family-settings"
     case dailyTasks = "daily-tasks"
     case dailyTasksKids = "daily-tasks-kids"
     case dailyTasksFailure = "daily-tasks-failure"
@@ -51,7 +52,7 @@ enum UITestScenario: String {
             sessionStore.apply(.session(Self.inviteSession(role: role)))
             return
         }
-        if self == .taskManagement || self == .dailyTasks || self == .dailyTasksFailure {
+        if self == .taskManagement || self == .familySettings || self == .dailyTasks || self == .dailyTasksFailure {
             sessionStore.apply(.session(Self.inviteSession(role: .administrator)))
             return
         }
@@ -237,6 +238,58 @@ private actor UITestFamilyRepository: FamilyRepository {
                 FamilyMember(id: UITestTaskFixtures.kidMemberID, name: "Rafa Silva", role: .kid, isFamilyCreator: false),
             ],
             nextCursor: nil
+        )
+    }
+
+    func getFamilySettings(accessToken: String) async throws -> FamilySettings {
+        FamilySettings(
+            timeZoneID: "America/Sao_Paulo",
+            scheduledTimeZoneChange: nil,
+            limits: CycleLimits(
+                startsAt: "2026-10-19T03:00:00.000Z",
+                endsAt: "2026-10-26T03:00:00.000Z",
+                timeZoneID: "America/Sao_Paulo",
+                isTransition: false
+            )
+        )
+    }
+
+    func previewFamilyTimeZoneChange(
+        timeZoneID: String,
+        application: TimeZoneApplication,
+        accessToken: String
+    ) async throws -> TimeZoneChangePreview {
+        TimeZoneChangePreview(
+            proposedTimeZoneID: timeZoneID,
+            application: application,
+            effectiveAt: "2026-10-26T03:00:00.000Z",
+            effectiveLimits: CycleLimits(
+                startsAt: "2026-10-19T03:00:00.000Z",
+                endsAt: "2026-10-26T03:00:00.000Z",
+                timeZoneID: timeZoneID,
+                isTransition: application == .immediate
+            ),
+            isTransition: application == .immediate
+        )
+    }
+
+    func changeFamilyTimeZone(
+        timeZoneID: String,
+        application: TimeZoneApplication,
+        accessToken: String
+    ) async throws -> FamilySettings {
+        FamilySettings(
+            timeZoneID: application == .immediate ? timeZoneID : "America/Sao_Paulo",
+            scheduledTimeZoneChange: application == .nextCycle ? ScheduledTimeZoneChange(
+                timeZoneID: timeZoneID,
+                effectiveAt: "2026-10-26T03:00:00.000Z"
+            ) : nil,
+            limits: CycleLimits(
+                startsAt: "2026-10-19T03:00:00.000Z",
+                endsAt: "2026-10-26T03:00:00.000Z",
+                timeZoneID: application == .immediate ? timeZoneID : "America/Sao_Paulo",
+                isTransition: application == .immediate
+            )
         )
     }
 }

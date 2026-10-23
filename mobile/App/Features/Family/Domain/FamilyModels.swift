@@ -56,9 +56,44 @@ nonisolated struct FamilyMemberPage: Equatable, Sendable {
     let nextCursor: String?
 }
 
+// MARK: - Family Settings (SPEC-002 Phase 3)
+
+nonisolated enum TimeZoneApplication: String, Codable, Equatable, Sendable {
+    case immediate
+    case nextCycle
+}
+
+nonisolated struct CycleLimits: Equatable, Sendable {
+    let startsAt: String
+    let endsAt: String
+    let timeZoneID: String
+    let isTransition: Bool
+}
+
+nonisolated struct ScheduledTimeZoneChange: Equatable, Sendable {
+    let timeZoneID: String
+    let effectiveAt: String
+}
+
+nonisolated struct FamilySettings: Equatable, Sendable {
+    let timeZoneID: String
+    let scheduledTimeZoneChange: ScheduledTimeZoneChange?
+    let limits: CycleLimits
+}
+
+nonisolated struct TimeZoneChangePreview: Equatable, Sendable {
+    let proposedTimeZoneID: String
+    let application: TimeZoneApplication
+    let effectiveAt: String
+    let effectiveLimits: CycleLimits
+    let isTransition: Bool
+}
+
 nonisolated enum FamilyError: Error, Equatable, Sendable {
     case creationGrantInvalid
     case validationFailed([String: [String]])
+    case actionNotAllowed
+    case timeZoneUnchanged
     case rateLimited
     /// The request may or may not have been persisted; callers must not retry automatically.
     case uncertainOutcome

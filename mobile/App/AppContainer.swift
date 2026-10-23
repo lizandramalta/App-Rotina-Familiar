@@ -98,6 +98,16 @@ final class AppContainer {
         MyTasksTabView(taskRepository: taskRepository, familyRepository: familyRepository, accessToken: accessToken)
     }
 
+    func makeFamilySettingsViewModel(session: ActiveFamilySession, sessionStore: AppSessionStore) -> FamilySettingsViewModel {
+        FamilySettingsViewModel(
+            repository: familyRepository,
+            session: session,
+            accessTokenProvider: { [weak sessionStore] in
+                sessionStore?.accessToken
+            }
+        )
+    }
+
     func makeKidsTaskList(accessToken: String) -> DailyTaskListView {
         DailyTaskListView(
             audience: .kid,

@@ -9,17 +9,35 @@ struct AuthenticatedHomeView: View {
     /// `nil` only if the session has no access token while authenticated, which should not happen;
     /// falls back to the plain placeholder rather than crashing.
     let myTasksTab: MyTasksTabView?
+    let makeFamilySettingsViewModel: (() -> FamilySettingsViewModel)?
     let kidsTaskList: DailyTaskListView?
     @State private var profileViewModel: ProfileViewModel
+    @State private var showsFamilySettingsScenario: Bool = {
+        #if DEBUG
+        return ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"] == "family-settings"
+        #else
+        return false
+        #endif
+    }()
+    @State private var selectedTab: Int = {
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"] == "family-settings" {
+            return 1
+        }
+        #endif
+        return 0
+    }()
 
     init(
         session: ActiveFamilySession,
         myTasksTab: MyTasksTabView?,
+        makeFamilySettingsViewModel: (() -> FamilySettingsViewModel)? = nil,
         kidsTaskList: DailyTaskListView?,
         makeProfileViewModel: () -> ProfileViewModel
     ) {
         self.session = session
         self.myTasksTab = myTasksTab
+        self.makeFamilySettingsViewModel = makeFamilySettingsViewModel
         self.kidsTaskList = kidsTaskList
         _profileViewModel = State(initialValue: makeProfileViewModel())
     }
@@ -27,7 +45,7 @@ struct AuthenticatedHomeView: View {
     private var role: MemberRole { session.role }
 
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             if role == .kid {
                 Group {
                     if let kidsTaskList {
@@ -56,8 +74,10 @@ struct AuthenticatedHomeView: View {
                     }
                 }
                 .tabItem { Label("destination.myTasks", systemImage: "checklist") }
-                destination("destination.family", icon: "person.3", identifier: "access.destination.family")
+                .tag(0)
+                familyDestination()
                     .tabItem { Label("destination.family", systemImage: "person.3") }
+                    .tag(1)
                 destination("destination.missions", icon: "star", identifier: "access.destination.missions")
                     .tabItem { Label("destination.missions", systemImage: "star") }
                 NavigationStack {
@@ -102,6 +122,41 @@ struct AuthenticatedHomeView: View {
                     ToolbarItem(placement: .topBarTrailing) {
                         profileButton
                     }
+                }
+            }
+        }
+    }
+
+    private func familyDestination() -> some View {
+        NavigationStack {
+            familyPlaceholder()
+                .navigationDestination(isPresented: $showsFamilySettingsScenario) {
+                    if let makeFamilySettingsViewModel {
+                        FamilySettingsView(viewModel: makeFamilySettingsViewModel())
+                    }
+                }
+        }
+    }
+
+    private func familyPlaceholder() -> some View {
+        ContentUnavailableView {
+            Label("destination.family", systemImage: "person.3")
+        } description: {
+            Text("destination.contentPending")
+        }
+        .navigationTitle("destination.family")
+        .accessibilityIdentifier("access.destination.family")
+        .toolbar {
+            if role == .administrator, let makeFamilySettingsViewModel {
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink {
+                        FamilySettingsView(viewModel: makeFamilySettingsViewModel())
+                    } label: {
+                        Image(systemName: "gearshape")
+                            .frame(minWidth: 44, minHeight: 44)
+                    }
+                    .accessibilityLabel("family.settings.title")
+                    .accessibilityIdentifier("family.navigation.settings_button")
                 }
             }
         }

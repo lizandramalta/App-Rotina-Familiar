@@ -24,6 +24,9 @@ struct AppRootView: View {
                 AuthenticatedHomeView(
                     session: profile,
                     myTasksTab: sessionStore.accessToken.map(container.makeMyTasksTabView),
+                    makeFamilySettingsViewModel: {
+                        container.makeFamilySettingsViewModel(session: profile, sessionStore: sessionStore)
+                    },
                     kidsTaskList: sessionStore.accessToken.map(container.makeKidsTaskList)
                 ) {
                     container.makeProfileViewModel(session: profile, sessionStore: sessionStore)

@@ -92,6 +92,37 @@ nonisolated private struct ListFamilyMembersResponseDTO: Decodable {
     let nextCursor: String?
 }
 
+nonisolated private struct CycleLimitsDTO: Decodable {
+    let startsAt: String
+    let endsAt: String
+    let timeZoneId: String
+    let isTransition: Bool
+}
+
+nonisolated private struct ScheduledTimeZoneChangeDTO: Decodable {
+    let timeZoneId: String
+    let effectiveAt: String
+}
+
+nonisolated private struct FamilySettingsResponseDTO: Decodable {
+    let timeZoneId: String
+    let scheduledTimeZoneChange: ScheduledTimeZoneChangeDTO?
+    let limits: CycleLimitsDTO
+}
+
+nonisolated private struct TimeZoneChangeRequestDTO: Encodable {
+    let timeZoneId: String
+    let application: TimeZoneApplication
+}
+
+nonisolated private struct TimeZoneChangePreviewResponseDTO: Decodable {
+    let proposedTimeZoneId: String
+    let application: TimeZoneApplication
+    let effectiveAt: String
+    let effectiveLimits: CycleLimitsDTO
+    let isTransition: Bool
+}
+
 nonisolated private struct ProblemDetailsDTO: Decodable {
     let code: String?
     let fieldErrors: [String: [String]]?
@@ -217,6 +248,80 @@ nonisolated struct HTTPFamilyRepository: FamilyRepository {
         )
     }
 
+    func getFamilySettings(accessToken: String) async throws -> FamilySettings {
+        let data = try await send(
+            path: "family/settings",
+            method: "GET",
+            headers: ["Authorization": "Bearer \(accessToken)"],
+            rawBody: Data()
+        )
+        let response = try decode(FamilySettingsResponseDTO.self, from: data)
+        return FamilySettings(
+            timeZoneID: response.timeZoneId,
+            scheduledTimeZoneChange: response.scheduledTimeZoneChange.map {
+                ScheduledTimeZoneChange(timeZoneID: $0.timeZoneId, effectiveAt: $0.effectiveAt)
+            },
+            limits: CycleLimits(
+                startsAt: response.limits.startsAt,
+                endsAt: response.limits.endsAt,
+                timeZoneID: response.limits.timeZoneId,
+                isTransition: response.limits.isTransition
+            )
+        )
+    }
+
+    func previewFamilyTimeZoneChange(
+        timeZoneID: String,
+        application: TimeZoneApplication,
+        accessToken: String
+    ) async throws -> TimeZoneChangePreview {
+        let data = try await send(
+            path: "family/time-zone-changes/preview",
+            method: "POST",
+            headers: ["Authorization": "Bearer \(accessToken)"],
+            json: TimeZoneChangeRequestDTO(timeZoneId: timeZoneID, application: application)
+        )
+        let response = try decode(TimeZoneChangePreviewResponseDTO.self, from: data)
+        return TimeZoneChangePreview(
+            proposedTimeZoneID: response.proposedTimeZoneId,
+            application: response.application,
+            effectiveAt: response.effectiveAt,
+            effectiveLimits: CycleLimits(
+                startsAt: response.effectiveLimits.startsAt,
+                endsAt: response.effectiveLimits.endsAt,
+                timeZoneID: response.effectiveLimits.timeZoneId,
+                isTransition: response.effectiveLimits.isTransition
+            ),
+            isTransition: response.isTransition
+        )
+    }
+
+    func changeFamilyTimeZone(
+        timeZoneID: String,
+        application: TimeZoneApplication,
+        accessToken: String
+    ) async throws -> FamilySettings {
+        let data = try await send(
+            path: "family/time-zone-changes",
+            method: "POST",
+            headers: ["Authorization": "Bearer \(accessToken)"],
+            json: TimeZoneChangeRequestDTO(timeZoneId: timeZoneID, application: application)
+        )
+        let response = try decode(FamilySettingsResponseDTO.self, from: data)
+        return FamilySettings(
+            timeZoneID: response.timeZoneId,
+            scheduledTimeZoneChange: response.scheduledTimeZoneChange.map {
+                ScheduledTimeZoneChange(timeZoneID: $0.timeZoneId, effectiveAt: $0.effectiveAt)
+            },
+            limits: CycleLimits(
+                startsAt: response.limits.startsAt,
+                endsAt: response.limits.endsAt,
+                timeZoneID: response.limits.timeZoneId,
+                isTransition: response.limits.isTransition
+            )
+        )
+    }
+
     static func multipartBody(boundary: String, purpose: String, jpeg: Data) -> Data {
         var body = Data()
         body.append(Data("--\(boundary)\r\n".utf8))
@@ -305,7 +410,12 @@ nonisolated struct HTTPFamilyRepository: FamilyRepository {
         switch (statusCode, problem?.code) {
         case (401, "CREATION_GRANT_INVALID"):
             return .creationGrantInvalid
+        case (403, "ACTION_NOT_ALLOWED"):
+            return .actionNotAllowed
         case (422, "VALIDATION_FAILED"):
+            if let timeZoneErrors = problem?.fieldErrors?["timeZoneId"], timeZoneErrors.contains("TIME_ZONE_UNCHANGED") {
+                return .timeZoneUnchanged
+            }
             return .validationFailed(problem?.fieldErrors ?? [:])
         case (429, _):
             return .rateLimited

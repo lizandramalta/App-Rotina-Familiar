@@ -375,7 +375,7 @@ final class InitialOnboardingViewModel {
             if fieldErrors["timeZoneId"] != nil {
                 banner = .unavailable
             }
-        case .rejected:
+        case .rejected, .actionNotAllowed, .timeZoneUnchanged:
             banner = .unavailable
         case .uncertainOutcome, .network, .unavailable, nil:
             banner = .uncertainOutcome
