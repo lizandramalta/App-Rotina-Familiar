@@ -23,12 +23,12 @@ final class FamilySettingsViewModel: ObservableObject {
 
     private let repository: any FamilyRepository
     private let session: ActiveFamilySession
-    private let accessTokenProvider: @Sendable () -> String?
+    private let accessTokenProvider: @MainActor () -> String?
 
     init(
         repository: any FamilyRepository,
         session: ActiveFamilySession,
-        accessTokenProvider: @escaping @Sendable () -> String?
+        accessTokenProvider: @escaping @MainActor () -> String?
     ) {
         self.repository = repository
         self.session = session

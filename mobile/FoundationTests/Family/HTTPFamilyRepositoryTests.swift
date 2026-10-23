@@ -2,6 +2,7 @@ import Foundation
 @testable import FamilyRoutine
 import Testing
 
+@Suite(.serialized)
 struct HTTPFamilyRepositoryTests {
     private let familyID = "00000000-0000-0000-0000-0000000000f1"
     private let memberID = "00000000-0000-0000-0000-0000000000a1"
