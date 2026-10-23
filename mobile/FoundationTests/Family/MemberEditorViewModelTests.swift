@@ -129,13 +129,17 @@ struct MemberEditorViewModelTests {
         #expect(!viewModel.canSubmit)
     }
 
-    @Test("SPEC-003 CA-07 reconciles with the confirmed list and does not POST again when the member already exists")
+    private func page(_ members: FamilyMember..., next: String? = nil) -> Result<FamilyMemberPage, Error> {
+        .success(FamilyMemberPage(items: members, nextCursor: next))
+    }
+
+    @Test("SPEC-003 CA-07 confirms a NEW profile found after an uncertain POST without posting again")
     func reconcilesWithoutDuplicate() async {
-        let existing = FamilyMember(id: UUID(), name: "Rafa", role: .kid, isFamilyCreator: false)
+        let created = FamilyMember(id: UUID(), name: "Rafa", role: .kid, isFamilyCreator: false)
         for error in [FamilyError.network, .uncertainOutcome, .unavailable] {
             let repository = FamilyRepositorySpy(
                 memberResults: [.failure(error)],
-                listMembersResults: [.success(FamilyMemberPage(items: [existing], nextCursor: nil))]
+                listMembersResults: [page(), page(created)]
             )
             let viewModel = makeViewModel(repository)
             viewModel.name = "Rafa"
@@ -145,20 +149,55 @@ struct MemberEditorViewModelTests {
             #expect(await viewModel.save())
 
             #expect(repository.createMemberCalls == 1)
-            #expect(repository.listMembersCalls == 1)
+            #expect(repository.listMembersCalls == 2)
             #expect(viewModel.failure == nil)
         }
     }
 
-    @Test("SPEC-003 CA-07 retries the POST only after the confirmed list shows no match")
+    @Test("SPEC-003 CA-07 does not mistake a pre-existing profile with the same name and role for the new one")
+    func preExistingProfileIsNotAFalsePositive() async {
+        let preExisting = FamilyMember(id: UUID(), name: "Rafa", role: .member, isFamilyCreator: false)
+        let repository = FamilyRepositorySpy(
+            memberResults: [.failure(FamilyError.network)],
+            listMembersResults: [page(preExisting), page(preExisting)]
+        )
+        let viewModel = makeViewModel(repository)
+        viewModel.name = "Rafa"
+        viewModel.role = .member
+
+        #expect(await viewModel.save() == false)
+        #expect(await viewModel.save())
+
+        #expect(repository.createMemberCalls == 2)
+    }
+
+    @Test("SPEC-003 CA-07 an injected baseline replaces the initial lookup")
+    func injectedBaseline() async {
+        let preExisting = FamilyMember(id: UUID(), name: "Rafa", role: .member, isFamilyCreator: false)
+        let repository = FamilyRepositorySpy(
+            memberResults: [.failure(FamilyError.network)],
+            listMembersResults: [page(preExisting)]
+        )
+        let viewModel = MemberEditorViewModel(
+            familyRepository: repository,
+            accessTokenProvider: { "token-1" },
+            existingMemberIDs: [preExisting.id]
+        )
+        viewModel.name = "Rafa"
+
+        #expect(await viewModel.save() == false)
+        #expect(repository.listMembersCalls == 0)
+        #expect(await viewModel.save())
+        #expect(repository.listMembersCalls == 1)
+        #expect(repository.createMemberCalls == 2)
+    }
+
+    @Test("SPEC-003 CA-07 retries the POST only after the confirmed list shows no match, across pages")
     func reconcilesThenRetries() async {
         let other = FamilyMember(id: UUID(), name: "Rafa", role: .member, isFamilyCreator: false)
         let repository = FamilyRepositorySpy(
             memberResults: [.failure(FamilyError.network)],
-            listMembersResults: [
-                .success(FamilyMemberPage(items: [other], nextCursor: "next")),
-                .success(FamilyMemberPage(items: [], nextCursor: nil)),
-            ]
+            listMembersResults: [page(), page(other, next: "next"), page()]
         )
         let viewModel = makeViewModel(repository)
         viewModel.name = "Rafa"
@@ -167,15 +206,29 @@ struct MemberEditorViewModelTests {
         #expect(await viewModel.save() == false)
         #expect(await viewModel.save())
 
-        #expect(repository.listMembersCalls == 2)
+        #expect(repository.listMembersCalls == 3)
         #expect(repository.createMemberCalls == 2)
+    }
+
+    @Test("SPEC-003 CA-07 without a baseline nothing is posted and the draft stays")
+    func baselineLookupFails() async {
+        let repository = FamilyRepositorySpy(listMembersResults: [.failure(FamilyError.network)])
+        let viewModel = makeViewModel(repository)
+        viewModel.name = "Rafa"
+
+        #expect(await viewModel.save() == false)
+        #expect(repository.createMemberCalls == 0)
+        #expect(viewModel.failure == .network)
+        #expect(viewModel.name == "Rafa")
+        #expect(await viewModel.save())
+        #expect(repository.createMemberCalls == 1)
     }
 
     @Test("SPEC-003 CA-07 keeps the draft and does not POST when the reconciliation lookup fails")
     func reconciliationLookupFails() async {
         let repository = FamilyRepositorySpy(
             memberResults: [.failure(FamilyError.network)],
-            listMembersResults: [.failure(FamilyError.network), .success(FamilyMemberPage(items: [], nextCursor: nil))]
+            listMembersResults: [page(), .failure(FamilyError.network), page()]
         )
         let viewModel = makeViewModel(repository)
         viewModel.name = "Rafa"
