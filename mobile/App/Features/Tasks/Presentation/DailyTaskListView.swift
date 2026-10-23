@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// TEL-010 (adult) and TEL-040 (Kids) — own daily checklist (SPEC-009 Fase 1, UX-009 §2/§3).
-/// Never shows a Semana selector (CA-01). Row tap opens TEL-012 for adults only: UX-009 doesn't
-/// define a Kids-side task detail destination, so Kids rows are informational, not navigable.
+/// Never shows a Semana selector (CA-01). Row tap opens TEL-012 for both audiences: SPEC-011
+/// requires Kids to reach their own completed task to reopen it (TEL-012/MOD-006).
 struct DailyTaskListView: View {
     @State private var viewModel: DailyTaskListViewModel
     let onSelectTask: (UUID) -> Void
@@ -246,9 +246,7 @@ struct DailyTaskListView: View {
     private func row(for item: OwnTaskListItem) -> some View {
         let isCompleted = item.displayStatus == .completed
         Button {
-            if viewModel.audience == .adult {
-                onSelectTask(item.task.id)
-            }
+            onSelectTask(item.task.id)
         } label: {
             HStack(spacing: 12) {
                 statusIcon(for: item.displayStatus)
@@ -261,19 +259,16 @@ struct DailyTaskListView: View {
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
-                if viewModel.audience == .adult {
-                    Image(systemName: "chevron.right")
-                        .font(.footnote)
-                        .foregroundStyle(.tertiary)
-                }
+                Image(systemName: "chevron.right")
+                    .font(.footnote)
+                    .foregroundStyle(.tertiary)
             }
             .padding(.vertical, 10)
         }
         .buttonStyle(.plain)
-        .disabled(viewModel.audience == .kid)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(accessibilityLabel(for: item)))
-        .accessibilityHint(viewModel.audience == .adult ? Text("tasks.personal.openDetailHint") : Text(""))
+        .accessibilityHint(Text("tasks.personal.openDetailHint"))
         .accessibilityIdentifier("tasks.daily.row.\(item.task.id.uuidString)")
     }
 

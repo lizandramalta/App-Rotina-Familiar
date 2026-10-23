@@ -47,3 +47,11 @@ struct GetDailyProgressUseCase: Sendable {
         try await repository.dailyProgress(referenceDate: referenceDate, accessToken: accessToken)
     }
 }
+
+struct ReopenTaskUseCase: Sendable {
+    let repository: any TaskRepository
+
+    func execute(taskID: UUID, confirm: Bool, accessToken: String) async throws -> FamilyTask {
+        try await repository.reopenTask(id: taskID, confirm: confirm, accessToken: accessToken)
+    }
+}

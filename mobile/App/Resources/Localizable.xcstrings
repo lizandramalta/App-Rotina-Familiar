@@ -2586,6 +2586,126 @@
         }
       }
     },
+    "task.reopen.accessibilityHint": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dê dois toques para devolver esta tarefa a Pendente"
+          }
+        }
+      }
+    },
+    "task.reopen.accessibilityLabel": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reabrir tarefa, botão"
+          }
+        }
+      }
+    },
+    "task.reopen.button": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reabrir"
+          }
+        }
+      }
+    },
+    "task.reopen.cancel_button": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manter concluída"
+          }
+        }
+      }
+    },
+    "task.reopen.confirm_button": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reabrir mesmo assim"
+          }
+        }
+      }
+    },
+    "task.reopen.mission_warning_body": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A missão \"%@\" volta a ficar em andamento. Participações e badges conquistados por ela serão removidos e não podem ser recuperados."
+          }
+        }
+      }
+    },
+    "task.reopen.mission_warning_body_kids": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se você continuar, a missão \"%@\" volta a ficar em andamento."
+          }
+        }
+      }
+    },
+    "task.reopen.mission_warning_reward": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A recompensa aceita por essa missão também será removida."
+          }
+        }
+      }
+    },
+    "task.reopen.mission_warning_title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reabrir vai afetar uma missão concluída"
+          }
+        }
+      }
+    },
+    "task.reopen.mission_warning_title_kids": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Essa tarefa faz parte de uma missão que já terminou"
+          }
+        }
+      }
+    },
+    "task.reopen.pending": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reabrindo tarefa…"
+          }
+        }
+      }
+    },
+    "task.reopen.success_banner": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tarefa voltou para Pendente. O crédito de hoje foi retirado."
+          }
+        }
+      }
+    },
     "tasks.common.error_action_not_allowed": {
       "localizations": {
         "pt-BR": {

@@ -8,4 +8,7 @@ nonisolated protocol TaskRepository: Sendable {
     /// `referenceDate` is `YYYY-MM-DD`. Backs TEL-010/TEL-040 (SPEC-009 Fase 1).
     func dailyTasks(referenceDate: String, cursor: String?, accessToken: String) async throws -> OwnTaskPage
     func dailyProgress(referenceDate: String, accessToken: String) async throws -> DailyProgress
+    /// Per SPEC-011 E-01: always called first without `confirm`; retried with `confirm: true`
+    /// only after the server refuses with `.missionReopenRequiresConfirmation`.
+    func reopenTask(id: UUID, confirm: Bool, accessToken: String) async throws -> FamilyTask
 }

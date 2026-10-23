@@ -1,9 +1,10 @@
 import SwiftUI
 
-/// TEL-012 — only Editar/Excluir (this card's scope). Concluir/Reabrir stay hidden entirely,
-/// not disabled, per UX-03: they belong to SPEC-010/SPEC-011.
+/// TEL-012 — Editar/Excluir (Admin/Membro only) and Reabrir (Admin/Membro always, Kids on
+/// their own task — SPEC-011). Concluir stays hidden entirely, out of this card's scope (SPEC-010).
 struct TaskDetailView: View {
     @State private var viewModel: TaskDetailViewModel
+    @AccessibilityFocusState private var isMissionWarningFocused: Bool
     let onRequestEdit: () -> Void
     let onDeleted: () -> Void
 
@@ -11,8 +12,22 @@ struct TaskDetailView: View {
     /// can invoke this destination's builder more than once for the same push (observed via
     /// XCUITest), and only `@State`'s storage — keyed by this view's identity, not by how many
     /// times `init` runs — survives that so `load()` isn't abandoned mid-flight by a replacement.
-    init(taskID: UUID, repository: any TaskRepository, accessToken: String, onRequestEdit: @escaping () -> Void, onDeleted: @escaping () -> Void) {
-        _viewModel = State(initialValue: TaskDetailViewModel(taskID: taskID, repository: repository, accessToken: accessToken))
+    init(
+        taskID: UUID,
+        role: MemberRole,
+        currentMemberID: UUID,
+        repository: any TaskRepository,
+        accessToken: String,
+        onRequestEdit: @escaping () -> Void,
+        onDeleted: @escaping () -> Void
+    ) {
+        _viewModel = State(initialValue: TaskDetailViewModel(
+            taskID: taskID,
+            role: role,
+            currentMemberID: currentMemberID,
+            repository: repository,
+            accessToken: accessToken
+        ))
         self.onRequestEdit = onRequestEdit
         self.onDeleted = onDeleted
     }
@@ -37,10 +52,25 @@ struct TaskDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                if viewModel.task != nil {
+                if viewModel.task != nil, viewModel.canManageTask {
                     Button("Editar", action: onRequestEdit)
                         .accessibilityIdentifier("tasks.detail.edit")
                 }
+            }
+        }
+        .sheet(isPresented: Binding(
+            get: { viewModel.missionReopenPrompt != nil },
+            set: { isPresented in if !isPresented { viewModel.cancelMissionReopen() } }
+        )) {
+            if let prompt = viewModel.missionReopenPrompt {
+                MissionReopenConfirmationView(
+                    prompt: prompt,
+                    role: viewModel.role,
+                    isSubmitting: viewModel.isReopening,
+                    isWarningFocused: $isMissionWarningFocused,
+                    onConfirm: { Task { await viewModel.confirmMissionReopen() } },
+                    onCancel: { viewModel.cancelMissionReopen() }
+                )
             }
         }
         .confirmationDialog(
@@ -107,20 +137,50 @@ struct TaskDetailView: View {
                 }
             }
 
-            Section {
-                if viewModel.canDeleteDirectly {
-                    Button("Excluir", role: .destructive) { viewModel.requestDelete() }
-                        .disabled(viewModel.isDeleting)
-                        .accessibilityIdentifier("tasks.detail.delete")
-                } else {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Excluir")
-                            .foregroundStyle(.secondary)
-                        Text("tasks.delete.error_already_completed")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
+            if viewModel.showReopenSuccessBanner {
+                Section {
+                    Text("task.reopen.success_banner")
+                }
+            }
+
+            if viewModel.reopenFailed {
+                Section {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("tasks.common.error_unavailable")
+                            .foregroundStyle(.red)
+                        Button("Tentar novamente") { Task { await viewModel.requestReopen() } }
                     }
-                    .accessibilityIdentifier("tasks.detail.delete_disabled")
+                }
+            }
+
+            if viewModel.canReopen {
+                Section {
+                    Button(viewModel.isReopening ? "task.reopen.pending" : "task.reopen.button") {
+                        Task { await viewModel.requestReopen() }
+                    }
+                    .disabled(viewModel.isReopening)
+                    .accessibilityIdentifier("tasks.detail.reopen")
+                    .accessibilityLabel(Text("task.reopen.accessibilityLabel"))
+                    .accessibilityHint(Text("task.reopen.accessibilityHint"))
+                }
+            }
+
+            if viewModel.canManageTask {
+                Section {
+                    if viewModel.canDeleteDirectly {
+                        Button("Excluir", role: .destructive) { viewModel.requestDelete() }
+                            .disabled(viewModel.isDeleting)
+                            .accessibilityIdentifier("tasks.detail.delete")
+                    } else {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Excluir")
+                                .foregroundStyle(.secondary)
+                            Text("tasks.delete.error_already_completed")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                        .accessibilityIdentifier("tasks.detail.delete_disabled")
+                    }
                 }
             }
         }
