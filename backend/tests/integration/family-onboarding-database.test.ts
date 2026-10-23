@@ -634,6 +634,9 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
           repository: onboardingRepository,
           storage: {
             async put() {},
+            async get() {
+              return undefined;
+            },
             async delete(key) {
               deleted.push(key);
             },

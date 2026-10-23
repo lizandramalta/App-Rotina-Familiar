@@ -111,6 +111,9 @@ describe('HTTP Presentation Layer (Fastify)', () => {
       uploadOnboardingMediaUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['uploadOnboardingMediaUseCase'],
+      getMediaContentUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['getMediaContentUseCase'],
       cleanOrphanOnboardingMedia: {
         run: vi.fn(),
       } as unknown as ApplicationContainer['cleanOrphanOnboardingMedia'],

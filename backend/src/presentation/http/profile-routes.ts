@@ -3,6 +3,7 @@ import type { ApplicationContainer } from '../../bootstrap/container.js';
 import { createAuthenticationHook, requireActor } from './authentication.js';
 
 interface UpdateOwnProfileBody {
+  readonly name?: string | null;
   readonly nickname?: string | null;
   readonly photoMediaId?: string | null;
 }
@@ -39,10 +40,19 @@ const nextTierSchema = {
 /** Resposta canônica de `GetOwnProfile`/`UpdateOwnProfile` (SPEC-006 §5.2). */
 const ownProfileResponseSchema = {
   type: 'object',
-  required: ['memberId', 'name', 'nickname', 'photoMediaId', 'totalParticipations', 'nextTier'],
+  required: [
+    'memberId',
+    'name',
+    'familyName',
+    'nickname',
+    'photoMediaId',
+    'totalParticipations',
+    'nextTier',
+  ],
   properties: {
     memberId: { type: 'string' },
     name: { type: 'string' },
+    familyName: { type: 'string' },
     nickname: { type: ['string', 'null'] },
     photoMediaId: { type: ['string', 'null'] },
     totalParticipations: { type: 'integer', minimum: 0 },
@@ -94,19 +104,20 @@ const badgeContributionsResponseSchema = {
 } as const;
 
 /**
- * `PATCH /v1/me/profile` (SPEC-002 + SPEC-006): `nickname`/`photoMediaId`
- * opcionais e nuláveis. Qualquer outro campo — inclusive `role`, `familyId`,
+ * `PATCH /v1/me/profile` (SPEC-002 + SPEC-006): `name` (só adulto),
+ * `nickname`/`photoMediaId` opcionais; os dois últimos nuláveis. Qualquer outro campo — inclusive `role`, `familyId`,
  * `kidsMode`, `isFamilyCreator`, `appleUserID` — é recusado como
  * `400 UNKNOWN_FIELD`, sem persistir.
  */
 const updateOwnProfileSchema = {
   tags: ['Profile'],
-  summary: 'Update the authenticated member nickname and/or photo',
+  summary: 'Update the authenticated member name, nickname and/or photo',
   security: [{ bearerAuth: [] }],
   body: {
     type: 'object',
     additionalProperties: false,
     properties: {
+      name: { type: ['string', 'null'] },
       nickname: { type: ['string', 'null'] },
       photoMediaId: { type: ['string', 'null'], format: 'uuid' },
     },
@@ -115,6 +126,7 @@ const updateOwnProfileSchema = {
     200: ownProfileResponseSchema,
     400: problemResponseSchema,
     401: problemResponseSchema,
+    403: problemResponseSchema,
     422: problemResponseSchema,
     503: problemResponseSchema,
   },
@@ -178,6 +190,7 @@ export function registerProfileRoutes(app: FastifyInstance, container: Applicati
       async (request, reply) => {
         const result = await container.updateOwnProfileUseCase.execute({
           actor: requireActor(request),
+          name: request.body.name,
           nickname: request.body.nickname,
           photoMediaId: request.body.photoMediaId,
         });

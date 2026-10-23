@@ -2,7 +2,7 @@
 
 **Status:** aprovada
 **Autor:** Claude | **Criada em:** 2026-10-07 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-07
-**Base funcional:** 1.14
+**Base funcional:** 1.19 (RN 1.19 / RF 1.18 / UC 1.17)
 **UX-spec:** [UX-006-editar-perfil.md](UX-006-editar-perfil.md)
 **Projetos envolvidos:** ambos
 **Tema do backlog:** Tema 1 - Acesso, família e perfis
@@ -31,12 +31,12 @@
 
 ### 3.1. Dentro do escopo
 
-- `GET /v1/me/profile` (`GetOwnProfile`): nome administrativo (somente leitura), `nickname`, `photoMediaId`, total de participações em missões e próximo marco.
-- `PATCH /v1/me/profile` (`UpdateOwnProfile`): atualizar `nickname` e/ou `photoMediaId`, ambos opcionais e nuláveis; rejeitar qualquer campo protegido (papel, família, modo Kids, identidade Apple).
+- `GET /v1/me/profile` (`GetOwnProfile`): nome, nome da família (`familyName`), `nickname`, `photoMediaId`, total de participações em missões e próximo marco.
+- `PATCH /v1/me/profile` (`UpdateOwnProfile`): atualizar `name` (opcional, somente titular adulto), `nickname` e/ou `photoMediaId`, estes dois opcionais e nuláveis; rejeitar qualquer campo protegido (papel, família, modo Kids, identidade Apple).
 - `GET /v1/me/badges` (`GetOwnBadges`): lista de badges cumulativos concedidos ao titular (bronze/prata/ouro/diamante).
 - `GET /v1/me/badges/{awardId}` (`GetBadgeContributions`): marco, data de concessão e missões que contribuíram para ele, restrito ao titular do marco.
-- Usar `POST /v1/media` e `GET /v1/media/{mediaId}/content` com sessão ativa e `purpose: profilePhoto` na edição posterior do próprio perfil. O envio anterior à criação pertence à SPEC-002 e não altera a titularidade exclusiva desta experiência. A infraestrutura continua reservada para `purpose: taskSignal` em SPEC-012/UC15.
-- TEL-030 (recorte de dados pessoais e badges — a ação "deixar administração" já entregue por SPEC-003 permanece inalterada), MOD-009 (Editar meu perfil) e TEL-054 (Detalhe do marco) no mobile.
+- Usar `POST /v1/media` e `GET /v1/media/{mediaId}/content` (bytes da foto, ver §5.2) com sessão ativa e `purpose: profilePhoto` na edição posterior do próprio perfil. O envio anterior à criação pertence à SPEC-002 e não altera a titularidade exclusiva desta experiência. A infraestrutura continua reservada para `purpose: taskSignal` em SPEC-012/UC15.
+- TEL-030 (recorte de dados pessoais, papel na família e badges — a ação "deixar administração" já entregue por SPEC-003 permanece inalterada; TEL-030 apenas a hospeda), MOD-009 (Editar meu perfil) e TEL-054 (Detalhe do marco) no mobile.
 - Autorização por titularidade exclusiva, isolamento multitenant/entre membros e validação de entrada, desde a Fase 1.
 
 ### 3.2. Fora do escopo (desta spec)
@@ -61,9 +61,9 @@
 
 | Perfil | Pode | Não pode | Reação do sistema a tentativa não autorizada |
 |---|---|---|---|
-| **Administrador** | Editar a própria foto/apelido; consultar os próprios badges e missões contribuintes | Editar apelido/foto de outro membro, inclusive pela rota administrativa (`PATCH /family/members/{id}`); consultar badge de outro membro | HTTP 403 `ACTION_NOT_ALLOWED` (campo protegido) / HTTP 404 `RESOURCE_NOT_FOUND` (badge de terceiro) / Ação oculta na UI |
+| **Administrador** | Editar o próprio nome, foto e apelido; consultar os próprios badges e missões contribuintes | Editar apelido/foto de outro membro, inclusive pela rota administrativa (`PATCH /family/members/{id}`); consultar badge de outro membro | HTTP 403 `ACTION_NOT_ALLOWED` (campo protegido) / HTTP 404 `RESOURCE_NOT_FOUND` (badge de terceiro) / Ação oculta na UI |
 | **Membro** | Idem Administrador | Idem Administrador | Idem Administrador |
-| **Kids** | Editar a própria foto/apelido (câmera ou galeria, igual aos adultos); consultar os próprios badges | Ativar/desativar o próprio modo Kids por este fluxo; qualquer ação administrativa | HTTP 403 `ACTION_NOT_ALLOWED` / Ação oculta na UI |
+| **Kids** | Editar a própria foto/apelido (câmera ou galeria, igual aos adultos); consultar os próprios badges | Ativar/desativar o próprio modo Kids por este fluxo; editar o próprio nome (`name`); qualquer ação administrativa | HTTP 403 `ACTION_NOT_ALLOWED` / Ação oculta na UI |
 
 - **Isolamento Multitenant Familiar (RNF06):** `GET /v1/me/badges/{awardId}` com um `awardId` que não pertença ao titular autenticado (de qualquer família) responde `404 Not Found` com código `RESOURCE_NOT_FOUND`, sem revelar metadado do marco de terceiro.
 - **Titularidade exclusiva (RF48, RNF27):** as rotas `/v1/me/profile` e `/v1/me/badges*` operam exclusivamente sobre o membro da sessão ativa; não aceitam `memberId` como parâmetro. A rota administrativa `PATCH /v1/family/members/{memberId}` (SPEC-003) já rejeita `nickname`/`photoMediaId` com `400 UNKNOWN_FIELD`, preservando essa restrição sem alteração nesta entrega.
@@ -74,12 +74,13 @@
 
 | Campo (`json_key`) | Tipo | Obrigatório? | Regras de Validação e Limites | Código de Erro (`fieldErrors[].code`) | Descrição e Comportamento |
 |---|---|---|---|---|---|
+| `name` | string | Não | Somente titular adulto (`administrator`/`member`). Após remover espaços nas extremidades, de **1 a 60 caracteres** Unicode visíveis, sem caracteres de controle (RF02). `null`, vazio após trim, acima do limite ou com controle é recusado; omitir preserva o nome vigente. Sessão `kids` que envie o campo recebe `403`. | `NAME_INVALID_LENGTH` | Nome de identificação do titular, separado do apelido (RN63) |
 | `nickname` | string ou `null` | Não | Opcional. Após remover espaços nas extremidades, no máximo **20 caracteres não-espaço** (espaços internos não contam para o limite); sem caracteres de controle. `null` ou string vazia após trim remove a configuração vigente. | `NICKNAME_INVALID_LENGTH` | Etiqueta/apelido visível à família; configuração exclusiva do titular (RN63) |
 | `photoMediaId` | uuid ou `null` | Não | Deve referenciar uma `MIDIA` em estado `READY`, pertencente ao titular (`titular_id`), com `finalidade: PROFILE_PHOTO`. `null` remove a foto vigente e volta à identificação padrão. | `PHOTO_MEDIA_NOT_READY` / `PHOTO_MEDIA_NOT_OWNED` / `PHOTO_MEDIA_PURPOSE_MISMATCH` | Foto de perfil opcional, por câmera ou galeria (RN63) |
 | `purpose` (em `POST /media`) | enum | Sim | Esta experiência envia `profilePhoto`; `taskSignal` é reservado ao fluxo Kids de SPEC-012 e não é iniciado por esta tela. | `MEDIA_PURPOSE_NOT_SUPPORTED` apenas para finalidade fora do contrato | Finalidade declarada do upload |
 | arquivo (multipart, em `POST /media`) | binário | Sim | Formato de imagem reconhecível pelo decodificador do servidor; o backend converte para JPEG com lado maior ≤1.600px e ≤5MB após processamento, removendo metadados (BA-16, mobile-decisions.md P-04). Falha de decodificação ou tamanho de entrada acima do limite operacional responde `415`/`413`. | `MEDIA_FORMAT_UNSUPPORTED` / `MEDIA_TOO_LARGE` | Conteúdo da foto a ser processado e armazenado no R2 |
 
-Campos não reconhecidos ou protegidos (`role`, `familyId`, `kidsMode`, `isFamilyCreator`, `appleUserID`, `status`, `concededAt`, `contributingMissionIds`) em `PATCH /v1/me/profile` são rejeitados com `400 UNKNOWN_FIELD`, sem persistir (convenção §1 dos contratos backend).
+Campos não reconhecidos ou protegidos (`role`, `familyId`, `kidsMode`, `isFamilyCreator`, `appleUserID`, `status`, `concededAt`, `contributingMissionIds`) em `PATCH /v1/me/profile` são rejeitados com `400 UNKNOWN_FIELD` (`name` é campo reconhecido, ver acima), sem persistir (convenção §1 dos contratos backend).
 
 ### 5.2. Contrato de API Compartilhado
 
@@ -90,20 +91,22 @@ Campos não reconhecidos ou protegidos (`role`, `familyId`, `kidsMode`, `isFamil
 {
   "memberId": "c1d2e3f4-a5b6-7890-cdef-123456789abc",
   "name": "Maria Silva",
+  "familyName": "Família Silva",
   "nickname": "Mari",
   "photoMediaId": "d4e5f6a7-b8c9-0123-def4-567890abcdef",
   "totalParticipations": 7,
   "nextTier": { "code": "silver", "requiredMissionCount": 10, "remaining": 3 }
 }
 ```
-`nextTier` é `null` quando o titular já atingiu `diamond` (50). `photoMediaId` é `null` sem foto configurada.
+`nextTier` é `null` quando o titular já atingiu `diamond` (50). `photoMediaId` é `null` sem foto configurada. `familyName` é o nome da família do titular, usado por TEL-030 na identificação (`"<Papel> · <Nome da Família>"` sem apelido; `"<Nome> · <Papel>"` com apelido); o papel vem da sessão.
 
 #### `PATCH /v1/me/profile`
 - **Autenticação:** Bearer Token de sessão ativa.
 - **Payload de entrada:**
 ```json
-{ "nickname": "Mari", "photoMediaId": "d4e5f6a7-b8c9-0123-def4-567890abcdef" }
+{ "name": "Maria Silva", "nickname": "Mari", "photoMediaId": "d4e5f6a7-b8c9-0123-def4-567890abcdef" }
 ```
+Todos os campos são opcionais; omitir preserva o valor vigente. `name` só é aceito de titular adulto.
 - **Resposta de sucesso — `200 OK`:** mesmo formato de `GetOwnProfile`, refletindo o estado canônico persistido.
 
 #### `GET /v1/me/badges`
@@ -143,7 +146,8 @@ Campos não reconhecidos ou protegidos (`role`, `familyId`, `kidsMode`, `isFamil
 
 #### `GET /v1/media/{mediaId}/content`
 - **Autenticação:** Bearer Token de sessão ativa; o servidor confere titularidade/família/finalidade a cada leitura.
-- **Resposta de sucesso:** `200 OK`, streaming binário com `Content-Type` da imagem, sem cache compartilhado.
+- **Resposta de sucesso:** `200 OK`, corpo binário da foto com `Content-Type: image/jpeg` e `Cache-Control: private, no-store`. Só serve mídia em estado `READY` da família do ator.
+- **Erro:** `404 RESOURCE_NOT_FOUND` para mídia inexistente, não `READY` ou de outra família, sem distinguir os casos (RNF06).
 
 #### Respostas de Erro Padronizadas (RFC 9457)
 
@@ -151,11 +155,11 @@ Campos não reconhecidos ou protegidos (`role`, `familyId`, `kidsMode`, `isFamil
 |---|---|---|
 | `400 Bad Request` | `UNKNOWN_FIELD` | Campo não reconhecido ou protegido em `PATCH /me/profile` |
 | `401 Unauthorized` | `SESSION_EXPIRED` | Token ausente, inválido ou expirado |
-| `403 Forbidden` | `ACTION_NOT_ALLOWED` | Tentativa de ação administrativa pelo fluxo pessoal (ex.: Kids alterando modo) |
-| `404 Not Found` | `RESOURCE_NOT_FOUND` | `awardId` que não pertence ao titular, de qualquer família |
+| `403 Forbidden` | `ACTION_NOT_ALLOWED` | Tentativa de ação administrativa pelo fluxo pessoal (ex.: Kids alterando modo) ou sessão `kids` enviando `name` |
+| `404 Not Found` | `RESOURCE_NOT_FOUND` | `awardId` que não pertence ao titular, de qualquer família; mídia de `GET /media/{mediaId}/content` inexistente, não `READY` ou de outra família |
 | `413 Payload Too Large` | `MEDIA_TOO_LARGE` | Upload acima do limite de entrada aceito pelo servidor |
 | `415 Unsupported Media Type` | `MEDIA_FORMAT_UNSUPPORTED` | Formato de imagem não reconhecido |
-| `422 Unprocessable Entity` | `VALIDATION_FAILED` | `fieldErrors` com `NICKNAME_INVALID_LENGTH` (ver E-03) |
+| `422 Unprocessable Entity` | `VALIDATION_FAILED` | `fieldErrors` com `NICKNAME_INVALID_LENGTH` (ver E-03) ou `NAME_INVALID_LENGTH` (`fieldErrors.name`, ver E-05) |
 | `422 Unprocessable Entity` | `PHOTO_MEDIA_NOT_READY` / `PHOTO_MEDIA_NOT_OWNED` / `PHOTO_MEDIA_PURPOSE_MISMATCH` | `photoMediaId` ainda processando, de outro titular, ou com finalidade incompatível |
 | `422 Unprocessable Entity` | `MEDIA_PURPOSE_NOT_SUPPORTED` | Finalidade fora das finalidades reconhecidas pelo contrato de mídia |
 | `429 Too Many Requests` | `RATE_LIMIT_EXCEEDED` | Excesso de requisições de edição/upload por janela |
@@ -181,13 +185,13 @@ Campos não reconhecidos ou protegidos (`role`, `familyId`, `kidsMode`, `isFamil
 - **CA-01: [Fluxo principal — Consulta do próprio perfil]**
   - **DADO QUE** um perfil ativo de qualquer papel está autenticado,
   - **QUANDO** consultar `GET /v1/me/profile`,
-  - **ENTÃO O SISTEMA DEVE** retornar nome administrativo, apelido, `photoMediaId`, total de participações e próximo marco, sem dados de terceiros,
+  - **ENTÃO O SISTEMA DEVE** retornar nome, `familyName`, apelido, `photoMediaId`, total de participações e próximo marco, sem dados de terceiros,
   - **E** retornar HTTP `200 OK`. *(UC10 passo 1; RF48, RF62)*
 
 - **CA-02: [Fluxo principal — Edição com sucesso]**
-  - **DADO QUE** um titular autenticado envia `nickname` com até 20 caracteres não-espaço e/ou `photoMediaId` de mídia `READY` própria,
+  - **DADO QUE** um titular autenticado envia `nickname` com até 20 caracteres não-espaço, `photoMediaId` de mídia `READY` própria e/ou (titular adulto) `name` válido,
   - **QUANDO** `PATCH /v1/me/profile` for processado,
-  - **ENTÃO O SISTEMA DEVE** persistir as alterações e retornar o estado canônico atualizado,
+  - **ENTÃO O SISTEMA DEVE** persistir as alterações e retornar o estado canônico atualizado (incluindo `familyName`),
   - **E** NÃO DEVE alterar papel, família ou modo Kids. *(UC10 passos 3–4; RF48, RN63)*
 
 - **CA-03: [Campo protegido]**
@@ -246,17 +250,35 @@ Campos não reconhecidos ou protegidos (`role`, `familyId`, `kidsMode`, `isFamil
 - **CA-12: [Perfil Kids]**
   - **DADO QUE** o usuário autenticado tem papel `kids`,
   - **QUANDO** editar a própria foto/apelido pelas rotas `/v1/me/profile` e `/v1/media`,
-  - **ENTÃO O SISTEMA DEVE** permitir a operação nos mesmos termos de um perfil adulto,
+  - **ENTÃO O SISTEMA DEVE** permitir a operação nos mesmos termos de um perfil adulto (exceto `name`, ver CA-14),
   - **E** NÃO DEVE expor nenhuma ação administrativa ou de terceiros nessas rotas. *(UC10 Atores; RF65)*
+
+- **CA-13: [Validação — Nome do titular adulto]**
+  - **DADO QUE** um titular `administrator` ou `member` envia `name` vazio após trim, com mais de 60 caracteres visíveis ou com caractere de controle,
+  - **QUANDO** `PATCH /v1/me/profile` for processado,
+  - **ENTÃO O SISTEMA DEVE** recusar com HTTP `422 Unprocessable Entity` e `VALIDATION_FAILED`, com `fieldErrors.name` e código `NAME_INVALID_LENGTH`,
+  - **E** não persistir nenhuma alteração do payload. *(RF02, RF48, RN63; E-05)*
+
+- **CA-14: [Perfil Kids — nome protegido]**
+  - **DADO QUE** a sessão ativa tem papel `kids`,
+  - **QUANDO** o payload de `PATCH /v1/me/profile` contiver `name`,
+  - **ENTÃO O SISTEMA DEVE** recusar com HTTP `403 Forbidden` e código `ACTION_NOT_ALLOWED`,
+  - **E** não persistir nenhuma alteração do payload. *(RF48, RN63; E-05)*
+
+- **CA-15: [Conteúdo da foto]**
+  - **DADO QUE** existe mídia `READY` da família do ator,
+  - **QUANDO** `GET /v1/media/{mediaId}/content` for chamado com sessão ativa,
+  - **ENTÃO O SISTEMA DEVE** responder `200 OK` com os bytes da imagem, `Content-Type: image/jpeg` e `Cache-Control: private, no-store`,
+  - **E** responder `404 RESOURCE_NOT_FOUND` para mídia inexistente, não `READY` ou de outra família, sem distinguir os casos. *(RN63, RNF06; E-06)*
 
 ### Checklist de Cobertura Obrigatória dos CAs:
 - [x] Fluxo principal de cada UC coberto (CA-01, CA-02)
 - [x] Todos os fluxos alternativos e exceções dos UCs mapeados (CA-06 a CA-10)
-- [x] Recusa explícita para cada perfil sem permissão (RNF07) — CA-03, CA-04, CA-12
-- [x] Isolamento estrito entre famílias / multitenancy (RNF06) — CA-05
+- [x] Recusa explícita para cada perfil sem permissão (RNF07) — CA-03, CA-04, CA-12, CA-14
+- [x] Isolamento estrito entre famílias / multitenancy (RNF06) — CA-05, CA-15
 - [ ] Ações simultâneas e concorrência tratadas (RNF11) — não aplicável nesta entrega: não há dois atores concorrendo sobre o mesmo recurso de perfil pessoal (titularidade exclusiva elimina a disputa); concorrência de última gravação válida é descrita na seção 5.3.
 - [x] Falha de conexão, timeout e preservação de estado (RNF12, RNF13) — CA-09
-- [x] Limites numéricos de campos e validações de fronteira cobertos — CA-06, CA-08
+- [x] Limites numéricos de campos e validações de fronteira cobertos — CA-06, CA-08, CA-13
 
 ## 8. Observabilidade, Métricas e Auditoria
 
@@ -283,13 +305,16 @@ Campos não reconhecidos ou protegidos (`role`, `familyId`, `kidsMode`, `isFamil
 | E-01 | Não havia limite de caracteres/charset definido para `nickname` em nenhuma fonte (RN63, RF48, modelo de dados). | Até 20 caracteres não-espaço após trim, sem caracteres de controle; vazio/nulo remove a configuração. | Pessoa usuária / 2026-10-07 | Sim — RN63 e RF48 atualizados (base funcional 1.13). |
 | E-02 | A infraestrutura compartilhada de mídia foi atribuída originalmente a SPEC-002. | As rotas autenticadas de foto do próprio perfil continuam nesta experiência; o envio antes da criação e sua autorização serão reconciliados na revisão de SPEC-002. `taskSignal` continua reservado para SPEC-012. | Pessoa usuária / 2026-10-07; revisão de dependência em 2026-10-19 | Não altera UC10; dependência técnica atualizada. |
 | E-03 | O texto original do CA-06 e da tabela §5.3 definia `400 Bad Request` para `NICKNAME_INVALID_LENGTH`, divergindo da convenção geral do contrato (`backend-contracts.md` §1: `400` é formato/campo desconhecido, `422` é valor semanticamente inválido) e de todo código equivalente já implementado (`TITLE_INVALID_LENGTH`, `WEIGHT_INVALID`, `FREQUENCY_DAYS_INVALID`, `NOTE_TOO_LONG`), todos `422`. | Inconsistência de redação corrigida: `NICKNAME_INVALID_LENGTH` responde `422 Unprocessable Entity`, por consistência com o restante do contrato. Decidido na implementação do SCRUM-51, sem objeção explícita à recomendação técnica. | Pessoa usuária / 2026-10-21 | Sim — CA-06 e tabela §5.3 corrigidos nesta revisão. |
+| E-04 | O protótipo do Figma (`566:37`, TEL-030) exibe o nome da família na identificação (`"<Papel> · <Nome da Família>"`; com apelido, título = apelido e apoio `"<Nome> · <Papel>"`), mas `OwnProfileView` não o retornava. | `GET`/`PATCH /v1/me/profile` passam a retornar `familyName: string`. O papel continua vindo da sessão. | Pessoa usuária / 2026-10-22 | Sim — RN63, RF48 e UC10; `backend-contracts.md` §3. |
+| E-05 | O Figma de MOD-009 (`567:294`, `568:81`, iPad) inclui o campo obrigatório "Seu nome" para adultos; no Modo Kids (`568:185`) só há "Seu apelido" e foto. Antes, o nome só era editável por Administradores (SPEC-003). | `PATCH /v1/me/profile` aceita `name?: string` opcional, só para titular adulto, com a validação de RF02 (1–60 caracteres visíveis após trim, sem controle). Sessão `kids` que o envie recebe `403 ACTION_NOT_ALLOWED`; valor inválido responde `422 VALIDATION_FAILED` com `fieldErrors.name`/`NAME_INVALID_LENGTH`. A edição administrativa do nome (SPEC-003) permanece. | Pessoa usuária / 2026-10-22 | Sim — RN63, RF48, UC10; `backend-contracts.md` §3. |
+| E-06 | `GET /v1/media/{mediaId}/content` constava no escopo, mas sem contrato de resposta; o mobile precisa exibir a foto salva. | Responde `200 OK` com `image/jpeg` e `Cache-Control: private, no-store` para mídia `READY` da família do ator; `404 RESOURCE_NOT_FOUND` se inexistente, não `READY` ou de outra família. | Pessoa usuária / 2026-10-22 | Sim — `backend-contracts.md` §6. |
 
 ## 10. Fases de Implementação e Critérios de Conclusão
 
 | Fase | Objetivo da Entrega | Critérios de Aceite Atendidos | Critério de Prontidão (Definition of Done) | Status |
 |---|---|---|---|---|
 | **1** | **Núcleo Mínimo (Core API + Isolamento):** `GetOwnProfile`, `UpdateOwnProfile`, `GetOwnBadges`, `GetBadgeContributions` e reutilização segura de `POST /media`/`GET /media/{id}/content` (`purpose: profilePhoto`) entregues por SPEC-002; titularidade, isolamento e validação. | CA-01 a CA-12 | Testes unitários e de integração verdes cobrindo os CAs listados. | concluída (SCRUM-51) |
-| **2** | **Experiência Mobile + Integração:** TEL-030 (recorte), MOD-009, TEL-054; câmera/galeria; estados de carregamento/erro/falha de upload. | CA-02, CA-06 a CA-10 integrados à UI | Telas integradas com a API, testes de UI/E2E e UX-spec verificada. | a fazer |
+| **2** | **Experiência Mobile + Integração:** ajustes de contrato no backend (`familyName`, `name` no `PATCH`, `GET /media/{id}/content`); TEL-030 (recorte), MOD-009, TEL-054 conforme Figma (iPhone, Kids, iPad retrato/paisagem); câmera/galeria; estados de carregamento/erro/falha de upload. | CA-13 a CA-15 no backend; CA-02, CA-06 a CA-10 integrados à UI | Telas integradas com a API, testes de UI/E2E e UX-spec verificada. | a fazer |
 | **3** | **Polimento e Casos Raros:** acessibilidade fina, transições de badge, textos de borda, animação de marco conquistado. | — (refinamento, sem novo CA) | Suíte de regressão verde e validação de QA concluída. | a fazer |
 
 ### Para cada fase:
@@ -299,6 +324,8 @@ Campos não reconhecidos ou protegidos (`role`, `familyId`, `kidsMode`, `isFamil
 
 **Registro de execução (2026-10-21):** SCRUM-51 concluiu a Fase 1 no backend — `GET`/`PATCH /v1/me/profile`, `GET /v1/me/badges` e `GET /v1/me/badges/{awardId}`, cobrindo CA-01 a CA-12 com testes unitários e de integração. A Fase 1 não expõe tela (capacidade só via API); a Fase 2 (Mobile) permanece pendente em card futuro.
 
+**Registro de revisão (2026-10-22, SCRUM-52):** a Fase 2 foi detalhada a partir do Figma (`566:37`), com as decisões E-04, E-05 e E-06 (`familyName`, `name` editável por adulto, conteúdo da mídia) e os novos CA-13 a CA-15; CA-01, CA-02 e CA-12 foram ajustados. A proposta gamificada (`580:59`) não faz parte desta entrega. Base funcional atualizada para RN 1.19 / RF 1.18 / UC 1.17.
+
 ## 11. Checklist de Aprovação da Spec (Definition of Ready)
 
 - [x] Todos os códigos citados (`RN`, `RF`, `RNF`, `UC`, `TEL`, `UF`) existem na base funcional vigente.
@@ -307,7 +334,7 @@ Campos não reconhecidos ou protegidos (`role`, `familyId`, `kidsMode`, `isFamil
 - [x] O dicionário de campos define tipos, limites e códigos de erro estáveis para todos os inputs.
 - [x] Todo critério de aceitação segue o padrão formal BDD (DADO / QUANDO / ENTÃO / E) e mapeia um teste automatizável.
 - [x] Isolamento entre famílias (RNF06) e recusa por perfil (RNF07) constam explicitamente nos CAs da Fase 1.
-- [x] Nenhuma premissa sem validação ou esclarecimento pendente na seção 9 — E-01 e E-02 decididos.
+- [x] Nenhuma premissa sem validação ou esclarecimento pendente na seção 9 — E-01 a E-06 decididos.
 - [x] A UX-spec correspondente está vinculada, revisada e coerente.
 - [x] A seção "Fora de questão" elimina riscos de suposições incorretas.
 - [x] Não há detalhes efêmeros de implementação que engessem a arquitetura interna dos módulos.

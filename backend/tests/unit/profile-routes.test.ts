@@ -9,6 +9,7 @@ const AWARD_ID = 'e5f6a7b8-0000-0000-0000-000000000001';
 const OWN_PROFILE = {
   memberId: TEST_ACTOR.memberId,
   name: 'Maria Silva',
+  familyName: 'Família Silva',
   nickname: 'Mari',
   photoMediaId: null,
   totalParticipations: 7,

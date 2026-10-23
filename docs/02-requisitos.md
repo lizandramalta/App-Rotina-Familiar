@@ -1,8 +1,8 @@
 # Requisitos funcionais e não funcionais
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.17\
-**Data:** 2026-10-19\
+**Versão:** 1.18\
+**Data:** 2026-10-22\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -349,7 +349,7 @@ Ao concluir tarefa sem responsável, o sistema deve atribuí-la ao adulto que co
 
 ### RF48
 
-O sistema deve permitir a Administradores, Membros e Kids editar os dados permitidos do próprio perfil, adicionar, substituir ou remover foto opcional por câmera ou galeria e configurar etiqueta/apelido. Para o futuro Criador, esses dados são oferecidos no rascunho inicial antes da criação da família. A foto escolhida deve ser enviada nessa etapa, sem criar perfil ou conceder acesso familiar; somente mídia protegida do próprio futuro Criador pode ser vinculada após a criação confirmada. Falha do envio deve permitir nova tentativa ou continuação sem foto, sem bloquear a criação; foto e etiqueta podem ser omitidas. O apelido é opcional, com até 20 caracteres não-espaço após remover espaços nas extremidades, sem caracteres de controle; vazio ou nulo remove a configuração vigente. Deve impedir acesso de terceiros à configuração de apelido, inclusive por operação administrativa. A edição não altera papel, família nem modo Kids.
+O sistema deve permitir a Administradores, Membros e Kids editar os dados permitidos do próprio perfil, adicionar, substituir ou remover foto opcional por câmera ou galeria e configurar etiqueta/apelido. Para o futuro Criador, esses dados são oferecidos no rascunho inicial antes da criação da família. A foto escolhida deve ser enviada nessa etapa, sem criar perfil ou conceder acesso familiar; somente mídia protegida do próprio futuro Criador pode ser vinculada após a criação confirmada. Falha do envio deve permitir nova tentativa ou continuação sem foto, sem bloquear a criação; foto e etiqueta podem ser omitidas. O apelido é opcional, com até 20 caracteres não-espaço após remover espaços nas extremidades, sem caracteres de controle; vazio ou nulo remove a configuração vigente. Administradores e Membros também podem editar o próprio nome de identificação por esse fluxo, com a validação do nome administrativo (RF02: de 1 a 60 caracteres visíveis após remover espaços nas extremidades, sem caracteres de controle); Kids não alteram o nome. Deve impedir acesso de terceiros à configuração de apelido, inclusive por operação administrativa. A edição não altera papel, família nem modo Kids. A consulta do próprio perfil retorna também o nome da família, para compor a identificação exibida.
 
 **Regras de negócio:** [RN01](01-regras-de-negocio.md#rn01), [RN63](01-regras-de-negocio.md#rn63).\
 **Casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC10](03-casos-de-uso.md#uc10)
@@ -773,6 +773,7 @@ A configuração de apelido deve ser protegida por titularidade no backend, incl
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.18 | 2026-10-22 | RF48: titular adulto edita o próprio nome de identificação (RF02), Kids não; consulta do próprio perfil inclui o nome da família. Para SPEC-006 (SCRUM-52). |
 | 1.17 | 2026-10-19 | RF59: exclusão que deixa apenas tarefas concluídas conclui a missão na mesma transação (RN38; SPEC-014/SPEC-007). RF01–03/RF38/RF40/RF48/RF67: foto antecipada, membros no rascunho, criação atômica e edição da família existente. RF11/RF22/RF24: apresentação por perfil sem alterar estado. RF41: emissão inicial direta e confirmação de reemissão. |
 | 1.16 | 2026-10-10 | RF18 e RF20 preservam e identificam carga histórica de membro removido. Para SPEC-018. |
 | 1.15 | 2026-10-10 | RF34 passa a detalhar título, descrição, unicidade e catálogo inicial dos itens de recompensa coletiva. Para SPEC-015. |

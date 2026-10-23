@@ -41,6 +41,7 @@ describe('UploadMediaUseCase', () => {
       markReady: vi.fn(async () => void events.push('markReady')),
       markFailed: vi.fn(async () => void events.push('markFailed')),
       findInFamily: vi.fn(),
+      findContentInFamily: vi.fn(),
       markLinked: vi.fn(),
     };
     storage = { put: vi.fn(async () => void events.push('put')) };

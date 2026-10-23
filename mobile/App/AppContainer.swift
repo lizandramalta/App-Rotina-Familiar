@@ -8,6 +8,7 @@ final class AppContainer {
     private let inviteLinkParser: InviteLinkParser
     private let familyRepository: any FamilyRepository
     private let taskRepository: any TaskRepository
+    private let profileRepository: any ProfileRepository
     private let credentialStore: any SessionCredentialStoring
     private let installationProofStore: any InstallationProofProviding
     private let appleAuthenticator: any AppleAuthenticating
@@ -20,6 +21,7 @@ final class AppContainer {
         inviteLinkParser: InviteLinkParser,
         familyRepository: any FamilyRepository,
         taskRepository: any TaskRepository,
+        profileRepository: any ProfileRepository,
         credentialStore: any SessionCredentialStoring,
         installationProofStore: any InstallationProofProviding,
         appleAuthenticator: any AppleAuthenticating,
@@ -31,6 +33,7 @@ final class AppContainer {
         self.inviteLinkParser = inviteLinkParser
         self.familyRepository = familyRepository
         self.taskRepository = taskRepository
+        self.profileRepository = profileRepository
         self.credentialStore = credentialStore
         self.installationProofStore = installationProofStore
         self.appleAuthenticator = appleAuthenticator
@@ -46,6 +49,7 @@ final class AppContainer {
             inviteLinkParser: InviteLinkParser(baseURL: configuration.inviteLinkBaseURL),
             familyRepository: HTTPFamilyRepository(baseURL: configuration.apiBaseURL),
             taskRepository: HTTPTaskRepository(baseURL: configuration.apiBaseURL),
+            profileRepository: HTTPProfileRepository(baseURL: configuration.apiBaseURL),
             credentialStore: KeychainSessionCredentialStore(secrets: secrets),
             installationProofStore: KeychainInstallationProofStore(secrets: secrets),
             appleAuthenticator: AppleSignInAdapter()
@@ -78,6 +82,15 @@ final class AppContainer {
             installationProofProvider: installationProofStore,
             parser: inviteLinkParser,
             sessionStore: sessionStore
+        )
+    }
+
+    func makeProfileViewModel(session: ActiveFamilySession, sessionStore: AppSessionStore) -> ProfileViewModel {
+        ProfileViewModel(
+            repository: profileRepository,
+            sessionStore: sessionStore,
+            session: session,
+            photoNormalizer: photoNormalizer
         )
     }
 

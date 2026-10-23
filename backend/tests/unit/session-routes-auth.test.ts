@@ -16,6 +16,7 @@ describe('Bearer authentication on protected routes', () => {
     test.updateOwnProfile.execute.mockResolvedValue({
       memberId: TEST_ACTOR.memberId,
       name: 'Maria Silva',
+      familyName: 'Família Silva',
       nickname: null,
       photoMediaId: PROFILE_BODY.photoMediaId,
       totalParticipations: 0,

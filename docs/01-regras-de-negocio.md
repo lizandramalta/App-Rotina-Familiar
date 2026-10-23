@@ -1,13 +1,13 @@
 # Regras de negócio
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.18\
-**Data:** 2026-10-19\
+**Versão:** 1.19\
+**Data:** 2026-10-22\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
 
-Este documento contém as regras vigentes da versão 1.18. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
+Este documento contém as regras vigentes da versão 1.19. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
 
 **Identificadores preservados:** RN15, RN29 e RN32 não estavam definidos na base recebida e permanecem não utilizados. Não representam conteúdo faltante desta versão.
 
@@ -514,6 +514,8 @@ Todos os perfis, inclusive Kids, podem adicionar, substituir ou remover a própr
 
 O apelido é opcional: vazio ou nulo remove a configuração vigente. Admite até 20 caracteres não-espaço após remover espaços nas extremidades; espaços internos não contam para esse limite. Não admite caracteres de controle.
 
+O titular adulto (Administrador ou Membro) também pode editar o próprio nome de identificação pelo mesmo fluxo, com as regras do nome administrativo (obrigatório, de 1 a 60 caracteres Unicode visíveis após remover espaços nas extremidades, sem caracteres de controle, RF02); a edição administrativa do nome por Administradores (RF03) permanece inalterada. Kids editam somente foto e apelido e não alteram o próprio nome. Quando o perfil não tem apelido, a identificação exibe o nome; quando tem, o apelido é o título e o nome aparece como apoio, sempre junto ao papel e ao nome da família.
+
 O apelido é visível à família, com edição exclusiva do titular. A foto de perfil pode ser escolhida por câmera ou galeria, inclusive por Kids; isso não altera a câmera direta da sinalização Kids. Kids acessam Meu perfil pelo avatar/cabeçalho, sem terceira aba no tab bar.
 
 **Requisitos funcionais:** [RF01](02-requisitos.md#rf01), [RF38](02-requisitos.md#rf38), [RF48](02-requisitos.md#rf48), [RF65](02-requisitos.md#rf65)\
@@ -574,6 +576,7 @@ A missão admite uma observação opcional de até 250 caracteres, contando espa
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.19 | 2026-10-22 | RN63: titular adulto também edita o próprio nome de identificação (1–60 caracteres visíveis, RF02); Kids editam somente foto e apelido; define a composição título/apoio da identificação com apelido, nome, papel e nome da família. Para SPEC-006 (SCRUM-52). |
 | 1.18 | 2026-10-19 | RN38 fecha a missão quando a exclusão de tarefa não concluída deixa apenas tarefas concluídas (SPEC-014/SPEC-007). RN01/RN07/RN45/RN63: foto antecipada, membros antes da criação atômica e retorno à família existente. RN46/RN60: convite inicial direto e confirmação de reemissão. RN23/RN55: apresentação por perfil da tarefa sinalizada por Kids, preservando estado único. |
 | 1.17 | 2026-10-10 | RN62 define `referenceDate` para resolver a semana do PDF e identifica crédito histórico como “Membro removido”. Para SPEC-019. |
 | 1.16 | 2026-10-10 | RN30, RN31 e RN61 preservam carga histórica de perfil removido em linha “Membro removido”, sem expor dados pessoais. Para SPEC-018. |

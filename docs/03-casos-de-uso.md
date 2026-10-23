@@ -1,8 +1,8 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.16\
-**Data:** 2026-10-19\
+**Versão:** 1.17\
+**Data:** 2026-10-22\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -449,17 +449,17 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Fluxo principal:**
 
-1. O usuário acessa Meu perfil pela navegação adulta ou pelo avatar/cabeçalho Kids; consulta foto, apelido, total de missões com participação e badges cumulativos.
-2. Ao selecionar editar, o sistema apresenta foto opcional por câmera ou galeria e etiqueta/apelido próprios.
-3. O usuário adiciona, substitui ou remove a foto e/ou altera o apelido e confirma.
+1. O usuário acessa Meu perfil pela navegação adulta ou pelo avatar/cabeçalho Kids; consulta foto, apelido (ou nome), papel, nome da família, total de missões com participação e badges cumulativos.
+2. Ao selecionar editar, o sistema apresenta foto opcional por câmera ou galeria, etiqueta/apelido próprios e, para Administrador e Membro, o nome de identificação.
+3. O usuário adiciona, substitui ou remove a foto e/ou altera o apelido (e o nome, se adulto) e confirma.
 4. O sistema valida e salva as alterações.
 
 **Alternativas e exceções:**
 
 - Somente o titular acessa a configuração do apelido; outros membros, inclusive Administradores, podem vê-lo, mas não editá-lo.
 - Sem foto, apresentar identificação padrão. Falha de upload mantém a foto anterior e oferece nova tentativa; cancelar não salva.
-- Cada missão encerrada com participação creditada conta uma vez para os marcos cumulativos bronze 5, prata 10, ouro 25 e diamante 50. Selecionar um marco abre TEL-054 com as missões contribuintes e permite abrir TEL-021; voltar restaura a origem. Sem badges, mostrar total e próximo marco, sem simular conquista. Não há concessão retroativa.
-- Dados inválidos exigem correção; alterações de permissões são impedidas. Kids não podem ativar/desativar seu modo por este fluxo.
+- Cada missão encerrada com participação creditada conta uma vez para os marcos cumulativos bronze 5, prata 10, ouro 25 e diamante 50. Selecionar um marco conquistado abre [TEL-054](design/screen-map.md#tel-054); marcos pendentes apenas exibem a meta correspondente e não são selecionáveis. TEL-054 mostra as missões contribuintes e permite abrir TEL-021; voltar restaura a origem. Sem badges, mostrar total e próximo marco, sem simular conquista. Não há concessão retroativa.
+- Dados inválidos exigem correção; alterações de permissões são impedidas. Kids não podem ativar/desativar seu modo nem editar o nome por este fluxo.
 
 **Pós-condição:** os dados permitidos estão atualizados, sem alteração indevida de permissões.
 
@@ -843,6 +843,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.17 | 2026-10-22 | UC10: nome da família e papel na consulta do perfil; titular adulto edita o próprio nome, Kids não. Para SPEC-006 (SCRUM-52). |
 | 1.16 | 2026-10-19 | UC07: exclusão que deixa só tarefas concluídas fecha a missão (RN38/RF59; SPEC-014/SPEC-007). UC01/UC02: foto antecipada, membros criados com a família, convites posteriores e edição sem segunda criação. UC11: apresentação por perfil da tarefa sinalizada, preservando estado único. |
 | 1.15 | 2026-10-10 | UC18 adota `referenceDate` para semana e identifica crédito histórico como “Membro removido”. Para SPEC-019. |
 | 1.14 | 2026-10-10 | UC13 preserva crédito histórico de perfil removido como “Membro removido”. Para SPEC-018. |

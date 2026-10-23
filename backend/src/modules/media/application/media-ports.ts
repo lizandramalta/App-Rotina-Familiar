@@ -37,7 +37,12 @@ export interface ObjectStoragePort {
   }): Promise<void>;
 }
 
-export interface ObjectStorageMaintenancePort extends ObjectStoragePort {
+/** Leitura dos bytes de um objeto; `undefined` quando a chave não existe. */
+export interface ObjectStorageReaderPort {
+  get(key: string): Promise<Buffer | undefined>;
+}
+
+export interface ObjectStorageMaintenancePort extends ObjectStoragePort, ObjectStorageReaderPort {
   delete(key: string): Promise<void>;
 }
 
@@ -45,6 +50,12 @@ export interface MediaRecord {
   readonly id: string;
   readonly ownerMemberId: string;
   readonly purpose: MediaPurpose;
+  readonly state: MediaState;
+}
+
+export interface MediaContentRecord {
+  readonly objectKey: string;
+  readonly contentType: string;
   readonly state: MediaState;
 }
 
@@ -72,6 +83,12 @@ export interface MediaRepositoryPort {
     tx: TransactionContext,
     params: { readonly familyId: string; readonly mediaId: string },
   ): Promise<MediaRecord | undefined>;
+
+  /** Chave e tipo do objeto, sempre no escopo da família (SPEC-006 CA-15). */
+  findContentInFamily(
+    tx: TransactionContext,
+    params: { readonly familyId: string; readonly mediaId: string },
+  ): Promise<MediaContentRecord | undefined>;
 
   markLinked(
     tx: TransactionContext,
