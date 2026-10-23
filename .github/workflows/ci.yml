@@ -98,13 +98,12 @@ jobs:
             -derivedDataPath "$RUNNER_TEMP/mobile-derived-data" \
             CODE_SIGNING_ALLOWED=NO
 
-      - name: Run Mobile tests on two simulator workers
+      - name: Run Mobile tests on the selected simulator
         run: |
           xcodebuild test-without-building \
             -project mobile.xcodeproj \
             -scheme FamilyRoutine \
             -destination 'platform=iOS Simulator,id=${{ steps.simulator.outputs.udid }}' \
             -derivedDataPath "$RUNNER_TEMP/mobile-derived-data" \
-            -parallel-testing-enabled YES \
-            -parallel-testing-worker-count 2 \
+            -parallel-testing-enabled NO \
             CODE_SIGNING_ALLOWED=NO
