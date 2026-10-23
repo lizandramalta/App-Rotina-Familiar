@@ -2,7 +2,7 @@ import SwiftUI
 
 /// TEL-053 — Configurações da família (fuso horário).
 /// Apresenta o fuso vigente da família, eventual alteração programada,
-/// seletor de novo fuso e botão primário "Ver efeitos" que abre MOD-012.
+/// seletor de novo fuso e botão primário "Aplicar" que abre MOD-012.
 /// Membro e Kids não possuem acesso e recebem aviso de acesso restrito.
 struct FamilySettingsView: View {
     @StateObject var viewModel: FamilySettingsViewModel
@@ -124,7 +124,7 @@ struct FamilySettingsView: View {
                         ProgressView()
                             .tint(.white)
                     } else {
-                        Text("family.settings.time_zone.preview")
+                        Text("family.settings.time_zone.apply")
                             .fontWeight(.semibold)
                     }
                 }
