@@ -63,7 +63,11 @@ describe('Own daily task queries — SPEC-009 phase 1 / SCRUM-38', () => {
       undefined,
     );
 
-    expect(result).toEqual({ items: [expect.objectContaining({ id: TASK.id })], nextCursor: null });
+    expect(result).toEqual({
+      items: [expect.objectContaining({ id: TASK.id })],
+      nextCursor: null,
+      familyCreatedAt: '2026-10-01',
+    });
     expect(repository.findOwnTasksPage).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
@@ -134,7 +138,22 @@ describe('Own daily task queries — SPEC-009 phase 1 / SCRUM-38', () => {
 
     await expect(
       new GetOwnProgressUseCase(dependencies()).execute(TEST_ACTOR, '2026-10-09'),
-    ).resolves.toEqual({ total: 0, completed: 0, percentage: null });
+    ).resolves.toEqual({ total: 0, completed: 0, percentage: null, familyCreatedAt: '2026-10-01' });
+  });
+
+  it('SPEC-009 E-05 exposes the family calendar start so clients can disable RN49 out-of-range days themselves', async () => {
+    const tasksResult = await new GetOwnTasksUseCase(dependencies()).execute(
+      TEST_ACTOR,
+      '2026-10-09',
+      undefined,
+    );
+    const progressResult = await new GetOwnProgressUseCase(dependencies()).execute(
+      TEST_ACTOR,
+      '2026-10-09',
+    );
+
+    expect(tasksResult.familyCreatedAt).toBe('2026-10-01');
+    expect(progressResult.familyCreatedAt).toBe('2026-10-01');
   });
 
   it('CA-08 translates an unavailable query dependency without pretending an empty result', async () => {

@@ -65,8 +65,8 @@
 
 | Rota | Entrada | Resultado | Permissão |
 |---|---|---|---|
-| `GET /v1/me/tasks` | `referenceDate` (`YYYY-MM-DD`), `cursor` opcional | Tarefas próprias do dia e paginação | Todos |
-| `GET /v1/me/progress` | `referenceDate` (`YYYY-MM-DD`) | Total, concluídas e progresso próprios do dia | Todos |
+| `GET /v1/me/tasks` | `referenceDate` (`YYYY-MM-DD`), `cursor` opcional | Tarefas próprias do dia, paginação e `familyCreatedAt` | Todos |
+| `GET /v1/me/progress` | `referenceDate` (`YYYY-MM-DD`) | Total, concluídas, progresso próprios do dia e `familyCreatedAt` | Todos |
 | `GET /v1/family/overview` | `period` (`day`/`week`), `referenceDate` | Progresso familiar e membros; sem carga | Adulto |
 | `GET /v1/family/tasks` | `period`, `referenceDate`, `memberId` opcional, `includeUnassigned` opcional, `cursor` opcional | Tarefas familiares filtradas e intervalo efetivo | Adulto |
 | `GET /v1/family/members/{memberId}/tasks` | `period`, `referenceDate`, `cursor` opcional | Tarefas daquele membro e intervalo efetivo | Adulto |
@@ -75,6 +75,7 @@
 - Nas rotas pessoais, `period` é campo desconhecido e deve ser recusado; a consulta é sempre diária.
 - `memberId` deve identificar membro da família do ator. `includeUnassigned=true` inclui tarefas sem responsável; omitido ou `false` não as inclui além do filtro solicitado.
 - `GET /v1/me/tasks` filtra pelo ator responsável/corresponsável. Cada item devolve `status` canônico e `displayStatus` calculado para a lista pessoal: quando `status` é `awaitingConfirmation`, adulto recebe `displayStatus: pending` e Kids recebe `displayStatus: awaitingConfirmation`; nos demais estados os dois coincidem. Ações, progresso e fila usam `status`, sem segundo estado persistido.
+- `GET /v1/me/tasks` e `GET /v1/me/progress` também devolvem `familyCreatedAt` (`YYYY-MM-DD`, data local à família), o limite inferior do carrossel pessoal (RN49). Decisão E-05: nenhum perfil tinha, antes desta entrega, acesso a essa data numa sessão já existente (`GET /v1/family` não a expõe e é bloqueada para Kids); o campo resolve isso simetricamente para os dois perfis, já que ambos chamam essas mesmas rotas.
 
 | HTTP | Código | Situação |
 |---:|---|---|
@@ -120,6 +121,7 @@ Não registrar título, observação, foto, tokens ou conteúdo de outra famíli
 | E-02 | `GET /family/overview` entrega progresso e membros; carga fica para SPEC-018. | Decidida pela pessoa usuária em 2026-10-06 | Sim |
 | E-03 | Minhas tarefas é diária para todos os perfis; Dia/Semana é exclusivo das consultas familiares adultas. | Decidida pela pessoa usuária em 2026-10-06 | Sim |
 | E-04 | Para tarefa compartilhada sinalizada por Kids, a lista do adulto corresponsável apresenta Pendente e a visualização Kids apresenta Aguardando confirmação; o estado efetivo permanece único. | Pessoa usuária / 2026-10-19 | Sim — RN23/RN55, RF11/RF22 e UC11. |
+| E-05 | `GET /v1/me/tasks` e `GET /v1/me/progress` passam a devolver `familyCreatedAt` (`YYYY-MM-DD`), derivado direto de `app.families.created_at` (sem lógica nova). Motivo: antes desta decisão, nenhum perfil tinha acesso à data de criação da família numa sessão já existente — `GET /v1/family` não a expõe e, além disso, é bloqueada para Kids — o que impedia o mobile de bloquear client-side as datas do carrossel pessoal anteriores à criação da família (RN49/RF11/RF22), tanto para adulto quanto para Kids. Expor o campo nas duas rotas pessoais resolve simetricamente para os dois perfis, já que ambos as chamam igualmente. | Architect / 2026-10-22 | Sim — RF11/RF22, RN49; `docs/architecture/backend-contracts.md` e `mobile-decisions.md` (MA-19) devem registrar o campo. |
 
 **Contrato técnico revisado:** `backend-contracts.md` 1.16 e BA-37/MA-19 definem `status` e `displayStatus`. O backend e o mobile anteriores ainda precisam implementar a projeção; permissões e fila permanecem pelo estado efetivo.
 

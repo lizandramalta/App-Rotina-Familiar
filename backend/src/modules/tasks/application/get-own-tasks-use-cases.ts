@@ -34,6 +34,8 @@ export interface OwnTaskView {
 export interface GetOwnTasksResult {
   readonly items: readonly OwnTaskView[];
   readonly nextCursor: string | null;
+  /** `YYYY-MM-DD` local à família — limite inferior do carrossel pessoal (RN49). */
+  readonly familyCreatedAt: string;
 }
 
 export interface GetOwnProgressResult {
@@ -41,6 +43,8 @@ export interface GetOwnProgressResult {
   readonly completed: number;
   /** `null` evita inventar percentual quando não há tarefas previstas. */
   readonly percentage: number | null;
+  /** `YYYY-MM-DD` local à família — limite inferior do carrossel pessoal (RN49). */
+  readonly familyCreatedAt: string;
 }
 
 interface OwnTasksCursorPayload {
@@ -171,7 +175,7 @@ async function resolveReferenceDate(
   clock: Clock,
   actor: ActorContext,
   input: unknown,
-): Promise<string> {
+): Promise<{ referenceDate: string; familyCreatedAt: string }> {
   const referenceDate = validateReferenceDate(input);
   const calendar = await translateDependencyFailure(() =>
     transactionRunner.run((tx) => repository.findFamilyCalendar(tx, actor.familyId)),
@@ -182,7 +186,10 @@ async function resolveReferenceDate(
     throw new NotFoundError('Family calendar not found.');
   }
   ensureReferenceDateInCalendar(referenceDate, calendar, clock.now());
-  return referenceDate;
+  return {
+    referenceDate,
+    familyCreatedAt: formatLocalDate(calendar.createdAt, calendar.timeZoneId),
+  };
 }
 
 export class GetOwnTasksUseCase {
@@ -199,7 +206,7 @@ export class GetOwnTasksUseCase {
     referenceDateInput: unknown,
     cursorInput: unknown,
   ): Promise<GetOwnTasksResult> {
-    const referenceDate = await resolveReferenceDate(
+    const { referenceDate, familyCreatedAt } = await resolveReferenceDate(
       this.deps.repository,
       this.deps.transactionRunner,
       this.deps.clock,
@@ -225,6 +232,7 @@ export class GetOwnTasksUseCase {
     return {
       items: items.map((task) => toOwnTaskView(task, actor.role)),
       nextCursor: hasNextPage && last !== undefined ? encodeCursor(referenceDate, last) : null,
+      familyCreatedAt,
     };
   }
 }
@@ -242,7 +250,7 @@ export class GetOwnProgressUseCase {
     actor: ActorContext,
     referenceDateInput: unknown,
   ): Promise<GetOwnProgressResult> {
-    const referenceDate = await resolveReferenceDate(
+    const { referenceDate, familyCreatedAt } = await resolveReferenceDate(
       this.deps.repository,
       this.deps.transactionRunner,
       this.deps.clock,
@@ -262,6 +270,7 @@ export class GetOwnProgressUseCase {
       total: progress.total,
       completed: progress.completed,
       percentage: progress.total === 0 ? null : (progress.completed / progress.total) * 100,
+      familyCreatedAt,
     };
   }
 }

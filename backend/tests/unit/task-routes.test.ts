@@ -22,8 +22,12 @@ const TASK = {
   createdAt: '2026-10-08T12:00:00.000Z',
 };
 
-const OWN_TASKS = { items: [{ ...TASK, displayStatus: 'pending' }], nextCursor: null };
-const OWN_PROGRESS = { total: 1, completed: 0, percentage: 0 };
+const OWN_TASKS = {
+  items: [{ ...TASK, displayStatus: 'pending' }],
+  nextCursor: null,
+  familyCreatedAt: '2026-10-01',
+};
+const OWN_PROGRESS = { total: 1, completed: 0, percentage: 0, familyCreatedAt: '2026-10-01' };
 const COMPLETION_RESULT = {
   task: { ...TASK, status: 'completed' },
   affectedResources: [
@@ -214,6 +218,7 @@ describe('Task routes — SPEC-007 phases 1 and 2', () => {
     const taskResponse = document.paths['/v1/me/tasks']?.get.responses['200']?.content?.[
       'application/json'
     ]?.schema as {
+      required?: string[];
       properties?: { items?: { items?: { required?: string[]; properties?: object } } };
     };
     expect(taskResponse.properties?.items?.items?.required).toContain('displayStatus');
@@ -221,8 +226,15 @@ describe('Task routes — SPEC-007 phases 1 and 2', () => {
       status: { enum: ['pending', 'awaitingConfirmation', 'completed'] },
       displayStatus: { enum: ['pending', 'awaitingConfirmation', 'completed'] },
     });
+    // SPEC-009 E-05: the personal carousel's lower bound (RN49) so clients can disable
+    // out-of-range days themselves instead of relying on a rejected query.
+    expect(taskResponse.required).toContain('familyCreatedAt');
     expect(document.paths['/v1/me/progress']?.get.security).toEqual([{ bearerAuth: [] }]);
     expect(document.paths['/v1/me/progress']?.get.responses).toHaveProperty('503');
+    const progressResponse = document.paths['/v1/me/progress']?.get.responses['200']?.content?.[
+      'application/json'
+    ]?.schema as { required?: string[] };
+    expect(progressResponse.required).toContain('familyCreatedAt');
   });
 
   it('CA-01 creates a task as the authenticated adult and returns its canonical resource', async () => {

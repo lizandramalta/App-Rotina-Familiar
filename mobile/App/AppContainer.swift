@@ -98,6 +98,16 @@ final class AppContainer {
         MyTasksTabView(taskRepository: taskRepository, familyRepository: familyRepository, accessToken: accessToken)
     }
 
+    func makeKidsTaskList(accessToken: String) -> DailyTaskListView {
+        DailyTaskListView(
+            audience: .kid,
+            repository: taskRepository,
+            accessToken: accessToken,
+            onSelectTask: { _ in },
+            onCreateTask: {}
+        )
+    }
+
     func makeOnboardingViewModel(
         grant: CreationGrant,
         sessionStore: AppSessionStore

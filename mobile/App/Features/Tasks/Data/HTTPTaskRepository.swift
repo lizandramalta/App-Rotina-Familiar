@@ -65,6 +65,32 @@ nonisolated private struct DeleteTaskResponseDTO: Decodable {
     let id: UUID
 }
 
+nonisolated private struct OwnTaskItemDTO: Decodable {
+    let id: UUID
+    let title: String
+    let weight: Int
+    let scheduledDate: String
+    let assigneeIds: [UUID]
+    let note: String?
+    let status: TaskStatus
+    let displayStatus: TaskStatus
+    let routineId: UUID?
+    let createdAt: Date
+}
+
+nonisolated private struct OwnTasksResponseDTO: Decodable {
+    let items: [OwnTaskItemDTO]
+    let nextCursor: String?
+    let familyCreatedAt: String
+}
+
+nonisolated private struct DailyProgressDTO: Decodable {
+    let total: Int
+    let completed: Int
+    let percentage: Double?
+    let familyCreatedAt: String
+}
+
 nonisolated private struct ProblemDetailsDTO: Decodable {
     let code: String?
     let fieldErrors: [String: [String]]?
@@ -129,6 +155,56 @@ nonisolated struct HTTPTaskRepository: TaskRepository {
         return try decode(DeleteTaskResponseDTO.self, from: data).id
     }
 
+    func dailyTasks(referenceDate: String, cursor: String?, accessToken: String) async throws -> OwnTaskPage {
+        var items = [URLQueryItem(name: "referenceDate", value: referenceDate)]
+        if let cursor {
+            items.append(URLQueryItem(name: "cursor", value: cursor))
+        }
+        let data = try await send(path: "me/tasks", method: "GET", queryItems: items, accessToken: accessToken)
+        let response = try decode(OwnTasksResponseDTO.self, from: data)
+        return try OwnTaskPage(
+            items: response.items.map(Self.toOwnTaskListItem),
+            nextCursor: response.nextCursor,
+            familyCreatedAt: response.familyCreatedAt
+        )
+    }
+
+    func dailyProgress(referenceDate: String, accessToken: String) async throws -> DailyProgress {
+        let data = try await send(
+            path: "me/progress",
+            method: "GET",
+            queryItems: [URLQueryItem(name: "referenceDate", value: referenceDate)],
+            accessToken: accessToken
+        )
+        let dto = try decode(DailyProgressDTO.self, from: data)
+        return DailyProgress(
+            total: dto.total,
+            completed: dto.completed,
+            percentage: dto.percentage,
+            familyCreatedAt: dto.familyCreatedAt
+        )
+    }
+
+    private static func toOwnTaskListItem(_ dto: OwnTaskItemDTO) throws -> OwnTaskListItem {
+        guard let weight = EffortWeight(rawValue: dto.weight) else {
+            throw TaskError.unavailable
+        }
+        return OwnTaskListItem(
+            task: FamilyTask(
+                id: dto.id,
+                title: dto.title,
+                weight: weight,
+                scheduledDate: dto.scheduledDate,
+                assigneeIDs: dto.assigneeIds,
+                note: dto.note,
+                status: dto.status,
+                routineID: dto.routineId,
+                createdAt: dto.createdAt
+            ),
+            displayStatus: dto.displayStatus
+        )
+    }
+
     private static func toFamilyTask(_ dto: TaskDTO) throws -> FamilyTask {
         guard let weight = EffortWeight(rawValue: dto.weight) else {
             throw TaskError.unavailable
@@ -175,6 +251,10 @@ nonisolated struct HTTPTaskRepository: TaskRepository {
         try await send(rawRequest: makeRequest(path: path, method: method, accessToken: accessToken))
     }
 
+    private func send(path: String, method: String, queryItems: [URLQueryItem], accessToken: String) async throws -> Data {
+        try await send(rawRequest: makeRequest(path: path, method: method, queryItems: queryItems, accessToken: accessToken))
+    }
+
     private func send(
         path: String,
         method: String,
@@ -189,6 +269,15 @@ nonisolated struct HTTPTaskRepository: TaskRepository {
 
     private func makeRequest(path: String, method: String, accessToken: String) -> URLRequest {
         var request = URLRequest(url: baseURL.appending(path: path))
+        request.httpMethod = method
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        return request
+    }
+
+    private func makeRequest(path: String, method: String, queryItems: [URLQueryItem], accessToken: String) -> URLRequest {
+        let url = baseURL.appending(path: path).appending(queryItems: queryItems)
+        var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
