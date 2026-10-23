@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// TEL-012 — only Editar/Excluir (this card's scope). Concluir/Reabrir stay hidden entirely,
-/// not disabled, per UX-03: they belong to SPEC-010/SPEC-011.
+/// TEL-012 — a routine occurrence shows its origin and materialization state. Routine management
+/// actions wait for MOD-003 in SPEC-008 Fase 2; single-task management remains available.
 struct TaskDetailView: View {
     @State private var viewModel: TaskDetailViewModel
     let onRequestEdit: () -> Void
@@ -11,8 +11,8 @@ struct TaskDetailView: View {
     /// can invoke this destination's builder more than once for the same push (observed via
     /// XCUITest), and only `@State`'s storage — keyed by this view's identity, not by how many
     /// times `init` runs — survives that so `load()` isn't abandoned mid-flight by a replacement.
-    init(taskID: UUID, repository: any TaskRepository, accessToken: String, onRequestEdit: @escaping () -> Void, onDeleted: @escaping () -> Void) {
-        _viewModel = State(initialValue: TaskDetailViewModel(taskID: taskID, repository: repository, accessToken: accessToken))
+    init(taskID: UUID, repository: any TaskRepository, routineRepository: any RoutineRepository, accessToken: String, onRequestEdit: @escaping () -> Void, onDeleted: @escaping () -> Void) {
+        _viewModel = State(initialValue: TaskDetailViewModel(taskID: taskID, repository: repository, routineRepository: routineRepository, accessToken: accessToken))
         self.onRequestEdit = onRequestEdit
         self.onDeleted = onDeleted
     }
@@ -37,7 +37,7 @@ struct TaskDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                if viewModel.task != nil {
+                if viewModel.task != nil, viewModel.task?.routineID == nil {
                     Button("Editar", action: onRequestEdit)
                         .accessibilityIdentifier("tasks.detail.edit")
                 }
@@ -92,6 +92,25 @@ struct TaskDetailView: View {
                 row(label: "tasks.form.weight_label", value: weightLabel(task.weight))
                 row(label: "tasks.form.scheduled_date_label", value: task.scheduledDate)
                 row(label: "tasks.form.assignees_label", value: assigneeSummary(task))
+                if let routine = viewModel.routine {
+                    row(label: "routines.recurrence.title", value: frequencyLabel(routine.frequency))
+                }
+            }
+
+            if task.routineID != nil {
+                Section {
+                    if viewModel.routine?.materializationState == .pending {
+                        Label("routines.materialization.preparing", systemImage: "clock")
+                            .accessibilityIdentifier("routines.detail.preparing")
+                    }
+                    if viewModel.routineLoadFailed {
+                        Label("routines.error_unavailable", systemImage: "exclamationmark.triangle")
+                        Button("tasks.error.retry") { Task { await viewModel.refreshRoutine() } }
+                    }
+                    Text("routines.detail.origin_hint")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             if let note = task.note, !note.isEmpty {
@@ -107,20 +126,22 @@ struct TaskDetailView: View {
                 }
             }
 
-            Section {
-                if viewModel.canDeleteDirectly {
-                    Button("Excluir", role: .destructive) { viewModel.requestDelete() }
-                        .disabled(viewModel.isDeleting)
-                        .accessibilityIdentifier("tasks.detail.delete")
-                } else {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Excluir")
-                            .foregroundStyle(.secondary)
-                        Text("tasks.delete.error_already_completed")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
+            if task.routineID == nil {
+                Section {
+                    if viewModel.canDeleteDirectly {
+                        Button("Excluir", role: .destructive) { viewModel.requestDelete() }
+                            .disabled(viewModel.isDeleting)
+                            .accessibilityIdentifier("tasks.detail.delete")
+                    } else {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Excluir")
+                                .foregroundStyle(.secondary)
+                            Text("tasks.delete.error_already_completed")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                        .accessibilityIdentifier("tasks.detail.delete_disabled")
                     }
-                    .accessibilityIdentifier("tasks.detail.delete_disabled")
                 }
             }
         }
@@ -158,6 +179,11 @@ struct TaskDetailView: View {
         case .medium: String(localized: "tasks.form.weight_option_medium")
         case .high: String(localized: "tasks.form.weight_option_high")
         }
+    }
+
+    private func frequencyLabel(_ frequency: RoutineFrequency) -> String {
+        if frequency == .daily { return String(localized: "routines.recurrence.daily") }
+        return String(format: String(localized: "routines.recurrence.every_days"), frequency.rawValue)
     }
 
     private func assigneeSummary(_ task: FamilyTask) -> String {

@@ -10,11 +10,13 @@ struct TaskEditorViewModelTests {
     private func makeViewModel(
         mode: TaskEditorMode = .create,
         repository: TaskRepositorySpy = TaskRepositorySpy(),
+        routineRepository: RoutineRepositorySpy = RoutineRepositorySpy(),
         members: [FamilyMember] = []
     ) -> TaskEditorViewModel {
         TaskEditorViewModel(
             mode: mode,
             repository: repository,
+            routineRepository: routineRepository,
             familyRepository: FamilyMembersStub(members: members),
             accessToken: "access-1",
             today: { self.fixedToday }
@@ -28,6 +30,93 @@ struct TaskEditorViewModelTests {
             assigneeIDs: task.assigneeIDs, note: task.note, status: .awaitingConfirmation,
             routineID: task.routineID, createdAt: task.createdAt
         )
+    }
+
+    @Test("SPEC-008 CA-01/CA-02: selecting recurrence sends the routine contract and never creates a single task")
+    func createsRoutineWithSelectedFrequency() async {
+        let taskRepository = TaskRepositorySpy()
+        let routineRepository = RoutineRepositorySpy()
+        let viewModel = makeViewModel(repository: taskRepository, routineRepository: routineRepository)
+        viewModel.title = "Regar as plantas"
+        viewModel.weight = .low
+        viewModel.note = "Antes do almoço"
+        let memberID = UUID()
+        viewModel.setAssignees([memberID])
+
+        await viewModel.prepareRecurrencePicker()
+        #expect(viewModel.isRecurrencePickerPresented)
+        viewModel.setRecurrence(startDate: viewModel.scheduledDate, frequency: .everySevenDays)
+        await viewModel.saveIfValid()
+
+        let command = routineRepository.createCalls.first
+        #expect(routineRepository.createCalls.count == 1)
+        #expect(taskRepository.createCalls.isEmpty)
+        #expect(command?.title == "Regar as plantas")
+        #expect(command?.note == "Antes do almoço")
+        #expect(command?.frequency == .everySevenDays)
+        #expect(command?.assigneeIDs == [memberID])
+        #expect(viewModel.savedRoutine?.materializationState == .pending)
+    }
+
+    @Test("SPEC-008 §5.3: a lost create response preserves the routine draft without automatic replay")
+    func uncertainRoutineCreationPreservesDraft() async {
+        let routineRepository = RoutineRepositorySpy(createResult: .failure(RoutineError.uncertainOutcome))
+        let viewModel = makeViewModel(routineRepository: routineRepository)
+        viewModel.title = "Regar as plantas"
+        viewModel.weight = .low
+        await viewModel.prepareRecurrencePicker()
+        viewModel.setRecurrence(startDate: viewModel.scheduledDate, frequency: .daily)
+
+        await viewModel.saveIfValid()
+
+        #expect(viewModel.banner == .routineUncertainOutcome)
+        #expect(viewModel.title == "Regar as plantas")
+        #expect(viewModel.frequency == .daily)
+        #expect(viewModel.savedRoutine == nil)
+        #expect(routineRepository.createCalls.count == 1)
+    }
+
+    @Test("SPEC-008 CA-02: backend frequency and start-date errors stay attached to the saved draft")
+    func routineValidationErrorsAreVisible() async {
+        let routineRepository = RoutineRepositorySpy(createResult: .failure(
+            RoutineError.validationFailed([
+                "frequencyDays": ["FREQUENCY_DAYS_INVALID"],
+                "startDate": ["START_DATE_INVALID"]
+            ])
+        ))
+        let viewModel = makeViewModel(routineRepository: routineRepository)
+        viewModel.title = "Regar as plantas"
+        viewModel.weight = .low
+        await viewModel.prepareRecurrencePicker()
+        viewModel.setRecurrence(startDate: viewModel.scheduledDate, frequency: .daily)
+
+        await viewModel.saveIfValid()
+
+        #expect(viewModel.frequencyError)
+        #expect(viewModel.startDateError)
+        #expect(viewModel.hasUnsavedChanges)
+    }
+
+    @Test("SPEC-008 RN11: MOD-002 uses the family's civil day when no date was edited")
+    func recurrenceDefaultsToFamilyToday() async {
+        let now = ISO8601DateFormatter().date(from: "2026-10-10T01:00:00Z")!
+        let viewModel = TaskEditorViewModel(
+            mode: .create,
+            repository: TaskRepositorySpy(),
+            routineRepository: RoutineRepositorySpy(),
+            familyRepository: FamilyMembersStub(),
+            accessToken: "access-1",
+            today: { now }
+        )
+
+        await viewModel.prepareRecurrencePicker()
+
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.timeZone = .current
+        formatter.dateFormat = "yyyy-MM-dd"
+        #expect(formatter.string(from: viewModel.scheduledDate) == "2026-10-09")
+        #expect(!viewModel.hasUnsavedChanges)
     }
 
     @Test("CA-01 creates a task with the typed fields and stores the canonical result")

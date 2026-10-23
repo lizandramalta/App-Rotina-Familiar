@@ -24,6 +24,7 @@ enum UITestScenario: String {
     case dailyTasks = "daily-tasks"
     case dailyTasksKids = "daily-tasks-kids"
     case dailyTasksFailure = "daily-tasks-failure"
+    case routineCreation = "routine-creation"
 
     static var current: UITestScenario? {
         ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"].flatMap(UITestScenario.init(rawValue:))
@@ -38,6 +39,7 @@ enum UITestScenario: String {
             inviteLinkParser: InviteLinkParser(baseURL: URL(string: "https://example.invalid")!),
             familyRepository: UITestFamilyRepository(scenario: self),
             taskRepository: UITestTaskRepository(scenario: self),
+            routineRepository: UITestRoutineRepository(),
             profileRepository: UITestProfileRepository(scenario: self),
             credentialStore: UITestCredentialStore(),
             installationProofStore: UITestInstallationProof(),
@@ -52,7 +54,7 @@ enum UITestScenario: String {
             sessionStore.apply(.session(Self.inviteSession(role: role)))
             return
         }
-        if self == .taskManagement || self == .familySettings || self == .dailyTasks || self == .dailyTasksFailure {
+        if self == .taskManagement || self == .familySettings || self == .dailyTasks || self == .dailyTasksFailure || self == .routineCreation {
             sessionStore.apply(.session(Self.inviteSession(role: .administrator)))
             return
         }
@@ -118,6 +120,44 @@ enum UITestScenario: String {
                 token: SessionToken(accessToken: "ui-test-access", expiresAt: .distantFuture),
                 refreshToken: refreshToken
             )
+        )
+    }
+}
+
+/// SPEC-008 Fase 1 UI fixture: a saved routine starts pending and completes on explicit consultation.
+private actor UITestRoutineRepository: RoutineRepository {
+    private var saved: Routine?
+
+    func familyTimeZoneID(accessToken: String) async throws -> String { "America/Sao_Paulo" }
+
+    func createRoutine(_ command: CreateRoutineCommand, accessToken: String) async throws -> Routine {
+        let routine = Routine(
+            id: UUID(uuidString: "00000000-0000-0000-0000-0000000000a8")!,
+            title: command.title,
+            weight: command.weight,
+            assigneeIDs: command.assigneeIDs,
+            note: command.note,
+            startDate: command.startDate,
+            frequency: command.frequency,
+            isActive: true,
+            materializationState: .pending
+        )
+        saved = routine
+        return routine
+    }
+
+    func routine(id: UUID, accessToken: String) async throws -> Routine {
+        guard let saved, saved.id == id else { throw RoutineError.notFound }
+        return Routine(
+            id: saved.id,
+            title: saved.title,
+            weight: saved.weight,
+            assigneeIDs: saved.assigneeIDs,
+            note: saved.note,
+            startDate: saved.startDate,
+            frequency: saved.frequency,
+            isActive: true,
+            materializationState: .complete
         )
     }
 }

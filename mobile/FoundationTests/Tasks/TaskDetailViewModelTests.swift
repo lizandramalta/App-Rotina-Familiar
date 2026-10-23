@@ -14,11 +14,34 @@ struct TaskDetailViewModelTests {
         )
     }
 
+    @Test("SPEC-008 CA-06: an occurrence keeps its own task state while the routine exposes pending materialization")
+    func loadsRoutineWithoutChangingOccurrence() async {
+        let base = fixture(status: .pending)
+        let task = FamilyTask(
+            id: base.id, title: base.title, weight: base.weight, scheduledDate: base.scheduledDate,
+            assigneeIDs: base.assigneeIDs, note: base.note, status: base.status,
+            routineID: routineRepositorySpyFixture.id, createdAt: base.createdAt
+        )
+        let taskRepository = TaskRepositorySpy(taskResult: .success(task))
+        let routineRepository = RoutineRepositorySpy()
+        let viewModel = TaskDetailViewModel(
+            taskID: task.id, repository: taskRepository,
+            routineRepository: routineRepository, accessToken: "access-1"
+        )
+
+        await viewModel.load()
+
+        #expect(viewModel.task?.id == task.id)
+        #expect(viewModel.task?.status == .pending)
+        #expect(viewModel.routine?.materializationState == .pending)
+        #expect(routineRepository.getCalls == [routineRepositorySpyFixture.id])
+    }
+
     @Test("Loads the task detail on demand")
     func loadsTask() async {
         let task = fixture(status: .pending)
         let repository = TaskRepositorySpy(taskResult: .success(task))
-        let viewModel = TaskDetailViewModel(taskID: task.id, repository: repository, accessToken: "access-1")
+        let viewModel = TaskDetailViewModel(taskID: task.id, repository: repository, routineRepository: RoutineRepositorySpy(), accessToken: "access-1")
 
         await viewModel.load()
 
@@ -30,7 +53,7 @@ struct TaskDetailViewModelTests {
     func completedTaskBlocksDeleteDirectly() async {
         let task = fixture(status: .completed)
         let repository = TaskRepositorySpy(taskResult: .success(task))
-        let viewModel = TaskDetailViewModel(taskID: task.id, repository: repository, accessToken: "access-1")
+        let viewModel = TaskDetailViewModel(taskID: task.id, repository: repository, routineRepository: RoutineRepositorySpy(), accessToken: "access-1")
         await viewModel.load()
 
         #expect(!viewModel.canDeleteDirectly)
@@ -45,7 +68,7 @@ struct TaskDetailViewModelTests {
     func pendingTaskDeletesAfterConfirmation() async {
         let task = fixture(status: .pending)
         let repository = TaskRepositorySpy(taskResult: .success(task), deleteResult: .success(task.id))
-        let viewModel = TaskDetailViewModel(taskID: task.id, repository: repository, accessToken: "access-1")
+        let viewModel = TaskDetailViewModel(taskID: task.id, repository: repository, routineRepository: RoutineRepositorySpy(), accessToken: "access-1")
         await viewModel.load()
 
         #expect(viewModel.canDeleteDirectly)
@@ -63,7 +86,7 @@ struct TaskDetailViewModelTests {
     func awaitingConfirmationDeletesWithoutExtraStep() async {
         let task = fixture(status: .awaitingConfirmation)
         let repository = TaskRepositorySpy(taskResult: .success(task), deleteResult: .success(task.id))
-        let viewModel = TaskDetailViewModel(taskID: task.id, repository: repository, accessToken: "access-1")
+        let viewModel = TaskDetailViewModel(taskID: task.id, repository: repository, routineRepository: RoutineRepositorySpy(), accessToken: "access-1")
         await viewModel.load()
 
         #expect(viewModel.hasPendingSignal)
@@ -77,7 +100,7 @@ struct TaskDetailViewModelTests {
     func missionProtectedDeleteIsBlocked() async {
         let task = fixture(status: .pending)
         let repository = TaskRepositorySpy(taskResult: .success(task), deleteResult: .failure(TaskError.missionCompletedProtected))
-        let viewModel = TaskDetailViewModel(taskID: task.id, repository: repository, accessToken: "access-1")
+        let viewModel = TaskDetailViewModel(taskID: task.id, repository: repository, routineRepository: RoutineRepositorySpy(), accessToken: "access-1")
         await viewModel.load()
 
         viewModel.requestDelete()
@@ -90,7 +113,7 @@ struct TaskDetailViewModelTests {
     @Test("A failed load reports loadFailed without crashing")
     func loadFailureIsReported() async {
         let repository = TaskRepositorySpy(taskResult: .failure(TaskError.notFound))
-        let viewModel = TaskDetailViewModel(taskID: UUID(), repository: repository, accessToken: "access-1")
+        let viewModel = TaskDetailViewModel(taskID: UUID(), repository: repository, routineRepository: RoutineRepositorySpy(), accessToken: "access-1")
 
         await viewModel.load()
 
