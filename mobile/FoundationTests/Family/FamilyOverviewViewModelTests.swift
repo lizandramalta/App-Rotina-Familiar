@@ -138,4 +138,34 @@ struct FamilyOverviewViewModelTests {
         #expect(viewModel.members == [maria, rafa])
         #expect(repository.listMembersCalls == 2)
     }
+
+    @Test("SPEC-003 CA-03 a 403 on reload clears the member list and cursor")
+    func reloadForbiddenClearsMembers() async {
+        let (viewModel, _) = makeViewModel([
+            page([member("Maria")], next: "c1"),
+            .failure(FamilyError.actionNotAllowed),
+        ])
+        await viewModel.loadInitial()
+        #expect(!viewModel.members.isEmpty)
+
+        await viewModel.loadInitial()
+
+        #expect(viewModel.members.isEmpty)
+        #expect(viewModel.nextCursor == nil)
+        #expect(viewModel.loadFailed)
+        #expect(viewModel.existingMemberIDs.isEmpty)
+    }
+
+    @Test("SPEC-003 CA-03 a 403 while loading a further page also clears the member list")
+    func pageForbiddenClearsMembers() async {
+        let first = member("Ana")
+        let (viewModel, _) = makeViewModel([page([first], next: "c1"), .failure(FamilyError.actionNotAllowed)])
+        await viewModel.loadInitial()
+
+        await viewModel.loadMoreIfNeeded(currentMember: first)
+
+        #expect(viewModel.members.isEmpty)
+        #expect(viewModel.nextCursor == nil)
+        #expect(viewModel.loadFailed)
+    }
 }

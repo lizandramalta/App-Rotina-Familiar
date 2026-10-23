@@ -53,7 +53,11 @@ final class FamilyOverviewViewModel {
             members = page.items
             nextCursor = page.nextCursor
             loadMoreFailed = false
+        } catch FamilyError.actionNotAllowed {
+            clearConfirmedMembers()
+            loadFailed = true
         } catch {
+            // Network/availability failures keep the already confirmed list.
             loadFailed = true
         }
     }
@@ -79,9 +83,19 @@ final class FamilyOverviewViewModel {
             let known = existingMemberIDs
             members += page.items.filter { !known.contains($0.id) }
             nextCursor = page.nextCursor
+        } catch FamilyError.actionNotAllowed {
+            clearConfirmedMembers()
+            loadFailed = true
         } catch {
             loadMoreFailed = true
         }
+    }
+
+    /// Access was refused: members the viewer may no longer see must not stay on screen (CA-03).
+    private func clearConfirmedMembers() {
+        members = []
+        nextCursor = nil
+        loadMoreFailed = false
     }
 
     func memberCreated() async {
