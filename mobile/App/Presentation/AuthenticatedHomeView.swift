@@ -11,6 +11,14 @@ struct AuthenticatedHomeView: View {
     let myTasksTab: MyTasksTabView?
     let makeFamilySettingsViewModel: (() -> FamilySettingsViewModel)?
     @State private var profileViewModel: ProfileViewModel
+    @State private var selectedTab: Int = {
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"] == "family-settings" {
+            return 1
+        }
+        #endif
+        return 0
+    }()
 
     init(
         session: ActiveFamilySession,
@@ -27,7 +35,7 @@ struct AuthenticatedHomeView: View {
     private var role: MemberRole { session.role }
 
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             if role == .kid {
                 destination("destination.myTasks", icon: "checklist", identifier: "access.destination.kids", showsProfileButton: true)
                     .tabItem { Label("destination.myTasks", systemImage: "checklist") }
@@ -42,8 +50,10 @@ struct AuthenticatedHomeView: View {
                     }
                 }
                 .tabItem { Label("destination.myTasks", systemImage: "checklist") }
+                .tag(0)
                 familyDestination()
                     .tabItem { Label("destination.family", systemImage: "person.3") }
+                    .tag(1)
                 destination("destination.missions", icon: "star", identifier: "access.destination.missions")
                     .tabItem { Label("destination.missions", systemImage: "star") }
                 NavigationStack {
@@ -91,25 +101,38 @@ struct AuthenticatedHomeView: View {
 
     private func familyDestination() -> some View {
         NavigationStack {
-            ContentUnavailableView {
-                Label("destination.family", systemImage: "person.3")
-            } description: {
-                Text("destination.contentPending")
+            #if DEBUG
+            if ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"] == "family-settings",
+               let makeFamilySettingsViewModel {
+                FamilySettingsView(viewModel: makeFamilySettingsViewModel())
+            } else {
+                familyPlaceholder()
             }
-            .navigationTitle("destination.family")
-            .accessibilityIdentifier("access.destination.family")
-            .toolbar {
-                if role == .administrator, let makeFamilySettingsViewModel {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        NavigationLink {
-                            FamilySettingsView(viewModel: makeFamilySettingsViewModel())
-                        } label: {
-                            Image(systemName: "gearshape")
-                                .frame(minWidth: 44, minHeight: 44)
-                        }
-                        .accessibilityLabel("family.settings.title")
-                        .accessibilityIdentifier("family.navigation.settings_button")
+            #else
+            familyPlaceholder()
+            #endif
+        }
+    }
+
+    private func familyPlaceholder() -> some View {
+        ContentUnavailableView {
+            Label("destination.family", systemImage: "person.3")
+        } description: {
+            Text("destination.contentPending")
+        }
+        .navigationTitle("destination.family")
+        .accessibilityIdentifier("access.destination.family")
+        .toolbar {
+            if role == .administrator, let makeFamilySettingsViewModel {
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink {
+                        FamilySettingsView(viewModel: makeFamilySettingsViewModel())
+                    } label: {
+                        Image(systemName: "gearshape")
+                            .frame(minWidth: 44, minHeight: 44)
                     }
+                    .accessibilityLabel("family.settings.title")
+                    .accessibilityIdentifier("family.navigation.settings_button")
                 }
             }
         }

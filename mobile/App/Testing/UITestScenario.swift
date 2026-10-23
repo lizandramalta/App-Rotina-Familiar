@@ -20,6 +20,7 @@ enum UITestScenario: String {
     case profileKids = "profile-kids"
     case profileSaveNetworkError = "profile-save-network-error"
     case taskManagement = "task-management"
+    case familySettings = "family-settings"
 
     static var current: UITestScenario? {
         ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"].flatMap(UITestScenario.init(rawValue:))
@@ -48,7 +49,7 @@ enum UITestScenario: String {
             sessionStore.apply(.session(Self.inviteSession(role: role)))
             return
         }
-        if self == .taskManagement {
+        if self == .taskManagement || self == .familySettings {
             sessionStore.apply(.session(Self.inviteSession(role: .administrator)))
             return
         }
