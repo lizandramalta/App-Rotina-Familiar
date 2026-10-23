@@ -5,15 +5,26 @@ struct FamilySettingsHubView: View {
     let viewModel: FamilyOverviewViewModel
     let makeFamilySettingsViewModel: (() -> FamilySettingsViewModel)?
     @State private var editorViewModel: MemberEditorViewModel?
+    @State private var isEditingFamilyName = false
+    @State private var draftFamilyName = ""
 
     var body: some View {
         List {
-            if let makeFamilySettingsViewModel {
-                Section("family.settings.hub.family_section") {
+            Section("family.settings.hub.family_section") {
+                Button {
+                    draftFamilyName = viewModel.familyName
+                    isEditingFamilyName = true
+                } label: {
+                    settingsRow(icon: "house", title: "family.settings.hub.family_name", value: viewModel.familyName)
+                }
+                .foregroundStyle(.primary)
+                .accessibilityIdentifier("family.settings.hub.family_name")
+
+                if let makeFamilySettingsViewModel {
                     NavigationLink {
                         FamilySettingsView(viewModel: makeFamilySettingsViewModel())
                     } label: {
-                        Text("family.settings.hub.timezone")
+                        settingsRow(icon: "globe", title: "family.settings.hub.timezone", value: viewModel.timeZoneDisplayName)
                     }
                     .accessibilityIdentifier("family.settings.hub.timezone")
                 }
@@ -62,7 +73,7 @@ struct FamilySettingsHubView: View {
                     .accessibilityIdentifier("family.members.add.action")
                 }
             } header: {
-                Text("family.settings.hub.members_section \(viewModel.members.count)")
+                Text(String(format: String(localized: "family.settings.hub.members_section"), viewModel.members.count))
             } footer: {
                 Text("family.settings.hub.members_footer")
             }
@@ -72,6 +83,13 @@ struct FamilySettingsHubView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task { await viewModel.loadInitial() }
         .refreshable { await viewModel.loadInitial() }
+        .alert("family.settings.hub.family_name", isPresented: $isEditingFamilyName) {
+            TextField("family.settings.hub.family_name", text: $draftFamilyName)
+            Button("family.settings.hub.cancel", role: .cancel) {}
+            Button("family.settings.hub.save") { viewModel.updateFamilyName(draftFamilyName) }
+        } message: {
+            Text("family.settings.hub.family_name_hint")
+        }
         .sheet(isPresented: Binding(get: { editorViewModel != nil }, set: { if !$0 { editorViewModel = nil } })) {
             if let editorViewModel {
                 NavigationStack {
@@ -81,6 +99,18 @@ struct FamilySettingsHubView: View {
                 }
             }
         }
+    }
+
+    private func settingsRow(icon: String, title: LocalizedStringKey, value: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .foregroundStyle(.secondary)
+                .frame(width: 24)
+            Text(title)
+            Spacer()
+            Text(value).foregroundStyle(.secondary)
+        }
+        .frame(minHeight: 44)
     }
 
     private func row(_ member: FamilyMember) -> some View {

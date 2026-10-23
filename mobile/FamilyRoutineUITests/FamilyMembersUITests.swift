@@ -74,6 +74,8 @@ final class FamilyMembersUITests: XCTestCase {
         openSettingsHub()
 
         XCTAssertTrue(app.staticTexts["Fuso horário"].exists)
+        XCTAssertTrue(app.staticTexts["Família Silva"].exists)
+        XCTAssertTrue(app.staticTexts["Membros · 2"].exists)
         XCTAssertTrue(memberRows.firstMatch.waitForExistence(timeout: 5))
         XCTAssertEqual(memberRows.count, 2)
         XCTAssertTrue(addAction.exists)

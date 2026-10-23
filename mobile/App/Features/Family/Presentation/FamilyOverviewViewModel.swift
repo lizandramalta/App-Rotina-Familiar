@@ -12,6 +12,8 @@ final class FamilyOverviewViewModel {
     private(set) var isLoadingMore = false
     private(set) var loadFailed = false
     private(set) var loadMoreFailed = false
+    // ponytail: placeholder until the backend exposes the family name and time zone (no data source today); local only, not persisted.
+    private(set) var familyName = "Família Silva"
 
     private let session: ActiveFamilySession
     private let familyRepository: any FamilyRepository
@@ -30,6 +32,7 @@ final class FamilyOverviewViewModel {
     /// The server stays the authority (RNF07); this only hides controls the API would refuse.
     var canAddMember: Bool { session.role == .administrator }
     var canConfigureFamily: Bool { session.role == .administrator }
+    var timeZoneDisplayName: String { "São Paulo" }
     var currentMemberID: UUID { session.memberID }
     var hasMorePages: Bool { nextCursor != nil }
     var existingMemberIDs: Set<UUID> { Set(members.map(\.id)) }
@@ -97,6 +100,11 @@ final class FamilyOverviewViewModel {
         members = []
         nextCursor = nil
         loadMoreFailed = false
+    }
+
+    func updateFamilyName(_ newName: String) {
+        let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmed.isEmpty { familyName = trimmed }
     }
 
     func memberCreated() async {

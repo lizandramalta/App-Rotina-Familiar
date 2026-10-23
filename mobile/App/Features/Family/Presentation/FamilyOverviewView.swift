@@ -58,7 +58,8 @@ struct FamilyOverviewView: View {
             }
         }
         .accessibilityIdentifier("family.members.list")
-        .navigationTitle("family.overview.title")
+        .navigationTitle(viewModel.familyName)
+        .navigationBarTitleDisplayMode(.large)
         .toolbar {
             if viewModel.canConfigureFamily {
                 ToolbarItem(placement: .topBarTrailing) {

@@ -1172,12 +1172,42 @@
         }
       }
     },
+    "family.settings.hub.cancel": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar"
+          }
+        }
+      }
+    },
     "family.settings.hub.creator_role": {
       "localizations": {
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "%@ · Criador da família"
+          }
+        }
+      }
+    },
+    "family.settings.hub.family_name": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome da família"
+          }
+        }
+      }
+    },
+    "family.settings.hub.family_name_hint": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aparece para todos os membros."
           }
         }
       }
@@ -1197,7 +1227,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Toque em um membro para visualizar detalhes do perfil."
+            "value": "Toque em um membro para editar dados, papel ou Modo Kids, gerar convite ou remover."
           }
         }
       }
@@ -1208,6 +1238,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Membros · %lld"
+          }
+        }
+      }
+    },
+    "family.settings.hub.save": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salvar"
           }
         }
       }
