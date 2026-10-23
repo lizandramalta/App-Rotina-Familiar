@@ -163,7 +163,7 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
       );
 
       expect(tasks.items.map((task) => task.id).sort()).toEqual([ownPending, ownCompleted].sort());
-      expect(progress).toEqual({ total: 2, completed: 1, percentage: 50 });
+      expect(progress).toEqual({ total: 2, completed: 1, percentage: 50, familyCreatedAt: '2026-10-01' });
     });
 
     it('SCRUM-107 / SPEC-009 CA-01, CA-04, CA-08 and CA-11 projects per actor and preserves own progress and family isolation', async () => {
@@ -223,7 +223,7 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
         }),
       ]);
       expect(otherAdultTasks.items).toHaveLength(1);
-      expect(progress).toEqual({ total: 2, completed: 1, percentage: 50 });
+      expect(progress).toEqual({ total: 2, completed: 1, percentage: 50, familyCreatedAt: '2026-10-01' });
     });
   },
 );
