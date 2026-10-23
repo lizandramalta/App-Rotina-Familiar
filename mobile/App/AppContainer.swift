@@ -108,6 +108,16 @@ final class AppContainer {
         )
     }
 
+    func makeFamilyOverviewViewModel(session: ActiveFamilySession, sessionStore: AppSessionStore) -> FamilyOverviewViewModel {
+        FamilyOverviewViewModel(
+            session: session,
+            familyRepository: familyRepository,
+            accessTokenProvider: { [weak sessionStore] in
+                sessionStore?.accessToken
+            }
+        )
+    }
+
     func makeKidsTaskList(accessToken: String) -> DailyTaskListView {
         DailyTaskListView(
             audience: .kid,

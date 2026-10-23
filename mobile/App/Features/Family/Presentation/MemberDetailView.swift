@@ -2,7 +2,11 @@ import SwiftUI
 
 /// TEL-032 — Detalhe do membro (Figma nodes 309:2057, 309:2219, 309:2281, UX-003 §5.2).
 struct MemberDetailView: View {
-    let viewModel: MemberDetailViewModel
+    @State private var viewModel: MemberDetailViewModel
+
+    init(viewModel: MemberDetailViewModel) {
+        _viewModel = State(initialValue: viewModel)
+    }
 
     var body: some View {
         ScrollView {

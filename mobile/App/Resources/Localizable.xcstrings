@@ -531,6 +531,16 @@
         }
       }
     },
+    "family.members.add.action": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar membro"
+          }
+        }
+      }
+    },
     "family.members.create.title": {
       "localizations": {
         "pt-BR": {
@@ -1088,6 +1098,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Convidar membros"
+          }
+        }
+      }
+    },
+    "family.overview.error_load": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível carregar os membros. Verifique sua conexão e tente novamente."
+          }
+        }
+      }
+    },
+    "family.overview.members_section": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Membros da família"
+          }
+        }
+      }
+    },
+    "family.overview.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Família"
           }
         }
       }

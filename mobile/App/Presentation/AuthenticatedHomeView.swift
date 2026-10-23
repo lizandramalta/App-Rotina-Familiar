@@ -10,6 +10,7 @@ struct AuthenticatedHomeView: View {
     /// falls back to the plain placeholder rather than crashing.
     let myTasksTab: MyTasksTabView?
     let makeFamilySettingsViewModel: (() -> FamilySettingsViewModel)?
+    @State private var familyOverviewViewModel: FamilyOverviewViewModel
     let kidsTaskList: DailyTaskListView?
     @State private var profileViewModel: ProfileViewModel
     @State private var showsFamilySettingsScenario: Bool = {
@@ -31,6 +32,7 @@ struct AuthenticatedHomeView: View {
     init(
         session: ActiveFamilySession,
         myTasksTab: MyTasksTabView?,
+        makeFamilyOverviewViewModel: () -> FamilyOverviewViewModel,
         makeFamilySettingsViewModel: (() -> FamilySettingsViewModel)? = nil,
         kidsTaskList: DailyTaskListView?,
         makeProfileViewModel: () -> ProfileViewModel
@@ -39,6 +41,7 @@ struct AuthenticatedHomeView: View {
         self.myTasksTab = myTasksTab
         self.makeFamilySettingsViewModel = makeFamilySettingsViewModel
         self.kidsTaskList = kidsTaskList
+        _familyOverviewViewModel = State(initialValue: makeFamilyOverviewViewModel())
         _profileViewModel = State(initialValue: makeProfileViewModel())
     }
 
@@ -129,34 +132,15 @@ struct AuthenticatedHomeView: View {
 
     private func familyDestination() -> some View {
         NavigationStack {
-            familyPlaceholder()
-                .navigationDestination(isPresented: $showsFamilySettingsScenario) {
-                    if let makeFamilySettingsViewModel {
-                        FamilySettingsView(viewModel: makeFamilySettingsViewModel())
-                    }
-                }
-        }
-    }
-
-    private func familyPlaceholder() -> some View {
-        ContentUnavailableView {
-            Label("destination.family", systemImage: "person.3")
-        } description: {
-            Text("destination.contentPending")
-        }
-        .navigationTitle("destination.family")
-        .accessibilityIdentifier("access.destination.family")
-        .toolbar {
-            if role == .administrator, let makeFamilySettingsViewModel {
-                ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink {
-                        FamilySettingsView(viewModel: makeFamilySettingsViewModel())
-                    } label: {
-                        Image(systemName: "gearshape")
-                            .frame(minWidth: 44, minHeight: 44)
-                    }
-                    .accessibilityLabel("family.settings.title")
-                    .accessibilityIdentifier("family.navigation.settings_button")
+            FamilyOverviewView(
+                viewModel: familyOverviewViewModel,
+                makeFamilySettingsViewModel: makeFamilySettingsViewModel
+            )
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("access.destination.family")
+            .navigationDestination(isPresented: $showsFamilySettingsScenario) {
+                if let makeFamilySettingsViewModel {
+                    FamilySettingsView(viewModel: makeFamilySettingsViewModel())
                 }
             }
         }
