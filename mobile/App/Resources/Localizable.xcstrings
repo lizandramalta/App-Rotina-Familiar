@@ -1855,6 +1855,116 @@
           }
         }
       }
+    },
+    "tasks.personal.dailyProgress": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Progresso de hoje"
+          }
+        }
+      }
+    },
+    "tasks.personal.emptyDay": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem tarefas para este dia"
+          }
+        }
+      }
+    },
+    "tasks.personal.status.pending": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pendente"
+          }
+        }
+      }
+    },
+    "tasks.personal.status.awaitingConfirmation": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aguardando confirmação"
+          }
+        }
+      }
+    },
+    "tasks.error.retry": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tentar novamente"
+          }
+        }
+      }
+    },
+    "tasks.personal.loadError": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível atualizar suas tarefas. Tente novamente."
+          }
+        }
+      }
+    },
+    "tasks.personal.newTask": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nova tarefa"
+          }
+        }
+      }
+    },
+    "tasks.personal.today": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "hoje"
+          }
+        }
+      }
+    },
+    "tasks.personal.selected": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "selecionado"
+          }
+        }
+      }
+    },
+    "tasks.personal.progressAccessibilityFormat": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$d de %2$d tarefas concluídas, %3$d%%"
+          }
+        }
+      }
+    },
+    "tasks.personal.openDetailHint": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir detalhe"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

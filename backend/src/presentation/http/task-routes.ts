@@ -82,7 +82,7 @@ const problemResponseSchema = {
 
 const ownTasksResponseSchema = {
   type: 'object',
-  required: ['items', 'nextCursor'],
+  required: ['items', 'nextCursor', 'familyCreatedAt'],
   properties: {
     items: {
       type: 'array',
@@ -97,16 +97,20 @@ const ownTasksResponseSchema = {
       },
     },
     nextCursor: { type: ['string', 'null'] },
+    // Limite inferior do carrossel pessoal (RN49), YYYY-MM-DD local à família — SPEC-009 E-05.
+    familyCreatedAt: { type: 'string' },
   },
 } as const;
 
 const ownProgressResponseSchema = {
   type: 'object',
-  required: ['total', 'completed', 'percentage'],
+  required: ['total', 'completed', 'percentage', 'familyCreatedAt'],
   properties: {
     total: { type: 'integer', minimum: 0 },
     completed: { type: 'integer', minimum: 0 },
     percentage: { type: ['number', 'null'], minimum: 0, maximum: 100 },
+    // Limite inferior do carrossel pessoal (RN49), YYYY-MM-DD local à família — SPEC-009 E-05.
+    familyCreatedAt: { type: 'string' },
   },
 } as const;
 

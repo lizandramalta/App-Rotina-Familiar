@@ -56,6 +56,37 @@ nonisolated struct UpdateTaskCommand: Sendable {
     let signalResolution: SignalResolution?
 }
 
+/// One day's personal checklist entry (TEL-010/TEL-040). Wraps `FamilyTask` rather than adding
+/// `displayStatus` to it directly, so TEL-012/013 keep depending only on the effective `status`
+/// (MA-19): actions, progress and the admin queue always read `task.status`, never `displayStatus`.
+nonisolated struct OwnTaskListItem: Equatable, Sendable, Identifiable {
+    let task: FamilyTask
+    /// Presentation-only label per SPEC-009 §5: adult sees `pending` even when the effective
+    /// `status` is `awaitingConfirmation`; Kids sees `awaitingConfirmation` (CA-11).
+    let displayStatus: TaskStatus
+
+    var id: UUID { task.id }
+}
+
+nonisolated struct OwnTaskPage: Equatable, Sendable {
+    let items: [OwnTaskListItem]
+    let nextCursor: String?
+    /// `YYYY-MM-DD`, the family's creation date — RN49's lower bound for the personal carousel
+    /// (SPEC-009 E-05). Same value as `DailyProgress.familyCreatedAt`; both calls return it so
+    /// either response alone is enough to compute the carousel's range.
+    let familyCreatedAt: String
+}
+
+/// `percentage` is `nil` when the backend has nothing to compute it from (e.g. no tasks that day).
+nonisolated struct DailyProgress: Equatable, Sendable {
+    let total: Int
+    let completed: Int
+    let percentage: Double?
+    /// `YYYY-MM-DD`, the family's creation date — RN49's lower bound for the personal carousel
+    /// (SPEC-009 E-05).
+    let familyCreatedAt: String
+}
+
 nonisolated enum TaskError: Error, Equatable, Sendable {
     case actionNotAllowed
     case notFound

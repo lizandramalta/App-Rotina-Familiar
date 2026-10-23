@@ -23,7 +23,8 @@ struct AppRootView: View {
             case let .authenticated(profile):
                 AuthenticatedHomeView(
                     role: profile.role,
-                    myTasksTab: sessionStore.accessToken.map(container.makeMyTasksTabView)
+                    myTasksTab: sessionStore.accessToken.map(container.makeMyTasksTabView),
+                    kidsTaskList: sessionStore.accessToken.map(container.makeKidsTaskList)
                 )
                 .id(profile.memberID)
             case let .initialProfile(grant):

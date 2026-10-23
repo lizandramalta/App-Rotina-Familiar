@@ -1,19 +1,29 @@
 import SwiftUI
 
 /// Role-specific navigation shell. Mission content belongs to its own approved card.
-/// The adult "Minhas tarefas" tab hosts TEL-012/TEL-013 (SCRUM-37); its root list (TEL-010) is
-/// still the placeholder below, reserved for the card that builds it.
+/// The adult "Minhas tarefas" tab hosts TEL-010/TEL-012/TEL-013 (SCRUM-37/39); the Kids tab
+/// hosts TEL-040 (SCRUM-39), its own own-daily checklist, no family navigation (CA-04).
 struct AuthenticatedHomeView: View {
     let role: MemberRole
     /// `nil` only if the session has no access token while authenticated, which should not happen;
     /// falls back to the plain placeholder rather than crashing.
     let myTasksTab: MyTasksTabView?
+    let kidsTaskList: DailyTaskListView?
 
     var body: some View {
         TabView {
             if role == .kid {
-                destination("destination.myTasks", icon: "checklist", identifier: "access.destination.kids")
-                    .tabItem { Label("destination.myTasks", systemImage: "checklist") }
+                Group {
+                    if let kidsTaskList {
+                        NavigationStack {
+                            kidsTaskList
+                                .accessibilityIdentifier("access.destination.kids")
+                        }
+                    } else {
+                        destination("destination.myTasks", icon: "checklist", identifier: "access.destination.kids")
+                    }
+                }
+                .tabItem { Label("destination.myTasks", systemImage: "checklist") }
                 destination("destination.missions", icon: "star", identifier: "access.destination.kids.missions")
                     .tabItem { Label("destination.missions", systemImage: "star") }
             } else {
