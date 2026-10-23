@@ -51,6 +51,20 @@ nonisolated struct FamilyMember: Identifiable, Equatable, Sendable {
     let isFamilyCreator: Bool
 }
 
+nonisolated struct MemberCapabilities: Equatable, Sendable {
+    let manageMembers: Bool
+}
+
+/// `GET /v1/family/members/{memberId}` — member detail with the caller's capabilities (SPEC-003).
+nonisolated struct FamilyMemberDetail: Identifiable, Equatable, Sendable {
+    let id: UUID
+    let name: String
+    let role: MemberRole
+    let isFamilyCreator: Bool
+    let createdAt: String
+    let capabilities: MemberCapabilities
+}
+
 nonisolated struct FamilyMemberPage: Equatable, Sendable {
     let items: [FamilyMember]
     let nextCursor: String?

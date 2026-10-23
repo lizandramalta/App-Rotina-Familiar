@@ -123,6 +123,9 @@ struct FamilyMembersStub: FamilyRepository {
     func listMembers(accessToken: String, cursor: String?) async throws -> FamilyMemberPage {
         FamilyMemberPage(items: members, nextCursor: nil)
     }
+    func getMemberDetail(memberID: UUID, accessToken: String) async throws -> FamilyMemberDetail {
+        throw FamilyError.unavailable
+    }
     func getFamilySettings(accessToken: String) async throws -> FamilySettings {
         throw FamilyError.unavailable
     }

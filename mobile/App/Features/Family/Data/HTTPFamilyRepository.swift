@@ -92,6 +92,19 @@ nonisolated private struct ListFamilyMembersResponseDTO: Decodable {
     let nextCursor: String?
 }
 
+nonisolated private struct MemberDetailDTO: Decodable {
+    struct Capabilities: Decodable {
+        let manageMembers: Bool
+    }
+
+    let id: UUID
+    let name: String
+    let role: MemberRole
+    let isFamilyCreator: Bool
+    let createdAt: String
+    let capabilities: Capabilities
+}
+
 nonisolated private struct CycleLimitsDTO: Decodable {
     let startsAt: String
     let endsAt: String
@@ -245,6 +258,24 @@ nonisolated struct HTTPFamilyRepository: FamilyRepository {
                 FamilyMember(id: $0.id, name: $0.name, role: $0.role, isFamilyCreator: $0.isFamilyCreator)
             },
             nextCursor: response.nextCursor
+        )
+    }
+
+    func getMemberDetail(memberID: UUID, accessToken: String) async throws -> FamilyMemberDetail {
+        let data = try await send(
+            path: "family/members/\(memberID.uuidString.lowercased())",
+            method: "GET",
+            headers: ["Authorization": "Bearer \(accessToken)"],
+            rawBody: Data()
+        )
+        let response = try decode(MemberDetailDTO.self, from: data)
+        return FamilyMemberDetail(
+            id: response.id,
+            name: response.name,
+            role: response.role,
+            isFamilyCreator: response.isFamilyCreator,
+            createdAt: response.createdAt,
+            capabilities: MemberCapabilities(manageMembers: response.capabilities.manageMembers)
         )
     }
 

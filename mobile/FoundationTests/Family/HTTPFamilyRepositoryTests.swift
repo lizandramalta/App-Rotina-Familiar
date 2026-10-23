@@ -155,6 +155,45 @@ struct HTTPFamilyRepositoryTests {
         #expect(try String(decoding: JSONEncoder().encode(MemberRole.kid), as: UTF8.self) == #""kids""#)
     }
 
+    @Test("SPEC-003 CA-01 gets member detail with capabilities")
+    func getMemberDetailSuccess() async throws {
+        let json = """
+        {
+            "id": "\(memberID)",
+            "name": "Maria Silva",
+            "role": "administrator",
+            "isFamilyCreator": true,
+            "createdAt": "2026-10-01T12:00:00.000Z",
+            "capabilities": { "manageMembers": true }
+        }
+        """
+        let stub = StubHTTP.make(status: 200, json: json)
+
+        let detail = try await stub.repository.getMemberDetail(
+            memberID: UUID(uuidString: memberID)!,
+            accessToken: "token-1"
+        )
+
+        let request = try #require(stub.requests().first)
+        #expect(request.method == "GET")
+        #expect(request.url.path == "/v1/family/members/\(memberID)")
+        #expect(request.headers["Authorization"] == "Bearer token-1")
+        #expect(detail.id == UUID(uuidString: memberID))
+        #expect(detail.name == "Maria Silva")
+        #expect(detail.role == .administrator)
+        #expect(detail.isFamilyCreator)
+        #expect(detail.createdAt == "2026-10-01T12:00:00.000Z")
+        #expect(detail.capabilities == MemberCapabilities(manageMembers: true))
+    }
+
+    @Test("SPEC-003 CA-03 maps member detail 403, 404 and network failure")
+    func getMemberDetailErrors() async {
+        await expectMemberDetailError(StubHTTP.make(status: 403, json: #"{"code":"ACTION_NOT_ALLOWED"}"#), .actionNotAllowed)
+        await expectMemberDetailError(StubHTTP.make(status: 404, json: #"{"code":"RESOURCE_NOT_FOUND"}"#), .rejected)
+        await expectMemberDetailError(StubHTTP.make(failure: URLError(.notConnectedToInternet)), .network)
+        await expectMemberDetailError(StubHTTP.make(status: 503, json: #"{"code":"DEPENDENCY_UNAVAILABLE"}"#), .unavailable)
+    }
+
     @Test("SPEC-002 CA-05 gets family settings and maps limits and scheduled change")
     func getFamilySettingsSuccess() async throws {
         let json = """
@@ -277,6 +316,12 @@ struct HTTPFamilyRepositoryTests {
                 application: .immediate,
                 accessToken: "token-1"
             )
+        }
+    }
+
+    private func expectMemberDetailError(_ stub: StubHTTP, _ expected: FamilyError) async {
+        await #expect(throws: expected) {
+            _ = try await stub.repository.getMemberDetail(memberID: UUID(uuidString: memberID)!, accessToken: "token-1")
         }
     }
 

@@ -241,6 +241,17 @@ private actor UITestFamilyRepository: FamilyRepository {
         )
     }
 
+    func getMemberDetail(memberID: UUID, accessToken: String) async throws -> FamilyMemberDetail {
+        FamilyMemberDetail(
+            id: memberID,
+            name: "Maria Silva",
+            role: .administrator,
+            isFamilyCreator: true,
+            createdAt: "2026-10-01T12:00:00.000Z",
+            capabilities: MemberCapabilities(manageMembers: true)
+        )
+    }
+
     func getFamilySettings(accessToken: String) async throws -> FamilySettings {
         FamilySettings(
             timeZoneID: "America/Sao_Paulo",
