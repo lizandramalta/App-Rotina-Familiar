@@ -481,6 +481,16 @@
         }
       }
     },
+    "family.members.create.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar membro"
+          }
+        }
+      }
+    },
     "family.members.discard.confirm": {
       "extractionState": "manual",
       "localizations": {
@@ -658,6 +668,56 @@
         }
       }
     },
+    "family.members.error_network": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível confirmar a alteração. Verifique sua conexão e atualize os dados."
+          }
+        }
+      }
+    },
+    "family.members.error_not_allowed": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Você não tem permissão para adicionar membros."
+          }
+        }
+      }
+    },
+    "family.members.name.error_invalid": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informe um nome válido."
+          }
+        }
+      }
+    },
+    "family.members.name.hint": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use de 1 a 60 caracteres."
+          }
+        }
+      }
+    },
+    "family.members.name.label": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome"
+          }
+        }
+      }
+    },
     "family.members.role.admin": {
       "extractionState": "extracted_with_value",
       "localizations": {
@@ -665,6 +725,16 @@
           "stringUnit": {
             "state": "new",
             "value": "Administrador"
+          }
+        }
+      }
+    },
+    "family.members.role.administrator.description": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gerencia a família."
           }
         }
       }
@@ -680,6 +750,26 @@
         }
       }
     },
+    "family.members.role.kids.description": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Participa de forma simplificada."
+          }
+        }
+      }
+    },
+    "family.members.role.label": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Papel na família"
+          }
+        }
+      }
+    },
     "family.members.role.member": {
       "extractionState": "extracted_with_value",
       "localizations": {
@@ -687,6 +777,16 @@
           "stringUnit": {
             "state": "new",
             "value": "Membro"
+          }
+        }
+      }
+    },
+    "family.members.role.member.description": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuida das tarefas."
           }
         }
       }
