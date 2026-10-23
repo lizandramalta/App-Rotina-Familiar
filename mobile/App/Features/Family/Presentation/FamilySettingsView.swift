@@ -47,10 +47,6 @@ struct FamilySettingsView: View {
                     dismiss()
                 } label: {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(.primary)
-                        .frame(width: 36, height: 36)
-                        .background(Color(.systemGray5), in: Circle())
                 }
                 .accessibilityLabel("Voltar")
                 .accessibilityIdentifier("family.settings.back_button")
