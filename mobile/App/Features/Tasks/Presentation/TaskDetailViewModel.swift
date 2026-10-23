@@ -20,10 +20,13 @@ enum TaskDeleteBlock: Equatable {
 final class TaskDetailViewModel {
     private let taskID: UUID
     private let getTaskDetail: GetTaskDetailUseCase
+    private let getRoutine: GetRoutineUseCase
     private let deleteTask: DeleteTaskUseCase
     private let accessToken: String
 
     private(set) var task: FamilyTask?
+    private(set) var routine: Routine?
+    private(set) var routineLoadFailed = false
     private(set) var isLoading = false
     private(set) var loadFailed = false
     private(set) var isDeleting = false
@@ -33,9 +36,10 @@ final class TaskDetailViewModel {
 
     var isConfirmingDelete = false
 
-    init(taskID: UUID, repository: any TaskRepository, accessToken: String) {
+    init(taskID: UUID, repository: any TaskRepository, routineRepository: any RoutineRepository, accessToken: String) {
         self.taskID = taskID
         self.getTaskDetail = GetTaskDetailUseCase(repository: repository)
+        self.getRoutine = GetRoutineUseCase(repository: routineRepository)
         self.deleteTask = DeleteTaskUseCase(repository: repository)
         self.accessToken = accessToken
     }
@@ -55,8 +59,28 @@ final class TaskDetailViewModel {
         defer { isLoading = false }
         do {
             task = try await getTaskDetail.execute(taskID: taskID, accessToken: accessToken)
+            if let routineID = task?.routineID {
+                await loadRoutine(id: routineID)
+            } else {
+                routine = nil
+                routineLoadFailed = false
+            }
         } catch {
             loadFailed = true
+        }
+    }
+
+    func refreshRoutine() async {
+        guard let routineID = task?.routineID else { return }
+        await loadRoutine(id: routineID)
+    }
+
+    private func loadRoutine(id: UUID) async {
+        do {
+            routine = try await getRoutine.execute(id: id, accessToken: accessToken)
+            routineLoadFailed = false
+        } catch {
+            routineLoadFailed = true
         }
     }
 

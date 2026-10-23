@@ -2586,6 +2586,196 @@
         }
       }
     },
+    "routines.detail.origin_hint": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faz parte de uma rotina. As próximas tarefas são independentes desta."
+          }
+        }
+      }
+    },
+    "routines.error_frequency_invalid": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolha uma frequência disponível."
+          }
+        }
+      }
+    },
+    "routines.error_result_uncertain": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível confirmar se a rotina foi salva. Confira o estado antes de tentar novamente."
+          }
+        }
+      }
+    },
+    "routines.error_start_date_invalid": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informe uma data de início válida."
+          }
+        }
+      }
+    },
+    "routines.error_unavailable": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível consultar a rotina. Tente novamente."
+          }
+        }
+      }
+    },
+    "routines.materialization.complete": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rotina salva. As próximas tarefas estão disponíveis quando entrarem no período consultável."
+          }
+        }
+      }
+    },
+    "routines.materialization.preparing": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estamos preparando as próximas tarefas."
+          }
+        }
+      }
+    },
+    "routines.materialization.refresh": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atualizar"
+          }
+        }
+      }
+    },
+    "routines.recurrence.cancel": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar"
+          }
+        }
+      }
+    },
+    "routines.recurrence.confirm": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirmar"
+          }
+        }
+      }
+    },
+    "routines.recurrence.daily": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todos os dias"
+          }
+        }
+      }
+    },
+    "routines.recurrence.every_days": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A cada %lld dias"
+          }
+        }
+      }
+    },
+    "routines.recurrence.frequency_section": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frequência"
+          }
+        }
+      }
+    },
+    "routines.recurrence.no_end_date_hint": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada repetição vira uma tarefa própria. A rotina continua até você alterar ou encerrar as próximas ocorrências."
+          }
+        }
+      }
+    },
+    "routines.recurrence.none": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem repetição"
+          }
+        }
+      }
+    },
+    "routines.recurrence.selected": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecionada"
+          }
+        }
+      }
+    },
+    "routines.recurrence.start_date": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Começa em"
+          }
+        }
+      }
+    },
+    "routines.recurrence.start_section": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Início"
+          }
+        }
+      }
+    },
+    "routines.recurrence.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repetição"
+          }
+        }
+      }
+    },
     "tasks.common.error_action_not_allowed": {
       "localizations": {
         "pt-BR": {
