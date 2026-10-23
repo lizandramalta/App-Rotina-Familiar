@@ -441,6 +441,56 @@
         }
       }
     },
+    "family.member.detail.error_not_allowed": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Você não tem permissão para ver este membro."
+          }
+        }
+      }
+    },
+    "family.member.detail.error_not_found": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este membro não está mais disponível."
+          }
+        }
+      }
+    },
+    "family.member.detail.retry": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tentar novamente"
+          }
+        }
+      }
+    },
+    "family.member.detail.tasks_placeholder": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As tarefas deste membro aparecerão aqui."
+          }
+        }
+      }
+    },
+    "family.member.detail.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detalhe do membro"
+          }
+        }
+      }
+    },
     "family.member.role.administrator": {
       "localizations": {
         "pt-BR": {
@@ -487,6 +537,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Adicionar membro"
+          }
+        }
+      }
+    },
+    "family.members.creator_badge": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Criador"
+          }
+        }
+      }
+    },
+    "family.members.creator_protected": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Criador da família não pode ser removido nem ter o papel alterado."
           }
         }
       }

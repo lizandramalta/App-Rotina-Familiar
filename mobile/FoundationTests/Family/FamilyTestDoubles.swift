@@ -40,6 +40,10 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
     var changeTimeZoneCalls: Int { lock.withLock { _changeTimeZoneCalls } }
     var createMemberCalls: Int { lock.withLock { _createMemberCalls } }
     var listMembersCalls: Int { lock.withLock { _listMembersCalls } }
+    func setMemberDetailResult(_ result: Result<FamilyMemberDetail, Error>) {
+        lock.withLock { memberDetailResult = result }
+    }
+
     var memberDetailRequests: [UUID] { lock.withLock { _memberDetailRequests } }
     var lastCommand: CreateFamilyCommand? { lock.withLock { _lastCommand } }
     var uploadedPhotos: [Data] { lock.withLock { _uploadedPhotos } }
