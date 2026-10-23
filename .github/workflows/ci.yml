@@ -62,10 +62,26 @@ jobs:
         run: npm run test:integration
 
   mobile:
-    name: Mobile (iOS Simulator build + tests)
+    name: Mobile (${{ matrix.shard }})
     # IPHONEOS_DEPLOYMENT_TARGET = 26.0 exige SDK do Xcode 26+; a imagem macos-15
     # traz Xcode 16 por padrão e não compila este target.
     runs-on: macos-26
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - shard: onboarding-and-unit
+            test_selection: >-
+              -only-testing:FamilyRoutineTests
+              -only-testing:FamilyRoutineUITests/OnboardingUITests
+              -only-testing:FamilyRoutineUITests/TaskManagementUITests
+          - shard: other-ui
+            test_selection: >-
+              -only-testing:FamilyRoutineUITests/DailyTaskListUITests
+              -only-testing:FamilyRoutineUITests/EntryUITests
+              -only-testing:FamilyRoutineUITests/InviteJoinUITests
+              -only-testing:FamilyRoutineUITests/ProfileUITests
+              -only-testing:FamilyRoutineUITests/RoutineCreationUITests
     defaults:
       run:
         working-directory: mobile
@@ -106,4 +122,5 @@ jobs:
             -destination 'platform=iOS Simulator,id=${{ steps.simulator.outputs.udid }}' \
             -derivedDataPath "$RUNNER_TEMP/mobile-derived-data" \
             -parallel-testing-enabled NO \
+            ${{ matrix.test_selection }} \
             CODE_SIGNING_ALLOWED=NO
