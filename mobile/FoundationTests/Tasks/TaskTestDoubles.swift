@@ -90,4 +90,13 @@ struct FamilyMembersStub: FamilyRepository {
     func listMembers(accessToken: String, cursor: String?) async throws -> FamilyMemberPage {
         FamilyMemberPage(items: members, nextCursor: nil)
     }
+    func getFamilySettings(accessToken: String) async throws -> FamilySettings {
+        throw FamilyError.unavailable
+    }
+    func previewFamilyTimeZoneChange(timeZoneID: String, application: TimeZoneApplication, accessToken: String) async throws -> TimeZoneChangePreview {
+        throw FamilyError.unavailable
+    }
+    func changeFamilyTimeZone(timeZoneID: String, application: TimeZoneApplication, accessToken: String) async throws -> FamilySettings {
+        throw FamilyError.unavailable
+    }
 }

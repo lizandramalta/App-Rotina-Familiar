@@ -154,6 +154,131 @@ struct HTTPFamilyRepositoryTests {
         #expect(try String(decoding: JSONEncoder().encode(MemberRole.kid), as: UTF8.self) == #""kids""#)
     }
 
+    @Test("SPEC-002 CA-05 gets family settings and maps limits and scheduled change")
+    func getFamilySettingsSuccess() async throws {
+        let json = """
+        {
+            "timeZoneId": "America/Sao_Paulo",
+            "scheduledTimeZoneChange": {
+                "timeZoneId": "America/Manaus",
+                "effectiveAt": "2026-10-26T03:00:00.000Z"
+            },
+            "limits": {
+                "startsAt": "2026-10-19T03:00:00.000Z",
+                "endsAt": "2026-10-26T03:00:00.000Z",
+                "timeZoneId": "America/Sao_Paulo",
+                "isTransition": false
+            }
+        }
+        """
+        let stub = StubHTTP.make(status: 200, json: json)
+
+        let settings = try await stub.repository.getFamilySettings(accessToken: "token-1")
+
+        let request = try #require(stub.requests().first)
+        #expect(request.method == "GET")
+        #expect(request.url.path == "/v1/family/settings")
+        #expect(request.headers["Authorization"] == "Bearer token-1")
+        #expect(settings.timeZoneID == "America/Sao_Paulo")
+        #expect(settings.scheduledTimeZoneChange?.timeZoneID == "America/Manaus")
+        #expect(settings.scheduledTimeZoneChange?.effectiveAt == "2026-10-26T03:00:00.000Z")
+        #expect(settings.limits.startsAt == "2026-10-19T03:00:00.000Z")
+        #expect(settings.limits.isTransition == false)
+    }
+
+    @Test("SPEC-002 CA-05 maps 403 ACTION_NOT_ALLOWED to actionNotAllowed error")
+    func getFamilySettingsActionNotAllowed() async throws {
+        let stub = StubHTTP.make(status: 403, json: #"{"code":"ACTION_NOT_ALLOWED"}"#)
+
+        await #expect(throws: FamilyError.actionNotAllowed) {
+            _ = try await stub.repository.getFamilySettings(accessToken: "token-1")
+        }
+    }
+
+    @Test("SPEC-002 CA-06 posts time-zone change preview and maps effective limits")
+    func previewFamilyTimeZoneChangeSuccess() async throws {
+        let json = """
+        {
+            "proposedTimeZoneId": "America/Manaus",
+            "application": "immediate",
+            "effectiveAt": "2026-10-23T15:00:00.000Z",
+            "effectiveLimits": {
+                "startsAt": "2026-10-19T03:00:00.000Z",
+                "endsAt": "2026-10-26T04:00:00.000Z",
+                "timeZoneId": "America/Manaus",
+                "isTransition": true
+            },
+            "isTransition": true
+        }
+        """
+        let stub = StubHTTP.make(status: 200, json: json)
+
+        let preview = try await stub.repository.previewFamilyTimeZoneChange(
+            timeZoneID: "America/Manaus",
+            application: .immediate,
+            accessToken: "token-1"
+        )
+
+        let request = try #require(stub.requests().first)
+        #expect(request.method == "POST")
+        #expect(request.url.path == "/v1/family/time-zone-changes/preview")
+        #expect(request.headers["Authorization"] == "Bearer token-1")
+        let body = try #require(JSONSerialization.jsonObject(with: request.body) as? [String: Any])
+        #expect(body["timeZoneId"] as? String == "America/Manaus")
+        #expect(body["application"] as? String == "immediate")
+        #expect(preview.proposedTimeZoneID == "America/Manaus")
+        #expect(preview.application == .immediate)
+        #expect(preview.isTransition == true)
+        #expect(preview.effectiveLimits.timeZoneID == "America/Manaus")
+    }
+
+    @Test("SPEC-002 CA-06/CA-07 posts time-zone confirmation and receives updated settings")
+    func changeFamilyTimeZoneSuccess() async throws {
+        let json = """
+        {
+            "timeZoneId": "America/Manaus",
+            "scheduledTimeZoneChange": null,
+            "limits": {
+                "startsAt": "2026-10-19T03:00:00.000Z",
+                "endsAt": "2026-10-26T04:00:00.000Z",
+                "timeZoneId": "America/Manaus",
+                "isTransition": true
+            }
+        }
+        """
+        let stub = StubHTTP.make(status: 200, json: json)
+
+        let updated = try await stub.repository.changeFamilyTimeZone(
+            timeZoneID: "America/Manaus",
+            application: .immediate,
+            accessToken: "token-1"
+        )
+
+        let request = try #require(stub.requests().first)
+        #expect(request.method == "POST")
+        #expect(request.url.path == "/v1/family/time-zone-changes")
+        #expect(request.headers["Authorization"] == "Bearer token-1")
+        #expect(updated.timeZoneID == "America/Manaus")
+        #expect(updated.scheduledTimeZoneChange == nil)
+        #expect(updated.limits.isTransition == true)
+    }
+
+    @Test("SPEC-002 CA-09 maps 422 TIME_ZONE_UNCHANGED to timeZoneUnchanged error")
+    func changeFamilyTimeZoneUnchanged() async throws {
+        let stub = StubHTTP.make(
+            status: 422,
+            json: #"{"code":"VALIDATION_FAILED","fieldErrors":{"timeZoneId":["TIME_ZONE_UNCHANGED"]}}"#
+        )
+
+        await #expect(throws: FamilyError.timeZoneUnchanged) {
+            _ = try await stub.repository.changeFamilyTimeZone(
+                timeZoneID: "America/Sao_Paulo",
+                application: .immediate,
+                accessToken: "token-1"
+            )
+        }
+    }
+
     private func expectCreateFamilyError(
         status: Int,
         json: String,

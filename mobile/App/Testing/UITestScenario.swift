@@ -232,6 +232,58 @@ private actor UITestFamilyRepository: FamilyRepository {
             nextCursor: nil
         )
     }
+
+    func getFamilySettings(accessToken: String) async throws -> FamilySettings {
+        FamilySettings(
+            timeZoneID: "America/Sao_Paulo",
+            scheduledTimeZoneChange: nil,
+            limits: CycleLimits(
+                startsAt: "2026-10-19T03:00:00.000Z",
+                endsAt: "2026-10-26T03:00:00.000Z",
+                timeZoneID: "America/Sao_Paulo",
+                isTransition: false
+            )
+        )
+    }
+
+    func previewFamilyTimeZoneChange(
+        timeZoneID: String,
+        application: TimeZoneApplication,
+        accessToken: String
+    ) async throws -> TimeZoneChangePreview {
+        TimeZoneChangePreview(
+            proposedTimeZoneID: timeZoneID,
+            application: application,
+            effectiveAt: "2026-10-26T03:00:00.000Z",
+            effectiveLimits: CycleLimits(
+                startsAt: "2026-10-19T03:00:00.000Z",
+                endsAt: "2026-10-26T03:00:00.000Z",
+                timeZoneID: timeZoneID,
+                isTransition: application == .immediate
+            ),
+            isTransition: application == .immediate
+        )
+    }
+
+    func changeFamilyTimeZone(
+        timeZoneID: String,
+        application: TimeZoneApplication,
+        accessToken: String
+    ) async throws -> FamilySettings {
+        FamilySettings(
+            timeZoneID: application == .immediate ? timeZoneID : "America/Sao_Paulo",
+            scheduledTimeZoneChange: application == .nextCycle ? ScheduledTimeZoneChange(
+                timeZoneID: timeZoneID,
+                effectiveAt: "2026-10-26T03:00:00.000Z"
+            ) : nil,
+            limits: CycleLimits(
+                startsAt: "2026-10-19T03:00:00.000Z",
+                endsAt: "2026-10-26T03:00:00.000Z",
+                timeZoneID: application == .immediate ? timeZoneID : "America/Sao_Paulo",
+                isTransition: application == .immediate
+            )
+        )
+    }
 }
 
 /// Stable ids shared between `UITestFamilyRepository.listMembers` and `UITestTaskRepository`

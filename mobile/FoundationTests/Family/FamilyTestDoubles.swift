@@ -6,29 +6,56 @@ actor FamilyRepositorySpy: FamilyRepository {
     private var uploadResults: [Result<String, Error>]
     private var linkResults: [Result<Void, Error>]
     private var memberResults: [Result<CreatedMember, Error>]
+    private var settingsResult: Result<FamilySettings, Error>
+    private var previewResults: [Result<TimeZoneChangePreview, Error>]
+    private var changeTimeZoneResults: [Result<FamilySettings, Error>]
     private let createDelay: Duration?
 
     private(set) var createFamilyCalls = 0
     private(set) var uploadCalls = 0
     private(set) var inviteCalls = 0
+    private(set) var getSettingsCalls = 0
+    private(set) var previewCalls = 0
+    private(set) var changeTimeZoneCalls = 0
     private(set) var lastCommand: CreateFamilyCommand?
     private(set) var uploadedPhotos: [Data] = []
     private(set) var linkedMediaIDs: [String] = []
     private(set) var createdMembers: [CreatedMember] = []
+    private(set) var lastPreviewTimeZoneID: String?
+    private(set) var lastPreviewApplication: TimeZoneApplication?
+    private(set) var lastChangeTimeZoneID: String?
+    private(set) var lastChangeApplication: TimeZoneApplication?
 
     init(
         createResult: Result<CreatedFamily, Error> = .success(FamilyRepositorySpy.createdFamily),
         uploadResults: [Result<String, Error>] = [],
         linkResults: [Result<Void, Error>] = [],
         memberResults: [Result<CreatedMember, Error>] = [],
+        settingsResult: Result<FamilySettings, Error> = .success(FamilyRepositorySpy.defaultSettings),
+        previewResults: [Result<TimeZoneChangePreview, Error>] = [],
+        changeTimeZoneResults: [Result<FamilySettings, Error>] = [],
         createDelay: Duration? = nil
     ) {
         self.createResult = createResult
         self.uploadResults = uploadResults
         self.linkResults = linkResults
         self.memberResults = memberResults
+        self.settingsResult = settingsResult
+        self.previewResults = previewResults
+        self.changeTimeZoneResults = changeTimeZoneResults
         self.createDelay = createDelay
     }
+
+    static let defaultSettings = FamilySettings(
+        timeZoneID: "America/Sao_Paulo",
+        scheduledTimeZoneChange: nil,
+        limits: CycleLimits(
+            startsAt: "2026-10-19T03:00:00.000Z",
+            endsAt: "2026-10-26T03:00:00.000Z",
+            timeZoneID: "America/Sao_Paulo",
+            isTransition: false
+        )
+    )
 
     static let createdFamily = CreatedFamily(
         familyID: UUID(uuidString: "00000000-0000-0000-0000-000000000003")!,
@@ -93,6 +120,62 @@ actor FamilyRepositorySpy: FamilyRepository {
 
     func listMembers(accessToken: String, cursor: String?) async throws -> FamilyMemberPage {
         FamilyMemberPage(items: [], nextCursor: nil)
+    }
+
+    func getFamilySettings(accessToken: String) async throws -> FamilySettings {
+        getSettingsCalls += 1
+        return try settingsResult.get()
+    }
+
+    func previewFamilyTimeZoneChange(
+        timeZoneID: String,
+        application: TimeZoneApplication,
+        accessToken: String
+    ) async throws -> TimeZoneChangePreview {
+        previewCalls += 1
+        lastPreviewTimeZoneID = timeZoneID
+        lastPreviewApplication = application
+        if !previewResults.isEmpty {
+            return try previewResults.removeFirst().get()
+        }
+        return TimeZoneChangePreview(
+            proposedTimeZoneID: timeZoneID,
+            application: application,
+            effectiveAt: "2026-10-26T03:00:00.000Z",
+            effectiveLimits: CycleLimits(
+                startsAt: "2026-10-19T03:00:00.000Z",
+                endsAt: "2026-10-26T03:00:00.000Z",
+                timeZoneID: timeZoneID,
+                isTransition: application == .immediate
+            ),
+            isTransition: application == .immediate
+        )
+    }
+
+    func changeFamilyTimeZone(
+        timeZoneID: String,
+        application: TimeZoneApplication,
+        accessToken: String
+    ) async throws -> FamilySettings {
+        changeTimeZoneCalls += 1
+        lastChangeTimeZoneID = timeZoneID
+        lastChangeApplication = application
+        if !changeTimeZoneResults.isEmpty {
+            return try changeTimeZoneResults.removeFirst().get()
+        }
+        return FamilySettings(
+            timeZoneID: application == .immediate ? timeZoneID : "America/Sao_Paulo",
+            scheduledTimeZoneChange: application == .nextCycle ? ScheduledTimeZoneChange(
+                timeZoneID: timeZoneID,
+                effectiveAt: "2026-10-26T03:00:00.000Z"
+            ) : nil,
+            limits: CycleLimits(
+                startsAt: "2026-10-19T03:00:00.000Z",
+                endsAt: "2026-10-26T03:00:00.000Z",
+                timeZoneID: application == .immediate ? timeZoneID : "America/Sao_Paulo",
+                isTransition: application == .immediate
+            )
+        )
     }
 }
 
