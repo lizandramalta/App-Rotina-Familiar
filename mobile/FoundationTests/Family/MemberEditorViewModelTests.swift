@@ -242,4 +242,77 @@ struct MemberEditorViewModelTests {
         #expect(await viewModel.save())
         #expect(repository.createMemberCalls == 2)
     }
+
+    @Test("SPEC-003 CA-07 reconciles the earlier attempt even if the draft was edited, then creates the edited draft")
+    func editedDraftAfterUncertainFailure() async {
+        let persisted = FamilyMember(id: UUID(), name: "Rafa", role: .member, isFamilyCreator: false)
+        let repository = FamilyRepositorySpy(
+            memberResults: [.failure(FamilyError.network)],
+            listMembersResults: [page(), page(persisted)]
+        )
+        let viewModel = makeViewModel(repository)
+        viewModel.name = "Rafa"
+        viewModel.role = .member
+
+        #expect(await viewModel.save() == false)
+        viewModel.name = "Rafael"
+        viewModel.role = .kid
+        #expect(await viewModel.save())
+
+        // "Rafa" was found persisted (no second POST for it); only "Rafael" is created now.
+        #expect(repository.createMemberCalls == 2)
+        #expect(repository.createdMembers.map(\.name) == ["Rafael"])
+        #expect(repository.createdMembers.map(\.role) == [.kid])
+    }
+
+    @Test("SPEC-003 CA-07 an edited draft is created when the earlier attempt did not persist")
+    func editedDraftWhenEarlierAttemptNotPersisted() async {
+        let repository = FamilyRepositorySpy(
+            memberResults: [.failure(FamilyError.network)],
+            listMembersResults: [page(), page()]
+        )
+        let viewModel = makeViewModel(repository)
+        viewModel.name = "Rafa"
+
+        #expect(await viewModel.save() == false)
+        viewModel.name = "Rafael"
+        #expect(await viewModel.save())
+
+        #expect(repository.createdMembers.map(\.name) == ["Rafael"])
+    }
+
+    @Test("SPEC-003 CA-07 an unchanged draft is confirmed from the earlier attempt without a second POST")
+    func unchangedDraftConfirmedFromPendingAttempt() async {
+        let persisted = FamilyMember(id: UUID(), name: "Rafa", role: .member, isFamilyCreator: false)
+        let repository = FamilyRepositorySpy(
+            memberResults: [.failure(FamilyError.network)],
+            listMembersResults: [page(), page(persisted)]
+        )
+        let viewModel = makeViewModel(repository)
+        viewModel.name = "Rafa"
+
+        #expect(await viewModel.save() == false)
+        #expect(await viewModel.save())
+
+        #expect(repository.createMemberCalls == 1)
+    }
+
+    @Test("SPEC-003 CA-07 keeps the pending attempt when the lookup fails, even after editing the draft")
+    func pendingAttemptSurvivesLookupFailure() async {
+        let persisted = FamilyMember(id: UUID(), name: "Rafa", role: .member, isFamilyCreator: false)
+        let repository = FamilyRepositorySpy(
+            memberResults: [.failure(FamilyError.network)],
+            listMembersResults: [page(), .failure(FamilyError.network), page(persisted)]
+        )
+        let viewModel = makeViewModel(repository)
+        viewModel.name = "Rafa"
+
+        #expect(await viewModel.save() == false)
+        viewModel.name = "Rafael"
+        #expect(await viewModel.save() == false)
+        #expect(repository.createMemberCalls == 1)
+
+        #expect(await viewModel.save())
+        #expect(repository.createdMembers.map(\.name) == ["Rafael"])
+    }
 }

@@ -22,8 +22,14 @@ final class MemberEditorViewModel {
     private(set) var nameError: FamilyCreationValidation.TextError?
     private(set) var failure: Failure?
 
-    /// Set after a failure that may have been persisted (CA-07); the next save checks the confirmed list first.
-    private var needsReconciliation = false
+    private struct PendingAttempt: Equatable {
+        let name: String
+        let role: MemberRole
+    }
+
+    /// The POST whose outcome is unknown (CA-07). The next save resolves it against the confirmed list first,
+    /// using these values even if the draft was edited since.
+    private var pendingAttempt: PendingAttempt?
     /// IDs confirmed before the first POST, so a pre-existing profile with the same name and role is never
     /// mistaken for the one an uncertain POST may have created (CA-07).
     private var baselineMemberIDs: Set<UUID>?
@@ -86,10 +92,15 @@ final class MemberEditorViewModel {
                 // Nothing has been sent yet, so failing here is safe and keeps the draft.
                 baselineMemberIDs = Set(try await confirmedMembers(accessToken: token).map(\.id))
             }
-            if needsReconciliation,
-               try await isAlreadyCreated(name: trimmedName, role: role, accessToken: token) {
-                needsReconciliation = false
-                return true
+            if let pending = pendingAttempt {
+                let created = try await createdMember(for: pending, accessToken: token)
+                pendingAttempt = nil
+                if let created {
+                    baselineMemberIDs?.insert(created.id)
+                    if pending == PendingAttempt(name: trimmedName, role: role) {
+                        return true
+                    }
+                }
             }
         } catch FamilyError.actionNotAllowed {
             failure = .notAllowed
@@ -108,14 +119,13 @@ final class MemberEditorViewModel {
                 role: role,
                 accessToken: token
             )
-            needsReconciliation = false
             return true
         } catch FamilyError.validationFailed {
             nameError = .invalidContent
         } catch FamilyError.actionNotAllowed {
             failure = .notAllowed
         } catch FamilyError.network, FamilyError.unavailable, FamilyError.uncertainOutcome {
-            needsReconciliation = true
+            pendingAttempt = PendingAttempt(name: trimmedName, role: role)
             failure = .network
         } catch {
             // rateLimited, rejected: definitively not created, so a plain retry is safe.
@@ -124,11 +134,11 @@ final class MemberEditorViewModel {
         return false
     }
 
-    /// A profile counts as created by the uncertain POST only if it matches the draft and was not in the baseline.
-    private func isAlreadyCreated(name: String, role: MemberRole, accessToken: String) async throws -> Bool {
+    /// A profile counts as created by the uncertain POST only if it matches the attempt and was not in the baseline.
+    private func createdMember(for attempt: PendingAttempt, accessToken: String) async throws -> FamilyMember? {
         let baseline = baselineMemberIDs ?? []
-        return try await confirmedMembers(accessToken: accessToken).contains {
-            $0.name == name && $0.role == role && !baseline.contains($0.id)
+        return try await confirmedMembers(accessToken: accessToken).first {
+            $0.name == attempt.name && $0.role == attempt.role && !baseline.contains($0.id)
         }
     }
 
