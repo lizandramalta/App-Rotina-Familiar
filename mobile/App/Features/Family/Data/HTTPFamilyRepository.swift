@@ -105,6 +105,16 @@ nonisolated private struct MemberDetailDTO: Decodable {
     let capabilities: Capabilities
 }
 
+nonisolated private struct FamilyProfileDTO: Decodable {
+    let id: UUID
+    let name: String
+    let timeZoneId: String
+}
+
+nonisolated private struct UpdateFamilyRequestDTO: Encodable {
+    let name: String
+}
+
 nonisolated private struct CycleLimitsDTO: Decodable {
     let startsAt: String
     let endsAt: String
@@ -277,6 +287,28 @@ nonisolated struct HTTPFamilyRepository: FamilyRepository {
             createdAt: response.createdAt,
             capabilities: MemberCapabilities(manageMembers: response.capabilities.manageMembers)
         )
+    }
+
+    func getFamily(accessToken: String) async throws -> FamilyProfile {
+        let data = try await send(
+            path: "family",
+            method: "GET",
+            headers: ["Authorization": "Bearer \(accessToken)"],
+            rawBody: Data()
+        )
+        let response = try decode(FamilyProfileDTO.self, from: data)
+        return FamilyProfile(id: response.id, name: response.name, timeZoneID: response.timeZoneId)
+    }
+
+    func updateFamilyName(_ name: String, accessToken: String) async throws -> FamilyProfile {
+        let data = try await send(
+            path: "family",
+            method: "PATCH",
+            headers: ["Authorization": "Bearer \(accessToken)"],
+            json: UpdateFamilyRequestDTO(name: name)
+        )
+        let response = try decode(FamilyProfileDTO.self, from: data)
+        return FamilyProfile(id: response.id, name: response.name, timeZoneID: response.timeZoneId)
     }
 
     func getFamilySettings(accessToken: String) async throws -> FamilySettings {

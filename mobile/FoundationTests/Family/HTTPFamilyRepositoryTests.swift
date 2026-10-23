@@ -186,6 +186,25 @@ struct HTTPFamilyRepositoryTests {
         #expect(detail.capabilities == MemberCapabilities(manageMembers: true))
     }
 
+    @Test("SPEC-002 gets and renames the family through GET and PATCH /v1/family")
+    func getAndUpdateFamily() async throws {
+        let json = """
+        { "id": "\(memberID)", "name": "Família Souza", "timeZoneId": "America/Manaus" }
+        """
+        let stub = StubHTTP.make(status: 200, json: json)
+
+        let fetched = try await stub.repository.getFamily(accessToken: "token-1")
+        let renamed = try await stub.repository.updateFamilyName("Família Souza", accessToken: "token-1")
+
+        let requests = stub.requests()
+        #expect(requests.map(\.method) == ["GET", "PATCH"])
+        #expect(requests.allSatisfy { $0.url.path == "/v1/family" })
+        #expect(requests[1].headers["Authorization"] == "Bearer token-1")
+        #expect(String(decoding: requests[1].body ?? Data(), as: UTF8.self) == #"{"name":"Família Souza"}"#)
+        #expect(fetched == FamilyProfile(id: UUID(uuidString: memberID)!, name: "Família Souza", timeZoneID: "America/Manaus"))
+        #expect(renamed == fetched)
+    }
+
     @Test("SPEC-003 CA-03 maps member detail 403, 404 and network failure")
     func getMemberDetailErrors() async {
         await expectMemberDetailError(StubHTTP.make(status: 403, json: #"{"code":"ACTION_NOT_ALLOWED"}"#), .actionNotAllowed)

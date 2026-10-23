@@ -7,6 +7,7 @@ struct FamilySettingsHubView: View {
     @State private var editorViewModel: MemberEditorViewModel?
     @State private var isEditingFamilyName = false
     @State private var draftFamilyName = ""
+    @State private var familyNameSaveFailed = false
 
     var body: some View {
         List {
@@ -15,10 +16,17 @@ struct FamilySettingsHubView: View {
                     draftFamilyName = viewModel.familyName
                     isEditingFamilyName = true
                 } label: {
-                    settingsRow(icon: "house", title: "family.settings.hub.family_name", value: viewModel.familyName)
+                    settingsRow(icon: "house", title: "family.settings.hub.family_name", value: viewModel.familyName, showsChevron: true)
                 }
                 .foregroundStyle(.primary)
                 .accessibilityIdentifier("family.settings.hub.family_name")
+
+                if familyNameSaveFailed {
+                    Label("family.settings.hub.family_name_error", systemImage: "exclamationmark.triangle")
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                        .accessibilityIdentifier("family.settings.hub.family_name_error")
+                }
 
                 if let makeFamilySettingsViewModel {
                     NavigationLink {
@@ -86,7 +94,16 @@ struct FamilySettingsHubView: View {
         .alert("family.settings.hub.family_name", isPresented: $isEditingFamilyName) {
             TextField("family.settings.hub.family_name", text: $draftFamilyName)
             Button("family.settings.hub.cancel", role: .cancel) {}
-            Button("family.settings.hub.save") { viewModel.updateFamilyName(draftFamilyName) }
+            Button("family.settings.hub.save") {
+                Task {
+                    do {
+                        try await viewModel.updateFamilyName(draftFamilyName)
+                        familyNameSaveFailed = false
+                    } catch {
+                        familyNameSaveFailed = true
+                    }
+                }
+            }
         } message: {
             Text("family.settings.hub.family_name_hint")
         }
@@ -101,7 +118,7 @@ struct FamilySettingsHubView: View {
         }
     }
 
-    private func settingsRow(icon: String, title: LocalizedStringKey, value: String) -> some View {
+    private func settingsRow(icon: String, title: LocalizedStringKey, value: String, showsChevron: Bool = false) -> some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .foregroundStyle(.secondary)
@@ -109,6 +126,11 @@ struct FamilySettingsHubView: View {
             Text(title)
             Spacer()
             Text(value).foregroundStyle(.secondary)
+            if showsChevron {
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(Color(uiColor: .tertiaryLabel))
+            }
         }
         .frame(minHeight: 44)
     }

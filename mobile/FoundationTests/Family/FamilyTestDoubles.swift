@@ -12,6 +12,8 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
     private var changeTimeZoneResults: [Result<FamilySettings, Error>]
     private var listMembersResults: [Result<FamilyMemberPage, Error>]
     private var memberDetailResult: Result<FamilyMemberDetail, Error>
+    private var familyResult: Result<FamilyProfile, Error> = .success(FamilyRepositorySpy.defaultFamilyProfile)
+    private var _updatedFamilyNames: [String] = []
     private let createDelay: Duration?
 
     private var _createFamilyCalls = 0
@@ -44,6 +46,11 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
         lock.withLock { memberDetailResult = result }
     }
 
+    func setFamilyResult(_ result: Result<FamilyProfile, Error>) {
+        lock.withLock { familyResult = result }
+    }
+
+    var updatedFamilyNames: [String] { lock.withLock { _updatedFamilyNames } }
     var memberDetailRequests: [UUID] { lock.withLock { _memberDetailRequests } }
     var lastCommand: CreateFamilyCommand? { lock.withLock { _lastCommand } }
     var uploadedPhotos: [Data] { lock.withLock { _uploadedPhotos } }
@@ -87,6 +94,12 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
             timeZoneID: "America/Sao_Paulo",
             isTransition: false
         )
+    )
+
+    static let defaultFamilyProfile = FamilyProfile(
+        id: UUID(uuidString: "00000000-0000-4000-8000-0000000000f1")!,
+        name: "Família Silva",
+        timeZoneID: "America/Sao_Paulo"
     )
 
     static let defaultMemberDetail = FamilyMemberDetail(
@@ -184,6 +197,20 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
         try lock.withLock {
             _memberDetailRequests.append(memberID)
             return try memberDetailResult.get()
+        }
+    }
+
+    func getFamily(accessToken: String) async throws -> FamilyProfile {
+        try lock.withLock { try familyResult.get() }
+    }
+
+    func updateFamilyName(_ name: String, accessToken: String) async throws -> FamilyProfile {
+        try lock.withLock {
+            _updatedFamilyNames.append(name)
+            let current = try familyResult.get()
+            let updated = FamilyProfile(id: current.id, name: name, timeZoneID: current.timeZoneID)
+            familyResult = .success(updated)
+            return updated
         }
     }
 

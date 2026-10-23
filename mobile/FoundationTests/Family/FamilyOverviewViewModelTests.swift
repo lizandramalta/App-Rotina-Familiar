@@ -24,6 +24,40 @@ struct FamilyOverviewViewModelTests {
         )
     }
 
+    @Test("SPEC-002 initial load shows the confirmed family name and time zone")
+    func loadsFamilyProfile() async {
+        let (viewModel, _) = makeViewModel([page([])])
+
+        await viewModel.loadInitial()
+
+        #expect(viewModel.familyName == "Família Silva")
+        #expect(viewModel.timeZoneDisplayName == "Horário de Brasília")
+    }
+
+    @Test("SPEC-002 renaming shows only the server-confirmed name and skips empty or unchanged input")
+    func renamesFamily() async throws {
+        let (viewModel, repository) = makeViewModel([page([])])
+        await viewModel.loadInitial()
+
+        try await viewModel.updateFamilyName("  Família Souza  ")
+        try await viewModel.updateFamilyName("   ")
+        try await viewModel.updateFamilyName("Família Souza")
+
+        #expect(viewModel.familyName == "Família Souza")
+        #expect(repository.updatedFamilyNames == ["Família Souza"])
+    }
+
+    @Test("SPEC-002 a failed rename keeps the confirmed name and reports the error")
+    func failedRenameKeepsName() async {
+        let (viewModel, repository) = makeViewModel([page([])])
+        await viewModel.loadInitial()
+        repository.setFamilyResult(.failure(FamilyError.network))
+
+        await #expect(throws: FamilyError.self) { try await viewModel.updateFamilyName("Nova") }
+
+        #expect(viewModel.familyName == "Família Silva")
+    }
+
     @Test("SPEC-003 CA-01 initial load fills members and cursor")
     func initialLoad() async {
         let maria = member("Maria", creator: true)

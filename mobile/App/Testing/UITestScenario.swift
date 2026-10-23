@@ -192,6 +192,8 @@ private struct UITestAccessRepository: AccessRepository {
 private actor UITestFamilyRepository: FamilyRepository {
     private let scenario: UITestScenario
     private var photoUploadAttempts = 0
+    private var familyName = "Família Silva"
+    private let familyTimeZoneID = "America/Sao_Paulo"
 
     init(scenario: UITestScenario) {
         self.scenario = scenario
@@ -262,6 +264,15 @@ private actor UITestFamilyRepository: FamilyRepository {
         )
     }
 
+    func getFamily(accessToken: String) async throws -> FamilyProfile {
+        FamilyProfile(id: UITestTaskFixtures.familyID, name: familyName, timeZoneID: familyTimeZoneID)
+    }
+
+    func updateFamilyName(_ name: String, accessToken: String) async throws -> FamilyProfile {
+        familyName = name
+        return FamilyProfile(id: UITestTaskFixtures.familyID, name: familyName, timeZoneID: familyTimeZoneID)
+    }
+
     func getFamilySettings(accessToken: String) async throws -> FamilySettings {
         FamilySettings(
             timeZoneID: "America/Sao_Paulo",
@@ -318,6 +329,7 @@ private actor UITestFamilyRepository: FamilyRepository {
 /// Stable ids shared between `UITestFamilyRepository.listMembers` and `UITestTaskRepository`
 /// fixtures, so a seeded task's assignees resolve to names in the picker.
 private enum UITestTaskFixtures {
+    static let familyID = UUID(uuidString: "00000000-0000-0000-0000-0000000000f1")!
     static let memberID = UUID(uuidString: "00000000-0000-0000-0000-0000000000a1")!
     static let kidMemberID = UUID(uuidString: "00000000-0000-0000-0000-0000000000a2")!
     static let pendingTaskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000b1")!

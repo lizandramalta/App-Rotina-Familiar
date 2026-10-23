@@ -58,7 +58,7 @@ struct FamilyOverviewView: View {
             }
         }
         .accessibilityIdentifier("family.members.list")
-        .navigationTitle(viewModel.familyName)
+        .navigationTitle(viewModel.familyName.isEmpty ? String(localized: "family.overview.title") : viewModel.familyName)
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             if viewModel.canConfigureFamily {

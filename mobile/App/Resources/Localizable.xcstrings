@@ -1202,6 +1202,16 @@
         }
       }
     },
+    "family.settings.hub.family_name_error": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível salvar o nome da família. Tente novamente."
+          }
+        }
+      }
+    },
     "family.settings.hub.family_name_hint": {
       "localizations": {
         "pt-BR": {

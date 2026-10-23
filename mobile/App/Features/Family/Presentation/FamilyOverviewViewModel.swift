@@ -12,8 +12,8 @@ final class FamilyOverviewViewModel {
     private(set) var isLoadingMore = false
     private(set) var loadFailed = false
     private(set) var loadMoreFailed = false
-    // ponytail: placeholder until the backend exposes the family name and time zone (no data source today); local only, not persisted.
-    private(set) var familyName = "Família Silva"
+    private(set) var familyName = ""
+    private(set) var timeZoneID = FamilyCreationValidation.defaultTimeZoneID
 
     private let session: ActiveFamilySession
     private let familyRepository: any FamilyRepository
@@ -32,7 +32,7 @@ final class FamilyOverviewViewModel {
     /// The server stays the authority (RNF07); this only hides controls the API would refuse.
     var canAddMember: Bool { session.role == .administrator }
     var canConfigureFamily: Bool { session.role == .administrator }
-    var timeZoneDisplayName: String { "São Paulo" }
+    var timeZoneDisplayName: String { TimeZoneDisplay.displayName(for: timeZoneID) }
     var currentMemberID: UUID { session.memberID }
     var hasMorePages: Bool { nextCursor != nil }
     var existingMemberIDs: Set<UUID> { Set(members.map(\.id)) }
@@ -52,6 +52,7 @@ final class FamilyOverviewViewModel {
 
         isLoading = true
         defer { isLoading = false }
+        await loadFamilyProfile(token: token)
         do {
             let page = try await familyRepository.listMembers(accessToken: token, cursor: nil)
             members = page.items
@@ -62,6 +63,17 @@ final class FamilyOverviewViewModel {
             loadFailed = true
         } catch {
             // Network/availability failures keep the already confirmed list.
+            loadFailed = true
+        }
+    }
+
+    /// Name and time zone are confirmed by the server; a failure keeps what is already shown.
+    private func loadFamilyProfile(token: String) async {
+        do {
+            let profile = try await familyRepository.getFamily(accessToken: token)
+            familyName = profile.name
+            timeZoneID = profile.timeZoneID
+        } catch {
             loadFailed = true
         }
     }
@@ -102,9 +114,14 @@ final class FamilyOverviewViewModel {
         loadMoreFailed = false
     }
 
-    func updateFamilyName(_ newName: String) {
+    /// Only the server-confirmed name is shown; an unchanged or empty name sends nothing.
+    func updateFamilyName(_ newName: String) async throws {
         let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !trimmed.isEmpty { familyName = trimmed }
+        guard !trimmed.isEmpty, trimmed != familyName else { return }
+        guard let token = accessTokenProvider() else { throw FamilyError.unavailable }
+        let updated = try await familyRepository.updateFamilyName(trimmed, accessToken: token)
+        familyName = updated.name
+        timeZoneID = updated.timeZoneID
     }
 
     func memberCreated() async {

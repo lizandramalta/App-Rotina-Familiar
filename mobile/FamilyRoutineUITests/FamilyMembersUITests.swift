@@ -81,6 +81,19 @@ final class FamilyMembersUITests: XCTestCase {
         XCTAssertTrue(addAction.exists)
     }
 
+    func testAdminRenamesFamilyAndTitleFollows() {
+        launch("family-overview")
+
+        openSettingsHub()
+        app.buttons["family.settings.hub.family_name"].tap()
+        let field = app.alerts.textFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.clearAndTypeText("Família Souza")
+        app.alerts.buttons["Salvar"].tap()
+
+        XCTAssertTrue(app.staticTexts["Família Souza"].waitForExistence(timeout: 5))
+    }
+
     func testAdminCanOpenCreateMemberFormAndSave() {
         launch("family-overview")
 
@@ -107,5 +120,15 @@ final class FamilyMembersUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Adicionar membro"].waitForNonExistence(timeout: 5))
         XCTAssertTrue(memberRows.firstMatch.waitForExistence(timeout: 5))
         XCTAssertTrue(addAction.exists)
+    }
+}
+
+private extension XCUIElement {
+    func clearAndTypeText(_ text: String) {
+        tap()
+        if let current = value as? String, !current.isEmpty {
+            typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: current.count))
+        }
+        typeText(text)
     }
 }

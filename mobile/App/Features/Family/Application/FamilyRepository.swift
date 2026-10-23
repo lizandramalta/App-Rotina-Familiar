@@ -10,6 +10,9 @@ nonisolated protocol FamilyRepository: Sendable {
     func listMembers(accessToken: String, cursor: String?) async throws -> FamilyMemberPage
     func getMemberDetail(memberID: UUID, accessToken: String) async throws -> FamilyMemberDetail
 
+    func getFamily(accessToken: String) async throws -> FamilyProfile
+    func updateFamilyName(_ name: String, accessToken: String) async throws -> FamilyProfile
+
     // MARK: - Settings and Time Zone (SPEC-002 Phase 3)
     func getFamilySettings(accessToken: String) async throws -> FamilySettings
     func previewFamilyTimeZoneChange(timeZoneID: String, application: TimeZoneApplication, accessToken: String) async throws -> TimeZoneChangePreview

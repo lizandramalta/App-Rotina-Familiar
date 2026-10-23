@@ -16,6 +16,13 @@ nonisolated struct OnboardingDraft: Equatable, Sendable {
     var members: [DraftMember] = []
 }
 
+/// Confirmed family identity returned by `GET`/`PATCH /v1/family` (SPEC-002).
+nonisolated struct FamilyProfile: Equatable, Sendable {
+    let id: UUID
+    let name: String
+    let timeZoneID: String
+}
+
 nonisolated struct CreateFamilyCommand: Equatable, Sendable {
     let creationGrant: String
     let creatorName: String
