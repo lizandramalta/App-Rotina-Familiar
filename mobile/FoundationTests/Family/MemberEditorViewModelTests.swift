@@ -128,4 +128,65 @@ struct MemberEditorViewModelTests {
         #expect(viewModel.hasUnsavedChanges)
         #expect(!viewModel.canSubmit)
     }
+
+    @Test("SPEC-003 CA-07 reconciles with the confirmed list and does not POST again when the member already exists")
+    func reconcilesWithoutDuplicate() async {
+        let existing = FamilyMember(id: UUID(), name: "Rafa", role: .kid, isFamilyCreator: false)
+        for error in [FamilyError.network, .uncertainOutcome, .unavailable] {
+            let repository = FamilyRepositorySpy(
+                memberResults: [.failure(error)],
+                listMembersResults: [.success(FamilyMemberPage(items: [existing], nextCursor: nil))]
+            )
+            let viewModel = makeViewModel(repository)
+            viewModel.name = "Rafa"
+            viewModel.role = .kid
+
+            #expect(await viewModel.save() == false)
+            #expect(await viewModel.save())
+
+            #expect(repository.createMemberCalls == 1)
+            #expect(repository.listMembersCalls == 1)
+            #expect(viewModel.failure == nil)
+        }
+    }
+
+    @Test("SPEC-003 CA-07 retries the POST only after the confirmed list shows no match")
+    func reconcilesThenRetries() async {
+        let other = FamilyMember(id: UUID(), name: "Rafa", role: .member, isFamilyCreator: false)
+        let repository = FamilyRepositorySpy(
+            memberResults: [.failure(FamilyError.network)],
+            listMembersResults: [
+                .success(FamilyMemberPage(items: [other], nextCursor: "next")),
+                .success(FamilyMemberPage(items: [], nextCursor: nil)),
+            ]
+        )
+        let viewModel = makeViewModel(repository)
+        viewModel.name = "Rafa"
+        viewModel.role = .kid
+
+        #expect(await viewModel.save() == false)
+        #expect(await viewModel.save())
+
+        #expect(repository.listMembersCalls == 2)
+        #expect(repository.createMemberCalls == 2)
+    }
+
+    @Test("SPEC-003 CA-07 keeps the draft and does not POST when the reconciliation lookup fails")
+    func reconciliationLookupFails() async {
+        let repository = FamilyRepositorySpy(
+            memberResults: [.failure(FamilyError.network)],
+            listMembersResults: [.failure(FamilyError.network), .success(FamilyMemberPage(items: [], nextCursor: nil))]
+        )
+        let viewModel = makeViewModel(repository)
+        viewModel.name = "Rafa"
+
+        #expect(await viewModel.save() == false)
+        #expect(await viewModel.save() == false)
+        #expect(repository.createMemberCalls == 1)
+        #expect(viewModel.failure == .network)
+        #expect(viewModel.name == "Rafa")
+
+        #expect(await viewModel.save())
+        #expect(repository.createMemberCalls == 2)
+    }
 }

@@ -10,6 +10,7 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
     private var settingsResult: Result<FamilySettings, Error>
     private var previewResults: [Result<TimeZoneChangePreview, Error>]
     private var changeTimeZoneResults: [Result<FamilySettings, Error>]
+    private var listMembersResults: [Result<FamilyMemberPage, Error>]
     private var memberDetailResult: Result<FamilyMemberDetail, Error>
     private let createDelay: Duration?
 
@@ -20,6 +21,8 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
     private var _previewCalls = 0
     private var _changeTimeZoneCalls = 0
     private var _memberDetailRequests: [UUID] = []
+    private var _createMemberCalls = 0
+    private var _listMembersCalls = 0
     private var _lastCommand: CreateFamilyCommand?
     private var _uploadedPhotos: [Data] = []
     private var _linkedMediaIDs: [String] = []
@@ -35,6 +38,8 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
     var getSettingsCalls: Int { lock.withLock { _getSettingsCalls } }
     var previewCalls: Int { lock.withLock { _previewCalls } }
     var changeTimeZoneCalls: Int { lock.withLock { _changeTimeZoneCalls } }
+    var createMemberCalls: Int { lock.withLock { _createMemberCalls } }
+    var listMembersCalls: Int { lock.withLock { _listMembersCalls } }
     var memberDetailRequests: [UUID] { lock.withLock { _memberDetailRequests } }
     var lastCommand: CreateFamilyCommand? { lock.withLock { _lastCommand } }
     var uploadedPhotos: [Data] { lock.withLock { _uploadedPhotos } }
@@ -53,6 +58,7 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
         settingsResult: Result<FamilySettings, Error> = .success(FamilyRepositorySpy.defaultSettings),
         previewResults: [Result<TimeZoneChangePreview, Error>] = [],
         changeTimeZoneResults: [Result<FamilySettings, Error>] = [],
+        listMembersResults: [Result<FamilyMemberPage, Error>] = [],
         memberDetailResult: Result<FamilyMemberDetail, Error> = .success(FamilyRepositorySpy.defaultMemberDetail),
         createDelay: Duration? = nil
     ) {
@@ -63,6 +69,7 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
         self.settingsResult = settingsResult
         self.previewResults = previewResults
         self.changeTimeZoneResults = changeTimeZoneResults
+        self.listMembersResults = listMembersResults
         self.memberDetailResult = memberDetailResult
         self.createDelay = createDelay
     }
@@ -140,6 +147,7 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
 
     func createMember(name: String, role: MemberRole, accessToken: String) async throws -> CreatedMember {
         try lock.withLock {
+            _createMemberCalls += 1
             if !memberResults.isEmpty {
                 let member = try memberResults.removeFirst().get()
                 _createdMembers.append(member)
@@ -159,7 +167,13 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
     }
 
     func listMembers(accessToken: String, cursor: String?) async throws -> FamilyMemberPage {
-        FamilyMemberPage(items: [], nextCursor: nil)
+        try lock.withLock {
+            _listMembersCalls += 1
+            guard !listMembersResults.isEmpty else {
+                return FamilyMemberPage(items: [], nextCursor: nil)
+            }
+            return try listMembersResults.removeFirst().get()
+        }
     }
 
     func getMemberDetail(memberID: UUID, accessToken: String) async throws -> FamilyMemberDetail {
