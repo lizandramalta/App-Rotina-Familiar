@@ -6,6 +6,7 @@ import SwiftUI
 /// Membro e Kids não possuem acesso e recebem aviso de acesso restrito.
 struct FamilySettingsView: View {
     @StateObject var viewModel: FamilySettingsViewModel
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         Group {
@@ -39,6 +40,22 @@ struct FamilySettingsView: View {
         }
         .navigationTitle("family.settings.title")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(.primary)
+                        .frame(width: 36, height: 36)
+                        .background(Color(.systemGray5), in: Circle())
+                }
+                .accessibilityLabel("Voltar")
+                .accessibilityIdentifier("family.settings.back_button")
+            }
+        }
         .accessibilityIdentifier("family.settings.view")
         .task {
             if viewModel.state == .idle {
@@ -122,7 +139,7 @@ struct FamilySettingsView: View {
                 HStack {
                     if viewModel.isPreviewLoading {
                         ProgressView()
-                            .tint(.white)
+                            .tint(Color(uiColor: .systemBackground))
                     } else {
                         Text("family.settings.time_zone.apply")
                             .fontWeight(.semibold)
@@ -130,8 +147,8 @@ struct FamilySettingsView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)
-                .background(viewModel.canRequestPreview ? Color.accentColor : Color.secondary.opacity(0.3))
-                .foregroundStyle(viewModel.canRequestPreview ? Color.white : Color.secondary)
+                .background(viewModel.canRequestPreview ? Color(uiColor: .label) : Color(.systemGray5))
+                .foregroundStyle(viewModel.canRequestPreview ? Color(uiColor: .systemBackground) : Color(uiColor: .secondaryLabel))
                 .clipShape(Capsule())
                 .padding(.horizontal, 20)
                 .padding(.vertical, 8)

@@ -11,6 +11,13 @@ struct AuthenticatedHomeView: View {
     let myTasksTab: MyTasksTabView?
     let makeFamilySettingsViewModel: (() -> FamilySettingsViewModel)?
     @State private var profileViewModel: ProfileViewModel
+    @State private var showsFamilySettingsScenario: Bool = {
+        #if DEBUG
+        return ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"] == "family-settings"
+        #else
+        return false
+        #endif
+    }()
     @State private var selectedTab: Int = {
         #if DEBUG
         if ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"] == "family-settings" {
@@ -101,16 +108,12 @@ struct AuthenticatedHomeView: View {
 
     private func familyDestination() -> some View {
         NavigationStack {
-            #if DEBUG
-            if ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"] == "family-settings",
-               let makeFamilySettingsViewModel {
-                FamilySettingsView(viewModel: makeFamilySettingsViewModel())
-            } else {
-                familyPlaceholder()
-            }
-            #else
             familyPlaceholder()
-            #endif
+                .navigationDestination(isPresented: $showsFamilySettingsScenario) {
+                    if let makeFamilySettingsViewModel {
+                        FamilySettingsView(viewModel: makeFamilySettingsViewModel())
+                    }
+                }
         }
     }
 
