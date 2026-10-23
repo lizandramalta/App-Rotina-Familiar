@@ -31,3 +31,19 @@ struct DeleteTaskUseCase: Sendable {
         try await repository.deleteTask(id: taskID, accessToken: accessToken)
     }
 }
+
+struct GetDailyTasksUseCase: Sendable {
+    let repository: any TaskRepository
+
+    func execute(referenceDate: String, cursor: String?, accessToken: String) async throws -> OwnTaskPage {
+        try await repository.dailyTasks(referenceDate: referenceDate, cursor: cursor, accessToken: accessToken)
+    }
+}
+
+struct GetDailyProgressUseCase: Sendable {
+    let repository: any TaskRepository
+
+    func execute(referenceDate: String, accessToken: String) async throws -> DailyProgress {
+        try await repository.dailyProgress(referenceDate: referenceDate, accessToken: accessToken)
+    }
+}

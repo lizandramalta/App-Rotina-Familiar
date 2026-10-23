@@ -922,6 +922,276 @@
         }
       }
     },
+    "family.settings.access_denied_description": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apenas administradores podem visualizar ou alterar as configurações da família."
+          }
+        }
+      }
+    },
+    "family.settings.access_denied_title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acesso restrito"
+          }
+        }
+      }
+    },
+    "family.settings.current_badge": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "atual"
+          }
+        }
+      }
+    },
+    "family.settings.help_footer": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O fuso horário é comum a toda a família e orienta os ciclos semanais."
+          }
+        }
+      }
+    },
+    "family.settings.loading": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carregando configurações..."
+          }
+        }
+      }
+    },
+    "family.settings.scheduled_badge": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "programado"
+          }
+        }
+      }
+    },
+    "family.settings.scheduled_change": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mudança programada"
+          }
+        }
+      }
+    },
+    "family.settings.section.current_time_zone": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fuso horário vigente"
+          }
+        }
+      }
+    },
+    "family.settings.section.new_time_zone": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Novo fuso"
+          }
+        }
+      }
+    },
+    "family.settings.selection_footer": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Somente Administradores podem propor e aplicar alterações de fuso. A escolha abaixo não grava automaticamente."
+          }
+        }
+      }
+    },
+    "family.settings.time_zone.apply": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aplicar"
+          }
+        }
+      }
+    },
+    "family.settings.time_zone.current": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fuso atual"
+          }
+        }
+      }
+    },
+    "family.settings.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configurações da família"
+          }
+        }
+      }
+    },
+    "family.settings.transition_footer": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Período de transição: ciclo adaptado ao novo fuso. As datas das tarefas não mudam."
+          }
+        }
+      }
+    },
+    "family.time_zone.apply_next_cycle": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aplicar no próximo ciclo"
+          }
+        }
+      }
+    },
+    "family.time_zone.apply_next_cycle_subtitle": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preserva o ciclo atual e agenda a troca para o próximo ciclo."
+          }
+        }
+      }
+    },
+    "family.time_zone.apply_now": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aplicar agora"
+          }
+        }
+      }
+    },
+    "family.time_zone.apply_now_subtitle": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajusta o ciclo atual com novo encerramento válido."
+          }
+        }
+      }
+    },
+    "family.time_zone.cancel_button": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar"
+          }
+        }
+      }
+    },
+    "family.time_zone.confirm_button": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirmar"
+          }
+        }
+      }
+    },
+    "family.time_zone.history_preserved": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As datas civis e registros de tarefas anteriores são preservados."
+          }
+        }
+      }
+    },
+    "family.time_zone.modal_title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirmar aplicação do fuso"
+          }
+        }
+      }
+    },
+    "family.time_zone.preview_from": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De"
+          }
+        }
+      }
+    },
+    "family.time_zone.preview_section": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resumo da prévia"
+          }
+        }
+      }
+    },
+    "family.time_zone.preview_to": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para"
+          }
+        }
+      }
+    },
+    "family.time_zone.transition_warning": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aviso: a aplicação imediata criará um ciclo de transição. As datas das tarefas existentes não mudam."
+          }
+        }
+      }
+    },
+    "family.time_zone.when_to_apply": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quando aplicar"
+          }
+        }
+      }
+    },
     "foundation.placeholder.action": {
       "localizations": {
         "pt-BR": {
@@ -2486,6 +2756,16 @@
         }
       }
     },
+    "tasks.error.retry": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tentar novamente"
+          }
+        }
+      }
+    },
     "tasks.form.assignees_footer": {
       "localizations": {
         "pt-BR": {
@@ -2676,6 +2956,106 @@
         }
       }
     },
+    "tasks.personal.dailyProgress": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Progresso de hoje"
+          }
+        }
+      }
+    },
+    "tasks.personal.emptyDay": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem tarefas para este dia"
+          }
+        }
+      }
+    },
+    "tasks.personal.loadError": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível atualizar suas tarefas. Tente novamente."
+          }
+        }
+      }
+    },
+    "tasks.personal.newTask": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nova tarefa"
+          }
+        }
+      }
+    },
+    "tasks.personal.openDetailHint": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir detalhe"
+          }
+        }
+      }
+    },
+    "tasks.personal.progressAccessibilityFormat": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$d de %2$d tarefas concluídas, %3$d%%"
+          }
+        }
+      }
+    },
+    "tasks.personal.selected": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "selecionado"
+          }
+        }
+      }
+    },
+    "tasks.personal.status.awaitingConfirmation": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aguardando confirmação"
+          }
+        }
+      }
+    },
+    "tasks.personal.status.pending": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pendente"
+          }
+        }
+      }
+    },
+    "tasks.personal.today": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "hoje"
+          }
+        }
+      }
+    },
     "tasks.signal_resolution.option_keep": {
       "localizations": {
         "pt-BR": {
@@ -2722,276 +3102,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Esta tarefa tem uma sinalização aguardando confirmação"
-          }
-        }
-      }
-    },
-    "family.settings.title": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Configurações da família"
-          }
-        }
-      }
-    },
-    "family.settings.time_zone.current": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fuso atual"
-          }
-        }
-      }
-    },
-    "family.settings.time_zone.apply": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aplicar"
-          }
-        }
-      }
-    },
-    "family.time_zone.apply_now": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aplicar agora"
-          }
-        }
-      }
-    },
-    "family.time_zone.apply_next_cycle": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aplicar no próximo ciclo"
-          }
-        }
-      }
-    },
-    "family.settings.section.current_time_zone": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fuso horário vigente"
-          }
-        }
-      }
-    },
-    "family.settings.section.new_time_zone": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Novo fuso"
-          }
-        }
-      }
-    },
-    "family.settings.scheduled_change": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mudança programada"
-          }
-        }
-      }
-    },
-    "family.settings.current_badge": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "atual"
-          }
-        }
-      }
-    },
-    "family.settings.scheduled_badge": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "programado"
-          }
-        }
-      }
-    },
-    "family.settings.help_footer": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O fuso horário é comum a toda a família e orienta os ciclos semanais."
-          }
-        }
-      }
-    },
-    "family.settings.selection_footer": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Somente Administradores podem propor e aplicar alterações de fuso. A escolha abaixo não grava automaticamente."
-          }
-        }
-      }
-    },
-    "family.settings.transition_footer": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Período de transição: ciclo adaptado ao novo fuso. As datas das tarefas não mudam."
-          }
-        }
-      }
-    },
-    "family.settings.access_denied_title": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Acesso restrito"
-          }
-        }
-      }
-    },
-    "family.settings.access_denied_description": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Apenas administradores podem visualizar ou alterar as configurações da família."
-          }
-        }
-      }
-    },
-    "family.settings.loading": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Carregando configurações..."
-          }
-        }
-      }
-    },
-    "family.time_zone.modal_title": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Confirmar aplicação do fuso"
-          }
-        }
-      }
-    },
-    "family.time_zone.preview_section": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Resumo da prévia"
-          }
-        }
-      }
-    },
-    "family.time_zone.preview_from": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "De"
-          }
-        }
-      }
-    },
-    "family.time_zone.preview_to": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Para"
-          }
-        }
-      }
-    },
-    "family.time_zone.when_to_apply": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quando aplicar"
-          }
-        }
-      }
-    },
-    "family.time_zone.apply_now_subtitle": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ajusta o ciclo atual com novo encerramento válido."
-          }
-        }
-      }
-    },
-    "family.time_zone.apply_next_cycle_subtitle": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Preserva o ciclo atual e agenda a troca para o próximo ciclo."
-          }
-        }
-      }
-    },
-    "family.time_zone.transition_warning": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aviso: a aplicação imediata criará um ciclo de transição. As datas das tarefas existentes não mudam."
-          }
-        }
-      }
-    },
-    "family.time_zone.history_preserved": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "As datas civis e registros de tarefas anteriores são preservados."
-          }
-        }
-      }
-    },
-    "family.time_zone.confirm_button": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Confirmar"
-          }
-        }
-      }
-    },
-    "family.time_zone.cancel_button": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cancelar"
           }
         }
       }

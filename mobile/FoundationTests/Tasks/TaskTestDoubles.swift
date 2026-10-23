@@ -22,27 +22,41 @@ final class TaskRepositorySpy: TaskRepository, @unchecked Sendable {
     private var taskResult: Result<FamilyTask, Error>
     private var updateResult: Result<FamilyTask, Error>
     private var deleteResult: Result<UUID, Error>
+    private var dailyTasksResult: Result<OwnTaskPage, Error>
+    private var dailyProgressResult: Result<DailyProgress, Error>
 
     private var _createCalls: [CreateTaskCommand] = []
     private var _taskCalls: [UUID] = []
     private var _updateCalls: [UpdateTaskCommand] = []
     private var _deleteCalls: [UUID] = []
+    private var _dailyTasksCalls: [String] = []
+    private var _dailyProgressCalls: [String] = []
 
     var createCalls: [CreateTaskCommand] { lock.withLock { _createCalls } }
     var taskCalls: [UUID] { lock.withLock { _taskCalls } }
     var updateCalls: [UpdateTaskCommand] { lock.withLock { _updateCalls } }
     var deleteCalls: [UUID] { lock.withLock { _deleteCalls } }
+    var dailyTasksCalls: [String] { lock.withLock { _dailyTasksCalls } }
+    var dailyProgressCalls: [String] { lock.withLock { _dailyProgressCalls } }
 
     init(
         createResult: Result<FamilyTask, Error> = .success(taskRepositorySpyFixture),
         taskResult: Result<FamilyTask, Error> = .success(taskRepositorySpyFixture),
         updateResult: Result<FamilyTask, Error> = .success(taskRepositorySpyFixture),
-        deleteResult: Result<UUID, Error> = .success(taskRepositorySpyFixture.id)
+        deleteResult: Result<UUID, Error> = .success(taskRepositorySpyFixture.id),
+        dailyTasksResult: Result<OwnTaskPage, Error> = .success(
+            OwnTaskPage(items: [], nextCursor: nil, familyCreatedAt: "2020-01-01")
+        ),
+        dailyProgressResult: Result<DailyProgress, Error> = .success(
+            DailyProgress(total: 0, completed: 0, percentage: nil, familyCreatedAt: "2020-01-01")
+        )
     ) {
         self.createResult = createResult
         self.taskResult = taskResult
         self.updateResult = updateResult
         self.deleteResult = deleteResult
+        self.dailyTasksResult = dailyTasksResult
+        self.dailyProgressResult = dailyProgressResult
     }
 
     static var fixture: FamilyTask { taskRepositorySpyFixture }
@@ -65,6 +79,25 @@ final class TaskRepositorySpy: TaskRepository, @unchecked Sendable {
     func deleteTask(id: UUID, accessToken: String) async throws -> UUID {
         lock.withLock { _deleteCalls.append(id) }
         return try deleteResult.get()
+    }
+
+    func dailyTasks(referenceDate: String, cursor: String?, accessToken: String) async throws -> OwnTaskPage {
+        lock.withLock { _dailyTasksCalls.append(referenceDate) }
+        return try dailyTasksResult.get()
+    }
+
+    func dailyProgress(referenceDate: String, accessToken: String) async throws -> DailyProgress {
+        lock.withLock { _dailyProgressCalls.append(referenceDate) }
+        return try dailyProgressResult.get()
+    }
+
+    /// Lets a single test sequence a success then a failure across two `load()` calls on the
+    /// same view model, mirroring a background refresh going bad (CA-09).
+    func setDailyResults(tasks: Result<OwnTaskPage, Error>? = nil, progress: Result<DailyProgress, Error>? = nil) {
+        lock.withLock {
+            if let tasks { dailyTasksResult = tasks }
+            if let progress { dailyProgressResult = progress }
+        }
     }
 }
 

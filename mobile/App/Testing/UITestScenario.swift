@@ -21,6 +21,9 @@ enum UITestScenario: String {
     case profileSaveNetworkError = "profile-save-network-error"
     case taskManagement = "task-management"
     case familySettings = "family-settings"
+    case dailyTasks = "daily-tasks"
+    case dailyTasksKids = "daily-tasks-kids"
+    case dailyTasksFailure = "daily-tasks-failure"
 
     static var current: UITestScenario? {
         ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"].flatMap(UITestScenario.init(rawValue:))
@@ -34,7 +37,7 @@ enum UITestScenario: String {
             inviteJoinAttemptStore: UITestInviteJoinAttemptStore(),
             inviteLinkParser: InviteLinkParser(baseURL: URL(string: "https://example.invalid")!),
             familyRepository: UITestFamilyRepository(scenario: self),
-            taskRepository: UITestTaskRepository(),
+            taskRepository: UITestTaskRepository(scenario: self),
             profileRepository: UITestProfileRepository(scenario: self),
             credentialStore: UITestCredentialStore(),
             installationProofStore: UITestInstallationProof(),
@@ -49,8 +52,12 @@ enum UITestScenario: String {
             sessionStore.apply(.session(Self.inviteSession(role: role)))
             return
         }
-        if self == .taskManagement || self == .familySettings {
+        if self == .taskManagement || self == .familySettings || self == .dailyTasks || self == .dailyTasksFailure {
             sessionStore.apply(.session(Self.inviteSession(role: .administrator)))
+            return
+        }
+        if self == .dailyTasksKids {
+            sessionStore.apply(.session(Self.inviteSession(role: .kid)))
             return
         }
         if self == .inviteSwitch {
@@ -296,57 +303,120 @@ private enum UITestTaskFixtures {
     static let completedTaskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000b2")!
     static let awaitingConfirmationTaskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000b3")!
     static let missionProtectedTaskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000b4")!
+    static let todayPendingTaskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000c1")!
+    static let todayAwaitingConfirmationTaskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000c2")!
+    static let todayCompletedTaskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000c3")!
 }
 
-/// Deterministic, backend-free double for the `.taskManagement` UI scenario. Pre-seeds one task
-/// per state so `UI_TEST_TASK_ROUTE=detail:<id>` can reach each without a real backend.
+/// Deterministic, backend-free double for the `.taskManagement`/`.dailyTasks*` UI scenarios.
+/// Pre-seeds one task per state so `UI_TEST_TASK_ROUTE=detail:<id>` can reach each without a real
+/// backend, plus a few tasks dated "today" (computed at launch) for TEL-010/TEL-040.
 private actor UITestTaskRepository: TaskRepository {
-    private var tasks: [UUID: FamilyTask] = [
-        UITestTaskFixtures.pendingTaskID: FamilyTask(
-            id: UITestTaskFixtures.pendingTaskID,
-            title: "Arrumar os brinquedos",
-            weight: .medium,
-            scheduledDate: "2026-10-10",
-            assigneeIDs: [UITestTaskFixtures.memberID],
-            note: nil,
-            status: .pending,
-            routineID: nil,
-            createdAt: Date(timeIntervalSince1970: 1_760_000_000)
-        ),
-        UITestTaskFixtures.completedTaskID: FamilyTask(
-            id: UITestTaskFixtures.completedTaskID,
-            title: "Lavar a louça",
-            weight: .low,
-            scheduledDate: "2026-10-08",
-            assigneeIDs: [],
-            note: nil,
-            status: .completed,
-            routineID: nil,
-            createdAt: Date(timeIntervalSince1970: 1_760_000_000)
-        ),
-        UITestTaskFixtures.awaitingConfirmationTaskID: FamilyTask(
-            id: UITestTaskFixtures.awaitingConfirmationTaskID,
-            title: "Guardar a roupa",
-            weight: .high,
-            scheduledDate: "2026-10-09",
-            assigneeIDs: [UITestTaskFixtures.kidMemberID],
-            note: "Separar por cor",
-            status: .awaitingConfirmation,
-            routineID: nil,
-            createdAt: Date(timeIntervalSince1970: 1_760_000_000)
-        ),
-        UITestTaskFixtures.missionProtectedTaskID: FamilyTask(
-            id: UITestTaskFixtures.missionProtectedTaskID,
-            title: "Organizar a sala",
-            weight: .medium,
-            scheduledDate: "2026-10-07",
-            assigneeIDs: [],
-            note: nil,
-            status: .completed,
-            routineID: nil,
-            createdAt: Date(timeIntervalSince1970: 1_760_000_000)
-        ),
-    ]
+    private let scenario: UITestScenario
+    private var tasks: [UUID: FamilyTask]
+
+    init(scenario: UITestScenario) {
+        self.scenario = scenario
+        let today = Self.wireString(from: Date())
+        // Yesterday is left task-free on purpose: it's the fixed, always-in-range empty day the
+        // UI tests navigate to via the carousel (no month-rollover risk near month boundaries).
+        tasks = [
+            UITestTaskFixtures.pendingTaskID: FamilyTask(
+                id: UITestTaskFixtures.pendingTaskID,
+                title: "Arrumar os brinquedos",
+                weight: .medium,
+                scheduledDate: "2026-10-10",
+                assigneeIDs: [UITestTaskFixtures.memberID],
+                note: nil,
+                status: .pending,
+                routineID: nil,
+                createdAt: Date(timeIntervalSince1970: 1_760_000_000)
+            ),
+            UITestTaskFixtures.completedTaskID: FamilyTask(
+                id: UITestTaskFixtures.completedTaskID,
+                title: "Lavar a louça",
+                weight: .low,
+                scheduledDate: "2026-10-08",
+                assigneeIDs: [],
+                note: nil,
+                status: .completed,
+                routineID: nil,
+                createdAt: Date(timeIntervalSince1970: 1_760_000_000)
+            ),
+            UITestTaskFixtures.awaitingConfirmationTaskID: FamilyTask(
+                id: UITestTaskFixtures.awaitingConfirmationTaskID,
+                title: "Guardar a roupa",
+                weight: .high,
+                scheduledDate: "2026-10-09",
+                assigneeIDs: [UITestTaskFixtures.kidMemberID],
+                note: "Separar por cor",
+                status: .awaitingConfirmation,
+                routineID: nil,
+                createdAt: Date(timeIntervalSince1970: 1_760_000_000)
+            ),
+            UITestTaskFixtures.missionProtectedTaskID: FamilyTask(
+                id: UITestTaskFixtures.missionProtectedTaskID,
+                title: "Organizar a sala",
+                weight: .medium,
+                scheduledDate: "2026-10-07",
+                assigneeIDs: [],
+                note: nil,
+                status: .completed,
+                routineID: nil,
+                createdAt: Date(timeIntervalSince1970: 1_760_000_000)
+            ),
+            UITestTaskFixtures.todayPendingTaskID: FamilyTask(
+                id: UITestTaskFixtures.todayPendingTaskID,
+                title: "Passear com o cachorro",
+                weight: .low,
+                scheduledDate: today,
+                assigneeIDs: [UITestTaskFixtures.memberID],
+                note: nil,
+                status: .pending,
+                routineID: nil,
+                createdAt: Date(timeIntervalSince1970: 1_760_000_100)
+            ),
+            UITestTaskFixtures.todayAwaitingConfirmationTaskID: FamilyTask(
+                id: UITestTaskFixtures.todayAwaitingConfirmationTaskID,
+                title: "Guardar as roupas limpas",
+                weight: .medium,
+                scheduledDate: today,
+                assigneeIDs: [UITestTaskFixtures.kidMemberID, UITestTaskFixtures.memberID],
+                note: nil,
+                status: .awaitingConfirmation,
+                routineID: nil,
+                createdAt: Date(timeIntervalSince1970: 1_760_000_200)
+            ),
+            UITestTaskFixtures.todayCompletedTaskID: FamilyTask(
+                id: UITestTaskFixtures.todayCompletedTaskID,
+                title: "Escovar os dentes",
+                weight: .low,
+                scheduledDate: today,
+                assigneeIDs: [],
+                note: nil,
+                status: .completed,
+                routineID: nil,
+                createdAt: Date(timeIntervalSince1970: 1_760_000_300)
+            ),
+        ]
+    }
+
+    private var role: MemberRole {
+        scenario == .dailyTasksKids ? .kid : .administrator
+    }
+
+    private static func displayStatus(for status: TaskStatus, role: MemberRole) -> TaskStatus {
+        guard status == .awaitingConfirmation else { return status }
+        return role == .kid ? .awaitingConfirmation : .pending
+    }
+
+    private static func wireString(from date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.timeZone = .current
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: date)
+    }
 
     func createTask(_ command: CreateTaskCommand, accessToken: String) async throws -> FamilyTask {
         let task = FamilyTask(
@@ -404,6 +474,35 @@ private actor UITestTaskRepository: TaskRepository {
         }
         tasks.removeValue(forKey: id)
         return id
+    }
+
+    /// Well before any fixture date and any plausible "today" during a test run (RN49's lower bound).
+    private static let familyCreatedAt = "2020-01-01"
+
+    func dailyTasks(referenceDate: String, cursor: String?, accessToken: String) async throws -> OwnTaskPage {
+        if scenario == .dailyTasksFailure {
+            throw TaskError.unavailable
+        }
+        let items = tasks.values
+            .filter { $0.scheduledDate == referenceDate }
+            .sorted { $0.createdAt < $1.createdAt }
+            .map { OwnTaskListItem(task: $0, displayStatus: Self.displayStatus(for: $0.status, role: role)) }
+        return OwnTaskPage(items: items, nextCursor: nil, familyCreatedAt: Self.familyCreatedAt)
+    }
+
+    func dailyProgress(referenceDate: String, accessToken: String) async throws -> DailyProgress {
+        if scenario == .dailyTasksFailure {
+            throw TaskError.unavailable
+        }
+        let dayTasks = tasks.values.filter { $0.scheduledDate == referenceDate }
+        let completed = dayTasks.filter { $0.status == .completed }.count
+        let total = dayTasks.count
+        return DailyProgress(
+            total: total,
+            completed: completed,
+            percentage: total == 0 ? nil : Double(completed) / Double(total) * 100,
+            familyCreatedAt: Self.familyCreatedAt
+        )
     }
 }
 

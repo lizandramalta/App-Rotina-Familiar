@@ -1,8 +1,7 @@
 import SwiftUI
 
-/// Hosts the adult "Minhas tarefas" tab's `NavigationStack` (MA-09). The root content is still
-/// the SCRUM-39 placeholder — unchanged and out of this card's scope — but the stack now knows
-/// how to push TEL-012/TEL-013, ready for that future list to push into once it exists.
+/// Hosts the adult "Minhas tarefas" tab's `NavigationStack` (MA-09). Root content is TEL-010
+/// (SCRUM-39): the stack pushes TEL-012/013 from there, same routes used since SCRUM-37.
 struct MyTasksTabView: View {
     let taskRepository: any TaskRepository
     let familyRepository: any FamilyRepository
@@ -12,12 +11,13 @@ struct MyTasksTabView: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            ContentUnavailableView {
-                Label("destination.myTasks", systemImage: "checklist")
-            } description: {
-                Text("destination.contentPending")
-            }
-            .navigationTitle("destination.myTasks")
+            DailyTaskListView(
+                audience: .adult,
+                repository: taskRepository,
+                accessToken: accessToken,
+                onSelectTask: { path.append(.detail($0)) },
+                onCreateTask: { path.append(.create) }
+            )
             .accessibilityIdentifier("access.destination.adult")
             .navigationDestination(for: FamilyTaskRoute.self) { route in
                 destination(for: route)
