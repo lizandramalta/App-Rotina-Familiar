@@ -3,6 +3,7 @@ import { asPostgresClient } from '../../../shared/infrastructure/postgres/postgr
 import {
   MediaPurpose,
   MediaState,
+  type MediaContentRecord,
   type MediaRecord,
   type MediaRepositoryPort,
 } from '../application/media-ports.js';
@@ -11,6 +12,12 @@ interface MediaRow {
   id: string;
   owner_member_id: string;
   purpose: string;
+  state: string;
+}
+
+interface MediaContentRow {
+  object_key: string;
+  content_type: string | null;
   state: string;
 }
 
@@ -77,6 +84,31 @@ export class PostgresMediaRepository implements MediaRepositoryPort {
       id: row.id,
       ownerMemberId: row.owner_member_id,
       purpose: row.purpose,
+      state: row.state,
+    };
+  }
+
+  public async findContentInFamily(
+    tx: TransactionContext,
+    params: { readonly familyId: string; readonly mediaId: string },
+  ): Promise<MediaContentRecord | undefined> {
+    const result = await asPostgresClient(tx).query<MediaContentRow>(
+      `select object_key, content_type, state
+         from app.media_assets
+        where family_id = $1 and id = $2`,
+      [params.familyId, params.mediaId],
+    );
+
+    const row = result.rows[0];
+    if (row === undefined || !isState(row.state)) {
+      return undefined;
+    }
+
+    // Todo upload é normalizado para JPEG (ImageProcessorPort), então é o
+    // padrão seguro caso o tipo ainda não tenha sido gravado.
+    return {
+      objectKey: row.object_key,
+      contentType: row.content_type ?? 'image/jpeg',
       state: row.state,
     };
   }

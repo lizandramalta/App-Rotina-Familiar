@@ -26,6 +26,7 @@ export interface TestApp {
   readonly uploadOnboardingMedia: UseCaseMock;
   readonly updateOwnProfile: UseCaseMock;
   readonly getOwnProfile: UseCaseMock;
+  readonly getMediaContent: UseCaseMock;
   readonly getOwnBadges: UseCaseMock;
   readonly getBadgeContributions: UseCaseMock;
   readonly authenticateSession: UseCaseMock;
@@ -84,6 +85,7 @@ export function buildTestApp(): TestApp {
   const uploadOnboardingMedia: UseCaseMock = { execute: vi.fn() };
   const updateOwnProfile: UseCaseMock = { execute: vi.fn() };
   const getOwnProfile: UseCaseMock = { execute: vi.fn() };
+  const getMediaContent: UseCaseMock = { execute: vi.fn() };
   const getOwnBadges: UseCaseMock = { execute: vi.fn() };
   const getBadgeContributions: UseCaseMock = { execute: vi.fn() };
   const authenticateSession: UseCaseMock = { execute: vi.fn().mockResolvedValue(TEST_ACTOR) };
@@ -133,6 +135,7 @@ export function buildTestApp(): TestApp {
     uploadOnboardingMediaUseCase: uploadOnboardingMedia,
     updateOwnProfileUseCase: updateOwnProfile,
     getOwnProfileUseCase: getOwnProfile,
+    getMediaContentUseCase: getMediaContent,
     getOwnBadgesUseCase: getOwnBadges,
     getBadgeContributionsUseCase: getBadgeContributions,
     createTaskUseCase: createTask,
@@ -171,6 +174,7 @@ export function buildTestApp(): TestApp {
     uploadOnboardingMedia,
     updateOwnProfile,
     getOwnProfile,
+    getMediaContent,
     getOwnBadges,
     getBadgeContributions,
     authenticateSession,

@@ -15,6 +15,7 @@ import { TEST_ACTOR } from '../support/build-test-app.js';
 
 const PROFILE: OwnProfileRecord = {
   name: 'Maria Silva',
+  familyName: 'Família Silva',
   nickname: 'Mari',
   photoMediaId: 'media-1',
 };
@@ -48,7 +49,7 @@ describe('GetOwnProfileUseCase — SPEC-006', () => {
     });
   });
 
-  it('CA-01 returns name, nickname, photo, total participations and next tier', async () => {
+  it('CA-01 returns name, familyName, nickname, photo, total participations and next tier', async () => {
     const result = await useCase.execute(TEST_ACTOR);
 
     expect(profileRepository.findOwnProfile).toHaveBeenCalledWith(expect.anything(), {
@@ -58,6 +59,7 @@ describe('GetOwnProfileUseCase — SPEC-006', () => {
     expect(result).toEqual({
       memberId: TEST_ACTOR.memberId,
       name: 'Maria Silva',
+      familyName: 'Família Silva',
       nickname: 'Mari',
       photoMediaId: 'media-1',
       totalParticipations: 7,

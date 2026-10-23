@@ -34,6 +34,7 @@ export class GetOwnProfileUseCase {
       return toOwnProfileResponse({
         memberId: actor.memberId,
         name: profile.name,
+        familyName: profile.familyName,
         nickname: profile.nickname,
         photoMediaId: profile.photoMediaId,
         progress,

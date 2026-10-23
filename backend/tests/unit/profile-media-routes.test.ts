@@ -8,6 +8,7 @@ import {
 } from '../../src/modules/media/domain/media-errors.js';
 import { MAX_UPLOAD_INPUT_BYTES } from '../../src/presentation/http/media-routes.js';
 import {
+  ActionNotAllowedError,
   DependencyUnavailableError,
   NotFoundError,
   ValidationError,
@@ -17,6 +18,7 @@ import { buildTestApp, TEST_ACTOR, type TestApp } from '../support/build-test-ap
 const OWN_PROFILE_RESULT = {
   memberId: TEST_ACTOR.memberId,
   name: 'Maria Silva',
+  familyName: 'Família Silva',
   nickname: 'Mari',
   photoMediaId: null as string | null,
   totalParticipations: 7,
@@ -75,6 +77,7 @@ describe('PATCH /v1/me/profile', () => {
     expect(response.json()).toEqual({ ...OWN_PROFILE_RESULT, photoMediaId: MEDIA_ID });
     expect(test.updateOwnProfile.execute).toHaveBeenCalledWith({
       actor: TEST_ACTOR,
+      name: undefined,
       nickname: undefined,
       photoMediaId: MEDIA_ID,
     });
@@ -98,6 +101,7 @@ describe('PATCH /v1/me/profile', () => {
     expect(response.json().nickname).toBe('Mi');
     expect(test.updateOwnProfile.execute).toHaveBeenCalledWith({
       actor: TEST_ACTOR,
+      name: undefined,
       nickname: 'Mi',
       photoMediaId: undefined,
     });
@@ -109,6 +113,7 @@ describe('PATCH /v1/me/profile', () => {
     expect(response.statusCode).toBe(200);
     expect(test.updateOwnProfile.execute).toHaveBeenCalledWith({
       actor: TEST_ACTOR,
+      name: undefined,
       nickname: undefined,
       photoMediaId: undefined,
     });
@@ -157,6 +162,43 @@ describe('PATCH /v1/me/profile', () => {
       code: 'VALIDATION_FAILED',
       fieldErrors: { nickname: ['NICKNAME_INVALID_LENGTH'] },
     });
+  });
+
+  it('CA-02 forwards name to the use case', async () => {
+    await patch({ name: 'Maria S.' });
+
+    expect(test.updateOwnProfile.execute).toHaveBeenCalledWith({
+      actor: TEST_ACTOR,
+      name: 'Maria S.',
+      nickname: undefined,
+      photoMediaId: undefined,
+    });
+  });
+
+  it('CA-13 maps NAME_INVALID_LENGTH to 422 VALIDATION_FAILED, including a null name', async () => {
+    test.updateOwnProfile.execute.mockRejectedValueOnce(
+      new ValidationError('The name is invalid.', { name: ['NAME_INVALID_LENGTH'] }),
+    );
+
+    const response = await patch({ name: null });
+
+    expect(response.statusCode).toBe(422);
+    expect(response.json()).toMatchObject({
+      code: 'VALIDATION_FAILED',
+      fieldErrors: { name: ['NAME_INVALID_LENGTH'] },
+    });
+    expect(test.updateOwnProfile.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ name: null }),
+    );
+  });
+
+  it('CA-14 maps a Kids rejection to 403 ACTION_NOT_ALLOWED', async () => {
+    test.updateOwnProfile.execute.mockRejectedValueOnce(new ActionNotAllowedError());
+
+    const response = await patch({ name: 'Kid' });
+
+    expect(response.statusCode).toBe(403);
+    expect(response.json().code).toBe('ACTION_NOT_ALLOWED');
   });
 
   it('maps domain errors to their contract status', async () => {

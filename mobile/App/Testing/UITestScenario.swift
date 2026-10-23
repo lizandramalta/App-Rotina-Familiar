@@ -16,6 +16,9 @@ enum UITestScenario: String {
     case inviteInvalidPassword = "invite-invalid-password"
     case inviteRecovery = "invite-recovery"
     case inviteRecoveryUnavailable = "invite-recovery-unavailable"
+    case profileAdult = "profile-adult"
+    case profileKids = "profile-kids"
+    case profileSaveNetworkError = "profile-save-network-error"
     case taskManagement = "task-management"
     case dailyTasks = "daily-tasks"
     case dailyTasksKids = "daily-tasks-kids"
@@ -34,6 +37,7 @@ enum UITestScenario: String {
             inviteLinkParser: InviteLinkParser(baseURL: URL(string: "https://example.invalid")!),
             familyRepository: UITestFamilyRepository(scenario: self),
             taskRepository: UITestTaskRepository(scenario: self),
+            profileRepository: UITestProfileRepository(scenario: self),
             credentialStore: UITestCredentialStore(),
             installationProofStore: UITestInstallationProof(),
             appleAuthenticator: UITestAppleAuthenticator()
@@ -42,6 +46,11 @@ enum UITestScenario: String {
 
     @MainActor
     func bootstrap(_ sessionStore: AppSessionStore) {
+        if [.profileAdult, .profileKids, .profileSaveNetworkError].contains(self) {
+            let role: MemberRole = self == .profileKids ? .kid : .administrator
+            sessionStore.apply(.session(Self.inviteSession(role: role)))
+            return
+        }
         if self == .taskManagement || self == .dailyTasks || self == .dailyTasksFailure {
             sessionStore.apply(.session(Self.inviteSession(role: .administrator)))
             return
@@ -442,6 +451,92 @@ private actor UITestTaskRepository: TaskRepository {
             familyCreatedAt: Self.familyCreatedAt
         )
     }
+}
+
+/// Deterministic profile data so UI scenarios reach TEL-030/MOD-009/TEL-054 without a network.
+private actor UITestProfileRepository: ProfileRepository {
+    private let scenario: UITestScenario
+    private var profile: OwnProfile
+    private var awards: [BadgeAward]
+    private let nextTier: NextBadgeTier?
+
+    init(scenario: UITestScenario) {
+        self.scenario = scenario
+        let awardedAt = Date(timeIntervalSince1970: 1_790_000_000)
+        if scenario == .profileKids {
+            profile = Self.profile(name: "Léo", total: 7)
+            awards = [BadgeAward(awardID: Self.bronzeID, tier: .bronze, requiredMissionCount: 5, awardedAt: awardedAt)]
+            nextTier = NextBadgeTier(code: .silver, requiredMissionCount: 10, remaining: 3)
+        } else {
+            profile = Self.profile(name: "Maria Silva", total: 12)
+            awards = [
+                BadgeAward(awardID: Self.bronzeID, tier: .bronze, requiredMissionCount: 5, awardedAt: awardedAt),
+                BadgeAward(awardID: Self.silverID, tier: .silver, requiredMissionCount: 10, awardedAt: awardedAt),
+            ]
+            nextTier = NextBadgeTier(code: .gold, requiredMissionCount: 25, remaining: 13)
+        }
+    }
+
+    private static let bronzeID = UUID(uuidString: "00000000-0000-0000-0000-0000000000b1")!
+    private static let silverID = UUID(uuidString: "00000000-0000-0000-0000-0000000000b2")!
+
+    private static func profile(name: String, total: Int) -> OwnProfile {
+        OwnProfile(
+            memberID: UUID(),
+            name: name,
+            familyName: "Família Silva",
+            nickname: nil,
+            photoMediaID: nil,
+            totalParticipations: total,
+            nextTier: nil
+        )
+    }
+
+    func getOwnProfile(accessToken: String) async throws -> OwnProfile { profile }
+
+    func updateOwnProfile(_ command: UpdateOwnProfileCommand, accessToken: String) async throws -> OwnProfile {
+        if scenario == .profileSaveNetworkError {
+            throw ProfileError.network
+        }
+        let nickname: String? = switch command.nickname {
+        case .unchanged: profile.nickname
+        case let .set(value): value
+        case .clear: nil
+        }
+        profile = OwnProfile(
+            memberID: profile.memberID,
+            name: command.name ?? profile.name,
+            familyName: profile.familyName,
+            nickname: nickname,
+            photoMediaID: profile.photoMediaID,
+            totalParticipations: profile.totalParticipations,
+            nextTier: nextTier
+        )
+        return profile
+    }
+
+    func getOwnBadges(accessToken: String) async throws -> BadgesOverview {
+        BadgesOverview(totalParticipations: profile.totalParticipations, nextTier: nextTier, awards: awards)
+    }
+
+    func getBadgeDetail(awardID: UUID, accessToken: String) async throws -> BadgeDetail {
+        guard let award = awards.first(where: { $0.awardID == awardID }) else {
+            throw ProfileError.notFound
+        }
+        return BadgeDetail(
+            awardID: award.awardID,
+            tier: award.tier,
+            awardedAt: award.awardedAt,
+            contributingMissions: [
+                ContributingMission(missionID: UUID(), title: "Organizar a sala", completedAt: Date(timeIntervalSince1970: 1_789_000_000)),
+                ContributingMission(missionID: UUID(), title: "Arrumar a cozinha", completedAt: Date(timeIntervalSince1970: 1_789_500_000)),
+            ]
+        )
+    }
+
+    func uploadProfilePhoto(_ jpeg: Data, accessToken: String) async throws -> String { "ui-test-media" }
+
+    func getMediaContent(mediaID: String, accessToken: String) async throws -> Data { Data() }
 }
 
 private final class UITestCredentialStore: SessionCredentialStoring, @unchecked Sendable {

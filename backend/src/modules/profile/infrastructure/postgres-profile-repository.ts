@@ -11,6 +11,7 @@ import type {
 
 interface ProfileRow {
   display_name: string;
+  family_name: string;
   nickname: string | null;
   photo_media_id: string | null;
 }
@@ -49,15 +50,21 @@ export class PostgresProfileRepository implements ProfileRepositoryPort {
     params: { readonly familyId: string; readonly memberId: string },
   ): Promise<OwnProfileRecord | undefined> {
     const result = await asPostgresClient(tx).query<ProfileRow>(
-      `select display_name, nickname, photo_media_id
-         from app.members
-        where family_id = $1 and id = $2`,
+      `select m.display_name, f.name as family_name, m.nickname, m.photo_media_id
+         from app.members m
+         join app.families f on f.id = m.family_id
+        where m.family_id = $1 and m.id = $2`,
       [params.familyId, params.memberId],
     );
     const row = result.rows[0];
     return row === undefined
       ? undefined
-      : { name: row.display_name, nickname: row.nickname, photoMediaId: row.photo_media_id };
+      : {
+          name: row.display_name,
+          familyName: row.family_name,
+          nickname: row.nickname,
+          photoMediaId: row.photo_media_id,
+        };
   }
 
   public async setPhoto(
@@ -76,6 +83,23 @@ export class PostgresProfileRepository implements ProfileRepositoryPort {
           set photo_media_id = $3, updated_at = $4
         where family_id = $1 and id = $2`,
       [params.familyId, params.memberId, params.photoMediaId, params.updatedAt],
+    );
+  }
+
+  public async setName(
+    tx: TransactionContext,
+    params: {
+      readonly familyId: string;
+      readonly memberId: string;
+      readonly name: string;
+      readonly updatedAt: Date;
+    },
+  ): Promise<void> {
+    await asPostgresClient(tx).query(
+      `update app.members
+          set display_name = $3, updated_at = $4
+        where family_id = $1 and id = $2`,
+      [params.familyId, params.memberId, params.name, params.updatedAt],
     );
   }
 

@@ -9,6 +9,7 @@ export interface NextTierResponse {
 export interface OwnProfileResponse {
   readonly memberId: string;
   readonly name: string;
+  readonly familyName: string;
   readonly nickname: string | null;
   readonly photoMediaId: string | null;
   readonly totalParticipations: number;
@@ -30,6 +31,7 @@ export function toNextTierResponse(progress: BadgeProgress): NextTierResponse | 
 export function toOwnProfileResponse(params: {
   readonly memberId: string;
   readonly name: string;
+  readonly familyName: string;
   readonly nickname: string | null;
   readonly photoMediaId: string | null;
   readonly progress: BadgeProgress;
@@ -37,6 +39,7 @@ export function toOwnProfileResponse(params: {
   return {
     memberId: params.memberId,
     name: params.name,
+    familyName: params.familyName,
     nickname: params.nickname,
     photoMediaId: params.photoMediaId,
     totalParticipations: params.progress.totalParticipations,

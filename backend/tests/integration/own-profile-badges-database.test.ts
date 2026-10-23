@@ -238,6 +238,36 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
       expect(row.rows).toEqual([{ nickname: 'Mari', photo_media_id: mediaId }]);
     });
 
+    it('CA-01/CA-02 returns familyName and persists a new name for an adult', async () => {
+      const family = await seedFamily();
+
+      const result = await updateOwnProfile().execute({
+        actor: actor(family, family.memberId),
+        name: '  Maria S.  ',
+      });
+      expect(result).toMatchObject({ name: 'Maria S.', familyName: 'Casa de teste' });
+
+      const fetched = await getOwnProfile().execute(actor(family, family.memberId));
+      expect(fetched).toMatchObject({ name: 'Maria S.', familyName: 'Casa de teste' });
+    });
+
+    it('CA-14 refuses a Kids name edit without touching the stored name', async () => {
+      const family = await seedFamily();
+
+      await expect(
+        updateOwnProfile().execute({
+          actor: actor(family, family.memberId, MemberRole.KIDS),
+          name: 'Outro nome',
+        }),
+      ).rejects.toMatchObject({ statusCode: 403, code: 'ACTION_NOT_ALLOWED' });
+
+      const row = await container.dbPool.query<{ display_name: string }>(
+        `select display_name from app.members where family_id = $1 and id = $2`,
+        [family.familyId, family.memberId],
+      );
+      expect(row.rows).toEqual([{ display_name: 'Maria Silva' }]);
+    });
+
     it('CA-09 rolls back the whole PATCH when the photo is invalid, keeping the previous nickname', async () => {
       const family = await seedFamily();
 

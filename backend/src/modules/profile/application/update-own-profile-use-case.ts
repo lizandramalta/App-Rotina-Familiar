@@ -1,8 +1,12 @@
 import type { ActorContext } from '../../../shared/application/actor-context.js';
 import type { Clock } from '../../../shared/application/clock.js';
 import type { TransactionRunner } from '../../../shared/application/transaction-runner.js';
-import { NotFoundError, ValidationError } from '../../../shared/domain/domain-error.js';
-import { normalizeNickname } from '../../family/domain/text-rules.js';
+import {
+  ActionNotAllowedError,
+  NotFoundError,
+  ValidationError,
+} from '../../../shared/domain/domain-error.js';
+import { normalizeName, normalizeNickname } from '../../family/domain/text-rules.js';
 import {
   PhotoMediaNotOwnedError,
   PhotoMediaNotReadyError,
@@ -13,15 +17,27 @@ import {
   MediaState,
   type MediaRepositoryPort,
 } from '../../media/application/media-ports.js';
+import { MemberRole } from '../../../shared/domain/member-role.js';
 import type { ProfileRepositoryPort } from './profile-repository-port.js';
 import { toOwnProfileResponse, type OwnProfileResponse } from './own-profile-response.js';
 
 export interface UpdateOwnProfileCommand {
   readonly actor: ActorContext;
+  /** Omitido preserva o nome; só titular adulto pode enviá-lo (SPEC-006 E-05). */
+  readonly name?: string | null;
   /** Omitido preserva o apelido vigente; `null`/vazio remove a configuração (RN63). */
   readonly nickname?: string | null;
   /** Omitido preserva a foto vigente; `null` remove a foto. */
   readonly photoMediaId?: string | null;
+}
+
+function validateName(input: string | null): string {
+  const normalized = normalizeName(input);
+  if ('value' in normalized) {
+    return normalized.value;
+  }
+  // Vazio, acima de 60 ou com controle: um só código de campo (SPEC-006 CA-13).
+  throw new ValidationError('The name is invalid.', { name: ['NAME_INVALID_LENGTH'] });
 }
 
 function validateNickname(input: string | null): string | null {
@@ -38,8 +54,8 @@ function validateNickname(input: string | null): string | null {
 }
 
 /**
- * `UpdateOwnProfile` (SPEC-006 Fase 1, CA-02/06/07/09): `nickname` e
- * `photoMediaId` são independentes e opcionais — omitir um campo preserva seu
+ * `UpdateOwnProfile` (SPEC-006, CA-02/06/07/09/13/14): `name` (só adulto),
+ * `nickname` e `photoMediaId` são independentes e opcionais — omitir um campo preserva seu
  * valor vigente. Nenhum dos dois altera papel, família ou modo Kids.
  */
 export class UpdateOwnProfileUseCase {
@@ -55,6 +71,11 @@ export class UpdateOwnProfileUseCase {
   public async execute(command: UpdateOwnProfileCommand): Promise<OwnProfileResponse> {
     const { actor } = command;
 
+    // Kids não editam o nome (CA-14); recusa antes de qualquer gravação.
+    if (command.name !== undefined && actor.role === MemberRole.KIDS) {
+      throw new ActionNotAllowedError();
+    }
+
     // Lock da família: a mídia é revalidada dentro dele, não antes (BA-08).
     return this.deps.transactionRunner.forFamily(actor.familyId, async (tx) => {
       const now = this.deps.clock.now();
@@ -65,6 +86,17 @@ export class UpdateOwnProfileUseCase {
       });
       if (current === undefined) {
         throw new NotFoundError('Member not found.');
+      }
+
+      let name = current.name;
+      if (command.name !== undefined) {
+        name = validateName(command.name);
+        await this.deps.profileRepository.setName(tx, {
+          familyId: actor.familyId,
+          memberId: actor.memberId,
+          name,
+          updatedAt: now,
+        });
       }
 
       let nickname = current.nickname;
@@ -124,7 +156,8 @@ export class UpdateOwnProfileUseCase {
 
       return toOwnProfileResponse({
         memberId: actor.memberId,
-        name: current.name,
+        name,
+        familyName: current.familyName,
         nickname,
         photoMediaId,
         progress,
