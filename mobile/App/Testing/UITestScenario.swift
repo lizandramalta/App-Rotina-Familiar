@@ -24,6 +24,8 @@ enum UITestScenario: String {
     case dailyTasks = "daily-tasks"
     case dailyTasksKids = "daily-tasks-kids"
     case dailyTasksFailure = "daily-tasks-failure"
+    case familyOverview = "family-overview"
+    case familyOverviewMember = "family-overview-member"
 
     static var current: UITestScenario? {
         ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"].flatMap(UITestScenario.init(rawValue:))
@@ -54,6 +56,14 @@ enum UITestScenario: String {
         }
         if self == .taskManagement || self == .familySettings || self == .dailyTasks || self == .dailyTasksFailure {
             sessionStore.apply(.session(Self.inviteSession(role: .administrator)))
+            return
+        }
+        if self == .familyOverview {
+            sessionStore.apply(.session(Self.inviteSession(role: .administrator)))
+            return
+        }
+        if self == .familyOverviewMember {
+            sessionStore.apply(.session(Self.inviteSession(role: .member)))
             return
         }
         if self == .dailyTasksKids {
