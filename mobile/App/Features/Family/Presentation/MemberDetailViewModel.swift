@@ -49,7 +49,7 @@ final class MemberDetailViewModel {
         }
     }
 
-    /// A failed reload keeps the last confirmed detail (UX-003 §6) and only reports the error.
+    /// Only a transient failure (network) keeps the last confirmed detail (UX-003 §6); 403 and 404 clear it.
     func load() async {
         guard !isLoading else { return }
         failure = nil
@@ -63,6 +63,8 @@ final class MemberDetailViewModel {
         do {
             detail = try await familyRepository.getMemberDetail(memberID: memberID, accessToken: token)
         } catch FamilyError.actionNotAllowed {
+            // Access was refused: stale content of a member the viewer may no longer see must not stay on screen.
+            detail = nil
             failure = .notAllowed
         } catch FamilyError.rejected {
             // 404: the member no longer exists, so stale data must not stay on screen.

@@ -132,4 +132,26 @@ struct MemberDetailViewModelTests {
         #expect(viewModel.failure == .network)
         #expect(repository.memberDetailRequests.isEmpty)
     }
+
+    @Test("SPEC-003 CA-03 a 403 on reload clears the previously loaded detail")
+    func reloadForbiddenClearsDetail() async {
+        let repository = FamilyRepositorySpy(memberDetailResult: .success(detail(manageMembers: true)))
+        let viewModel = MemberDetailViewModel(
+            memberID: memberID,
+            session: ActiveFamilySession(memberID: UUID(), familyID: UUID(), role: .administrator, isFamilyCreator: false),
+            familyRepository: repository,
+            accessTokenProvider: { "token-1" }
+        )
+        await viewModel.load()
+        #expect(viewModel.detail != nil)
+        repository.setMemberDetailResult(.failure(FamilyError.actionNotAllowed))
+
+        await viewModel.load()
+
+        #expect(viewModel.detail == nil)
+        #expect(viewModel.failure == .notAllowed)
+        #expect(viewModel.errorMessage != nil)
+        #expect(!viewModel.isCreator)
+        #expect(!viewModel.canManage)
+    }
 }
