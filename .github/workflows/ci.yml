@@ -81,22 +81,30 @@ jobs:
           cp Configuration/Development.xcconfig.example Configuration/Development.xcconfig
           cp Configuration/Production.xcconfig.example Configuration/Production.xcconfig
 
-      - name: Build for iOS Simulator
+      - name: Select an available iPhone simulator
+        id: simulator
         run: |
-          xcodebuild build \
-            -project mobile.xcodeproj \
-            -scheme FamilyRoutine \
-            -destination 'generic/platform=iOS Simulator' \
-            CODE_SIGNING_ALLOWED=NO
-
-      - name: Run FoundationTests on an available simulator
-        run: |
-          # O nome do simulador muda entre imagens do runner; resolvemos o UDID
-          # do primeiro iPhone disponível em vez de fixar um modelo.
+          # Simulator names vary between runner images; use the first available iPhone.
           udid=$(xcrun simctl list devices available --json \
             | python3 -c 'import json,sys;d=json.load(sys.stdin)["devices"];print(next(x["udid"] for rt in d for x in d[rt] if "iOS" in rt and x["name"].startswith("iPhone")))')
-          xcodebuild test \
+          echo "udid=$udid" >> "$GITHUB_OUTPUT"
+
+      - name: Build app and test bundles for iOS Simulator
+        run: |
+          xcodebuild build-for-testing \
             -project mobile.xcodeproj \
             -scheme FamilyRoutine \
-            -destination "platform=iOS Simulator,id=$udid" \
+            -destination 'platform=iOS Simulator,id=${{ steps.simulator.outputs.udid }}' \
+            -derivedDataPath "$RUNNER_TEMP/mobile-derived-data" \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Run Mobile tests on two simulator workers
+        run: |
+          xcodebuild test-without-building \
+            -project mobile.xcodeproj \
+            -scheme FamilyRoutine \
+            -destination 'platform=iOS Simulator,id=${{ steps.simulator.outputs.udid }}' \
+            -derivedDataPath "$RUNNER_TEMP/mobile-derived-data" \
+            -parallel-testing-enabled YES \
+            -parallel-testing-worker-count 2 \
             CODE_SIGNING_ALLOWED=NO
