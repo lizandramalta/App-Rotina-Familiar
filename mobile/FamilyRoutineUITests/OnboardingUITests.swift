@@ -35,8 +35,7 @@ final class OnboardingUITests: XCTestCase {
     func testProfileRequiresNameAndBackPreservesTheDraft() {
         launch("onboarding")
 
-        app.buttons["profile.initial.continue"].tap()
-        XCTAssertTrue(app.staticTexts["Informe seu nome para continuar."].waitForExistence(timeout: 2))
+        XCTAssertFalse(app.buttons["profile.initial.continue"].isEnabled)
 
         openFamilyStep(name: "Maria")
         app.buttons["family.create.back"].tap()
@@ -139,10 +138,9 @@ final class OnboardingUITests: XCTestCase {
 
         app.buttons["family.onboarding.invite_button"].tap()
 
-        let closeButton = app.buttons["Close"].exists ? app.buttons["Close"] : app.buttons["Fechar"]
-        if closeButton.waitForExistence(timeout: 3) {
-            closeButton.tap()
-        }
+        let dismissRegion = app.otherElements["PopoverDismissRegion"].firstMatch
+        XCTAssertTrue(dismissRegion.waitForExistence(timeout: 5))
+        dismissRegion.tap()
 
         XCTAssertTrue(app.buttons["family.onboarding.finish_invites"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["family.onboarding.finish_invites"].isEnabled)
