@@ -1172,6 +1172,76 @@
         }
       }
     },
+    "family.settings.hub.creator_role": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · Criador da família"
+          }
+        }
+      }
+    },
+    "family.settings.hub.family_section": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Família"
+          }
+        }
+      }
+    },
+    "family.settings.hub.members_footer": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toque em um membro para editar dados, papel ou Modo Kids, gerar convite ou remover."
+          }
+        }
+      }
+    },
+    "family.settings.hub.members_section": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Membros · %lld"
+          }
+        }
+      }
+    },
+    "family.settings.hub.timezone": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fuso horário"
+          }
+        }
+      }
+    },
+    "family.settings.hub.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configurações da família"
+          }
+        }
+      }
+    },
+    "family.settings.hub.you": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(você)"
+          }
+        }
+      }
+    },
     "family.settings.loading": {
       "localizations": {
         "pt-BR": {

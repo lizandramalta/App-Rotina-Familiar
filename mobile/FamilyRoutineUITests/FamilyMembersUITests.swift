@@ -25,6 +25,16 @@ final class FamilyMembersUITests: XCTestCase {
         app.buttons["family.members.add.action"]
     }
 
+    private var settingsButton: XCUIElement {
+        app.buttons["family.navigation.settings_button"]
+    }
+
+    private func openSettingsHub() {
+        XCTAssertTrue(settingsButton.waitForExistence(timeout: 5))
+        settingsButton.tap()
+        XCTAssertTrue(app.navigationBars["Configurações da família"].waitForExistence(timeout: 5))
+    }
+
     func testAdminSeesAddActionAndCanOpenMemberDetail() {
         launch("family-overview")
 
@@ -34,8 +44,8 @@ final class FamilyMembersUITests: XCTestCase {
         XCTAssertEqual(memberRows.count, 2)
         XCTAssertTrue(app.staticTexts["Maria Silva"].exists)
         XCTAssertTrue(app.staticTexts["Rafa Silva"].exists)
-        XCTAssertTrue(addAction.exists)
-        XCTAssertTrue(addAction.isHittable)
+        XCTAssertTrue(settingsButton.exists)
+        XCTAssertFalse(addAction.exists, "TEL-050 no longer hosts the add entry")
 
         app.staticTexts["Maria Silva"].tap()
 
@@ -55,12 +65,24 @@ final class FamilyMembersUITests: XCTestCase {
         XCTAssertTrue(memberRows.firstMatch.waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["Maria Silva"].exists)
         XCTAssertFalse(addAction.exists, "SPEC-003 CA-02: only Administrators see the add entry")
-        XCTAssertFalse(app.buttons["family.navigation.settings_button"].exists)
+        XCTAssertFalse(settingsButton.exists)
+    }
+
+    func testAdminOpensSettingsHubWithMembersAndAddAction() {
+        launch("family-overview")
+
+        openSettingsHub()
+
+        XCTAssertTrue(app.staticTexts["Fuso horário"].exists)
+        XCTAssertTrue(memberRows.firstMatch.waitForExistence(timeout: 5))
+        XCTAssertEqual(memberRows.count, 2)
+        XCTAssertTrue(addAction.exists)
     }
 
     func testAdminCanOpenCreateMemberFormAndSave() {
         launch("family-overview")
 
+        openSettingsHub()
         XCTAssertTrue(addAction.waitForExistence(timeout: 5))
         addAction.tap()
 

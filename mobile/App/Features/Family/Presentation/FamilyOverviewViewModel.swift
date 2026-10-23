@@ -30,6 +30,7 @@ final class FamilyOverviewViewModel {
     /// The server stays the authority (RNF07); this only hides controls the API would refuse.
     var canAddMember: Bool { session.role == .administrator }
     var canConfigureFamily: Bool { session.role == .administrator }
+    var currentMemberID: UUID { session.memberID }
     var hasMorePages: Bool { nextCursor != nil }
     var existingMemberIDs: Set<UUID> { Set(members.map(\.id)) }
 

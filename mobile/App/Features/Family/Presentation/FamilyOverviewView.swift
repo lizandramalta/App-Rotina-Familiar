@@ -3,7 +3,6 @@ import SwiftUI
 /// TEL-050 — Família (Figma nodes 372:4825, 372:5195, 561:173, UX-003 §5.1).
 struct FamilyOverviewView: View {
     @State private var viewModel: FamilyOverviewViewModel
-    @State private var editorViewModel: MemberEditorViewModel?
     private let makeFamilySettingsViewModel: (() -> FamilySettingsViewModel)?
 
     init(
@@ -16,17 +15,6 @@ struct FamilyOverviewView: View {
 
     var body: some View {
         List {
-            if viewModel.canAddMember {
-                Section {
-                    Button {
-                        editorViewModel = viewModel.makeMemberEditorViewModel()
-                    } label: {
-                        Label("family.members.add.action", systemImage: "plus.circle.fill")
-                    }
-                    .accessibilityIdentifier("family.members.add.action")
-                }
-            }
-
             if let message = viewModel.errorMessage {
                 Section {
                     Label {
@@ -72,10 +60,10 @@ struct FamilyOverviewView: View {
         .accessibilityIdentifier("family.members.list")
         .navigationTitle("family.overview.title")
         .toolbar {
-            if viewModel.canConfigureFamily, let makeFamilySettingsViewModel {
+            if viewModel.canConfigureFamily {
                 ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink {
-                        FamilySettingsView(viewModel: makeFamilySettingsViewModel())
+                        FamilySettingsHubView(viewModel: viewModel, makeFamilySettingsViewModel: makeFamilySettingsViewModel)
                     } label: {
                         Image(systemName: "gearshape")
                             .frame(minWidth: 44, minHeight: 44)
@@ -87,15 +75,6 @@ struct FamilyOverviewView: View {
         }
         .task { await viewModel.loadInitial() }
         .refreshable { await viewModel.loadInitial() }
-        .sheet(isPresented: Binding(get: { editorViewModel != nil }, set: { if !$0 { editorViewModel = nil } })) {
-            if let editorViewModel {
-                NavigationStack {
-                    MemberEditorView(viewModel: editorViewModel) {
-                        Task { await viewModel.memberCreated() }
-                    }
-                }
-            }
-        }
     }
 
     private func row(_ member: FamilyMember) -> some View {
