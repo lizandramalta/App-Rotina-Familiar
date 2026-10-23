@@ -43,6 +43,19 @@ nonisolated struct MemberInvite: Equatable, Sendable {
     let password: String
 }
 
+/// `GET /v1/family/members` row — consumed by Tasks' assignee picker (MOD-001).
+nonisolated struct FamilyMember: Identifiable, Equatable, Sendable {
+    let id: UUID
+    let name: String
+    let role: MemberRole
+    let isFamilyCreator: Bool
+}
+
+nonisolated struct FamilyMemberPage: Equatable, Sendable {
+    let items: [FamilyMember]
+    let nextCursor: String?
+}
+
 nonisolated enum FamilyError: Error, Equatable, Sendable {
     case creationGrantInvalid
     case validationFailed([String: [String]])

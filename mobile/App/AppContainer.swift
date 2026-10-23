@@ -7,6 +7,7 @@ final class AppContainer {
     private let inviteJoinAttemptStore: any InviteJoinAttemptStoring
     private let inviteLinkParser: InviteLinkParser
     private let familyRepository: any FamilyRepository
+    private let taskRepository: any TaskRepository
     private let profileRepository: any ProfileRepository
     private let credentialStore: any SessionCredentialStoring
     private let installationProofStore: any InstallationProofProviding
@@ -19,6 +20,7 @@ final class AppContainer {
         inviteJoinAttemptStore: any InviteJoinAttemptStoring,
         inviteLinkParser: InviteLinkParser,
         familyRepository: any FamilyRepository,
+        taskRepository: any TaskRepository,
         profileRepository: any ProfileRepository,
         credentialStore: any SessionCredentialStoring,
         installationProofStore: any InstallationProofProviding,
@@ -30,6 +32,7 @@ final class AppContainer {
         self.inviteJoinAttemptStore = inviteJoinAttemptStore
         self.inviteLinkParser = inviteLinkParser
         self.familyRepository = familyRepository
+        self.taskRepository = taskRepository
         self.profileRepository = profileRepository
         self.credentialStore = credentialStore
         self.installationProofStore = installationProofStore
@@ -45,6 +48,7 @@ final class AppContainer {
             inviteJoinAttemptStore: KeychainInviteJoinAttemptStore(secrets: secrets),
             inviteLinkParser: InviteLinkParser(baseURL: configuration.inviteLinkBaseURL),
             familyRepository: HTTPFamilyRepository(baseURL: configuration.apiBaseURL),
+            taskRepository: HTTPTaskRepository(baseURL: configuration.apiBaseURL),
             profileRepository: HTTPProfileRepository(baseURL: configuration.apiBaseURL),
             credentialStore: KeychainSessionCredentialStore(secrets: secrets),
             installationProofStore: KeychainInstallationProofStore(secrets: secrets),
@@ -88,6 +92,10 @@ final class AppContainer {
             session: session,
             photoNormalizer: photoNormalizer
         )
+    }
+
+    func makeMyTasksTabView(accessToken: String) -> MyTasksTabView {
+        MyTasksTabView(taskRepository: taskRepository, familyRepository: familyRepository, accessToken: accessToken)
     }
 
     func makeOnboardingViewModel(

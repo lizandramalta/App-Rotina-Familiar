@@ -80,6 +80,18 @@ nonisolated private struct InviteResponseDTO: Decodable {
     let password: String
 }
 
+nonisolated private struct FamilyMemberDTO: Decodable {
+    let id: UUID
+    let name: String
+    let role: MemberRole
+    let isFamilyCreator: Bool
+}
+
+nonisolated private struct ListFamilyMembersResponseDTO: Decodable {
+    let items: [FamilyMemberDTO]
+    let nextCursor: String?
+}
+
 nonisolated private struct ProblemDetailsDTO: Decodable {
     let code: String?
     let fieldErrors: [String: [String]]?
@@ -183,6 +195,26 @@ nonisolated struct HTTPFamilyRepository: FamilyRepository {
         )
         let response = try decode(InviteResponseDTO.self, from: data)
         return MemberInvite(inviteID: response.inviteId, link: response.link, password: response.password)
+    }
+
+    func listMembers(accessToken: String, cursor: String?) async throws -> FamilyMemberPage {
+        var path = "family/members"
+        if let cursor {
+            path += "?cursor=\(cursor.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? cursor)"
+        }
+        let data = try await send(
+            path: path,
+            method: "GET",
+            headers: ["Authorization": "Bearer \(accessToken)"],
+            rawBody: Data()
+        )
+        let response = try decode(ListFamilyMembersResponseDTO.self, from: data)
+        return FamilyMemberPage(
+            items: response.items.map {
+                FamilyMember(id: $0.id, name: $0.name, role: $0.role, isFamilyCreator: $0.isFamilyCreator)
+            },
+            nextCursor: response.nextCursor
+        )
     }
 
     static func multipartBody(boundary: String, purpose: String, jpeg: Data) -> Data {
