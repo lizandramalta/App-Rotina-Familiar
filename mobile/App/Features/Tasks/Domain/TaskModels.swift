@@ -87,6 +87,14 @@ nonisolated struct DailyProgress: Equatable, Sendable {
     let familyCreatedAt: String
 }
 
+/// A mission named in the `MISSION_REOPEN_REQUIRES_CONFIRMATION` conflict body (SPEC-011 §5.2),
+/// shown by MOD-006 before the caller confirms. Carries only what the warning displays — not the
+/// full `Mission` domain shape, which this module doesn't otherwise model.
+nonisolated struct AffectedMission: Equatable, Sendable, Identifiable {
+    let id: UUID
+    let title: String
+}
+
 nonisolated enum TaskError: Error, Equatable, Sendable {
     case actionNotAllowed
     case notFound
@@ -101,4 +109,9 @@ nonisolated enum TaskError: Error, Equatable, Sendable {
     case rejected
     case network
     case unavailable
+    /// `409 TASK_NOT_COMPLETED` on reopening: the task is already `pending`/`awaitingConfirmation`.
+    /// Reconciled silently per UX-011 — never shown as a technical error.
+    case taskNotCompleted
+    /// `409 MISSION_REOPEN_REQUIRES_CONFIRMATION` on reopening: resend with `confirm: true` to proceed (SPEC-011 E-01).
+    case missionReopenRequiresConfirmation(missionsAffected: [AffectedMission], hasAcceptedReward: Bool)
 }

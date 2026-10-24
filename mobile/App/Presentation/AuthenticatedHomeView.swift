@@ -10,7 +10,7 @@ struct AuthenticatedHomeView: View {
     /// falls back to the plain placeholder rather than crashing.
     let myTasksTab: MyTasksTabView?
     let makeFamilySettingsViewModel: (() -> FamilySettingsViewModel)?
-    let kidsTaskList: DailyTaskListView?
+    let kidsTasksTabView: KidsTasksTabView?
     @State private var profileViewModel: ProfileViewModel
     @State private var showsFamilySettingsScenario: Bool = {
         #if DEBUG
@@ -32,13 +32,13 @@ struct AuthenticatedHomeView: View {
         session: ActiveFamilySession,
         myTasksTab: MyTasksTabView?,
         makeFamilySettingsViewModel: (() -> FamilySettingsViewModel)? = nil,
-        kidsTaskList: DailyTaskListView?,
+        kidsTasksTabView: KidsTasksTabView?,
         makeProfileViewModel: () -> ProfileViewModel
     ) {
         self.session = session
         self.myTasksTab = myTasksTab
         self.makeFamilySettingsViewModel = makeFamilySettingsViewModel
-        self.kidsTaskList = kidsTaskList
+        self.kidsTasksTabView = kidsTasksTabView
         _profileViewModel = State(initialValue: makeProfileViewModel())
     }
 
@@ -48,16 +48,8 @@ struct AuthenticatedHomeView: View {
         TabView(selection: $selectedTab) {
             if role == .kid {
                 Group {
-                    if let kidsTaskList {
-                        NavigationStack {
-                            kidsTaskList
-                                .accessibilityIdentifier("access.destination.kids")
-                                .toolbar {
-                                    ToolbarItem(placement: .topBarTrailing) {
-                                        profileButton
-                                    }
-                                }
-                        }
+                    if let kidsTasksTabView {
+                        kidsTasksTabView
                     } else {
                         destination("destination.myTasks", icon: "checklist", identifier: "access.destination.kids", showsProfileButton: true)
                     }

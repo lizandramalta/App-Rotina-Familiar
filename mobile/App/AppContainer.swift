@@ -94,8 +94,14 @@ final class AppContainer {
         )
     }
 
-    func makeMyTasksTabView(accessToken: String) -> MyTasksTabView {
-        MyTasksTabView(taskRepository: taskRepository, familyRepository: familyRepository, accessToken: accessToken)
+    func makeMyTasksTabView(session: ActiveFamilySession, accessToken: String) -> MyTasksTabView {
+        MyTasksTabView(
+            taskRepository: taskRepository,
+            familyRepository: familyRepository,
+            role: session.role,
+            currentMemberID: session.memberID,
+            accessToken: accessToken
+        )
     }
 
     func makeFamilySettingsViewModel(session: ActiveFamilySession, sessionStore: AppSessionStore) -> FamilySettingsViewModel {
@@ -108,13 +114,16 @@ final class AppContainer {
         )
     }
 
-    func makeKidsTaskList(accessToken: String) -> DailyTaskListView {
-        DailyTaskListView(
-            audience: .kid,
-            repository: taskRepository,
+    func makeKidsTasksTabView(
+        session: ActiveFamilySession,
+        accessToken: String,
+        makeProfileViewModel: @escaping () -> ProfileViewModel
+    ) -> KidsTasksTabView {
+        KidsTasksTabView(
+            taskRepository: taskRepository,
+            currentMemberID: session.memberID,
             accessToken: accessToken,
-            onSelectTask: { _ in },
-            onCreateTask: {}
+            makeProfileViewModel: makeProfileViewModel
         )
     }
 

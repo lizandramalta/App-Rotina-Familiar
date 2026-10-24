@@ -266,7 +266,9 @@ final class TaskEditorViewModel {
             banner = .rejected
         case .signalResolutionRequired:
             isSignalResolutionPresented = true
-        case .notFound, .alreadyCompleted, .missionWouldHaveNoTasks, .rejected, .unavailable, nil:
+        case .notFound, .alreadyCompleted, .missionWouldHaveNoTasks, .rejected, .unavailable,
+             .taskNotCompleted, .missionReopenRequiresConfirmation, nil:
+            // Never thrown by create/update — reopening-only cases (SPEC-011); same fallback as any other rejection.
             banner = .rejected
         }
     }

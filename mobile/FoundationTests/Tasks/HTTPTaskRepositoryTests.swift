@@ -103,6 +103,33 @@ struct HTTPTaskRepositoryTests {
         await expectError(status: 400, json: #"{"code":"UNKNOWN_FIELD"}"#, .rejected)
     }
 
+    @Test("POST /v1/tasks/:id/reopening sends confirm explicitly and decodes only the task")
+    func reopenTaskSuccess() async throws {
+        let stub = TaskStubHTTP.make(status: 200, json: #"{"task":\#(taskJSON(status: "pending"))}"#)
+
+        let task = try await stub.repository.reopenTask(id: UUID(uuidString: taskID)!, confirm: false, accessToken: "access-1")
+
+        let request = try #require(stub.requests().first)
+        #expect(request.method == "POST")
+        #expect(request.url.path == "/v1/tasks/\(taskID)/reopening")
+        let body = try #require(JSONSerialization.jsonObject(with: request.body) as? [String: Any])
+        #expect(body["confirm"] as? Bool == false)
+        #expect(task.status == .pending)
+    }
+
+    @Test("409 TASK_NOT_COMPLETED and MISSION_REOPEN_REQUIRES_CONFIRMATION map to SPEC-011's dedicated cases")
+    func reopenTaskErrorMapping() async {
+        await expectError(status: 409, json: #"{"code":"TASK_NOT_COMPLETED"}"#, .taskNotCompleted)
+        await expectError(
+            status: 409,
+            json: #"{"code":"MISSION_REOPEN_REQUIRES_CONFIRMATION","missionsAffected":[{"id":"00000000-0000-0000-0000-0000000000f2","title":"Arrumar o quintal"}],"hasAcceptedReward":true}"#,
+            .missionReopenRequiresConfirmation(
+                missionsAffected: [AffectedMission(id: UUID(uuidString: "00000000-0000-0000-0000-0000000000f2")!, title: "Arrumar o quintal")],
+                hasAcceptedReward: true
+            )
+        )
+    }
+
     private func expectError(status: Int, json: String, _ expected: TaskError) async {
         let stub = TaskStubHTTP.make(status: status, json: json)
         await #expect(throws: expected) {

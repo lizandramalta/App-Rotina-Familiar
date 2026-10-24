@@ -5,6 +5,8 @@ import SwiftUI
 struct MyTasksTabView: View {
     let taskRepository: any TaskRepository
     let familyRepository: any FamilyRepository
+    let role: MemberRole
+    let currentMemberID: UUID
     let accessToken: String
 
     @State private var path: [FamilyTaskRoute] = []
@@ -44,6 +46,8 @@ struct MyTasksTabView: View {
         case let .detail(taskID):
             TaskDetailView(
                 taskID: taskID,
+                role: role,
+                currentMemberID: currentMemberID,
                 repository: taskRepository,
                 accessToken: accessToken,
                 onRequestEdit: { path.append(.edit(taskID)) },

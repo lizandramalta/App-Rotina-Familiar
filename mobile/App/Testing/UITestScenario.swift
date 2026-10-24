@@ -57,7 +57,21 @@ enum UITestScenario: String {
             return
         }
         if self == .dailyTasksKids {
-            sessionStore.apply(.session(Self.inviteSession(role: .kid)))
+            // Must match `UITestTaskFixtures.kidMemberID`, the assignee on the Kids-owned fixture
+            // tasks, so SPEC-011's `canReopen` check (assignee == current member) finds them.
+            sessionStore.apply(.session(AuthenticatedSession(
+                sessionID: UUID(),
+                profile: ActiveFamilySession(
+                    memberID: UITestTaskFixtures.kidMemberID,
+                    familyID: UUID(),
+                    role: .kid,
+                    isFamilyCreator: false
+                ),
+                credentials: SessionCredentials(
+                    token: SessionToken(accessToken: "ui-test-access", expiresAt: .distantFuture),
+                    refreshToken: "new-refresh"
+                )
+            )))
             return
         }
         if self == .inviteSwitch {
@@ -306,6 +320,12 @@ private enum UITestTaskFixtures {
     static let todayPendingTaskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000c1")!
     static let todayAwaitingConfirmationTaskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000c2")!
     static let todayCompletedTaskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000c3")!
+    /// SPEC-011: completed, no mission impact — reopens directly (CA-01).
+    static let missionFreeReopenTaskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000d1")!
+    /// SPEC-011: completed, requires confirmation on the first attempt (CA-02/03).
+    static let missionReopenTaskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000d2")!
+    /// SPEC-011: completed, assigned to Kids — Kids can reopen it (CA-04).
+    static let kidsOwnCompletedTaskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000d3")!
 }
 
 /// Deterministic, backend-free double for the `.taskManagement`/`.dailyTasks*` UI scenarios.
@@ -318,6 +338,11 @@ private actor UITestTaskRepository: TaskRepository {
     init(scenario: UITestScenario) {
         self.scenario = scenario
         let today = Self.wireString(from: Date())
+        // Within the carousel's -7..+6 day window (RN49) so UI tests can reach it by date, unlike
+        // the other fixtures below, which use fixed dates reached only via `UI_TEST_TASK_ROUTE`.
+        let threeDaysAgo = Self.wireString(
+            from: Calendar(identifier: .gregorian).date(byAdding: .day, value: -3, to: Date())!
+        )
         // Yesterday is left task-free on purpose: it's the fixed, always-in-range empty day the
         // UI tests navigate to via the carousel (no month-rollover risk near month boundaries).
         tasks = [
@@ -397,6 +422,39 @@ private actor UITestTaskRepository: TaskRepository {
                 status: .completed,
                 routineID: nil,
                 createdAt: Date(timeIntervalSince1970: 1_760_000_300)
+            ),
+            UITestTaskFixtures.missionFreeReopenTaskID: FamilyTask(
+                id: UITestTaskFixtures.missionFreeReopenTaskID,
+                title: "Fazer a cama",
+                weight: .low,
+                scheduledDate: "2026-10-06",
+                assigneeIDs: [UITestTaskFixtures.memberID],
+                note: nil,
+                status: .completed,
+                routineID: nil,
+                createdAt: Date(timeIntervalSince1970: 1_760_000_000)
+            ),
+            UITestTaskFixtures.missionReopenTaskID: FamilyTask(
+                id: UITestTaskFixtures.missionReopenTaskID,
+                title: "Alimentar o gato",
+                weight: .medium,
+                scheduledDate: "2026-10-05",
+                assigneeIDs: [UITestTaskFixtures.memberID],
+                note: nil,
+                status: .completed,
+                routineID: nil,
+                createdAt: Date(timeIntervalSince1970: 1_760_000_000)
+            ),
+            UITestTaskFixtures.kidsOwnCompletedTaskID: FamilyTask(
+                id: UITestTaskFixtures.kidsOwnCompletedTaskID,
+                title: "Regar as plantas",
+                weight: .low,
+                scheduledDate: threeDaysAgo,
+                assigneeIDs: [UITestTaskFixtures.kidMemberID],
+                note: nil,
+                status: .completed,
+                routineID: nil,
+                createdAt: Date(timeIntervalSince1970: 1_760_000_400)
             ),
         ]
     }
@@ -488,6 +546,34 @@ private actor UITestTaskRepository: TaskRepository {
             .sorted { $0.createdAt < $1.createdAt }
             .map { OwnTaskListItem(task: $0, displayStatus: Self.displayStatus(for: $0.status, role: role)) }
         return OwnTaskPage(items: items, nextCursor: nil, familyCreatedAt: Self.familyCreatedAt)
+    }
+
+    func reopenTask(id: UUID, confirm: Bool, accessToken: String) async throws -> FamilyTask {
+        guard let task = tasks[id] else {
+            throw TaskError.notFound
+        }
+        guard task.status == .completed else {
+            throw TaskError.taskNotCompleted
+        }
+        if id == UITestTaskFixtures.missionReopenTaskID, !confirm {
+            throw TaskError.missionReopenRequiresConfirmation(
+                missionsAffected: [AffectedMission(id: UUID(), title: "Arrumar o quintal")],
+                hasAcceptedReward: false
+            )
+        }
+        let reopened = FamilyTask(
+            id: task.id,
+            title: task.title,
+            weight: task.weight,
+            scheduledDate: task.scheduledDate,
+            assigneeIDs: task.assigneeIDs,
+            note: task.note,
+            status: .pending,
+            routineID: task.routineID,
+            createdAt: task.createdAt
+        )
+        tasks[id] = reopened
+        return reopened
     }
 
     func dailyProgress(referenceDate: String, accessToken: String) async throws -> DailyProgress {

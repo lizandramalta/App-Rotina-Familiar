@@ -96,6 +96,28 @@ nonisolated private struct ProblemDetailsDTO: Decodable {
     let fieldErrors: [String: [String]]?
 }
 
+nonisolated private struct ReopenTaskRequestDTO: Encodable {
+    let confirm: Bool
+}
+
+/// Only `task` is decoded from the success body (SPEC-011 §5.2): `affectedResources` isn't shown
+/// anywhere in TEL-012/MOD-006 (UX-011), so there's nothing to map it to.
+nonisolated private struct ReopenTaskResponseDTO: Decodable {
+    let task: TaskDTO
+}
+
+nonisolated private struct AffectedMissionDTO: Decodable {
+    let id: UUID
+    let title: String
+}
+
+/// Decoded only for `409 MISSION_REOPEN_REQUIRES_CONFIRMATION`, whose body carries fields beyond
+/// the generic `ProblemDetailsDTO` (SPEC-011 §5.2).
+nonisolated private struct ReopeningConflictDTO: Decodable {
+    let missionsAffected: [AffectedMissionDTO]?
+    let hasAcceptedReward: Bool?
+}
+
 nonisolated struct HTTPTaskRepository: TaskRepository {
     private let baseURL: URL
     private let session: URLSession
@@ -183,6 +205,19 @@ nonisolated struct HTTPTaskRepository: TaskRepository {
             percentage: dto.percentage,
             familyCreatedAt: dto.familyCreatedAt
         )
+    }
+
+    /// Always sends `confirm` explicitly, true or false — matches the contract's "absent or false
+    /// means not confirmed" and avoids a conditionally-omitted body (SPEC-011 §5.1, E-01).
+    func reopenTask(id: UUID, confirm: Bool, accessToken: String) async throws -> FamilyTask {
+        let body = ReopenTaskRequestDTO(confirm: confirm)
+        let data = try await send(
+            path: "tasks/\(id.uuidString.lowercased())/reopening",
+            method: "POST",
+            accessToken: accessToken,
+            json: body
+        )
+        return try Self.toFamilyTask(decode(ReopenTaskResponseDTO.self, from: data).task)
     }
 
     private static func toOwnTaskListItem(_ dto: OwnTaskItemDTO) throws -> OwnTaskListItem {
@@ -316,6 +351,14 @@ nonisolated struct HTTPTaskRepository: TaskRepository {
             return .missionCompletedProtected
         case (409, "MISSION_WOULD_HAVE_NO_TASKS"):
             return .missionWouldHaveNoTasks
+        case (409, "TASK_NOT_COMPLETED"):
+            return .taskNotCompleted
+        case (409, "MISSION_REOPEN_REQUIRES_CONFIRMATION"):
+            let conflict = try? decoder.decode(ReopeningConflictDTO.self, from: data)
+            return .missionReopenRequiresConfirmation(
+                missionsAffected: (conflict?.missionsAffected ?? []).map { AffectedMission(id: $0.id, title: $0.title) },
+                hasAcceptedReward: conflict?.hasAcceptedReward ?? false
+            )
         case (422, "SIGNAL_RESOLUTION_REQUIRED"):
             return .signalResolutionRequired
         case (422, "VALIDATION_FAILED"):
