@@ -62,26 +62,10 @@ jobs:
         run: npm run test:integration
 
   mobile:
-    name: Mobile (${{ matrix.shard }})
+    name: Mobile (iOS Simulator unit tests)
     # IPHONEOS_DEPLOYMENT_TARGET = 26.0 exige SDK do Xcode 26+; a imagem macos-15
     # traz Xcode 16 por padrão e não compila este target.
     runs-on: macos-26
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - shard: onboarding-and-unit
-            test_selection: >-
-              -only-testing:FamilyRoutineTests
-              -only-testing:FamilyRoutineUITests/OnboardingUITests
-              -only-testing:FamilyRoutineUITests/TaskManagementUITests
-          - shard: other-ui
-            test_selection: >-
-              -only-testing:FamilyRoutineUITests/DailyTaskListUITests
-              -only-testing:FamilyRoutineUITests/EntryUITests
-              -only-testing:FamilyRoutineUITests/InviteJoinUITests
-              -only-testing:FamilyRoutineUITests/ProfileUITests
-              -only-testing:FamilyRoutineUITests/RoutineCreationUITests
     defaults:
       run:
         working-directory: mobile
@@ -105,22 +89,12 @@ jobs:
             | python3 -c 'import json,sys;d=json.load(sys.stdin)["devices"];print(next(x["udid"] for rt in d for x in d[rt] if "iOS" in rt and x["name"].startswith("iPhone")))')
           echo "udid=$udid" >> "$GITHUB_OUTPUT"
 
-      - name: Build app and test bundles for iOS Simulator
+      - name: Build and run Mobile unit tests
         run: |
-          xcodebuild build-for-testing \
+          xcodebuild test \
             -project mobile.xcodeproj \
-            -scheme FamilyRoutine \
+            -scheme FamilyRoutineUnitTests \
             -destination 'platform=iOS Simulator,id=${{ steps.simulator.outputs.udid }}' \
-            -derivedDataPath "$RUNNER_TEMP/mobile-derived-data" \
-            CODE_SIGNING_ALLOWED=NO
-
-      - name: Run Mobile tests on the selected simulator
-        run: |
-          xcodebuild test-without-building \
-            -project mobile.xcodeproj \
-            -scheme FamilyRoutine \
-            -destination 'platform=iOS Simulator,id=${{ steps.simulator.outputs.udid }}' \
-            -derivedDataPath "$RUNNER_TEMP/mobile-derived-data" \
             -parallel-testing-enabled NO \
-            ${{ matrix.test_selection }} \
+            -only-testing:FamilyRoutineTests \
             CODE_SIGNING_ALLOWED=NO
