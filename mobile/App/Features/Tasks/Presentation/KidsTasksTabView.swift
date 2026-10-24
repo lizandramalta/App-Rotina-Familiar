@@ -10,6 +10,7 @@ import SwiftUI
 /// wrapped around it from the caller.
 struct KidsTasksTabView: View {
     let taskRepository: any TaskRepository
+    let routineRepository: any RoutineRepository
     let currentMemberID: UUID
     let accessToken: String
     let makeProfileViewModel: () -> ProfileViewModel
@@ -19,11 +20,13 @@ struct KidsTasksTabView: View {
 
     init(
         taskRepository: any TaskRepository,
+        routineRepository: any RoutineRepository,
         currentMemberID: UUID,
         accessToken: String,
         makeProfileViewModel: @escaping () -> ProfileViewModel
     ) {
         self.taskRepository = taskRepository
+        self.routineRepository = routineRepository
         self.currentMemberID = currentMemberID
         self.accessToken = accessToken
         self.makeProfileViewModel = makeProfileViewModel
@@ -51,6 +54,7 @@ struct KidsTasksTabView: View {
                     role: .kid,
                     currentMemberID: currentMemberID,
                     repository: taskRepository,
+                    routineRepository: routineRepository,
                     accessToken: accessToken,
                     onRequestEdit: {},
                     onDeleted: { path.removeAll() }

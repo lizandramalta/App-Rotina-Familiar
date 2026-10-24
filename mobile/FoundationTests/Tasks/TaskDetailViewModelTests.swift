@@ -3,6 +3,7 @@ import Foundation
 import Testing
 
 /// SPEC-007 Mobile CAs for TEL-012: CA-05 to CA-08, CA-15.
+/// SPEC-008 Mobile CA-06 for routine occurrences.
 /// SPEC-011 Mobile CAs for the Reabrir action: CA-01 to CA-05.
 @MainActor
 struct TaskDetailViewModelTests {
@@ -22,15 +23,62 @@ struct TaskDetailViewModelTests {
         taskID: UUID,
         role: MemberRole = .administrator,
         currentMemberID: UUID = TaskDetailViewModelTests.adultMemberID,
-        repository: TaskRepositorySpy
+        repository: TaskRepositorySpy,
+        routineRepository: any RoutineRepository = RoutineRepositorySpy()
     ) -> TaskDetailViewModel {
         TaskDetailViewModel(
             taskID: taskID,
             role: role,
             currentMemberID: currentMemberID,
             repository: repository,
+            routineRepository: routineRepository,
             accessToken: "access-1"
         )
+    }
+
+    @Test("SPEC-008 CA-06: an occurrence keeps its own task state while the routine exposes pending materialization")
+    func loadsRoutineWithoutChangingOccurrence() async {
+        let base = fixture(status: .pending)
+        let task = FamilyTask(
+            id: base.id, title: base.title, weight: base.weight, scheduledDate: base.scheduledDate,
+            assigneeIDs: base.assigneeIDs, note: base.note, status: base.status,
+            routineID: routineRepositorySpyFixture.id, createdAt: base.createdAt
+        )
+        let taskRepository = TaskRepositorySpy(taskResult: .success(task))
+        let routineRepository = RoutineRepositorySpy()
+        let viewModel = makeViewModel(taskID: task.id, repository: taskRepository, routineRepository: routineRepository)
+
+        await viewModel.load()
+
+        #expect(viewModel.task?.id == task.id)
+        #expect(viewModel.task?.status == .pending)
+        #expect(viewModel.routine?.materializationState == .pending)
+        #expect(routineRepository.getCalls == [routineRepositorySpyFixture.id])
+    }
+
+    @Test("SPEC-008 CA-03 / SPEC-011 CA-04: Kids can reopen their own occurrence without loading routine configuration")
+    func kidReopensOwnRoutineOccurrenceWithoutRoutineAccess() async {
+        let base = fixture(status: .completed, assigneeIDs: [Self.kidMemberID])
+        let task = FamilyTask(
+            id: base.id, title: base.title, weight: base.weight, scheduledDate: base.scheduledDate,
+            assigneeIDs: base.assigneeIDs, note: base.note, status: base.status,
+            routineID: routineRepositorySpyFixture.id, createdAt: base.createdAt
+        )
+        let taskRepository = TaskRepositorySpy(taskResult: .success(task))
+        let routineRepository = RoutineRepositorySpy()
+        let viewModel = makeViewModel(
+            taskID: task.id,
+            role: .kid,
+            currentMemberID: Self.kidMemberID,
+            repository: taskRepository,
+            routineRepository: routineRepository
+        )
+
+        await viewModel.load()
+
+        #expect(viewModel.canReopen)
+        #expect(viewModel.routine == nil)
+        #expect(routineRepository.getCalls.isEmpty)
     }
 
     @Test("Loads the task detail on demand")

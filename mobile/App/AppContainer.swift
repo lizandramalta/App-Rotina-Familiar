@@ -8,6 +8,7 @@ final class AppContainer {
     private let inviteLinkParser: InviteLinkParser
     private let familyRepository: any FamilyRepository
     private let taskRepository: any TaskRepository
+    private let routineRepository: any RoutineRepository
     private let profileRepository: any ProfileRepository
     private let credentialStore: any SessionCredentialStoring
     private let installationProofStore: any InstallationProofProviding
@@ -21,6 +22,7 @@ final class AppContainer {
         inviteLinkParser: InviteLinkParser,
         familyRepository: any FamilyRepository,
         taskRepository: any TaskRepository,
+        routineRepository: any RoutineRepository,
         profileRepository: any ProfileRepository,
         credentialStore: any SessionCredentialStoring,
         installationProofStore: any InstallationProofProviding,
@@ -33,6 +35,7 @@ final class AppContainer {
         self.inviteLinkParser = inviteLinkParser
         self.familyRepository = familyRepository
         self.taskRepository = taskRepository
+        self.routineRepository = routineRepository
         self.profileRepository = profileRepository
         self.credentialStore = credentialStore
         self.installationProofStore = installationProofStore
@@ -49,6 +52,7 @@ final class AppContainer {
             inviteLinkParser: InviteLinkParser(baseURL: configuration.inviteLinkBaseURL),
             familyRepository: HTTPFamilyRepository(baseURL: configuration.apiBaseURL),
             taskRepository: HTTPTaskRepository(baseURL: configuration.apiBaseURL),
+            routineRepository: HTTPRoutineRepository(baseURL: configuration.apiBaseURL),
             profileRepository: HTTPProfileRepository(baseURL: configuration.apiBaseURL),
             credentialStore: KeychainSessionCredentialStore(secrets: secrets),
             installationProofStore: KeychainInstallationProofStore(secrets: secrets),
@@ -97,6 +101,7 @@ final class AppContainer {
     func makeMyTasksTabView(session: ActiveFamilySession, accessToken: String) -> MyTasksTabView {
         MyTasksTabView(
             taskRepository: taskRepository,
+            routineRepository: routineRepository,
             familyRepository: familyRepository,
             role: session.role,
             currentMemberID: session.memberID,
@@ -121,6 +126,7 @@ final class AppContainer {
     ) -> KidsTasksTabView {
         KidsTasksTabView(
             taskRepository: taskRepository,
+            routineRepository: routineRepository,
             currentMemberID: session.memberID,
             accessToken: accessToken,
             makeProfileViewModel: makeProfileViewModel
