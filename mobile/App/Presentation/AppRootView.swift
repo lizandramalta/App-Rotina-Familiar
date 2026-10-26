@@ -40,6 +40,18 @@ struct AppRootView: View {
                                 container.makeProfileViewModel(session: profile, sessionStore: sessionStore)
                             }
                         )
+                    },
+                    missionsTab: sessionStore.accessToken.map {
+                        container.makeMissionsTabView(session: profile, accessToken: $0)
+                    },
+                    kidsMissionsTabView: sessionStore.accessToken.map { accessToken in
+                        container.makeKidsMissionsTabView(
+                            session: profile,
+                            accessToken: accessToken,
+                            makeProfileViewModel: {
+                                container.makeProfileViewModel(session: profile, sessionStore: sessionStore)
+                            }
+                        )
                     }
                 ) {
                     container.makeProfileViewModel(session: profile, sessionStore: sessionStore)

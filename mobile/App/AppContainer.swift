@@ -10,6 +10,7 @@ final class AppContainer {
     private let taskRepository: any TaskRepository
     private let routineRepository: any RoutineRepository
     private let profileRepository: any ProfileRepository
+    private let missionRepository: any MissionRepository
     private let credentialStore: any SessionCredentialStoring
     private let installationProofStore: any InstallationProofProviding
     private let appleAuthenticator: any AppleAuthenticating
@@ -24,6 +25,7 @@ final class AppContainer {
         taskRepository: any TaskRepository,
         routineRepository: any RoutineRepository,
         profileRepository: any ProfileRepository,
+        missionRepository: any MissionRepository,
         credentialStore: any SessionCredentialStoring,
         installationProofStore: any InstallationProofProviding,
         appleAuthenticator: any AppleAuthenticating,
@@ -37,6 +39,7 @@ final class AppContainer {
         self.taskRepository = taskRepository
         self.routineRepository = routineRepository
         self.profileRepository = profileRepository
+        self.missionRepository = missionRepository
         self.credentialStore = credentialStore
         self.installationProofStore = installationProofStore
         self.appleAuthenticator = appleAuthenticator
@@ -54,6 +57,7 @@ final class AppContainer {
             taskRepository: HTTPTaskRepository(baseURL: configuration.apiBaseURL),
             routineRepository: HTTPRoutineRepository(baseURL: configuration.apiBaseURL),
             profileRepository: HTTPProfileRepository(baseURL: configuration.apiBaseURL),
+            missionRepository: HTTPMissionRepository(baseURL: configuration.apiBaseURL),
             credentialStore: KeychainSessionCredentialStore(secrets: secrets),
             installationProofStore: KeychainInstallationProofStore(secrets: secrets),
             appleAuthenticator: AppleSignInAdapter()
@@ -135,6 +139,33 @@ final class AppContainer {
         makeProfileViewModel: @escaping () -> ProfileViewModel
     ) -> KidsTasksTabView {
         KidsTasksTabView(
+            taskRepository: taskRepository,
+            routineRepository: routineRepository,
+            currentMemberID: session.memberID,
+            accessToken: accessToken,
+            makeProfileViewModel: makeProfileViewModel
+        )
+    }
+
+    func makeMissionsTabView(session: ActiveFamilySession, accessToken: String) -> MissionsTabView {
+        MissionsTabView(
+            missionRepository: missionRepository,
+            taskRepository: taskRepository,
+            routineRepository: routineRepository,
+            familyRepository: familyRepository,
+            role: session.role,
+            currentMemberID: session.memberID,
+            accessToken: accessToken
+        )
+    }
+
+    func makeKidsMissionsTabView(
+        session: ActiveFamilySession,
+        accessToken: String,
+        makeProfileViewModel: @escaping () -> ProfileViewModel
+    ) -> KidsMissionsTabView {
+        KidsMissionsTabView(
+            missionRepository: missionRepository,
             taskRepository: taskRepository,
             routineRepository: routineRepository,
             currentMemberID: session.memberID,

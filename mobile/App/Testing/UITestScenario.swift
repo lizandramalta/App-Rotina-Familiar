@@ -27,6 +27,9 @@ enum UITestScenario: String {
     case familyOverview = "family-overview"
     case familyOverviewMember = "family-overview-member"
     case routineCreation = "routine-creation"
+    case missionManagement = "mission-management"
+    case missionManagementMember = "mission-management-member"
+    case missionManagementKids = "mission-management-kids"
 
     static var current: UITestScenario? {
         ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"].flatMap(UITestScenario.init(rawValue:))
@@ -43,6 +46,7 @@ enum UITestScenario: String {
             taskRepository: UITestTaskRepository(scenario: self),
             routineRepository: UITestRoutineRepository(),
             profileRepository: UITestProfileRepository(scenario: self),
+            missionRepository: UITestMissionRepository(scenario: self),
             credentialStore: UITestCredentialStore(),
             installationProofStore: UITestInstallationProof(),
             appleAuthenticator: UITestAppleAuthenticator()
@@ -56,8 +60,31 @@ enum UITestScenario: String {
             sessionStore.apply(.session(Self.inviteSession(role: role)))
             return
         }
-        if self == .taskManagement || self == .familySettings || self == .dailyTasks || self == .dailyTasksFailure || self == .routineCreation {
+        if self == .taskManagement || self == .familySettings || self == .dailyTasks || self == .dailyTasksFailure
+            || self == .routineCreation || self == .missionManagement {
             sessionStore.apply(.session(Self.inviteSession(role: .administrator)))
+            return
+        }
+        if self == .missionManagementMember {
+            sessionStore.apply(.session(Self.inviteSession(role: .member)))
+            return
+        }
+        if self == .missionManagementKids {
+            // Must match `UITestTaskFixtures.kidMemberID`, the assignee on the Kids-owned fixture
+            // task linked to the mission fixture, so CA-19's own-task tap-through can be tested.
+            sessionStore.apply(.session(AuthenticatedSession(
+                sessionID: UUID(),
+                profile: ActiveFamilySession(
+                    memberID: UITestTaskFixtures.kidMemberID,
+                    familyID: UUID(),
+                    role: .kid,
+                    isFamilyCreator: false
+                ),
+                credentials: SessionCredentials(
+                    token: SessionToken(accessToken: "ui-test-access", expiresAt: .distantFuture),
+                    refreshToken: "new-refresh"
+                )
+            )))
             return
         }
         if self == .familyOverview {
@@ -749,6 +776,140 @@ private actor UITestProfileRepository: ProfileRepository {
     func uploadProfilePhoto(_ jpeg: Data, accessToken: String) async throws -> String { "ui-test-media" }
 
     func getMediaContent(mediaID: String, accessToken: String) async throws -> Data { Data() }
+}
+
+private enum UITestMissionFixtures {
+    static let inProgressMissionID = UUID(uuidString: "00000000-0000-0000-0000-0000000000e1")!
+    static let completedMissionID = UUID(uuidString: "00000000-0000-0000-0000-0000000000e2")!
+}
+
+/// SPEC-014 Fase 2 UI fixture: two missions pre-linked to tasks already seeded by
+/// `UITestTaskRepository`, so TEL-021/022's by-id hydration resolves end-to-end without a backend.
+/// The in-progress mission links one task assigned to the adult fixture member and one assigned to
+/// the Kids fixture member, so CA-19's own-task tap-through (and its absence for "de outra pessoa") is testable.
+private actor UITestMissionRepository: MissionRepository {
+    private let scenario: UITestScenario
+    private var missions: [UUID: Mission]
+
+    init(scenario: UITestScenario) {
+        self.scenario = scenario
+        let omitsRedemption = scenario == .missionManagementKids
+        missions = [
+            UITestMissionFixtures.inProgressMissionID: Mission(
+                id: UITestMissionFixtures.inProgressMissionID,
+                familyID: UITestTaskFixtures.familyID,
+                title: "Casa pronta para o fim de semana",
+                note: "Antes da visita da vó no sábado.",
+                status: .inProgress,
+                taskIDs: [UITestTaskFixtures.pendingTaskID, UITestTaskFixtures.awaitingConfirmationTaskID],
+                completedAt: nil,
+                isRedemptionAvailable: omitsRedemption ? nil : false,
+                createdAt: Date(timeIntervalSince1970: 1_760_000_000)
+            ),
+            UITestMissionFixtures.completedMissionID: Mission(
+                id: UITestMissionFixtures.completedMissionID,
+                familyID: UITestTaskFixtures.familyID,
+                title: "Semana organizada",
+                note: nil,
+                status: .completed,
+                taskIDs: [UITestTaskFixtures.completedTaskID],
+                completedAt: Date(timeIntervalSince1970: 1_760_100_000),
+                isRedemptionAvailable: omitsRedemption ? nil : true,
+                createdAt: Date(timeIntervalSince1970: 1_760_050_000)
+            ),
+        ]
+    }
+
+    func createMission(_ command: CreateMissionCommand, accessToken: String) async throws -> Mission {
+        let mission = Mission(
+            id: UUID(),
+            familyID: UITestTaskFixtures.familyID,
+            title: command.title,
+            note: command.note,
+            status: .inProgress,
+            taskIDs: command.taskIDs,
+            completedAt: nil,
+            isRedemptionAvailable: scenario == .missionManagementKids ? nil : false,
+            createdAt: Date()
+        )
+        missions[mission.id] = mission
+        return mission
+    }
+
+    func mission(id: UUID, accessToken: String) async throws -> Mission {
+        guard let mission = missions[id] else {
+            throw MissionError.notFound
+        }
+        return mission
+    }
+
+    func missions(cursor: String?, accessToken: String) async throws -> MissionPage {
+        let items = missions.values
+            .sorted { $0.createdAt < $1.createdAt }
+            .map {
+                MissionSummary(
+                    id: $0.id,
+                    title: $0.title,
+                    status: $0.status,
+                    taskCount: $0.taskIDs.count,
+                    completedTaskCount: $0.status == .completed ? $0.taskIDs.count : 0
+                )
+            }
+        return MissionPage(items: items, nextCursor: nil)
+    }
+
+    func updateMission(_ command: UpdateMissionCommand, accessToken: String) async throws -> Mission {
+        guard let current = missions[command.missionID] else {
+            throw MissionError.notFound
+        }
+        guard current.status == .inProgress else {
+            throw MissionError.completedProtected
+        }
+        let updated = Mission(
+            id: current.id,
+            familyID: current.familyID,
+            title: command.title,
+            note: command.note,
+            status: current.status,
+            taskIDs: command.taskIDs,
+            completedAt: current.completedAt,
+            isRedemptionAvailable: current.isRedemptionAvailable,
+            createdAt: current.createdAt
+        )
+        missions[current.id] = updated
+        return updated
+    }
+
+    func taskOptions(query: String?, cursor: String?, accessToken: String) async throws -> MissionTaskOptionPage {
+        let allTasks: [MissionTaskOption] = [
+            MissionTaskOption(
+                id: UITestTaskFixtures.pendingTaskID,
+                title: "Arrumar os brinquedos",
+                weight: .medium,
+                scheduledDate: "2026-10-10",
+                status: .pending,
+                assigneeIDs: [UITestTaskFixtures.memberID]
+            ),
+            MissionTaskOption(
+                id: UITestTaskFixtures.completedTaskID,
+                title: "Lavar a louça",
+                weight: .low,
+                scheduledDate: "2026-10-08",
+                status: .completed,
+                assigneeIDs: []
+            ),
+            MissionTaskOption(
+                id: UITestTaskFixtures.awaitingConfirmationTaskID,
+                title: "Guardar a roupa",
+                weight: .high,
+                scheduledDate: "2026-10-09",
+                status: .awaitingConfirmation,
+                assigneeIDs: [UITestTaskFixtures.kidMemberID]
+            ),
+        ]
+        let filtered = query.map { text in allTasks.filter { $0.title.localizedCaseInsensitiveContains(text) } } ?? allTasks
+        return MissionTaskOptionPage(items: filtered, nextCursor: nil)
+    }
 }
 
 private final class UITestCredentialStore: SessionCredentialStoring, @unchecked Sendable {

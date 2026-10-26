@@ -4,7 +4,7 @@ import SwiftUI
 /// per the 2026-10-19 design decision: chevron back, inline title, ✓ Salvar trailing.
 struct TaskEditorView: View {
     @State private var viewModel: TaskEditorViewModel
-    let onSaved: () -> Void
+    let onSaved: (FamilyTask) -> Void
     let onRoutineSaved: (Routine) -> Void
 
     @State private var isDiscardConfirmationPresented = false
@@ -20,7 +20,7 @@ struct TaskEditorView: View {
         routineRepository: any RoutineRepository,
         familyRepository: any FamilyRepository,
         accessToken: String,
-        onSaved: @escaping () -> Void,
+        onSaved: @escaping (FamilyTask) -> Void,
         onRoutineSaved: @escaping (Routine) -> Void
     ) {
         _viewModel = State(initialValue: TaskEditorViewModel(
@@ -106,8 +106,8 @@ struct TaskEditorView: View {
             await viewModel.load()
         }
         .onChange(of: viewModel.savedTask) { _, savedTask in
-            if savedTask != nil {
-                onSaved()
+            if let savedTask {
+                onSaved(savedTask)
             }
         }
         .onChange(of: viewModel.savedRoutine) { _, savedRoutine in
