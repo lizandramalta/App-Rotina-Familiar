@@ -1,10 +1,10 @@
-# User flows — versão 1.15
+# User flows — versão 1.17
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão dos fluxos:** 1.15\
-**Base funcional:** RN 1.18 / RF 1.17 / UC 1.16\
-**Screen map:** 1.14 — revisão de 2026-10-19\
-**Data:** 2026-10-19\
+**Versão dos fluxos:** 1.17\
+**Base funcional:** RN 1.18 / RF 1.17 / UC 1.18\
+**Screen map:** 1.15 — revisão de 2026-10-26\
+**Data:** 2026-10-26\
 **Situação:** primeira versão para revisão de design
 
 [Projeto](../../README.md) · [Índice documental](../DOCUMENTACAO.md) · [Screen map](screen-map.md) · [Regras](../01-regras-de-negocio.md) · [Requisitos](../02-requisitos.md) · [Casos de uso](../03-casos-de-uso.md) · [Diagrama de classes](../06-diagrama-de-classes.md)
@@ -28,7 +28,7 @@ O detalhamento traduz a base 1.5 em caminhos para design; as decisões de 2026-1
 | Operação em andamento | Exibir processamento sem bloquear toda a interface e sem indicar sucesso antes da confirmação. |
 | Falha de consulta | Informar que os dados não puderam ser carregados e oferecer nova tentativa na mesma tela; não confundir falha com lista vazia. |
 | Paginação de lista | Ao se aproximar do fim dos itens confirmados, carregar a próxima página de até 20 itens. Falha mantém os itens carregados e oferece nova tentativa; `nextCursor` ausente encerra a rolagem. |
-| Falha de gravação | Consultar estado após resposta perdida, sem repetição automática ou chave geral de operação; informar quando não for possível determinar se uma criação foi salva; permanecer na tela de origem da operação e permitir nova tentativa. Não atualizar progresso como se houvesse sucesso. |
+| Falha de gravação | Consultar estado após resposta perdida, sem repetição automática ou chave geral de operação; informar quando não for possível determinar se uma criação foi salva; permanecer na tela de origem da operação e permitir nova tentativa. A apresentação otimista de TEL-010/TEL-040 é temporária: recusa confirmada restaura tarefa e progresso; resposta incerta exige consulta antes de novo envio. |
 | Cancelar formulário ou modal | Retornar à origem sem gravar a alteração cancelada. Fechar um seletor interno retorna ao formulário que o abriu. |
 | Voltar após consulta | Retornar à tela que abriu o detalhe, mantendo o contexto de data quando aplicável. |
 | Sessão renovável | Renovação transparente; refresh token sem expiração temporal continua sujeito à revogação. |
@@ -245,12 +245,12 @@ Responsáveis e repetição são escolhas do formulário; não é obrigatório a
 ## UF-06 — Concluir tarefa mantendo ou assumindo responsáveis
 
 **Objetivo:** concluir a tarefa inteira diretamente, com crédito previsível.
-**Entrada:** TEL-012, tarefa Pendente ou Aguardando confirmação; Administrador ou Membro apenas quando não houver responsável Kids.
+**Entrada:** círculo de TEL-010 ou ação em TEL-012, tarefa Pendente ou Aguardando confirmação; Administrador ou Membro apenas quando não houver responsável Kids.
 **Referências:** [UC12](../03-casos-de-uso.md#uc12); RN48, RN55–56; RF12, RF47, RF56.
 
 ```mermaid
 flowchart TD
-    A["TEL-012 · Acionar concluir"] --> AK{"Há responsável Kids?"}
+    A["TEL-010 círculo ou TEL-012 · Acionar concluir"] --> AK{"Há responsável Kids?"}
     AK -->|Sim e Membro| J(["TEL-012 · Ação não disponível"])
     AK -->|Não ou Administrador| B{"Há responsáveis?"}
     B -->|Não| C["Atribuir automaticamente ao adulto que conclui"]
@@ -258,12 +258,14 @@ flowchart TD
     C --> K["Revalidar estado e salvar conclusão e responsáveis juntos"]
     D --> K
     K --> L{"Operação confirmada?"}
-    L -->|Sim| M(["TEL-012 · Concluída para todos os responsáveis finais"])
+    L -->|Sim| M(["Origem atualizada · Concluída para todos os responsáveis finais"])
     L -->|Já concluída| M
     L -->|Falha| N["Informar falha e consultar estado atual"]
 ```
 
 Concluir não exibe alerta. Cada responsável final recebe o peso integral; quem apenas executou a ação não recebe crédito se não for responsável. A tarefa conta uma vez no progresso de cada missão e no progresso coletivo diário ou semanal. Tarefa com responsável Kids só é concluída manualmente por Administrador; a pendência e foto são preservadas para auditoria administrativa. Se outra conclusão já foi confirmada, a interface atualiza silenciosamente para Concluída. Outras ocorrências da rotina não mudam.
+
+Em TEL-010, o círculo atualiza linha e progresso imediatamente. Outro toque autorizado altera a intenção exibida, mas o app envia um comando por vez para a tarefa; uma recusa confirmada restaura o estado canônico e abre alerta. Se a resposta for incerta, consulta o servidor antes de qualquer novo envio.
 
 <a id="uf-07"></a>
 
@@ -321,12 +323,12 @@ A seta tracejada liga os registros entre os dois usuários; não representa nave
 ## UF-08 — Reabrir e excluir tarefa
 
 **Objetivo:** aplicar a alteração permitida sem corromper conquistas ou descontar carga duas vezes.  
-**Entrada:** TEL-012. Reabertura por Administrador/Membro em tarefa acessível e por Kids em tarefa própria; exclusão por Administrador ou Membro.
+**Entrada:** reabertura pelo círculo de TEL-010/TEL-040 ou por TEL-012; exclusão em TEL-012. Reabertura por Administrador/Membro em tarefa acessível e por Kids em tarefa própria; exclusão por Administrador ou Membro.
 **Referências:** [UC17](../03-casos-de-uso.md#uc17), [UC07](../03-casos-de-uso.md#uc07); RN50, RN57–59, RN66; RF09, RF57–59, RF69.
 
 ```mermaid
 flowchart TD
-    A["TEL-012 · Solicitar reabertura ou exclusão"] --> B{"Tarefa concluída?"}
+    A["TEL-010/TEL-040 círculo ou TEL-012 · Solicitar reabertura; exclusão em TEL-012"] --> B{"Tarefa concluída?"}
     B -->|Sim| C{"Missão concluída ou recompensa aceita?"}
     C -->|Não| F["Pendente · retirar crédito anterior e recalcular progresso"]
     C -->|Sim| E["MOD-006 · Avisar que a missão será reaberta e confirmar"]
@@ -349,6 +351,8 @@ flowchart TD
 Não existe exclusão direta de tarefa concluída. Reabrir uma tarefa vinculada a missão concluída e/ou com recompensa aceita exige MOD-006: confirmar retorna a missão para Em andamento e remove recompensa, participações e badges derivados, sem histórico. Em exclusão de rotina, preservar ocorrências concluídas e informar os registros que não podem ser excluídos. A última tarefa de uma missão exige vincular outra antes de tentar excluí-la. Não se contorna a proteção de missão concluída pela mudança de alcance. Excluir uma tarefa Aguardando confirmação remove a sinalização corrente da criança junto com a tarefa, sem pedir confirmação adicional sobre a sinalização (RN66).
 
 A reabertura é uma operação independente: retira o crédito do dia e da semana da conclusão anterior para todos os responsáveis, mantém responsáveis e atualiza progresso. Se a exclusão posterior falhar ou for cancelada, a reabertura já salva permanece. A exclusão não desconta o peso novamente. Cada gravação segue as condições comuns de falha e concorrência.
+
+No círculo de TEL-010/TEL-040, linha e progresso mudam no toque quando a ação é permitida. Um toque seguinte autorizado registra a intenção mais recente; o app serializa os comandos da tarefa. MOD-006 restaura Concluída até a confirmação explícita. Uma recusa confirmada restaura o estado canônico e abre alerta; resposta incerta exige consulta antes de novo envio.
 
 <a id="uf-09"></a>
 
@@ -607,6 +611,8 @@ Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imedi
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.17 | UC 1.18 | 1.15 | 2026-10-26 | UF-06/UF-08: atualização imediata no círculo, última intenção por tarefa, comandos em sequência e restauração/reconciliação após falhas. |
+| 1.16 | UC 1.18 | 1.15 | 2026-10-26 | UF-06/UF-08 adicionam o círculo da lista pessoal como entrada para concluir/reabrir, sem mudar permissões, confirmação ou efeitos. |
 | 1.15 | RN 1.18 / RF 1.17 / UC 1.16 | 1.14 | 2026-10-19 | UF-01 cria família e membros iniciais juntos em TEL-002, mantém TEL-056 para convites e retorna à edição sem nova criação; foto antecipada. UF-02/12 separam emissão direta de reemissão confirmada; UF-04 apresenta estado pessoal por perfil. |
 | 1.14 | 1.17 | 1.13 | 2026-10-10 | Consolida UF-09/10/11/14/15 com listas paginadas de até 20 itens, rolagem infinita e nova tentativa sem perder itens confirmados. Para SPEC-003, SPEC-015, SPEC-016, SPEC-018, SPEC-019 e SPEC-020. |
 | 1.13 | 1.17 | 1.12 | 2026-10-10 | UF-15 detalha variante Kids, consulta interna e compartilhamento cancelável. Para SPEC-020. |

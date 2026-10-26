@@ -16,6 +16,7 @@ struct KidsTasksTabView: View {
     let makeProfileViewModel: () -> ProfileViewModel
 
     @State private var path: [UUID] = []
+    @State private var listRevision = 0
     @State private var profileViewModel: ProfileViewModel
 
     init(
@@ -37,8 +38,11 @@ struct KidsTasksTabView: View {
         NavigationStack(path: $path) {
             DailyTaskListView(
                 audience: .kid,
+                role: .kid,
+                currentMemberID: currentMemberID,
                 repository: taskRepository,
                 accessToken: accessToken,
+                refreshRevision: listRevision,
                 onSelectTask: { path.append($0) },
                 onCreateTask: {}
             )
@@ -57,7 +61,8 @@ struct KidsTasksTabView: View {
                     routineRepository: routineRepository,
                     accessToken: accessToken,
                     onRequestEdit: {},
-                    onDeleted: { path.removeAll() }
+                    onDeleted: { path.removeAll(); listRevision += 1 },
+                    onReopened: { listRevision += 1 }
                 )
             }
         }

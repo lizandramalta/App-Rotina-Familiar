@@ -5,6 +5,7 @@ import Testing
 /// SPEC-007 Mobile CAs for TEL-012: CA-05 to CA-08, CA-15.
 /// SPEC-008 Mobile CA-06 for routine occurrences.
 /// SPEC-011 Mobile CAs for the Reabrir action: CA-01 to CA-05.
+/// SPEC-010 Fase 2 CA-01/02/04/05/06 for direct completion and reconciliation.
 @MainActor
 struct TaskDetailViewModelTests {
     private static let adultMemberID = UUID()
@@ -24,7 +25,8 @@ struct TaskDetailViewModelTests {
         role: MemberRole = .administrator,
         currentMemberID: UUID = TaskDetailViewModelTests.adultMemberID,
         repository: TaskRepositorySpy,
-        routineRepository: any RoutineRepository = RoutineRepositorySpy()
+        routineRepository: any RoutineRepository = RoutineRepositorySpy(),
+        familyRepository: any FamilyRepository = FamilyMembersStub()
     ) -> TaskDetailViewModel {
         TaskDetailViewModel(
             taskID: taskID,
@@ -32,6 +34,7 @@ struct TaskDetailViewModelTests {
             currentMemberID: currentMemberID,
             repository: repository,
             routineRepository: routineRepository,
+            familyRepository: familyRepository,
             accessToken: "access-1"
         )
     }
@@ -295,5 +298,150 @@ struct TaskDetailViewModelTests {
         #expect(!viewModel.canReopen)
         await viewModel.requestReopen()
         #expect(repository.reopenCalls.isEmpty, "a hidden action must never reach the server")
+    }
+
+    @Test("SPEC-010 CA-01/05: Admin completes a Kids signal and uses the canonical result")
+    func adminCompletesAwaitingKidsTask() async {
+        let pending = fixture(status: .awaitingConfirmation, assigneeIDs: [Self.kidMemberID])
+        let completed = fixture(status: .completed, assigneeIDs: [Self.kidMemberID])
+        let repository = TaskRepositorySpy(taskResult: .success(pending), completeResult: .success(completed))
+        let viewModel = makeViewModel(taskID: pending.id, repository: repository)
+        await viewModel.load()
+
+        #expect(viewModel.canComplete)
+        await viewModel.requestComplete()
+
+        #expect(viewModel.task == completed)
+        #expect(viewModel.completionRevision == 1)
+        #expect(repository.completeCalls == [pending.id])
+    }
+
+    @Test("SPEC-010 CA-02: an unassigned task displays the assignee returned by the server")
+    func unassignedTaskUsesServerAssignee() async {
+        let pending = fixture(status: .pending)
+        let completed = fixture(status: .completed, assigneeIDs: [Self.adultMemberID])
+        let repository = TaskRepositorySpy(taskResult: .success(pending), completeResult: .success(completed))
+        let viewModel = makeViewModel(taskID: pending.id, repository: repository)
+        await viewModel.load()
+        await viewModel.requestComplete()
+
+        #expect(viewModel.task?.assigneeIDs == [Self.adultMemberID])
+        #expect(viewModel.task?.status == .completed)
+    }
+
+    @Test("TEL-012: a previous reopening banner disappears when the task is completed again")
+    func completionClearsReopeningBanner() async {
+        let completed = fixture(status: .completed)
+        let pending = fixture(status: .pending)
+        let repository = TaskRepositorySpy(
+            taskResult: .success(completed),
+            completeResult: .success(completed),
+            reopenResult: .success(pending)
+        )
+        let viewModel = makeViewModel(taskID: completed.id, repository: repository)
+        await viewModel.load()
+
+        await viewModel.requestReopen()
+        #expect(viewModel.showReopenSuccessBanner)
+
+        await viewModel.requestComplete()
+        #expect(viewModel.task?.status == .completed)
+        #expect(!viewModel.showReopenSuccessBanner)
+    }
+
+    @Test("SPEC-010 CA-04: a Member never sees or invokes completion on a Kids task")
+    func memberCannotCompleteKidsTask() async {
+        let pending = fixture(status: .pending, assigneeIDs: [Self.kidMemberID])
+        let repository = TaskRepositorySpy(taskResult: .success(pending))
+        let family = FamilyMembersStub(members: [
+            FamilyMember(id: Self.kidMemberID, name: "Rafa", role: .kid, isFamilyCreator: false)
+        ])
+        let viewModel = makeViewModel(taskID: pending.id, role: .member, repository: repository, familyRepository: family)
+        await viewModel.load()
+
+        #expect(!viewModel.showsCompleteAction)
+        await viewModel.requestComplete()
+        #expect(repository.completeCalls.isEmpty)
+    }
+
+    @Test("SPEC-010 CA-04: Member checks every page before enabling an adult-assigned task")
+    func memberChecksPagedAssignees() async {
+        let pending = fixture(status: .pending, assigneeIDs: [Self.adultMemberID])
+        let repository = TaskRepositorySpy(taskResult: .success(pending))
+        let family = FamilyMembersStub(pages: [
+            [FamilyMember(id: Self.kidMemberID, name: "Rafa", role: .kid, isFamilyCreator: false)],
+            [FamilyMember(id: Self.adultMemberID, name: "Alex", role: .member, isFamilyCreator: false)]
+        ])
+        let viewModel = makeViewModel(taskID: pending.id, role: .member, repository: repository, familyRepository: family)
+        await viewModel.load()
+
+        #expect(viewModel.showsCompleteAction)
+        #expect(!viewModel.memberRolesLoadFailed)
+    }
+
+    @Test("SPEC-010 CA-04: unavailable member roles keep the action hidden")
+    func memberRoleLookupFailureHidesCompletion() async {
+        let pending = fixture(status: .pending, assigneeIDs: [Self.kidMemberID])
+        let repository = TaskRepositorySpy(taskResult: .success(pending))
+        let family = FamilyMembersStub(listError: .unavailable)
+        let viewModel = makeViewModel(taskID: pending.id, role: .member, repository: repository, familyRepository: family)
+        await viewModel.load()
+
+        #expect(!viewModel.showsCompleteAction)
+        #expect(viewModel.memberRolesLoadFailed)
+    }
+
+    @Test("SPEC-010 CA-06: TASK_ALREADY_COMPLETED silently loads the confirmed state once")
+    func completionConflictReconciles() async {
+        let pending = fixture(status: .pending)
+        let completed = fixture(status: .completed)
+        let repository = TaskRepositorySpy(taskResult: .success(pending), completeResult: .failure(TaskError.alreadyCompleted))
+        let viewModel = makeViewModel(taskID: pending.id, repository: repository)
+        await viewModel.load()
+        repository.setTaskResult(.success(completed))
+
+        await viewModel.requestComplete()
+
+        #expect(viewModel.task == completed)
+        #expect(viewModel.completionFailure == nil)
+        #expect(viewModel.completionRevision == 1)
+        #expect(repository.completeCalls == [pending.id])
+        #expect(repository.taskCalls == [pending.id, pending.id])
+    }
+
+    @Test("SPEC-010 safety: an uncertain completion checks state and never resends automatically")
+    func uncertainCompletionChecksBeforeAnotherAction() async {
+        let pending = fixture(status: .pending)
+        let repository = TaskRepositorySpy(taskResult: .success(pending), completeResult: .failure(TaskError.uncertainOutcome))
+        let viewModel = makeViewModel(taskID: pending.id, repository: repository)
+        await viewModel.load()
+
+        await viewModel.requestComplete()
+
+        #expect(viewModel.task?.status == .pending)
+        #expect(viewModel.completionFailure == .notCompleted)
+        #expect(viewModel.completionRevision == 0)
+        #expect(repository.completeCalls == [pending.id])
+        #expect(repository.taskCalls == [pending.id, pending.id])
+    }
+
+    @Test("SPEC-010 safety: failed reconciliation blocks a second POST until refresh succeeds")
+    func failedReconciliationBlocksSecondPost() async {
+        let pending = fixture(status: .pending)
+        let repository = TaskRepositorySpy(taskResult: .success(pending), completeResult: .failure(TaskError.uncertainOutcome))
+        let viewModel = makeViewModel(taskID: pending.id, repository: repository)
+        await viewModel.load()
+        repository.setTaskResult(.failure(TaskError.network))
+
+        await viewModel.requestComplete()
+        await viewModel.requestComplete()
+
+        #expect(viewModel.completionFailure == .needsRefresh)
+        #expect(repository.completeCalls == [pending.id])
+        repository.setTaskResult(.success(pending))
+        await viewModel.refreshCompletionStatus()
+        #expect(viewModel.completionFailure == .notCompleted)
+        #expect(viewModel.canComplete)
+        #expect(repository.completeCalls == [pending.id])
     }
 }

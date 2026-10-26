@@ -106,6 +106,12 @@ nonisolated private struct ReopenTaskResponseDTO: Decodable {
     let task: TaskDTO
 }
 
+/// SPEC-010 §5: the completion response also carries affectedResources, which TEL-012
+/// invalidates through its parent list revision rather than exposing transport details.
+nonisolated private struct CompleteTaskResponseDTO: Decodable {
+    let task: TaskDTO
+}
+
 nonisolated private struct AffectedMissionDTO: Decodable {
     let id: UUID
     let title: String
@@ -175,6 +181,20 @@ nonisolated struct HTTPTaskRepository: TaskRepository {
     func deleteTask(id: UUID, accessToken: String) async throws -> UUID {
         let data = try await send(path: "tasks/\(id.uuidString.lowercased())", method: "DELETE", accessToken: accessToken)
         return try decode(DeleteTaskResponseDTO.self, from: data).id
+    }
+
+    /// A lost POST response is ambiguous. Report it for reconciliation, never replay the command.
+    func completeTask(id: UUID, accessToken: String) async throws -> FamilyTask {
+        do {
+            let data = try await send(
+                path: "tasks/\(id.uuidString.lowercased())/completion",
+                method: "POST",
+                accessToken: accessToken
+            )
+            return try Self.toFamilyTask(decode(CompleteTaskResponseDTO.self, from: data).task)
+        } catch TaskError.network, TaskError.unavailable {
+            throw TaskError.uncertainOutcome
+        }
     }
 
     func dailyTasks(referenceDate: String, cursor: String?, accessToken: String) async throws -> OwnTaskPage {

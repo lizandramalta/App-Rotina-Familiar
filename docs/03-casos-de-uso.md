@@ -1,7 +1,7 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.17\
+**Versão:** 1.18\
 **Data:** 2026-10-22\
 **Situação:** base documental consolidada
 
@@ -538,7 +538,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 **Fluxo principal:**
 
-1. O usuário seleciona a tarefa e aciona concluir.
+1. O usuário aciona o círculo da tarefa em TEL-010 ou abre o detalhe TEL-012 e aciona Concluir.
 2. Se a tarefa tiver responsável Kids e o usuário for Membro, o sistema não oferece concluir. Caso contrário, envia a conclusão sem alerta.
 3. O sistema mantém os responsáveis atuais; se não houver, atribui a tarefa ao adulto que conclui.
 4. O sistema registra quem executou a ação e conclui a tarefa para todos os responsáveis finais.
@@ -740,7 +740,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 **Fluxo principal:**
 
-1. O ator seleciona a tarefa e solicita o retorno para Pendente.
+1. O ator aciona o círculo de uma tarefa concluída em Minhas tarefas (TEL-010/TEL-040, quando permitida) ou abre TEL-012 e solicita o retorno para Pendente.
 2. O sistema verifica o perfil, o estado e os vínculos da tarefa.
 3. Se houver missão concluída e/ou recompensa aceita, informa que a missão será reaberta e que recompensa, participações e badges derivados serão removidos; nos demais casos, informa os efeitos sobre carga e progresso.
 4. O ator confirma quando o alerta for apresentado.
@@ -843,6 +843,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.18 | 2026-10-26 | UC12 e UC17 permitem concluir/reabrir pelo círculo da lista pessoal; o restante da linha abre o detalhe. Permissões e efeitos mantidos. |
 | 1.17 | 2026-10-22 | UC10: nome da família e papel na consulta do perfil; titular adulto edita o próprio nome, Kids não. Para SPEC-006 (SCRUM-52). |
 | 1.16 | 2026-10-19 | UC07: exclusão que deixa só tarefas concluídas fecha a missão (RN38/RF59; SPEC-014/SPEC-007). UC01/UC02: foto antecipada, membros criados com a família, convites posteriores e edição sem segunda criação. UC11: apresentação por perfil da tarefa sinalizada, preservando estado único. |
 | 1.15 | 2026-10-10 | UC18 adota `referenceDate` para semana e identifica crédito histórico como “Membro removido”. Para SPEC-019. |

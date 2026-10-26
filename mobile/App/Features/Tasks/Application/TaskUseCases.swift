@@ -32,6 +32,14 @@ struct DeleteTaskUseCase: Sendable {
     }
 }
 
+struct CompleteTaskUseCase: Sendable {
+    let repository: any TaskRepository
+
+    func execute(taskID: UUID, accessToken: String) async throws -> FamilyTask {
+        try await repository.completeTask(id: taskID, accessToken: accessToken)
+    }
+}
+
 struct GetDailyTasksUseCase: Sendable {
     let repository: any TaskRepository
 
