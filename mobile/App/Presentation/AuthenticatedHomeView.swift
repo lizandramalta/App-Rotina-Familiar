@@ -23,7 +23,7 @@ struct AuthenticatedHomeView: View {
     @State private var selectedTab: Int = {
         #if DEBUG
         let scenario = ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"]
-        if scenario == "family-settings" || scenario == "family-overview" || scenario == "family-overview-member" {
+        if scenario == "family-settings" || scenario == "family-overview" || scenario == "family-overview-member" || scenario == "member-invite" || scenario == "member-invite-uncertain" {
             return 1
         }
         #endif

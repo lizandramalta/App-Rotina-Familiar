@@ -147,6 +147,24 @@ struct HTTPFamilyRepositoryTests {
         #expect(invite.link == "https://x.test/i/1")
     }
 
+    @Test("SPEC-004 CA-07 maps invite issuance failures; a lost response is uncertain")
+    func issueInviteErrors() async {
+        let cases: [(StubHTTP, FamilyError)] = [
+            (StubHTTP.make(status: 403, json: #"{"code":"ACTION_NOT_ALLOWED"}"#), .actionNotAllowed),
+            (StubHTTP.make(status: 404, json: #"{"code":"RESOURCE_NOT_FOUND"}"#), .rejected),
+            (StubHTTP.make(status: 409, json: #"{"code":"INVITE_NOT_ISSUABLE"}"#), .rejected),
+            (StubHTTP.make(status: 429, json: #"{"code":"RATE_LIMITED"}"#), .rateLimited),
+            (StubHTTP.make(status: 503, json: #"{"code":"DEPENDENCY_UNAVAILABLE"}"#), .uncertainOutcome),
+            (StubHTTP.make(failure: URLError(.timedOut)), .uncertainOutcome),
+            (StubHTTP.make(status: 201, json: #"{"unexpected":true}"#), .uncertainOutcome),
+        ]
+        for (stub, expected) in cases {
+            await #expect(throws: expected) {
+                _ = try await stub.repository.issueInvite(memberID: UUID(uuidString: memberID)!, accessToken: "token-1")
+            }
+        }
+    }
+
     @Test("MemberRole accepts both kid and kids on the wire")
     func roleDecoding() throws {
         let decoder = JSONDecoder()

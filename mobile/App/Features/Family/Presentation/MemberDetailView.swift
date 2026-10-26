@@ -3,6 +3,7 @@ import SwiftUI
 /// TEL-032 — Detalhe do membro (Figma nodes 309:2057, 309:2219, 309:2281, UX-003 §5.2).
 struct MemberDetailView: View {
     @State private var viewModel: MemberDetailViewModel
+    @State private var showsReissueConfirmation = false
 
     init(viewModel: MemberDetailViewModel) {
         _viewModel = State(initialValue: viewModel)
@@ -15,6 +16,9 @@ struct MemberDetailView: View {
                     identity(detail)
                     if viewModel.isCreator {
                         creatorNotice
+                    }
+                    if viewModel.canIssueInvite {
+                        inviteSection
                     }
                     tasksPlaceholder
                 } else if viewModel.isLoading {
@@ -50,6 +54,73 @@ struct MemberDetailView: View {
         .navigationTitle("family.member.detail.title")
         .navigationBarTitleDisplayMode(.inline)
         .task { await viewModel.load() }
+        .navigationDestination(isPresented: $showsReissueConfirmation) {
+            MemberInviteConfirmationView(viewModel: viewModel)
+        }
+        .inviteShareSheet(
+            viewModel: viewModel,
+            isPresented: viewModel.transientInvite != nil && !showsReissueConfirmation
+        )
+    }
+
+    /// UX-004 §5.1: first issuance is a direct tap; a previous invite routes to the TEL-034 confirmation.
+    private var inviteSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("family.member.detail.invite_section")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(Color(uiColor: .secondaryLabel))
+                .padding(.horizontal, 8)
+
+            VStack(alignment: .leading, spacing: 12) {
+                if viewModel.hasPreviousInvite {
+                    Button {
+                        showsReissueConfirmation = true
+                    } label: {
+                        Label("memberInvite.reissue.title", systemImage: "arrow.triangle.2.circlepath")
+                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                    }
+                    .disabled(viewModel.isIssuingInvite)
+                    .accessibilityHint("memberInvite.a11y.action_hint")
+                    .accessibilityIdentifier("memberInvite.reissue.title")
+                } else {
+                    Button {
+                        Task { await viewModel.issueFirstInvite() }
+                    } label: {
+                        Label("memberInvite.issue.title", systemImage: "person.badge.plus")
+                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                    }
+                    .disabled(viewModel.isIssuingInvite)
+                    .accessibilityIdentifier("memberInvite.issue.title")
+                }
+
+                if viewModel.isIssuingInvite {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                        Text("memberInvite.submitting")
+                            .font(.footnote)
+                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("memberInvite.submitting")
+                }
+
+                if let message = viewModel.inviteErrorMessage {
+                    Label(message, systemImage: "exclamationmark.triangle")
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                        .accessibilityIdentifier("memberInvite.error")
+                }
+
+                if viewModel.wasShareCancelled {
+                    Label("memberInvite.share.cancelled", systemImage: "info.circle")
+                        .font(.footnote)
+                        .foregroundStyle(Color(uiColor: .secondaryLabel))
+                        .accessibilityIdentifier("memberInvite.share.cancelled")
+                }
+            }
+            .padding(16)
+            .background(Color(uiColor: .secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        }
     }
 
     private func identity(_ detail: FamilyMemberDetail) -> some View {

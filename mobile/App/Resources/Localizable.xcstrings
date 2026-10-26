@@ -461,6 +461,16 @@
         }
       }
     },
+    "family.member.detail.invite_section": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Convite"
+          }
+        }
+      }
+    },
     "family.member.detail.retry": {
       "localizations": {
         "pt-BR": {
@@ -1728,6 +1738,166 @@
           "stringUnit": {
             "state": "translated",
             "value": "Abrir perfil"
+          }
+        }
+      }
+    },
+    "memberInvite.a11y.action_hint": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gera novas credenciais e encerra o acesso anterior desta pessoa"
+          }
+        }
+      }
+    },
+    "memberInvite.back.action": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voltar"
+          }
+        }
+      }
+    },
+    "memberInvite.cancel.action": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar"
+          }
+        }
+      }
+    },
+    "memberInvite.confirm.effects": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um novo convite vai invalidar os anteriores e encerrar o acesso atual desta pessoa."
+          }
+        }
+      }
+    },
+    "memberInvite.error.notAllowed": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Você não tem permissão para gerar este convite."
+          }
+        }
+      }
+    },
+    "memberInvite.error.rateLimited": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tente novamente mais tarde."
+          }
+        }
+      }
+    },
+    "memberInvite.error.unavailable": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este convite não pode mais ser gerado para este perfil."
+          }
+        }
+      }
+    },
+    "memberInvite.error.uncertain": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível confirmar a geração do convite. Não compartilhe dados; para tentar de novo, gere um novo convite."
+          }
+        }
+      }
+    },
+    "memberInvite.issue.action": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gerar convite"
+          }
+        }
+      }
+    },
+    "memberInvite.issue.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gerar convite"
+          }
+        }
+      }
+    },
+    "memberInvite.reissue.action": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gerar novo convite"
+          }
+        }
+      }
+    },
+    "memberInvite.reissue.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gerar novo convite"
+          }
+        }
+      }
+    },
+    "memberInvite.share.cancelled": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O convite foi gerado, mas não foi compartilhado. Para compartilhar depois, gere um novo convite."
+          }
+        }
+      }
+    },
+    "memberInvite.share.message": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Convite para entrar na família\nLink: %@\nSenha: %@"
+          }
+        }
+      }
+    },
+    "memberInvite.submitting": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gerando convite…"
+          }
+        }
+      }
+    },
+    "memberInvite.unavailable.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Convite indisponível"
           }
         }
       }

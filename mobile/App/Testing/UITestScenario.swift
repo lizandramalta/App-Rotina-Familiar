@@ -26,6 +26,8 @@ enum UITestScenario: String {
     case dailyTasksFailure = "daily-tasks-failure"
     case familyOverview = "family-overview"
     case familyOverviewMember = "family-overview-member"
+    case memberInvite = "member-invite"
+    case memberInviteUncertain = "member-invite-uncertain"
     case taskCompletionMember = "task-completion-member"
     case taskCompletionConflict = "task-completion-conflict"
     case taskOptimisticDelayed = "task-optimistic-delayed"
@@ -68,7 +70,7 @@ enum UITestScenario: String {
             sessionStore.apply(.session(Self.inviteSession(role: .administrator)))
             return
         }
-        if self == .familyOverview {
+        if self == .familyOverview || self == .memberInvite || self == .memberInviteUncertain {
             sessionStore.apply(.session(Self.inviteSession(role: .administrator)))
             return
         }
@@ -302,7 +304,10 @@ private actor UITestFamilyRepository: FamilyRepository {
     }
 
     func issueInvite(memberID: UUID, accessToken: String) async throws -> MemberInvite {
-        MemberInvite(inviteID: UUID(), link: "https://example.invalid/invite/test", password: "ABC-123")
+        if scenario == .memberInviteUncertain {
+            throw FamilyError.uncertainOutcome
+        }
+        return MemberInvite(inviteID: UUID(), link: "https://example.invalid/invite/test", password: "ABC-123")
     }
 
     func listMembers(accessToken: String, cursor: String?) async throws -> FamilyMemberPage {
@@ -316,11 +321,13 @@ private actor UITestFamilyRepository: FamilyRepository {
     }
 
     func getMemberDetail(memberID: UUID, accessToken: String) async throws -> FamilyMemberDetail {
-        FamilyMemberDetail(
+        // Rafa is a regular target for invites; every other id keeps the Creator fixture.
+        let isKid = memberID == UITestTaskFixtures.kidMemberID
+        return FamilyMemberDetail(
             id: memberID,
-            name: "Maria Silva",
-            role: .administrator,
-            isFamilyCreator: true,
+            name: isKid ? "Rafa Silva" : "Maria Silva",
+            role: isKid ? .kid : .administrator,
+            isFamilyCreator: !isKid,
             createdAt: "2026-10-01T12:00:00.000Z",
             capabilities: MemberCapabilities(manageMembers: true)
         )

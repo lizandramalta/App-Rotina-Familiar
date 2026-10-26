@@ -241,14 +241,21 @@ nonisolated struct HTTPFamilyRepository: FamilyRepository {
     }
 
     func issueInvite(memberID: UUID, accessToken: String) async throws -> MemberInvite {
-        let data = try await send(
-            path: "family/members/\(memberID.uuidString.lowercased())/invites",
-            method: "POST",
-            headers: ["Authorization": "Bearer \(accessToken)"],
-            json: EmptyRequestDTO()
-        )
-        let response = try decode(InviteResponseDTO.self, from: data)
-        return MemberInvite(inviteID: response.inviteId, link: response.link, password: response.password)
+        // Never retried: the password cannot be recovered, so a lost response is reported as uncertain (SPEC-004 CA-07).
+        do {
+            let data = try await send(
+                path: "family/members/\(memberID.uuidString.lowercased())/invites",
+                method: "POST",
+                headers: ["Authorization": "Bearer \(accessToken)"],
+                json: EmptyRequestDTO()
+            )
+            let response = try Self.decoder.decode(InviteResponseDTO.self, from: data)
+            return MemberInvite(inviteID: response.inviteId, link: response.link, password: response.password)
+        } catch FamilyError.network, FamilyError.unavailable {
+            throw FamilyError.uncertainOutcome
+        } catch is DecodingError {
+            throw FamilyError.uncertainOutcome
+        }
     }
 
     func listMembers(accessToken: String, cursor: String?) async throws -> FamilyMemberPage {

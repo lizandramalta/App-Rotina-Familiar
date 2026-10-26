@@ -12,6 +12,8 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
     private var changeTimeZoneResults: [Result<FamilySettings, Error>]
     private var listMembersResults: [Result<FamilyMemberPage, Error>]
     private var memberDetailResult: Result<FamilyMemberDetail, Error>
+    private var inviteResults: [Result<MemberInvite, Error>]
+    private var _invitedMemberIDs: [UUID] = []
     private var familyResult: Result<FamilyProfile, Error> = .success(FamilyRepositorySpy.defaultFamilyProfile)
     private var _updatedFamilyNames: [String] = []
     private let createDelay: Duration?
@@ -37,6 +39,7 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
     var createFamilyCalls: Int { lock.withLock { _createFamilyCalls } }
     var uploadCalls: Int { lock.withLock { _uploadCalls } }
     var inviteCalls: Int { lock.withLock { _inviteCalls } }
+    var invitedMemberIDs: [UUID] { lock.withLock { _invitedMemberIDs } }
     var getSettingsCalls: Int { lock.withLock { _getSettingsCalls } }
     var previewCalls: Int { lock.withLock { _previewCalls } }
     var changeTimeZoneCalls: Int { lock.withLock { _changeTimeZoneCalls } }
@@ -71,8 +74,10 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
         changeTimeZoneResults: [Result<FamilySettings, Error>] = [],
         listMembersResults: [Result<FamilyMemberPage, Error>] = [],
         memberDetailResult: Result<FamilyMemberDetail, Error> = .success(FamilyRepositorySpy.defaultMemberDetail),
+        inviteResults: [Result<MemberInvite, Error>] = [],
         createDelay: Duration? = nil
     ) {
+        self.inviteResults = inviteResults
         self.createResult = createResult
         self.uploadResults = uploadResults
         self.linkResults = linkResults
@@ -177,8 +182,10 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
     }
 
     func issueInvite(memberID: UUID, accessToken: String) async throws -> MemberInvite {
-        lock.withLock {
+        try lock.withLock {
             _inviteCalls += 1
+            _invitedMemberIDs.append(memberID)
+            if !inviteResults.isEmpty { return try inviteResults.removeFirst().get() }
             return MemberInvite(inviteID: UUID(), link: "https://example.test/invite", password: "PW")
         }
     }
