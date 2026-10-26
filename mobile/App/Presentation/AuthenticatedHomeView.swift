@@ -12,6 +12,8 @@ struct AuthenticatedHomeView: View {
     let makeFamilySettingsViewModel: (() -> FamilySettingsViewModel)?
     @State private var familyOverviewViewModel: FamilyOverviewViewModel
     let kidsTasksTabView: KidsTasksTabView?
+    let missionsTab: MissionsTabView?
+    let kidsMissionsTabView: KidsMissionsTabView?
     @State private var profileViewModel: ProfileViewModel
     @State private var showsFamilySettingsScenario: Bool = {
         #if DEBUG
@@ -26,6 +28,12 @@ struct AuthenticatedHomeView: View {
         if scenario == "family-settings" || scenario == "family-overview" || scenario == "family-overview-member" {
             return 1
         }
+        if scenario == "mission-management" || scenario == "mission-management-member" {
+            return 2
+        }
+        if scenario == "mission-management-kids" {
+            return 1
+        }
         #endif
         return 0
     }()
@@ -36,12 +44,16 @@ struct AuthenticatedHomeView: View {
         makeFamilyOverviewViewModel: () -> FamilyOverviewViewModel,
         makeFamilySettingsViewModel: (() -> FamilySettingsViewModel)? = nil,
         kidsTasksTabView: KidsTasksTabView?,
+        missionsTab: MissionsTabView?,
+        kidsMissionsTabView: KidsMissionsTabView?,
         makeProfileViewModel: () -> ProfileViewModel
     ) {
         self.session = session
         self.myTasksTab = myTasksTab
         self.makeFamilySettingsViewModel = makeFamilySettingsViewModel
         self.kidsTasksTabView = kidsTasksTabView
+        self.missionsTab = missionsTab
+        self.kidsMissionsTabView = kidsMissionsTabView
         _familyOverviewViewModel = State(initialValue: makeFamilyOverviewViewModel())
         _profileViewModel = State(initialValue: makeProfileViewModel())
     }
@@ -59,8 +71,16 @@ struct AuthenticatedHomeView: View {
                     }
                 }
                 .tabItem { Label("destination.myTasks", systemImage: "checklist") }
-                destination("destination.missions", icon: "star", identifier: "access.destination.kids.missions", showsProfileButton: true)
-                    .tabItem { Label("destination.missions", systemImage: "star") }
+                .tag(0)
+                Group {
+                    if let kidsMissionsTabView {
+                        kidsMissionsTabView
+                    } else {
+                        destination("destination.missions", icon: "star", identifier: "access.destination.kids.missions", showsProfileButton: true)
+                    }
+                }
+                .tabItem { Label("destination.missions", systemImage: "star") }
+                .tag(1)
             } else {
                 Group {
                     if let myTasksTab {
@@ -74,8 +94,15 @@ struct AuthenticatedHomeView: View {
                 familyDestination()
                     .tabItem { Label("destination.family", systemImage: "person.3") }
                     .tag(1)
-                destination("destination.missions", icon: "star", identifier: "access.destination.missions")
-                    .tabItem { Label("destination.missions", systemImage: "star") }
+                Group {
+                    if let missionsTab {
+                        missionsTab
+                    } else {
+                        destination("destination.missions", icon: "star", identifier: "access.destination.missions")
+                    }
+                }
+                .tabItem { Label("destination.missions", systemImage: "star") }
+                .tag(2)
                 NavigationStack {
                     ProfileView(viewModel: profileViewModel)
                         .accessibilityElement(children: .contain)

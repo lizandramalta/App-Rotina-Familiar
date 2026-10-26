@@ -55,7 +55,7 @@ struct MyTasksTabView: View {
                 routineRepository: routineRepository,
                 familyRepository: familyRepository,
                 accessToken: accessToken,
-                onSaved: { routineFeedback = nil; path.removeAll(); listRevision += 1 },
+                onSaved: { _ in routineFeedback = nil; path.removeAll(); listRevision += 1 },
                 onRoutineSaved: { routine in
                     routineFeedback = routine
                     routineRefreshFailed = false
@@ -84,7 +84,7 @@ struct MyTasksTabView: View {
                 routineRepository: routineRepository,
                 familyRepository: familyRepository,
                 accessToken: accessToken,
-                onSaved: { if !path.isEmpty { path.removeLast() }; listRevision += 1 },
+                onSaved: { _ in if !path.isEmpty { path.removeLast() }; listRevision += 1 },
                 onRoutineSaved: { _ in }
             )
         }
