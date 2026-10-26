@@ -6,8 +6,11 @@ import SwiftUI
 struct TaskDetailView: View {
     @State private var viewModel: TaskDetailViewModel
     @AccessibilityFocusState private var isMissionWarningFocused: Bool
+    @AccessibilityFocusState private var isStatusFocused: Bool
     let onRequestEdit: () -> Void
     let onDeleted: () -> Void
+    let onCompleted: () -> Void
+    let onReopened: () -> Void
 
     /// Owns the view model via `@State` rather than taking a pre-built instance: `NavigationStack`
     /// can invoke this destination's builder more than once for the same push (observed via
@@ -19,9 +22,12 @@ struct TaskDetailView: View {
         currentMemberID: UUID,
         repository: any TaskRepository,
         routineRepository: any RoutineRepository,
+        familyRepository: (any FamilyRepository)? = nil,
         accessToken: String,
         onRequestEdit: @escaping () -> Void,
-        onDeleted: @escaping () -> Void
+        onDeleted: @escaping () -> Void,
+        onCompleted: @escaping () -> Void = {},
+        onReopened: @escaping () -> Void = {}
     ) {
         _viewModel = State(initialValue: TaskDetailViewModel(
             taskID: taskID,
@@ -29,10 +35,13 @@ struct TaskDetailView: View {
             currentMemberID: currentMemberID,
             repository: repository,
             routineRepository: routineRepository,
+            familyRepository: familyRepository,
             accessToken: accessToken
         ))
         self.onRequestEdit = onRequestEdit
         self.onDeleted = onDeleted
+        self.onCompleted = onCompleted
+        self.onReopened = onReopened
     }
 
     var body: some View {
@@ -107,104 +116,204 @@ struct TaskDetailView: View {
                 onDeleted()
             }
         }
+        .onChange(of: viewModel.completionRevision) { _, revision in
+            if revision > 0 {
+                onCompleted()
+                isStatusFocused = true
+            }
+        }
+        .onChange(of: viewModel.showReopenSuccessBanner) { _, isShown in
+            if isShown {
+                onReopened()
+                isStatusFocused = true
+            }
+        }
     }
 
     @ViewBuilder
     private func content(for task: FamilyTask) -> some View {
-        List {
-            Section {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(task.title)
-                        .font(.title3.weight(.semibold))
-                    statusBadge(for: task.status)
-                }
-                .padding(.vertical, 4)
-            }
-
-            Section {
-                row(label: "tasks.form.weight_label", value: weightLabel(task.weight))
-                row(label: "tasks.form.scheduled_date_label", value: task.scheduledDate)
-                row(label: "tasks.form.assignees_label", value: assigneeSummary(task))
-                if let routine = viewModel.routine {
-                    row(label: "routines.recurrence.title", value: frequencyLabel(routine.frequency))
-                }
-            }
-
-            if viewModel.role != .kid, task.routineID != nil {
-                Section {
-                    if viewModel.routine?.materializationState == .pending {
-                        Label("routines.materialization.preparing", systemImage: "clock")
-                            .accessibilityIdentifier("routines.detail.preparing")
-                    }
-                    if viewModel.routineLoadFailed {
-                        Label("routines.error_unavailable", systemImage: "exclamationmark.triangle")
-                        Button("tasks.error.retry") { Task { await viewModel.refreshRoutine() } }
-                    }
-                    Text("routines.detail.origin_hint")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
-            }
-
-            if let note = task.note, !note.isEmpty {
-                Section("tasks.detail.note_label") {
-                    Text(note)
-                }
-            }
-
-            if let banner = viewModel.banner {
-                Section {
-                    Text(banner == .loadFailed ? "tasks.detail.load_error" : "tasks.common.error_unavailable")
-                        .foregroundStyle(.red)
-                }
-            }
-
-            if viewModel.showReopenSuccessBanner {
-                Section {
-                    Text("task.reopen.success_banner")
-                }
-            }
-
-            if viewModel.reopenFailed {
+        GeometryReader { geometry in
+            List {
                 Section {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("tasks.common.error_unavailable")
+                        Text(task.title)
+                            .font(.title3.weight(.semibold))
+                        statusBadge(for: task.status)
+                            .accessibilityFocused($isStatusFocused)
+                            .accessibilityIdentifier("tasks.detail.status")
+                    }
+                    .padding(.vertical, 4)
+                }
+
+                if viewModel.showReopenSuccessBanner {
+                    Section {
+                        HStack(alignment: .top, spacing: 12) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(.primary)
+                                .accessibilityHidden(true)
+                            Text("task.reopen.success_banner")
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(16)
+                        .background(.background, in: RoundedRectangle(cornerRadius: 16))
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(Color.clear)
+                    }
+                }
+
+                Section {
+                    row(label: "tasks.form.weight_label", value: weightLabel(task.weight))
+                    row(label: "tasks.form.scheduled_date_label", value: task.scheduledDate)
+                    row(label: "tasks.form.assignees_label", value: assigneeSummary(task))
+                    if let routine = viewModel.routine {
+                        row(label: "routines.recurrence.title", value: frequencyLabel(routine.frequency))
+                    }
+                }
+
+                if viewModel.role != .kid, task.routineID != nil {
+                    Section {
+                        if viewModel.routine?.materializationState == .pending {
+                            Label("routines.materialization.preparing", systemImage: "clock")
+                                .accessibilityIdentifier("routines.detail.preparing")
+                        }
+                        if viewModel.routineLoadFailed {
+                            Label("routines.error_unavailable", systemImage: "exclamationmark.triangle")
+                            Button("tasks.error.retry") { Task { await viewModel.refreshRoutine() } }
+                        }
+                        Text("routines.detail.origin_hint")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                if let note = task.note, !note.isEmpty {
+                    Section("tasks.detail.note_label") {
+                        Text(note)
+                    }
+                }
+
+                if let banner = viewModel.banner {
+                    Section {
+                        Text(banner == .loadFailed ? "tasks.detail.load_error" : "tasks.common.error_unavailable")
                             .foregroundStyle(.red)
-                        Button("Tentar novamente") { Task { await viewModel.requestReopen() } }
                     }
                 }
-            }
 
-            if viewModel.canReopen {
-                Section {
-                    Button(viewModel.isReopening ? "task.reopen.pending" : "task.reopen.button") {
-                        Task { await viewModel.requestReopen() }
+                if viewModel.reopenFailed {
+                    Section {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("tasks.common.error_unavailable")
+                                .foregroundStyle(.red)
+                            Button("Tentar novamente") { Task { await viewModel.requestReopen() } }
+                        }
                     }
-                    .disabled(viewModel.isReopening)
-                    .accessibilityIdentifier("tasks.detail.reopen")
-                    .accessibilityLabel(Text("task.reopen.accessibilityLabel"))
-                    .accessibilityHint(Text("task.reopen.accessibilityHint"))
                 }
-            }
 
-            if viewModel.canManageTask, task.routineID == nil {
-                Section {
-                    if viewModel.canDeleteDirectly {
-                        Button("Excluir", role: .destructive) { viewModel.requestDelete() }
+                if viewModel.memberRolesLoadFailed, task.status != .completed {
+                    Section {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("task.complete.members_unavailable")
+                                .foregroundStyle(.secondary)
+                            Button("tasks.error.retry") { Task { await viewModel.retryMemberRoles() } }
+                        }
+                    }
+                }
+
+                if let failure = viewModel.completionFailure {
+                    Section {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(completionFailureMessageKey(for: failure))
+                                .foregroundStyle(.secondary)
+                            if failure == .needsRefresh {
+                                Button("task.complete.refresh_status") {
+                                    Task { await viewModel.refreshCompletionStatus() }
+                                }
+                                .disabled(viewModel.isCompleting)
+                                .accessibilityIdentifier("tasks.detail.complete.refresh")
+                            }
+                        }
+                        .accessibilityElement(children: .contain)
+                    }
+                }
+
+                if viewModel.showsCompleteAction {
+                    Section {
+                        Button {
+                            Task { await viewModel.requestComplete() }
+                        } label: {
+                            Text(viewModel.isCompleting ? "task.complete.pending" : "task.complete.button")
+                                .frame(maxWidth: .infinity, minHeight: 50)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.white)
+                        .background(Color(red: 0.11, green: 0.11, blue: 0.12), in: Capsule())
+                        .disabled(!viewModel.canComplete)
+                        .opacity(viewModel.canComplete ? 1 : 0.5)
+                        .accessibilityIdentifier("tasks.detail.complete")
+                        .accessibilityLabel(Text(viewModel.isCompleting ? "task.complete.pending" : "task.complete.button"))
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(Color.clear)
+                    }
+                }
+
+                if viewModel.canReopen {
+                    Section {
+                        Button {
+                            Task { await viewModel.requestReopen() }
+                        } label: {
+                            Text(viewModel.isReopening ? "task.reopen.pending" : "task.reopen.button")
+                                .frame(maxWidth: .infinity, minHeight: 50)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.primary)
+                        .background(.background, in: Capsule())
+                        .overlay(Capsule().strokeBorder(Color(uiColor: .separator), lineWidth: 1))
+                        .disabled(viewModel.isReopening)
+                        .accessibilityIdentifier("tasks.detail.reopen")
+                        .accessibilityLabel(Text("task.reopen.accessibilityLabel"))
+                        .accessibilityHint(Text("task.reopen.accessibilityHint"))
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(Color.clear)
+                    }
+                }
+
+                if viewModel.canManageTask, task.routineID == nil {
+                    Section {
+                        if viewModel.canDeleteDirectly {
+                            Button(role: .destructive) { viewModel.requestDelete() } label: {
+                                Text("Excluir")
+                                    .frame(maxWidth: .infinity, minHeight: 50)
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .foregroundStyle(.red)
+                            .background(.background, in: Capsule())
                             .disabled(viewModel.isDeleting)
                             .accessibilityIdentifier("tasks.detail.delete")
-                    } else {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Excluir")
-                                .foregroundStyle(.secondary)
-                            Text("tasks.delete.error_already_completed")
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
+                            .listRowInsets(EdgeInsets())
+                            .listRowBackground(Color.clear)
+                        } else {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Excluir")
+                                    .frame(maxWidth: .infinity, minHeight: 50)
+                                    .background(.background, in: Capsule())
+                                    .foregroundStyle(.red.opacity(0.5))
+                                Text("tasks.delete.error_already_completed")
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .accessibilityIdentifier("tasks.detail.delete_disabled")
+                            .listRowInsets(EdgeInsets())
+                            .listRowBackground(Color.clear)
                         }
-                        .accessibilityIdentifier("tasks.detail.delete_disabled")
                     }
                 }
             }
+            .frame(maxWidth: geometry.size.width >= 1100 ? 734 : 580)
+            .frame(maxWidth: .infinity)
+            .background(Color(uiColor: .systemGroupedBackground))
         }
     }
 
@@ -212,6 +321,12 @@ struct TaskDetailView: View {
         viewModel.deleteBlock == .alreadyCompleted
             ? "tasks.delete.error_already_completed"
             : "tasks.delete.error_mission_protected"
+    }
+
+    private func completionFailureMessageKey(for failure: TaskCompletionFailure) -> LocalizedStringKey {
+        failure == .needsRefresh
+            ? "task.complete.error_unconfirmed"
+            : "task.complete.still_pending"
     }
 
     private func row(label: LocalizedStringKey, value: String) -> some View {

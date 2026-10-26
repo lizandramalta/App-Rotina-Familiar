@@ -20,6 +20,11 @@ struct MissionReopenPrompt: Equatable {
     let hasAcceptedReward: Bool
 }
 
+enum TaskCompletionFailure: Equatable {
+    case needsRefresh
+    case notCompleted
+}
+
 /// Backs TEL-012: Editar/Excluir (Admin/Membro only, SPEC-007/UX-011 §4) and Reabrir
 /// (Admin/Membro always, Kids only on their own task — SPEC-011 §4).
 @MainActor
@@ -30,7 +35,9 @@ final class TaskDetailViewModel {
     private let currentMemberID: UUID
     private let getTaskDetail: GetTaskDetailUseCase
     private let getRoutine: GetRoutineUseCase
+    private let familyRepository: (any FamilyRepository)?
     private let deleteTask: DeleteTaskUseCase
+    private let completeTask: CompleteTaskUseCase
     private let reopenTask: ReopenTaskUseCase
     private let accessToken: String
 
@@ -47,6 +54,11 @@ final class TaskDetailViewModel {
     private(set) var missionReopenPrompt: MissionReopenPrompt?
     private(set) var reopenFailed = false
     private(set) var showReopenSuccessBanner = false
+    private(set) var isCompleting = false
+    private(set) var completionFailure: TaskCompletionFailure?
+    private(set) var completionRevision = 0
+    private(set) var memberRolesLoadFailed = false
+    private var memberRoles: [UUID: MemberRole]?
 
     var isConfirmingDelete = false
 
@@ -56,6 +68,7 @@ final class TaskDetailViewModel {
         currentMemberID: UUID,
         repository: any TaskRepository,
         routineRepository: any RoutineRepository,
+        familyRepository: (any FamilyRepository)? = nil,
         accessToken: String
     ) {
         self.taskID = taskID
@@ -63,7 +76,9 @@ final class TaskDetailViewModel {
         self.currentMemberID = currentMemberID
         self.getTaskDetail = GetTaskDetailUseCase(repository: repository)
         self.getRoutine = GetRoutineUseCase(repository: routineRepository)
+        self.familyRepository = familyRepository
         self.deleteTask = DeleteTaskUseCase(repository: repository)
+        self.completeTask = CompleteTaskUseCase(repository: repository)
         self.reopenTask = ReopenTaskUseCase(repository: repository)
         self.accessToken = accessToken
     }
@@ -82,6 +97,28 @@ final class TaskDetailViewModel {
         task?.status == .awaitingConfirmation
     }
 
+    /// SPEC-010 CA-04: never offer the Member action until every assignee's role is known.
+    /// The backend rechecks this inside its transaction; this is only a presentation guard.
+    var showsCompleteAction: Bool {
+        guard let task, task.status != .completed else {
+            return false
+        }
+        switch role {
+        case .administrator:
+            return true
+        case .member:
+            if task.assigneeIDs.isEmpty { return true }
+            guard let memberRoles else { return false }
+            return task.assigneeIDs.allSatisfy { memberRoles[$0] != nil && memberRoles[$0] != .kid }
+        case .kid:
+            return false
+        }
+    }
+
+    var canComplete: Bool {
+        showsCompleteAction && !isCompleting && completionFailure != .needsRefresh
+    }
+
     /// Admin/Membro: any completed task. Kids: only their own (SPEC-011 §4, RBAC).
     var canReopen: Bool {
         guard let task, task.status == .completed else { return false }
@@ -97,6 +134,8 @@ final class TaskDetailViewModel {
         defer { isLoading = false }
         do {
             task = try await getTaskDetail.execute(taskID: taskID, accessToken: accessToken)
+            completionFailure = nil
+            await loadMemberRolesIfNeeded()
             if role != .kid, let routineID = task?.routineID {
                 await loadRoutine(id: routineID)
             } else {
@@ -105,6 +144,89 @@ final class TaskDetailViewModel {
             }
         } catch {
             loadFailed = true
+        }
+    }
+
+    func retryMemberRoles() async {
+        await loadMemberRolesIfNeeded()
+    }
+
+    private func loadMemberRolesIfNeeded() async {
+        memberRoles = nil
+        memberRolesLoadFailed = false
+        guard role == .member, let task, task.status != .completed, !task.assigneeIDs.isEmpty else {
+            return
+        }
+        guard let familyRepository else {
+            memberRolesLoadFailed = true
+            return
+        }
+        do {
+            var roles: [UUID: MemberRole] = [:]
+            var cursor: String?
+            var seenCursors = Set<String>()
+            repeat {
+                let page = try await familyRepository.listMembers(accessToken: accessToken, cursor: cursor)
+                for member in page.items {
+                    roles[member.id] = member.role
+                }
+                cursor = page.nextCursor
+                if let cursor, !seenCursors.insert(cursor).inserted {
+                    throw FamilyError.unavailable
+                }
+            } while cursor != nil
+            memberRoles = roles
+            memberRolesLoadFailed = task.assigneeIDs.contains { roles[$0] == nil }
+        } catch {
+            memberRolesLoadFailed = true
+        }
+    }
+
+    /// SPEC-010 Fase 2 CA-01/02/05/06. The POST is never replayed automatically.
+    func requestComplete() async {
+        guard canComplete else { return }
+        isCompleting = true
+        completionFailure = nil
+        showReopenSuccessBanner = false
+        defer { isCompleting = false }
+
+        do {
+            task = try await completeTask.execute(taskID: taskID, accessToken: accessToken)
+            if task?.status == .completed {
+                completionRevision += 1
+            } else {
+                completionFailure = .needsRefresh
+            }
+        } catch TaskError.alreadyCompleted {
+            await reconcileCompletion()
+        } catch TaskError.uncertainOutcome {
+            await reconcileCompletion()
+        } catch {
+            completionFailure = .needsRefresh
+        }
+    }
+
+    /// Checks the canonical state before another explicit command after an uncertain result.
+    func refreshCompletionStatus() async {
+        guard !isCompleting, completionFailure != nil else { return }
+        isCompleting = true
+        defer { isCompleting = false }
+        await reconcileCompletion()
+    }
+
+    private func reconcileCompletion() async {
+        do {
+            let latest = try await getTaskDetail.execute(taskID: taskID, accessToken: accessToken)
+            task = latest
+            if latest.status == .completed {
+                completionFailure = nil
+                completionRevision += 1
+            } else {
+                await loadMemberRolesIfNeeded()
+                completionFailure = .notCompleted
+            }
+        } catch {
+            completionFailure = .needsRefresh
         }
     }
 

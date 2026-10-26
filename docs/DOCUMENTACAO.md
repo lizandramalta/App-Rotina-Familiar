@@ -1,8 +1,8 @@
-# Documentação do projeto — versão 1.25
+# Documentação do projeto — versão 1.27
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.25\
-**Data:** 2026-10-21\
+**Versão:** 1.27\
+**Data:** 2026-10-26\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Modelo de dados](05-modelo-de-dados.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -16,10 +16,10 @@
 | [Índice e versões](DOCUMENTACAO.md) | Organização documental, rastreabilidade e política de versões. |
 | [Regras de negócio](01-regras-de-negocio.md) | Regras vigentes e suas relações com RF, RNF e UC; versão 1.18. |
 | [Requisitos](02-requisitos.md) | 71 requisitos funcionais e 27 não funcionais, com vínculos às regras e aos casos de uso; versão 1.17. |
-| [Especificação dos casos de uso](03-casos-de-uso.md) | 19 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições; versão 1.16. |
+| [Especificação dos casos de uso](03-casos-de-uso.md) | 19 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições; versão 1.18. |
 | [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) | Visão geral e cinco recortes UML, com fontes PlantUML e imagens SVG. |
-| [Screen map](design/screen-map.md) | Mapa 1.14: navegação, catálogo de telas, modais, estados e cobertura de UC01–UC19; base RN 1.18 / RF 1.17 / UC 1.16. |
-| [User flows](design/user-flows.md) | Fluxos 1.15: 16 percursos que cobrem UC01–UC19, com decisões, alternativas e retornos; base RN 1.18 / RF 1.17 / UC 1.16 e screen map 1.14. |
+| [Screen map](design/screen-map.md) | Mapa 1.15: navegação, catálogo de telas, modais, estados e cobertura de UC01–UC19; base RN 1.18 / RF 1.17 / UC 1.18. |
+| [User flows](design/user-flows.md) | Fluxos 1.17: 16 percursos que cobrem UC01–UC19, com decisões, alternativas e retornos; base RN 1.18 / RF 1.17 / UC 1.18 e screen map 1.15. |
 | [Modelo de dados (DER)](05-modelo-de-dados.md) | Modelo 1.9: preparação de foto por grant antes da família, criação conjunta de membros e estado visual apenas projetado; base RN 1.18 / RF 1.17 / UC 1.16. |
 | [Diagrama de classes](06-diagrama-de-classes.md) | Modelo 1.9: rascunho de membros, resultado de criação, foto antecipada e item pessoal com estado efetivo/exibido; base RN 1.18 / RF 1.17 / UC 1.16. |
 | [Arquitetura mobile](architecture/mobile-architecture.md) | Arquitetura 1.6: Swift + SwiftUI, View + ViewModel, integração do onboarding e projeção pessoal de tarefas. |
@@ -145,6 +145,8 @@ A fundação backend adota Node.js, TypeScript, Fastify e `pg`. Parte da API de 
 
 | Versão | Data | Alteração |
 | --- | --- | --- |
+| 1.27 | 2026-10-26 | TEL-010/TEL-040 atualizam estado e progresso ao toque; UF-06/UF-08 e UX-009/010/011 registram última intenção, comandos sequenciais e reconciliação de falhas. |
+| 1.26 | 2026-10-26 | UC12/UC17, TEL-010/TEL-040 e UF-06/UF-08 registram o círculo da lista pessoal como ação de concluir/reabrir; UX-009, SPEC/UX-010/011 e testes mobile alinhados. |
 | 1.25 | 2026-10-21 | Contratos backend 1.19 registram o endereço Cloudflare de Universal Links, AASA e fallback do convite, sem alteração funcional. |
 | 1.24 | 2026-10-21 | Contratos backend 1.18 e OpenAPI refletem perfil próprio (`nickname`/foto) e consulta de badges implementados na SPEC-006 Fase 1 (SCRUM-51). SPEC-006 CA-06/§5.3 corrigidos de `400` para `422` em `NICKNAME_INVALID_LENGTH` (E-03), por consistência com o restante do contrato. |
 | 1.23 | 2026-10-19 | Contratos backend 1.17 e OpenAPI refletem `displayStatus` pessoal implementado na SPEC-009 Fase 1 (SCRUM-107). |

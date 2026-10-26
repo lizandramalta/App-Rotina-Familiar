@@ -3546,6 +3546,66 @@
         }
       }
     },
+    "task.complete.button": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concluir tarefa"
+          }
+        }
+      }
+    },
+    "task.complete.error_unconfirmed": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível confirmar a conclusão. Consulte o estado da tarefa antes de tentar novamente."
+          }
+        }
+      }
+    },
+    "task.complete.members_unavailable": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível verificar os responsáveis desta tarefa."
+          }
+        }
+      }
+    },
+    "task.complete.pending": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concluindo tarefa…"
+          }
+        }
+      }
+    },
+    "task.complete.refresh_status": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consultar estado"
+          }
+        }
+      }
+    },
+    "task.complete.still_pending": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A tarefa continua pendente. Você pode tentar concluir novamente."
+          }
+        }
+      }
+    },
     "task.reopen.accessibilityHint": {
       "localizations": {
         "pt-BR": {
@@ -4032,6 +4092,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Esforço médio"
+          }
+        }
+      }
+    },
+    "tasks.personal.actionError": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível confirmar a mudança. Consulte o estado da tarefa antes de tentar novamente."
+          }
+        }
+      }
+    },
+    "tasks.personal.actionFailedMessage": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A alteração não foi aplicada. A tarefa voltou ao estado confirmado."
+          }
+        }
+      }
+    },
+    "tasks.personal.actionFailedTitle": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível alterar a tarefa"
+          }
+        }
+      }
+    },
+    "tasks.personal.actionUncertainTitle": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ainda não foi possível confirmar a alteração"
           }
         }
       }

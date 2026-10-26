@@ -26,6 +26,10 @@ enum UITestScenario: String {
     case dailyTasksFailure = "daily-tasks-failure"
     case familyOverview = "family-overview"
     case familyOverviewMember = "family-overview-member"
+    case taskCompletionMember = "task-completion-member"
+    case taskCompletionConflict = "task-completion-conflict"
+    case taskOptimisticDelayed = "task-optimistic-delayed"
+    case taskOptimisticFailure = "task-optimistic-failure"
     case routineCreation = "routine-creation"
     case missionManagement = "mission-management"
     case missionManagementMember = "mission-management-member"
@@ -60,7 +64,12 @@ enum UITestScenario: String {
             sessionStore.apply(.session(Self.inviteSession(role: role)))
             return
         }
+        if self == .taskCompletionMember {
+            sessionStore.apply(.session(Self.inviteSession(role: .member)))
+            return
+        }
         if self == .taskManagement || self == .familySettings || self == .dailyTasks || self == .dailyTasksFailure
+            || self == .taskCompletionConflict || self == .taskOptimisticDelayed || self == .taskOptimisticFailure
             || self == .routineCreation || self == .missionManagement {
             sessionStore.apply(.session(Self.inviteSession(role: .administrator)))
             return
@@ -560,7 +569,9 @@ private actor UITestTaskRepository: TaskRepository {
     }
 
     private var role: MemberRole {
-        scenario == .dailyTasksKids ? .kid : .administrator
+        if scenario == .dailyTasksKids { return .kid }
+        if scenario == .taskCompletionMember { return .member }
+        return .administrator
     }
 
     private static func displayStatus(for status: TaskStatus, role: MemberRole) -> TaskStatus {
@@ -632,6 +643,36 @@ private actor UITestTaskRepository: TaskRepository {
         }
         tasks.removeValue(forKey: id)
         return id
+    }
+
+    func completeTask(id: UUID, accessToken: String) async throws -> FamilyTask {
+        guard let task = tasks[id] else { throw TaskError.notFound }
+        guard task.status != .completed else { throw TaskError.alreadyCompleted }
+        if scenario == .taskOptimisticDelayed, id == UITestTaskFixtures.todayPendingTaskID {
+            try await Task.sleep(for: .seconds(2))
+        }
+        if scenario == .taskOptimisticFailure, id == UITestTaskFixtures.todayPendingTaskID {
+            throw TaskError.rejected
+        }
+        if role == .member, task.assigneeIDs.contains(UITestTaskFixtures.kidMemberID) {
+            throw TaskError.actionNotAllowed
+        }
+        let completed = FamilyTask(
+            id: task.id,
+            title: task.title,
+            weight: task.weight,
+            scheduledDate: task.scheduledDate,
+            assigneeIDs: task.assigneeIDs.isEmpty ? [UITestTaskFixtures.memberID] : task.assigneeIDs,
+            note: task.note,
+            status: .completed,
+            routineID: task.routineID,
+            createdAt: task.createdAt
+        )
+        tasks[id] = completed
+        if scenario == .taskCompletionConflict {
+            throw TaskError.alreadyCompleted
+        }
+        return completed
     }
 
     /// Well before any fixture date and any plausible "today" during a test run (RN49's lower bound).

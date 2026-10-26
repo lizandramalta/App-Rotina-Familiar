@@ -20,10 +20,14 @@ final class TaskReopenUITests: XCTestCase {
     func testCA01AdultReopensDirectlyWithoutMissionImpact() {
         launchAdult(route: "detail:\(missionFreeReopenTaskID)")
 
-        XCTAssertTrue(app.buttons["tasks.detail.reopen"].waitForExistence(timeout: 5))
-        app.buttons["tasks.detail.reopen"].tap()
+        let reopen = app.buttons["tasks.detail.reopen"]
+        XCTAssertTrue(reopen.waitForExistence(timeout: 5))
+        XCTAssertGreaterThanOrEqual(reopen.frame.width, min(app.frame.width - 40, 500))
+        reopen.tap()
 
-        XCTAssertTrue(app.staticTexts["Tarefa voltou para Pendente. O crédito de hoje foi retirado."].waitForExistence(timeout: 5))
+        let banner = app.staticTexts["Tarefa voltou para Pendente. O crédito de hoje foi retirado."]
+        XCTAssertTrue(banner.waitForExistence(timeout: 5))
+        XCTAssertLessThan(banner.frame.minY, app.staticTexts["Esforço"].frame.minY)
         XCTAssertFalse(app.buttons["tasks.detail.reopen"].exists, "a pending task no longer offers Reabrir")
     }
 

@@ -20,7 +20,10 @@ struct MyTasksTabView: View {
         NavigationStack(path: $path) {
             DailyTaskListView(
                 audience: .adult,
+                role: role,
+                currentMemberID: currentMemberID,
                 repository: taskRepository,
+                familyRepository: familyRepository,
                 accessToken: accessToken,
                 refreshRevision: listRevision,
                 routineFeedback: routineFeedback,
@@ -67,9 +70,12 @@ struct MyTasksTabView: View {
                 currentMemberID: currentMemberID,
                 repository: taskRepository,
                 routineRepository: routineRepository,
+                familyRepository: familyRepository,
                 accessToken: accessToken,
                 onRequestEdit: { path.append(.edit(taskID)) },
-                onDeleted: { path.removeAll(); listRevision += 1 }
+                onDeleted: { path.removeAll(); listRevision += 1 },
+                onCompleted: { listRevision += 1 },
+                onReopened: { listRevision += 1 }
             )
         case let .edit(taskID):
             TaskEditorView(

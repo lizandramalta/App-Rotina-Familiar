@@ -17,10 +17,15 @@ struct DailyTaskListView: View {
     /// error message and retry action. Same mechanism already used in EntryView.
     @AccessibilityFocusState private var isHeaderFocused: Bool
     @AccessibilityFocusState private var isErrorFocused: Bool
+    @AccessibilityFocusState private var isMissionWarningFocused: Bool
+    @AccessibilityFocusState private var focusedTaskID: UUID?
 
     init(
         audience: TaskAudience,
+        role: MemberRole,
+        currentMemberID: UUID,
         repository: any TaskRepository,
+        familyRepository: (any FamilyRepository)? = nil,
         accessToken: String,
         refreshRevision: Int = 0,
         routineFeedback: Routine? = nil,
@@ -32,7 +37,10 @@ struct DailyTaskListView: View {
     ) {
         _viewModel = State(initialValue: DailyTaskListViewModel(
             audience: audience,
+            role: role,
+            currentMemberID: currentMemberID,
             repository: repository,
+            familyRepository: familyRepository,
             accessToken: accessToken
         ))
         self.refreshRevision = refreshRevision
@@ -67,6 +75,10 @@ struct DailyTaskListView: View {
                             if viewModel.loadFailed {
                                 inlineFailureBanner
                             }
+                            if viewModel.actionFailure != nil,
+                               viewModel.items.contains(where: { $0.id == viewModel.actionFailureTaskID }) {
+                                actionFailureBanner
+                            }
                             taskList
                         }
                     }
@@ -77,6 +89,41 @@ struct DailyTaskListView: View {
         }
         .navigationTitle("destination.myTasks")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: Binding(
+            get: { viewModel.missionReopenPrompt != nil },
+            set: { if !$0 { viewModel.cancelMissionReopen() } }
+        )) {
+            if let prompt = viewModel.missionReopenPrompt {
+                MissionReopenConfirmationView(
+                    prompt: prompt,
+                    role: viewModel.audience == .kid ? .kid : viewModel.role,
+                    isSubmitting: viewModel.missionReopenTaskID.map { viewModel.actionInFlight.contains($0) } ?? false,
+                    isWarningFocused: $isMissionWarningFocused,
+                    onConfirm: { viewModel.confirmMissionReopen() },
+                    onCancel: { viewModel.cancelMissionReopen() }
+                )
+            }
+        }
+        .alert(
+            viewModel.actionAlert == .uncertain
+                ? "tasks.personal.actionUncertainTitle"
+                : "tasks.personal.actionFailedTitle",
+            isPresented: Binding(
+                get: { viewModel.actionAlert != nil },
+                set: { if !$0 { viewModel.dismissActionAlert() } }
+            )
+        ) {
+            if viewModel.actionAlert == .uncertain {
+                Button("task.complete.refresh_status") {
+                    Task { await viewModel.refreshActionStatus() }
+                }
+            }
+            Button("OK") { viewModel.dismissActionAlert() }
+        } message: {
+            Text(viewModel.actionAlert == .uncertain
+                 ? "tasks.personal.actionError"
+                 : "tasks.personal.actionFailedMessage")
+        }
         .toolbar {
             if viewModel.audience == .adult {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -100,6 +147,12 @@ struct DailyTaskListView: View {
             if failed {
                 isErrorFocused = true
             }
+        }
+        .onChange(of: viewModel.actionRevision) { _, _ in
+            focusedTaskID = viewModel.lastChangedTaskID
+        }
+        .onChange(of: viewModel.actionFailure) { _, failure in
+            if failure != nil { isErrorFocused = true }
         }
     }
 
@@ -279,6 +332,27 @@ struct DailyTaskListView: View {
             .accessibilityFocused($isErrorFocused)
     }
 
+    private var actionFailureBanner: some View {
+        HStack {
+            Label(
+                viewModel.actionFailure == .notCompleted
+                    ? "task.complete.still_pending"
+                    : "tasks.personal.actionError",
+                systemImage: "exclamationmark.triangle.fill"
+            )
+            .font(.footnote)
+            Spacer()
+            Button("task.complete.refresh_status") {
+                Task { await viewModel.refreshActionStatus() }
+            }
+            .disabled(viewModel.actionFailureTaskID.map { viewModel.actionInFlight.contains($0) } ?? false)
+            .accessibilityIdentifier("tasks.daily.action.refresh")
+        }
+        .foregroundStyle(.red)
+        .accessibilityIdentifier("tasks.daily.action.error")
+        .accessibilityFocused($isErrorFocused)
+    }
+
     // MARK: List
 
     private var taskList: some View {
@@ -293,31 +367,51 @@ struct DailyTaskListView: View {
     @ViewBuilder
     private func row(for item: OwnTaskListItem) -> some View {
         let isCompleted = item.displayStatus == .completed
-        Button {
-            onSelectTask(item.task.id)
-        } label: {
-            HStack(spacing: 12) {
-                statusIcon(for: item.displayStatus)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(item.task.title)
-                        .strikethrough(isCompleted)
-                        .foregroundStyle(isCompleted ? .secondary : .primary)
-                    Text(detailText(for: item))
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
+        HStack(spacing: 0) {
+            if viewModel.showsToggle(item) {
+                Button {
+                    viewModel.toggle(item)
+                } label: {
+                    statusIcon(for: item.displayStatus)
+                        .frame(minWidth: 44, minHeight: 44)
+                        .contentShape(Rectangle())
                 }
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.footnote)
-                    .foregroundStyle(.tertiary)
+                .buttonStyle(.plain)
+                .disabled(!viewModel.canToggle(item))
+                .accessibilityLabel(Text("\(item.task.status == .completed ? String(localized: "task.reopen.button") : String(localized: "task.complete.button")), \(item.task.title)"))
+                .accessibilityIdentifier("tasks.daily.toggle.\(item.id.uuidString)")
+            } else {
+                statusIcon(for: item.displayStatus)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .accessibilityHidden(true)
             }
-            .padding(.vertical, 10)
+            Button {
+                onSelectTask(item.task.id)
+            } label: {
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(item.task.title)
+                            .strikethrough(isCompleted)
+                            .foregroundStyle(isCompleted ? .secondary : .primary)
+                        Text(detailText(for: item))
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.footnote)
+                        .foregroundStyle(.tertiary)
+                }
+                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(Text(accessibilityLabel(for: item)))
+            .accessibilityHint(Text("tasks.personal.openDetailHint"))
+            .accessibilityIdentifier("tasks.daily.row.\(item.task.id.uuidString)")
+            .accessibilityFocused($focusedTaskID, equals: item.id)
         }
-        .buttonStyle(.plain)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(accessibilityLabel(for: item)))
-        .accessibilityHint(Text("tasks.personal.openDetailHint"))
-        .accessibilityIdentifier("tasks.daily.row.\(item.task.id.uuidString)")
+        .padding(.vertical, 10)
     }
 
     private func statusIcon(for status: TaskStatus) -> some View {

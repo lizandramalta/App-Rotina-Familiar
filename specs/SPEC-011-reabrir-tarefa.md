@@ -2,7 +2,7 @@
 
 **Status:** aprovada
 **Autor:** Claude | **Criada em:** 2026-10-07 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-07
-**Base funcional:** 1.13
+**Base funcional:** UC 1.18; RN/RF conforme rastreabilidade
 **UX-spec:** [UX-011-reabrir-tarefa.md](UX-011-reabrir-tarefa.md)
 **Projetos envolvidos:** ambos
 **Tema do backlog:** Tema 2 — Tarefas e rotina
@@ -20,7 +20,7 @@
 | Regras | RN38, RN50, RN53, RN55, RN57, RN58, RN59 |
 | Requisitos | RF09, RF18, RF19, RF57, RF58, RF59 |
 | Não funcionais | RNF01, RNF02, RNF05, RNF06, RNF07, RNF08, RNF09, RNF10, RNF11, RNF12, RNF13, RNF14, RNF22, RNF25 |
-| Telas e fluxo | TEL-012, MOD-006, UF-08 |
+| Telas e fluxo | TEL-010, TEL-012, TEL-040, MOD-006, UF-08 |
 | Arquitetura | MA-07, MA-08, MA-11; BA-05, BA-07, BA-08, BA-14, BA-20 |
 
 - **Depende de:** [SPEC-010-concluir-tarefa.md](SPEC-010-concluir-tarefa.md), aprovada — fornece `Completion` e o estado `completed` que esta spec reverte. [SPEC-014-gerenciar-missoes.md](SPEC-014-gerenciar-missoes.md), aprovada — fornece `Mission`, `MissionStatus` e `CloseEligibleMissions`, cujo efeito esta spec é a única operação autorizada a reverter (RN58).
@@ -36,6 +36,7 @@
 - Recalcular o progresso das missões em andamento vinculadas à tarefa.
 - Quando a tarefa estiver vinculada a ao menos uma missão `completed` e/ou com recompensa aceita: exigir confirmação explícita (`confirm: true`) antes de persistir; ao confirmar, retornar a(s) missão(ões) para `inProgress` e remover recompensa aceita, participações e badges derivados dela, na mesma transação, sem preservar histórico desses dados (RN38/53/58).
 - Autorização: Administrador e Membro em qualquer tarefa acessível da família; Kids somente na própria tarefa, como responsável.
+- Em TEL-010/TEL-040, o círculo reabre quando permitido; o restante da linha abre o detalhe. Após a ação, lista e progresso consultam o servidor; MOD-006 mantém a mesma confirmação.
 - Isolamento multitenant (RNF06) e consistência sob concorrência (RNF11/25, lock por família BA-08).
 
 ### 3.2. Fora do escopo (desta spec)
@@ -231,11 +232,11 @@ Segredos, tokens e dados de autenticação nunca entram em logs ou telemetria.
 | Fase | Objetivo | CAs atendidos | Prontidão | Status |
 |---|---|---|---|---|
 | **1** | Núcleo (API, RBAC, isolamento, fluxo de confirmação, concorrência) | CA-01 a CA-08 | Testes unitários e de integração verdes | a fazer |
-| **2** | Mobile (TEL-012 ação Reabrir, MOD-006, Kids escopo próprio) | CA-01 a CA-05 integrados à UI | Telas integradas, UX-spec verificada | a fazer |
+| **2** | Mobile (TEL-010/TEL-040 círculo, TEL-012 ação Reabrir, MOD-006, Kids escopo próprio) | CA-01 a CA-05 integrados à UI | Telas integradas, UX-spec verificada | a fazer |
 | **3** | Resiliência de rede | CA-09 | Suíte de regressão verde | a fazer |
 
 - **Fase 1** não publica nenhuma tela; só o endpoint. Pode ser publicada isoladamente (nenhuma UI nova depende dela ainda).
-- **Fase 2** entrega a ação completa no TEL-012. Deve sair junto com a Fase 1.
+- **Fase 2** entrega a ação completa no TEL-010/TEL-012/TEL-040. Deve sair junto com a Fase 1.
 - **Fase 3** não muda comportamento funcional.
 
 ## 11. Checklist de aprovação

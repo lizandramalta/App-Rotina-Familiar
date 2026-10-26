@@ -130,6 +130,43 @@ struct HTTPTaskRepositoryTests {
         )
     }
 
+    @Test("SPEC-010 CA-01/02/05: completion POST has no body and decodes the canonical task")
+    func completeTaskSuccess() async throws {
+        let stub = TaskStubHTTP.make(
+            status: 200,
+            json: #"{"task":\#(taskJSON(status: "completed")),"affectedResources":[]}"#
+        )
+
+        let task = try await stub.repository.completeTask(id: UUID(uuidString: taskID)!, accessToken: "access-1")
+
+        let request = try #require(stub.requests().first)
+        #expect(request.method == "POST")
+        #expect(request.url.path == "/v1/tasks/\(taskID)/completion")
+        #expect(request.body.isEmpty)
+        #expect(request.headers["Authorization"] == "Bearer access-1")
+        #expect(task.status == .completed)
+    }
+
+    @Test("SPEC-010 CA-06: a competing completion reports the named conflict for canonical reload")
+    func completeTaskConflict() async {
+        let stub = TaskStubHTTP.make(status: 409, json: #"{"code":"TASK_ALREADY_COMPLETED"}"#)
+
+        await #expect(throws: TaskError.alreadyCompleted) {
+            _ = try await stub.repository.completeTask(id: UUID(uuidString: taskID)!, accessToken: "access-1")
+        }
+        #expect(stub.requests().count == 1)
+    }
+
+    @Test("SPEC-010 safety: an ambiguous POST is reported once for reconciliation")
+    func completeTaskNetworkFailureIsUncertain() async {
+        let stub = TaskStubHTTP.make(failure: URLError(.timedOut))
+
+        await #expect(throws: TaskError.uncertainOutcome) {
+            _ = try await stub.repository.completeTask(id: UUID(uuidString: taskID)!, accessToken: "access-1")
+        }
+        #expect(stub.requests().count == 1)
+    }
+
     private func expectError(status: Int, json: String, _ expected: TaskError) async {
         let stub = TaskStubHTTP.make(status: status, json: json)
         await #expect(throws: expected) {

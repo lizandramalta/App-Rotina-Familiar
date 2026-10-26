@@ -2,7 +2,7 @@
 
 **Status:** aprovada
 **Autor:** Codex | **Criada em:** 2026-10-06 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-06
-**Base funcional:** 1.10
+**Base funcional:** UC 1.18; RN/RF conforme rastreabilidade
 **UX-spec:** [UX-010-concluir-tarefa.md](UX-010-concluir-tarefa.md)
 **Projetos envolvidos:** ambos
 **Tema do backlog:** Tema 2 — Tarefas e rotina
@@ -20,11 +20,11 @@
 | Regras | RN21–23, RN26, RN30, RN35, RN48, RN55–56 |
 | Requisitos | RF12, RF26, RF47, RF56 |
 | Não funcionais | RNF01, RNF02, RNF05–14, RNF22, RNF25 |
-| Telas e fluxo | TEL-012, UF-06 |
+| Telas e fluxo | TEL-010, TEL-012, UF-06 |
 | Arquitetura | MA-07; BA-07, BA-08 |
 
 - **Depende de:** [SPEC-007-gerenciar-tarefas.md](SPEC-007-gerenciar-tarefas.md), aprovada.
-- **Fontes consultadas:** regras, requisitos, UC12, screen map, UF-06, contratos e arquiteturas mobile/backend.
+- **Fontes consultadas:** regras, requisitos, UC12, screen map (TEL-010/TEL-012), UF-06, contratos e arquiteturas mobile/backend.
 
 ## 3. Escopo
 
@@ -36,6 +36,7 @@
 - Tarefa com ao menos um responsável Kids: somente Administrador conclui manualmente; Membro apenas visualiza.
 - Conclusão manual administrativa encerra pendência Kids e preserva sinalização/foto para auditoria administrativa.
 - Concorrência: uma conclusão válida; a segunda retorna `409 TASK_ALREADY_COMPLETED` e o mobile reconcilia silenciosamente.
+- Em TEL-010, o círculo conclui quando autorizado; o restante da linha abre TEL-012. Após a ação, lista e progresso consultam o servidor.
 
 ### Fora
 
@@ -114,7 +115,7 @@ Erros seguem `application/problem+json`. `409 TASK_ALREADY_COMPLETED` não é ex
 | Fase | CAs | Prontidão | Status |
 |---|---|---|---|
 | 1 | CA-01, CA-02, CA-04 a CA-07 | API, transação, RBAC/isolation e testes verdes | concluída — SCRUM-40 |
-| 2 | CA-01, CA-02, CA-04 a CA-06 | TEL-012 integrado, UX e UI tests verdes | a fazer |
+| 2 | CA-01, CA-02, CA-04 a CA-06 | TEL-010/TEL-012 integrados, UX e UI tests verdes | a fazer |
 | 3 | CA-08 | Falhas/telemetria verificadas | a fazer |
 
 **Registro de execução (2026-10-10):** SCRUM-40 concluiu a Fase 1 no backend. A integração Mobile e a reconciliação de interface permanecem na Fase 2 (SCRUM-41).

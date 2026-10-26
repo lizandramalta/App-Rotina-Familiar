@@ -10,10 +10,213 @@ struct DailyTaskListViewModelTests {
 
     private func makeViewModel(
         audience: TaskAudience = .adult,
+        role: MemberRole = .administrator,
+        currentMemberID: UUID = UUID(),
+        familyRepository: (any FamilyRepository)? = nil,
         repository: TaskRepositorySpy,
         today: @escaping () -> Date = { Self.fixedToday }
     ) -> DailyTaskListViewModel {
-        DailyTaskListViewModel(audience: audience, repository: repository, accessToken: "access-1", today: today)
+        DailyTaskListViewModel(
+            audience: audience,
+            role: audience == .kid ? .kid : role,
+            currentMemberID: currentMemberID,
+            repository: repository,
+            familyRepository: familyRepository,
+            accessToken: "access-1",
+            today: today
+        )
+    }
+
+    private func task(status: TaskStatus, assignees: [UUID] = []) -> FamilyTask {
+        let original = TaskRepositorySpy.fixture
+        return FamilyTask(
+            id: original.id, title: original.title, weight: original.weight,
+            scheduledDate: original.scheduledDate, assigneeIDs: assignees,
+            note: original.note, status: status, routineID: original.routineID,
+            createdAt: original.createdAt
+        )
+    }
+
+    private func page(_ task: FamilyTask, displayStatus: TaskStatus? = nil) -> OwnTaskPage {
+        OwnTaskPage(items: [OwnTaskListItem(task: task, displayStatus: displayStatus ?? task.status)],
+                    nextCursor: nil, familyCreatedAt: Self.familyCreatedAt)
+    }
+
+    private func waitForAction(_ viewModel: DailyTaskListViewModel, taskID: UUID) async {
+        for _ in 0..<1_000 {
+            if !viewModel.actionInFlight.contains(taskID) { return }
+            await Task.yield()
+        }
+        Issue.record("Task action did not finish")
+    }
+
+    @Test("SPEC-010 CA-01 and SPEC-011 CA-01: list toggle completes, reopens, and refreshes progress")
+    func toggleUpdatesTaskAndProgress() async {
+        let pending = task(status: .pending)
+        let completed = task(status: .completed)
+        let repository = TaskRepositorySpy(
+            completeResult: .success(completed), dailyTasksResult: .success(page(pending)),
+            dailyProgressResult: .success(DailyProgress(total: 1, completed: 0, percentage: 0, familyCreatedAt: Self.familyCreatedAt)),
+            reopenResult: .success(pending)
+        )
+        let viewModel = makeViewModel(repository: repository)
+        await viewModel.load()
+        repository.setDailyResults(
+            tasks: .success(page(completed)),
+            progress: .success(DailyProgress(total: 1, completed: 1, percentage: 100, familyCreatedAt: Self.familyCreatedAt))
+        )
+        viewModel.toggle(viewModel.items[0])
+        #expect(viewModel.items[0].task.status == .completed, "The row changes before the server replies")
+        #expect(viewModel.progress?.completed == 1)
+        await waitForAction(viewModel, taskID: pending.id)
+        #expect(repository.completeCalls == [pending.id])
+        #expect(viewModel.items[0].task.status == .completed)
+        #expect(viewModel.progress?.completed == 1)
+
+        repository.setDailyResults(
+            tasks: .success(page(pending)),
+            progress: .success(DailyProgress(total: 1, completed: 0, percentage: 0, familyCreatedAt: Self.familyCreatedAt))
+        )
+        viewModel.toggle(viewModel.items[0])
+        #expect(viewModel.items[0].task.status == .pending)
+        #expect(viewModel.progress?.completed == 0)
+        await waitForAction(viewModel, taskID: pending.id)
+        #expect(repository.reopenCalls == [ReopenCall(id: pending.id, confirm: false)])
+        #expect(viewModel.items[0].task.status == .pending)
+        #expect(viewModel.progress?.completed == 0)
+    }
+
+    @Test("SPEC-010 CA-04: Member cannot complete a Kids task even when its display status is pending")
+    func memberCannotCompleteKidsTaskFromList() async {
+        let kidID = UUID()
+        let awaiting = task(status: .awaitingConfirmation, assignees: [kidID])
+        let repository = TaskRepositorySpy(dailyTasksResult: .success(page(awaiting, displayStatus: .pending)))
+        let family = FamilyMembersStub(members: [FamilyMember(id: kidID, name: "Rafa", role: .kid, isFamilyCreator: false)])
+        let viewModel = makeViewModel(role: .member, familyRepository: family, repository: repository)
+        await viewModel.load()
+
+        #expect(!viewModel.showsToggle(viewModel.items[0]))
+        viewModel.toggle(viewModel.items[0])
+        #expect(repository.completeCalls.isEmpty)
+    }
+
+    @Test("SPEC-010 CA-06/08: uncertain completion is read before another explicit command")
+    func uncertainCompletionReconcilesWithoutReplay() async {
+        let pending = task(status: .pending)
+        let completed = task(status: .completed)
+        let repository = TaskRepositorySpy(
+            taskResult: .success(completed), completeResult: .failure(TaskError.uncertainOutcome),
+            dailyTasksResult: .success(page(pending))
+        )
+        let viewModel = makeViewModel(repository: repository)
+        await viewModel.load()
+        repository.setDailyResults(tasks: .success(page(completed)))
+
+        viewModel.toggle(viewModel.items[0])
+        await waitForAction(viewModel, taskID: pending.id)
+
+        #expect(repository.completeCalls == [pending.id])
+        #expect(repository.taskCalls == [pending.id])
+        #expect(viewModel.items[0].task.status == .completed)
+        #expect(viewModel.actionFailure == nil)
+    }
+
+    @Test("SPEC-011 CA-02/03: mission impact requires an explicit second command")
+    func missionReopenRequiresConfirmation() async {
+        let completed = task(status: .completed)
+        let pending = task(status: .pending)
+        let affected = [AffectedMission(id: UUID(), title: "Missão")]
+        let repository = TaskRepositorySpy(
+            dailyTasksResult: .success(page(completed)),
+            reopenResult: .failure(TaskError.missionReopenRequiresConfirmation(missionsAffected: affected, hasAcceptedReward: false))
+        )
+        let viewModel = makeViewModel(repository: repository)
+        await viewModel.load()
+        viewModel.toggle(viewModel.items[0])
+        #expect(viewModel.items[0].task.status == .pending)
+        await waitForAction(viewModel, taskID: completed.id)
+        #expect(viewModel.missionReopenPrompt == MissionReopenPrompt(missionsAffected: affected, hasAcceptedReward: false))
+        #expect(viewModel.items[0].task.status == .completed, "MOD-006 restores the confirmed state until consent")
+        #expect(repository.reopenCalls == [ReopenCall(id: completed.id, confirm: false)])
+
+        repository.setReopenResult(.success(pending))
+        repository.setDailyResults(tasks: .success(page(pending)))
+        viewModel.confirmMissionReopen()
+        await waitForAction(viewModel, taskID: completed.id)
+        #expect(repository.reopenCalls == [ReopenCall(id: completed.id, confirm: false), ReopenCall(id: completed.id, confirm: true)])
+        #expect(viewModel.missionReopenPrompt == nil)
+        #expect(viewModel.items[0].task.status == .pending)
+    }
+
+    @Test("SPEC-010/011: a second tap keeps the latest intent while the first write is in flight")
+    func latestIntentWinsAfterInFlightCompletion() async {
+        let pending = task(status: .pending)
+        let completed = task(status: .completed)
+        let gate = TaskRequestGate()
+        let repository = TaskRepositorySpy(
+            completeResult: .success(completed), dailyTasksResult: .success(page(pending)),
+            dailyProgressResult: .success(DailyProgress(total: 1, completed: 0, percentage: 0, familyCreatedAt: Self.familyCreatedAt)),
+            reopenResult: .success(pending), completionGate: gate
+        )
+        let viewModel = makeViewModel(repository: repository)
+        await viewModel.load()
+
+        viewModel.toggle(viewModel.items[0])
+        #expect(viewModel.items[0].task.status == .completed)
+        #expect(viewModel.progress?.completed == 1)
+        for _ in 0..<1_000 where repository.completeCalls.isEmpty { await Task.yield() }
+        #expect(repository.completeCalls.count == 1)
+
+        viewModel.toggle(viewModel.items[0])
+        #expect(viewModel.items[0].task.status == .pending)
+        #expect(viewModel.progress?.completed == 0)
+        await gate.release()
+        await waitForAction(viewModel, taskID: pending.id)
+
+        #expect(repository.completeCalls == [pending.id])
+        #expect(repository.reopenCalls == [ReopenCall(id: pending.id, confirm: false)])
+        #expect(viewModel.items[0].task.status == .pending)
+        #expect(viewModel.actionAlert == nil)
+    }
+
+    @Test("SPEC-010 CA-08: a rejected write rolls the optimistic row and progress back")
+    func rejectedCompletionRollsBackAndAlerts() async {
+        let pending = task(status: .pending)
+        let repository = TaskRepositorySpy(
+            taskResult: .success(pending), completeResult: .failure(TaskError.actionNotAllowed),
+            dailyTasksResult: .success(page(pending)),
+            dailyProgressResult: .success(DailyProgress(total: 1, completed: 0, percentage: 0, familyCreatedAt: Self.familyCreatedAt))
+        )
+        let viewModel = makeViewModel(repository: repository)
+        await viewModel.load()
+
+        viewModel.toggle(viewModel.items[0])
+        #expect(viewModel.items[0].task.status == .completed)
+        await waitForAction(viewModel, taskID: pending.id)
+
+        #expect(viewModel.items[0].task.status == .pending)
+        #expect(viewModel.progress?.completed == 0)
+        #expect(viewModel.actionAlert == .failed)
+        #expect(repository.completeCalls == [pending.id])
+    }
+
+    @Test("SPEC-010 CA-08: an unreadable outcome never automatically replays the POST")
+    func uncertainCompletionBlocksUntilCanonicalRefresh() async {
+        let pending = task(status: .pending)
+        let repository = TaskRepositorySpy(
+            taskResult: .failure(TaskError.network), completeResult: .failure(TaskError.uncertainOutcome),
+            dailyTasksResult: .success(page(pending))
+        )
+        let viewModel = makeViewModel(repository: repository)
+        await viewModel.load()
+
+        viewModel.toggle(viewModel.items[0])
+        await waitForAction(viewModel, taskID: pending.id)
+
+        #expect(viewModel.items[0].task.status == .pending)
+        #expect(viewModel.actionAlert == .uncertain)
+        #expect(!viewModel.canToggle(viewModel.items[0]))
+        #expect(repository.completeCalls == [pending.id])
     }
 
     @Test("CA-01 loads the day's tasks and progress on first appearance")

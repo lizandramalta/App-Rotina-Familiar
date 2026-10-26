@@ -3,8 +3,9 @@
 **Status:** aprovada
 **Autor:** Claude | **Criada em:** 2026-10-07 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-07
 **Spec funcional vinculada:** [SPEC-011-reabrir-tarefa.md](SPEC-011-reabrir-tarefa.md)
-**Base funcional:** 1.13
-**Superfícies:** TEL-012, MOD-006, UF-08
+**Base funcional:** UC 1.18; RN/RF conforme SPEC-011
+**Revisão de interface:** 2026-10-26 — atualização imediata em TEL-010/TEL-040
+**Superfícies:** TEL-010, TEL-012, TEL-040, MOD-006, UF-08
 
 ## 1. Jornada
 
@@ -13,7 +14,9 @@ A pessoa abre o detalhe de uma tarefa concluída (TEL-012) e toca em "Reabrir". 
 | Origem | Ação | Destino | Retorno |
 |---|---|---|---|
 | TEL-012 (tarefa concluída) | Admin/Membro/Kids (próprio) toca Reabrir | TEL-012 pendente | Banner confirmando a reabertura e a retirada do crédito |
+| TEL-010/TEL-040 (tarefa concluída) | Perfil autorizado toca o círculo | Mesma lista, tarefa pendente | Atualiza linha e progresso; tocar no restante da linha abre o detalhe |
 | TEL-012 (impacto de missão) | Toca Reabrir | MOD-006 | Confirmar reabre e aplica; Cancelar mantém concluída |
+| TEL-010/TEL-040 (impacto de missão) | Toca o círculo | MOD-006 | Confirmar reabre e atualiza a lista; Cancelar mantém concluída |
 
 ```mermaid
 flowchart TD
@@ -34,6 +37,11 @@ flowchart TD
 - **Sucesso sem impacto:** fecha qualquer modal, atualiza para "Pendente" e mostra banner não bloqueante: "Tarefa voltou para Pendente. O crédito de hoje foi retirado."
 - **Conflito (`TASK_NOT_COMPLETED`/`RESOURCE_NOT_FOUND`):** atualiza a tela para o estado atual, sem mensagem de erro técnico — mesmo padrão de reconciliação silenciosa do UX-010.
 - **Falha não reconciliada:** mantém a tarefa como estava e oferece "Tentar novamente" após consultar o estado.
+
+### TEL-010/TEL-040 — círculo da lista
+- Linha e progresso mudam no toque; um toque seguinte, quando autorizado para a próxima transição, altera imediatamente a intenção mostrada, enquanto os comandos da mesma tarefa seguem em ordem.
+- Uma recusa confirmada restaura o estado canônico e abre alerta. Resposta incerta exige consulta antes de novo envio automático.
+- `MISSION_REOPEN_REQUIRES_CONFIRMATION` restaura temporariamente Concluída e abre MOD-006; só Confirmar aplica a reabertura. Cancelar mantém Concluída.
 
 ### MOD-006 — Confirmar reabertura com impacto de missão
 - Exibida somente quando a resposta do servidor for `409 MISSION_REOPEN_REQUIRES_CONFIRMATION`.

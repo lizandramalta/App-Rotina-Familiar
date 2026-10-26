@@ -19,6 +19,22 @@ struct ReopenCall: Equatable {
     let confirm: Bool
 }
 
+actor TaskRequestGate {
+    private var waiter: CheckedContinuation<Void, Never>?
+    private var isReleased = false
+
+    func wait() async {
+        if isReleased { return }
+        await withCheckedContinuation { waiter = $0 }
+    }
+
+    func release() {
+        isReleased = true
+        waiter?.resume()
+        waiter = nil
+    }
+}
+
 /// A lock-protected class rather than an actor (matching `UITestCredentialStore`'s existing
 /// pattern in this codebase): avoids `await` at every call site in tests that are themselves
 /// `@MainActor`-isolated, which is all that's needed for a synchronous, deterministic double.
@@ -28,14 +44,17 @@ final class TaskRepositorySpy: TaskRepository, @unchecked Sendable {
     private var taskResult: Result<FamilyTask, Error>
     private var updateResult: Result<FamilyTask, Error>
     private var deleteResult: Result<UUID, Error>
+    private var completeResult: Result<FamilyTask, Error>
     private var dailyTasksResult: Result<OwnTaskPage, Error>
     private var dailyProgressResult: Result<DailyProgress, Error>
     private var reopenResult: Result<FamilyTask, Error>
+    private let completionGate: TaskRequestGate?
 
     private var _createCalls: [CreateTaskCommand] = []
     private var _taskCalls: [UUID] = []
     private var _updateCalls: [UpdateTaskCommand] = []
     private var _deleteCalls: [UUID] = []
+    private var _completeCalls: [UUID] = []
     private var _dailyTasksCalls: [String] = []
     private var _dailyProgressCalls: [String] = []
     private var _reopenCalls: [ReopenCall] = []
@@ -44,6 +63,7 @@ final class TaskRepositorySpy: TaskRepository, @unchecked Sendable {
     var taskCalls: [UUID] { lock.withLock { _taskCalls } }
     var updateCalls: [UpdateTaskCommand] { lock.withLock { _updateCalls } }
     var deleteCalls: [UUID] { lock.withLock { _deleteCalls } }
+    var completeCalls: [UUID] { lock.withLock { _completeCalls } }
     var dailyTasksCalls: [String] { lock.withLock { _dailyTasksCalls } }
     var dailyProgressCalls: [String] { lock.withLock { _dailyProgressCalls } }
     var reopenCalls: [ReopenCall] { lock.withLock { _reopenCalls } }
@@ -53,21 +73,25 @@ final class TaskRepositorySpy: TaskRepository, @unchecked Sendable {
         taskResult: Result<FamilyTask, Error> = .success(taskRepositorySpyFixture),
         updateResult: Result<FamilyTask, Error> = .success(taskRepositorySpyFixture),
         deleteResult: Result<UUID, Error> = .success(taskRepositorySpyFixture.id),
+        completeResult: Result<FamilyTask, Error> = .success(taskRepositorySpyFixture),
         dailyTasksResult: Result<OwnTaskPage, Error> = .success(
             OwnTaskPage(items: [], nextCursor: nil, familyCreatedAt: "2020-01-01")
         ),
         dailyProgressResult: Result<DailyProgress, Error> = .success(
             DailyProgress(total: 0, completed: 0, percentage: nil, familyCreatedAt: "2020-01-01")
         ),
-        reopenResult: Result<FamilyTask, Error> = .success(taskRepositorySpyFixture)
+        reopenResult: Result<FamilyTask, Error> = .success(taskRepositorySpyFixture),
+        completionGate: TaskRequestGate? = nil
     ) {
         self.createResult = createResult
         self.taskResult = taskResult
         self.updateResult = updateResult
         self.deleteResult = deleteResult
+        self.completeResult = completeResult
         self.dailyTasksResult = dailyTasksResult
         self.dailyProgressResult = dailyProgressResult
         self.reopenResult = reopenResult
+        self.completionGate = completionGate
     }
 
     static var fixture: FamilyTask { taskRepositorySpyFixture }
@@ -90,6 +114,12 @@ final class TaskRepositorySpy: TaskRepository, @unchecked Sendable {
     func deleteTask(id: UUID, accessToken: String) async throws -> UUID {
         lock.withLock { _deleteCalls.append(id) }
         return try deleteResult.get()
+    }
+
+    func completeTask(id: UUID, accessToken: String) async throws -> FamilyTask {
+        lock.withLock { _completeCalls.append(id) }
+        await completionGate?.wait()
+        return try lock.withLock { completeResult }.get()
     }
 
     func dailyTasks(referenceDate: String, cursor: String?, accessToken: String) async throws -> OwnTaskPage {
@@ -126,11 +156,17 @@ final class TaskRepositorySpy: TaskRepository, @unchecked Sendable {
     func setTaskResult(_ result: Result<FamilyTask, Error>) {
         lock.withLock { taskResult = result }
     }
+
+    func setCompleteResult(_ result: Result<FamilyTask, Error>) {
+        lock.withLock { completeResult = result }
+    }
 }
 
 /// `TaskEditorViewModel` only needs `listMembers` from `FamilyRepository`; every other method is unused here.
 struct FamilyMembersStub: FamilyRepository {
     var members: [FamilyMember] = []
+    var pages: [[FamilyMember]] = []
+    var listError: FamilyError?
 
     func createFamily(_ command: CreateFamilyCommand, installationProof: String) async throws -> CreatedFamily {
         throw FamilyError.unavailable
@@ -148,7 +184,11 @@ struct FamilyMembersStub: FamilyRepository {
         throw FamilyError.unavailable
     }
     func listMembers(accessToken: String, cursor: String?) async throws -> FamilyMemberPage {
-        FamilyMemberPage(items: members, nextCursor: nil)
+        if let listError { throw listError }
+        if pages.isEmpty { return FamilyMemberPage(items: members, nextCursor: nil) }
+        let index = cursor.flatMap(Int.init) ?? 0
+        guard pages.indices.contains(index) else { throw FamilyError.unavailable }
+        return FamilyMemberPage(items: pages[index], nextCursor: index + 1 < pages.count ? String(index + 1) : nil)
     }
     func getMemberDetail(memberID: UUID, accessToken: String) async throws -> FamilyMemberDetail {
         throw FamilyError.unavailable
