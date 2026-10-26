@@ -23,14 +23,24 @@ struct AppRootView: View {
             case let .authenticated(profile):
                 AuthenticatedHomeView(
                     session: profile,
-                    myTasksTab: sessionStore.accessToken.map(container.makeMyTasksTabView),
+                    myTasksTab: sessionStore.accessToken.map {
+                        container.makeMyTasksTabView(session: profile, accessToken: $0)
+                    },
                     makeFamilyOverviewViewModel: {
                         container.makeFamilyOverviewViewModel(session: profile, sessionStore: sessionStore)
                     },
                     makeFamilySettingsViewModel: {
                         container.makeFamilySettingsViewModel(session: profile, sessionStore: sessionStore)
                     },
-                    kidsTaskList: sessionStore.accessToken.map(container.makeKidsTaskList)
+                    kidsTasksTabView: sessionStore.accessToken.map { accessToken in
+                        container.makeKidsTasksTabView(
+                            session: profile,
+                            accessToken: accessToken,
+                            makeProfileViewModel: {
+                                container.makeProfileViewModel(session: profile, sessionStore: sessionStore)
+                            }
+                        )
+                    }
                 ) {
                     container.makeProfileViewModel(session: profile, sessionStore: sessionStore)
                 }

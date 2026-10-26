@@ -13,6 +13,12 @@ let taskRepositorySpyFixture = FamilyTask(
     createdAt: Date(timeIntervalSince1970: 1_760_000_000)
 )
 
+/// Plain tuples can't conform to `Equatable`, so `reopenCalls` needs a named type to support `==`.
+struct ReopenCall: Equatable {
+    let id: UUID
+    let confirm: Bool
+}
+
 /// A lock-protected class rather than an actor (matching `UITestCredentialStore`'s existing
 /// pattern in this codebase): avoids `await` at every call site in tests that are themselves
 /// `@MainActor`-isolated, which is all that's needed for a synchronous, deterministic double.
@@ -24,6 +30,7 @@ final class TaskRepositorySpy: TaskRepository, @unchecked Sendable {
     private var deleteResult: Result<UUID, Error>
     private var dailyTasksResult: Result<OwnTaskPage, Error>
     private var dailyProgressResult: Result<DailyProgress, Error>
+    private var reopenResult: Result<FamilyTask, Error>
 
     private var _createCalls: [CreateTaskCommand] = []
     private var _taskCalls: [UUID] = []
@@ -31,6 +38,7 @@ final class TaskRepositorySpy: TaskRepository, @unchecked Sendable {
     private var _deleteCalls: [UUID] = []
     private var _dailyTasksCalls: [String] = []
     private var _dailyProgressCalls: [String] = []
+    private var _reopenCalls: [ReopenCall] = []
 
     var createCalls: [CreateTaskCommand] { lock.withLock { _createCalls } }
     var taskCalls: [UUID] { lock.withLock { _taskCalls } }
@@ -38,6 +46,7 @@ final class TaskRepositorySpy: TaskRepository, @unchecked Sendable {
     var deleteCalls: [UUID] { lock.withLock { _deleteCalls } }
     var dailyTasksCalls: [String] { lock.withLock { _dailyTasksCalls } }
     var dailyProgressCalls: [String] { lock.withLock { _dailyProgressCalls } }
+    var reopenCalls: [ReopenCall] { lock.withLock { _reopenCalls } }
 
     init(
         createResult: Result<FamilyTask, Error> = .success(taskRepositorySpyFixture),
@@ -49,7 +58,8 @@ final class TaskRepositorySpy: TaskRepository, @unchecked Sendable {
         ),
         dailyProgressResult: Result<DailyProgress, Error> = .success(
             DailyProgress(total: 0, completed: 0, percentage: nil, familyCreatedAt: "2020-01-01")
-        )
+        ),
+        reopenResult: Result<FamilyTask, Error> = .success(taskRepositorySpyFixture)
     ) {
         self.createResult = createResult
         self.taskResult = taskResult
@@ -57,6 +67,7 @@ final class TaskRepositorySpy: TaskRepository, @unchecked Sendable {
         self.deleteResult = deleteResult
         self.dailyTasksResult = dailyTasksResult
         self.dailyProgressResult = dailyProgressResult
+        self.reopenResult = reopenResult
     }
 
     static var fixture: FamilyTask { taskRepositorySpyFixture }
@@ -91,6 +102,11 @@ final class TaskRepositorySpy: TaskRepository, @unchecked Sendable {
         return try dailyProgressResult.get()
     }
 
+    func reopenTask(id: UUID, confirm: Bool, accessToken: String) async throws -> FamilyTask {
+        lock.withLock { _reopenCalls.append(ReopenCall(id: id, confirm: confirm)) }
+        return try reopenResult.get()
+    }
+
     /// Lets a single test sequence a success then a failure across two `load()` calls on the
     /// same view model, mirroring a background refresh going bad (CA-09).
     func setDailyResults(tasks: Result<OwnTaskPage, Error>? = nil, progress: Result<DailyProgress, Error>? = nil) {
@@ -98,6 +114,17 @@ final class TaskRepositorySpy: TaskRepository, @unchecked Sendable {
             if let tasks { dailyTasksResult = tasks }
             if let progress { dailyProgressResult = progress }
         }
+    }
+
+    /// Lets a test sequence a confirmation-required failure then a success across two
+    /// `requestReopen()`/`confirmMissionReopen()` calls on the same view model (CA-02/03).
+    func setReopenResult(_ result: Result<FamilyTask, Error>) {
+        lock.withLock { reopenResult = result }
+    }
+
+    /// Lets a test simulate the silent reconciliation reload triggered by `TASK_NOT_COMPLETED`.
+    func setTaskResult(_ result: Result<FamilyTask, Error>) {
+        lock.withLock { taskResult = result }
     }
 }
 
@@ -140,5 +167,51 @@ struct FamilyMembersStub: FamilyRepository {
     }
     func changeFamilyTimeZone(timeZoneID: String, application: TimeZoneApplication, accessToken: String) async throws -> FamilySettings {
         throw FamilyError.unavailable
+    }
+}
+
+let routineRepositorySpyFixture = Routine(
+    id: UUID(uuidString: "00000000-0000-0000-0000-0000000000a8")!,
+    title: "Regar as plantas",
+    weight: .low,
+    assigneeIDs: [],
+    note: nil,
+    startDate: "2026-10-10",
+    frequency: .everySevenDays,
+    isActive: true,
+    materializationState: .pending
+)
+
+final class RoutineRepositorySpy: RoutineRepository, @unchecked Sendable {
+    private let lock = NSLock()
+    private let timeZoneResult: Result<String, Error>
+    private let createResult: Result<Routine, Error>
+    private let getResult: Result<Routine, Error>
+    private var _createCalls: [CreateRoutineCommand] = []
+    private var _getCalls: [UUID] = []
+
+    var createCalls: [CreateRoutineCommand] { lock.withLock { _createCalls } }
+    var getCalls: [UUID] { lock.withLock { _getCalls } }
+
+    init(
+        timeZoneResult: Result<String, Error> = .success("America/Sao_Paulo"),
+        createResult: Result<Routine, Error> = .success(routineRepositorySpyFixture),
+        getResult: Result<Routine, Error> = .success(routineRepositorySpyFixture)
+    ) {
+        self.timeZoneResult = timeZoneResult
+        self.createResult = createResult
+        self.getResult = getResult
+    }
+
+    func familyTimeZoneID(accessToken: String) async throws -> String { try timeZoneResult.get() }
+
+    func createRoutine(_ command: CreateRoutineCommand, accessToken: String) async throws -> Routine {
+        lock.withLock { _createCalls.append(command) }
+        return try createResult.get()
+    }
+
+    func routine(id: UUID, accessToken: String) async throws -> Routine {
+        lock.withLock { _getCalls.append(id) }
+        return try getResult.get()
     }
 }

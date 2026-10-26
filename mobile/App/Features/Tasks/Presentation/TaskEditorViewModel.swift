@@ -13,6 +13,8 @@ enum TaskEditorBanner: Equatable {
     case actionNotAllowed
     case missionProtected
     case rejected
+    case routineUnavailable
+    case routineUncertainOutcome
 }
 
 enum TaskEditorMode: Equatable {
@@ -28,6 +30,8 @@ final class TaskEditorViewModel {
     private let getTaskDetail: GetTaskDetailUseCase
     private let createTask: CreateTaskUseCase
     private let updateTask: UpdateTaskUseCase
+    private let createRoutine: CreateRoutineUseCase
+    private let routineRepository: any RoutineRepository
     private let familyRepository: any FamilyRepository
     private let accessToken: String
     private let today: () -> Date
@@ -37,9 +41,14 @@ final class TaskEditorViewModel {
     var scheduledDate: Date
     var note = ""
     private(set) var assigneeIDs: Set<UUID> = []
+    private(set) var frequency: RoutineFrequency?
+    private(set) var familyTimeZoneID: String?
+    var isRecurrencePickerPresented = false
 
     private(set) var titleError: TaskFieldError?
     private(set) var noteError: TaskFieldError?
+    private(set) var startDateError = false
+    private(set) var frequencyError = false
 
     private(set) var isLoading = false
     private(set) var loadFailed = false
@@ -49,6 +58,7 @@ final class TaskEditorViewModel {
     private(set) var isSaving = false
     private(set) var banner: TaskEditorBanner?
     private(set) var savedTask: FamilyTask?
+    private(set) var savedRoutine: Routine?
 
     var isAssigneePickerPresented = false
     var isSignalResolutionPresented = false
@@ -65,12 +75,14 @@ final class TaskEditorViewModel {
         let scheduledDate: Date
         let note: String
         let assigneeIDs: Set<UUID>
+        let frequency: RoutineFrequency?
     }
     private var initialSnapshot: Snapshot?
 
     init(
         mode: TaskEditorMode,
         repository: any TaskRepository,
+        routineRepository: any RoutineRepository,
         familyRepository: any FamilyRepository,
         accessToken: String,
         today: @escaping () -> Date = Date.init
@@ -79,12 +91,14 @@ final class TaskEditorViewModel {
         self.getTaskDetail = GetTaskDetailUseCase(repository: repository)
         self.createTask = CreateTaskUseCase(repository: repository)
         self.updateTask = UpdateTaskUseCase(repository: repository)
+        self.createRoutine = CreateRoutineUseCase(repository: routineRepository)
+        self.routineRepository = routineRepository
         self.familyRepository = familyRepository
         self.accessToken = accessToken
         self.today = today
         self.scheduledDate = today()
         if mode == .create {
-            initialSnapshot = Snapshot(title: "", weight: nil, scheduledDate: self.scheduledDate, note: "", assigneeIDs: [])
+            initialSnapshot = Snapshot(title: "", weight: nil, scheduledDate: self.scheduledDate, note: "", assigneeIDs: [], frequency: nil)
         }
     }
 
@@ -93,7 +107,7 @@ final class TaskEditorViewModel {
         guard let initialSnapshot else {
             return false
         }
-        let current = Snapshot(title: title, weight: weight, scheduledDate: scheduledDate, note: note, assigneeIDs: assigneeIDs)
+        let current = Snapshot(title: title, weight: weight, scheduledDate: scheduledDate, note: note, assigneeIDs: assigneeIDs, frequency: frequency)
         return current != initialSnapshot
     }
 
@@ -126,7 +140,7 @@ final class TaskEditorViewModel {
             note = task.note ?? ""
             assigneeIDs = Set(task.assigneeIDs)
             currentStatus = task.status
-            initialSnapshot = Snapshot(title: title, weight: weight, scheduledDate: scheduledDate, note: note, assigneeIDs: assigneeIDs)
+            initialSnapshot = Snapshot(title: title, weight: weight, scheduledDate: scheduledDate, note: note, assigneeIDs: assigneeIDs, frequency: nil)
         } catch {
             loadFailed = true
         }
@@ -134,6 +148,46 @@ final class TaskEditorViewModel {
 
     func setAssignees(_ ids: Set<UUID>) {
         assigneeIDs = ids
+    }
+
+    /// Resolves the family's current civil date before MOD-002 can offer a default start date.
+    func prepareRecurrencePicker() async {
+        guard mode == .create, !isRecurrencePickerPresented else { return }
+        banner = nil
+        do {
+            let timeZoneID: String
+            if let familyTimeZoneID {
+                timeZoneID = familyTimeZoneID
+            } else {
+                timeZoneID = try await routineRepository.familyTimeZoneID(accessToken: accessToken)
+                familyTimeZoneID = timeZoneID
+            }
+            if let initialSnapshot, scheduledDate == initialSnapshot.scheduledDate {
+                let familyToday = Self.wireString(from: today(), timeZoneID: timeZoneID)
+                if let adjusted = Self.date(fromWire: familyToday) {
+                    scheduledDate = adjusted
+                    self.initialSnapshot = Snapshot(
+                        title: initialSnapshot.title,
+                        weight: initialSnapshot.weight,
+                        scheduledDate: adjusted,
+                        note: initialSnapshot.note,
+                        assigneeIDs: initialSnapshot.assigneeIDs,
+                        frequency: initialSnapshot.frequency
+                    )
+                }
+            }
+            isRecurrencePickerPresented = true
+        } catch {
+            banner = .routineUnavailable
+        }
+    }
+
+    func setRecurrence(startDate: Date, frequency: RoutineFrequency?) {
+        scheduledDate = startDate
+        self.frequency = frequency
+        startDateError = false
+        frequencyError = false
+        isRecurrencePickerPresented = false
     }
 
     /// MOD-001's member list is small (a family), so a single page is always requested.
@@ -217,16 +271,30 @@ final class TaskEditorViewModel {
         do {
             switch mode {
             case .create:
-                savedTask = try await createTask.execute(
-                    CreateTaskCommand(
-                        title: validatedTitle,
-                        weight: weight,
-                        scheduledDate: scheduledDateString,
-                        assigneeIDs: Array(assigneeIDs),
-                        note: validatedNote
-                    ),
-                    accessToken: accessToken
-                )
+                if let frequency {
+                    savedRoutine = try await createRoutine.execute(
+                        CreateRoutineCommand(
+                            title: validatedTitle,
+                            weight: weight,
+                            assigneeIDs: Array(assigneeIDs),
+                            note: validatedNote,
+                            startDate: scheduledDateString,
+                            frequency: frequency
+                        ),
+                        accessToken: accessToken
+                    )
+                } else {
+                    savedTask = try await createTask.execute(
+                        CreateTaskCommand(
+                            title: validatedTitle,
+                            weight: weight,
+                            scheduledDate: scheduledDateString,
+                            assigneeIDs: Array(assigneeIDs),
+                            note: validatedNote
+                        ),
+                        accessToken: accessToken
+                    )
+                }
             case let .edit(taskID):
                 savedTask = try await updateTask.execute(
                     UpdateTaskCommand(
@@ -242,7 +310,28 @@ final class TaskEditorViewModel {
                 )
             }
         } catch {
-            handleSaveFailure(error)
+            if frequency != nil, mode == .create {
+                handleRoutineFailure(error)
+            } else {
+                handleSaveFailure(error)
+            }
+        }
+    }
+
+    private func handleRoutineFailure(_ error: Error) {
+        switch error as? RoutineError {
+        case .uncertainOutcome, .network, .unavailable:
+            banner = .routineUncertainOutcome
+        case .actionNotAllowed:
+            banner = .actionNotAllowed
+        case let .validationFailed(fieldErrors):
+            if fieldErrors["title"] != nil { titleError = .invalid }
+            if fieldErrors["note"] != nil { noteError = .invalid }
+            startDateError = fieldErrors["startDate"] != nil
+            frequencyError = fieldErrors["frequencyDays"] != nil
+            banner = .rejected
+        case .notFound, .rejected, nil:
+            banner = .rejected
         }
     }
 
@@ -266,9 +355,25 @@ final class TaskEditorViewModel {
             banner = .rejected
         case .signalResolutionRequired:
             isSignalResolutionPresented = true
-        case .notFound, .alreadyCompleted, .missionWouldHaveNoTasks, .rejected, .unavailable, nil:
+        case .notFound, .alreadyCompleted, .missionWouldHaveNoTasks, .rejected, .unavailable,
+             .taskNotCompleted, .missionReopenRequiresConfirmation, nil:
+            // Never thrown by create/update — reopening-only cases (SPEC-011); same fallback as any other rejection.
             banner = .rejected
         }
+    }
+
+    var recurrenceSummary: String {
+        guard let frequency else { return String(localized: "routines.recurrence.none") }
+        if frequency == .daily { return String(localized: "routines.recurrence.daily") }
+        return String(format: String(localized: "routines.recurrence.every_days"), frequency.rawValue)
+    }
+
+    private static func wireString(from date: Date, timeZoneID: String) -> String {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.timeZone = TimeZone(identifier: timeZoneID)
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: date)
     }
 
     private static func wireString(from date: Date) -> String {
