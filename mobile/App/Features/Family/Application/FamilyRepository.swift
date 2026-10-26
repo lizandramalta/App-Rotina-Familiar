@@ -8,6 +8,10 @@ nonisolated protocol FamilyRepository: Sendable {
     func issueInvite(memberID: UUID, accessToken: String) async throws -> MemberInvite
     /// Consumed by Tasks' assignee picker (MOD-001); not paginated further there — families are small.
     func listMembers(accessToken: String, cursor: String?) async throws -> FamilyMemberPage
+    func getMemberDetail(memberID: UUID, accessToken: String) async throws -> FamilyMemberDetail
+
+    func getFamily(accessToken: String) async throws -> FamilyProfile
+    func updateFamilyName(_ name: String, accessToken: String) async throws -> FamilyProfile
 
     // MARK: - Settings and Time Zone (SPEC-002 Phase 3)
     func getFamilySettings(accessToken: String) async throws -> FamilySettings

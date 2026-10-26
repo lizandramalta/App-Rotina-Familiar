@@ -441,6 +441,56 @@
         }
       }
     },
+    "family.member.detail.error_not_allowed": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Você não tem permissão para ver este membro."
+          }
+        }
+      }
+    },
+    "family.member.detail.error_not_found": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este membro não está mais disponível."
+          }
+        }
+      }
+    },
+    "family.member.detail.retry": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tentar novamente"
+          }
+        }
+      }
+    },
+    "family.member.detail.tasks_placeholder": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As tarefas deste membro aparecerão aqui."
+          }
+        }
+      }
+    },
+    "family.member.detail.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detalhe do membro"
+          }
+        }
+      }
+    },
     "family.member.role.administrator": {
       "localizations": {
         "pt-BR": {
@@ -477,6 +527,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Adicionar membro"
+          }
+        }
+      }
+    },
+    "family.members.add.action": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar membro"
+          }
+        }
+      }
+    },
+    "family.members.create.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar membro"
+          }
+        }
+      }
+    },
+    "family.members.creator_badge": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Criador"
+          }
+        }
+      }
+    },
+    "family.members.creator_protected": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Criador da família não pode ser removido nem ter o papel alterado."
           }
         }
       }
@@ -658,6 +748,56 @@
         }
       }
     },
+    "family.members.error_network": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível confirmar a alteração. Verifique sua conexão e atualize os dados."
+          }
+        }
+      }
+    },
+    "family.members.error_not_allowed": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Você não tem permissão para adicionar membros."
+          }
+        }
+      }
+    },
+    "family.members.name.error_invalid": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informe um nome válido."
+          }
+        }
+      }
+    },
+    "family.members.name.hint": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use de 1 a 60 caracteres."
+          }
+        }
+      }
+    },
+    "family.members.name.label": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome"
+          }
+        }
+      }
+    },
     "family.members.role.admin": {
       "extractionState": "extracted_with_value",
       "localizations": {
@@ -665,6 +805,16 @@
           "stringUnit": {
             "state": "new",
             "value": "Administrador"
+          }
+        }
+      }
+    },
+    "family.members.role.administrator.description": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gerencia a família."
           }
         }
       }
@@ -680,6 +830,26 @@
         }
       }
     },
+    "family.members.role.kids.description": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Participa de forma simplificada."
+          }
+        }
+      }
+    },
+    "family.members.role.label": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Papel na família"
+          }
+        }
+      }
+    },
     "family.members.role.member": {
       "extractionState": "extracted_with_value",
       "localizations": {
@@ -687,6 +857,16 @@
           "stringUnit": {
             "state": "new",
             "value": "Membro"
+          }
+        }
+      }
+    },
+    "family.members.role.member.description": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuida das tarefas."
           }
         }
       }
@@ -922,6 +1102,36 @@
         }
       }
     },
+    "family.overview.error_load": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível carregar os membros. Verifique sua conexão e tente novamente."
+          }
+        }
+      }
+    },
+    "family.overview.members_section": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Membros da família"
+          }
+        }
+      }
+    },
+    "family.overview.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Família"
+          }
+        }
+      }
+    },
     "family.settings.access_denied_description": {
       "localizations": {
         "pt-BR": {
@@ -958,6 +1168,126 @@
           "stringUnit": {
             "state": "translated",
             "value": "O fuso horário é comum a toda a família e orienta os ciclos semanais."
+          }
+        }
+      }
+    },
+    "family.settings.hub.cancel": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelar"
+          }
+        }
+      }
+    },
+    "family.settings.hub.creator_role": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · Criador da família"
+          }
+        }
+      }
+    },
+    "family.settings.hub.family_name": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome da família"
+          }
+        }
+      }
+    },
+    "family.settings.hub.family_name_error": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível salvar o nome da família. Tente novamente."
+          }
+        }
+      }
+    },
+    "family.settings.hub.family_name_hint": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aparece para todos os membros."
+          }
+        }
+      }
+    },
+    "family.settings.hub.family_section": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Família"
+          }
+        }
+      }
+    },
+    "family.settings.hub.members_footer": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toque em um membro para editar dados, papel ou Modo Kids, gerar convite ou remover."
+          }
+        }
+      }
+    },
+    "family.settings.hub.members_section": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Membros · %lld"
+          }
+        }
+      }
+    },
+    "family.settings.hub.save": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salvar"
+          }
+        }
+      }
+    },
+    "family.settings.hub.timezone": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fuso horário"
+          }
+        }
+      }
+    },
+    "family.settings.hub.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configurações da família"
+          }
+        }
+      }
+    },
+    "family.settings.hub.you": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(você)"
           }
         }
       }

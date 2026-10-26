@@ -92,6 +92,29 @@ nonisolated private struct ListFamilyMembersResponseDTO: Decodable {
     let nextCursor: String?
 }
 
+nonisolated private struct MemberDetailDTO: Decodable {
+    struct Capabilities: Decodable {
+        let manageMembers: Bool
+    }
+
+    let id: UUID
+    let name: String
+    let role: MemberRole
+    let isFamilyCreator: Bool
+    let createdAt: String
+    let capabilities: Capabilities
+}
+
+nonisolated private struct FamilyProfileDTO: Decodable {
+    let id: UUID
+    let name: String
+    let timeZoneId: String
+}
+
+nonisolated private struct UpdateFamilyRequestDTO: Encodable {
+    let name: String
+}
+
 nonisolated private struct CycleLimitsDTO: Decodable {
     let startsAt: String
     let endsAt: String
@@ -246,6 +269,46 @@ nonisolated struct HTTPFamilyRepository: FamilyRepository {
             },
             nextCursor: response.nextCursor
         )
+    }
+
+    func getMemberDetail(memberID: UUID, accessToken: String) async throws -> FamilyMemberDetail {
+        let data = try await send(
+            path: "family/members/\(memberID.uuidString.lowercased())",
+            method: "GET",
+            headers: ["Authorization": "Bearer \(accessToken)"],
+            rawBody: Data()
+        )
+        let response = try decode(MemberDetailDTO.self, from: data)
+        return FamilyMemberDetail(
+            id: response.id,
+            name: response.name,
+            role: response.role,
+            isFamilyCreator: response.isFamilyCreator,
+            createdAt: response.createdAt,
+            capabilities: MemberCapabilities(manageMembers: response.capabilities.manageMembers)
+        )
+    }
+
+    func getFamily(accessToken: String) async throws -> FamilyProfile {
+        let data = try await send(
+            path: "family",
+            method: "GET",
+            headers: ["Authorization": "Bearer \(accessToken)"],
+            rawBody: Data()
+        )
+        let response = try decode(FamilyProfileDTO.self, from: data)
+        return FamilyProfile(id: response.id, name: response.name, timeZoneID: response.timeZoneId)
+    }
+
+    func updateFamilyName(_ name: String, accessToken: String) async throws -> FamilyProfile {
+        let data = try await send(
+            path: "family",
+            method: "PATCH",
+            headers: ["Authorization": "Bearer \(accessToken)"],
+            json: UpdateFamilyRequestDTO(name: name)
+        )
+        let response = try decode(FamilyProfileDTO.self, from: data)
+        return FamilyProfile(id: response.id, name: response.name, timeZoneID: response.timeZoneId)
     }
 
     func getFamilySettings(accessToken: String) async throws -> FamilySettings {

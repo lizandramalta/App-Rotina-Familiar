@@ -24,6 +24,8 @@ enum UITestScenario: String {
     case dailyTasks = "daily-tasks"
     case dailyTasksKids = "daily-tasks-kids"
     case dailyTasksFailure = "daily-tasks-failure"
+    case familyOverview = "family-overview"
+    case familyOverviewMember = "family-overview-member"
     case routineCreation = "routine-creation"
 
     static var current: UITestScenario? {
@@ -56,6 +58,14 @@ enum UITestScenario: String {
         }
         if self == .taskManagement || self == .familySettings || self == .dailyTasks || self == .dailyTasksFailure || self == .routineCreation {
             sessionStore.apply(.session(Self.inviteSession(role: .administrator)))
+            return
+        }
+        if self == .familyOverview {
+            sessionStore.apply(.session(Self.inviteSession(role: .administrator)))
+            return
+        }
+        if self == .familyOverviewMember {
+            sessionStore.apply(.session(Self.inviteSession(role: .member)))
             return
         }
         if self == .dailyTasksKids {
@@ -236,6 +246,8 @@ private struct UITestAccessRepository: AccessRepository {
 private actor UITestFamilyRepository: FamilyRepository {
     private let scenario: UITestScenario
     private var photoUploadAttempts = 0
+    private var familyName = "Família Silva"
+    private let familyTimeZoneID = "America/Sao_Paulo"
 
     init(scenario: UITestScenario) {
         self.scenario = scenario
@@ -295,6 +307,26 @@ private actor UITestFamilyRepository: FamilyRepository {
         )
     }
 
+    func getMemberDetail(memberID: UUID, accessToken: String) async throws -> FamilyMemberDetail {
+        FamilyMemberDetail(
+            id: memberID,
+            name: "Maria Silva",
+            role: .administrator,
+            isFamilyCreator: true,
+            createdAt: "2026-10-01T12:00:00.000Z",
+            capabilities: MemberCapabilities(manageMembers: true)
+        )
+    }
+
+    func getFamily(accessToken: String) async throws -> FamilyProfile {
+        FamilyProfile(id: UITestTaskFixtures.familyID, name: familyName, timeZoneID: familyTimeZoneID)
+    }
+
+    func updateFamilyName(_ name: String, accessToken: String) async throws -> FamilyProfile {
+        familyName = name
+        return FamilyProfile(id: UITestTaskFixtures.familyID, name: familyName, timeZoneID: familyTimeZoneID)
+    }
+
     func getFamilySettings(accessToken: String) async throws -> FamilySettings {
         FamilySettings(
             timeZoneID: "America/Sao_Paulo",
@@ -351,6 +383,7 @@ private actor UITestFamilyRepository: FamilyRepository {
 /// Stable ids shared between `UITestFamilyRepository.listMembers` and `UITestTaskRepository`
 /// fixtures, so a seeded task's assignees resolve to names in the picker.
 private enum UITestTaskFixtures {
+    static let familyID = UUID(uuidString: "00000000-0000-0000-0000-0000000000f1")!
     static let memberID = UUID(uuidString: "00000000-0000-0000-0000-0000000000a1")!
     static let kidMemberID = UUID(uuidString: "00000000-0000-0000-0000-0000000000a2")!
     static let pendingTaskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000b1")!

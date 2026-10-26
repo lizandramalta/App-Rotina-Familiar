@@ -26,6 +26,9 @@ struct AppRootView: View {
                     myTasksTab: sessionStore.accessToken.map {
                         container.makeMyTasksTabView(session: profile, accessToken: $0)
                     },
+                    makeFamilyOverviewViewModel: {
+                        container.makeFamilyOverviewViewModel(session: profile, sessionStore: sessionStore)
+                    },
                     makeFamilySettingsViewModel: {
                         container.makeFamilySettingsViewModel(session: profile, sessionStore: sessionStore)
                     },
