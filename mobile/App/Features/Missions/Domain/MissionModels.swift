@@ -47,7 +47,7 @@ nonisolated struct MissionTaskOption: Equatable, Sendable, Identifiable {
     let assigneeIDs: [UUID]
 }
 
-extension MissionTaskOption {
+nonisolated extension MissionTaskOption {
     /// The canonical mission resource only carries bare `taskIds` (SPEC-014 §5.2); TEL-021 and
     /// TEL-022's edit mode hydrate each linked task's title/status via the existing single-task
     /// lookup (`TaskRepository.task(id:)`, the same one TEL-012 already uses) rather than a new
