@@ -43,6 +43,7 @@ final class DailyTaskListViewModel {
     private(set) var missionReopenTaskID: UUID?
     private(set) var lastChangedTaskID: UUID?
     private(set) var actionRevision = 0
+    private(set) var memberNames: [UUID: String] = [:]
     private var memberRoles: [UUID: MemberRole]?
     private var serverItems: [OwnTaskListItem] = []
     private var serverProgress: DailyProgress?
@@ -140,7 +141,7 @@ final class DailyTaskListViewModel {
             }
             publishOptimisticState()
             familyCreatedAt = Self.date(fromWire: page.familyCreatedAt) ?? familyCreatedAt
-            await loadMemberRolesIfNeeded()
+            await loadMemberDirectoryIfNeeded()
         } catch {
             loadFailed = true
         }
@@ -373,21 +374,26 @@ final class DailyTaskListViewModel {
         )
     }
 
-    private func loadMemberRolesIfNeeded() async {
-        guard role == .member, items.contains(where: { $0.task.status != .completed && !$0.task.assigneeIDs.isEmpty }),
-              let familyRepository else { return }
+    private func loadMemberDirectoryIfNeeded() async {
+        guard audience == .adult, !items.isEmpty, let familyRepository else { return }
         do {
             var roles: [UUID: MemberRole] = [:]
+            var names: [UUID: String] = [:]
             var cursor: String?
             var seenCursors = Set<String>()
             repeat {
                 let page = try await familyRepository.listMembers(accessToken: accessToken, cursor: cursor)
-                for member in page.items { roles[member.id] = member.role }
+                for member in page.items {
+                    roles[member.id] = member.role
+                    names[member.id] = member.name
+                }
                 cursor = page.nextCursor
                 if let cursor, !seenCursors.insert(cursor).inserted { throw FamilyError.unavailable }
             } while cursor != nil
-            memberRoles = roles
+            memberNames = names
+            memberRoles = role == .member ? roles : nil
         } catch {
+            memberNames = [:]
             memberRoles = nil
         }
     }

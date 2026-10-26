@@ -18,13 +18,21 @@ final class DailyTaskListUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Passear com o cachorro"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["Guardar as roupas limpas"].exists)
         XCTAssertTrue(app.staticTexts["Escovar os dentes"].exists)
-        XCTAssertTrue(app.staticTexts["1/3"].exists)
+        XCTAssertTrue(app.staticTexts["Hoje | 3 Tarefas"].exists)
+        let ownTask = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Passear com o cachorro")).firstMatch
+        let sharedTask = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Guardar as roupas limpas")).firstMatch
+        XCTAssertTrue(ownTask.label.contains("Você, P1 - Baixo Esforço"), ownTask.label)
+        XCTAssertTrue(sharedTask.label.contains("Você e Rafa Silva, P2 - Médio Esforço"), sharedTask.label)
+        XCTAssertTrue(app.otherElements["tasks.daily.progress"].exists)
 
-        // CA-11: the adult never sees "Aguardando confirmação" in their own list.
+        // SPEC-009 CA-11 / UX-009: visual status leaves the adult subtitle; VoiceOver retains it.
+        XCTAssertFalse(app.staticTexts["Pendente"].exists)
         XCTAssertFalse(app.staticTexts["Aguardando confirmação"].exists)
 
         // CA-04/adult-only: can create a new task from here.
         XCTAssertTrue(app.buttons["tasks.daily.new"].exists)
+        ownTask.tap()
+        XCTAssertTrue(app.buttons["tasks.detail.edit"].waitForExistence(timeout: 5))
     }
 
     func testKidsSeesAwaitingConfirmationLabelAndNoCreateAction() {
@@ -42,10 +50,26 @@ final class DailyTaskListUITests: XCTestCase {
         launch(scenario: "daily-tasks")
         XCTAssertTrue(app.staticTexts["Passear com o cachorro"].waitForExistence(timeout: 5))
 
-        let yesterday = Self.wireString(from: Calendar(identifier: .gregorian).date(byAdding: .day, value: -1, to: Date())!)
-        app.buttons["tasks.daily.day.\(yesterday)"].tap()
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.firstWeekday = 1
+        let today = Date()
+        let weekStart = calendar.dateInterval(of: .weekOfYear, for: today)!.start
+        let threeDaysAgo = calendar.date(byAdding: .day, value: -3, to: today)!
+        let emptyDay = (0 ..< 7)
+            .compactMap { calendar.date(byAdding: .day, value: $0, to: weekStart) }
+            .first { !calendar.isDate($0, inSameDayAs: today) && !calendar.isDate($0, inSameDayAs: threeDaysAgo) }!
+        app.buttons["tasks.daily.day.\(Self.wireString(from: emptyDay))"].tap()
 
         XCTAssertTrue(app.staticTexts["Sem tarefas para este dia"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Tarefas atribuídas a você aparecem aqui."].exists)
+        XCTAssertTrue(app.buttons["tasks.daily.empty_new"].exists)
+        XCTAssertTrue(app.otherElements["tasks.daily.progress"].exists)
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = "TEL-010 empty day"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+        app.buttons["tasks.daily.empty_new"].tap()
+        XCTAssertTrue(app.buttons["tasks.editor.save"].waitForExistence(timeout: 5))
     }
 
     func testLoadFailureShowsRetryableErrorNotEmpty() {
@@ -53,6 +77,7 @@ final class DailyTaskListUITests: XCTestCase {
 
         XCTAssertTrue(app.staticTexts["Não foi possível atualizar suas tarefas. Tente novamente."].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["Tentar novamente"].exists)
+        XCTAssertTrue(app.staticTexts["tasks.daily.load_error"].exists)
         XCTAssertFalse(app.staticTexts["Sem tarefas para este dia"].exists)
     }
 
