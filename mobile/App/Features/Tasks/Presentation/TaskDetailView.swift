@@ -5,6 +5,7 @@ import SwiftUI
 /// state; routine management waits for MOD-003 in SPEC-008 Fase 2.
 struct TaskDetailView: View {
     @State private var viewModel: TaskDetailViewModel
+    private let currentMemberID: UUID
     @AccessibilityFocusState private var isMissionWarningFocused: Bool
     @AccessibilityFocusState private var isStatusFocused: Bool
     let onRequestEdit: () -> Void
@@ -38,6 +39,7 @@ struct TaskDetailView: View {
             familyRepository: familyRepository,
             accessToken: accessToken
         ))
+        self.currentMemberID = currentMemberID
         self.onRequestEdit = onRequestEdit
         self.onDeleted = onDeleted
         self.onCompleted = onCompleted
@@ -61,7 +63,9 @@ struct TaskDetailView: View {
                 Color.clear
             }
         }
+        .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .tabBar)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 if viewModel.task != nil, viewModel.canManageTask, viewModel.task?.routineID == nil {
@@ -85,16 +89,17 @@ struct TaskDetailView: View {
                 )
             }
         }
-        .confirmationDialog(
+        .alert(
             "tasks.delete.confirm_message",
-            isPresented: $viewModel.isConfirmingDelete,
-            titleVisibility: .visible
+            isPresented: $viewModel.isConfirmingDelete
         ) {
-            Button("Excluir", role: .destructive) { Task { await viewModel.confirmDelete() } }
             Button("Cancelar", role: .cancel) {}
+            Button("Excluir", role: .destructive) { Task { await viewModel.confirmDelete() } }
         } message: {
             if viewModel.hasPendingSignal {
-                Text("tasks.delete.pending_signal_notice")
+                Text("\(viewModel.task?.title ?? "")\n\n\(String(localized: "tasks.delete.pending_signal_notice"))")
+            } else if let task = viewModel.task {
+                Text(task.title)
             }
         }
         .alert(
@@ -130,97 +135,84 @@ struct TaskDetailView: View {
         }
     }
 
-    @ViewBuilder
     private func content(for task: FamilyTask) -> some View {
         GeometryReader { geometry in
-            List {
-                Section {
-                    VStack(alignment: .leading, spacing: 8) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    VStack(alignment: .leading, spacing: 10) {
                         Text(task.title)
-                            .font(.title3.weight(.semibold))
-                        statusBadge(for: task.status)
+                            .font(.title.bold())
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        statusBadge(for: displayedStatus(for: task))
                             .accessibilityFocused($isStatusFocused)
                             .accessibilityIdentifier("tasks.detail.status")
                     }
-                    .padding(.vertical, 4)
-                }
+                    .padding(.horizontal, 4)
 
-                if viewModel.showReopenSuccessBanner {
-                    Section {
-                        HStack(alignment: .top, spacing: 12) {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(.primary)
-                                .accessibilityHidden(true)
-                            Text("task.reopen.success_banner")
+                    if viewModel.showReopenSuccessBanner {
+                        Label("task.reopen.success_banner", systemImage: "checkmark.circle.fill")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(16)
+                            .background(.background, in: RoundedRectangle(cornerRadius: 16))
+                    }
+
+                    detailsCard(for: task)
+
+                    if viewModel.role != .kid,
+                       task.routineID != nil,
+                       viewModel.routine?.materializationState == .pending || viewModel.routineLoadFailed {
+                        VStack(alignment: .leading, spacing: 8) {
+                            if viewModel.routine?.materializationState == .pending {
+                                Label("routines.materialization.preparing", systemImage: "clock")
+                                    .accessibilityIdentifier("routines.detail.preparing")
+                            }
+                            if viewModel.routineLoadFailed {
+                                Label("routines.error_unavailable", systemImage: "exclamationmark.triangle")
+                                Button("tasks.error.retry") { Task { await viewModel.refreshRoutine() } }
+                            }
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(16)
-                        .background(.background, in: RoundedRectangle(cornerRadius: 16))
-                        .listRowInsets(EdgeInsets())
-                        .listRowBackground(Color.clear)
+                        .background(.background, in: RoundedRectangle(cornerRadius: 20))
                     }
-                }
 
-                Section {
-                    row(label: "tasks.form.weight_label", value: weightLabel(task.weight))
-                    row(label: "tasks.form.scheduled_date_label", value: task.scheduledDate)
-                    row(label: "tasks.form.assignees_label", value: assigneeSummary(task))
-                    if let routine = viewModel.routine {
-                        row(label: "routines.recurrence.title", value: frequencyLabel(routine.frequency))
-                    }
-                }
-
-                if viewModel.role != .kid, task.routineID != nil {
-                    Section {
-                        if viewModel.routine?.materializationState == .pending {
-                            Label("routines.materialization.preparing", systemImage: "clock")
-                                .accessibilityIdentifier("routines.detail.preparing")
+                    if let note = task.note, !note.isEmpty {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("tasks.detail.note_label")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                                .padding(.leading, 20)
+                            Text(note)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 14)
+                                .background(.background, in: RoundedRectangle(cornerRadius: 26))
                         }
-                        if viewModel.routineLoadFailed {
-                            Label("routines.error_unavailable", systemImage: "exclamationmark.triangle")
-                            Button("tasks.error.retry") { Task { await viewModel.refreshRoutine() } }
-                        }
-                        Text("routines.detail.origin_hint")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
                     }
-                }
 
-                if let note = task.note, !note.isEmpty {
-                    Section("tasks.detail.note_label") {
-                        Text(note)
-                    }
-                }
-
-                if let banner = viewModel.banner {
-                    Section {
+                    if let banner = viewModel.banner {
                         Text(banner == .loadFailed ? "tasks.detail.load_error" : "tasks.common.error_unavailable")
                             .foregroundStyle(.red)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                }
 
-                if viewModel.reopenFailed {
-                    Section {
+                    if viewModel.reopenFailed {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("tasks.common.error_unavailable")
                                 .foregroundStyle(.red)
                             Button("Tentar novamente") { Task { await viewModel.requestReopen() } }
                         }
                     }
-                }
 
-                if viewModel.memberRolesLoadFailed, task.status != .completed {
-                    Section {
+                    if viewModel.memberDirectoryLoadFailed {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("task.complete.members_unavailable")
+                            Text("tasks.detail.assignees_unavailable")
                                 .foregroundStyle(.secondary)
                             Button("tasks.error.retry") { Task { await viewModel.retryMemberRoles() } }
                         }
                     }
-                }
 
-                if let failure = viewModel.completionFailure {
-                    Section {
+                    if let failure = viewModel.completionFailure {
                         VStack(alignment: .leading, spacing: 8) {
                             Text(completionFailureMessageKey(for: failure))
                                 .foregroundStyle(.secondary)
@@ -234,87 +226,96 @@ struct TaskDetailView: View {
                         }
                         .accessibilityElement(children: .contain)
                     }
-                }
 
-                if viewModel.showsCompleteAction {
-                    Section {
-                        Button {
-                            Task { await viewModel.requestComplete() }
-                        } label: {
-                            Text(viewModel.isCompleting ? "task.complete.pending" : "task.complete.button")
-                                .frame(maxWidth: .infinity, minHeight: 50)
-                                .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(.white)
-                        .background(Color(red: 0.11, green: 0.11, blue: 0.12), in: Capsule())
-                        .disabled(!viewModel.canComplete)
-                        .opacity(viewModel.canComplete ? 1 : 0.5)
-                        .accessibilityIdentifier("tasks.detail.complete")
-                        .accessibilityLabel(Text(viewModel.isCompleting ? "task.complete.pending" : "task.complete.button"))
-                        .listRowInsets(EdgeInsets())
-                        .listRowBackground(Color.clear)
-                    }
-                }
-
-                if viewModel.canReopen {
-                    Section {
-                        Button {
-                            Task { await viewModel.requestReopen() }
-                        } label: {
-                            Text(viewModel.isReopening ? "task.reopen.pending" : "task.reopen.button")
-                                .frame(maxWidth: .infinity, minHeight: 50)
-                                .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(.primary)
-                        .background(.background, in: Capsule())
-                        .overlay(Capsule().strokeBorder(Color(uiColor: .separator), lineWidth: 1))
-                        .disabled(viewModel.isReopening)
-                        .accessibilityIdentifier("tasks.detail.reopen")
-                        .accessibilityLabel(Text("task.reopen.accessibilityLabel"))
-                        .accessibilityHint(Text("task.reopen.accessibilityHint"))
-                        .listRowInsets(EdgeInsets())
-                        .listRowBackground(Color.clear)
-                    }
-                }
-
-                if viewModel.canManageTask, task.routineID == nil {
-                    Section {
-                        if viewModel.canDeleteDirectly {
-                            Button(role: .destructive) { viewModel.requestDelete() } label: {
-                                Text("Excluir")
+                    VStack(spacing: 10) {
+                        if viewModel.showsCompleteAction {
+                            Button {
+                                Task { await viewModel.requestComplete() }
+                            } label: {
+                                Text(viewModel.isCompleting ? "task.complete.pending" : "task.complete.button")
                                     .frame(maxWidth: .infinity, minHeight: 50)
-                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .foregroundStyle(.white)
+                            .background(Color(red: 0.11, green: 0.11, blue: 0.12), in: Capsule())
+                            .disabled(!viewModel.canComplete)
+                            .opacity(viewModel.canComplete ? 1 : 0.5)
+                            .accessibilityIdentifier("tasks.detail.complete")
+                            .accessibilityLabel(Text(viewModel.isCompleting ? "task.complete.pending" : "task.complete.button"))
+                        }
+
+                        if viewModel.canReopen {
+                            Button {
+                                Task { await viewModel.requestReopen() }
+                            } label: {
+                                Text(viewModel.isReopening ? "task.reopen.pending" : "task.reopen.button")
+                                    .frame(maxWidth: .infinity, minHeight: 50)
+                            }
+                            .buttonStyle(.plain)
+                            .foregroundStyle(.primary)
+                            .background(.background, in: Capsule())
+                            .overlay(Capsule().strokeBorder(Color(uiColor: .separator), lineWidth: 1))
+                            .disabled(viewModel.isReopening)
+                            .accessibilityIdentifier("tasks.detail.reopen")
+                            .accessibilityLabel(Text("task.reopen.accessibilityLabel"))
+                            .accessibilityHint(Text("task.reopen.accessibilityHint"))
+                        }
+
+                        if viewModel.canManageTask, task.routineID == nil {
+                            Button(role: .destructive) { viewModel.requestDelete() } label: {
+                                Text("tasks.detail.delete_action")
+                                    .frame(maxWidth: .infinity, minHeight: 50)
                             }
                             .buttonStyle(.plain)
                             .foregroundStyle(.red)
                             .background(.background, in: Capsule())
-                            .disabled(viewModel.isDeleting)
-                            .accessibilityIdentifier("tasks.detail.delete")
-                            .listRowInsets(EdgeInsets())
-                            .listRowBackground(Color.clear)
-                        } else {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Excluir")
-                                    .frame(maxWidth: .infinity, minHeight: 50)
-                                    .background(.background, in: Capsule())
-                                    .foregroundStyle(.red.opacity(0.5))
+                            .disabled(!viewModel.canDeleteDirectly || viewModel.isDeleting)
+                            .opacity(viewModel.canDeleteDirectly ? 1 : 0.4)
+                            .accessibilityIdentifier(viewModel.canDeleteDirectly ? "tasks.detail.delete" : "tasks.detail.delete_disabled")
+                            .accessibilityHint(viewModel.canDeleteDirectly ? Text("") : Text("tasks.delete.error_already_completed"))
+
+                            if !viewModel.canDeleteDirectly {
                                 Text("tasks.delete.error_already_completed")
                                     .font(.footnote)
                                     .foregroundStyle(.secondary)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.horizontal, 20)
                             }
-                            .accessibilityIdentifier("tasks.detail.delete_disabled")
-                            .listRowInsets(EdgeInsets())
-                            .listRowBackground(Color.clear)
                         }
                     }
+
+                    if viewModel.role == .member, task.status == .awaitingConfirmation {
+                        Text("tasks.detail.admin_confirmation_hint")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, 20)
+                    }
                 }
+                .frame(maxWidth: geometry.size.width >= 1100 ? 694 : 540)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .frame(maxWidth: .infinity)
             }
-            .frame(maxWidth: geometry.size.width >= 1100 ? 734 : 580)
-            .frame(maxWidth: .infinity)
             .background(Color(uiColor: .systemGroupedBackground))
         }
+    }
+
+    private func detailsCard(for task: FamilyTask) -> some View {
+        VStack(spacing: 0) {
+            row(label: "tasks.form.weight_label", value: weightLabel(task.weight), identifier: "tasks.detail.weight")
+            Divider().padding(.leading, 20)
+            row(label: "tasks.form.scheduled_date_label", value: dateLabel(task.scheduledDate), identifier: "tasks.detail.date")
+            Divider().padding(.leading, 20)
+            row(label: "tasks.form.assignees_label", value: assigneeSummary(task), identifier: "tasks.detail.assignees")
+            Divider().padding(.leading, 20)
+            row(
+                label: "routines.recurrence.title",
+                value: viewModel.routine.map { frequencyLabel($0.frequency) }
+                    ?? String(localized: "routines.recurrence.none"),
+                identifier: "tasks.detail.recurrence"
+            )
+        }
+        .background(.background, in: RoundedRectangle(cornerRadius: 26))
     }
 
     private var deleteBlockMessageKey: LocalizedStringKey {
@@ -329,13 +330,20 @@ struct TaskDetailView: View {
             : "task.complete.still_pending"
     }
 
-    private func row(label: LocalizedStringKey, value: String) -> some View {
-        HStack {
+    private func row(label: LocalizedStringKey, value: String, identifier: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
             Text(label)
-            Spacer()
+                .layoutPriority(1)
             Text(value)
                 .foregroundStyle(.secondary)
+                .multilineTextAlignment(.trailing)
+                .frame(maxWidth: .infinity, alignment: .trailing)
         }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 15)
+        .frame(minHeight: 51)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier(identifier)
     }
 
     private func statusBadge(for status: TaskStatus) -> some View {
@@ -345,16 +353,39 @@ struct TaskDetailView: View {
         case .completed: ("tasks.detail.status_completed", "checkmark.circle.fill")
         }
         return Label(key, systemImage: icon)
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
+            .font(.footnote)
+            .foregroundStyle(.primary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(Color(uiColor: .tertiarySystemFill), in: Capsule())
+            .accessibilityElement(children: .combine)
+    }
+
+    private func displayedStatus(for task: FamilyTask) -> TaskStatus {
+        viewModel.role == .member && task.status == .awaitingConfirmation ? .pending : task.status
     }
 
     private func weightLabel(_ weight: EffortWeight) -> String {
         switch weight {
-        case .low: String(localized: "tasks.form.weight_option_low")
-        case .medium: String(localized: "tasks.form.weight_option_medium")
-        case .high: String(localized: "tasks.form.weight_option_high")
+        case .low: String(localized: "tasks.detail.weight_low")
+        case .medium: String(localized: "tasks.detail.weight_medium")
+        case .high: String(localized: "tasks.detail.weight_high")
         }
+    }
+
+    private func dateLabel(_ wireDate: String) -> String {
+        let parser = DateFormatter()
+        parser.locale = Locale(identifier: "en_US_POSIX")
+        parser.timeZone = TimeZone(secondsFromGMT: 0)
+        parser.dateFormat = "yyyy-MM-dd"
+        guard let date = parser.date(from: wireDate) else { return wireDate }
+
+        let formatter = DateFormatter()
+        formatter.locale = .current
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        formatter.setLocalizedDateFormatFromTemplate("EEEE d MMMM")
+        let formatted = formatter.string(from: date)
+        return formatted.prefix(1).uppercased(with: .current) + formatted.dropFirst()
     }
 
     private func frequencyLabel(_ frequency: RoutineFrequency) -> String {
@@ -363,6 +394,14 @@ struct TaskDetailView: View {
     }
 
     private func assigneeSummary(_ task: FamilyTask) -> String {
-        task.assigneeIDs.isEmpty ? String(localized: "tasks.form.assignees_none") : "\(task.assigneeIDs.count)"
+        guard !task.assigneeIDs.isEmpty else { return String(localized: "tasks.form.assignees_none") }
+        let names = task.assigneeIDs.map { id in
+            if id == currentMemberID { return String(localized: "tasks.detail.you") }
+            return viewModel.memberNames[id] ?? String(localized: "tasks.detail.other_member")
+        }
+        let conjunction = String(localized: "tasks.detail.and")
+        if names.count == 1 { return names[0] }
+        if names.count == 2 { return names.joined(separator: " \(conjunction) ") }
+        return names.dropLast().joined(separator: ", ") + " \(conjunction) " + names[names.count - 1]
     }
 }

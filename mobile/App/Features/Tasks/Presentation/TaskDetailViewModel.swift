@@ -58,6 +58,8 @@ final class TaskDetailViewModel {
     private(set) var completionFailure: TaskCompletionFailure?
     private(set) var completionRevision = 0
     private(set) var memberRolesLoadFailed = false
+    private(set) var memberDirectoryLoadFailed = false
+    private(set) var memberNames: [UUID: String] = [:]
     private var memberRoles: [UUID: MemberRole]?
 
     var isConfirmingDelete = false
@@ -135,7 +137,7 @@ final class TaskDetailViewModel {
         do {
             task = try await getTaskDetail.execute(taskID: taskID, accessToken: accessToken)
             completionFailure = nil
-            await loadMemberRolesIfNeeded()
+            await loadMemberDirectoryIfNeeded()
             if role != .kid, let routineID = task?.routineID {
                 await loadRoutine(id: routineID)
             } else {
@@ -148,37 +150,47 @@ final class TaskDetailViewModel {
     }
 
     func retryMemberRoles() async {
-        await loadMemberRolesIfNeeded()
+        await loadMemberDirectoryIfNeeded()
     }
 
-    private func loadMemberRolesIfNeeded() async {
+    private func loadMemberDirectoryIfNeeded() async {
         memberRoles = nil
         memberRolesLoadFailed = false
-        guard role == .member, let task, task.status != .completed, !task.assigneeIDs.isEmpty else {
+        memberDirectoryLoadFailed = false
+        memberNames = [:]
+        guard role != .kid, let task, !task.assigneeIDs.isEmpty else {
             return
         }
         guard let familyRepository else {
-            memberRolesLoadFailed = true
+            memberDirectoryLoadFailed = true
+            memberRolesLoadFailed = role == .member && task.status != .completed
             return
         }
         do {
             var roles: [UUID: MemberRole] = [:]
+            var names: [UUID: String] = [:]
             var cursor: String?
             var seenCursors = Set<String>()
             repeat {
                 let page = try await familyRepository.listMembers(accessToken: accessToken, cursor: cursor)
                 for member in page.items {
                     roles[member.id] = member.role
+                    names[member.id] = member.name
                 }
                 cursor = page.nextCursor
                 if let cursor, !seenCursors.insert(cursor).inserted {
                     throw FamilyError.unavailable
                 }
             } while cursor != nil
-            memberRoles = roles
-            memberRolesLoadFailed = task.assigneeIDs.contains { roles[$0] == nil }
+            memberNames = names
+            memberDirectoryLoadFailed = task.assigneeIDs.contains { names[$0] == nil }
+            if role == .member && task.status != .completed {
+                memberRoles = roles
+                memberRolesLoadFailed = task.assigneeIDs.contains { roles[$0] == nil }
+            }
         } catch {
-            memberRolesLoadFailed = true
+            memberDirectoryLoadFailed = true
+            memberRolesLoadFailed = role == .member && task.status != .completed
         }
     }
 
@@ -222,7 +234,7 @@ final class TaskDetailViewModel {
                 completionFailure = nil
                 completionRevision += 1
             } else {
-                await loadMemberRolesIfNeeded()
+                await loadMemberDirectoryIfNeeded()
                 completionFailure = .notCompleted
             }
         } catch {
@@ -245,13 +257,14 @@ final class TaskDetailViewModel {
     }
 
     func requestDelete() {
-        guard canDeleteDirectly else {
+        guard canManageTask, task?.routineID == nil, canDeleteDirectly, !isDeleting else {
             return
         }
         isConfirmingDelete = true
     }
 
     func confirmDelete() async {
+        guard canManageTask, task?.routineID == nil, canDeleteDirectly, !isDeleting else { return }
         isConfirmingDelete = false
         isDeleting = true
         banner = nil

@@ -4,6 +4,7 @@
 **Autor:** Claude | **Criada em:** 2026-10-06 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-06
 **Spec funcional vinculada:** [SPEC-007-gerenciar-tarefas.md](SPEC-007-gerenciar-tarefas.md)
 **Base funcional:** 1.7
+**Revisão de interface:** 2026-10-27 — TEL-012 alinhada ao [protótipo de detalhe adulto](https://www.figma.com/design/CuxXOp9tKivMbELeeB6mHw/APP-FAM%C3%8DLIA-%7C-C18?node-id=331-3136)
 **Superfícies de interface:** TEL-011, TEL-012 (parcial), TEL-013 (parcial), MOD-001, MOD-005, MOD-014
 
 ## 1. Objetivo da experiência e jornada
@@ -52,8 +53,10 @@
 ### 5.2. TEL-012 — Detalhe da tarefa (ações desta entrega)
 
 - **Objetivo:** mostrar título, peso, responsáveis, observação, estado e origem, com acesso a Editar e Excluir.
-- **Anatomia:** cabeçalho com título e estado (`Pendente`, `Aguardando confirmação`, `Concluída`); corpo com peso, responsáveis, data e observação quando houver; ações "Editar" e "Excluir" visíveis apenas para Administrador/Membro.
-- **Comportamento:** nesta entrega, "Concluir" e "Reabrir" não são exibidos — eles pertencem a SPEC-010/SPEC-011 e só aparecem quando essas entregas existirem. "Excluir" fica desabilitado com explicação quando a tarefa está `completed` ou protegida por missão concluída.
+- **Anatomia:** título fora dos cartões e selo de estado separado com ícone e texto; cartão branco de detalhes com esforço, data, nomes dos responsáveis e repetição; observação em cartão próprio quando houver. O detalhe aberto por push oculta a tab bar e mantém Voltar e Editar na barra superior. As ações aparecem abaixo dos dados, com Excluir tarefa em cartão branco separado.
+- **Valores:** esforço no detalhe usa `P1 - Baixo Esforço`, `P2 - Médio Esforço` ou `P3 - Alto Esforço`, sem mudar os rótulos do formulário em §5.1. Responsáveis mostra `Você` para o titular e os nomes dos demais membros, inclusive em tarefas compartilhadas; nunca substitui nomes por uma contagem. Se o diretório estiver indisponível, apresenta aviso e ação de tentar novamente.
+- **Variante Membro com Kids:** uma sinalização pendente mantém o estado efetivo, mas apresenta o selo `Pendente` ao Membro corresponsável e informa que a confirmação cabe ao Administrador, conforme UX-009 §3. O botão Concluir/Reabrir permanece oculto quando a tarefa tem responsável Kids.
+- **Comportamento:** nesta entrega, "Concluir" e "Reabrir" não são exibidos — eles pertencem a SPEC-010/SPEC-011 e só aparecem quando essas entregas existirem. Em tarefa única, "Excluir" fica desabilitado com explicação quando a tarefa está `completed` ou protegida por missão concluída. Em ocorrência de rotina, a ação de exclusão e a escolha do alcance pertencem à SPEC-008, Fase 2 (SCRUM-45), e ainda não aparecem nesta entrega.
 
 ### 5.3. MOD-001 — Selecionar responsáveis
 
@@ -63,7 +66,7 @@
 ### 5.4. MOD-005 — Confirmar exclusão
 
 - **Objetivo:** confirmar o alcance e os impactos antes de excluir.
-- **Anatomia:** mensagem de confirmação; quando há sinalização Kids pendente, inclui uma linha informando que a sinalização será removida junto com a tarefa; ações Cancelar e Excluir.
+- **Anatomia:** alerta nativo com pergunta de confirmação e nome da tarefa; quando há sinalização Kids pendente, inclui uma linha informando que a sinalização será removida junto com a tarefa; ações Cancelar e Excluir.
 - **Comportamento:** bloqueia e explica quando a tarefa é `completed` ou está protegida por missão concluída, sem oferecer "Excluir" nesses casos.
 
 ### 5.5. MOD-014 — Resolver sinalização pendente
@@ -104,6 +107,11 @@ Não há estado vazio nestas superfícies: TEL-013 sempre é um formulário e TE
 | Botão salvar | `tasks.form.submit` | "Salvar tarefa" | Ação primária |
 | Botão salvando | `tasks.form.submitting` | "Salvando..." | Durante envio |
 | Excluir — confirmar | `tasks.delete.confirm_message` | "Excluir esta tarefa?" | MOD-005 |
+| Excluir — ação no detalhe | `tasks.detail.delete_action` | "Excluir tarefa" | TEL-012 |
+| Esforço no detalhe | `tasks.detail.weight_{low,medium,high}` | "P1 - Baixo Esforço" / "P2 - Médio Esforço" / "P3 - Alto Esforço" | TEL-012 |
+| Responsáveis no detalhe | `tasks.detail.you` / `other_member` / `and` | "Você" / "Outro membro" / "e" | TEL-012 |
+| Diretório indisponível | `tasks.detail.assignees_unavailable` | "Não foi possível carregar os nomes dos responsáveis." | TEL-012 |
+| Sinalização para Membro | `tasks.detail.admin_confirmation_hint` | "A confirmação é feita por um Administrador." | TEL-012, variante Membro com Kids |
 | Excluir — aviso de sinalização | `tasks.delete.pending_signal_notice` | "A sinalização da criança para esta tarefa será removida." | MOD-005, quando `awaitingConfirmation` |
 | Bloqueio concluída | `tasks.delete.error_already_completed` | "Tarefas concluídas não podem ser excluídas diretamente" | 409 |
 | Bloqueio missão concluída | `tasks.delete.error_mission_protected` | "Esta tarefa faz parte de uma missão concluída e não pode ser alterada" | 409 |
@@ -121,6 +129,7 @@ Não há estado vazio nestas superfícies: TEL-013 sempre é um formulário e TE
 - Rótulos acessíveis: botão de peso anuncia o nível ("Esforço: pouco, selecionado"); contador de caracteres é anunciado ao atingir o limite.
 - Todos os textos usam Dynamic Type, sem truncar título ou observação; campos de texto expandem verticalmente.
 - Cor nunca é a única indicação de erro ou estado; usar texto e ícone semântico com contraste WCAG AA.
+- Em TEL-012, título e selo são elementos separados; cada linha de detalhes anuncia rótulo e valor juntos. Excluir tarefa tem papel destrutivo e, quando indisponível por conclusão, anuncia o motivo.
 - Alvos de toque com no mínimo 44×44 pt. Em iPad, TEL-013 usa `Form Sheet` centralizado até 540 pt; MOD-001, MOD-005 e MOD-014 seguem o mesmo padrão.
 
 ## 9. Decisões e esclarecimentos de UX

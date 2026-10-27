@@ -44,6 +44,10 @@ final class TaskCompletionUITests: XCTestCase {
 
         XCTAssertTrue(app.staticTexts["Guardar a roupa"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.buttons["tasks.detail.complete"].exists)
+        // SPEC-009 CA-11 / UX-009: the Member sees Pendente while the Kids signal awaits Admin review.
+        XCTAssertTrue(app.staticTexts["tasks.detail.status"].label.contains("Pendente"))
+        XCTAssertTrue(app.staticTexts["A confirmação é feita por um Administrador."].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["tasks.detail.assignees"].label.contains("Rafa Silva"))
     }
 
     func testCA04MemberCanCompleteAdultTask() {

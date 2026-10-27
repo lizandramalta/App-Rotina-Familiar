@@ -3626,16 +3626,6 @@
         }
       }
     },
-    "routines.detail.origin_hint": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Faz parte de uma rotina. As próximas tarefas são independentes desta."
-          }
-        }
-      }
-    },
     "routines.error_frequency_invalid": {
       "localizations": {
         "pt-BR": {
@@ -4126,6 +4116,46 @@
         }
       }
     },
+    "tasks.detail.admin_confirmation_hint": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A confirmação é feita por um Administrador."
+          }
+        }
+      }
+    },
+    "tasks.detail.and": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "e"
+          }
+        }
+      }
+    },
+    "tasks.detail.assignees_unavailable": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível carregar os nomes dos responsáveis."
+          }
+        }
+      }
+    },
+    "tasks.detail.delete_action": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excluir tarefa"
+          }
+        }
+      }
+    },
     "tasks.detail.load_error": {
       "localizations": {
         "pt-BR": {
@@ -4156,6 +4186,16 @@
         }
       }
     },
+    "tasks.detail.other_member": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Outro membro"
+          }
+        }
+      }
+    },
     "tasks.detail.status_awaiting_confirmation": {
       "localizations": {
         "pt-BR": {
@@ -4182,6 +4222,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pendente"
+          }
+        }
+      }
+    },
+    "tasks.detail.weight_high": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "P3 - Alto Esforço"
+          }
+        }
+      }
+    },
+    "tasks.detail.weight_low": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "P1 - Baixo Esforço"
+          }
+        }
+      }
+    },
+    "tasks.detail.weight_medium": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "P2 - Médio Esforço"
+          }
+        }
+      }
+    },
+    "tasks.detail.you": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Você"
           }
         }
       }

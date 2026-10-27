@@ -78,6 +78,7 @@ struct MissionsTabView: View {
                 currentMemberID: currentMemberID,
                 repository: taskRepository,
                 routineRepository: routineRepository,
+                familyRepository: familyRepository,
                 accessToken: accessToken,
                 onRequestEdit: { path.append(.taskEdit(taskID)) },
                 onDeleted: { if !path.isEmpty { path.removeLast() } }
