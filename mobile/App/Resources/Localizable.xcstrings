@@ -1902,6 +1902,446 @@
         }
       }
     },
+    "missions.common.error_action_not_allowed": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta ação não está disponível para o seu perfil."
+          }
+        }
+      }
+    },
+    "missions.common.error_network": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível conectar. Verifique sua internet."
+          }
+        }
+      }
+    },
+    "missions.common.error_unavailable": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Algo não funcionou. Tente novamente."
+          }
+        }
+      }
+    },
+    "missions.common.error_uncertain": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível confirmar se a missão foi salva. Verifique antes de tentar novamente."
+          }
+        }
+      }
+    },
+    "missions.common.retry": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tentar novamente"
+          }
+        }
+      }
+    },
+    "missions.create.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nova missão"
+          }
+        }
+      }
+    },
+    "missions.detail.edit": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar"
+          }
+        }
+      }
+    },
+    "missions.detail.load_error": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível carregar a missão"
+          }
+        }
+      }
+    },
+    "missions.detail.note_title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Observação"
+          }
+        }
+      }
+    },
+    "missions.detail.tasks_section_title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tarefas vinculadas · %lld"
+          }
+        }
+      }
+    },
+    "missions.edit.error_completed_protected": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta missão já foi concluída e não pode ser editada"
+          }
+        }
+      }
+    },
+    "missions.edit.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar missão"
+          }
+        }
+      }
+    },
+    "missions.form.error_note_too_long": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A observação pode ter no máximo 250 caracteres"
+          }
+        }
+      }
+    },
+    "missions.form.error_tasks_required": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uma missão precisa de ao menos uma tarefa vinculada"
+          }
+        }
+      }
+    },
+    "missions.form.error_title_required": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informe um título para a missão"
+          }
+        }
+      }
+    },
+    "missions.form.error_title_too_long": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O título pode ter no máximo 60 caracteres"
+          }
+        }
+      }
+    },
+    "missions.form.note_counter": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld/250 caracteres"
+          }
+        }
+      }
+    },
+    "missions.form.note_placeholder": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Observação (opcional)"
+          }
+        }
+      }
+    },
+    "missions.form.select_tasks_button": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecionar tarefas"
+          }
+        }
+      }
+    },
+    "missions.form.submit": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salvar missão"
+          }
+        }
+      }
+    },
+    "missions.form.submitting": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salvando..."
+          }
+        }
+      }
+    },
+    "missions.form.tasks_section_title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tarefas vinculadas"
+          }
+        }
+      }
+    },
+    "missions.form.title_counter": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld/60 caracteres"
+          }
+        }
+      }
+    },
+    "missions.form.title_placeholder": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ex.: Arrumar o quintal"
+          }
+        }
+      }
+    },
+    "missions.list.create_label": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nova missão"
+          }
+        }
+      }
+    },
+    "missions.list.empty_action": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Criar primeira missão"
+          }
+        }
+      }
+    },
+    "missions.list.empty_description": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crie uma missão para transformar tarefas em uma conquista da família."
+          }
+        }
+      }
+    },
+    "missions.list.empty_title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhuma missão ainda"
+          }
+        }
+      }
+    },
+    "missions.list.load_error": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível carregar as missões"
+          }
+        }
+      }
+    },
+    "missions.list.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Missões e conquistas"
+          }
+        }
+      }
+    },
+    "missions.status.completed": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concluída"
+          }
+        }
+      }
+    },
+    "missions.status.in_progress": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Em andamento"
+          }
+        }
+      }
+    },
+    "missions.task_picker.add_new_task": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+ Nova tarefa"
+          }
+        }
+      }
+    },
+    "missions.task_picker.close_label": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fechar"
+          }
+        }
+      }
+    },
+    "missions.task_picker.confirm_label": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirmar"
+          }
+        }
+      }
+    },
+    "missions.task_picker.empty_description": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tente outro título ou crie uma nova tarefa."
+          }
+        }
+      }
+    },
+    "missions.task_picker.empty_title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhuma tarefa encontrada"
+          }
+        }
+      }
+    },
+    "missions.task_picker.load_error": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível carregar as tarefas"
+          }
+        }
+      }
+    },
+    "missions.task_picker.none_selected": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecione ao menos uma tarefa"
+          }
+        }
+      }
+    },
+    "missions.task_picker.not_selected": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "não selecionada"
+          }
+        }
+      }
+    },
+    "missions.task_picker.search_placeholder": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar tarefa por título"
+          }
+        }
+      }
+    },
+    "missions.task_picker.selected": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "selecionada"
+          }
+        }
+      }
+    },
+    "missions.task_picker.selected_count": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld selecionadas"
+          }
+        }
+      }
+    },
+    "missions.task_picker.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecionar tarefas"
+          }
+        }
+      }
+    },
     "onboarding.discard.confirm": {
       "localizations": {
         "pt-BR": {
