@@ -1,8 +1,8 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.18\
-**Data:** 2026-10-22\
+**Versão:** 1.19\
+**Data:** 2026-10-27\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -340,7 +340,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 - O sistema impede excluir ou alterar uma tarefa quando isso modificar dados preservados de uma missão concluída.
 - Título ausente, com mais de 60 caracteres visíveis ou peso fora de 1 a 3 e operações de gerenciamento por Kids são rejeitados.
 - Concluída sem proteção admite edição individual de título, peso, data, responsáveis e observação. Informar os efeitos: créditos e progresso são recalculados, instante original da conclusão e auditoria são preservados. Sem responsáveis, não há crédito individual. Última edição válida efetivada no servidor prevalece, sem comparação de versão antiga (RN17).
-- Editar uma tarefa Aguardando confirmação exige escolher, no mesmo salvamento, entre retornar a Pendente — descartando a sinalização corrente da criança — ou manter Aguardando confirmação com os dados atualizados e a sinalização corrente intacta (RN66). Excluir uma tarefa Aguardando confirmação remove a sinalização corrente junto com a tarefa, sem registrar confirmação ou recusa.
+- Editar individualmente uma tarefa Aguardando confirmação exige escolher, no mesmo salvamento, entre retornar a Pendente — descartando a sinalização corrente da criança — ou manter Aguardando confirmação com os dados atualizados e a sinalização corrente intacta (RN66). Excluir uma tarefa Aguardando confirmação remove a sinalização corrente junto com a tarefa, sem registrar confirmação ou recusa. A edição de rotina “esta e as futuras” ([UC08](03-casos-de-uso.md#uc08)) não altera estados nem exige essa escolha.
 
 **Pós-condição:** a alteração permitida foi salva, sem exclusão direta de tarefas concluídas nem modificação de conquistas preservadas.
 
@@ -377,6 +377,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 - Sem repetição, o sistema cria uma tarefa única.
 - Alterações no alcance “selecionada e futuras” incluem a ocorrência escolhida e as futuras elegíveis, respeitando o histórico e as proteções de missões concluídas.
+- Ao editar ou excluir uma ocorrência de rotina, o sistema sempre pergunta o alcance: somente esta tarefa ou esta e as futuras. Somente esta segue a edição ou exclusão individual do [UC07](03-casos-de-uso.md#uc07), inclusive da data prevista. Esta e as futuras altera somente título, peso, responsáveis e observação, não altera data inicial, frequência nem data prevista, e substitui edições individuais anteriores das futuras abrangidas.
 - Não existe frequência mensal.
 - A limitação de consulta do carrossel não interrompe a geração de tarefas futuras.
 
@@ -843,6 +844,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.19 | 2026-10-27 | UC08: editar ou excluir ocorrência de rotina sempre pergunta o alcance; “esta e as futuras” não altera repetição nem data prevista e substitui edições individuais anteriores das futuras. UC07: a escolha do RN66 vale para a edição individual; a edição de rotina não altera estados. Para SPEC-008 Fase 2. |
 | 1.18 | 2026-10-26 | UC12 e UC17 permitem concluir/reabrir pelo círculo da lista pessoal; o restante da linha abre o detalhe. Permissões e efeitos mantidos. |
 | 1.17 | 2026-10-22 | UC10: nome da família e papel na consulta do perfil; titular adulto edita o próprio nome, Kids não. Para SPEC-006 (SCRUM-52). |
 | 1.16 | 2026-10-19 | UC07: exclusão que deixa só tarefas concluídas fecha a missão (RN38/RF59; SPEC-014/SPEC-007). UC01/UC02: foto antecipada, membros criados com a família, convites posteriores e edição sem segunda criação. UC11: apresentação por perfil da tarefa sinalizada, preservando estado único. |

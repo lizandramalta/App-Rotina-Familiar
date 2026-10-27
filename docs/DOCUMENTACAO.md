@@ -1,8 +1,8 @@
-# Documentação do projeto — versão 1.28
+# Documentação do projeto — versão 1.29
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.28\
-**Data:** 2026-10-26\
+**Versão:** 1.29\
+**Data:** 2026-10-27\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Modelo de dados](05-modelo-de-dados.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -14,9 +14,9 @@
 | [Apresentação do projeto](../README.md) | Propósito, público, jornada e escopo do MVP. |
 | [Visão do produto](00-visao-do-produto.md) | Contexto, objetivos, princípios, escopo e critérios de sucesso. |
 | [Índice e versões](DOCUMENTACAO.md) | Organização documental, rastreabilidade e política de versões. |
-| [Regras de negócio](01-regras-de-negocio.md) | Regras vigentes e suas relações com RF, RNF e UC; versão 1.18. |
-| [Requisitos](02-requisitos.md) | 71 requisitos funcionais e 27 não funcionais, com vínculos às regras e aos casos de uso; versão 1.17. |
-| [Especificação dos casos de uso](03-casos-de-uso.md) | 19 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições; versão 1.18. |
+| [Regras de negócio](01-regras-de-negocio.md) | Regras vigentes e suas relações com RF, RNF e UC; versão 1.20. |
+| [Requisitos](02-requisitos.md) | 71 requisitos funcionais e 27 não funcionais, com vínculos às regras e aos casos de uso; versão 1.19. |
+| [Especificação dos casos de uso](03-casos-de-uso.md) | 19 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições; versão 1.19. |
 | [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) | Visão geral e cinco recortes UML, com fontes PlantUML e imagens SVG. |
 | [Screen map](design/screen-map.md) | Mapa 1.16: navegação, catálogo de telas, modais, estados e cobertura de UC01–UC19; base RN 1.18 / RF 1.17 / UC 1.18. |
 | [User flows](design/user-flows.md) | Fluxos 1.18: 16 percursos que cobrem UC01–UC19, com decisões, alternativas e retornos; base RN 1.18 / RF 1.17 / UC 1.18 e screen map 1.16. |
@@ -27,7 +27,7 @@
 | [Decisões da arquitetura mobile](architecture/mobile-decisions.md) | MA-01–MA-19 e P-01–P-09, incluindo criação conjunta, retorno sem recriação e estado exibido por perfil. |
 | [Convenções de código mobile](architecture/mobile-code-conventions.md) | Convenções de Swift/SwiftUI, camadas, concorrência, segurança, testes e revisão. |
 | [Arquitetura backend](architecture/backend-architecture.md) | Backend 1.4: Node.js, Clean Architecture, monólito modular, Supabase/R2 e criação conjunta com foto antecipada. |
-| [Contratos backend](architecture/backend-contracts.md) | Contratos 1.19 da API `/v1`: `displayStatus` pessoal, edição de perfil próprio (`nickname`/foto) e consulta de badges materializados na API e OpenAPI; integração de Universal Links no host público Cloudflare; criação com membros/foto antecipada ainda pendente. |
+| [Contratos backend](architecture/backend-contracts.md) | Contratos 1.21 da API `/v1`: alcance “selecionada e futuras” da rotina sem `startDate`/`frequencyDays`; `displayStatus` pessoal, edição de perfil próprio (`nickname`/foto) e consulta de badges materializados na API e OpenAPI; integração de Universal Links no host público Cloudflare; criação com membros/foto antecipada ainda pendente. |
 | [Decisões backend](architecture/backend-decisions.md) | BA-01–BA-37: escolhas confirmadas e propostas técnicas, inclusive preparação de foto e projeção pessoal. |
 | [Convenções de código backend](architecture/backend-code-conventions.md) | Convenções de TypeScript/Fastify, camadas, contratos, SQL, segurança, testes e revisão. |
 | [Specs de entrega](../specs/README.md) | Recortes aprovados de implementação compartilhados entre mobile e backend. |
@@ -132,7 +132,7 @@ TEL-014 e TEL-031 foram incorporadas à TEL-050 e retiradas da navegação; os i
 
 ## Política de versionamento
 
-1. A base funcional vigente está na versão **1.18**. O índice documental está na versão **1.28** por consolidar também registros técnicos e de apresentação. Screen map e user flows têm versionamento independente; as arquiteturas mobile e backend também. Documentos alinhados a uma versão funcional anterior devem ser atualizados quando o comportamento que descrevem for afetado.
+1. A base funcional vigente está na versão **1.20** (regras 1.20, requisitos 1.19 e casos de uso 1.19). O índice documental está na versão **1.29** por consolidar também registros técnicos e de apresentação. Screen map e user flows têm versionamento independente; as arquiteturas mobile e backend também. Documentos alinhados a uma versão funcional anterior devem ser atualizados quando o comportamento que descrevem for afetado.
 2. Preserve os identificadores RN, RF, RNF, UC, TEL, MOD e UF. Novos itens recebem novos códigos; códigos retirados não são reutilizados.
 3. A edição vigente fica na raiz e em `docs/`. O Git mantém o histórico e permite comparar ou recuperar versões anteriores por commits e, quando adotadas, tags. Não mantenha cópias da documentação em pastas de versões.
 4. Alterações funcionais e suas referências devem evoluir juntas, com versão, data e histórico dos códigos e comportamentos afetados. Use 1.1, 1.2... para revisões incrementais e 2.0 para mudanças substanciais da base funcional.
@@ -145,6 +145,7 @@ A fundação backend adota Node.js, TypeScript, Fastify e `pg`. Parte da API de 
 
 | Versão | Data | Alteração |
 | --- | --- | --- |
+| 1.29 | 2026-10-27 | RN17/RF13/UC08: editar ou excluir ocorrência de rotina sempre pergunta o alcance; “esta e as futuras” altera somente título, peso, responsáveis e observação, sem mudar repetição ou data prevista, e substitui edições individuais anteriores das futuras. RN66/UC07: a escolha entre Pendente e Aguardando confirmação vale para a edição individual; a edição de rotina não altera estados. Contratos backend 1.21, SPEC-008 (E-05 a E-13), UX-008 e UX-007 (anatomia da TEL-013/MOD-001) alinhados. |
 | 1.28 | 2026-10-26 | TEL-010 adulta alinhada ao protótipo de média fidelidade; UX-009, screen map 1.16 e user flows 1.18 registram rótulos, carrossel visual, cartões e acessibilidade sem alterar a base funcional. |
 | 1.27 | 2026-10-26 | TEL-010/TEL-040 atualizam estado e progresso ao toque; UF-06/UF-08 e UX-009/010/011 registram última intenção, comandos sequenciais e reconciliação de falhas. |
 | 1.26 | 2026-10-26 | UC12/UC17, TEL-010/TEL-040 e UF-06/UF-08 registram o círculo da lista pessoal como ação de concluir/reabrir; UX-009, SPEC/UX-010/011 e testes mobile alinhados. |

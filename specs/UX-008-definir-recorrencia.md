@@ -3,7 +3,7 @@
 **Status:** aprovada
 **Autor:** Codex | **Criada em:** 2026-10-06 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-06
 **Spec funcional vinculada:** [SPEC-008-definir-recorrencia.md](SPEC-008-definir-recorrencia.md)
-**Base funcional:** 1.8
+**Base funcional:** RN 1.20 / RF 1.19 / UC 1.19 (revisada em 2026-10-27, UX-04 e UX-05)
 **Superfícies de interface:** TEL-012, TEL-013, MOD-002, MOD-003, UF-05
 
 ## 1. Objetivo da experiência e jornada
@@ -34,8 +34,11 @@
 | MOD-002 | Escolher frequência recorrente e confirmar | TEL-013 | — | Exibe resumo da frequência; não exibe data final |
 | TEL-013 | Salvar rotina | Origem | Falha mantém TEL-013 | Exibe preparo enquanto materialização estiver pendente |
 | TEL-012 | Editar ocorrência de rotina | MOD-003 | Cancelar retorna ao detalhe sem gravar | Mantém o contexto da ocorrência e da origem |
-| MOD-003 | Escolher “Selecionada e futuras” | TEL-013 | Voltar preserva escolha até cancelar o formulário | A ocorrência aberta é incluída no alcance |
+| MOD-003 | Escolher “Somente esta tarefa” | TEL-013 (edição individual, SPEC-007) | Voltar preserva escolha até cancelar o formulário | Salvar grava só a ocorrência aberta (`PATCH /v1/tasks/{taskId}`) |
+| MOD-003 | Escolher “Esta tarefa e as futuras” | TEL-013 | Voltar preserva escolha até cancelar o formulário | A ocorrência aberta é incluída no alcance; salvar usa `PATCH /v1/routines/{routineId}` com `fromTaskId` |
 | TEL-012 | Excluir ocorrência de rotina | MOD-003 → MOD-005 | Cancelar não altera ocorrências | Confirma alcance e registros preservados |
+| MOD-003 (excluir) | Escolher “Somente esta tarefa” e confirmar em MOD-005 | Origem | Cancelar em MOD-005 retorna ao detalhe | Exclui só a ocorrência aberta (`DELETE /v1/tasks/{taskId}`) |
+| MOD-003 (excluir) | Escolher “Esta tarefa e as futuras” e confirmar em MOD-005 | Origem | Cancelar em MOD-005 retorna ao detalhe | `POST /v1/routines/{routineId}/future-task-deletions` com `fromTaskId` |
 
 - **Prevenção de perda:** ao fechar TEL-013 com alteração não salva, mostrar confirmação de descarte. Falha de rede ou resposta incerta preserva o rascunho e não anuncia êxito.
 - **Retorno:** a origem preserva período, filtros e posição de navegação; quando a rotina estiver preparando, uma atualização posterior não muda silenciosamente os campos que a pessoa acabou de preencher.
@@ -47,6 +50,8 @@
 - **Objetivo:** editar os campos comuns e encaminhar a escolha de repetição a MOD-002.
 - **Anatomia:** mantém os campos da UX-007; o resumo de repetição mostra “Sem repetição” ou a frequência selecionada. Nenhum componente de data final é exibido.
 - **Acesso:** somente Administrador/Membro vê o seletor e o botão de salvar. Kids não navegam à tela.
+- **Edição de ocorrência de rotina:** a linha Repetição mostra a frequência vigente somente para leitura, sem abrir MOD-002, nos dois alcances. Em “Esta tarefa e as futuras”, a Data também fica somente leitura e apenas título, esforço, responsáveis e observação são editáveis (SPEC-008 E-05, E-07). Em “Somente esta tarefa”, a Data continua editável.
+- **Edição de tarefa única:** a linha Repetição mostra “Sem repetição” somente para leitura; editar não transforma tarefa única em rotina (UX-05).
 
 ### 5.2. MOD-002 — Configurar repetição
 
@@ -57,13 +62,13 @@
 ### 5.3. MOD-003 — Definir alcance
 
 - **Objetivo:** tornar explícito o alcance antes de editar ou encerrar uma rotina a partir de uma ocorrência.
-- **Anatomia:** resumo da ocorrência aberta, opção “Somente esta tarefa” quando aplicável e opção “Esta e as futuras”; texto explica que a segunda inclui a tarefa aberta e preserva passado, concluídas e registros protegidos.
-- **Comportamento:** o ramo de rotina envia `fromTaskId` somente após confirmação da opção inclusiva. Se a API indicar proteção, o modal fecha para o detalhe atualizado e apresenta o motivo sem prometer alteração.
+- **Anatomia:** sheet com ✕ (Cancelar) e ✓ (Confirmar) na barra; título “Onde aplicar esta alteração?” ao editar ou “O que excluir?” ao excluir; resumo da ocorrência aberta no formato “{título} · {data curta}”; grupo de seleção única sempre com “Somente esta tarefa” (“As outras ocorrências da rotina não mudam.”) e “Esta tarefa e as futuras” (“Inclui esta tarefa. As anteriores e as concluídas permanecem preservadas.”); rodapé “Cancelar volta ao detalhe sem gravar.”, precedido de “Depois você confirma a exclusão.” no fluxo de excluir (UX-04).
+- **Comportamento:** Confirmar fica desabilitado até uma opção ser escolhida. “Somente esta tarefa” segue a edição ou exclusão individual da SPEC-007. O ramo de rotina envia `fromTaskId` somente após confirmação da opção inclusiva. Se a API indicar proteção ou origem inválida, o modal fecha para o detalhe atualizado e apresenta o motivo sem prometer alteração.
 
 ### 5.4. TEL-012 — Detalhe da tarefa de rotina
 
 - **Objetivo:** identificar que a ocorrência vem de rotina e iniciar a ação de editar/excluir no alcance correto.
-- **Comportamento:** em ocorrência de rotina, editar ou excluir abre MOD-003 antes da confirmação final. Ações não autorizadas permanecem ocultas.
+- **Comportamento:** em ocorrência de rotina, Administrador/Membro veem Editar e Excluir; ambos abrem MOD-003 antes da confirmação final. O texto de origem explica a escolha de alcance. Ações não autorizadas permanecem ocultas.
 
 ## 6. Estados de interface
 
@@ -89,8 +94,14 @@
 | Sem data final | `routines.recurrence.no_end_date_hint` | “A rotina continua até você alterar ou encerrar as próximas ocorrências.” | Ajuda no modal |
 | Preparando | `routines.materialization.preparing` | “Estamos preparando as próximas tarefas.” | Após salvar/consultar `202` |
 | Alcance | `routines.scope.title` | “Onde aplicar esta alteração?” | MOD-003 |
+| Alcance ao excluir | `routines.scope.delete_title` | “O que excluir?” | MOD-003 no fluxo de excluir |
+| Somente esta | `routines.scope.only_this` | “Somente esta tarefa” | Alcance individual |
+| Explicação somente esta | `routines.scope.only_this_hint` | “As outras ocorrências da rotina não mudam.” | MOD-003 |
 | Selecionada e futuras | `routines.scope.selected_and_future` | “Esta tarefa e as futuras” | Alcance de rotina |
 | Explicação do alcance | `routines.scope.selected_and_future_hint` | “Inclui esta tarefa. As anteriores e as concluídas permanecem preservadas.” | MOD-003 |
+| Rodapé cancelar | `routines.scope.cancel_hint` | “Cancelar volta ao detalhe sem gravar.” | MOD-003 |
+| Rodapé excluir | `routines.scope.delete_hint` | “Depois você confirma a exclusão.” | MOD-003 no fluxo de excluir |
+| Origem no detalhe | `routines.detail.origin_hint` | “Faz parte de uma rotina. Ao editar ou excluir, você escolhe se vale só para esta tarefa ou também para as próximas.” | TEL-012 em ocorrência de rotina |
 | Frequência inválida | `routines.error_frequency_invalid` | “Escolha uma frequência disponível.” | `FREQUENCY_DAYS_INVALID` |
 | Início inválido | `routines.error_start_date_invalid` | “Informe uma data de início válida.” | `START_DATE_INVALID` |
 | Origem inválida | `routines.error_source_task_invalid` | “Esta tarefa não pode definir o alcance da rotina. Atualize e tente novamente.” | `ROUTINE_SOURCE_TASK_INVALID` |
@@ -111,6 +122,8 @@
 | UX-01 | Não existe campo ou mensagem que sugira data final obrigatória; o texto explica que a rotina pode ser alterada ou encerrada futuramente. | Decidida em 2026-10-06 | Não; aplica RN14/RF13 |
 | UX-02 | “Esta tarefa e as futuras” declara que inclui a ocorrência aberta. | Decidida em 2026-10-06 | Não; aplica RN17/RF13 |
 | UX-03 | Materialização pendente é apresentada como preparo, sem percentual ou total final não confirmado. | Decidida em 2026-10-06 | Não; aplica contratos e RNF12/13 |
+| UX-04 | MOD-003 sempre oferece “Somente esta tarefa” e “Esta tarefa e as futuras”, ao editar e ao excluir. | Decidida em 2026-10-27 | Não; aplica RN17/RN18/UC08 |
+| UX-05 | Na edição, a linha Repetição é somente leitura: tarefa única não vira rotina e ocorrência de rotina não muda a frequência; em “Esta tarefa e as futuras” a Data também é somente leitura. | Decidida em 2026-10-27 | Sim; aplica SPEC-008 E-05/E-07 (RN17 1.20) |
 
 ## 10. Checklist de aprovação
 
