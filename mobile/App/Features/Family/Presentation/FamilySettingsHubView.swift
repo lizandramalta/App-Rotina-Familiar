@@ -57,7 +57,9 @@ struct FamilySettingsHubView: View {
                 }
                 ForEach(viewModel.members) { member in
                     NavigationLink {
-                        MemberDetailView(viewModel: viewModel.makeMemberDetailViewModel(memberID: member.id))
+                        MemberDetailView(viewModel: viewModel.makeMemberDetailViewModel(memberID: member.id)) {
+                            Task { await viewModel.loadInitial() }
+                        }
                     } label: {
                         row(member)
                     }

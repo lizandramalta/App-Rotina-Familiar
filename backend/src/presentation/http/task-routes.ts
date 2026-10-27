@@ -16,6 +16,18 @@ interface OwnProgressQuery {
   readonly referenceDate: string;
 }
 
+interface FamilyQuery {
+  readonly startDate?: string;
+  readonly endDate?: string;
+  readonly memberId?: string;
+  readonly status?: string;
+  readonly cursor?: string;
+}
+
+interface MemberTaskParams {
+  readonly memberId: string;
+}
+
 interface TaskBody {
   readonly title?: unknown;
   readonly weight?: unknown;
@@ -208,6 +220,60 @@ const referenceDateQuerySchema = {
   properties: { referenceDate: { type: 'string' } },
 } as const;
 
+const familyRangeQuerySchema = {
+  type: 'object',
+  required: ['startDate', 'endDate'],
+  additionalProperties: false,
+  properties: { startDate: { type: 'string' }, endDate: { type: 'string' } },
+} as const;
+
+const familyProgressResponseSchema = {
+  type: 'object',
+  required: ['total', 'completed', 'pending', 'awaitingConfirmation', 'percentage'],
+  properties: {
+    total: { type: 'integer', minimum: 0 },
+    completed: { type: 'integer', minimum: 0 },
+    pending: { type: 'integer', minimum: 0 },
+    awaitingConfirmation: { type: 'integer', minimum: 0 },
+    percentage: { type: ['number', 'null'], minimum: 0, maximum: 100 },
+  },
+} as const;
+
+const familyOverviewResponseSchema = {
+  type: 'object',
+  required: ['startDate', 'endDate', 'familyCreatedAt', 'progress', 'members'],
+  properties: {
+    startDate: { type: 'string' },
+    endDate: { type: 'string' },
+    familyCreatedAt: { type: 'string' },
+    progress: familyProgressResponseSchema,
+    members: {
+      type: 'array',
+      items: {
+        ...familyProgressResponseSchema,
+        required: [...familyProgressResponseSchema.required, 'memberId', 'name', 'role'],
+        properties: {
+          ...familyProgressResponseSchema.properties,
+          memberId: { type: 'string' },
+          name: { type: 'string' },
+          role: { enum: ['administrator', 'member', 'kids'] },
+        },
+      },
+    },
+  },
+} as const;
+
+const familyTasksResponseSchema = {
+  type: 'object',
+  required: ['startDate', 'endDate', 'items', 'nextCursor'],
+  properties: {
+    startDate: { type: 'string' },
+    endDate: { type: 'string' },
+    items: ownTasksResponseSchema.properties.items,
+    nextCursor: { type: ['string', 'null'] },
+  },
+} as const;
+
 function requireEmptyCompletionBody(body: unknown): void {
   if (body === undefined) {
     return;
@@ -295,6 +361,117 @@ export function registerTaskRoutes(app: FastifyInstance, container: ApplicationC
               requireActor(request),
               request.query.referenceDate,
             ),
+          ),
+    );
+
+    // SPEC-009 CA-05/07/08/10/12: family scope and role projection are server-side.
+    scope.get<{ Querystring: FamilyQuery }>(
+      '/family/overview',
+      {
+        schema: {
+          tags: ['Family'],
+          summary: 'Get family task progress and member progress for an inclusive date range',
+          security: [{ bearerAuth: [] }],
+          querystring: {
+            ...familyRangeQuerySchema,
+            required: [],
+          },
+          response: {
+            200: familyOverviewResponseSchema,
+            400: problemResponseSchema,
+            401: problemResponseSchema,
+            403: problemResponseSchema,
+            404: problemResponseSchema,
+            422: problemResponseSchema,
+            503: problemResponseSchema,
+          },
+        },
+      },
+      async (request, reply) =>
+        reply
+          .status(200)
+          .header('Cache-Control', 'no-store')
+          .send(
+            await container.getFamilyOverviewUseCase.execute(
+              requireActor(request),
+              request.query.startDate,
+              request.query.endDate,
+            ),
+          ),
+    );
+
+    scope.get<{ Querystring: FamilyQuery }>(
+      '/family/tasks',
+      {
+        schema: {
+          tags: ['Family'],
+          summary: 'List family tasks for an inclusive date range and optional member or status',
+          security: [{ bearerAuth: [] }],
+          querystring: {
+            ...familyRangeQuerySchema,
+            properties: {
+              ...familyRangeQuerySchema.properties,
+              memberId: { type: 'string' },
+              status: { type: 'string' },
+              cursor: { type: 'string' },
+            },
+          },
+          response: {
+            200: familyTasksResponseSchema,
+            400: problemResponseSchema,
+            401: problemResponseSchema,
+            403: problemResponseSchema,
+            404: problemResponseSchema,
+            422: problemResponseSchema,
+            503: problemResponseSchema,
+          },
+        },
+      },
+      async (request, reply) =>
+        reply
+          .status(200)
+          .header('Cache-Control', 'no-store')
+          .send(
+            await container.getFamilyTasksUseCase.execute(requireActor(request), request.query),
+          ),
+    );
+
+    scope.get<{ Params: MemberTaskParams; Querystring: FamilyQuery }>(
+      '/family/members/:memberId/tasks',
+      {
+        schema: {
+          tags: ['Family'],
+          summary: 'List a family member tasks for an inclusive date range',
+          security: [{ bearerAuth: [] }],
+          params: {
+            type: 'object',
+            required: ['memberId'],
+            properties: { memberId: { type: 'string', format: 'uuid' } },
+          },
+          querystring: {
+            ...familyRangeQuerySchema,
+            properties: { ...familyRangeQuerySchema.properties, cursor: { type: 'string' } },
+          },
+          response: {
+            200: familyTasksResponseSchema,
+            400: problemResponseSchema,
+            401: problemResponseSchema,
+            403: problemResponseSchema,
+            404: problemResponseSchema,
+            422: problemResponseSchema,
+            503: problemResponseSchema,
+          },
+        },
+      },
+      async (request, reply) =>
+        reply
+          .status(200)
+          .header('Cache-Control', 'no-store')
+          .send(
+            await container.getFamilyTasksUseCase.execute(requireActor(request), {
+              ...request.query,
+              memberId: request.params.memberId,
+            }),
           ),
     );
 

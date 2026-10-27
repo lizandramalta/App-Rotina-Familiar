@@ -20,6 +20,8 @@ import { MissionReopenRequiresConfirmationError } from '../../modules/tasks/doma
 import { registerMissionRoutes } from './mission-routes.js';
 import { registerMemberRoutes } from './member-routes.js';
 import { registerRewardRoutes } from './reward-routes.js';
+import { registerReportRoutes } from './report-routes.js';
+import { registerKidsSignalRoutes } from './kids-signal-routes.js';
 
 export function buildHttpApp(
   container: ApplicationContainer,
@@ -82,6 +84,8 @@ export function buildHttpApp(
         { name: 'Media', description: 'Upload de mídia privada.' },
         { name: 'Profile', description: 'Dados do próprio perfil.' },
         { name: 'Tasks', description: 'Gestão de tarefas únicas.' },
+        { name: 'Kids', description: 'Sinalização de tarefas Kids e avaliação administrativa.' },
+        { name: 'Reports', description: 'Snapshots para relatórios locais.' },
         {
           name: 'Routines',
           description: 'Configuração de recorrência e materialização de ocorrências.',
@@ -329,6 +333,8 @@ export function buildHttpApp(
       registerRoutineRoutes(scope, container);
       registerMissionRoutes(scope, container);
       registerRewardRoutes(scope, container);
+      registerReportRoutes(scope, container);
+      registerKidsSignalRoutes(scope, container);
     },
     { prefix: '/v1' },
   );

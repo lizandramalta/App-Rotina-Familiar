@@ -5,6 +5,7 @@ import SwiftUI
 /// state; routine management waits for MOD-003 in SPEC-008 Fase 2.
 struct TaskDetailView: View {
     @State private var viewModel: TaskDetailViewModel
+    @State private var showsSignalSheet = false
     private let currentMemberID: UUID
     @AccessibilityFocusState private var isMissionWarningFocused: Bool
     @AccessibilityFocusState private var isStatusFocused: Bool
@@ -88,6 +89,9 @@ struct TaskDetailView: View {
                     onCancel: { viewModel.cancelMissionReopen() }
                 )
             }
+        }
+        .sheet(isPresented: $showsSignalSheet) {
+            KidsSignalSheet(viewModel: viewModel)
         }
         .alert(
             "tasks.delete.confirm_message",
@@ -228,6 +232,12 @@ struct TaskDetailView: View {
                     }
 
                     VStack(spacing: 10) {
+                        if viewModel.canSignal {
+                            Button("kids.signal.open") { showsSignalSheet = true }
+                                .buttonStyle(.borderedProminent)
+                                .frame(maxWidth: .infinity, minHeight: 50)
+                                .accessibilityIdentifier("kids.signal.open")
+                        }
                         if viewModel.showsCompleteAction {
                             Button {
                                 Task { await viewModel.requestComplete() }

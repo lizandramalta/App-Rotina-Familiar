@@ -184,7 +184,7 @@ nome (cada um em sua própria transação) e registra versão e hash em
 Arquivos seguem `NNNN_descricao_em_ingles.sql` e são identificados pelo nome completo
 no registro de migrations. Há prefixos históricos repetidos (`0005` e `0007`), que
 não devem ser renomeados após aplicação; para novos arquivos, use o próximo prefixo
-ainda não usado (atualmente `0008`). Editar uma migration já aplicada é erro: o hash
+ainda não usado (atualmente `0015`). Editar uma migration já aplicada é erro: o hash
 deixa de bater e o comando aborta antes de tocar no banco, porque quem já aplicou não
 receberia a alteração.
 

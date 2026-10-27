@@ -4,6 +4,7 @@ import type { Clock } from '../../../shared/application/clock.js';
 import type { TransactionRunner } from '../../../shared/application/transaction-runner.js';
 import {
   ActionNotAllowedError,
+  ConflictError,
   DependencyUnavailableError,
   DomainError,
   NotFoundError,
@@ -207,6 +208,147 @@ export class CreateMemberUseCase {
           createdAt: this.deps.clock.now(),
         });
         return toMemberView(member);
+      }),
+    );
+  }
+}
+
+function memberStateConflict(): ConflictError {
+  return new ConflictError(
+    'The requested member transition is not allowed.',
+    'MEMBER_STATE_CONFLICT',
+  );
+}
+
+async function requireCurrentAdministrator(
+  repository: MemberManagementRepositoryPort,
+  tx: import('../../../shared/application/transaction-runner.js').TransactionContext,
+  actor: ActorContext,
+): Promise<void> {
+  requireAdministrator(
+    await repository.findMemberRole(tx, { familyId: actor.familyId, memberId: actor.memberId }),
+  );
+}
+
+interface ManagementDependencies {
+  readonly repository: MemberManagementRepositoryPort;
+  readonly transactionRunner: TransactionRunner;
+  readonly clock: Clock;
+}
+
+/** SPEC-003 CA-02/03/07: administrative name is distinct from a private nickname. */
+export class UpdateMemberUseCase {
+  constructor(private readonly deps: ManagementDependencies) {}
+
+  async execute(actor: ActorContext, memberId: string, nameInput: unknown): Promise<MemberView> {
+    requireAdministrator(actor.role);
+    const name = validateName(nameInput);
+    return translateDependencyFailure(() =>
+      this.deps.transactionRunner.forFamily(actor.familyId, async (tx) => {
+        await requireCurrentAdministrator(this.deps.repository, tx, actor);
+        const member = await this.deps.repository.findMember(tx, {
+          familyId: actor.familyId,
+          memberId,
+        });
+        if (!member) throw new NotFoundError('Family member not found.');
+        if (member.id === actor.memberId) throw new ActionNotAllowedError();
+        return toMemberView(
+          await this.deps.repository.updateMember(tx, {
+            familyId: actor.familyId,
+            memberId,
+            name,
+            now: this.deps.clock.now(),
+          }),
+        );
+      }),
+    );
+  }
+}
+
+/** SPEC-003 CA-04: role transitions preserve the creator and Kids promotion rule. */
+export class ChangeMemberRoleUseCase {
+  constructor(private readonly deps: ManagementDependencies) {}
+
+  async execute(actor: ActorContext, memberId: string, roleInput: unknown): Promise<MemberView> {
+    requireAdministrator(actor.role);
+    const role = validateRole(roleInput);
+    return translateDependencyFailure(() =>
+      this.deps.transactionRunner.forFamily(actor.familyId, async (tx) => {
+        await requireCurrentAdministrator(this.deps.repository, tx, actor);
+        const member = await this.deps.repository.findMember(tx, {
+          familyId: actor.familyId,
+          memberId,
+        });
+        if (!member) throw new NotFoundError('Family member not found.');
+        if (
+          member.isFamilyCreator ||
+          member.id === actor.memberId ||
+          (member.role === MemberRole.KIDS && role === MemberRole.ADMINISTRATOR)
+        ) {
+          throw memberStateConflict();
+        }
+        if (member.role === role) return toMemberView(member);
+        return toMemberView(
+          await this.deps.repository.updateMember(tx, {
+            familyId: actor.familyId,
+            memberId,
+            role,
+            now: this.deps.clock.now(),
+          }),
+        );
+      }),
+    );
+  }
+}
+
+/** SPEC-003 CA-05: voluntary administration exit is an explicit self command. */
+export class LeaveAdministrationUseCase {
+  constructor(private readonly deps: ManagementDependencies) {}
+
+  async execute(actor: ActorContext): Promise<MemberView> {
+    requireAdministrator(actor.role);
+    return translateDependencyFailure(() =>
+      this.deps.transactionRunner.forFamily(actor.familyId, async (tx) => {
+        await requireCurrentAdministrator(this.deps.repository, tx, actor);
+        const member = await this.deps.repository.findMember(tx, {
+          familyId: actor.familyId,
+          memberId: actor.memberId,
+        });
+        if (!member) throw new NotFoundError('Family member not found.');
+        if (member.isFamilyCreator) throw memberStateConflict();
+        return toMemberView(
+          await this.deps.repository.updateMember(tx, {
+            familyId: actor.familyId,
+            memberId: actor.memberId,
+            role: MemberRole.MEMBER,
+            now: this.deps.clock.now(),
+          }),
+        );
+      }),
+    );
+  }
+}
+
+/** SPEC-003 CA-06: logical removal and access revocation share one transaction. */
+export class RemoveMemberUseCase {
+  constructor(private readonly deps: ManagementDependencies) {}
+
+  async execute(actor: ActorContext, memberId: string): Promise<void> {
+    requireAdministrator(actor.role);
+    await translateDependencyFailure(() =>
+      this.deps.transactionRunner.forFamily(actor.familyId, async (tx) => {
+        await requireCurrentAdministrator(this.deps.repository, tx, actor);
+        const member = await this.deps.repository.findMember(tx, {
+          familyId: actor.familyId,
+          memberId,
+        });
+        if (!member) throw new NotFoundError('Family member not found.');
+        if (member.isFamilyCreator || member.id === actor.memberId) throw memberStateConflict();
+        await this.deps.repository.removeMember(tx, {
+          familyId: actor.familyId,
+          memberId,
+          now: this.deps.clock.now(),
+        });
       }),
     );
   }

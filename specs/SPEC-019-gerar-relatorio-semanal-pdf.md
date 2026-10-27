@@ -19,7 +19,7 @@ Adultos geram uma visão semanal compartilhável da participação familiar. O b
 | Regras | RN28, RN30–31, RN60–62 |
 | Requisito | RF61 |
 | Não funcionais | RNF05–08, RNF10, RNF12–13, RNF22, RNF26–27 |
-| Telas/fluxo | TEL-050, TEL-051, UF-14 |
+| Telas/fluxo | TEL-011, TEL-051, UF-14 |
 | Arquitetura | MA-07, MA-09, MA-11, MA-12, MA-15; BA-05, BA-07–08, BA-13, BA-15, BA-20 |
 
 - **Depende de:** SPEC-018 aprovada.
@@ -28,7 +28,7 @@ Adultos geram uma visão semanal compartilhável da participação familiar. O b
 ## 3. Escopo
 
 - `GET /v1/reports/weekly-snapshot?referenceDate=YYYY-MM-DD` para adulto autorizado.
-- PDF local com família, período/fuso, instante de geração, gráficos de carga/progresso e tabela por membro.
+- PDF local iniciado pelo menu de TEL-011, com família, período/fuso, instante de geração, gráficos de carga/progresso e tabela por membro. Se o intervalo da lista incluir mais de uma semana, TEL-051 solicita a semana antes de gerar.
 - Semana atual parcial, semana sem dados e linha “Membro removido” sem dados pessoais.
 - Visualizar, salvar e compartilhar por ação explícita.
 
@@ -74,6 +74,7 @@ Fase 1 não é publicável isoladamente.
 |---|---|---|---|
 | E-01 | Semana é resolvida por `referenceDate` no fuso da família. | 2026-10-10 | RN62, UC18 e contratos atualizados. |
 | E-02 | PDF usa “Membro removido” em créditos históricos. | 2026-10-10 | RN62, UC18 e contratos atualizados. |
+| E-03 | A ação parte do menu de TEL-011; intervalo que toca mais de uma semana exige seleção da semana em TEL-051. | Pessoa usuária / 2026-10-27 | RN62, RF61, UC18 e UX-019. |
 
 ## 9. Checklist
 

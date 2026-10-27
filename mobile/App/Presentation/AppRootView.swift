@@ -56,7 +56,7 @@ struct AppRootView: View {
                 ) {
                     container.makeProfileViewModel(session: profile, sessionStore: sessionStore)
                 }
-                .id(profile.memberID)
+                .id(profile)
             case let .initialProfile(grant):
                 InitialOnboardingFlowView(
                     viewModel: container.makeOnboardingViewModel(grant: grant, sessionStore: sessionStore)

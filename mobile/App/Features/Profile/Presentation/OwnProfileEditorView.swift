@@ -317,7 +317,7 @@ struct OwnProfileEditorView: View {
 }
 
 /// Camera capture for "Tirar foto"; returns the raw JPEG, which the normalizer then resizes and strips.
-private struct CameraPicker: UIViewControllerRepresentable {
+struct CameraPicker: UIViewControllerRepresentable {
     let onFinish: (Data?) -> Void
 
     func makeUIViewController(context: Context) -> UIImagePickerController {

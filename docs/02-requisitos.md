@@ -1,7 +1,7 @@
 # Requisitos funcionais e não funcionais
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.20\
+**Versão:** 1.21\
 **Data:** 2026-10-27\
 **Situação:** base documental consolidada
 
@@ -433,18 +433,18 @@ Ao excluir uma tarefa não concluída, o sistema deve remover seus vínculos de 
 
 ### RF60
 
-O sistema deve oferecer a Administradores e Membros a área Família (Minha família) na navegação principal, apresentando diretamente progresso total por dia ou semana e uma lista de membros. Cada item abre o detalhe com as tarefas daquele membro e seletor Dia/Semana. Deve abrir no dia atual, herdar o período ao abrir o detalhe e preservar membro e período ao consultar suas tarefas; voltar restaura o contexto da origem. Todas as tarefas, inclusive sem responsável, permanecem acessíveis pela consulta familiar complementar. A carga é integrada na entrega específica de UC13.
+O sistema deve oferecer a Administradores e Membros a área Família (Minha família) na navegação principal, apresentando progresso total no intervalo selecionado e uma lista de membros. A seleção inicial é a semana corrente; Início/Fim permite qualquer intervalo válido dentro de RN49. Cada item abre o detalhe com as tarefas daquele membro e preserva exatamente o intervalo, inclusive quando não coincide com Dia ou Semana; voltar restaura o contexto da origem. Tarefas da família mantém o intervalo e apresenta todas as tarefas, inclusive sem responsável. A carga de UC13 terá apresentação própria em entrega posterior, fora da TEL-050 atual.
 
 O progresso deve mostrar concluídas/total e percentual, contar cada tarefa uma vez e apresentar “Sem tarefas” quando o total for zero. Carga e progresso seguem RN60–61 e são atualizados após alterações válidas.
 
-O botão Gerar relatório semanal PDF fica na própria Família para ambos os perfis adultos. O botão Adicionar membro também fica em Família, somente para Administradores. Editar perfil e gerar/reenviar convite ficam no detalhe do membro, somente para Administradores quando permitido, respeitando o acesso Apple do Criador e a edição exclusiva do próprio apelido. Confirmações Kids permanecem exclusivas dos Administradores. Kids não acessam a área Família.
+Gerar relatório semanal PDF fica no menu de Tarefas da família para ambos os perfis adultos. Adicionar membro fica em Configurações da família, somente para Administradores. Editar perfil e gerar/reenviar convite ficam no detalhe do membro, somente para Administradores quando permitido, respeitando o acesso Apple do Criador e a edição exclusiva do próprio apelido. Confirmações Kids permanecem exclusivas dos Administradores. Kids não acessam a área Família.
 
 **Regras de negócio:** [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61)  
 **Casos de uso:** [UC11](03-casos-de-uso.md#uc11)
 
 ### RF61
 
-O sistema deve oferecer Gerar relatório PDF na própria tela Família e permitir selecionar uma semana, gerar, visualizar e salvar ou compartilhar o PDF de RN62, com gráficos de carga e progresso familiar e tabela com peso creditado e tarefas realizadas por membro. Deve mostrar geração em andamento, falha com nova tentativa e semana atual parcial. Selecionar Dia na carga não transforma o PDF em relatório diário.
+O sistema deve oferecer Gerar relatório PDF no menu de Tarefas da família e permitir selecionar uma semana, gerar, visualizar e salvar ou compartilhar o PDF de RN62, com gráficos de carga e progresso familiar e tabela com peso creditado e tarefas realizadas por membro. Se o intervalo consultado tocar mais de uma semana, deve pedir a escolha antes de gerar; com uma única semana, usa-a diretamente. Deve mostrar geração em andamento, falha com nova tentativa e semana atual parcial. O filtro livre da consulta não transforma o PDF em relatório de intervalo arbitrário.
 
 **Regras de negócio:** [RN62](01-regras-de-negocio.md#rn62)  
 **Casos de uso:** [UC18](03-casos-de-uso.md#uc18)
@@ -479,7 +479,7 @@ O sistema deve oferecer ao perfil Kids exatamente duas abas independentes: “Mi
 
 ### RF66
 
-O sistema deve oferecer seletor Dia/Semana nos indicadores de progresso familiar em Minha família e nas tarefas do membro selecionado em seu detalhe. Minhas tarefas é diária para todos os perfis. Deve informar datas, preservar período ao navegar para detalhes e listas e aplicar as fórmulas e limites de RN61. A consulta semanal não altera o período livre de prazo das missões.
+O sistema deve oferecer filtro Início/Fim livre nos indicadores de progresso familiar em Minha família e nas tarefas do membro selecionado em seu detalhe. Minhas tarefas é diária para todos os perfis. Deve informar as datas, preservar exatamente o intervalo ao navegar para detalhes e listas e aplicar as fórmulas e limites de RN61. O intervalo familiar não altera o período livre de prazo das missões.
 
 **Regras de negócio:** [RN28](01-regras-de-negocio.md#rn28), [RN33](01-regras-de-negocio.md#rn33), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61)  
 **Casos de uso:** [UC11](03-casos-de-uso.md#uc11), [UC13](03-casos-de-uso.md#uc13)
@@ -773,6 +773,7 @@ A configuração de apelido deve ser protegida por titularidade no backend, incl
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.21 | 2026-10-27 | RF11, RF22, RF24, RF60–61 e RF66: intervalo livre, projeção de Pendentes para Membro, menu do PDF em TEL-011 e configurações em TEL-057. |
 | 1.20 | 2026-10-27 | RF13: explicita a preservação da data prevista já gravada, inclusive após edição individual, no alcance “selecionada e futuras”. Para SPEC-008 Fase 2 / SCRUM-45. |
 | 1.19 | 2026-10-27 | RF13: alcance “selecionada e futuras” limitado a título, peso, responsáveis e observação, sem alterar data inicial, frequência ou data prevista, e substituindo edições individuais anteriores das futuras abrangidas. Para SPEC-008 Fase 2. |
 | 1.18 | 2026-10-22 | RF48: titular adulto edita o próprio nome de identificação (RF02), Kids não; consulta do próprio perfil inclui o nome da família. Para SPEC-006 (SCRUM-52). |

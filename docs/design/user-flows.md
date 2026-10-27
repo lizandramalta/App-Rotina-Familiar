@@ -1,10 +1,10 @@
-# User flows — versão 1.18
+# User flows — versão 1.19
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão dos fluxos:** 1.18\
-**Base funcional:** RN 1.18 / RF 1.17 / UC 1.18\
-**Screen map:** 1.16 — revisão de 2026-10-26\
-**Data:** 2026-10-26\
+**Versão dos fluxos:** 1.19\
+**Base funcional:** RN 1.22 / RF 1.21 / UC 1.21\
+**Screen map:** 1.17 — revisão de 2026-10-27\
+**Data:** 2026-10-27\
 **Situação:** primeira versão para revisão de design
 
 [Projeto](../../README.md) · [Índice documental](../DOCUMENTACAO.md) · [Screen map](screen-map.md) · [Regras](../01-regras-de-negocio.md) · [Requisitos](../02-requisitos.md) · [Casos de uso](../03-casos-de-uso.md) · [Diagrama de classes](../06-diagrama-de-classes.md)
@@ -45,7 +45,7 @@ Referências transversais: RNF01, RNF05–13 e RNF17–25, conforme a operação
 | [UF-01](#uf-01) | Criar família ou retornar como Criador | Criador | UC01, UC04 |
 | [UF-02](#uf-02) | Convidar e ingressar | Administrador e pessoa convidada | UC02, UC09 |
 | [UF-03](#uf-03) | Recuperar acesso ao perfil | Usuário sem sessão e Administrador | UC02, UC04, UC09 |
-| [UF-04](#uf-04) | Consultar tarefas e progresso pessoal diário ou familiar Dia/Semana | Todos; área Família somente adultos | UC11 |
+| [UF-04](#uf-04) | Consultar tarefas e progresso pessoal diário ou familiar em Início/Fim livres | Todos; área Família somente adultos | UC11 |
 | [UF-05](#uf-05) | Criar ou editar tarefa e rotina | Administrador, Membro | UC07, UC08 |
 | [UF-06](#uf-06) | Concluir tarefa mantendo ou assumindo responsáveis | Administrador, Membro | UC12 |
 | [UF-07](#uf-07) | Sinalizar e validar tarefa Kids | Kids e Administrador | UC15, UC03 |
@@ -107,7 +107,8 @@ flowchart TD
 ```mermaid
 flowchart TD
     subgraph Admin["Administrador"]
-      A["TEL-050 · Família"] -->|Adicionar membro| C["TEL-033 · Adicionar membro e definir perfil"]
+      A["TEL-050 · Família"] -->|Configurações| S["TEL-057 · Configurações da família"]
+      S -->|Adicionar membro| C["TEL-033 · Adicionar membro e definir perfil"]
       C --> D{"Dados e perfil válidos?"}
       D -->|Não · corrigir| C
       D -->|Sim · salvar| E["TEL-032 · Perfil salvo"]
@@ -168,7 +169,7 @@ flowchart TD
 
 <a id="uf-04"></a>
 
-## UF-04 — Consultar tarefas e progresso pessoal diário ou familiar Dia/Semana
+## UF-04 — Consultar tarefas e progresso pessoal diário ou familiar em intervalo livre
 
 **Objetivo:** consultar o período pessoal ou o período da família e abrir uma tarefa permitida.  
 **Entrada:** Minhas tarefas ou Família, escolhidas independentemente.  
@@ -182,8 +183,8 @@ flowchart TD
     B -->|Familiar adulto| E["TEL-050 · Família"]
     C --> F["Escolher data diária"]
     D --> F
-    E -->|Consultar totais da família| FF["Escolher Dia ou Semana mantendo a data de referência"]
-    E -->|Selecionar membro da lista| PM["TEL-032 · Tarefas daquele membro · Dia/Semana"]
+    E -->|Consultar totais da família| FF["Escolher Início e Fim livres no intervalo disponível"]
+    E -->|Selecionar membro da lista| PM["TEL-032 · Tarefas daquele membro · intervalo herdado"]
     PM --> FF
     F --> G{"Data no intervalo permitido?"}
     FF --> G
@@ -201,9 +202,9 @@ flowchart TD
     P --> N
 ```
 
-Em Minhas tarefas, todos os perfis consultam somente o dia de referência e seu progresso diário. TEL-010 mostra ao adulto apenas tarefas em que é responsável ou corresponsável. Após Kids sinalizar uma tarefa compartilhada, a lista pessoal do adulto corresponsável a apresenta como Pendente e a visualização pessoal Kids como Aguardando confirmação; o estado efetivo continua Aguardando confirmação, sem alterar permissões ou progresso. Dia/Semana mantém a data de referência nas superfícies familiares adultas. A semana vai de segunda a domingo; semanas de borda indicam os dias disponíveis. Progresso semanal familiar usa concluídas/total da semana, não a média dos percentuais diários. O intervalo vai da criação da família ao último dia do mês corrente, incluindo dias futuros desse mês. Na visão familiar, cada tarefa prevista no período conta uma vez no total e, se concluída, uma vez no numerador; peso e quantidade de responsáveis não multiplicam o progresso. Tarefas sem responsável entram no total. Aguardando confirmação não conta como concluída.
+Em Minhas tarefas, todos os perfis consultam somente o dia de referência e seu progresso diário. TEL-010 mostra ao adulto apenas tarefas em que é responsável ou corresponsável. Após Kids sinalizar uma tarefa compartilhada, a lista pessoal do adulto corresponsável a apresenta como Pendente e a visualização pessoal Kids como Aguardando confirmação; o estado efetivo continua Aguardando confirmação, sem alterar permissões ou progresso. TEL-050, TEL-011 e TEL-032 aceitam qualquer intervalo válido entre Início e Fim. O intervalo vai da criação da família ao último dia do mês corrente, incluindo dias futuros desse mês. Na visão familiar, cada tarefa prevista no período conta uma vez no total e, se concluída, uma vez no numerador; peso e quantidade de responsáveis não multiplicam o progresso. Tarefas sem responsável entram no total. Aguardando confirmação não conta como concluída e aparece como Pendente para Membros.
 
-TEL-032 mantém o membro selecionado ao alternar Dia/Semana e abre TEL-012 para uma tarefa. Herdar o período da Família não liga os seletores: voltar restaura a seleção anterior de TEL-050. Membro sem tarefas mostra estado vazio; falha de consulta não é apresentada como ausência de tarefas. A carga não integra TEL-050 nesta entrega e fica para SPEC-018. Ações administrativas no detalhe seguem UF-12.
+TEL-032 mantém o membro selecionado e o intervalo exato herdado de TEL-050; o filtro pode ser alterado localmente. Voltar restaura a seleção anterior de TEL-050. Membro sem tarefas mostra estado vazio; falha de consulta não é apresentada como ausência de tarefas. A carga não integra TEL-050 nesta entrega e fica para SPEC-018. Ações administrativas no detalhe seguem UF-12.
 
 **Continuação:** adultos podem seguir UF-05, UF-06 ou UF-08 a partir das telas permitidas; Kids seguem UF-07 somente para tarefa própria pendente. Voltar do detalhe restaura a origem, que pode ser uma lista pessoal, familiar ou missão. Consultar outra data não altera tarefas. Ao abrir o checklist em um novo dia, o padrão volta a ser o dia atual.
 
@@ -358,13 +359,13 @@ No círculo de TEL-010/TEL-040, linha e progresso mudam no toque quando a ação
 
 ## UF-09 — Consultar carga diária ou semanal
 
-**Objetivo:** entender a distribuição da participação creditada no período.  
-**Entrada:** Família, por Administrador ou Membro.  
+**Objetivo:** entender a distribuição da participação creditada no período, no relatório semanal. A visualização de carga em TEL-050 fica para entrega posterior de SPEC-018.
+**Entrada:** Tarefas da família → Relatório semanal, por Administrador ou Membro.
 **Referências:** [UC13](../03-casos-de-uso.md#uc13); RN28, RN30–34, RN61; RF18–21, RF56–57, RF66.
 
 ```mermaid
 flowchart TD
-    A["TEL-050 · Minha família · carga e progresso integrados"] --> C["Escolher Dia ou Semana e data de referência"]
+    A["TEL-011 · Tarefas da família · relatório semanal"] --> C["Escolher a semana do relatório"]
     C --> D{"Há conclusões válidas no período?"}
     D -->|Não| E["Informar ausência de carga"]
     D -->|Sim| F["Mostrar peso por membro e participação no total"]
@@ -375,7 +376,7 @@ flowchart TD
     G -->|Voltar| A
 ```
 
-Cada responsável recebe o peso integral; o total soma cargas individuais. Pendentes e Aguardando confirmação não entram. Reaberturas ajustam o dia e a semana originais. Crédito histórico de perfil removido aparece como “Membro removido”, sem dado pessoal. Sem carga, não dividir por zero. A semana vai de segunda a domingo; a consulta ocorre na própria TEL-050 e mantém a referência selecionada. Kids não acessam esta tela. O destaque semanal é consultado separadamente em UF-15.
+Cada responsável recebe o peso integral; o total soma cargas individuais. Pendentes e Aguardando confirmação não entram. Reaberturas ajustam o dia e a semana originais. Crédito histórico de perfil removido aparece como “Membro removido”, sem dado pessoal. Sem carga, não dividir por zero. A semana vai de segunda a domingo; a carga é consultada no snapshot do relatório, sem visualização em TEL-050 nesta entrega. Kids não acessam esse relatório. O destaque semanal é consultado separadamente em UF-15.
 
 <a id="uf-10"></a>
 
@@ -520,12 +521,12 @@ O formulário permite adicionar/substituir/remover foto opcional e configurar et
 ## UF-14 — Gerar relatório semanal em PDF
 
 **Objetivo:** obter a visão semanal da família em arquivo.  
-**Entrada:** botão Gerar relatório PDF na própria Minha família (TEL-050), por adulto.  
+**Entrada:** menu Gerar relatório PDF em Tarefas da família (TEL-011), por adulto.
 **Referências:** [UC18](../03-casos-de-uso.md#uc18); RN62; RF61; RNF26–27.
 
 ```mermaid
 flowchart TD
-    A["TEL-050 · Gerar relatório PDF"] --> B["TEL-051 · Selecionar semana segunda–domingo"]
+    A["TEL-011 · Gerar relatório PDF"] --> B["TEL-051 · Selecionar semana segunda–domingo quando o intervalo tocar várias semanas"]
     B --> C{"Semana atual ou passada válida?"}
     C -->|Não| B
     C -->|Sim| D["Backend fornece snapshot / app gera PDF · atual parcial"]
@@ -611,6 +612,7 @@ Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imedi
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.19 | RN 1.22 / RF 1.21 / UC 1.21 | 1.17 | 2026-10-27 | UF-04 usa Início/Fim livres e herda intervalo exato em TEL-032/TEL-011; UF-02 acessa inclusão por TEL-057; UF-14 parte de TEL-011 e seleciona semana quando o intervalo tocar várias; carga de TEL-050 adiada. |
 | 1.18 | UC 1.18 | 1.16 | 2026-10-26 | Alinha os nomes das abas adultas ao protótipo de TEL-010; percursos, ações e permissões permanecem iguais. |
 | 1.17 | UC 1.18 | 1.15 | 2026-10-26 | UF-06/UF-08: atualização imediata no círculo, última intenção por tarefa, comandos em sequência e restauração/reconciliação após falhas. |
 | 1.16 | UC 1.18 | 1.15 | 2026-10-26 | UF-06/UF-08 adicionam o círculo da lista pessoal como entrada para concluir/reabrir, sem mudar permissões, confirmação ou efeitos. |

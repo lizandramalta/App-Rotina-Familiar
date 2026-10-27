@@ -34,6 +34,7 @@ final class TaskDetailViewModel {
     let role: MemberRole
     private let currentMemberID: UUID
     private let getTaskDetail: GetTaskDetailUseCase
+    private let repository: any TaskRepository
     private let getRoutine: GetRoutineUseCase
     private let familyRepository: (any FamilyRepository)?
     private let deleteTask: DeleteTaskUseCase
@@ -57,6 +58,10 @@ final class TaskDetailViewModel {
     private(set) var isCompleting = false
     private(set) var completionFailure: TaskCompletionFailure?
     private(set) var completionRevision = 0
+    private(set) var isSignaling = false
+    private(set) var signalFailed = false
+    private(set) var photoUploadFailed = false
+    private(set) var signalNeedsRefresh = false
     private(set) var memberRolesLoadFailed = false
     private(set) var memberDirectoryLoadFailed = false
     private(set) var memberNames: [UUID: String] = [:]
@@ -77,6 +82,7 @@ final class TaskDetailViewModel {
         self.role = role
         self.currentMemberID = currentMemberID
         self.getTaskDetail = GetTaskDetailUseCase(repository: repository)
+        self.repository = repository
         self.getRoutine = GetRoutineUseCase(repository: routineRepository)
         self.familyRepository = familyRepository
         self.deleteTask = DeleteTaskUseCase(repository: repository)
@@ -128,6 +134,44 @@ final class TaskDetailViewModel {
             return task.assigneeIDs.contains(currentMemberID)
         }
         return true
+    }
+
+    var canSignal: Bool {
+        guard let task else { return false }
+        return role == .kid && task.status == .pending && task.assigneeIDs.contains(currentMemberID)
+    }
+
+    /// SPEC-012 CA-01/02/07: optional photo is normalized before private upload.
+    func sendSignal(photoData: Data?) async {
+        guard canSignal, !isSignaling else { return }
+        isSignaling = true
+        signalFailed = false
+        photoUploadFailed = false
+        signalNeedsRefresh = false
+        defer { isSignaling = false }
+        var mediaID: String?
+        if let photoData {
+            do {
+                let jpeg = try await ProfilePhotoNormalizer().normalize(photoData)
+                mediaID = try await repository.uploadSignalPhoto(jpeg, accessToken: accessToken)
+            } catch {
+                photoUploadFailed = true
+                return
+            }
+        }
+        do {
+            task = try await repository.signalTask(id: taskID, photoMediaID: mediaID, accessToken: accessToken)
+            completionRevision += 1
+        } catch {
+            // A lost response may follow a committed signal. Read before offering another explicit attempt.
+            do {
+                let current = try await getTaskDetail.execute(taskID: taskID, accessToken: accessToken)
+                task = current
+                signalFailed = current.status == .pending
+            } catch {
+                signalNeedsRefresh = true
+            }
+        }
     }
 
     func load() async {

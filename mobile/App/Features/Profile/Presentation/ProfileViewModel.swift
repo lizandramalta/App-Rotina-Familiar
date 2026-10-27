@@ -13,6 +13,7 @@ final class ProfileViewModel {
     }
 
     private let repository: any ProfileRepository
+    private let familyRepository: (any FamilyRepository)?
     private let sessionStore: AppSessionStore
     private let photoNormalizer: any ProfilePhotoNormalizing
     let session: ActiveFamilySession
@@ -27,6 +28,8 @@ final class ProfileViewModel {
     /// MOD-009 is presented while this is set (`.sheet(item:)`).
     private(set) var editor: OwnProfileEditorViewModel?
     var isShowingLeaveAdminPlaceholder = false
+    private(set) var isLeavingAdministration = false
+    private(set) var leaveAdministrationFailed = false
 
     private var avatarMediaID: String?
 
@@ -34,9 +37,11 @@ final class ProfileViewModel {
         repository: any ProfileRepository,
         sessionStore: AppSessionStore,
         session: ActiveFamilySession,
+        familyRepository: (any FamilyRepository)? = nil,
         photoNormalizer: any ProfilePhotoNormalizing = ProfilePhotoNormalizer()
     ) {
         self.repository = repository
+        self.familyRepository = familyRepository
         self.sessionStore = sessionStore
         self.photoNormalizer = photoNormalizer
         self.session = session
@@ -171,6 +176,26 @@ final class ProfileViewModel {
 
     var canLeaveAdministration: Bool {
         session.role == .administrator && !session.isFamilyCreator
+    }
+
+    /// SPEC-003 CA-05: only a confirmed response changes the local role.
+    func leaveAdministration() async {
+        guard canLeaveAdministration, !isLeavingAdministration,
+              let familyRepository, let token = sessionStore.accessToken else { return }
+        isLeavingAdministration = true
+        leaveAdministrationFailed = false
+        defer { isLeavingAdministration = false }
+        do {
+            let confirmed = try await familyRepository.leaveAdministration(accessToken: token)
+            guard confirmed.id == session.memberID, confirmed.role == .member else {
+                leaveAdministrationFailed = true
+                return
+            }
+            isShowingLeaveAdminPlaceholder = false
+            sessionStore.applyConfirmedRole(.member)
+        } catch {
+            leaveAdministrationFailed = true
+        }
     }
 
     var roleFooter: String {

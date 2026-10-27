@@ -66,6 +66,9 @@ nonisolated private struct CreateMemberRequestDTO: Encodable {
     let role: MemberRole
 }
 
+nonisolated private struct UpdateMemberNameDTO: Encodable { let name: String }
+nonisolated private struct ChangeMemberRoleDTO: Encodable { let role: MemberRole }
+
 nonisolated private struct CreateMemberResponseDTO: Decodable {
     let id: UUID
     let name: String
@@ -103,6 +106,145 @@ nonisolated private struct MemberDetailDTO: Decodable {
     let isFamilyCreator: Bool
     let createdAt: String
     let capabilities: Capabilities
+}
+
+nonisolated private struct FamilyProgressDTO: Decodable {
+    let total: Int
+    let completed: Int
+    let pending: Int
+    let awaitingConfirmation: Int
+    let percentage: Double?
+
+    var model: FamilyProgress {
+        FamilyProgress(
+            total: total,
+            completed: completed,
+            pending: pending,
+            awaitingConfirmation: awaitingConfirmation,
+            percentage: percentage
+        )
+    }
+}
+
+nonisolated private struct FamilyOverviewDTO: Decodable {
+    struct Member: Decodable {
+        let memberId: UUID
+        let name: String
+        let role: MemberRole
+        let total: Int
+        let completed: Int
+        let pending: Int
+        let awaitingConfirmation: Int
+        let percentage: Double?
+
+        var model: FamilyMemberProgress {
+            FamilyMemberProgress(
+                memberID: memberId,
+                name: name,
+                role: role,
+                progress: FamilyProgress(
+                    total: total,
+                    completed: completed,
+                    pending: pending,
+                    awaitingConfirmation: awaitingConfirmation,
+                    percentage: percentage
+                )
+            )
+        }
+    }
+
+    let startDate: String
+    let endDate: String
+    let familyCreatedAt: String
+    let progress: FamilyProgressDTO
+    let members: [Member]
+
+    var model: FamilyOverview {
+        FamilyOverview(
+            range: FamilyDateRange(startDate: startDate, endDate: endDate),
+            familyCreatedAt: familyCreatedAt,
+            progress: progress.model,
+            members: members.map(\.model)
+        )
+    }
+}
+
+nonisolated private struct FamilyTaskPageDTO: Decodable {
+    struct Item: Decodable {
+        let id: UUID
+        let title: String
+        let weight: EffortWeight
+        let scheduledDate: String
+        let assigneeIds: [UUID]
+        let note: String?
+        let status: TaskStatus
+        let displayStatus: TaskStatus
+        let routineId: UUID?
+        let createdAt: Date
+
+        var model: FamilyTaskItem {
+            FamilyTaskItem(
+                task: FamilyTask(
+                    id: id,
+                    title: title,
+                    weight: weight,
+                    scheduledDate: scheduledDate,
+                    assigneeIDs: assigneeIds,
+                    note: note,
+                    status: status,
+                    routineID: routineId,
+                    createdAt: createdAt
+                ),
+                displayStatus: displayStatus
+            )
+        }
+    }
+
+    let startDate: String
+    let endDate: String
+    let items: [Item]
+    let nextCursor: String?
+
+    var model: FamilyTaskPage {
+        FamilyTaskPage(
+            range: FamilyDateRange(startDate: startDate, endDate: endDate),
+            items: items.map(\.model),
+            nextCursor: nextCursor
+        )
+    }
+}
+
+nonisolated private struct WeeklyReportDTO: Decodable {
+    struct Period: Decodable { let startDate: String; let endDate: String }
+    struct Progress: Decodable { let total: Int; let completed: Int; let percentage: Double? }
+    struct Load: Decodable { let totalWeight: Int }
+    struct Member: Decodable {
+        let memberId: UUID?
+        let displayName: String
+        let weight: Int
+        let completedTasks: Int
+        let percentage: Double?
+    }
+    let period: Period
+    let timeZoneId: String
+    let generatedAt: Date
+    let isPartial: Bool
+    let isTransition: Bool
+    let progress: Progress
+    let load: Load
+    let members: [Member]
+
+    var model: WeeklyReportSnapshot {
+        WeeklyReportSnapshot(
+            period: FamilyDateRange(startDate: period.startDate, endDate: period.endDate),
+            timeZoneID: timeZoneId, generatedAt: generatedAt,
+            isPartial: isPartial, isTransition: isTransition,
+            progress: .init(total: progress.total, completed: progress.completed, percentage: progress.percentage),
+            totalWeight: load.totalWeight,
+            members: members.map { .init(displayName: $0.displayName, weight: $0.weight,
+                                         completedTasks: $0.completedTasks, percentage: $0.percentage) }
+        )
+    }
 }
 
 nonisolated private struct FamilyProfileDTO: Decodable {
@@ -296,6 +438,94 @@ nonisolated struct HTTPFamilyRepository: FamilyRepository {
         )
     }
 
+    func updateMemberName(memberID: UUID, name: String, accessToken: String) async throws -> FamilyMember {
+        let data = try await send(
+            path: "family/members/\(memberID.uuidString.lowercased())", method: "PATCH",
+            headers: ["Authorization": "Bearer \(accessToken)"], json: UpdateMemberNameDTO(name: name)
+        )
+        let member = try decode(FamilyMemberDTO.self, from: data)
+        return FamilyMember(id: member.id, name: member.name, role: member.role, isFamilyCreator: member.isFamilyCreator)
+    }
+
+    func changeMemberRole(memberID: UUID, role: MemberRole, accessToken: String) async throws -> FamilyMember {
+        let data = try await send(
+            path: "family/members/\(memberID.uuidString.lowercased())/role-changes", method: "POST",
+            headers: ["Authorization": "Bearer \(accessToken)"], json: ChangeMemberRoleDTO(role: role)
+        )
+        let member = try decode(FamilyMemberDTO.self, from: data)
+        return FamilyMember(id: member.id, name: member.name, role: member.role, isFamilyCreator: member.isFamilyCreator)
+    }
+
+    func removeMember(memberID: UUID, accessToken: String) async throws {
+        _ = try await send(
+            path: "family/members/\(memberID.uuidString.lowercased())", method: "DELETE",
+            headers: ["Authorization": "Bearer \(accessToken)"], rawBody: Data()
+        )
+    }
+
+    func leaveAdministration(accessToken: String) async throws -> FamilyMember {
+        let data = try await send(
+            path: "me/administration-exit", method: "POST",
+            headers: ["Authorization": "Bearer \(accessToken)"], json: EmptyRequestDTO()
+        )
+        let member = try decode(FamilyMemberDTO.self, from: data)
+        return FamilyMember(id: member.id, name: member.name, role: member.role, isFamilyCreator: member.isFamilyCreator)
+    }
+
+    func getFamilyOverview(range: FamilyDateRange?, accessToken: String) async throws -> FamilyOverview {
+        var query: [URLQueryItem] = []
+        if let range {
+            query = [
+                URLQueryItem(name: "startDate", value: range.startDate),
+                URLQueryItem(name: "endDate", value: range.endDate),
+            ]
+        }
+        let data = try await send(
+            path: Self.queryPath("family/overview", query: query),
+            method: "GET",
+            headers: ["Authorization": "Bearer \(accessToken)"],
+            rawBody: Data()
+        )
+        return try decode(FamilyOverviewDTO.self, from: data).model
+    }
+
+    func listFamilyTasks(
+        range: FamilyDateRange,
+        memberID: UUID?,
+        status: FamilyTaskStatusFilter,
+        cursor: String?,
+        accessToken: String
+    ) async throws -> FamilyTaskPage {
+        var query = [
+            URLQueryItem(name: "startDate", value: range.startDate),
+            URLQueryItem(name: "endDate", value: range.endDate),
+        ]
+        if status != .all {
+            query.append(URLQueryItem(name: "status", value: status.rawValue))
+        }
+        if let cursor {
+            query.append(URLQueryItem(name: "cursor", value: cursor))
+        }
+        let route = memberID.map { "family/members/\($0.uuidString.lowercased())/tasks" } ?? "family/tasks"
+        let data = try await send(
+            path: Self.queryPath(route, query: query),
+            method: "GET",
+            headers: ["Authorization": "Bearer \(accessToken)"],
+            rawBody: Data()
+        )
+        return try decode(FamilyTaskPageDTO.self, from: data).model
+    }
+
+    func getWeeklyReport(referenceDate: String, accessToken: String) async throws -> WeeklyReportSnapshot {
+        let data = try await send(
+            path: Self.queryPath("reports/weekly-snapshot", query: [URLQueryItem(name: "referenceDate", value: referenceDate)]),
+            method: "GET",
+            headers: ["Authorization": "Bearer \(accessToken)"],
+            rawBody: Data()
+        )
+        return try decode(WeeklyReportDTO.self, from: data).model
+    }
+
     func getFamily(accessToken: String) async throws -> FamilyProfile {
         let data = try await send(
             path: "family",
@@ -451,7 +681,15 @@ nonisolated struct HTTPFamilyRepository: FamilyRepository {
         headers: [String: String],
         rawBody: Data
     ) async throws -> Data {
-        var request = URLRequest(url: baseURL.appending(path: path))
+        let parts = path.split(separator: "?", maxSplits: 1, omittingEmptySubsequences: false)
+        var url = baseURL.appending(path: String(parts[0]))
+        if parts.count == 2, var components = URLComponents(url: url, resolvingAgainstBaseURL: false) {
+            components.percentEncodedQuery = String(parts[1])
+            if let resolved = components.url {
+                url = resolved
+            }
+        }
+        var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         headers.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
@@ -494,5 +732,12 @@ nonisolated struct HTTPFamilyRepository: FamilyRepository {
         default:
             return .rejected
         }
+    }
+
+    private static func queryPath(_ path: String, query: [URLQueryItem]) -> String {
+        guard !query.isEmpty else { return path }
+        var components = URLComponents()
+        components.queryItems = query
+        return path + "?" + (components.percentEncodedQuery ?? "")
     }
 }

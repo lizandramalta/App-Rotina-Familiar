@@ -7,6 +7,8 @@ nonisolated protocol TaskRepository: Sendable {
     func deleteTask(id: UUID, accessToken: String) async throws -> UUID
     /// SPEC-010 CA-01/02/05: the server derives the actor and returns the canonical task.
     func completeTask(id: UUID, accessToken: String) async throws -> FamilyTask
+    func uploadSignalPhoto(_ jpeg: Data, accessToken: String) async throws -> String
+    func signalTask(id: UUID, photoMediaID: String?, accessToken: String) async throws -> FamilyTask
     /// `referenceDate` is `YYYY-MM-DD`. Backs TEL-010/TEL-040 (SPEC-009 Fase 1).
     func dailyTasks(referenceDate: String, cursor: String?, accessToken: String) async throws -> OwnTaskPage
     func dailyProgress(referenceDate: String, accessToken: String) async throws -> DailyProgress

@@ -158,3 +158,9 @@ final class KidsSignalRepositorySpy: KidsSignalRepository, @unchecked Sendable {
         }
     }
 }
+
+extension KidsSignalRepositorySpy {
+    func getSignalDetail(id: UUID, accessToken: String) async throws -> KidsSignalDetail { throw KidsSignalError.unavailable }
+    func decideSignal(id: UUID, decision: KidsReviewDecision, accessToken: String) async throws -> KidsDecisionResult { throw KidsSignalError.unavailable }
+    func getSignalPhoto(mediaID: UUID, accessToken: String) async throws -> Data { throw KidsSignalError.unavailable }
+}

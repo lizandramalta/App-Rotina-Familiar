@@ -137,6 +137,43 @@ struct ProfileViewModelTests {
         )
     }
 
+    @Test("SPEC-003 CA-05 changes the local role only after a confirmed administration exit")
+    func confirmedAdministrationExit() async {
+        let store = AppSessionStore(
+            repository: AccessRepositoryStub(), credentialStore: FamilyCredentialStoreStub(),
+            installationProofProvider: FamilyInstallationProofStub()
+        )
+        let active = ActiveFamilySession(memberID: UUID(), familyID: UUID(), role: .administrator, isFamilyCreator: false)
+        store.apply(.session(AuthenticatedSession(
+            sessionID: UUID(), profile: active,
+            credentials: SessionCredentials(
+                token: SessionToken(accessToken: "access-1", expiresAt: .distantFuture),
+                refreshToken: "refresh-1"
+            )
+        )))
+        let family = FamilyRepositorySpy()
+        let viewModel = ProfileViewModel(
+            repository: ProfileRepositorySpy(
+                profileResults: [.success(Fixtures.profile())],
+                badgesResult: .success(Fixtures.badges()), mediaResult: .success(Data())
+            ), sessionStore: store, session: active,
+            familyRepository: family
+        )
+        family.setLeaveAdministrationResult(.failure(FamilyError.network))
+        await viewModel.leaveAdministration()
+        #expect(viewModel.leaveAdministrationFailed)
+        #expect(store.state == .authenticated(active))
+
+        family.setLeaveAdministrationResult(.success(FamilyMember(
+            id: active.memberID, name: "Admin", role: .member, isFamilyCreator: false
+        )))
+        await viewModel.leaveAdministration()
+        #expect(!viewModel.leaveAdministrationFailed)
+        #expect(store.state == .authenticated(ActiveFamilySession(
+            memberID: active.memberID, familyID: active.familyID, role: .member, isFamilyCreator: false
+        )))
+    }
+
     @Test("a member sees the role section with the management footer and no leave action")
     func roleMember() {
         let harness = Harness(role: .member)

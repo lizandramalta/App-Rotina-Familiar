@@ -1,6 +1,29 @@
 import Foundation
 @testable import FamilyRoutine
 
+// Existing test doubles can opt into family query fixtures only in tests that exercise SPEC-009.
+extension FamilyRepository {
+    func updateMemberName(memberID: UUID, name: String, accessToken: String) async throws -> FamilyMember { throw FamilyError.unavailable }
+    func changeMemberRole(memberID: UUID, role: MemberRole, accessToken: String) async throws -> FamilyMember { throw FamilyError.unavailable }
+    func removeMember(memberID: UUID, accessToken: String) async throws { throw FamilyError.unavailable }
+    func leaveAdministration(accessToken: String) async throws -> FamilyMember { throw FamilyError.unavailable }
+    func getWeeklyReport(referenceDate: String, accessToken: String) async throws -> WeeklyReportSnapshot {
+        throw FamilyError.unavailable
+    }
+    func getFamilyOverview(range: FamilyDateRange?, accessToken: String) async throws -> FamilyOverview {
+        throw FamilyError.unavailable
+    }
+
+    func listFamilyTasks(
+        range: FamilyDateRange,
+        memberID: UUID?,
+        status: FamilyTaskStatusFilter,
+        cursor: String?,
+        accessToken: String
+    ) async throws -> FamilyTaskPage {
+        throw FamilyError.unavailable
+    }
+}
 final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
     private let lock = NSLock()
     private var createResult: Result<CreatedFamily, Error>
@@ -15,6 +38,7 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
     private var inviteResults: [Result<MemberInvite, Error>]
     private var _invitedMemberIDs: [UUID] = []
     private var familyResult: Result<FamilyProfile, Error> = .success(FamilyRepositorySpy.defaultFamilyProfile)
+    private var leaveAdministrationResult: Result<FamilyMember, Error> = .failure(FamilyError.unavailable)
     private var _updatedFamilyNames: [String] = []
     private let createDelay: Duration?
 
@@ -51,6 +75,10 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
 
     func setFamilyResult(_ result: Result<FamilyProfile, Error>) {
         lock.withLock { familyResult = result }
+    }
+
+    func setLeaveAdministrationResult(_ result: Result<FamilyMember, Error>) {
+        lock.withLock { leaveAdministrationResult = result }
     }
 
     var updatedFamilyNames: [String] { lock.withLock { _updatedFamilyNames } }
@@ -209,6 +237,10 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
 
     func getFamily(accessToken: String) async throws -> FamilyProfile {
         try lock.withLock { try familyResult.get() }
+    }
+
+    func leaveAdministration(accessToken: String) async throws -> FamilyMember {
+        try lock.withLock { try leaveAdministrationResult.get() }
     }
 
     func updateFamilyName(_ name: String, accessToken: String) async throws -> FamilyProfile {

@@ -47,6 +47,7 @@ describe('SCRUM-56 / SPEC-011 phase 1 — ReopenTask', () => {
       isOnlyTaskOfAnActiveMission: vi.fn(),
       hasCurrentSignal: vi.fn(),
       hasKidsAssignee: vi.fn(),
+      closeCurrentSignalByManualCompletion: vi.fn(),
       completeTask: vi.fn(),
       reopenTask: vi.fn().mockResolvedValue({ ...TASK, status: 'pending' }),
       updateTask: vi.fn(),

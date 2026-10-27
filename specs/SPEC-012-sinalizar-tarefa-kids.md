@@ -230,7 +230,7 @@ Campos não reconhecidos em `POST /tasks/{taskId}/signals` são rejeitados com `
 | **2** | **Experiência Mobile:** TEL-041/MOD-011 integrados, câmera direta, revisar/refazer/descartar. | CA-01, CA-02, CA-07 | Telas integradas com a API; UX-spec verificada; testes de UI verdes. | a fazer |
 | **3** | **Resiliência e Observabilidade:** falhas de rede/upload e telemetria. | CA-08 | Suíte de regressão verde; eventos `task_signaled`/`task_signal_denied` emitidos. | a fazer |
 
-- **Fora da Fase 1:** interface mobile (botão Sinalizar/MOD-011) ainda não existe; a API é utilizável apenas por chamadas diretas/testes.
+- **Fora da Fase 1:** a interface mobile (botão Sinalizar/MOD-011) pertence à Fase 2 e está integrada nesta entrega; a validação visual específica permanece pendente.
 - **Pode ser publicada de forma independente em produção?** Fase 1: não (sem UI, sem valor percebido). Fase 2: sim, desde que SPEC-013 ainda não exista — a tarefa fica em `awaitingConfirmation` sem fila administrativa visível até SPEC-013 ser entregue; isso é aceitável como entrega intermediária, mas a família só completa o ciclo depois de SPEC-013.
 
 ## 11. Checklist de Aprovação da Spec (Definition of Ready)

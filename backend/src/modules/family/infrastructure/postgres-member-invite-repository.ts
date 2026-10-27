@@ -24,7 +24,7 @@ export class PostgresMemberInviteRepository implements MemberInviteRepositoryPor
                  where s.id = $3 and s.member_id = m.id and s.revoked_at is null
               ) as session_active
          from app.members m
-        where m.family_id = $1 and m.id = $2`,
+        where m.family_id = $1 and m.id = $2 and m.removed_at is null`,
       [params.familyId, params.memberId, params.sessionId],
     );
     const row = result.rows[0];
@@ -39,7 +39,7 @@ export class PostgresMemberInviteRepository implements MemberInviteRepositoryPor
     params: { readonly familyId: string; readonly memberId: string },
   ): Promise<InviteTarget | undefined> {
     const result = await asPostgresClient(tx).query<{ id: string; is_family_creator: boolean }>(
-      `select id, is_family_creator from app.members where family_id = $1 and id = $2`,
+      `select id, is_family_creator from app.members where family_id = $1 and id = $2 and removed_at is null`,
       [params.familyId, params.memberId],
     );
     const row = result.rows[0];

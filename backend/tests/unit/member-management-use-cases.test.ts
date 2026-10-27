@@ -1,9 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   CreateMemberUseCase,
+  ChangeMemberRoleUseCase,
   GetMemberDetailUseCase,
+  LeaveAdministrationUseCase,
   ListFamilyMembersUseCase,
   MEMBERS_PAGE_SIZE,
+  RemoveMemberUseCase,
 } from '../../src/modules/family/application/member-management-use-cases.js';
 import type {
   MemberManagementRepositoryPort,
@@ -46,6 +49,8 @@ describe('Member management use cases — SPEC-003 phase 1', () => {
         isFamilyCreator: false,
         createdAt: input.createdAt,
       })),
+      updateMember: vi.fn(),
+      removeMember: vi.fn(),
     };
     transactionRunner = {
       run: vi.fn(async (work: (tx: TransactionContext) => Promise<unknown>) =>
@@ -60,6 +65,10 @@ describe('Member management use cases — SPEC-003 phase 1', () => {
   const dependencies = () => ({
     repository: repository as unknown as MemberManagementRepositoryPort,
     transactionRunner,
+  });
+  const managementDependencies = () => ({
+    ...dependencies(),
+    clock: { now: () => NOW, nowIsoString: () => NOW.toISOString() },
   });
 
   it('CA-01 creates a normalized member in the session family under the family lock', async () => {
@@ -174,5 +183,62 @@ describe('Member management use cases — SPEC-003 phase 1', () => {
       '11111111-2222-4333-8444-555555555555',
     );
     expect(result.capabilities).toEqual({ manageMembers: false });
+  });
+
+  it('SPEC-003 CA-04 protects the creator and refuses direct Kids promotion', async () => {
+    const target = member('11111111-2222-4333-8444-555555555555');
+    repository.findMember.mockResolvedValue({ ...target, isFamilyCreator: true });
+    const change = new ChangeMemberRoleUseCase(managementDependencies());
+    await expect(change.execute(TEST_ACTOR, target.id, MemberRole.MEMBER)).rejects.toMatchObject({
+      code: 'MEMBER_STATE_CONFLICT',
+    });
+    repository.findMember.mockResolvedValue({ ...target, role: MemberRole.KIDS });
+    await expect(
+      change.execute(TEST_ACTOR, target.id, MemberRole.ADMINISTRATOR),
+    ).rejects.toMatchObject({
+      code: 'MEMBER_STATE_CONFLICT',
+    });
+    expect(repository.updateMember).not.toHaveBeenCalled();
+  });
+
+  it('SPEC-003 CA-05 allows only a non-creator Admin to leave administration', async () => {
+    const own = { ...member(TEST_ACTOR.memberId), role: MemberRole.ADMINISTRATOR };
+    repository.findMember.mockResolvedValue({ ...own, isFamilyCreator: true });
+    const leave = new LeaveAdministrationUseCase(managementDependencies());
+    await expect(leave.execute(TEST_ACTOR)).rejects.toMatchObject({
+      code: 'MEMBER_STATE_CONFLICT',
+    });
+    repository.findMember.mockResolvedValue(own);
+    repository.updateMember.mockResolvedValue({ ...own, role: MemberRole.MEMBER });
+    expect((await leave.execute({ ...TEST_ACTOR, isFamilyCreator: false })).role).toBe(
+      MemberRole.MEMBER,
+    );
+    expect(repository.updateMember).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        memberId: TEST_ACTOR.memberId,
+        role: MemberRole.MEMBER,
+      }),
+    );
+  });
+
+  it('SPEC-003 CA-06 revalidates Admin role before member removal', async () => {
+    const target = member('11111111-2222-4333-8444-555555555555');
+    repository.findMember.mockResolvedValue(target);
+    repository.findMemberRole.mockResolvedValue(MemberRole.MEMBER);
+    const remove = new RemoveMemberUseCase(managementDependencies());
+    await expect(remove.execute(TEST_ACTOR, target.id)).rejects.toBeInstanceOf(
+      ActionNotAllowedError,
+    );
+    expect(repository.removeMember).not.toHaveBeenCalled();
+    repository.findMemberRole.mockResolvedValue(MemberRole.ADMINISTRATOR);
+    await remove.execute(TEST_ACTOR, target.id);
+    expect(repository.removeMember).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        familyId: TEST_ACTOR.familyId,
+        memberId: target.id,
+      }),
+    );
   });
 });

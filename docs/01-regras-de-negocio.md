@@ -1,13 +1,13 @@
 # Regras de negócio
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.21\
+**Versão:** 1.22\
 **Data:** 2026-10-27\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
 
-Este documento contém as regras vigentes da versão 1.21. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
+Este documento contém as regras vigentes da versão 1.22. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
 
 **Identificadores preservados:** RN15, RN29 e RN32 não estavam definidos na base recebida e permanecem não utilizados. Não representam conteúdo faltante desta versão.
 
@@ -191,7 +191,7 @@ Administradores e Membros podem concluir uma tarefa Pendente ou Aguardando confi
 
 ## RN23
 
-A sinalização de um perfil Kids altera a tarefa de Pendente para Aguardando confirmação, sem gerar conclusão parcial. Na lista pessoal diária de um adulto corresponsável, a tarefa sinalizada é apresentada como Pendente; na visualização pessoal Kids, aparece como Aguardando confirmação. Essa diferença de apresentação não altera o estado único da tarefa, a sinalização pendente, o cálculo de progresso, a fila administrativa nem as permissões de ação. A confirmação por Administrador ou a conclusão manual por Administrador torna a tarefa Concluída para todos os responsáveis. A conclusão manual encerra a pendência e preserva a sinalização e a foto opcional exclusivamente para auditoria administrativa.
+A sinalização de um perfil Kids altera a tarefa de Pendente para Aguardando confirmação, sem gerar conclusão parcial. Na lista pessoal diária de um adulto corresponsável e nas consultas familiares vistas por Membro, a tarefa sinalizada é apresentada e contada como Pendente; na visualização pessoal Kids e nas consultas familiares vistas por Administrador, aparece como Aguardando confirmação. Essa diferença de apresentação não altera o estado único da tarefa, a sinalização pendente, o cálculo de progresso, a fila administrativa nem as permissões de ação. A confirmação por Administrador ou a conclusão manual por Administrador torna a tarefa Concluída para todos os responsáveis. A conclusão manual encerra a pendência e preserva a sinalização e a foto opcional exclusivamente para auditoria administrativa.
 
 **Requisitos funcionais:** [RF11](02-requisitos.md#rf11), [RF22](02-requisitos.md#rf22), [RF23](02-requisitos.md#rf23), [RF24](02-requisitos.md#rf24), [RF26](02-requisitos.md#rf26)\
 **Requisitos não funcionais específicos:** [RNF11](02-requisitos.md#rnf11)  
@@ -472,11 +472,11 @@ A exclusão de tarefa não concluída remove seus vínculos com missões em anda
 
 ## RN60
 
-Administradores e Membros acessam a área Família (Minha família), que apresenta diretamente a carga e o progresso coletivo por dia ou semana e a lista de membros. Selecionar um membro abre o detalhe com as tarefas daquela pessoa por dia ou semana. A consulta abre no dia atual; o período segue RN49 e RN61. O detalhe herda o período da origem, mantém o filtro por membro e, ao voltar, restaura o contexto anterior de Família. A consulta complementar de todas as tarefas, inclusive sem responsável, continua disponível.
+Administradores e Membros acessam a área Família (Minha família), que apresenta o progresso coletivo e a lista de membros para um intervalo de datas. A consulta inicial usa a semana corrente. O filtro Início/Fim aceita qualquer intervalo válido dentro de RN49. Selecionar um membro abre o detalhe com suas tarefas para exatamente o intervalo escolhido; ao voltar, a Família recupera o mesmo intervalo e os filtros. A consulta complementar Tarefas da família mantém o intervalo e inclui tarefas sem responsável.
 
 O progresso familiar é a quantidade de tarefas concluídas dentre as tarefas previstas para o período dividida pelo total de tarefas previstas para esse período. Cada tarefa conta uma vez, independentemente do peso ou dos responsáveis, incluindo as sem responsável no total. Pendentes e Aguardando confirmação não entram no numerador. Sem tarefas, apresentar “Sem tarefas”, sem divisão por zero. Alterações válidas atualizam o indicador.
 
-Gerar relatório semanal em PDF fica na própria tela Família para adultos. Adicionar membro também fica nessa tela, exclusivamente para Administradores. Editar perfil e gerar/reenviar convite ficam no detalhe do membro, exclusivamente para Administradores e conforme as restrições do perfil; não permitem editar apelido de terceiros. A emissão inicial ocorre por ação explícita; na reemissão, informar os efeitos sobre convites e sessão anteriores antes de confirmar. O Criador retorna por Apple. Confirmações Kids permanecem exclusivas dos Administradores. Kids não acessam esta área.
+Gerar relatório semanal em PDF fica no menu de Tarefas da família para adultos. Configurações da família reúne Adicionar membro, exclusivamente para Administradores, e o acesso às configurações de nome e fuso. Editar perfil e gerar/reenviar convite ficam no detalhe do membro, exclusivamente para Administradores e conforme as restrições do perfil; não permitem editar apelido de terceiros. A emissão inicial ocorre por ação explícita; na reemissão, informar os efeitos sobre convites e sessão anteriores antes de confirmar. O Criador retorna por Apple. Confirmações Kids permanecem exclusivas dos Administradores. Kids não acessam esta área.
 
 **Requisitos funcionais:** [RF60](02-requisitos.md#rf60), [RF66](02-requisitos.md#rf66)  
 **Requisitos não funcionais específicos:** [RNF01](02-requisitos.md#rnf01), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF09](02-requisitos.md#rnf09)  
@@ -486,7 +486,7 @@ Gerar relatório semanal em PDF fica na própria tela Família para adultos. Adi
 
 **Tema:** Períodos e métricas
 
-Minhas tarefas (todos os perfis) é uma consulta diária: mostra as tarefas próprias e o progresso da data selecionada, sem alternância Dia/Semana. Os indicadores integrados de Minha família, a consulta complementar de tarefas familiares e as tarefas no detalhe do membro (adultos) oferecem alternância Dia/Semana. A semana contém a data selecionada e vai de segunda a domingo. O intervalo de consulta de tarefas continua da criação da família até o último dia do mês corrente; nas semanas de borda, informar os dias efetivamente disponíveis. O progresso pessoal conta tarefas próprias concluídas sobre o total próprio previsto no dia; o familiar usa RN60. O progresso semanal familiar é calculado sobre os totais da semana, nunca pela média simples dos percentuais diários.
+Minhas tarefas (todos os perfis) é uma consulta diária: mostra as tarefas próprias e o progresso da data selecionada. Minha família, Tarefas da família e as tarefas no detalhe do membro (adultos) compartilham um filtro Início/Fim livre, inclusivo, com Início menor ou igual a Fim e ambas as datas dentro de RN49. A seleção inicial é a semana corrente (segunda a domingo), recortada pelos limites de RN49 quando necessário. O progresso pessoal conta tarefas próprias concluídas sobre o total próprio previsto no dia; o familiar usa RN60 e calcula concluídas/total do intervalo inteiro, nunca a média dos percentuais diários.
 
 A carga/sobrecarga usa a data da conclusão válida, enquanto o progresso usa as tarefas previstas para o período e seu estado atual. Uma tarefa atrasada pode contribuir para a carga de hoje e para o progresso do dia em que estava prevista. Crédito histórico de perfil removido permanece em linha identificada como “Membro removido”. A carga indica participação creditada, sem limiar de diagnóstico de sobrecarga definido. Seleção, gráficos e rótulos devem explicitar período e métrica. Sem tarefas ou carga, informar ausência de dados; não simular 100%.
 
@@ -498,7 +498,7 @@ A carga/sobrecarga usa a data da conclusão válida, enquanto o progresso usa as
 
 **Tema:** Relatório semanal em PDF
 
-O backend fornece um snapshot consistente e o aplicativo gera o arquivo. Administradores e Membros podem gerar um relatório familiar em PDF para uma semana selecionada de segunda a domingo. O documento identifica família, período e momento de geração, inclui gráficos da distribuição de carga semanal por membro e do progresso total da família, além do peso total creditado e número de tarefas realizadas por membro. O gráfico de progresso usa concluídas/total de tarefas previstas para a semana (RN60); peso e quantidade realizada por membro usam conclusões válidas naquela semana (RN30).
+O backend fornece um snapshot consistente e o aplicativo gera o arquivo. Administradores e Membros podem gerar, a partir de Tarefas da família, um relatório familiar em PDF para uma semana selecionada de segunda a domingo. Quando o intervalo consultado alcançar mais de uma semana, o aplicativo solicita a escolha da semana antes da geração; para uma única semana, usa essa semana. O documento identifica família, período e momento de geração, inclui gráficos da distribuição de carga semanal por membro e do progresso total da família, além do peso total creditado e número de tarefas realizadas por membro. O gráfico de progresso usa concluídas/total de tarefas previstas para a semana (RN60); peso e quantidade realizada por membro usam conclusões válidas naquela semana (RN30).
 
 Uma tarefa compartilhada conta uma vez para cada responsável no número individual e credita o peso integral a cada um; o total familiar de tarefas realizadas conta tarefas distintas, sem somar contagens individuais. O relatório explica essa diferença. Crédito histórico de perfil removido é identificado como “Membro removido”, sem dado pessoal. A semana é selecionada por data de referência e resolvida de segunda a domingo no fuso da família. Semana atual é identificada como parcial até o momento da geração; semanas futuras não geram relatório. Na semana de criação, manter o intervalo explícito e considerar as tarefas retroativas cadastradas; não presumir ausência de dados apenas por uma data prevista anteceder a criação da família. Semana sem dados pode gerar relatório com zeros e indicação “Sem tarefas” onde aplicável. O PDF reflete os dados no momento de geração; reabrir uma tarefa exige gerar novo arquivo para obter valores atualizados. Não incluir fotos de validação, credenciais ou configuração privada de perfil.
 
@@ -576,6 +576,7 @@ A missão admite uma observação opcional de até 250 caracteres, contando espa
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.22 | 2026-10-27 | RN23, RN60–62: aba Família usa intervalo Início/Fim livre, detalhe herda o intervalo, PDF parte de Tarefas da família e Membro conta sinalizações Kids como Pendentes na projeção. |
 | 1.21 | 2026-10-27 | RN17: a edição “selecionada e futuras” preserva a data prevista já gravada em cada ocorrência, inclusive após edição individual; substitui apenas edições dos campos permitidos. Para SPEC-008 Fase 2 / SCRUM-45. |
 | 1.20 | 2026-10-27 | RN17: o alcance “selecionada e futuras” altera somente título, peso, responsáveis e observação, sem mudar data inicial, frequência ou data prevista das ocorrências, e substitui edições individuais anteriores das futuras abrangidas. RN66: a escolha entre Pendente e Aguardando confirmação vale para a edição individual; a edição de rotina “selecionada e futuras” não muda estados. Para SPEC-008 Fase 2. |
 | 1.19 | 2026-10-22 | RN63: titular adulto também edita o próprio nome de identificação (1–60 caracteres visíveis, RF02); Kids editam somente foto e apelido; define a composição título/apoio da identificação com apelido, nome, papel e nome da família. Para SPEC-006 (SCRUM-52). |

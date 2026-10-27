@@ -60,6 +60,7 @@ describe('Task management use cases — SPEC-007', () => {
       isOnlyTaskOfAnActiveMission: vi.fn().mockResolvedValue(false),
       hasCurrentSignal: vi.fn().mockResolvedValue(false),
       hasKidsAssignee: vi.fn().mockResolvedValue(false),
+      closeCurrentSignalByManualCompletion: vi.fn(),
       completeTask: vi.fn().mockResolvedValue({ ...TASK, status: 'completed' }),
       reopenTask: vi.fn().mockResolvedValue(TASK),
       updateTask: vi.fn().mockResolvedValue(TASK),

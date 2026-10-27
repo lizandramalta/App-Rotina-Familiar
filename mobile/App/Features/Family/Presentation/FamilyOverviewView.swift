@@ -3,6 +3,7 @@ import SwiftUI
 /// TEL-050 — Família (Figma nodes 372:4825, 372:5195, 561:173, UX-003 §5.1).
 struct FamilyOverviewView: View {
     @State private var viewModel: FamilyOverviewViewModel
+    @State private var showsRangeFilter = false
     private let makeFamilySettingsViewModel: (() -> FamilySettingsViewModel)?
 
     init(
@@ -33,6 +34,85 @@ struct FamilyOverviewView: View {
                 }
             }
 
+            if let overview = viewModel.overview {
+                Section {
+                    Button {
+                        showsRangeFilter = true
+                    } label: {
+                        Label {
+                            Text(
+                                String(
+                                    format: String(localized: "family.tasks.range"),
+                                    overview.range.startDate,
+                                    overview.range.endDate
+                                )
+                            )
+                        } icon: {
+                            Image(systemName: "line.3.horizontal.decrease")
+                        }
+                        .frame(minHeight: 44)
+                    }
+                    .accessibilityIdentifier("family.overview.range_filter")
+
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("family.overview.progress")
+                            .font(.headline)
+                        Text(
+                            String(
+                                format: String(localized: "family.overview.completed_total"),
+                                overview.progress.completed,
+                                overview.progress.total
+                            )
+                        )
+                        .font(.title3.weight(.bold))
+                        if overview.progress.total > 0 {
+                            ProgressView(value: Double(overview.progress.completed), total: Double(overview.progress.total))
+                                .tint(.green)
+                        } else {
+                            Text("family.overview.no_tasks")
+                                .foregroundStyle(.secondary)
+                        }
+                        HStack(spacing: 16) {
+                            statusCount("family.tasks.status.pending", count: overview.progress.pending)
+                            if overview.progress.awaitingConfirmation > 0 {
+                                statusCount("family.tasks.status.awaiting", count: overview.progress.awaitingConfirmation)
+                            }
+                        }
+                        .font(.footnote)
+                    }
+                    .padding(.vertical, 8)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("family.overview.progress")
+                }
+
+                if let tasks = viewModel.makeFamilyTasksViewModel() {
+                    Section {
+                        NavigationLink {
+                            FamilyTasksView(viewModel: tasks)
+                        } label: {
+                            Label("family.tasks.title", systemImage: "checklist")
+                                .frame(minHeight: 44)
+                        }
+                        .accessibilityIdentifier("family.overview.all_tasks")
+                    }
+                }
+            } else if viewModel.isLoadingOverview {
+                Section {
+                    ProgressView().frame(maxWidth: .infinity)
+                        .accessibilityIdentifier("family.overview.progress_loading")
+                }
+            }
+
+            if viewModel.overviewFailed {
+                Section {
+                    Label("family.overview.error_load", systemImage: "exclamationmark.triangle")
+                        .foregroundStyle(.red)
+                    Button("family.member.detail.retry") {
+                        Task { await viewModel.loadInitial() }
+                    }
+                }
+            }
+
             if viewModel.canReviewKidsConfirmations {
                 Section {
                     NavigationLink {
@@ -47,27 +127,22 @@ struct FamilyOverviewView: View {
                 }
             }
 
-            Section("family.overview.members_section") {
-                if viewModel.members.isEmpty && viewModel.isLoading {
-                    ProgressView()
-                        .frame(maxWidth: .infinity)
-                }
-                ForEach(viewModel.members) { member in
-                    NavigationLink {
-                        MemberDetailView(viewModel: viewModel.makeMemberDetailViewModel(memberID: member.id))
-                    } label: {
-                        row(member)
+            if let overview = viewModel.overview {
+                Section("family.overview.members_section") {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 16) {
+                        ForEach(overview.members) { member in
+                            NavigationLink {
+                                MemberDetailView(viewModel: viewModel.makeMemberDetailViewModel(memberID: member.id)) {
+                                    Task { await viewModel.loadInitial() }
+                                }
+                            } label: {
+                                memberRing(member)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityIdentifier("family.member.ring.\(member.id.uuidString.lowercased())")
+                        }
                     }
-                    .accessibilityIdentifier("family.member.row.\(member.id.uuidString.lowercased())")
-                    .task { await viewModel.loadMoreIfNeeded(currentMember: member) }
-                }
-                if viewModel.isLoadingMore {
-                    ProgressView().frame(maxWidth: .infinity)
-                }
-                if viewModel.loadMoreFailed {
-                    Button("family.member.detail.retry") {
-                        Task { await viewModel.loadMore() }
-                    }
+                    .padding(.vertical, 12)
                 }
             }
         }
@@ -90,36 +165,53 @@ struct FamilyOverviewView: View {
         }
         .task { await viewModel.loadInitial() }
         .refreshable { await viewModel.loadInitial() }
-    }
-
-    private func row(_ member: FamilyMember) -> some View {
-        HStack(spacing: 12) {
-            Text(String(member.name.prefix(1)).uppercased())
-                .font(.headline)
-                .foregroundStyle(Color(uiColor: .secondaryLabel))
-                .frame(width: 40, height: 40)
-                .background(Color(uiColor: .tertiarySystemFill), in: Circle())
-                .accessibilityHidden(true)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(member.name)
-                    .font(.body)
-                Text(member.role.onboardingTitleKey)
-                    .font(.footnote)
-                    .foregroundStyle(Color(uiColor: .secondaryLabel))
-            }
-
-            Spacer()
-
-            if member.isFamilyCreator {
-                Text("family.members.creator_badge")
-                    .font(.caption.weight(.semibold))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 2)
-                    .background(.quaternary, in: Capsule())
+        .sheet(isPresented: $showsRangeFilter) {
+            if let overview = viewModel.overview {
+                FamilyRangeFilterSheet(
+                    range: overview.range,
+                    firstDate: overview.familyCreatedAt,
+                    timeZoneID: viewModel.timeZoneID
+                ) { range in
+                    Task { await viewModel.applyRange(range) }
+                }
             }
         }
-        .frame(minHeight: 44)
+    }
+
+    private func memberRing(_ member: FamilyMemberProgress) -> some View {
+        VStack(spacing: 8) {
+            ZStack {
+                Circle()
+                    .stroke(Color(uiColor: .tertiarySystemFill), lineWidth: 8)
+                Circle()
+                    .trim(from: 0, to: CGFloat((member.progress.percentage ?? 0) / 100))
+                    .stroke(.green, style: StrokeStyle(lineWidth: 8, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                Text(member.progress.percentage.map { "\(Int($0.rounded()))%" } ?? "—")
+                    .font(.subheadline.weight(.bold))
+            }
+            .frame(width: 72, height: 72)
+            Text(member.name)
+                .font(.footnote.weight(.semibold))
+                .lineLimit(1)
+            Text(
+                String(
+                    format: String(localized: "family.overview.member_completed"),
+                    member.progress.completed,
+                    member.progress.total
+                )
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, minHeight: 128)
         .accessibilityElement(children: .combine)
+    }
+
+    private func statusCount(_ title: LocalizedStringKey, count: Int) -> some View {
+        HStack(spacing: 4) {
+            Text("\(count)")
+            Text(title)
+        }
     }
 }

@@ -24,7 +24,7 @@ export class PostgresSessionLookup implements SessionLookupPort {
       `select s.id as session_id, s.family_id, s.member_id, m.role, m.is_family_creator
          from app.session_access_tokens t
          join app.sessions s on s.id = t.session_id
-         join app.members m on m.family_id = s.family_id and m.id = s.member_id
+         join app.members m on m.family_id = s.family_id and m.id = s.member_id and m.removed_at is null
         where t.token_hash = $1
           and t.revoked_at is null
           and t.expires_at > $2

@@ -46,4 +46,24 @@ export interface MemberManagementRepositoryPort {
       readonly createdAt: Date;
     },
   ): Promise<MemberRecord>;
+
+  updateMember(
+    tx: TransactionContext,
+    params: {
+      readonly familyId: string;
+      readonly memberId: string;
+      readonly name?: string;
+      readonly role?: MemberRole;
+      readonly now: Date;
+    },
+  ): Promise<MemberRecord>;
+
+  removeMember(
+    tx: TransactionContext,
+    params: {
+      readonly familyId: string;
+      readonly memberId: string;
+      readonly now: Date;
+    },
+  ): Promise<void>;
 }

@@ -14,6 +14,10 @@ final class FamilyOverviewViewModel {
     private(set) var loadMoreFailed = false
     private(set) var familyName = ""
     private(set) var timeZoneID = FamilyCreationValidation.defaultTimeZoneID
+    private(set) var overview: FamilyOverview?
+    private(set) var isLoadingOverview = false
+    private(set) var overviewFailed = false
+    private(set) var selectedRange: FamilyDateRange?
 
     private let session: ActiveFamilySession
     private let familyRepository: any FamilyRepository
@@ -58,6 +62,7 @@ final class FamilyOverviewViewModel {
         isLoading = true
         defer { isLoading = false }
         await loadFamilyProfile(token: token)
+        await loadOverview(token: token, range: selectedRange)
         do {
             let page = try await familyRepository.listMembers(accessToken: token, cursor: nil)
             members = page.items
@@ -70,6 +75,31 @@ final class FamilyOverviewViewModel {
             // Network/availability failures keep the already confirmed list.
             loadFailed = true
         }
+    }
+
+    private func loadOverview(token: String, range: FamilyDateRange?) async {
+        guard !isLoadingOverview else { return }
+        isLoadingOverview = true
+        overviewFailed = false
+        defer { isLoadingOverview = false }
+        do {
+            let confirmed = try await familyRepository.getFamilyOverview(range: range, accessToken: token)
+            overview = confirmed
+            selectedRange = confirmed.range
+        } catch FamilyError.actionNotAllowed {
+            overview = nil
+            overviewFailed = true
+        } catch {
+            overviewFailed = true
+        }
+    }
+
+    func applyRange(_ range: FamilyDateRange) async {
+        guard range.startDate <= range.endDate,
+              let firstDate = overview?.familyCreatedAt,
+              range.startDate >= firstDate,
+              let token = accessTokenProvider() else { return }
+        await loadOverview(token: token, range: range)
     }
 
     /// Name and time zone are confirmed by the server; a failure keeps what is already shown.
@@ -141,6 +171,24 @@ final class FamilyOverviewViewModel {
         MemberDetailViewModel(
             memberID: memberID,
             session: session,
+            familyRepository: familyRepository,
+            accessTokenProvider: accessTokenProvider,
+            range: selectedRange,
+            familyCreatedAt: overview?.familyCreatedAt,
+            timeZoneID: timeZoneID
+        )
+    }
+
+    func makeFamilyTasksViewModel(memberID: UUID? = nil) -> FamilyTasksViewModel? {
+        guard let range = selectedRange else { return nil }
+        return FamilyTasksViewModel(
+            range: range,
+            memberID: memberID,
+            members: overview?.members ?? [],
+            role: session.role,
+            familyName: familyName,
+            familyCreatedAt: overview?.familyCreatedAt,
+            timeZoneID: timeZoneID,
             familyRepository: familyRepository,
             accessTokenProvider: accessTokenProvider
         )

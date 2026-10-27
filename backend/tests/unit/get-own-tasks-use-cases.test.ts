@@ -39,6 +39,9 @@ describe('Own daily task queries — SPEC-009 phase 1 / SCRUM-38', () => {
       findFamilyCalendar: vi.fn().mockResolvedValue(CALENDAR),
       findOwnTasksPage: vi.fn().mockResolvedValue([TASK]),
       countOwnTasksProgress: vi.fn().mockResolvedValue({ total: 1, completed: 0 }),
+      findFamilyOverview: vi.fn(),
+      findFamilyTasksPage: vi.fn(),
+      familyMemberExists: vi.fn(),
     };
     transactionRunner = {
       run: vi.fn(async (work: (tx: TransactionContext) => Promise<unknown>) =>

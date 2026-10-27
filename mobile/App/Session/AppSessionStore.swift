@@ -130,6 +130,15 @@ final class AppSessionStore {
         state = .authenticated(profile)
     }
 
+    /// Applies a role transition only after the server confirms it (SPEC-003 CA-05).
+    func applyConfirmedRole(_ role: MemberRole) {
+        guard case let .authenticated(profile) = state else { return }
+        state = .authenticated(ActiveFamilySession(
+            memberID: profile.memberID, familyID: profile.familyID,
+            role: role, isFamilyCreator: profile.isFamilyCreator
+        ))
+    }
+
     /// Returns to TEL-001 keeping the draft, so a new `creationGrant` can resume the form.
     func returnToEntry(preserving draft: OnboardingDraft) {
         onboardingDraft = draft

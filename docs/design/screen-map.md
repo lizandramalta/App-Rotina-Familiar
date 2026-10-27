@@ -1,9 +1,9 @@
-# Screen map — versão 1.16
+# Screen map — versão 1.17
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do mapa:** 1.16\
-**Base funcional:** RN 1.18 / RF 1.17 / UC 1.18\
-**Data:** 2026-10-26\
+**Versão do mapa:** 1.17\
+**Base funcional:** RN 1.22 / RF 1.21 / UC 1.21\
+**Data:** 2026-10-27\
 **Situação:** referência inicial para design; organização de navegação proposta
 
 [Projeto](../../README.md) · [Índice e versões](../DOCUMENTACAO.md) · [Visão](../00-visao-do-produto.md) · [Regras](../01-regras-de-negocio.md) · [Requisitos](../02-requisitos.md) · [Casos de uso](../03-casos-de-uso.md) · [Diagrama de classes](../06-diagrama-de-classes.md)
@@ -74,8 +74,8 @@ Com sessão válida, a entrada é dispensada e o sistema abre TEL-010 ou TEL-040
 ```mermaid
 flowchart TD
     T010["TEL-010 · Tarefas"]
-    T050["TEL-050 · Família · carga, progresso e lista de membros"]
-    T032["TEL-032 · Detalhe do membro · tarefas por dia ou semana"]
+    T050["TEL-050 · Família · progresso e lista de membros"]
+    T032["TEL-032 · Detalhe do membro · tarefas no intervalo"]
     T033["TEL-033 · Criar ou editar membro · Admin"]
     T034["TEL-034 · Convite do membro · Admin"]
     T011["TEL-011 · Todas as tarefas da família"]
@@ -91,14 +91,15 @@ flowchart TD
     M005("MOD-005 · Confirmar exclusão")
     M006("MOD-006 · Confirmar reabertura")
     T050 -->|Selecionar item da lista de membros| T032
-    T050 -->|Adicionar membro / Admin| T033
+    T050 -->|Configurações / Admin| T057["TEL-057 · Configurações da família"]
+    T057 -->|Adicionar membro| T033
     T032 -->|Editar perfil / Admin e permitido| T033
     T032 -->|Reenviar convite / Admin e perfil elegível| T034
     T032 -->|Selecionar tarefa do membro| T012
     T033 -->|Perfil salvo| T032
     T050 -->|Todas as tarefas / inclusive sem responsável| T011
-    T050 -->|Gerar relatório PDF| T051
-    T050 -->|Configurações / Admin| T053["TEL-053 · Configurações da família"]
+    T011 -->|Gerar relatório PDF| T051
+    T057 -->|Fuso horário| T053["TEL-053 · Alterar fuso"]
     T053 --> M012("MOD-012 · Aplicar fuso agora ou no próximo ciclo")
     T050 -->|Admin| T015
     T010 --> T012
@@ -118,13 +119,13 @@ flowchart TD
     T016 --> T012
 ```
 
-**TEL-050 — Família:** apresenta progresso e carga total da família, com seletor Dia/Semana, distribuição sem ranking e lista de membros. Crédito histórico de perfil removido aparece como “Membro removido”, sem atalho ou dado pessoal. Cada item ativo abre TEL-032. O botão Adicionar membro fica nesta tela e é exclusivo do Administrador; Gerar relatório PDF fica nesta tela para Administradores e Membros e abre TEL-051. Confirmações Kids continuam exclusivas do Administrador.
+**TEL-050 — Família:** apresenta progresso das tarefas da família e dos membros no intervalo livre entre Início e Fim, limitado pela criação da família e pelo fim do mês corrente. Cada membro ativo abre TEL-032 com o intervalo exato selecionado. A tela abre TEL-011 para todas as tarefas e, somente para Administradores, TEL-015 para Confirmações Kids e TEL-057 para Configurações. A carga familiar de SPEC-018 fica para entrega posterior e não integra esta tela.
 
-**TEL-032 — Detalhe do membro:** Administradores e Membros consultam as tarefas da pessoa selecionada por dia ou semana. A tela identifica o membro, preserva o filtro por pessoa ao alternar período e permite abrir a tarefa em TEL-012. As ações Editar perfil e Reenviar convite ficam aqui, somente para Administradores e quando permitidas pelas regras do perfil; visualizar tarefas não concede gestão de membros. A configuração de apelido permanece exclusiva do titular em Meu perfil. O Criador retorna por Apple, sem convite de recuperação.
+**TEL-032 — Detalhe do membro:** Administradores e Membros consultam as tarefas da pessoa selecionada no intervalo herdado exatamente de TEL-050 e podem alterá-lo sem mudar o período da origem. A tela identifica o membro e permite abrir a tarefa em TEL-012. As ações Editar perfil, Remover membro e Gerar/Reenviar convite ficam aqui, somente para Administradores e quando permitidas; visualizar tarefas não concede gestão. A configuração de apelido permanece exclusiva do titular em Meu perfil. O Criador retorna por Apple, sem convite de recuperação.
 
-TEL-010, TEL-040 e TEL-050 abrem no dia atual. TEL-010 e TEL-040 consultam somente o dia selecionado. Ao selecionar um membro, TEL-032 herda o dia/semana de TEL-050; mudanças de período no detalhe não alteram os indicadores familiares da origem. Voltar restaura o contexto anterior. TEL-011 permanece como consulta complementar de todas as tarefas, inclusive sem responsável, preservando o período de TEL-050. Nas superfícies familiares adultas, no modo Dia o carrossel segue RN49; no modo Semana, mostra segunda–domingo, com limites disponíveis explicitados nas semanas de borda.
+TEL-010 e TEL-040 abrem no dia atual e consultam somente o dia selecionado. TEL-050 inicia na semana corrente, limitada ao intervalo disponível. TEL-032 e TEL-011 herdam exatamente Início e Fim de TEL-050; mudanças locais não alteram a origem e voltar restaura o contexto anterior. TEL-011 inclui tarefas sem responsável e oferece Gerar relatório PDF. Se o intervalo tocar mais de uma semana, TEL-051 solicita a semana antes da geração.
 
-Progresso é concluídas/total de tarefas previstas no período, sem ponderar peso nem multiplicar responsáveis. Sem tarefas, apresentar “Sem tarefas”. A carga usa a data de conclusão válida (RN61). O relatório continua sempre semanal. TEL-015 e TEL-016 são exclusivos do Administrador; fotos de validação mantêm suas permissões.
+Progresso é concluídas/total de tarefas previstas no período, sem ponderar peso nem multiplicar responsáveis. Sem tarefas, apresentar “Sem tarefas”. Para Membro, Aguardando confirmação aparece e é contado como Pendente, sem mudar o estado canônico; Administrador vê o estado separado. A carga usa a data de conclusão válida (RN61) quando consultada no relatório. O relatório continua sempre semanal. TEL-015 e TEL-016 são exclusivos do Administrador; fotos de validação mantêm suas permissões.
 
 ## 3. Missões e recompensas
 
@@ -159,6 +160,7 @@ Missões em andamento e concluídas são grupos da mesma lista. Participações,
 ```mermaid
 flowchart TD
     T050["TEL-050 · Família"]
+    T057["TEL-057 · Configurações da família · Admin"]
     T030["TEL-030 · Meu perfil · todos"]
     T032["TEL-032 · Detalhe e tarefas do membro · Adultos"]
     T033["TEL-033 · Criar ou editar membro · Admin"]
@@ -169,7 +171,8 @@ flowchart TD
     T030 -->|Marco| T054["TEL-054 · Detalhe do marco"]
     T054 -->|Missão contribuinte| T021["TEL-021 · Detalhe da missão"]
     T050 -->|Selecionar membro| T032
-    T050 -->|Adicionar membro / Admin| T033
+    T050 -->|Configurações / Admin| T057
+    T057 -->|Adicionar membro| T033
     T033 -->|Perfil salvo| T032
     T032 -->|Editar / Admin e permitido| T033
     T033 --> M010
@@ -212,7 +215,8 @@ A sinalização muda a tarefa inteira para Aguardando confirmação. O progresso
 
 ```mermaid
 flowchart TD
-    T050["TEL-050 · Minha família · adultos"] --> T051["TEL-051 · Relatório semanal PDF"]
+    T050["TEL-050 · Família · adultos"] --> T011["TEL-011 · Tarefas da família"]
+    T011 -->|Gerar relatório PDF| T051["TEL-051 · Relatório semanal PDF"]
     T051 -->|Selecionar semana e gerar| PDF[["Visualizador / salvar / compartilhar PDF"]]
     PDF -->|Voltar ou cancelar| T051
     Job["Sistema · segunda-feira / apurar semana anterior"] -.-> N[["Notificação ao reconhecido"]]
@@ -223,11 +227,11 @@ flowchart TD
     W -->|Retornar ou cancelar| T052
 ```
 
-TEL-051 mantém a semana selecionada em geração, falha ou retorno; vindo de Dia, propõe a semana que contém a data e explicita o intervalo. TEL-052 pertence à pessoa reconhecida, inclui semana, pontos, tarefas realizadas e convite para fazer algo em família. Não é terceira aba Kids. Notificação sem sessão válida passa pelo acesso e só depois abre o resultado se a pessoa continuar autorizada. Há entrada interna mesmo sem notificação externa. Apuração ocorre às 00:00 de segunda-feira no fuso da família e preserva resultados já finalizados (RN28/RN65).
+TEL-051 mantém a semana selecionada em geração, falha ou retorno; quando TEL-011 cobre várias semanas, solicita uma semana antes de gerar. Se cobre uma só, usa essa semana. TEL-052 pertence à pessoa reconhecida, inclui semana, pontos, tarefas realizadas e convite para fazer algo em família. Não é terceira aba Kids. Notificação sem sessão válida passa pelo acesso e só depois abre o resultado se a pessoa continuar autorizada. Há entrada interna mesmo sem notificação externa. Apuração ocorre às 00:00 de segunda-feira no fuso da família e preserva resultados já finalizados (RN28/RN65).
 
 ## 5.2. Configuração, marcos e datas
 
-Família oferece Configurações da família somente a Administradores (TEL-053). Selecionar fuso abre MOD-012 com efeitos e alternativas imediata/próximo ciclo. Exibir fuso vigente e mudança programada; cancelar/falhar mantém estado confirmado. Criação (TEL-002) já permite escolher fuso, padrão `America/Sao_Paulo`.
+Família oferece TEL-057 Configurações da família somente a Administradores. A opção de fuso abre TEL-053 e MOD-012 com efeitos e alternativas imediata/próximo ciclo. Exibir fuso vigente e mudança programada; cancelar/falhar mantém estado confirmado. Criação (TEL-002) já permite escolher fuso, padrão `America/Sao_Paulo`.
 
 Meu perfil lista total de missões com participação e badges cumulativos. Marco conquistado abre TEL-054, cuja lista contém as missões que contribuíram para a concessão; selecionar uma abre TEL-021. Sem badge, informar total/próximo marco. Não existe selo configurável em TEL-022.
 
@@ -246,10 +250,10 @@ A = Administrador (inclui Criador); M = Membro; K = Kids. Códigos RF e RNF são
 | TEL-003 | Entrar por convite | Pessoa com link | Validar convite, informar senha e acessar perfil novo ou recuperado | [UC09](../03-casos-de-uso.md#uc09); RF42–46, RF54 |
 | TEL-004 | Recuperar acesso | Sem sessão | Orientar novo convite com Administrador; retorno Apple do Criador | [UC02](../03-casos-de-uso.md#uc02), [UC09](../03-casos-de-uso.md#uc09); RF41, RF46 |
 | TEL-010 | Tarefas | A, M | Tela principal e inicial; somente tarefas em que o adulto é responsável ou corresponsável, com estado e progresso próprios diários. Carrossel pessoal visual de domingo a sábado, cartões individuais com responsáveis e P1/P2/P3, incentivo e cabeçalho datado; o status permanece no ícone e no VoiceOver, fora do subtítulo visual. O círculo conclui/reabre quando permitido; o restante do cartão abre TEL-012. Tarefa compartilhada sinalizada por Kids é apresentada como Pendente aqui, sem alterar seu estado efetivo nem as ações permitidas | [UC11](../03-casos-de-uso.md#uc11), [UC12](../03-casos-de-uso.md#uc12), [UC17](../03-casos-de-uso.md#uc17); RF11, RF12, RF17, RF49, RF57 |
-| TEL-011 | Tarefas da família | A, M | Consultar tarefas de outros e sem responsável por dia ou semana, preservando o período de Família; abrir e criar | [UC07](../03-casos-de-uso.md#uc07), [UC12](../03-casos-de-uso.md#uc12), [UC11](../03-casos-de-uso.md#uc11); RF07–12, RF60 |
+| TEL-011 | Tarefas da família | A, M | Consultar tarefas de todos, inclusive sem responsável, por Início/Fim livres herdados de TEL-050; filtrar membro e estado, abrir/criar tarefa e gerar PDF semanal | [UC07](../03-casos-de-uso.md#uc07), [UC12](../03-casos-de-uso.md#uc12), [UC11](../03-casos-de-uso.md#uc11), [UC18](../03-casos-de-uso.md#uc18); RF07–12, RF60–61 |
 | TEL-012 | Detalhe da tarefa | A, M | Título, peso, responsáveis, estado, origem em rotina; concluir, editar, excluir ou reabrir conforme regra | [UC07](../03-casos-de-uso.md#uc07), [UC12](../03-casos-de-uso.md#uc12), [UC17](../03-casos-de-uso.md#uc17); RF08–12, RF47, RF56–59 |
 | TEL-013 | Criar/editar tarefa ou rotina | A, M | Título (1–60 car.), peso 1–3, data livre (padrão hoje), responsáveis, observação opcional (até 250 car.) e repetição com DatePicker inicial livre; identificar alcance e efeitos em concluídas; editar tarefa Aguardando confirmação abre MOD-014 | [UC07](../03-casos-de-uso.md#uc07), [UC08](../03-casos-de-uso.md#uc08); RF07–10, RF13–16, RF69, RF70 |
-| TEL-014 | Retirada — carga incorporada à Família | — | Conteúdo incorporado à TEL-050; ID preservado, sem destino navegável | [UC13](../03-casos-de-uso.md#uc13); RF18–21, RF56–57 |
+| TEL-014 | Reservada — carga familiar | — | Carga visual adiada para entrega posterior de SPEC-018; ID preservado, sem destino nesta entrega | [UC13](../03-casos-de-uso.md#uc13); RF18–21, RF56–57 |
 | TEL-015 | Confirmações Kids | A | Fila de tarefas aguardando avaliação | [UC03](../03-casos-de-uso.md#uc03); RF25–26 |
 | TEL-016 | Avaliar sinalização | A | Responsáveis, criança que sinalizou, foto opcional; confirmar ou recusar | [UC03](../03-casos-de-uso.md#uc03); RF25–26, RF55–56 |
 | TEL-020 | Missões e conquistas | A, M, K | Aba independente para adultos e Kids; listas em andamento/concluídas; abrir detalhe; criar e gerenciar itens somente A | [UC05](../03-casos-de-uso.md#uc05), [UC14](../03-casos-de-uso.md#uc14); RF28–32, RF36 |
@@ -258,16 +262,17 @@ A = Administrador (inclui Criador); M = Membro; K = Kids. Códigos RF e RNF são
 | TEL-023 | Itens de recompensa | A | Consultar predefinidos e personalizados; adicionar item com título e descrição opcional | [UC06](../03-casos-de-uso.md#uc06); RF33–34 |
 | TEL-024 | Roleta da missão | A | Sortear, ver resultado, aceitar ou sortear novamente; sair sem consumir resgate | [UC16](../03-casos-de-uso.md#uc16); RF35, RF51–53 |
 | TEL-030 | Meu perfil | A, M, K | Principal adulta; avatar/cabeçalho para Kids; foto por câmera/galeria, apelido só do titular, badges cumulativos e detalhe dos marcos; deixar papel Admin quando permitido | [UC10](../03-casos-de-uso.md#uc10), [UC02](../03-casos-de-uso.md#uc02); RF48, RF62, RF65, RF03, RF05 |
-| TEL-031 | Retirada — lista incorporada à Família | — | Lista e botão Adicionar membro incorporados à TEL-050; ID preservado, sem destino navegável | [UC02](../03-casos-de-uso.md#uc02); RF02–06, RF40 |
-| TEL-032 | Detalhe e tarefas do membro | A, M; gestão somente A | Identificação e tarefas do membro por dia/semana; abrir tarefa; editar perfil, remover e gerar/reenviar convite quando permitido, sem acesso ao apelido de terceiros | [UC11](../03-casos-de-uso.md#uc11), [UC02](../03-casos-de-uso.md#uc02); RF60, RF66, RF03–06, RF41 |
+| TEL-031 | Reservada — lista de membros | — | Lista e botão Adicionar membro ficam em TEL-057; ID preservado, sem destino navegável | [UC02](../03-casos-de-uso.md#uc02); RF02–06, RF40 |
+| TEL-032 | Detalhe e tarefas do membro | A, M; gestão somente A | Identificação e tarefas no intervalo exato herdado de TEL-050, alterável localmente; abrir tarefa; editar perfil, remover e gerar/reenviar convite quando permitido, sem acesso ao apelido de terceiros | [UC11](../03-casos-de-uso.md#uc11), [UC02](../03-casos-de-uso.md#uc02); RF60, RF66, RF03–06, RF41 |
 | TEL-033 | Criar/editar membro | A, após criação da família | Dados permitidos e configuração Kids/papel, respeitando restrições; membro preparado antes da criação permanece em TEL-002 | [UC02](../03-casos-de-uso.md#uc02); RF02–06, RF40 |
 | TEL-034 | Convite do membro | A | Primeira emissão explícita abre diretamente a folha nativa; reemissão exige confirmação dos efeitos. Link e senha são compartilhados juntos para o mesmo perfil | [UC01](../03-casos-de-uso.md#uc01), [UC02](../03-casos-de-uso.md#uc02); RF41, RF54 |
 | TEL-040 | Minhas tarefas Kids | K | Aba inicial; próprias tarefas e progresso diários. O círculo reabre tarefa própria concluída; o restante da linha abre o detalhe. Tarefa sinalizada aparece Aguardando confirmação até decisão válida | [UC11](../03-casos-de-uso.md#uc11), [UC17](../03-casos-de-uso.md#uc17); RF17, RF22, RF49, RF57 |
 | TEL-041 | Detalhe da minha tarefa | K responsável | Informações da tarefa e estado; sinalizar se pendente | [UC15](../03-casos-de-uso.md#uc15); RF23–24, RF55–56 |
-| TEL-050 | Família | A, M | Tela principal; progresso e carga familiar Dia/Semana, distribuição sem ranking e linha histórica de removido quando aplicável; Gerar relatório PDF e Todas as tarefas; Adicionar membro e confirmações Kids somente A | [UC02](../03-casos-de-uso.md#uc02), [UC03](../03-casos-de-uso.md#uc03), [UC13](../03-casos-de-uso.md#uc13); [UC11](../03-casos-de-uso.md#uc11); RF18–21, RF60, RN60–61 |
-| TEL-051 | Relatório semanal PDF | A, M | Selecionar semana, gerar gráficos e tabela, visualizar/salvar/compartilhar; semana atual parcial | [UC18](../03-casos-de-uso.md#uc18); RF61, RN62 |
+| TEL-050 | Família | A, M | Tela principal; progresso familiar e por membro com Início/Fim livres, lista de membros e entrada em Tarefas da família; Configurações e Confirmações Kids somente A; carga fica para entrega posterior | [UC02](../03-casos-de-uso.md#uc02), [UC03](../03-casos-de-uso.md#uc03), [UC11](../03-casos-de-uso.md#uc11); RF60, RF66, RN60–61 |
+| TEL-051 | Relatório semanal PDF | A, M | A partir de TEL-011, selecionar semana quando o intervalo tocar mais de uma, gerar gráficos e tabela, visualizar/salvar/compartilhar; semana atual parcial | [UC18](../03-casos-de-uso.md#uc18); RF61, RN62 |
+| TEL-057 | Configurações da família | A | Concentrar nome da família, fuso e gestão de membros; abrir TEL-032/TEL-033/TEL-053 | [UC01](../03-casos-de-uso.md#uc01), [UC02](../03-casos-de-uso.md#uc02); RF01–06, RF48 |
 | TEL-052 | Meu destaque semanal | A, M, K reconhecido | Semana encerrada, pontos, tarefas realizadas, convite editável e compartilhar no WhatsApp ou copiar mensagem; variante Kids sem carga/PDF | [UC19](../03-casos-de-uso.md#uc19); RF63–64, RN65 |
-| TEL-053 | Configurações da família | A | Fuso vigente/programado; selecionar novo fuso e confirmar aplicação imediata ou próximo ciclo em MOD-012 | [UC01](../03-casos-de-uso.md#uc01); RF67, RN28 |
+| TEL-053 | Alterar fuso da família | A | Fuso vigente/programado; selecionar novo fuso e confirmar aplicação imediata ou próximo ciclo em MOD-012 | [UC01](../03-casos-de-uso.md#uc01); RF67, RN28 |
 | TEL-054 | Detalhe do marco de participação | A, M, K titular | Bronze 5, prata 10, ouro 25, diamante 50; missões contribuintes do marco conquistado com acesso a TEL-021 | [UC10](../03-casos-de-uso.md#uc10); RF62, RN64 |
 | TEL-055 | Configurar perfil inicial | Futuro Criador autenticado sem família | Nome administrativo obrigatório; foto e etiqueta/apelido opcionais. A foto escolhida é enviada antes da criação, com repetição ou continuação sem foto em falha; avançar para TEL-002 ou cancelar sem criar perfil | [UC01](../03-casos-de-uso.md#uc01); RF01, RF38, RF48 |
 | TEL-056 | Convites iniciais | Criador Administrador de família já criada, com membros iniciais | Lista dos membros criados junto com a família; convite explícito por pessoa, primeira emissão direta pela folha nativa, opção de adiar e avançar para TEL-010. Voltar abre TEL-002 para editar a família existente | [UC01](../03-casos-de-uso.md#uc01), [UC02](../03-casos-de-uso.md#uc02); RF02, RF38, RF41 |
@@ -303,7 +308,7 @@ A = Administrador (inclui Criador); M = Membro; K = Kids. Códigos RF e RNF são
 | TEL-010/040/050 | Sem tarefas no período; Pendente, Aguardando confirmação e Concluída; progresso apenas de conclusões válidas. Em tarefa compartilhada sinalizada por Kids, TEL-010 do adulto corresponsável mostra Pendente e TEL-040 Kids mostra Aguardando confirmação; estado efetivo e permissões não mudam. Carrossel da criação da família até último dia do mês atual. |
 | TEL-011/012/013/032 | Lista vazia, inclusive membro sem tarefas no período; preservar filtro do membro e período no retorno; dados inválidos; sem responsáveis; compartilhada; origem em rotina; operação bloqueada por conquista ou vínculo com missão; editar tarefa Aguardando confirmação exige resolver a sinalização pendente (MOD-014). |
 | TEL-015/016 | Fila vazia, sinalização sem foto, foto indisponível e tarefa já decidida por outro adulto; atualizar estado e impedir decisão duplicada. |
-| TEL-050 | Dia/semana sem conclusões: informar ausência de carga, sem divisão por zero; distribuição sem ranking. |
+| TEL-050 | Intervalo sem tarefas: informar “Sem tarefas”, sem simular 100%; Membro vê Aguardando confirmação como Pendente. |
 | TEL-020/021/022 | Sem missões; em andamento; concluída sem resgate; concluída com recompensa visível a todos os perfis; seleção sem tarefas impede salvar. Conquista concluída não editável. |
 | TEL-023/024 | Itens carregando; cadastro inválido; pronta para sortear; resultado aguardando aceitação; recompensa aceita; resgate já realizado por outro Admin; falha ao salvar mantém informação verdadeira. |
 | TEL-030/032–034 | Campos inválidos, acesso de gestão negado, Criador protegido, membro removido enquanto tela aberta; somente perfis ativos recebem recuperação. |
@@ -329,6 +334,7 @@ Campos funcionais de data/fuso e seleção de foto estão definidos; o layout vi
 
 | Versão do mapa | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.17 | RN 1.22 / RF 1.21 / UC 1.21 | 2026-10-27 | TEL-050 e TEL-011 usam intervalo livre Início/Fim; TEL-032 herda o intervalo exato; PDF parte de TEL-011 e pede semana quando necessário; gestão entra por TEL-057; carga visual de TEL-050 adiada. |
 | 1.16 | RN 1.18 / RF 1.17 / UC 1.18 | 2026-10-26 | TEL-010 adota a apresentação adulta do Figma: aba “Tarefas”, semana visual domingo–sábado, cartões com responsáveis/P1–P3, progresso por extenso, incentivo e status apenas no ícone/VoiceOver; regras e período semanal familiar preservados. |
 | 1.15 | UC 1.18 | 2026-10-26 | TEL-010 e TEL-040 usam o círculo para concluir/reabrir quando permitido; a linha abre detalhe. MOD-006 pode partir da lista. |
 | 1.14 | RN 1.18 / RF 1.17 / UC 1.16 | 2026-10-19 | TEL-002 prepara membros para criação atômica e edita família existente no retorno; TEL-056 fica como convite após criação. Foto inicial enviada antes da criação; convite inicial direto e reemissão confirmada; estados pessoais distintos para adulto/Kids. |

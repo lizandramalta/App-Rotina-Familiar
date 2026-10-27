@@ -10,7 +10,7 @@
 ## 1. Contexto e objetivo
 
 - **Problema / necessidade:** a pessoa precisa enxergar rapidamente o que lhe cabe no dia, sem misturar a consulta pessoal com a visão de acompanhamento da família.
-- **Objetivo da entrega:** disponibilizar a consulta diária de tarefas e progresso próprios a todos os perfis e, para adultos, a consulta familiar de tarefas e progresso por Dia/Semana, preservando permissões e isolamento familiar.
+- **Objetivo da entrega:** disponibilizar a consulta diária de tarefas e progresso próprios a todos os perfis e, para adultos, a consulta familiar de tarefas e progresso em qualquer intervalo válido, preservando permissões e isolamento familiar.
 
 ## 2. Rastreabilidade e dependências
 
@@ -33,8 +33,8 @@
 - Minhas tarefas em TEL-010 e TEL-040: lista e progresso próprios exclusivamente do dia de referência. TEL-010 inclui apenas tarefas em que o adulto é responsável ou corresponsável.
 - Tarefa compartilhada sinalizada por Kids: estado efetivo único `awaitingConfirmation`; na lista pessoal do adulto corresponsável aparece Pendente e na visualização pessoal Kids, Aguardando confirmação, sem alterar progresso, fila administrativa ou ações permitidas.
 - Navegação pessoal por data entre a criação da família e o último dia do mês corrente, incluindo dias futuros do mês atual.
-- Área Família adulta em TEL-050: progresso familiar e membros por Dia/Semana; detalhe de membro em TEL-032 e lista complementar em TEL-011 preservam o contexto.
-- Filtros familiares `memberId` e `includeUnassigned`, incluindo tarefas sem responsável quando solicitado.
+- Área Família adulta em TEL-050: progresso familiar e membros para Início/Fim livre; detalhe de membro em TEL-032 e lista complementar em TEL-011 preservam exatamente o intervalo escolhido. A seleção inicial é a semana corrente.
+- Filtros familiares `memberId` e status; TEL-011 inclui tarefas sem responsável em Todos. Para Membro, `awaitingConfirmation` é projetado e contado como Pendente, sem mudar o estado canônico.
 - Estados vazio, carregando, falha e acesso negado, com autorização e isolamento familiar desde a primeira fase.
 
 ### 3.2. Fora do escopo
@@ -67,13 +67,13 @@
 |---|---|---|---|
 | `GET /v1/me/tasks` | `referenceDate` (`YYYY-MM-DD`), `cursor` opcional | Tarefas próprias do dia, paginação e `familyCreatedAt` | Todos |
 | `GET /v1/me/progress` | `referenceDate` (`YYYY-MM-DD`) | Total, concluídas, progresso próprios do dia e `familyCreatedAt` | Todos |
-| `GET /v1/family/overview` | `period` (`day`/`week`), `referenceDate` | Progresso familiar e membros; sem carga | Adulto |
-| `GET /v1/family/tasks` | `period`, `referenceDate`, `memberId` opcional, `includeUnassigned` opcional, `cursor` opcional | Tarefas familiares filtradas e intervalo efetivo | Adulto |
-| `GET /v1/family/members/{memberId}/tasks` | `period`, `referenceDate`, `cursor` opcional | Tarefas daquele membro e intervalo efetivo | Adulto |
+| `GET /v1/family/overview` | `startDate`, `endDate` juntos ou ambos omitidos | Progresso familiar e membros, `familyCreatedAt`; sem carga. Sem datas, retorna semana corrente recortada | Adulto |
+| `GET /v1/family/tasks` | `startDate`, `endDate`, `memberId` e `status` opcionais, `cursor` opcional | Tarefas familiares filtradas e intervalo efetivo, inclusive sem responsável em Todos | Adulto |
+| `GET /v1/family/members/{memberId}/tasks` | `startDate`, `endDate`, `cursor` opcional | Tarefas daquele membro e intervalo efetivo | Adulto |
 
-- `referenceDate` respeita RN49. Nas rotas familiares, `period` é `day` ou `week`; a semana é segunda–domingo e informa bordas efetivas.
+- `startDate` e `endDate` são datas inclusivas, com início menor ou igual a fim, dentro de RN49. A seleção inicial no aplicativo é a semana corrente, recortada nas bordas permitidas. As rotas retornam o intervalo efetivo.
 - Nas rotas pessoais, `period` é campo desconhecido e deve ser recusado; a consulta é sempre diária.
-- `memberId` deve identificar membro da família do ator. `includeUnassigned=true` inclui tarefas sem responsável; omitido ou `false` não as inclui além do filtro solicitado.
+- `memberId` deve identificar membro da família do ator. Sem `memberId`, a lista inclui tarefas sem responsável. `status` aceita `pending`, `awaitingConfirmation` (somente Administrador) ou `completed`; Membro que filtra `pending` também recebe `awaitingConfirmation` com `displayStatus: pending`.
 - `GET /v1/me/tasks` filtra pelo ator responsável/corresponsável. Cada item devolve `status` canônico e `displayStatus` calculado para a lista pessoal: quando `status` é `awaitingConfirmation`, adulto recebe `displayStatus: pending` e Kids recebe `displayStatus: awaitingConfirmation`; nos demais estados os dois coincidem. Ações, progresso e fila usam `status`, sem segundo estado persistido.
 - `GET /v1/me/tasks` e `GET /v1/me/progress` também devolvem `familyCreatedAt` (`YYYY-MM-DD`, data local à família), o limite inferior do carrossel pessoal (RN49). Decisão E-05: nenhum perfil tinha, antes desta entrega, acesso a essa data numa sessão já existente (`GET /v1/family` não a expõe e é bloqueada para Kids); o campo resolve isso simetricamente para os dois perfis, já que ambos chamam essas mesmas rotas.
 
@@ -91,9 +91,9 @@
 - **CA-02: mudança de data pessoal** — **DADO QUE** a pessoa navega no carrossel pessoal, **QUANDO** selecionar data dentro de RN49, **ENTÃO** atualiza apenas lista e progresso daquele dia. *(RN49, RF11, RF17)*
 - **CA-03: limites e vazio pessoal** — **DADO QUE** a data está fora do intervalo ou não há tarefas no dia, **QUANDO** a consulta ocorrer, **ENTÃO** a seleção inválida é bloqueada ou é mostrado “Sem tarefas”, sem percentual fictício. *(RN49, RF49)*
 - **CA-04: Kids restrito ao próprio dia** — **DADO QUE** a sessão é Kids, **QUANDO** acessar a aba inicial, **ENTÃO** consulta somente suas tarefas/progresso diários, **E** não recebe dados nem caminhos familiares. *(RN27, RF22, RF65)*
-- **CA-05: consulta familiar adulta por período** — **DADO QUE** um Administrador ou Membro abre Família, **QUANDO** escolher Dia ou Semana válida, **ENTÃO** vê progresso familiar e membros do período, **E** a semana usa os totais de segunda a domingo. *(RN60, RN61, RF60)*
-- **CA-06: lista familiar e sem responsável** — **DADO QUE** um adulto abre Todas as tarefas, **QUANDO** aplicar o período e `includeUnassigned=true`, **ENTÃO** vê também tarefas sem responsável, preservando o período ao abrir detalhes. *(UC11, RN60)*
-- **CA-07: filtro e detalhe de membro** — **DADO QUE** um adulto seleciona membro ou envia `memberId`, **QUANDO** o membro pertence à família, **ENTÃO** a lista é restringida a ele e TEL-032 preserva membro e período; voltar restaura a origem. *(RN60, RF66)*
+- **CA-05: consulta familiar adulta por intervalo** — **DADO QUE** um Administrador ou Membro abre Família, **QUANDO** escolher Início/Fim válido, **ENTÃO** vê progresso familiar e membros do intervalo inclusivo; a seleção inicial é a semana corrente. *(RN60, RN61, RF60)*
+- **CA-06: lista familiar e sem responsável** — **DADO QUE** um adulto abre Tarefas da família, **QUANDO** aplicar o intervalo e o filtro Todos, **ENTÃO** vê também tarefas sem responsável, preservando o intervalo ao abrir detalhes. *(UC11, RN60)*
+- **CA-07: filtro e detalhe de membro** — **DADO QUE** um adulto seleciona membro ou envia `memberId`, **QUANDO** o membro pertence à família, **ENTÃO** a lista é restringida a ele e TEL-032 preserva membro e exatamente o intervalo livre; voltar restaura a origem. *(RN60, RF66)*
 - **CA-08: isolamento familiar** — **DADO QUE** a rota recebe ID de outra família, **QUANDO** o backend validar a requisição, **ENTÃO** responde `404 RESOURCE_NOT_FOUND`, **E** não vaza qualquer dado. *(RNF06, RNF07)*
 - **CA-09: erro distinto de vazio** — **DADO QUE** a consulta falha ou retorna indisponível, **QUANDO** a interface tratar a resposta, **ENTÃO** mostra falha recuperável e não “Sem tarefas”. *(RNF12, RNF13)*
 - **CA-10: overview sem carga** — **DADO QUE** um adulto consulta `GET /family/overview`, **QUANDO** recebe sucesso, **ENTÃO** a resposta contém somente progresso familiar e membros definidos nesta entrega, **E NÃO** simula distribuição de carga. *(E-02)*
@@ -102,6 +102,8 @@
   - **QUANDO** adulto corresponsável e Kids abrirem suas listas pessoais,
   - **ENTÃO** TEL-010 do adulto DEVE apresentar Pendente e a visualização Kids DEVE apresentar Aguardando confirmação,
   - **E** estado efetivo `awaitingConfirmation`, progresso, fila de validação e permissões permanecem os mesmos. *(RN23/RN55, RF11/RF22/RF24, UC11)*
+
+- **CA-12: estado familiar apresentado por perfil** — **DADO QUE** há tarefas `awaitingConfirmation`, **QUANDO** Membro abre Família ou Tarefas da família, **ENTÃO** elas entram na contagem e no filtro Pendentes; Administrador vê a categoria Aguardando confirmação separada, **E** o estado efetivo, a fila Kids e as permissões permanecem iguais. *(RN23/RN60, RF60, UC11)*
 
 ## 7. Observabilidade
 
@@ -117,20 +119,22 @@ Não registrar título, observação, foto, tokens ou conteúdo de outra famíli
 
 | # | Decisão | Situação | Altera `docs/`? |
 |---|---|---|---|
-| E-01 | Filtros da lista familiar chamam-se `memberId` e `includeUnassigned`. | Decidida pela pessoa usuária em 2026-10-06 | Sim |
+| E-01 | Filtros originais chamavam-se `memberId` e `includeUnassigned`; E-06 substitui o segundo na lista atual. | Decidida pela pessoa usuária em 2026-10-06; revisada em 2026-10-27 | Sim |
 | E-02 | `GET /family/overview` entrega progresso e membros; carga fica para SPEC-018. | Decidida pela pessoa usuária em 2026-10-06 | Sim |
-| E-03 | Minhas tarefas é diária para todos os perfis; Dia/Semana é exclusivo das consultas familiares adultas. | Decidida pela pessoa usuária em 2026-10-06 | Sim |
+| E-03 | Minhas tarefas é diária para todos os perfis; a consulta familiar adulta usa intervalo livre conforme E-06. | Decidida pela pessoa usuária em 2026-10-06; revisada em 2026-10-27 | Sim |
 | E-04 | Para tarefa compartilhada sinalizada por Kids, a lista do adulto corresponsável apresenta Pendente e a visualização Kids apresenta Aguardando confirmação; o estado efetivo permanece único. | Pessoa usuária / 2026-10-19 | Sim — RN23/RN55, RF11/RF22 e UC11. |
 | E-05 | `GET /v1/me/tasks` e `GET /v1/me/progress` passam a devolver `familyCreatedAt` (`YYYY-MM-DD`), derivado direto de `app.families.created_at` (sem lógica nova). Motivo: antes desta decisão, nenhum perfil tinha acesso à data de criação da família numa sessão já existente — `GET /v1/family` não a expõe e, além disso, é bloqueada para Kids — o que impedia o mobile de bloquear client-side as datas do carrossel pessoal anteriores à criação da família (RN49/RF11/RF22), tanto para adulto quanto para Kids. Expor o campo nas duas rotas pessoais resolve simetricamente para os dois perfis, já que ambos as chamam igualmente. | Architect / 2026-10-22 | Sim — RF11/RF22, RN49; `docs/architecture/backend-contracts.md` e `mobile-decisions.md` (MA-19) devem registrar o campo. |
+| E-06 | Filtro familiar Início/Fim aceita qualquer intervalo inclusivo válido; TEL-032 herda exatamente esse intervalo. TEL-011 inclui tarefas sem responsável em Todos. | Pessoa usuária / 2026-10-27 | Sim — RN60/RN61, RF60/RF66, UC11. |
+| E-07 | Nas consultas familiares de Membro, `awaitingConfirmation` é apresentado e contado como Pendente; Administrador mantém categoria própria. | Pessoa usuária / 2026-10-27 | Sim — RN23/RN60, RF60, UC11. |
 
-**Contrato técnico revisado:** `backend-contracts.md` 1.16 e BA-37/MA-19 definem `status` e `displayStatus`. O backend e o mobile anteriores ainda precisam implementar a projeção; permissões e fila permanecem pelo estado efetivo.
+**Contrato técnico revisado:** `backend-contracts.md` 1.23 e BA-37/MA-19 definem `status` e `displayStatus`. A projeção foi implementada no backend e no mobile; permissões e fila permanecem pelo estado efetivo.
 
 ## 9. Fases de implementação
 
 | Fase | Objetivo | CAs | Prontidão | Status |
 |---|---|---|---|---|
 | 1 | Consulta própria diária, estado por perfil, validação, autorização e isolamento | CA-01 a CA-04, CA-08, CA-11 | Contrato de projeção reconciliado e testes unitários, integração e interface por perfil verdes | em andamento — backend anterior SCRUM-38 concluído; Mobile pendente (SCRUM-39) |
-| 2 | Consulta familiar adulta, filtros, contexto e detalhe de membro | CA-05 a CA-07, CA-10 | Testes de período, filtros e navegação verdes | a fazer |
+| 2 | Consulta familiar adulta, filtros, contexto e detalhe de membro | CA-05 a CA-07, CA-10, CA-12 | Testes de intervalo, filtros, perfil e navegação verdes | em implementação — backend e telas integrados; validação visual específica pendente |
 | 3 | Falhas, acessibilidade e observabilidade | CA-09 | Estados de erro e telemetria verificados | a fazer |
 
 **Registro de execução (2026-10-19):** SCRUM-38 concluiu a consulta própria diária anterior no backend. A Fase 1 requer verificar a projeção do estado por perfil e a interface Mobile (SCRUM-39).

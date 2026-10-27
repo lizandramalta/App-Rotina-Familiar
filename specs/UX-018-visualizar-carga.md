@@ -14,7 +14,9 @@ Administradores e Membros entendem a distribuição da participação creditada 
 
 Na TEL-050, a pessoa escolhe Dia/Semana e data de referência; a carga atualiza mantendo o contexto. Em semana, o período mostra segunda–domingo ou o intervalo efetivo de transição. Gerar PDF continua seguindo a semana correspondente, fora desta entrega.
 
-## 3. TEL-050 — Carga integrada
+## 3. Apresentação futura da carga
+
+A seção aprovada “04 · Aba Família” apresenta apenas progresso de tarefas na TEL-050 atual. A apresentação de carga descrita abaixo permanece para uma entrega posterior; não deve ser inserida na tela atual. O snapshot de backend continua necessário para o PDF da SPEC-019.
 
 - Cartão “Distribuição da carga” com período, carga total e explicação de participação creditada.
 - Gráfico segmentado neutro e lista textual por pessoa: nome, peso e percentual. A lista usa ordem neutra estável, não ordem de maior carga.

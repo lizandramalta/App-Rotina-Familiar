@@ -46,7 +46,13 @@ struct KidsReviewQueueView: View {
         List {
             Section {
                 ForEach(viewModel.items) { item in
-                    row(item)
+                    NavigationLink {
+                        KidsSignalDetailView(viewModel: viewModel.makeDetailViewModel(id: item.id)) {
+                            Task { await viewModel.load() }
+                        }
+                    } label: {
+                        row(item)
+                    }
                         .task { await viewModel.loadMoreIfNeeded(currentItem: item) }
                 }
                 if viewModel.isLoadingMore {

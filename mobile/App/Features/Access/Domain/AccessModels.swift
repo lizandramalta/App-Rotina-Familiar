@@ -36,7 +36,7 @@ nonisolated struct SessionCredentials: Sendable, Equatable {
     let refreshToken: String
 }
 
-nonisolated struct ActiveFamilySession: Sendable, Equatable {
+nonisolated struct ActiveFamilySession: Sendable, Equatable, Hashable {
     let memberID: UUID
     let familyID: UUID
     let role: MemberRole

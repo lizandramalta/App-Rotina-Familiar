@@ -46,8 +46,8 @@
 ### 5.1. TEL-050 — Família
 
 - **Objetivo nesta entrega:** iniciar a criação para Administradores e abrir o detalhe de qualquer membro para adultos.
-- **Anatomia:** a lista de membros continua como conteúdo existente e carrega a próxima página de até 20 perfis ao se aproximar do fim da rolagem; o botão “Adicionar membro” aparece apenas quando a capacidade `manageMembers` estiver confirmada.
-- **Transição:** criar não gera credenciais. Pela origem TEL-050, abre TEL-032; no retorno de TEL-056 a TEL-002, uma nova inclusão após a criação usa as mesmas permissões de gestão, sem recriar a família.
+- **Anatomia:** o progresso e a lista de membros compartilham o intervalo da Família; a lista carrega a próxima página de até 20 perfis ao se aproximar do fim da rolagem. “Adicionar membro” aparece em Configurações da família (TEL-057) apenas quando a capacidade `manageMembers` estiver confirmada.
+- **Transição:** criar não gera credenciais. Pela origem TEL-050, abre TEL-032; pelo botão Configurações abre TEL-057 e dali TEL-033. No retorno de TEL-056 a TEL-002, uma nova inclusão após a criação usa as mesmas permissões de gestão, sem recriar a família.
 
 ### 5.2. TEL-032 — Detalhe e tarefas do membro
 

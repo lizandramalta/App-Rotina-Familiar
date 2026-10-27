@@ -112,6 +112,10 @@ nonisolated private struct CompleteTaskResponseDTO: Decodable {
     let task: TaskDTO
 }
 
+nonisolated private struct SignalTaskRequestDTO: Encodable { let photoMediaId: String? }
+nonisolated private struct SignalTaskResponseDTO: Decodable { let task: TaskDTO }
+nonisolated private struct SignalPhotoResponseDTO: Decodable { let mediaId: String }
+
 nonisolated private struct AffectedMissionDTO: Decodable {
     let id: UUID
     let title: String
@@ -192,6 +196,35 @@ nonisolated struct HTTPTaskRepository: TaskRepository {
                 accessToken: accessToken
             )
             return try Self.toFamilyTask(decode(CompleteTaskResponseDTO.self, from: data).task)
+        } catch TaskError.network, TaskError.unavailable {
+            throw TaskError.uncertainOutcome
+        }
+    }
+
+    func uploadSignalPhoto(_ jpeg: Data, accessToken: String) async throws -> String {
+        let boundary = "Boundary-\(UUID().uuidString)"
+        var body = Data()
+        body.append(Data("--\(boundary)\r\n".utf8))
+        body.append(Data("Content-Disposition: form-data; name=\"purpose\"\r\n\r\ntaskSignal\r\n".utf8))
+        body.append(Data("--\(boundary)\r\n".utf8))
+        body.append(Data("Content-Disposition: form-data; name=\"file\"; filename=\"signal.jpg\"\r\n".utf8))
+        body.append(Data("Content-Type: image/jpeg\r\n\r\n".utf8))
+        body.append(jpeg)
+        body.append(Data("\r\n--\(boundary)--\r\n".utf8))
+        var request = makeRequest(path: "media", method: "POST", accessToken: accessToken)
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        request.httpBody = body
+        let data = try await send(rawRequest: request)
+        return try decode(SignalPhotoResponseDTO.self, from: data).mediaId
+    }
+
+    func signalTask(id: UUID, photoMediaID: String?, accessToken: String) async throws -> FamilyTask {
+        do {
+            let data = try await send(
+                path: "tasks/\(id.uuidString.lowercased())/signals", method: "POST",
+                accessToken: accessToken, json: SignalTaskRequestDTO(photoMediaId: photoMediaID)
+            )
+            return try Self.toFamilyTask(decode(SignalTaskResponseDTO.self, from: data).task)
         } catch TaskError.network, TaskError.unavailable {
             throw TaskError.uncertainOutcome
         }

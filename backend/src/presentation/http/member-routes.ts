@@ -15,6 +15,13 @@ interface CreateMemberBody {
   readonly role?: unknown;
 }
 
+interface UpdateMemberBody {
+  readonly name?: unknown;
+}
+interface ChangeRoleBody {
+  readonly role?: unknown;
+}
+
 const memberProperties = {
   id: { type: 'string' },
   name: { type: 'string' },
@@ -182,6 +189,148 @@ export function registerMemberRoutes(app: FastifyInstance, container: Applicatio
           .header('Location', `/v1/family/members/${member.id}`)
           .header('Cache-Control', 'no-store')
           .send(member);
+      },
+    );
+
+    // SPEC-003 CA-02–06: each command is scoped and revalidated after the family lock.
+    scope.patch<{ Params: MemberParams; Body: UpdateMemberBody }>(
+      '/family/members/:memberId',
+      {
+        schema: {
+          tags: ['Members'],
+          summary: 'Edit a family member administrative name',
+          security: [{ bearerAuth: [] }],
+          params: {
+            type: 'object',
+            required: ['memberId'],
+            properties: { memberId: { type: 'string', format: 'uuid' } },
+          },
+          body: {
+            type: 'object',
+            additionalProperties: false,
+            required: ['name'],
+            properties: { name: {} },
+          },
+          response: {
+            200: memberResponseSchema,
+            400: problemResponseSchema,
+            401: problemResponseSchema,
+            403: problemResponseSchema,
+            404: problemResponseSchema,
+            422: problemResponseSchema,
+            503: problemResponseSchema,
+          },
+        },
+      },
+      async (request, reply) =>
+        reply
+          .status(200)
+          .header('Cache-Control', 'no-store')
+          .send(
+            await container.updateMemberUseCase.execute(
+              requireActor(request),
+              request.params.memberId,
+              request.body.name,
+            ),
+          ),
+    );
+
+    scope.post<{ Params: MemberParams; Body: ChangeRoleBody }>(
+      '/family/members/:memberId/role-changes',
+      {
+        schema: {
+          tags: ['Members'],
+          summary: 'Change a member role',
+          security: [{ bearerAuth: [] }],
+          params: {
+            type: 'object',
+            required: ['memberId'],
+            properties: { memberId: { type: 'string', format: 'uuid' } },
+          },
+          body: {
+            type: 'object',
+            additionalProperties: false,
+            required: ['role'],
+            properties: { role: {} },
+          },
+          response: {
+            200: memberResponseSchema,
+            400: problemResponseSchema,
+            401: problemResponseSchema,
+            403: problemResponseSchema,
+            404: problemResponseSchema,
+            409: problemResponseSchema,
+            422: problemResponseSchema,
+            503: problemResponseSchema,
+          },
+        },
+      },
+      async (request, reply) =>
+        reply
+          .status(200)
+          .header('Cache-Control', 'no-store')
+          .send(
+            await container.changeMemberRoleUseCase.execute(
+              requireActor(request),
+              request.params.memberId,
+              request.body.role,
+            ),
+          ),
+    );
+
+    scope.post(
+      '/me/administration-exit',
+      {
+        preValidation: async (request) => {
+          request.body ??= {};
+        },
+        schema: {
+          tags: ['Members'],
+          summary: 'Leave family administration',
+          security: [{ bearerAuth: [] }],
+          body: { type: 'object', additionalProperties: false, properties: {} },
+          response: {
+            200: memberResponseSchema,
+            400: problemResponseSchema,
+            401: problemResponseSchema,
+            403: problemResponseSchema,
+            409: problemResponseSchema,
+            503: problemResponseSchema,
+          },
+        },
+      },
+      async (request, reply) =>
+        reply
+          .status(200)
+          .header('Cache-Control', 'no-store')
+          .send(await container.leaveAdministrationUseCase.execute(requireActor(request))),
+    );
+
+    scope.delete<{ Params: MemberParams }>(
+      '/family/members/:memberId',
+      {
+        schema: {
+          tags: ['Members'],
+          summary: 'Remove a member while preserving history',
+          security: [{ bearerAuth: [] }],
+          params: {
+            type: 'object',
+            required: ['memberId'],
+            properties: { memberId: { type: 'string', format: 'uuid' } },
+          },
+          response: {
+            400: problemResponseSchema,
+            401: problemResponseSchema,
+            403: problemResponseSchema,
+            404: problemResponseSchema,
+            409: problemResponseSchema,
+            503: problemResponseSchema,
+          },
+        },
+      },
+      async (request, reply) => {
+        await container.removeMemberUseCase.execute(requireActor(request), request.params.memberId);
+        return reply.status(204).header('Cache-Control', 'no-store').send();
       },
     );
 
