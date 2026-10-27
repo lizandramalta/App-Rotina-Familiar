@@ -133,6 +133,9 @@ final class AppContainer {
             familyRepository: familyRepository,
             accessTokenProvider: { [weak sessionStore] in
                 sessionStore?.accessToken
+            },
+            makeKidsReviewQueueViewModel: { [unowned self] in
+                self.makeKidsReviewQueueViewModel(sessionStore: sessionStore)
             }
         )
     }

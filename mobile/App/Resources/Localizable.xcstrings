@@ -1122,6 +1122,16 @@
         }
       }
     },
+    "family.overview.kids_confirmations": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirmações Kids"
+          }
+        }
+      }
+    },
     "family.overview.members_section": {
       "localizations": {
         "pt-BR": {

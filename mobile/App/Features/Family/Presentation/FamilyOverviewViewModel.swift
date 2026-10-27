@@ -18,12 +18,15 @@ final class FamilyOverviewViewModel {
     private let session: ActiveFamilySession
     private let familyRepository: any FamilyRepository
     private let accessTokenProvider: @MainActor () -> String?
+    private let makeKidsReviewQueueViewModel: (() -> KidsReviewQueueViewModel)?
 
     init(
         session: ActiveFamilySession,
         familyRepository: any FamilyRepository,
-        accessTokenProvider: @escaping @MainActor () -> String?
+        accessTokenProvider: @escaping @MainActor () -> String?,
+        makeKidsReviewQueueViewModel: (() -> KidsReviewQueueViewModel)? = nil
     ) {
+        self.makeKidsReviewQueueViewModel = makeKidsReviewQueueViewModel
         self.session = session
         self.familyRepository = familyRepository
         self.accessTokenProvider = accessTokenProvider
@@ -32,6 +35,8 @@ final class FamilyOverviewViewModel {
     /// The server stays the authority (RNF07); this only hides controls the API would refuse.
     var canAddMember: Bool { session.role == .administrator }
     var canConfigureFamily: Bool { session.role == .administrator }
+    /// Kids confirmations are Admin-only (SPEC-013 CA-05, UX-013 §1).
+    var canReviewKidsConfirmations: Bool { session.role == .administrator && makeKidsReviewQueueViewModel != nil }
     var timeZoneDisplayName: String { TimeZoneDisplay.displayName(for: timeZoneID) }
     var currentMemberID: UUID { session.memberID }
     var hasMorePages: Bool { nextCursor != nil }
@@ -126,6 +131,10 @@ final class FamilyOverviewViewModel {
 
     func memberCreated() async {
         await loadInitial()
+    }
+
+    func makeKidsReviewQueue() -> KidsReviewQueueViewModel? {
+        makeKidsReviewQueueViewModel?()
     }
 
     func makeMemberDetailViewModel(memberID: UUID) -> MemberDetailViewModel {

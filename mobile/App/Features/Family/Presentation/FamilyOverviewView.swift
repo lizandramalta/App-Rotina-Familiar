@@ -33,6 +33,20 @@ struct FamilyOverviewView: View {
                 }
             }
 
+            if viewModel.canReviewKidsConfirmations {
+                Section {
+                    NavigationLink {
+                        if let queue = viewModel.makeKidsReviewQueue() {
+                            KidsReviewQueueView(viewModel: queue)
+                        }
+                    } label: {
+                        Label("family.overview.kids_confirmations", systemImage: "checkmark.shield")
+                            .frame(minHeight: 44)
+                    }
+                    .accessibilityIdentifier("family.overview.kids_confirmations")
+                }
+            }
+
             Section("family.overview.members_section") {
                 if viewModel.members.isEmpty && viewModel.isLoading {
                     ProgressView()
