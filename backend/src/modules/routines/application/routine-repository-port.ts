@@ -29,7 +29,72 @@ export interface MaterializeBatchResult {
   readonly isComplete: boolean;
 }
 
+export interface RoutineOccurrenceRecord {
+  readonly id: string;
+  readonly routineId: string | null;
+  readonly originalDate: string;
+  readonly scheduledDate: string;
+  readonly status: 'pending' | 'awaitingConfirmation' | 'completed';
+  readonly isProtected: boolean;
+}
+
 export interface RoutineRepositoryPort {
+  findSourceOccurrence(
+    tx: TransactionContext,
+    familyId: string,
+    taskId: string,
+  ): Promise<RoutineOccurrenceRecord | undefined>;
+  listFutureOccurrences(
+    tx: TransactionContext,
+    familyId: string,
+    routineId: string,
+    fromOriginalDate: string,
+    taskTemplateId: string,
+  ): Promise<readonly RoutineOccurrenceRecord[]>;
+  updateConfiguration(
+    tx: TransactionContext,
+    params: {
+      readonly routine: RoutineRecord;
+      readonly title: string;
+      readonly weight: number;
+      readonly note: string | null;
+      readonly assigneeIds: readonly string[];
+      readonly now: Date;
+    },
+  ): Promise<void>;
+  updateOccurrences(
+    tx: TransactionContext,
+    params: {
+      readonly familyId: string;
+      readonly taskIds: readonly string[];
+      readonly title: string;
+      readonly weight: number;
+      readonly note: string | null;
+      readonly assigneeIds: readonly string[];
+      readonly actorId: string;
+      readonly now: Date;
+    },
+  ): Promise<void>;
+  wouldEmptyActiveMission(
+    tx: TransactionContext,
+    familyId: string,
+    taskIds: readonly string[],
+  ): Promise<boolean>;
+  deleteOccurrences(
+    tx: TransactionContext,
+    params: {
+      readonly familyId: string;
+      readonly taskIds: readonly string[];
+      readonly actorId: string;
+      readonly now: Date;
+    },
+  ): Promise<readonly string[]>;
+  endGeneration(
+    tx: TransactionContext,
+    familyId: string,
+    routineId: string,
+    now: Date,
+  ): Promise<void>;
   insertRoutine(
     tx: TransactionContext,
     params: {

@@ -1,8 +1,8 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.21 · **Base funcional:** RN 1.20 / RF 1.19 / UC 1.19 · **Arquitetura backend:** 1.4\
+**Versão:** 1.22 · **Base funcional:** RN 1.21 / RF 1.20 / UC 1.20 · **Arquitetura backend:** 1.4\
 **Data:** 2026-10-27\
-**Situação:** `GetOwnProfile`/`UpdateOwnProfile`/`GetOwnBadges`/`GetBadgeContributions` materializados na API e OpenAPI (SPEC-006 Fase 1); ampliações de onboarding ainda exigem implementação e atualização da OpenAPI
+**Situação:** rotas de rotina da SPEC-008 Fase 2 e consultas/edições de perfil e badges da SPEC-006 Fase 1 materializadas na API e OpenAPI; ampliações de onboarding ainda exigem implementação e atualização da OpenAPI
 
 [Arquitetura](backend-architecture.md) · [Decisões](backend-decisions.md) · [Catálogo mobile](mobile-feature-catalog.md) · [UC](../03-casos-de-uso.md) · [Índice](../DOCUMENTACAO.md)
 
@@ -108,7 +108,7 @@ Preview de fuso é apenas leitura de suporte a MOD-012. A gravação pode reflet
 | `POST /tasks/{taskId}/reopening` | `ReopenTask` | Comando explícito → conclusão desfeita, missões/recompensas/badges afetados | Adulto; Kids somente tarefa própria |
 | `POST /routines` | `CreateRoutine` | Título, peso, responsáveis, `note` opcional, `startDate`, `frequencyDays`; sem `endDate` → rotina e materialização | Adulto |
 | `GET /routines/{routineId}` | `GetRoutine` | Configuração, versão vigente e progresso de materialização | Adulto |
-| `PATCH /routines/{routineId}` | `UpdateFutureRoutine` | `fromTaskId` e `title`, `weight`, `assigneeIds`, `note` opcionais; a ocorrência de origem e as futuras elegíveis (`original_date` igual ou posterior ao da origem), substituindo edições individuais anteriores das futuras. Não altera o estado das ocorrências. `startDate`, `frequencyDays` e `signalResolution` não são aceitos (`400 UNKNOWN_FIELD`). Origem protegida por missão concluída → `409 MISSION_COMPLETED_PROTECTED` sem mudança; futuras protegidas são preservadas. `200` → `{ routine, updatedTaskIds, preservedTaskIds }` | Adulto |
+| `PATCH /routines/{routineId}` | `UpdateFutureRoutine` | `fromTaskId` e `title`, `weight`, `assigneeIds`, `note` opcionais; a ocorrência de origem e as futuras elegíveis (`original_date` igual ou posterior ao da origem), substituindo edições individuais anteriores dos campos permitidos nas futuras; preserva a data prevista já gravada em cada ocorrência, inclusive após edição individual. Não altera o estado das ocorrências. `startDate`, `frequencyDays` e `signalResolution` não são aceitos (`400 UNKNOWN_FIELD`). Origem protegida por missão concluída → `409 MISSION_COMPLETED_PROTECTED` sem mudança; futuras protegidas são preservadas. `200` → `{ routine, updatedTaskIds, preservedTaskIds }` | Adulto |
 | `POST /routines/{routineId}/future-task-deletions` | `DeleteFutureRoutineTasks` | `fromTaskId` → ocorrência de origem e futuras elegíveis (`original_date` igual ou posterior ao da origem), preservando concluídas e protegidas; remove a sinalização das excluídas como na exclusão individual (RN66); encerra a geração (`is_active=false`, `deactivated_at`). Deixar missão em andamento sem tarefas → `409 MISSION_WOULD_HAVE_NO_TASKS` sem mudança. `200` → `{ routineId, deletedTaskIds, preservedTaskIds, generationEnded }` | Adulto |
 | `POST /tasks/{taskId}/signals` | `SignalTask` | `photoMediaId` opcional → sinalização corrente | Kids responsável e tarefa pendente |
 | `GET /kids/signals` | `GetKidsReviewQueue` | Sinalizações pendentes paginadas, da mais antiga para a mais recente | Admin |
@@ -236,6 +236,7 @@ O documento OpenAPI 3.1 é gerado pelos schemas HTTP em `/docs/json`, e a interf
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.22 | 2026-10-27 | `UpdateFutureRoutine` preserva a data prevista já gravada em cada ocorrência abrangida, inclusive após edição individual; substitui somente os campos permitidos. Para SPEC-008 Fase 2 / SCRUM-45. Base funcional RN 1.21 / RF 1.20 / UC 1.20. |
 | 1.21 | 2026-10-27 | `PATCH /routines/{routineId}` (`UpdateFutureRoutine`) aceita somente `fromTaskId`, `title`, `weight`, `assigneeIds` e `note`; `startDate`/`frequencyDays` respondem `400 UNKNOWN_FIELD`. O alcance substitui edições individuais anteriores das futuras abrangidas, usa `original_date` para definir as futuras e não altera estados (`signalResolution` recusado). Define `409` para origem protegida e para missão sem tarefas, encerramento da geração e formatos de resposta `200` de alteração e encerramento. Base funcional RN 1.20 / RF 1.19 / UC 1.19 (SPEC-008 Fase 2). |
 | 1.20 | 2026-10-22 | §3: `GetOwnProfile`/`UpdateOwnProfile` passam a incluir `familyName`; `UpdateOwnProfile` aceita `name` opcional para titular adulto (`403 ACTION_NOT_ALLOWED` para Kids; `422 NAME_INVALID_LENGTH`). §6: `GET /media/{mediaId}/content` especifica `200 image/jpeg`, `Cache-Control: private, no-store` e `404` para mídia indisponível. Base funcional RN 1.19 / RF 1.18 / UC 1.17 (SPEC-006 Fase 2; SCRUM-52). |
 | 1.19 | 2026-10-21 | Registra o host gratuito Cloudflare Workers para Universal Links, AASA e página de fallback; configurações de backend e mobile devem coincidir. |

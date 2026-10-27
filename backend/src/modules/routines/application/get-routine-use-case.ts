@@ -70,6 +70,10 @@ export class GetRoutineUseCase {
         throw new NotFoundError('Routine not found.');
       }
 
+      if (!routine.isActive) {
+        return toRoutineResponse(routine, true);
+      }
+
       const timeZoneId = await this.deps.familySettingsRepository.findFamilyTimeZone(
         tx,
         actor.familyId,

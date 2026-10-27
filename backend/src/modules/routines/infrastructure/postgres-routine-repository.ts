@@ -2,6 +2,7 @@ import type { TransactionContext } from '../../../shared/application/transaction
 import { asPostgresClient } from '../../../shared/infrastructure/postgres/postgres-transaction-runner.js';
 import type {
   MaterializeBatchResult,
+  RoutineOccurrenceRecord,
   RoutineRecord,
   RoutineRepositoryPort,
 } from '../application/routine-repository-port.js';
@@ -19,6 +20,26 @@ interface RoutineRow {
   generated_until: string | null;
   created_at: Date;
   assignee_ids: string[] | null;
+}
+
+interface OccurrenceRow {
+  id: string;
+  routine_id: string | null;
+  original_date: string;
+  scheduled_date: string;
+  status: RoutineOccurrenceRecord['status'];
+  is_protected: boolean;
+}
+
+function toOccurrence(row: OccurrenceRow): RoutineOccurrenceRecord {
+  return {
+    id: row.id,
+    routineId: row.routine_id,
+    originalDate: row.original_date,
+    scheduledDate: row.scheduled_date,
+    status: row.status,
+    isProtected: row.is_protected,
+  };
 }
 
 function toRoutine(row: RoutineRow): RoutineRecord {
@@ -51,6 +72,231 @@ const routineSelect = `
    group by r.id, t.title, t.weight, t.note`;
 
 export class PostgresRoutineRepository implements RoutineRepositoryPort {
+  public async findSourceOccurrence(
+    tx: TransactionContext,
+    familyId: string,
+    taskId: string,
+  ): Promise<RoutineOccurrenceRecord | undefined> {
+    const result = await asPostgresClient(tx).query<OccurrenceRow>(
+      `select t.id, t.routine_id,
+              to_char(t.original_date, 'YYYY-MM-DD') as original_date,
+              to_char(t.scheduled_date, 'YYYY-MM-DD') as scheduled_date, t.status,
+              exists (
+                select 1 from app.mission_tasks mt
+                join app.missions m on m.family_id = mt.family_id and m.id = mt.mission_id
+                where mt.family_id = t.family_id and mt.task_id = t.id and m.completed_at is not null
+              ) as is_protected
+         from app.task_occurrences t
+        where t.family_id = $1 and t.id = $2 and t.deleted_at is null
+        for update of t`,
+      [familyId, taskId],
+    );
+    const row = result.rows[0];
+    return row === undefined ? undefined : toOccurrence(row);
+  }
+
+  public async listFutureOccurrences(
+    tx: TransactionContext,
+    familyId: string,
+    routineId: string,
+    fromOriginalDate: string,
+    taskTemplateId: string,
+  ): Promise<readonly RoutineOccurrenceRecord[]> {
+    const result = await asPostgresClient(tx).query<OccurrenceRow>(
+      `select t.id, t.routine_id,
+              to_char(t.original_date, 'YYYY-MM-DD') as original_date,
+              to_char(t.scheduled_date, 'YYYY-MM-DD') as scheduled_date, t.status,
+              exists (
+                select 1 from app.mission_tasks mt
+                join app.missions m on m.family_id = mt.family_id and m.id = mt.mission_id
+                where mt.family_id = t.family_id and mt.task_id = t.id and m.completed_at is not null
+              ) as is_protected
+         from app.task_occurrences t
+        where t.family_id = $1 and t.routine_id = $2 and t.task_template_id = $4
+          and t.original_date >= $3::date and t.deleted_at is null
+        order by t.original_date, t.id
+        for update of t`,
+      [familyId, routineId, fromOriginalDate, taskTemplateId],
+    );
+    return result.rows.map(toOccurrence);
+  }
+
+  public async updateConfiguration(
+    tx: TransactionContext,
+    params: {
+      readonly routine: RoutineRecord;
+      readonly title: string;
+      readonly weight: number;
+      readonly note: string | null;
+      readonly assigneeIds: readonly string[];
+      readonly now: Date;
+    },
+  ): Promise<void> {
+    const client = asPostgresClient(tx);
+    await client.query(
+      `update app.task_templates set title = $3, weight = $4, note = $5, updated_at = $6
+        where family_id = $1 and id = $2`,
+      [
+        params.routine.familyId,
+        params.routine.taskTemplateId,
+        params.title,
+        params.weight,
+        params.note,
+        params.now,
+      ],
+    );
+    await client.query(
+      `delete from app.routine_assignees where family_id = $1 and routine_id = $2`,
+      [params.routine.familyId, params.routine.id],
+    );
+    if (params.assigneeIds.length > 0) {
+      await client.query(
+        `insert into app.routine_assignees (family_id, routine_id, member_id)
+         select $1, $2, member_id from unnest($3::uuid[]) as assignee(member_id)`,
+        [params.routine.familyId, params.routine.id, params.assigneeIds],
+      );
+    }
+    await client.query(`update app.routines set updated_at = $3 where family_id = $1 and id = $2`, [
+      params.routine.familyId,
+      params.routine.id,
+      params.now,
+    ]);
+  }
+
+  public async updateOccurrences(
+    tx: TransactionContext,
+    params: {
+      readonly familyId: string;
+      readonly taskIds: readonly string[];
+      readonly title: string;
+      readonly weight: number;
+      readonly note: string | null;
+      readonly assigneeIds: readonly string[];
+      readonly actorId: string;
+      readonly now: Date;
+    },
+  ): Promise<void> {
+    if (params.taskIds.length === 0) return;
+    const client = asPostgresClient(tx);
+    // O evento captura os valores anteriores antes da atualização em lote.
+    await client.query(
+      `insert into app.task_events
+         (id, family_id, task_id, actor_id, event_type, old_values, new_values, created_at)
+       select gen_random_uuid(), t.family_id, t.id, $3, 'edited',
+              jsonb_build_object('title', t.title, 'weight', t.weight,
+                'scheduledDate', to_char(t.scheduled_date, 'YYYY-MM-DD'), 'note', t.note,
+                'assigneeIds', coalesce((select jsonb_agg(a.member_id order by a.member_id)
+                  from app.task_assignees a where a.family_id = t.family_id and a.task_id = t.id), '[]'::jsonb),
+                'status', t.status),
+              jsonb_build_object('title', $5::text, 'weight', $6::int,
+                'scheduledDate', to_char(t.scheduled_date, 'YYYY-MM-DD'), 'note', $7::text,
+                'assigneeIds', $8::uuid[], 'status', t.status), $4
+         from app.task_occurrences t
+        where t.family_id = $1 and t.id = any($2::uuid[]) and t.deleted_at is null`,
+      [
+        params.familyId,
+        params.taskIds,
+        params.actorId,
+        params.now,
+        params.title,
+        params.weight,
+        params.note,
+        params.assigneeIds,
+      ],
+    );
+    await client.query(
+      `update app.task_occurrences set title = $3, weight = $4, note = $5, updated_at = $6
+        where family_id = $1 and id = any($2::uuid[]) and deleted_at is null`,
+      [params.familyId, params.taskIds, params.title, params.weight, params.note, params.now],
+    );
+    await client.query(
+      `delete from app.task_assignees where family_id = $1 and task_id = any($2::uuid[])`,
+      [params.familyId, params.taskIds],
+    );
+    if (params.assigneeIds.length > 0) {
+      await client.query(
+        `insert into app.task_assignees (family_id, task_id, member_id)
+         select $1, task.id, assignee.member_id
+           from unnest($2::uuid[]) as task(id)
+          cross join unnest($3::uuid[]) as assignee(member_id)`,
+        [params.familyId, params.taskIds, params.assigneeIds],
+      );
+    }
+  }
+
+  public async wouldEmptyActiveMission(
+    tx: TransactionContext,
+    familyId: string,
+    taskIds: readonly string[],
+  ): Promise<boolean> {
+    if (taskIds.length === 0) return false;
+    const result = await asPostgresClient(tx).query(
+      `select 1 from app.missions m
+         join app.mission_tasks mt on mt.family_id = m.family_id and mt.mission_id = m.id
+        where m.family_id = $1 and m.completed_at is null
+        group by m.id
+       having bool_and(mt.task_id = any($2::uuid[]))
+        limit 1`,
+      [familyId, taskIds],
+    );
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  public async deleteOccurrences(
+    tx: TransactionContext,
+    params: {
+      readonly familyId: string;
+      readonly taskIds: readonly string[];
+      readonly actorId: string;
+      readonly now: Date;
+    },
+  ): Promise<readonly string[]> {
+    if (params.taskIds.length === 0) return [];
+    const client = asPostgresClient(tx);
+    await client.query(
+      `insert into app.task_events
+         (id, family_id, task_id, actor_id, event_type, old_values, new_values, created_at)
+       select gen_random_uuid(), t.family_id, t.id, $3, 'deleted',
+              jsonb_build_object('title', t.title, 'weight', t.weight,
+                'scheduledDate', to_char(t.scheduled_date, 'YYYY-MM-DD'), 'note', t.note,
+                'assigneeIds', coalesce((select jsonb_agg(a.member_id order by a.member_id)
+                  from app.task_assignees a where a.family_id = t.family_id and a.task_id = t.id), '[]'::jsonb),
+                'status', t.status), null, $4
+         from app.task_occurrences t
+        where t.family_id = $1 and t.id = any($2::uuid[]) and t.deleted_at is null`,
+      [params.familyId, params.taskIds, params.actorId, params.now],
+    );
+    await client.query(
+      `update app.kids_signals set discarded_at = $3
+        where family_id = $1 and task_id = any($2::uuid[]) and discarded_at is null`,
+      [params.familyId, params.taskIds, params.now],
+    );
+    const unlinked = await client.query<{ mission_id: string }>(
+      `delete from app.mission_tasks
+        where family_id = $1 and task_id = any($2::uuid[])
+        returning mission_id`,
+      [params.familyId, params.taskIds],
+    );
+    await client.query(
+      `update app.task_occurrences set deleted_at = $3, updated_at = $3
+        where family_id = $1 and id = any($2::uuid[]) and deleted_at is null`,
+      [params.familyId, params.taskIds, params.now],
+    );
+    return unlinked.rows.map((row) => row.mission_id);
+  }
+
+  public async endGeneration(
+    tx: TransactionContext,
+    familyId: string,
+    routineId: string,
+    now: Date,
+  ): Promise<void> {
+    await asPostgresClient(tx).query(
+      `update app.routines set is_active = false, deactivated_at = $3, updated_at = $3
+        where family_id = $1 and id = $2`,
+      [familyId, routineId, now],
+    );
+  }
   public async insertRoutine(
     tx: TransactionContext,
     params: {

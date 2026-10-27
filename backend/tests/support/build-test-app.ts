@@ -43,6 +43,8 @@ export interface TestApp {
   readonly deleteTask: UseCaseMock;
   readonly createRoutine: UseCaseMock;
   readonly getRoutine: UseCaseMock;
+  readonly updateFutureRoutine: UseCaseMock;
+  readonly deleteFutureRoutineTasks: UseCaseMock;
   readonly createMission: UseCaseMock;
   readonly editMission: UseCaseMock;
   readonly listMissions: UseCaseMock;
@@ -102,6 +104,8 @@ export function buildTestApp(): TestApp {
   const deleteTask: UseCaseMock = { execute: vi.fn() };
   const createRoutine: UseCaseMock = { execute: vi.fn() };
   const getRoutine: UseCaseMock = { execute: vi.fn() };
+  const updateFutureRoutine: UseCaseMock = { execute: vi.fn() };
+  const deleteFutureRoutineTasks: UseCaseMock = { execute: vi.fn() };
   const createMission: UseCaseMock = { execute: vi.fn() };
   const editMission: UseCaseMock = { execute: vi.fn() };
   const listMissions: UseCaseMock = { execute: vi.fn() };
@@ -148,6 +152,8 @@ export function buildTestApp(): TestApp {
     deleteTaskUseCase: deleteTask,
     createRoutineUseCase: createRoutine,
     getRoutineUseCase: getRoutine,
+    updateFutureRoutineUseCase: updateFutureRoutine,
+    deleteFutureRoutineTasksUseCase: deleteFutureRoutineTasks,
     createMissionUseCase: createMission,
     editMissionUseCase: editMission,
     listMissionsUseCase: listMissions,
@@ -191,6 +197,8 @@ export function buildTestApp(): TestApp {
     deleteTask,
     createRoutine,
     getRoutine,
+    updateFutureRoutine,
+    deleteFutureRoutineTasks,
     createMission,
     editMission,
     listMissions,

@@ -1,7 +1,7 @@
 # Requisitos funcionais e não funcionais
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.19\
+**Versão:** 1.20\
 **Data:** 2026-10-27\
 **Situação:** base documental consolidada
 
@@ -104,7 +104,7 @@ O sistema deve permitir a Administradores e Membros concluir tarefas Pendentes o
 
 ### RF13
 
-O sistema deve configurar início por DatePicker sem limites de produto, frequência da rotina e observação opcional de até 250 caracteres, sem exigir data final. Deve gerar ocorrências independentes sem duplicação. Materializar até o fim do mês seguinte, repor diariamente e completar em consulta se necessário; início além do horizonte permanece programado. Concluir uma ocorrência não altera outras. A alteração “selecionada e futuras” inclui a ocorrência de origem, preservando passado e ocorrências concluídas ou protegidas; altera somente título, peso, responsáveis e observação, sem mudar data inicial, frequência ou data prevista das ocorrências, e substitui edições individuais anteriores das futuras abrangidas.
+O sistema deve configurar início por DatePicker sem limites de produto, frequência da rotina e observação opcional de até 250 caracteres, sem exigir data final. Deve gerar ocorrências independentes sem duplicação. Materializar até o fim do mês seguinte, repor diariamente e completar em consulta se necessário; início além do horizonte permanece programado. Concluir uma ocorrência não altera outras. A alteração “selecionada e futuras” inclui a ocorrência de origem, preservando passado e ocorrências concluídas ou protegidas; altera somente título, peso, responsáveis e observação, sem mudar data inicial, frequência ou a data prevista já gravada em cada ocorrência, mesmo após edição individual, e substitui edições individuais anteriores dos campos permitidos nas futuras abrangidas.
 
 **Regras de negócio:** [RN11](01-regras-de-negocio.md#rn11), [RN14](01-regras-de-negocio.md#rn14), [RN16](01-regras-de-negocio.md#rn16), [RN17](01-regras-de-negocio.md#rn17), [RN67](01-regras-de-negocio.md#rn67)
 **Casos de uso:** [UC08](03-casos-de-uso.md#uc08)
@@ -773,6 +773,7 @@ A configuração de apelido deve ser protegida por titularidade no backend, incl
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.20 | 2026-10-27 | RF13: explicita a preservação da data prevista já gravada, inclusive após edição individual, no alcance “selecionada e futuras”. Para SPEC-008 Fase 2 / SCRUM-45. |
 | 1.19 | 2026-10-27 | RF13: alcance “selecionada e futuras” limitado a título, peso, responsáveis e observação, sem alterar data inicial, frequência ou data prevista, e substituindo edições individuais anteriores das futuras abrangidas. Para SPEC-008 Fase 2. |
 | 1.18 | 2026-10-22 | RF48: titular adulto edita o próprio nome de identificação (RF02), Kids não; consulta do próprio perfil inclui o nome da família. Para SPEC-006 (SCRUM-52). |
 | 1.17 | 2026-10-19 | RF59: exclusão que deixa apenas tarefas concluídas conclui a missão na mesma transação (RN38; SPEC-014/SPEC-007). RF01–03/RF38/RF40/RF48/RF67: foto antecipada, membros no rascunho, criação atômica e edição da família existente. RF11/RF22/RF24: apresentação por perfil sem alterar estado. RF41: emissão inicial direta e confirmação de reemissão. |

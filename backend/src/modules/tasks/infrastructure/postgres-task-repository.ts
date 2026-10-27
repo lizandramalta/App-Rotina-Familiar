@@ -452,14 +452,25 @@ export class PostgresTaskRepository implements TaskRepositoryPort, TaskQueryRepo
       assigneeIds: params.task.assigneeIds,
       status: params.task.status,
     };
-    await client.query(
-      `update app.task_templates
-          set title = $3, weight = $4, note = $5, updated_at = $6
-        where family_id = $1 and id = (
-          select task_template_id from app.task_occurrences where family_id = $1 and id = $2
-        )`,
-      [params.task.familyId, params.task.id, params.title, params.weight, params.note, params.now],
-    );
+    // Uma edição individual de ocorrência não redefine o template compartilhado
+    // da rotina; só UpdateFutureRoutine altera a configuração das próximas.
+    if (params.task.routineId === null) {
+      await client.query(
+        `update app.task_templates
+            set title = $3, weight = $4, note = $5, updated_at = $6
+          where family_id = $1 and id = (
+            select task_template_id from app.task_occurrences where family_id = $1 and id = $2
+          )`,
+        [
+          params.task.familyId,
+          params.task.id,
+          params.title,
+          params.weight,
+          params.note,
+          params.now,
+        ],
+      );
+    }
     await client.query(
       `update app.task_occurrences
           set title = $3, weight = $4, scheduled_date = $5, note = $6, status = $7, updated_at = $8

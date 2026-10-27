@@ -80,6 +80,10 @@ import {
 import { PostgresTaskRepository } from '../modules/tasks/infrastructure/postgres-task-repository.js';
 import { CreateRoutineUseCase } from '../modules/routines/application/create-routine-use-case.js';
 import { GetRoutineUseCase } from '../modules/routines/application/get-routine-use-case.js';
+import {
+  DeleteFutureRoutineTasksUseCase,
+  UpdateFutureRoutineUseCase,
+} from '../modules/routines/application/manage-routine-use-cases.js';
 import { PostgresRoutineRepository } from '../modules/routines/infrastructure/postgres-routine-repository.js';
 import { ReopenTaskUseCase } from '../modules/tasks/application/reopen-task-use-case.js';
 import { CloseEligibleMissions } from '../modules/missions/application/close-eligible-missions.js';
@@ -142,6 +146,8 @@ export interface ApplicationContainer {
   readonly deleteTaskUseCase: DeleteTaskUseCase;
   readonly createRoutineUseCase: CreateRoutineUseCase;
   readonly getRoutineUseCase: GetRoutineUseCase;
+  readonly updateFutureRoutineUseCase: UpdateFutureRoutineUseCase;
+  readonly deleteFutureRoutineTasksUseCase: DeleteFutureRoutineTasksUseCase;
   readonly createMissionUseCase: CreateMissionUseCase;
   readonly editMissionUseCase: EditMissionUseCase;
   readonly listMissionsUseCase: ListMissionsUseCase;
@@ -453,6 +459,18 @@ export function createContainer(config: Configuration): ApplicationContainer {
     transactionRunner,
     clock,
   });
+  const updateFutureRoutineUseCase = new UpdateFutureRoutineUseCase({
+    ...routineDependencies,
+    logger,
+  });
+  const deleteFutureRoutineTasksUseCase = new DeleteFutureRoutineTasksUseCase({
+    routineRepository,
+    taskRepository,
+    missionCloser: closeEligibleMissions,
+    transactionRunner,
+    clock,
+    logger,
+  });
 
   return {
     config,
@@ -499,6 +517,8 @@ export function createContainer(config: Configuration): ApplicationContainer {
     deleteTaskUseCase,
     createRoutineUseCase,
     getRoutineUseCase,
+    updateFutureRoutineUseCase,
+    deleteFutureRoutineTasksUseCase,
     createMissionUseCase,
     editMissionUseCase,
     listMissionsUseCase,

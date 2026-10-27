@@ -20,7 +20,10 @@ const NOW = new Date('2026-10-08T12:00:00.000Z');
 
 describe('CreateRoutineUseCase — SPEC-008', () => {
   let taskRepository: Record<'insertTaskTemplate' | 'countFamilyMembers', ReturnType<typeof vi.fn>>;
-  let routineRepository: Record<keyof RoutineRepositoryPort, ReturnType<typeof vi.fn>>;
+  let routineRepository: Record<
+    'insertRoutine' | 'findRoutine' | 'materializeBatch',
+    ReturnType<typeof vi.fn>
+  >;
   let familySettingsRepository: { findFamilyTimeZone: ReturnType<typeof vi.fn> };
   let transactionRunner: TransactionRunner;
   let useCase: CreateRoutineUseCase;
