@@ -5,5 +5,6 @@ import Foundation
 nonisolated enum FamilyTaskRoute: Hashable {
     case create
     case detail(UUID)
-    case edit(UUID)
+    /// `scope` comes from MOD-003 when the task is a routine occurrence (UX-008 §4).
+    case edit(UUID, scope: RoutineScope?)
 }

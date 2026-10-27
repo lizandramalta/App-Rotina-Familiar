@@ -444,4 +444,100 @@ struct TaskDetailViewModelTests {
         #expect(viewModel.canComplete)
         #expect(repository.completeCalls == [pending.id])
     }
+
+    private func routineOccurrence(status: TaskStatus = .pending) -> FamilyTask {
+        let base = fixture(status: status)
+        return FamilyTask(
+            id: base.id, title: base.title, weight: base.weight, scheduledDate: base.scheduledDate,
+            assigneeIDs: base.assigneeIDs, note: base.note, status: base.status,
+            routineID: routineRepositorySpyFixture.id, createdAt: base.createdAt
+        )
+    }
+
+    @Test("SPEC-008 UX-04: editing a routine occurrence asks the scope first; a single task opens TEL-013")
+    func editAsksScopeOnlyForRoutineOccurrences() async {
+        let routineTask = routineOccurrence()
+        let routineViewModel = makeViewModel(taskID: routineTask.id, repository: TaskRepositorySpy(taskResult: .success(routineTask)))
+        await routineViewModel.load()
+        #expect(routineViewModel.requestEdit() == false)
+        #expect(routineViewModel.scopePrompt == .edit)
+
+        let single = fixture(status: .pending)
+        let singleViewModel = makeViewModel(taskID: single.id, repository: TaskRepositorySpy(taskResult: .success(single)))
+        await singleViewModel.load()
+        #expect(singleViewModel.requestEdit() == true)
+        #expect(singleViewModel.scopePrompt == nil)
+    }
+
+    @Test("SPEC-008 CA-08: \"Esta tarefa e as futuras\" deletes through the routine after MOD-005 confirms")
+    func deletesFromHereOn() async {
+        let task = routineOccurrence()
+        let taskRepository = TaskRepositorySpy(taskResult: .success(task))
+        let routineRepository = RoutineRepositorySpy()
+        let viewModel = makeViewModel(taskID: task.id, repository: taskRepository, routineRepository: routineRepository)
+        await viewModel.load()
+
+        viewModel.requestDelete()
+        #expect(viewModel.scopePrompt == .delete)
+        viewModel.chooseDeleteScope(.thisAndFuture)
+        #expect(viewModel.isConfirmingDelete)
+        await viewModel.confirmDelete()
+
+        #expect(routineRepository.deleteFutureCalls.map(\.fromTaskID) == [task.id])
+        #expect(taskRepository.deleteCalls.isEmpty)
+        #expect(viewModel.isDeleted)
+    }
+
+    @Test("SPEC-008 UX-04: \"Somente esta tarefa\" keeps the individual deletion")
+    func deletesOnlyThisOccurrence() async {
+        let task = routineOccurrence()
+        let taskRepository = TaskRepositorySpy(taskResult: .success(task))
+        let routineRepository = RoutineRepositorySpy()
+        let viewModel = makeViewModel(taskID: task.id, repository: taskRepository, routineRepository: routineRepository)
+        await viewModel.load()
+
+        viewModel.requestDelete()
+        viewModel.chooseDeleteScope(.onlyThis)
+        await viewModel.confirmDelete()
+
+        #expect(taskRepository.deleteCalls == [task.id])
+        #expect(routineRepository.deleteFutureCalls.isEmpty)
+    }
+
+    @Test("SPEC-008 E-11: a mission that would be left empty blocks the deletion without leaving the detail")
+    func futureDeletionBlockedByMission() async {
+        let task = routineOccurrence()
+        let routineRepository = RoutineRepositorySpy(deleteFutureResult: .failure(RoutineError.missionWouldHaveNoTasks))
+        let viewModel = makeViewModel(
+            taskID: task.id,
+            repository: TaskRepositorySpy(taskResult: .success(task)),
+            routineRepository: routineRepository
+        )
+        await viewModel.load()
+
+        viewModel.requestDelete()
+        viewModel.chooseDeleteScope(.thisAndFuture)
+        await viewModel.confirmDelete()
+
+        #expect(viewModel.deleteBlock == .missionWouldHaveNoTasks)
+        #expect(viewModel.isDeleted == false)
+    }
+
+    @Test("SPEC-008 CA-10: an unconfirmed deletion is never retried and reloads the canonical state")
+    func uncertainFutureDeletion() async {
+        let task = routineOccurrence()
+        let taskRepository = TaskRepositorySpy(taskResult: .success(task))
+        let routineRepository = RoutineRepositorySpy(deleteFutureResult: .failure(RoutineError.uncertainOutcome))
+        let viewModel = makeViewModel(taskID: task.id, repository: taskRepository, routineRepository: routineRepository)
+        await viewModel.load()
+
+        viewModel.requestDelete()
+        viewModel.chooseDeleteScope(.thisAndFuture)
+        await viewModel.confirmDelete()
+
+        #expect(viewModel.banner == .deleteUncertain)
+        #expect(routineRepository.deleteFutureCalls.count == 1)
+        #expect(taskRepository.taskCalls.count == 2)
+    }
 }
+

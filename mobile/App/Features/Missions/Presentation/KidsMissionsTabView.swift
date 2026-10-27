@@ -83,7 +83,7 @@ struct KidsMissionsTabView: View {
                 repository: taskRepository,
                 routineRepository: routineRepository,
                 accessToken: accessToken,
-                onRequestEdit: {},
+                onRequestEdit: { _ in },
                 onDeleted: { path.removeAll() }
             )
         }

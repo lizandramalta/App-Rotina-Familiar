@@ -5,6 +5,12 @@ nonisolated protocol RoutineRepository: Sendable {
     func familyTimeZoneID(accessToken: String) async throws -> String
     func createRoutine(_ command: CreateRoutineCommand, accessToken: String) async throws -> Routine
     func routine(id: UUID, accessToken: String) async throws -> Routine
+    func updateFutureRoutine(
+        id: UUID,
+        command: UpdateFutureRoutineCommand,
+        accessToken: String
+    ) async throws -> UpdateFutureRoutineResult
+    func deleteFutureTasks(id: UUID, fromTaskID: UUID, accessToken: String) async throws -> DeleteFutureRoutineTasksResult
 }
 
 nonisolated struct CreateRoutineUseCase: Sendable {
@@ -20,5 +26,23 @@ nonisolated struct GetRoutineUseCase: Sendable {
 
     func execute(id: UUID, accessToken: String) async throws -> Routine {
         try await repository.routine(id: id, accessToken: accessToken)
+    }
+}
+
+/// SPEC-008 Fase 2 — CA-07: the open occurrence and the following ones.
+nonisolated struct UpdateFutureRoutineUseCase: Sendable {
+    let repository: any RoutineRepository
+
+    func execute(routineID: UUID, command: UpdateFutureRoutineCommand, accessToken: String) async throws -> UpdateFutureRoutineResult {
+        try await repository.updateFutureRoutine(id: routineID, command: command, accessToken: accessToken)
+    }
+}
+
+/// SPEC-008 Fase 2 — CA-08: deletes the open occurrence and the following ones, ending the routine.
+nonisolated struct DeleteFutureRoutineTasksUseCase: Sendable {
+    let repository: any RoutineRepository
+
+    func execute(routineID: UUID, fromTaskID: UUID, accessToken: String) async throws -> DeleteFutureRoutineTasksResult {
+        try await repository.deleteFutureTasks(id: routineID, fromTaskID: fromTaskID, accessToken: accessToken)
     }
 }

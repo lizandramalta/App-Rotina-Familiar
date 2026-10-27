@@ -76,6 +76,67 @@ struct HTTPRoutineRepositoryTests {
         await expectError(503, #"{"code":"DEPENDENCY_UNAVAILABLE"}"#, .unavailable)
     }
 
+    @Test("SPEC-008 CA-07 PATCH sends only fromTaskId and the editable fields, never recurrence or state")
+    func updateFuture() async throws {
+        let taskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000b5")!
+        let json = """
+        {"routine":\(routineJSON(state: "complete")),"updatedTaskIds":["\(taskID.uuidString.lowercased())"],"preservedTaskIds":[]}
+        """
+        let stub = RoutineStubHTTP.make(status: 200, json: json)
+
+        let result = try await stub.repository.updateFutureRoutine(
+            id: routineID,
+            command: UpdateFutureRoutineCommand(fromTaskID: taskID, title: "Regar", weight: .medium, assigneeIDs: [], note: nil),
+            accessToken: "access-1"
+        )
+
+        let request = try #require(stub.requests().first)
+        let body = try #require(JSONSerialization.jsonObject(with: request.body) as? [String: Any])
+        #expect(request.method == "PATCH")
+        #expect(request.url.path == "/v1/routines/\(routineID.uuidString.lowercased())")
+        #expect(Set(body.keys) == ["fromTaskId", "title", "weight", "assigneeIds", "note"])
+        #expect(body["note"] is NSNull)
+        #expect(result.updatedTaskIDs == [taskID])
+    }
+
+    @Test("SPEC-008 CA-08 POST future-task-deletions sends the source occurrence")
+    func deleteFuture() async throws {
+        let taskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000b5")!
+        let json = """
+        {"routineId":"\(routineID.uuidString.lowercased())","deletedTaskIds":["\(taskID.uuidString.lowercased())"],"preservedTaskIds":[],"generationEnded":true}
+        """
+        let stub = RoutineStubHTTP.make(status: 200, json: json)
+
+        let result = try await stub.repository.deleteFutureTasks(id: routineID, fromTaskID: taskID, accessToken: "access-1")
+
+        let request = try #require(stub.requests().first)
+        #expect(request.method == "POST")
+        #expect(request.url.path == "/v1/routines/\(routineID.uuidString.lowercased())/future-task-deletions")
+        #expect(result.deletedTaskIDs == [taskID])
+    }
+
+    @Test("SPEC-008 E-10/E-11 maps the 409 protections and a lost write as uncertain")
+    func futureScopeErrors() async {
+        let taskID = UUID()
+        let protected = RoutineStubHTTP.make(status: 409, json: #"{"code":"MISSION_COMPLETED_PROTECTED"}"#)
+        await #expect(throws: RoutineError.missionProtected) {
+            _ = try await protected.repository.updateFutureRoutine(
+                id: routineID,
+                command: UpdateFutureRoutineCommand(fromTaskID: taskID, title: "A", weight: .low, assigneeIDs: [], note: nil),
+                accessToken: "access-1"
+            )
+        }
+        let empty = RoutineStubHTTP.make(status: 409, json: #"{"code":"MISSION_WOULD_HAVE_NO_TASKS"}"#)
+        await #expect(throws: RoutineError.missionWouldHaveNoTasks) {
+            _ = try await empty.repository.deleteFutureTasks(id: routineID, fromTaskID: taskID, accessToken: "access-1")
+        }
+        let lost = RoutineStubHTTP.make(failure: URLError(.timedOut))
+        await #expect(throws: RoutineError.uncertainOutcome) {
+            _ = try await lost.repository.deleteFutureTasks(id: routineID, fromTaskID: taskID, accessToken: "access-1")
+        }
+        #expect(lost.requests().count == 1)
+    }
+
     private func expectError(_ status: Int, _ json: String, _ expected: RoutineError) async {
         let stub = RoutineStubHTTP.make(status: status, json: json)
         await #expect(throws: expected) {

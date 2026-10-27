@@ -284,4 +284,91 @@ struct TaskEditorViewModelTests {
         #expect(calls.first?.signalResolution == .keepAwaitingConfirmation)
         #expect(calls.first?.note == "Só a observação mudou")
     }
+
+    private func routineOccurrenceFixture(status: TaskStatus = .pending) -> FamilyTask {
+        let task = TaskRepositorySpy.fixture
+        return FamilyTask(
+            id: task.id, title: task.title, weight: task.weight, scheduledDate: task.scheduledDate,
+            assigneeIDs: task.assigneeIDs, note: task.note, status: status,
+            routineID: routineRepositorySpyFixture.id, createdAt: task.createdAt
+        )
+    }
+
+    @Test("SPEC-008 CA-07 / E-05 to E-08: \"Esta tarefa e as futuras\" saves through the routine, date locked, no MOD-014")
+    func savesThisAndFutureThroughRoutine() async {
+        let task = routineOccurrenceFixture(status: .awaitingConfirmation)
+        let repository = TaskRepositorySpy(taskResult: .success(task))
+        let routineRepository = RoutineRepositorySpy()
+        let viewModel = makeViewModel(mode: .edit(task.id, scope: .thisAndFuture), repository: repository, routineRepository: routineRepository)
+        await viewModel.load()
+        viewModel.title = "Arrumar os brinquedos da sala"
+
+        #expect(viewModel.isScheduledDateLocked)
+        #expect(viewModel.editingRecurrenceSummary == String(format: String(localized: "routines.recurrence.every_days"), 7))
+        await viewModel.saveIfValid()
+
+        #expect(viewModel.isSignalResolutionPresented == false)
+        #expect(repository.updateCalls.isEmpty)
+        let call = routineRepository.updateFutureCalls.first
+        #expect(call?.routineID == routineRepositorySpyFixture.id)
+        #expect(call?.command.fromTaskID == task.id)
+        #expect(call?.command.title == "Arrumar os brinquedos da sala")
+        #expect(viewModel.savedTask?.scheduledDate == task.scheduledDate)
+        #expect(viewModel.savedTask?.status == .awaitingConfirmation)
+    }
+
+    @Test("SPEC-008 UX-04: \"Somente esta tarefa\" keeps the individual edit with an editable date")
+    func savesOnlyThisIndividually() async {
+        let task = routineOccurrenceFixture()
+        let repository = TaskRepositorySpy(taskResult: .success(task))
+        let routineRepository = RoutineRepositorySpy()
+        let viewModel = makeViewModel(mode: .edit(task.id, scope: .onlyThis), repository: repository, routineRepository: routineRepository)
+        await viewModel.load()
+
+        #expect(viewModel.isScheduledDateLocked == false)
+        await viewModel.saveIfValid()
+
+        #expect(repository.updateCalls.count == 1)
+        #expect(routineRepository.updateFutureCalls.isEmpty)
+    }
+
+    @Test("SPEC-008 E-10: a protected source keeps the draft and explains the block")
+    func protectedSourceKeepsDraft() async {
+        let task = routineOccurrenceFixture()
+        let routineRepository = RoutineRepositorySpy(updateFutureResult: .failure(RoutineError.missionProtected))
+        let viewModel = makeViewModel(
+            mode: .edit(task.id, scope: .thisAndFuture),
+            repository: TaskRepositorySpy(taskResult: .success(task)),
+            routineRepository: routineRepository
+        )
+        await viewModel.load()
+        viewModel.title = "Novo título"
+
+        await viewModel.saveIfValid()
+
+        #expect(viewModel.banner == .missionProtected)
+        #expect(viewModel.savedTask == nil)
+        #expect(viewModel.title == "Novo título")
+    }
+
+    @Test("Figma MOD-001: the signed-in member is listed first as \"Você\"")
+    func currentMemberFirstAsYou() async {
+        let me = UUID()
+        let other = FamilyMember(id: UUID(), name: "Alex", role: .member, isFamilyCreator: false)
+        let viewModel = TaskEditorViewModel(
+            mode: .create,
+            repository: TaskRepositorySpy(),
+            routineRepository: RoutineRepositorySpy(),
+            familyRepository: FamilyMembersStub(members: [other, FamilyMember(id: me, name: "Maria", role: .administrator, isFamilyCreator: true)]),
+            accessToken: "access-1",
+            currentMemberID: me,
+            today: { self.fixedToday }
+        )
+        await viewModel.loadAssigneeCandidatesIfNeeded()
+
+        #expect(viewModel.orderedMembers.first?.id == me)
+        #expect(viewModel.displayName(for: viewModel.orderedMembers[0]) == String(localized: "tasks.detail.you"))
+        #expect(viewModel.displayName(for: other) == "Alex")
+    }
 }
+

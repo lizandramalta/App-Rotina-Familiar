@@ -16,7 +16,7 @@ final class RoutineCreationUITests: XCTestCase {
         XCTAssertTrue(title.waitForExistence(timeout: 5))
         title.tap()
         title.typeText("Regar as plantas")
-        app.buttons.matching(NSPredicate(format: "label == %@", "Pouco esforço")).firstMatch.tap()
+        app.buttons.matching(NSPredicate(format: "label == %@", "P1 - Baixo Esforço")).firstMatch.tap()
         app.buttons["tasks.editor.recurrence"].tap()
 
         let sevenDays = app.buttons["routines.recurrence.option.7"]

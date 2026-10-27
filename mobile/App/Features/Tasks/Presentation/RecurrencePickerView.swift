@@ -17,10 +17,13 @@ struct RecurrencePickerView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("routines.recurrence.start_section") {
+                Section {
                     DatePicker("routines.recurrence.start_date", selection: $startDate, displayedComponents: .date)
                         .datePickerStyle(.compact)
+                        .frame(minHeight: 44)
                         .accessibilityIdentifier("routines.recurrence.start_date")
+                } header: {
+                    sectionHeader("routines.recurrence.start_section")
                 }
 
                 Section {
@@ -29,31 +32,49 @@ struct RecurrencePickerView: View {
                         option(value, label: label(for: value))
                     }
                 } header: {
-                    Text("routines.recurrence.frequency_section")
+                    sectionHeader("routines.recurrence.frequency_section")
                 } footer: {
                     Text("routines.recurrence.no_end_date_hint")
+                        .font(.footnote)
                 }
             }
+            // Prototype spacing: content starts 8 pt below the bar and sections sit close together.
+            .listSectionSpacing(.compact)
+            .contentMargins(.top, 8, for: .scrollContent)
+            // Content that fits stays still instead of bouncing under the bar (larger text still scrolls).
+            .scrollBounceBehavior(.basedOnSize)
+            .environment(\.defaultMinListRowHeight, 50)
             .navigationTitle("routines.recurrence.title")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("routines.recurrence.cancel") { dismiss() }
-                        .accessibilityIdentifier("routines.recurrence.cancel")
+                ToolbarItem(placement: .cancellationAction) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
+                    .accessibilityLabel("routines.recurrence.cancel")
+                    .accessibilityIdentifier("routines.recurrence.cancel")
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
+                // `.confirmationAction` renders the prominent filled ✓ circle of the prototype.
+                ToolbarItem(placement: .confirmationAction) {
                     Button {
                         onConfirm(startDate, frequency)
                         dismiss()
                     } label: {
                         Image(systemName: "checkmark")
+                            .fontWeight(.semibold)
                     }
+                    .buttonStyle(.glassProminent)
                     .accessibilityLabel("routines.recurrence.confirm")
                     .accessibilityIdentifier("routines.recurrence.confirm")
                 }
             }
         }
-        .presentationDetents([.large])
+        // One size, as in the prototype: a second (large) detent made a scroll resize the sheet
+        // into a different-looking full-height card. Scrolling now only moves the content.
+        .presentationDetents([.fraction(0.82)])
+        .presentationContentInteraction(.scrolls)
         .presentationDragIndicator(.visible)
         .frame(maxWidth: 540)
     }
@@ -68,6 +89,7 @@ struct RecurrencePickerView: View {
                 Spacer()
                 if frequency == value {
                     Image(systemName: "checkmark")
+                        .fontWeight(.semibold)
                         .foregroundStyle(.primary)
                 }
             }
@@ -75,9 +97,19 @@ struct RecurrencePickerView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
         .accessibilityLabel(Text(label))
         .accessibilityValue(frequency == value ? Text("routines.recurrence.selected") : Text(""))
         .accessibilityIdentifier("routines.recurrence.option.\(value?.rawValue ?? 0)")
+    }
+
+    /// Small secondary section title, as in the prototype, instead of the large default header.
+    private func sectionHeader(_ key: LocalizedStringKey) -> some View {
+        // An explicit label color: `.secondary` inside a Form header is dimmed twice.
+        Text(key)
+            .font(.footnote)
+            .foregroundStyle(Color(uiColor: .secondaryLabel))
+            .textCase(nil)
     }
 
     private func label(for value: RoutineFrequency) -> String {

@@ -55,6 +55,7 @@ struct MyTasksTabView: View {
                 routineRepository: routineRepository,
                 familyRepository: familyRepository,
                 accessToken: accessToken,
+                currentMemberID: currentMemberID,
                 onSaved: { _ in routineFeedback = nil; path.removeAll(); listRevision += 1 },
                 onRoutineSaved: { routine in
                     routineFeedback = routine
@@ -72,18 +73,19 @@ struct MyTasksTabView: View {
                 routineRepository: routineRepository,
                 familyRepository: familyRepository,
                 accessToken: accessToken,
-                onRequestEdit: { path.append(.edit(taskID)) },
+                onRequestEdit: { scope in path.append(.edit(taskID, scope: scope)) },
                 onDeleted: { path.removeAll(); listRevision += 1 },
                 onCompleted: { listRevision += 1 },
                 onReopened: { listRevision += 1 }
             )
-        case let .edit(taskID):
+        case let .edit(taskID, scope):
             TaskEditorView(
-                mode: .edit(taskID),
+                mode: .edit(taskID, scope: scope),
                 repository: taskRepository,
                 routineRepository: routineRepository,
                 familyRepository: familyRepository,
                 accessToken: accessToken,
+                currentMemberID: currentMemberID,
                 onSaved: { _ in if !path.isEmpty { path.removeLast() }; listRevision += 1 },
                 onRoutineSaved: { _ in }
             )

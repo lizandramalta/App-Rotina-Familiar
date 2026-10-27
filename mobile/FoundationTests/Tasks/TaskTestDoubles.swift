@@ -229,18 +229,32 @@ final class RoutineRepositorySpy: RoutineRepository, @unchecked Sendable {
     private let getResult: Result<Routine, Error>
     private var _createCalls: [CreateRoutineCommand] = []
     private var _getCalls: [UUID] = []
+    private let updateFutureResult: Result<UpdateFutureRoutineResult, Error>
+    private let deleteFutureResult: Result<DeleteFutureRoutineTasksResult, Error>
+    private var _updateFutureCalls: [(routineID: UUID, command: UpdateFutureRoutineCommand)] = []
+    private var _deleteFutureCalls: [(routineID: UUID, fromTaskID: UUID)] = []
 
     var createCalls: [CreateRoutineCommand] { lock.withLock { _createCalls } }
     var getCalls: [UUID] { lock.withLock { _getCalls } }
+    var updateFutureCalls: [(routineID: UUID, command: UpdateFutureRoutineCommand)] { lock.withLock { _updateFutureCalls } }
+    var deleteFutureCalls: [(routineID: UUID, fromTaskID: UUID)] { lock.withLock { _deleteFutureCalls } }
 
     init(
         timeZoneResult: Result<String, Error> = .success("America/Sao_Paulo"),
         createResult: Result<Routine, Error> = .success(routineRepositorySpyFixture),
-        getResult: Result<Routine, Error> = .success(routineRepositorySpyFixture)
+        getResult: Result<Routine, Error> = .success(routineRepositorySpyFixture),
+        updateFutureResult: Result<UpdateFutureRoutineResult, Error> = .success(
+            UpdateFutureRoutineResult(routine: routineRepositorySpyFixture, updatedTaskIDs: [], preservedTaskIDs: [])
+        ),
+        deleteFutureResult: Result<DeleteFutureRoutineTasksResult, Error> = .success(
+            DeleteFutureRoutineTasksResult(routineID: routineRepositorySpyFixture.id, deletedTaskIDs: [], preservedTaskIDs: [])
+        )
     ) {
         self.timeZoneResult = timeZoneResult
         self.createResult = createResult
         self.getResult = getResult
+        self.updateFutureResult = updateFutureResult
+        self.deleteFutureResult = deleteFutureResult
     }
 
     func familyTimeZoneID(accessToken: String) async throws -> String { try timeZoneResult.get() }
@@ -253,5 +267,19 @@ final class RoutineRepositorySpy: RoutineRepository, @unchecked Sendable {
     func routine(id: UUID, accessToken: String) async throws -> Routine {
         lock.withLock { _getCalls.append(id) }
         return try getResult.get()
+    }
+
+    func updateFutureRoutine(
+        id: UUID,
+        command: UpdateFutureRoutineCommand,
+        accessToken: String
+    ) async throws -> UpdateFutureRoutineResult {
+        lock.withLock { _updateFutureCalls.append((id, command)) }
+        return try updateFutureResult.get()
+    }
+
+    func deleteFutureTasks(id: UUID, fromTaskID: UUID, accessToken: String) async throws -> DeleteFutureRoutineTasksResult {
+        lock.withLock { _deleteFutureCalls.append((id, fromTaskID)) }
+        return try deleteFutureResult.get()
     }
 }

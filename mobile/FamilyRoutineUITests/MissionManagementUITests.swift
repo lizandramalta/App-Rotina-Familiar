@@ -83,7 +83,7 @@ final class MissionManagementUITests: XCTestCase {
         XCTAssertTrue(newTaskTitleField.waitForExistence(timeout: 5))
         newTaskTitleField.tap()
         newTaskTitleField.typeText("Tirar o lixo")
-        app.buttons["Pouco esforço"].tap()
+        app.buttons["P1 - Baixo Esforço"].tap()
         app.buttons["tasks.editor.save"].tap()
 
         let newRow = app.staticTexts["Tirar o lixo"]

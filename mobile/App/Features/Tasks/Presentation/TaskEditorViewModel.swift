@@ -15,11 +15,14 @@ enum TaskEditorBanner: Equatable {
     case rejected
     case routineUnavailable
     case routineUncertainOutcome
+    /// `ROUTINE_SOURCE_TASK_INVALID` — the open occurrence can no longer define the scope.
+    case routineSourceInvalid
 }
 
 enum TaskEditorMode: Equatable {
     case create
-    case edit(UUID)
+    /// `scope` is set only when editing a routine occurrence through MOD-003 (UX-008 §4).
+    case edit(UUID, scope: RoutineScope? = nil)
 }
 
 /// Backs TEL-013 (single-task fields only — recurrence belongs to SPEC-008). Pushed, never a sheet.
@@ -31,10 +34,14 @@ final class TaskEditorViewModel {
     private let createTask: CreateTaskUseCase
     private let updateTask: UpdateTaskUseCase
     private let createRoutine: CreateRoutineUseCase
+    private let getRoutine: GetRoutineUseCase
+    private let updateFutureRoutine: UpdateFutureRoutineUseCase
     private let routineRepository: any RoutineRepository
     private let familyRepository: any FamilyRepository
     private let accessToken: String
     private let today: () -> Date
+    /// Lets MOD-001 and the Quem faz summary show the signed-in member as "Você" (Figma MOD-001).
+    let currentMemberID: UUID?
 
     var title = ""
     var weight: EffortWeight?
@@ -54,6 +61,10 @@ final class TaskEditorViewModel {
     private(set) var loadFailed = false
     /// Set once the existing task loads in edit mode; `nil` while creating or still loading.
     private(set) var currentStatus: TaskStatus?
+    /// The occurrence being edited, kept to rebuild it after a routine-scope save.
+    private var loadedTask: FamilyTask?
+    /// The routine of the occurrence being edited, shown read-only in the Repetição row.
+    private(set) var editingRoutine: Routine?
 
     private(set) var isSaving = false
     private(set) var banner: TaskEditorBanner?
@@ -85,13 +96,17 @@ final class TaskEditorViewModel {
         routineRepository: any RoutineRepository,
         familyRepository: any FamilyRepository,
         accessToken: String,
+        currentMemberID: UUID? = nil,
         today: @escaping () -> Date = Date.init
     ) {
         self.mode = mode
+        self.currentMemberID = currentMemberID
         self.getTaskDetail = GetTaskDetailUseCase(repository: repository)
         self.createTask = CreateTaskUseCase(repository: repository)
         self.updateTask = UpdateTaskUseCase(repository: repository)
         self.createRoutine = CreateRoutineUseCase(repository: routineRepository)
+        self.getRoutine = GetRoutineUseCase(repository: routineRepository)
+        self.updateFutureRoutine = UpdateFutureRoutineUseCase(repository: routineRepository)
         self.routineRepository = routineRepository
         self.familyRepository = familyRepository
         self.accessToken = accessToken
@@ -116,6 +131,24 @@ final class TaskEditorViewModel {
         return false
     }
 
+    var routineScope: RoutineScope? {
+        if case let .edit(_, scope) = mode { return scope }
+        return nil
+    }
+
+    /// "Esta tarefa e as futuras" never moves occurrences: the date stays as generated (SPEC-008 E-07).
+    var isScheduledDateLocked: Bool {
+        routineScope == .thisAndFuture
+    }
+
+    /// Editing never turns a single task into a routine nor changes a routine's frequency (UX-008 UX-05).
+    var editingRecurrenceSummary: String {
+        guard let frequency = editingRoutine?.frequency else {
+            return loadedTask?.routineID == nil ? String(localized: "routines.recurrence.none") : ""
+        }
+        return Self.summary(for: frequency)
+    }
+
     /// The form only enables Salvar once title and weight are both valid (UX-007 §5.1).
     var isFormValid: Bool {
         guard case .success = TaskValidation.validatedTitle(title) else {
@@ -125,7 +158,7 @@ final class TaskEditorViewModel {
     }
 
     func load() async {
-        guard case let .edit(taskID) = mode else {
+        guard case let .edit(taskID, _) = mode else {
             return
         }
         isLoading = true
@@ -140,10 +173,25 @@ final class TaskEditorViewModel {
             note = task.note ?? ""
             assigneeIDs = Set(task.assigneeIDs)
             currentStatus = task.status
+            loadedTask = task
+            if let routineID = task.routineID {
+                // Only feeds the read-only summary; a failure leaves the row empty, never blocks editing.
+                editingRoutine = try? await getRoutine.execute(id: routineID, accessToken: accessToken)
+            }
             initialSnapshot = Snapshot(title: title, weight: weight, scheduledDate: scheduledDate, note: note, assigneeIDs: assigneeIDs, frequency: nil)
         } catch {
             loadFailed = true
         }
+    }
+
+    /// The signed-in member first, then the others in the directory order (Figma MOD-001).
+    var orderedMembers: [FamilyMember] {
+        let current = availableMembers.filter { $0.id == currentMemberID }
+        return current + availableMembers.filter { $0.id != currentMemberID }
+    }
+
+    func displayName(for member: FamilyMember) -> String {
+        member.id == currentMemberID ? String(localized: "tasks.detail.you") : member.name
     }
 
     func setAssignees(_ ids: Set<UUID>) {
@@ -214,7 +262,8 @@ final class TaskEditorViewModel {
         guard validate() else {
             return
         }
-        if currentStatus == .awaitingConfirmation, signalResolutionChoice == nil {
+        // MOD-014 belongs to individual edits only; the routine scope never changes states (SPEC-008 E-08).
+        if routineScope != .thisAndFuture, currentStatus == .awaitingConfirmation, signalResolutionChoice == nil {
             isSignalResolutionPresented = true
             return
         }
@@ -295,7 +344,32 @@ final class TaskEditorViewModel {
                         accessToken: accessToken
                     )
                 }
-            case let .edit(taskID):
+            case let .edit(_, .thisAndFuture?):
+                guard let loadedTask, let routineID = loadedTask.routineID else { return }
+                _ = try await updateFutureRoutine.execute(
+                    routineID: routineID,
+                    command: UpdateFutureRoutineCommand(
+                        fromTaskID: loadedTask.id,
+                        title: validatedTitle,
+                        weight: weight,
+                        assigneeIDs: Array(assigneeIDs),
+                        note: validatedNote
+                    ),
+                    accessToken: accessToken
+                )
+                // Date and state are untouched by this scope, so the occurrence is rebuilt locally.
+                savedTask = FamilyTask(
+                    id: loadedTask.id,
+                    title: validatedTitle,
+                    weight: weight,
+                    scheduledDate: loadedTask.scheduledDate,
+                    assigneeIDs: Array(assigneeIDs),
+                    note: validatedNote,
+                    status: loadedTask.status,
+                    routineID: routineID,
+                    createdAt: loadedTask.createdAt
+                )
+            case let .edit(taskID, _):
                 savedTask = try await updateTask.execute(
                     UpdateTaskCommand(
                         taskID: taskID,
@@ -310,7 +384,9 @@ final class TaskEditorViewModel {
                 )
             }
         } catch {
-            if frequency != nil, mode == .create {
+            if routineScope == .thisAndFuture {
+                handleFutureRoutineFailure(error)
+            } else if frequency != nil, mode == .create {
                 handleRoutineFailure(error)
             } else {
                 handleSaveFailure(error)
@@ -330,7 +406,24 @@ final class TaskEditorViewModel {
             startDateError = fieldErrors["startDate"] != nil
             frequencyError = fieldErrors["frequencyDays"] != nil
             banner = .rejected
-        case .notFound, .rejected, nil:
+        case .notFound, .rejected, .missionProtected, .missionWouldHaveNoTasks, nil:
+            banner = .rejected
+        }
+    }
+
+    private func handleFutureRoutineFailure(_ error: Error) {
+        switch error as? RoutineError {
+        case .uncertainOutcome, .network, .unavailable:
+            banner = .routineUncertainOutcome
+        case .actionNotAllowed:
+            banner = .actionNotAllowed
+        case .missionProtected:
+            banner = .missionProtected
+        case let .validationFailed(fieldErrors):
+            if fieldErrors["title"] != nil { titleError = .invalid }
+            if fieldErrors["note"] != nil { noteError = .invalid }
+            banner = fieldErrors["fromTaskId"] != nil ? .routineSourceInvalid : .rejected
+        case .notFound, .rejected, .missionWouldHaveNoTasks, nil:
             banner = .rejected
         }
     }
@@ -364,6 +457,10 @@ final class TaskEditorViewModel {
 
     var recurrenceSummary: String {
         guard let frequency else { return String(localized: "routines.recurrence.none") }
+        return Self.summary(for: frequency)
+    }
+
+    private static func summary(for frequency: RoutineFrequency) -> String {
         if frequency == .daily { return String(localized: "routines.recurrence.daily") }
         return String(format: String(localized: "routines.recurrence.every_days"), frequency.rawValue)
     }
