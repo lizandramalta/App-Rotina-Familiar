@@ -137,6 +137,15 @@ final class AppContainer {
         )
     }
 
+    func makeKidsReviewQueueViewModel(sessionStore: AppSessionStore) -> KidsReviewQueueViewModel {
+        KidsReviewQueueViewModel(
+            repository: kidsSignalRepository,
+            accessTokenProvider: { [weak sessionStore] in
+                sessionStore?.accessToken
+            }
+        )
+    }
+
     func makeKidsTasksTabView(
         session: ActiveFamilySession,
         accessToken: String,

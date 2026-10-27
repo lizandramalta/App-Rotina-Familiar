@@ -1742,6 +1742,96 @@
         }
       }
     },
+    "kidsReview.queue.empty": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não há tarefas aguardando avaliação."
+          }
+        }
+      }
+    },
+    "kidsReview.queue.error_subtitle": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verifique sua conexão e tente novamente."
+          }
+        }
+      }
+    },
+    "kidsReview.queue.error_title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível carregar a fila"
+          }
+        }
+      }
+    },
+    "kidsReview.queue.header": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Da sinalização mais antiga para a mais recente."
+          }
+        }
+      }
+    },
+    "kidsReview.queue.item_signaled_by": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sinalizado por %1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "kidsReview.queue.no_photo": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem foto"
+          }
+        }
+      }
+    },
+    "kidsReview.queue.retry": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tentar novamente"
+          }
+        }
+      }
+    },
+    "kidsReview.queue.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirmações Kids"
+          }
+        }
+      }
+    },
+    "kidsReview.queue.with_photo": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Com foto"
+          }
+        }
+      }
+    },
     "memberInvite.a11y.action_hint": {
       "localizations": {
         "pt-BR": {
