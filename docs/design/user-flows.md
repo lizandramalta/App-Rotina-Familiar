@@ -1,9 +1,9 @@
-# User flows — versão 1.17
+# User flows — versão 1.18
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão dos fluxos:** 1.17\
+**Versão dos fluxos:** 1.18\
 **Base funcional:** RN 1.18 / RF 1.17 / UC 1.18\
-**Screen map:** 1.15 — revisão de 2026-10-26\
+**Screen map:** 1.16 — revisão de 2026-10-26\
 **Data:** 2026-10-26\
 **Situação:** primeira versão para revisão de design
 
@@ -17,7 +17,7 @@ Cada fluxo representa um objetivo do usuário e usa as telas `TEL` e os modais `
 
 Nos diagramas, retângulos representam telas ou ações, losangos representam decisões e formas arredondadas representam resultados ou pontos de entrada/saída. Um nó de ação ou resultado não cria uma tela adicional. As setas mostram a sequência dentro daquele objetivo. A condição escrita na seta determina o caminho.
 
-**Minhas tarefas, Meu perfil, Missões e conquistas e Família são destinos independentes da navegação principal adulta.** Minhas tarefas é o destino inicial após acesso. Os fluxos iniciados em Família, Meu perfil ou Missões não passam por Minhas tarefas. Kids possuem duas abas independentes: Minhas tarefas e Missões e conquistas; Meu perfil é acessado pelo avatar/cabeçalho.
+**Tarefas, Perfil, Missões e Família são destinos independentes da navegação principal adulta.** Tarefas é o destino inicial após acesso. Os fluxos iniciados em Família, Perfil ou Missões não passam por Tarefas. Kids possuem duas abas independentes: Minhas tarefas e Missões e conquistas; Meu perfil é acessado pelo avatar/cabeçalho.
 
 O detalhamento traduz a base 1.5 em caminhos para design; as decisões de 2026-10-05 estão consolidadas nas regras e no registro de arquitetura. Falhas e retornos comuns são definidos abaixo e se aplicam a todos os diagramas, mesmo quando não repetidos em cada desenho.
 
@@ -611,6 +611,7 @@ Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imedi
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.18 | UC 1.18 | 1.16 | 2026-10-26 | Alinha os nomes das abas adultas ao protótipo de TEL-010; percursos, ações e permissões permanecem iguais. |
 | 1.17 | UC 1.18 | 1.15 | 2026-10-26 | UF-06/UF-08: atualização imediata no círculo, última intenção por tarefa, comandos em sequência e restauração/reconciliação após falhas. |
 | 1.16 | UC 1.18 | 1.15 | 2026-10-26 | UF-06/UF-08 adicionam o círculo da lista pessoal como entrada para concluir/reabrir, sem mudar permissões, confirmação ou efeitos. |
 | 1.15 | RN 1.18 / RF 1.17 / UC 1.16 | 1.14 | 2026-10-19 | UF-01 cria família e membros iniciais juntos em TEL-002, mantém TEL-056 para convites e retorna à edição sem nova criação; foto antecipada. UF-02/12 separam emissão direta de reemissão confirmada; UF-04 apresenta estado pessoal por perfil. |

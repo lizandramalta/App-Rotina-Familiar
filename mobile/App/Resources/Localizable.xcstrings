@@ -3896,6 +3896,36 @@
         }
       }
     },
+    "tasks.adult.missionsTab": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Missões"
+          }
+        }
+      }
+    },
+    "tasks.adult.profileTab": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perfil"
+          }
+        }
+      }
+    },
+    "tasks.adult.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tarefas"
+          }
+        }
+      }
+    },
     "tasks.common.error_action_not_allowed": {
       "localizations": {
         "pt-BR": {
@@ -4306,6 +4336,26 @@
         }
       }
     },
+    "tasks.personal.and": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "e"
+          }
+        }
+      }
+    },
+    "tasks.personal.completedCountFormat": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$d de %2$d concluídas"
+          }
+        }
+      }
+    },
     "tasks.personal.dailyProgress": {
       "localizations": {
         "pt-BR": {
@@ -4316,12 +4366,42 @@
         }
       }
     },
+    "tasks.personal.dateSectionFormat": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ | %2$d Tarefas"
+          }
+        }
+      }
+    },
     "tasks.personal.emptyDay": {
       "localizations": {
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Sem tarefas para este dia"
+          }
+        }
+      }
+    },
+    "tasks.personal.emptyHint": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tarefas atribuídas a você aparecem aqui."
+          }
+        }
+      }
+    },
+    "tasks.personal.encouragement": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Você consegue!"
           }
         }
       }
@@ -4346,12 +4426,32 @@
         }
       }
     },
+    "tasks.personal.noTasks": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem tarefas"
+          }
+        }
+      }
+    },
     "tasks.personal.openDetailHint": {
       "localizations": {
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Abrir detalhe"
+          }
+        }
+      }
+    },
+    "tasks.personal.otherMember": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "outra pessoa"
           }
         }
       }
@@ -4402,6 +4502,66 @@
           "stringUnit": {
             "state": "translated",
             "value": "hoje"
+          }
+        }
+      }
+    },
+    "tasks.personal.todaySectionFormat": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoje | %d Tarefas"
+          }
+        }
+      }
+    },
+    "tasks.personal.unassigned": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem responsável"
+          }
+        }
+      }
+    },
+    "tasks.personal.weightHigh": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "P3 - Alto Esforço"
+          }
+        }
+      }
+    },
+    "tasks.personal.weightLow": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "P1 - Baixo Esforço"
+          }
+        }
+      }
+    },
+    "tasks.personal.weightMedium": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "P2 - Médio Esforço"
+          }
+        }
+      }
+    },
+    "tasks.personal.you": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Você"
           }
         }
       }
