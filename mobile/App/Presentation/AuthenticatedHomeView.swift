@@ -219,7 +219,7 @@ struct AuthenticatedHomeView: View {
                     routineRepository: myTasksTab.routineRepository,
                     familyRepository: myTasksTab.familyRepository,
                     accessToken: myTasksTab.accessToken,
-                    onRequestEdit: { familyTaskPath.append(.edit(taskID)) },
+                    onRequestEdit: { scope in familyTaskPath.append(.edit(taskID, scope: scope)) },
                     onDeleted: {
                         familyTaskPath.removeAll()
                         Task { await familyOverviewViewModel.loadInitial() }
@@ -227,13 +227,14 @@ struct AuthenticatedHomeView: View {
                     onCompleted: { Task { await familyOverviewViewModel.loadInitial() } },
                     onReopened: { Task { await familyOverviewViewModel.loadInitial() } }
                 )
-            case let .edit(taskID):
+            case let .edit(taskID, scope):
                 TaskEditorView(
-                    mode: .edit(taskID),
+                    mode: .edit(taskID, scope: scope),
                     repository: myTasksTab.taskRepository,
                     routineRepository: myTasksTab.routineRepository,
                     familyRepository: myTasksTab.familyRepository,
                     accessToken: myTasksTab.accessToken,
+                    currentMemberID: session.memberID,
                     onSaved: { _ in
                         if !familyTaskPath.isEmpty { familyTaskPath.removeLast() }
                         Task { await familyOverviewViewModel.loadInitial() }

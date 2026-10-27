@@ -20,6 +20,7 @@ struct TaskEditorView: View {
         routineRepository: any RoutineRepository,
         familyRepository: any FamilyRepository,
         accessToken: String,
+        currentMemberID: UUID? = nil,
         onSaved: @escaping (FamilyTask) -> Void,
         onRoutineSaved: @escaping (Routine) -> Void
     ) {
@@ -28,7 +29,8 @@ struct TaskEditorView: View {
             repository: repository,
             routineRepository: routineRepository,
             familyRepository: familyRepository,
-            accessToken: accessToken
+            accessToken: accessToken,
+            currentMemberID: currentMemberID
         ))
         self.onSaved = onSaved
         self.onRoutineSaved = onRoutineSaved
@@ -65,7 +67,8 @@ struct TaskEditorView: View {
                 .accessibilityIdentifier("tasks.editor.back")
                 .accessibilityLabel("Voltar")
             }
-            ToolbarItem(placement: .navigationBarTrailing) {
+            // `.confirmationAction` renders the prominent filled ✓ circle of the prototype (UX-007 §5.1).
+            ToolbarItem(placement: .confirmationAction) {
                 if viewModel.isSaving {
                     ProgressView()
                         .accessibilityLabel("tasks.form.submitting")
@@ -74,7 +77,9 @@ struct TaskEditorView: View {
                         Task { await viewModel.saveIfValid() }
                     } label: {
                         Image(systemName: "checkmark")
+                            .fontWeight(.semibold)
                     }
+                    .buttonStyle(.glassProminent)
                     .disabled(!viewModel.isFormValid)
                     .accessibilityIdentifier("tasks.editor.save")
                     .accessibilityLabel("tasks.form.submit")
@@ -92,7 +97,11 @@ struct TaskEditorView: View {
             Text("tasks.form.discard_message")
         }
         .sheet(isPresented: $viewModel.isAssigneePickerPresented) {
+            // One size, as in the prototype: scrolling moves the list, never resizes the sheet.
             AssigneePickerView(viewModel: viewModel)
+                .presentationDetents([.medium])
+                .presentationContentInteraction(.scrolls)
+                .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $viewModel.isSignalResolutionPresented) {
             SignalResolutionView(viewModel: viewModel)
@@ -104,6 +113,8 @@ struct TaskEditorView: View {
         }
         .task {
             await viewModel.load()
+            // Quem faz shows names, not a count, so the family directory loads with the form.
+            await viewModel.loadAssigneeCandidatesIfNeeded()
         }
         .onChange(of: viewModel.savedTask) { _, savedTask in
             if let savedTask {
@@ -118,13 +129,21 @@ struct TaskEditorView: View {
     @ViewBuilder
     private var form: some View {
         Form {
+            // Title and note share one card, with both counters in its footer (UX-007 §5.1).
             Section {
-                VStack(alignment: .leading, spacing: 4) {
-                    TextField("tasks.form.title_placeholder", text: $viewModel.title)
-                        .accessibilityIdentifier("tasks.editor.title")
-                    Text(Self.counterText(key: "tasks.form.title_counter", count: viewModel.title.count))
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
+                TextField("tasks.form.title_placeholder", text: $viewModel.title)
+                    .accessibilityIdentifier("tasks.editor.title")
+                VStack(alignment: .leading, spacing: 6) {
+                    TextField("tasks.form.note_placeholder", text: $viewModel.note, axis: .vertical)
+                        .lineLimit(1 ... 6)
+                        .accessibilityIdentifier("tasks.editor.note")
+                    HStack(spacing: 12) {
+                        Spacer()
+                        Text(Self.counterText(key: "tasks.form.title_counter", count: viewModel.title.count))
+                        Text(Self.counterText(key: "tasks.form.note_counter", count: viewModel.note.count))
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 }
                 if let titleError = viewModel.titleError {
                     Text(titleError == .required ? "tasks.form.error_title_required" : "tasks.form.error_title_too_long")
@@ -132,37 +151,54 @@ struct TaskEditorView: View {
                         .foregroundStyle(.red)
                         .accessibilityIdentifier("tasks.editor.title_error")
                 }
+                if viewModel.noteError != nil {
+                    Text("tasks.form.error_note_too_long")
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                        .accessibilityIdentifier("tasks.editor.note_error")
+                }
             }
 
             Section {
+                // The section header carries the visible "Esforço" title; the hidden label keeps
+                // the picker named for VoiceOver.
                 Picker("tasks.form.weight_label", selection: $viewModel.weight) {
                     Text("tasks.form.weight_option_low").tag(EffortWeight?.some(.low))
                     Text("tasks.form.weight_option_medium").tag(EffortWeight?.some(.medium))
                     Text("tasks.form.weight_option_high").tag(EffortWeight?.some(.high))
                 }
                 .pickerStyle(.inline)
+                .labelsHidden()
                 .accessibilityIdentifier("tasks.editor.weight")
+            } header: {
+                sectionHeader("tasks.form.weight_label")
+            } footer: {
+                Text("tasks.form.weight_hint")
+                    .font(.footnote)
             }
 
             Section {
                 DatePicker("tasks.form.scheduled_date_label", selection: $viewModel.scheduledDate, displayedComponents: .date)
                     .datePickerStyle(.compact)
+                    .disabled(viewModel.isScheduledDateLocked)
                     .accessibilityIdentifier("tasks.editor.scheduled_date")
-                if !viewModel.isEditing {
+                if viewModel.isEditing {
+                    // Read-only: editing never changes the recurrence (UX-008 §5.1, UX-05).
+                    HStack {
+                        Text("routines.recurrence.title")
+                        Spacer()
+                        Text(viewModel.editingRecurrenceSummary)
+                            .foregroundStyle(.secondary)
+                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("tasks.editor.recurrence_readonly")
+                } else {
                     Button {
                         Task { await viewModel.prepareRecurrencePicker() }
                     } label: {
-                        HStack {
-                            Text("routines.recurrence.title")
-                                .foregroundStyle(.primary)
-                            Spacer()
-                            Text(viewModel.recurrenceSummary)
-                                .foregroundStyle(.secondary)
-                            Image(systemName: "chevron.right")
-                                .font(.footnote)
-                                .foregroundStyle(.tertiary)
-                        }
+                        navigationRow(title: "routines.recurrence.title", value: viewModel.recurrenceSummary)
                     }
+                    .buttonStyle(.plain)
                     .accessibilityLabel("routines.recurrence.title")
                     .accessibilityValue(Text(viewModel.recurrenceSummary))
                     .accessibilityIdentifier("tasks.editor.recurrence")
@@ -179,43 +215,23 @@ struct TaskEditorView: View {
                         .foregroundStyle(.red)
                         .accessibilityIdentifier("tasks.editor.frequency_error")
                 }
+            } header: {
+                sectionHeader("tasks.form.date_section_title")
             }
 
+            // No footer here: the assignee explanation was dropped from TEL-013 and MOD-001 (UX-06).
             Section {
                 Button {
                     viewModel.isAssigneePickerPresented = true
                 } label: {
-                    HStack {
-                        Text("tasks.form.assignees_label")
-                            .foregroundStyle(.primary)
-                        Spacer()
-                        Text(assigneeSummary)
-                            .foregroundStyle(.secondary)
-                        Image(systemName: "chevron.right")
-                            .font(.footnote)
-                            .foregroundStyle(.tertiary)
-                    }
+                    navigationRow(title: "tasks.form.assignees_row", value: assigneeSummary)
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel("tasks.form.assignees_row")
+                .accessibilityValue(Text(assigneeSummary))
                 .accessibilityIdentifier("tasks.editor.assignees")
-            } footer: {
-                Text("tasks.form.assignees_footer")
-            }
-
-            Section {
-                VStack(alignment: .leading, spacing: 4) {
-                    TextField("tasks.form.note_placeholder", text: $viewModel.note, axis: .vertical)
-                        .lineLimit(3 ... 6)
-                        .accessibilityIdentifier("tasks.editor.note")
-                    Text(Self.counterText(key: "tasks.form.note_counter", count: viewModel.note.count))
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
-                if viewModel.noteError != nil {
-                    Text("tasks.form.error_note_too_long")
-                        .font(.footnote)
-                        .foregroundStyle(.red)
-                        .accessibilityIdentifier("tasks.editor.note_error")
-                }
+            } header: {
+                sectionHeader("tasks.form.assignees_label")
             }
 
             if let banner = viewModel.banner {
@@ -228,13 +244,38 @@ struct TaskEditorView: View {
         }
     }
 
+    /// Small secondary section title, as in the prototype, instead of the large default header.
+    private func sectionHeader(_ key: LocalizedStringKey) -> some View {
+        // An explicit label color: `.secondary` inside a Form header is dimmed twice.
+        Text(key)
+            .font(.footnote)
+            .foregroundStyle(Color(uiColor: .secondaryLabel))
+            .textCase(nil)
+    }
+
+    /// Tappable row in primary text — a plain button style keeps the Form from tinting it with the
+    /// accent color (UX-007 §5.1).
+    private func navigationRow(title: LocalizedStringKey, value: String) -> some View {
+        HStack {
+            Text(title)
+                .foregroundStyle(.primary)
+            Spacer()
+            Text(value)
+                .foregroundStyle(.secondary)
+            Image(systemName: "chevron.right")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.tertiary)
+        }
+        .contentShape(Rectangle())
+    }
+
     private var assigneeSummary: String {
         if viewModel.assigneeIDs.isEmpty {
-            return String(localized: "tasks.form.assignees_none")
+            return String(localized: "tasks.form.assignees_row_none")
         }
-        let names = viewModel.availableMembers
+        let names = viewModel.orderedMembers
             .filter { viewModel.assigneeIDs.contains($0.id) }
-            .map(\.name)
+            .map { viewModel.displayName(for: $0) }
         return names.isEmpty ? "\(viewModel.assigneeIDs.count)" : names.joined(separator: ", ")
     }
 
@@ -258,6 +299,8 @@ struct TaskEditorView: View {
             "routines.error_unavailable"
         case .routineUncertainOutcome:
             "routines.error_result_uncertain"
+        case .routineSourceInvalid:
+            "routines.error_source_task_invalid"
         }
     }
 }

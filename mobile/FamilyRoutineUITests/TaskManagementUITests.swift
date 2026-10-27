@@ -58,6 +58,67 @@ final class TaskManagementUITests: XCTestCase {
         XCTAssertTrue(app.buttons["tasks.editor.save"].waitForExistence(timeout: 5))
     }
 
+    /// SCRUM-110 / UX-007 §5.1, §5.3 and UX-04 to UX-08: TEL-013 and MOD-001 follow the prototype.
+    func testTaskFormAndAssigneePickerFollowThePrototype() {
+        launch(route: "create")
+        XCTAssertTrue(app.buttons["tasks.editor.save"].waitForExistence(timeout: 5))
+
+        XCTAssertTrue(app.textFields["tasks.editor.note"].exists || app.textViews["tasks.editor.note"].exists)
+        XCTAssertTrue(app.staticTexts["Título 0/60"].exists)
+        XCTAssertTrue(app.staticTexts["Observação 0/250"].exists)
+        XCTAssertTrue(app.staticTexts["Esforço"].exists)
+        XCTAssertTrue(app.buttons["P1 - Baixo Esforço"].exists)
+        XCTAssertTrue(app.staticTexts["Data e repetição"].exists)
+
+        let assignees = app.buttons["tasks.editor.assignees"]
+        XCTAssertTrue(assignees.exists)
+        XCTAssertEqual(assignees.label, "Quem faz")
+        XCTAssertEqual(assignees.value as? String, "Ninguém")
+        XCTAssertFalse(app.staticTexts.containing(NSPredicate(format: "label BEGINSWITH %@", "Escolha nenhum")).firstMatch.exists)
+
+        let formShot = XCTAttachment(screenshot: app.screenshot())
+        formShot.name = "TEL-013 new task"
+        formShot.lifetime = .keepAlways
+        add(formShot)
+
+        assignees.tap()
+        XCTAssertTrue(app.buttons["tasks.assignee_picker.confirm"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Rafa Silva"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Kids"].exists)
+        XCTAssertFalse(app.staticTexts.containing(NSPredicate(format: "label BEGINSWITH %@", "Escolha nenhum")).firstMatch.exists)
+
+        let pickerShot = XCTAttachment(screenshot: app.screenshot())
+        pickerShot.name = "MOD-001 assignee picker"
+        pickerShot.lifetime = .keepAlways
+        add(pickerShot)
+
+
+        app.staticTexts["Rafa Silva"].tap()
+        app.buttons["tasks.assignee_picker.confirm"].tap()
+        XCTAssertTrue(assignees.waitForExistence(timeout: 5))
+        XCTAssertEqual(assignees.value as? String, "Rafa Silva")
+
+        // UX-008 MOD-002: ✕/✓ bar like the other sheets of the prototype.
+        app.buttons["tasks.editor.recurrence"].tap()
+        let cancelRecurrence = app.buttons["routines.recurrence.cancel"]
+        XCTAssertTrue(cancelRecurrence.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Frequência"].exists)
+        // Scrolling the options must scroll the content, not resize the sheet into another look.
+        let recurrenceConfirmTop = app.buttons["routines.recurrence.confirm"].frame.minY
+        app.buttons["routines.recurrence.option.14"].swipeUp()
+        let scrolledShot = XCTAttachment(screenshot: app.screenshot())
+        scrolledShot.name = "MOD-002 after scrolling"
+        scrolledShot.lifetime = .keepAlways
+        add(scrolledShot)
+        XCTAssertEqual(app.buttons["routines.recurrence.confirm"].frame.minY, recurrenceConfirmTop, accuracy: 2)
+        let recurrenceShot = XCTAttachment(screenshot: app.screenshot())
+        recurrenceShot.name = "MOD-002 recurrence"
+        recurrenceShot.lifetime = .keepAlways
+        add(recurrenceShot)
+        cancelRecurrence.tap()
+        XCTAssertTrue(assignees.waitForExistence(timeout: 5))
+    }
+
     func testEditingAnExistingTaskPreFillsTheRealData() {
         launch(route: "detail:00000000-0000-0000-0000-0000000000b1")
         XCTAssertTrue(app.staticTexts["Arrumar os brinquedos"].waitForExistence(timeout: 5))

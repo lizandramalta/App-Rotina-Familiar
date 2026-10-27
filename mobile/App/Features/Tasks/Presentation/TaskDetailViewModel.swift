@@ -5,6 +5,8 @@ import Observation
 enum TaskDetailBanner: Equatable {
     case deleteFailed
     case loadFailed
+    /// A routine-scope deletion whose result could not be confirmed; the detail was reloaded.
+    case deleteUncertain
 }
 
 /// MOD-005's two blocking variants that stop the delete flow outright, as opposed to the
@@ -12,6 +14,8 @@ enum TaskDetailBanner: Equatable {
 enum TaskDeleteBlock: Equatable {
     case alreadyCompleted
     case missionProtected
+    /// `MISSION_WOULD_HAVE_NO_TASKS` on "Esta tarefa e as futuras" (SPEC-008 E-11).
+    case missionWouldHaveNoTasks
 }
 
 /// MOD-006's content, populated from `TaskError.missionReopenRequiresConfirmation` (SPEC-011 §5.2).
@@ -38,6 +42,7 @@ final class TaskDetailViewModel {
     private let getRoutine: GetRoutineUseCase
     private let familyRepository: (any FamilyRepository)?
     private let deleteTask: DeleteTaskUseCase
+    private let deleteFutureRoutineTasks: DeleteFutureRoutineTasksUseCase
     private let completeTask: CompleteTaskUseCase
     private let reopenTask: ReopenTaskUseCase
     private let accessToken: String
@@ -68,6 +73,10 @@ final class TaskDetailViewModel {
     private var memberRoles: [UUID: MemberRole]?
 
     var isConfirmingDelete = false
+    /// MOD-003 is showing for this purpose (routine occurrences only, UX-008 §5.4).
+    var scopePrompt: RoutineScopePurpose?
+    /// Scope chosen in MOD-003 for the deletion MOD-005 is confirming.
+    private(set) var pendingDeleteScope: RoutineScope?
 
     init(
         taskID: UUID,
@@ -86,6 +95,7 @@ final class TaskDetailViewModel {
         self.getRoutine = GetRoutineUseCase(repository: routineRepository)
         self.familyRepository = familyRepository
         self.deleteTask = DeleteTaskUseCase(repository: repository)
+        self.deleteFutureRoutineTasks = DeleteFutureRoutineTasksUseCase(repository: routineRepository)
         self.completeTask = CompleteTaskUseCase(repository: repository)
         self.reopenTask = ReopenTaskUseCase(repository: repository)
         self.accessToken = accessToken
@@ -300,20 +310,59 @@ final class TaskDetailViewModel {
         }
     }
 
+    var isRoutineOccurrence: Bool {
+        task?.routineID != nil
+    }
+
+    /// Short MOD-003 summary: "{título} · {data curta}" (UX-008 §5.3).
+    var scopeSummary: String {
+        guard let task else { return "" }
+        guard let date = Self.date(fromWire: task.scheduledDate) else { return task.title }
+        let day = date.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))
+        return "\(task.title) · \(day)"
+    }
+
+    /// Editing a routine occurrence always asks for the scope first (UX-008 UX-04). Returns
+    /// `true` when the caller can open TEL-013 right away (a single task).
+    func requestEdit() -> Bool {
+        guard canManageTask, task != nil else { return false }
+        if isRoutineOccurrence {
+            scopePrompt = .edit
+            return false
+        }
+        return true
+    }
+
     func requestDelete() {
-        guard canManageTask, task?.routineID == nil, canDeleteDirectly, !isDeleting else {
+        guard canManageTask, canDeleteDirectly, !isDeleting, task != nil else {
             return
         }
+        if isRoutineOccurrence {
+            scopePrompt = .delete
+        } else {
+            pendingDeleteScope = nil
+            isConfirmingDelete = true
+        }
+    }
+
+    /// MOD-003 confirmed for a deletion: MOD-005 still confirms it (UX-008 §4).
+    func chooseDeleteScope(_ scope: RoutineScope) {
+        scopePrompt = nil
+        pendingDeleteScope = scope
         isConfirmingDelete = true
     }
 
     func confirmDelete() async {
-        guard canManageTask, task?.routineID == nil, canDeleteDirectly, !isDeleting else { return }
+        guard canManageTask, canDeleteDirectly, !isDeleting, let task else { return }
         isConfirmingDelete = false
         isDeleting = true
         banner = nil
         defer { isDeleting = false }
 
+        if let routineID = task.routineID, pendingDeleteScope == .thisAndFuture {
+            await deleteFromHereOn(routineID: routineID, task: task)
+            return
+        }
         do {
             _ = try await deleteTask.execute(taskID: taskID, accessToken: accessToken)
             isDeleted = true
@@ -321,9 +370,49 @@ final class TaskDetailViewModel {
             deleteBlock = .alreadyCompleted
         } catch TaskError.missionCompletedProtected {
             deleteBlock = .missionProtected
+        } catch TaskError.missionWouldHaveNoTasks {
+            deleteBlock = .missionWouldHaveNoTasks
         } catch {
             banner = .deleteFailed
         }
+    }
+
+    /// CA-08: the open occurrence and the following ones; the routine stops generating.
+    private func deleteFromHereOn(routineID: UUID, task: FamilyTask) async {
+        do {
+            _ = try await deleteFutureRoutineTasks.execute(
+                routineID: routineID,
+                fromTaskID: task.id,
+                accessToken: accessToken
+            )
+            isDeleted = true
+        } catch RoutineError.missionWouldHaveNoTasks {
+            deleteBlock = .missionWouldHaveNoTasks
+        } catch RoutineError.uncertainOutcome {
+            // Never retried automatically: reload so the screen shows the canonical state (CA-10).
+            banner = .deleteUncertain
+            await reloadAfterUncertainDelete()
+        } catch {
+            banner = .deleteFailed
+        }
+    }
+
+    private func reloadAfterUncertainDelete() async {
+        do {
+            task = try await getTaskDetail.execute(taskID: taskID, accessToken: accessToken)
+        } catch TaskError.notFound {
+            isDeleted = true
+        } catch {
+            // Keep the last known state; the banner already says the result is unconfirmed.
+        }
+    }
+
+    private static func date(fromWire wire: String) -> Date? {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.timeZone = .current
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.date(from: wire)
     }
 
     func dismissDeleteBlock() {

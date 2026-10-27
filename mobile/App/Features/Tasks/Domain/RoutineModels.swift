@@ -36,8 +36,41 @@ nonisolated struct CreateRoutineCommand: Sendable {
     let frequency: RoutineFrequency
 }
 
+/// MOD-003 — where an edit or deletion opened from a routine occurrence applies (UX-008 §5.3).
+nonisolated enum RoutineScope: Equatable, Hashable, Sendable {
+    /// Individual edit/deletion of the open occurrence (SPEC-007 routes).
+    case onlyThis
+    /// The open occurrence and the following ones (SPEC-008 Fase 2, `fromTaskId`).
+    case thisAndFuture
+}
+
+/// `PATCH /v1/routines/{id}` — only these fields; recurrence and states never change (SPEC-008 E-05, E-08).
+nonisolated struct UpdateFutureRoutineCommand: Sendable, Equatable {
+    let fromTaskID: UUID
+    let title: String
+    let weight: EffortWeight
+    let assigneeIDs: [UUID]
+    let note: String?
+}
+
+nonisolated struct UpdateFutureRoutineResult: Sendable, Equatable {
+    let routine: Routine
+    let updatedTaskIDs: [UUID]
+    let preservedTaskIDs: [UUID]
+}
+
+nonisolated struct DeleteFutureRoutineTasksResult: Sendable, Equatable {
+    let routineID: UUID
+    let deletedTaskIDs: [UUID]
+    let preservedTaskIDs: [UUID]
+}
+
 nonisolated enum RoutineError: Error, Equatable, Sendable {
     case actionNotAllowed
+    /// `409 MISSION_COMPLETED_PROTECTED` — the source occurrence belongs to a completed mission.
+    case missionProtected
+    /// `409 MISSION_WOULD_HAVE_NO_TASKS` — the deletion would leave an in-progress mission empty.
+    case missionWouldHaveNoTasks
     case notFound
     case validationFailed([String: [String]])
     case uncertainOutcome

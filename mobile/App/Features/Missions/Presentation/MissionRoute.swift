@@ -11,5 +11,5 @@ nonisolated enum MissionRoute: Hashable {
     /// `TaskDetailView`'s own "Editar" button, reached from `.taskDetail` — reused as-is rather
     /// than wired as a dead end, since `canManageTask` only depends on `role`, not on how the
     /// screen was reached.
-    case taskEdit(UUID)
+    case taskEdit(UUID, scope: RoutineScope?)
 }

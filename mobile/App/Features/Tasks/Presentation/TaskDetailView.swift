@@ -1,15 +1,16 @@
 import SwiftUI
 
 /// TEL-012 — Editar/Excluir (Admin/Membro only) and Reabrir (Admin/Membro always, Kids on
-/// their own task — SPEC-011). Adult routine occurrences show their origin and materialization
-/// state; routine management waits for MOD-003 in SPEC-008 Fase 2.
+/// their own task — SPEC-011). On a routine occurrence, Editar and Excluir first ask the scope in
+/// MOD-003 (SPEC-008 Fase 2, UX-008 §5.4).
 struct TaskDetailView: View {
     @State private var viewModel: TaskDetailViewModel
     @State private var showsSignalSheet = false
     private let currentMemberID: UUID
     @AccessibilityFocusState private var isMissionWarningFocused: Bool
     @AccessibilityFocusState private var isStatusFocused: Bool
-    let onRequestEdit: () -> Void
+    /// `nil` for a single task; the scope chosen in MOD-003 for a routine occurrence.
+    let onRequestEdit: (RoutineScope?) -> Void
     let onDeleted: () -> Void
     let onCompleted: () -> Void
     let onReopened: () -> Void
@@ -26,7 +27,7 @@ struct TaskDetailView: View {
         routineRepository: any RoutineRepository,
         familyRepository: (any FamilyRepository)? = nil,
         accessToken: String,
-        onRequestEdit: @escaping () -> Void,
+        onRequestEdit: @escaping (RoutineScope?) -> Void,
         onDeleted: @escaping () -> Void,
         onCompleted: @escaping () -> Void = {},
         onReopened: @escaping () -> Void = {}
@@ -69,9 +70,11 @@ struct TaskDetailView: View {
         .toolbar(.hidden, for: .tabBar)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                if viewModel.task != nil, viewModel.canManageTask, viewModel.task?.routineID == nil {
-                    Button("Editar", action: onRequestEdit)
-                        .accessibilityIdentifier("tasks.detail.edit")
+                if viewModel.task != nil, viewModel.canManageTask {
+                    Button("Editar") {
+                        if viewModel.requestEdit() { onRequestEdit(nil) }
+                    }
+                    .accessibilityIdentifier("tasks.detail.edit")
                 }
             }
         }
@@ -93,6 +96,22 @@ struct TaskDetailView: View {
         .sheet(isPresented: $showsSignalSheet) {
             KidsSignalSheet(viewModel: viewModel)
         }
+        .sheet(isPresented: Binding(
+            get: { viewModel.scopePrompt != nil },
+            set: { isPresented in if !isPresented { viewModel.scopePrompt = nil } }
+        )) {
+            if let purpose = viewModel.scopePrompt {
+                RoutineScopeSheetView(purpose: purpose, summary: viewModel.scopeSummary) { scope in
+                    switch purpose {
+                    case .edit:
+                        viewModel.scopePrompt = nil
+                        onRequestEdit(scope)
+                    case .delete:
+                        viewModel.chooseDeleteScope(scope)
+                    }
+                }
+            }
+        }
         .alert(
             "tasks.delete.confirm_message",
             isPresented: $viewModel.isConfirmingDelete
@@ -100,7 +119,9 @@ struct TaskDetailView: View {
             Button("Cancelar", role: .cancel) {}
             Button("Excluir", role: .destructive) { Task { await viewModel.confirmDelete() } }
         } message: {
-            if viewModel.hasPendingSignal {
+            if viewModel.pendingDeleteScope == .thisAndFuture {
+                Text("\(viewModel.task?.title ?? "")\n\n\(String(localized: "routines.scope.selected_and_future_hint"))")
+            } else if viewModel.hasPendingSignal {
                 Text("\(viewModel.task?.title ?? "")\n\n\(String(localized: "tasks.delete.pending_signal_notice"))")
             } else if let task = viewModel.task {
                 Text(task.title)
@@ -195,7 +216,7 @@ struct TaskDetailView: View {
                     }
 
                     if let banner = viewModel.banner {
-                        Text(banner == .loadFailed ? "tasks.detail.load_error" : "tasks.common.error_unavailable")
+                        Text(bannerMessageKey(banner))
                             .foregroundStyle(.red)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
@@ -271,7 +292,7 @@ struct TaskDetailView: View {
                             .accessibilityHint(Text("task.reopen.accessibilityHint"))
                         }
 
-                        if viewModel.canManageTask, task.routineID == nil {
+                        if viewModel.canManageTask {
                             Button(role: .destructive) { viewModel.requestDelete() } label: {
                                 Text("tasks.detail.delete_action")
                                     .frame(maxWidth: .infinity, minHeight: 50)
@@ -328,10 +349,20 @@ struct TaskDetailView: View {
         .background(.background, in: RoundedRectangle(cornerRadius: 26))
     }
 
+    private func bannerMessageKey(_ banner: TaskDetailBanner) -> LocalizedStringKey {
+        switch banner {
+        case .loadFailed: "tasks.detail.load_error"
+        case .deleteFailed: "tasks.common.error_unavailable"
+        case .deleteUncertain: "tasks.delete.error_uncertain"
+        }
+    }
+
     private var deleteBlockMessageKey: LocalizedStringKey {
-        viewModel.deleteBlock == .alreadyCompleted
-            ? "tasks.delete.error_already_completed"
-            : "tasks.delete.error_mission_protected"
+        switch viewModel.deleteBlock {
+        case .alreadyCompleted: "tasks.delete.error_already_completed"
+        case .missionWouldHaveNoTasks: "tasks.delete.error_mission_would_be_empty"
+        case .missionProtected, nil: "tasks.delete.error_mission_protected"
+        }
     }
 
     private func completionFailureMessageKey(for failure: TaskCompletionFailure) -> LocalizedStringKey {

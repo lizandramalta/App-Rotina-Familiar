@@ -221,6 +221,7 @@ private actor UITestRoutineRepository: RoutineRepository {
     }
 
     func routine(id: UUID, accessToken: String) async throws -> Routine {
+        if id == UITestTaskFixtures.routineID { return Self.weeklyRoutine }
         guard let saved, saved.id == id else { throw RoutineError.notFound }
         return Routine(
             id: saved.id,
@@ -233,6 +234,37 @@ private actor UITestRoutineRepository: RoutineRepository {
             isActive: true,
             materializationState: .complete
         )
+    }
+
+    /// The routine behind `UITestTaskFixtures.routineOccurrenceTaskID`.
+    private static let weeklyRoutine = Routine(
+        id: UITestTaskFixtures.routineID,
+        title: "Regar as plantas",
+        weight: .low,
+        assigneeIDs: [UITestTaskFixtures.memberID],
+        note: nil,
+        startDate: "2026-10-05",
+        frequency: .everySevenDays,
+        isActive: true,
+        materializationState: .complete
+    )
+
+    func updateFutureRoutine(
+        id: UUID,
+        command: UpdateFutureRoutineCommand,
+        accessToken: String
+    ) async throws -> UpdateFutureRoutineResult {
+        guard id == UITestTaskFixtures.routineID else { throw RoutineError.notFound }
+        return UpdateFutureRoutineResult(
+            routine: Self.weeklyRoutine,
+            updatedTaskIDs: [command.fromTaskID],
+            preservedTaskIDs: []
+        )
+    }
+
+    func deleteFutureTasks(id: UUID, fromTaskID: UUID, accessToken: String) async throws -> DeleteFutureRoutineTasksResult {
+        guard id == UITestTaskFixtures.routineID else { throw RoutineError.notFound }
+        return DeleteFutureRoutineTasksResult(routineID: id, deletedTaskIDs: [fromTaskID], preservedTaskIDs: [])
     }
 }
 
@@ -516,6 +548,9 @@ private enum UITestTaskFixtures {
     static let completedTaskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000b2")!
     static let awaitingConfirmationTaskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000b3")!
     static let missionProtectedTaskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000b4")!
+    /// SPEC-008 Fase 2: a weekly routine occurrence — Editar/Excluir open MOD-003.
+    static let routineOccurrenceTaskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000b5")!
+    static let routineID = UUID(uuidString: "00000000-0000-0000-0000-0000000000a9")!
     static let todayPendingTaskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000c1")!
     static let todayAwaitingConfirmationTaskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000c2")!
     static let todayCompletedTaskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000c3")!
@@ -587,6 +622,17 @@ private actor UITestTaskRepository: TaskRepository {
                 note: nil,
                 status: .completed,
                 routineID: nil,
+                createdAt: Date(timeIntervalSince1970: 1_760_000_000)
+            ),
+            UITestTaskFixtures.routineOccurrenceTaskID: FamilyTask(
+                id: UITestTaskFixtures.routineOccurrenceTaskID,
+                title: "Regar as plantas",
+                weight: .low,
+                scheduledDate: "2026-10-05",
+                assigneeIDs: [UITestTaskFixtures.memberID],
+                note: nil,
+                status: .pending,
+                routineID: UITestTaskFixtures.routineID,
                 createdAt: Date(timeIntervalSince1970: 1_760_000_000)
             ),
             UITestTaskFixtures.todayPendingTaskID: FamilyTask(

@@ -80,16 +80,17 @@ struct MissionsTabView: View {
                 routineRepository: routineRepository,
                 familyRepository: familyRepository,
                 accessToken: accessToken,
-                onRequestEdit: { path.append(.taskEdit(taskID)) },
+                onRequestEdit: { scope in path.append(.taskEdit(taskID, scope: scope)) },
                 onDeleted: { if !path.isEmpty { path.removeLast() } }
             )
-        case let .taskEdit(taskID):
+        case let .taskEdit(taskID, scope):
             TaskEditorView(
-                mode: .edit(taskID),
+                mode: .edit(taskID, scope: scope),
                 repository: taskRepository,
                 routineRepository: routineRepository,
                 familyRepository: familyRepository,
                 accessToken: accessToken,
+                currentMemberID: currentMemberID,
                 onSaved: { _ in if !path.isEmpty { path.removeLast() } },
                 onRoutineSaved: { _ in }
             )
