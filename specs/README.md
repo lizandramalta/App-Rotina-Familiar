@@ -56,7 +56,7 @@ da experiência. Isso permite evoluir o visual sem perder decisões, estados e t
 
 ## Mapa de implementação
 
-**Base funcional vigente:** RN 1.18 / RF 1.17 / UC 1.16 (2026-10-19)
+**Base funcional vigente:** RN 1.21 / RF 1.20 / UC 1.20 (2026-10-27)
 
 **Convenção de status:** `não criada` indica apenas uma entrega planejada; `em revisão`
 indica que o par existente foi atualizado após decisões de produto e ainda requer

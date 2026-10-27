@@ -1,7 +1,7 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.19\
+**Versão:** 1.20\
 **Data:** 2026-10-27\
 **Situação:** base documental consolidada
 
@@ -377,7 +377,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 - Sem repetição, o sistema cria uma tarefa única.
 - Alterações no alcance “selecionada e futuras” incluem a ocorrência escolhida e as futuras elegíveis, respeitando o histórico e as proteções de missões concluídas.
-- Ao editar ou excluir uma ocorrência de rotina, o sistema sempre pergunta o alcance: somente esta tarefa ou esta e as futuras. Somente esta segue a edição ou exclusão individual do [UC07](03-casos-de-uso.md#uc07), inclusive da data prevista. Esta e as futuras altera somente título, peso, responsáveis e observação, não altera data inicial, frequência nem data prevista, e substitui edições individuais anteriores das futuras abrangidas.
+- Ao editar ou excluir uma ocorrência de rotina, o sistema sempre pergunta o alcance: somente esta tarefa ou esta e as futuras. Somente esta segue a edição ou exclusão individual do [UC07](03-casos-de-uso.md#uc07), inclusive da data prevista. Esta e as futuras altera somente título, peso, responsáveis e observação, não altera data inicial, frequência nem a data prevista já gravada em cada ocorrência, inclusive quando alterada individualmente, e substitui edições individuais anteriores dos campos permitidos nas futuras abrangidas.
 - Não existe frequência mensal.
 - A limitação de consulta do carrossel não interrompe a geração de tarefas futuras.
 
@@ -844,6 +844,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.20 | 2026-10-27 | UC08: o alcance “esta e as futuras” preserva a data prevista já gravada de cada ocorrência, inclusive após edição individual. Para SPEC-008 Fase 2 / SCRUM-45. |
 | 1.19 | 2026-10-27 | UC08: editar ou excluir ocorrência de rotina sempre pergunta o alcance; “esta e as futuras” não altera repetição nem data prevista e substitui edições individuais anteriores das futuras. UC07: a escolha do RN66 vale para a edição individual; a edição de rotina não altera estados. Para SPEC-008 Fase 2. |
 | 1.18 | 2026-10-26 | UC12 e UC17 permitem concluir/reabrir pelo círculo da lista pessoal; o restante da linha abre o detalhe. Permissões e efeitos mantidos. |
 | 1.17 | 2026-10-22 | UC10: nome da família e papel na consulta do perfil; titular adulto edita o próprio nome, Kids não. Para SPEC-006 (SCRUM-52). |

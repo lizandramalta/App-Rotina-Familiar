@@ -190,4 +190,115 @@ describe('Routine routes — SPEC-008 phase 1', () => {
     expect(getRoute?.responses).toHaveProperty('200');
     expect(getRoute?.responses).toHaveProperty('404');
   });
+
+  it('SPEC-008 CA-07 sends only allowed fields to the future update and returns affected IDs', async () => {
+    const result = { routine: ROUTINE, updatedTaskIds: [ROUTINE_ID], preservedTaskIds: [] };
+    test.updateFutureRoutine.execute.mockResolvedValue(result);
+    const response = await test.app.inject({
+      method: 'PATCH',
+      url: `/v1/routines/${ROUTINE_ID}`,
+      headers: AUTH,
+      payload: { fromTaskId: ROUTINE_ID, title: 'Novo título', assigneeIds: [] },
+    });
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual(result);
+    expect(test.updateFutureRoutine.execute).toHaveBeenCalledWith({
+      actor: TEST_ACTOR,
+      routineId: ROUTINE_ID,
+      fromTaskId: ROUTINE_ID,
+      title: 'Novo título',
+      weight: undefined,
+      assigneeIds: [],
+      note: undefined,
+    });
+  });
+
+  it.each(['startDate', 'frequencyDays', 'signalResolution', 'scheduledDate'])(
+    'SPEC-008 CA-07 rejects protected PATCH field %s before the use case',
+    async (field) => {
+      const response = await test.app.inject({
+        method: 'PATCH',
+        url: `/v1/routines/${ROUTINE_ID}`,
+        headers: AUTH,
+        payload: { fromTaskId: ROUTINE_ID, [field]: 'invalid' },
+      });
+      expect(response.statusCode).toBe(400);
+      expect(response.json()).toMatchObject({
+        code: 'UNKNOWN_FIELD',
+        fieldErrors: { [field]: ['UNKNOWN_FIELD'] },
+      });
+      expect(test.updateFutureRoutine.execute).not.toHaveBeenCalled();
+    },
+  );
+
+  it('SPEC-008 CA-08 returns the closure scope and rejects unknown fields', async () => {
+    const result = {
+      routineId: ROUTINE_ID,
+      deletedTaskIds: [ROUTINE_ID],
+      preservedTaskIds: [],
+      generationEnded: true,
+    };
+    test.deleteFutureRoutineTasks.execute.mockResolvedValue(result);
+    const success = await test.app.inject({
+      method: 'POST',
+      url: `/v1/routines/${ROUTINE_ID}/future-task-deletions`,
+      headers: AUTH,
+      payload: { fromTaskId: ROUTINE_ID },
+    });
+    expect(success.statusCode).toBe(200);
+    expect(success.json()).toEqual(result);
+    const rejected = await test.app.inject({
+      method: 'POST',
+      url: `/v1/routines/${ROUTINE_ID}/future-task-deletions`,
+      headers: AUTH,
+      payload: { fromTaskId: ROUTINE_ID, familyId: TEST_ACTOR.familyId },
+    });
+    expect(rejected.statusCode).toBe(400);
+    expect(rejected.json().code).toBe('UNKNOWN_FIELD');
+    expect(test.deleteFutureRoutineTasks.execute).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ['PATCH', `/v1/routines/${ROUTINE_ID}`],
+    ['POST', `/v1/routines/${ROUTINE_ID}/future-task-deletions`],
+  ] as const)('requires an active session for %s %s', async (method, url) => {
+    const response = await test.app.inject({
+      method,
+      url,
+      payload: { fromTaskId: ROUTINE_ID },
+    });
+    expect(response.statusCode).toBe(401);
+    expect(test.updateFutureRoutine.execute).not.toHaveBeenCalled();
+    expect(test.deleteFutureRoutineTasks.execute).not.toHaveBeenCalled();
+  });
+
+  it('documents both SPEC-008 phase 2 routes with bearer security and error responses', async () => {
+    const response = await test.app.inject({ method: 'GET', url: '/docs/json' });
+    const paths = response.json().paths as Record<
+      string,
+      Record<
+        string,
+        {
+          security: unknown[];
+          tags: string[];
+          requestBody: { content: Record<string, { schema: { additionalProperties: boolean } }> };
+          responses: Record<string, unknown>;
+        }
+      >
+    >;
+    for (const [path, method] of [
+      ['/v1/routines/{routineId}', 'patch'],
+      ['/v1/routines/{routineId}/future-task-deletions', 'post'],
+    ]) {
+      const route = paths[path]?.[method];
+      expect(route?.security).toEqual([{ bearerAuth: [] }]);
+      expect(route?.tags).toContain('Routines');
+      expect(route?.requestBody.content['application/json']?.schema.additionalProperties).toBe(
+        false,
+      );
+      for (const status of ['200', '400', '401', '403', '404', '409', '422', '503']) {
+        expect(route?.responses).toHaveProperty(status);
+      }
+    }
+  });
 });

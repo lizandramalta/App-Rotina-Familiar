@@ -1,13 +1,13 @@
 # Regras de negócio
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.20\
+**Versão:** 1.21\
 **Data:** 2026-10-27\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
 
-Este documento contém as regras vigentes da versão 1.20. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
+Este documento contém as regras vigentes da versão 1.21. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
 
 **Identificadores preservados:** RN15, RN29 e RN32 não estavam definidos na base recebida e permanecem não utilizados. Não representam conteúdo faltante desta versão.
 
@@ -143,7 +143,7 @@ Cada tarefa, inclusive a gerada por uma rotina, possui identificação e status 
 
 ## RN17
 
-A edição individual altera apenas a tarefa escolhida. Edições da rotina no alcance “selecionada e futuras” incluem a ocorrência selecionada e afetam somente as futuras abrangidas, preservando passado e ocorrências concluídas/protegidas. Esse alcance altera somente título, peso, responsáveis e observação; a data inicial e a frequência da rotina não mudam por ele, e a data prevista das ocorrências abrangidas permanece a gerada pela rotina. Ele também substitui edições individuais anteriores das ocorrências futuras abrangidas. Uma tarefa concluída pode ser editada individualmente se não estiver protegida por missão concluída: título, peso, data prevista e responsáveis são ajustáveis. Peso e responsáveis atualizam o crédito vigente; data prevista atualiza o progresso, sem alterar o instante original da conclusão. Sem responsáveis, a tarefa continua concluída e conta no progresso familiar, mas não gera crédito individual. Registrar autor, instante e valores anteriores na auditoria. Destaques já apurados e PDFs exportados permanecem preservados. Nas edições válidas, prevalece a última gravação efetivada pelo servidor, sem rejeição por versão antiga; permissões e proteções continuam sendo verificadas.
+A edição individual altera apenas a tarefa escolhida. Edições da rotina no alcance “selecionada e futuras” incluem a ocorrência selecionada e afetam somente as futuras abrangidas, preservando passado e ocorrências concluídas/protegidas. Esse alcance altera somente título, peso, responsáveis e observação; a data inicial e a frequência da rotina não mudam por ele, e cada ocorrência abrangida preserva sua data prevista já gravada, inclusive quando ela foi alterada individualmente. Edições individuais anteriores dos campos permitidos são substituídas nas ocorrências futuras abrangidas. Uma tarefa concluída pode ser editada individualmente se não estiver protegida por missão concluída: título, peso, data prevista e responsáveis são ajustáveis. Peso e responsáveis atualizam o crédito vigente; data prevista atualiza o progresso, sem alterar o instante original da conclusão. Sem responsáveis, a tarefa continua concluída e conta no progresso familiar, mas não gera crédito individual. Registrar autor, instante e valores anteriores na auditoria. Destaques já apurados e PDFs exportados permanecem preservados. Nas edições válidas, prevalece a última gravação efetivada pelo servidor, sem rejeição por versão antiga; permissões e proteções continuam sendo verificadas.
 
 **Requisitos funcionais:** [RF08](02-requisitos.md#rf08), [RF13](02-requisitos.md#rf13)  
 **Requisitos não funcionais específicos:** [RNF09](02-requisitos.md#rnf09)  
@@ -576,6 +576,7 @@ A missão admite uma observação opcional de até 250 caracteres, contando espa
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.21 | 2026-10-27 | RN17: a edição “selecionada e futuras” preserva a data prevista já gravada em cada ocorrência, inclusive após edição individual; substitui apenas edições dos campos permitidos. Para SPEC-008 Fase 2 / SCRUM-45. |
 | 1.20 | 2026-10-27 | RN17: o alcance “selecionada e futuras” altera somente título, peso, responsáveis e observação, sem mudar data inicial, frequência ou data prevista das ocorrências, e substitui edições individuais anteriores das futuras abrangidas. RN66: a escolha entre Pendente e Aguardando confirmação vale para a edição individual; a edição de rotina “selecionada e futuras” não muda estados. Para SPEC-008 Fase 2. |
 | 1.19 | 2026-10-22 | RN63: titular adulto também edita o próprio nome de identificação (1–60 caracteres visíveis, RF02); Kids editam somente foto e apelido; define a composição título/apoio da identificação com apelido, nome, papel e nome da família. Para SPEC-006 (SCRUM-52). |
 | 1.18 | 2026-10-19 | RN38 fecha a missão quando a exclusão de tarefa não concluída deixa apenas tarefas concluídas (SPEC-014/SPEC-007). RN01/RN07/RN45/RN63: foto antecipada, membros antes da criação atômica e retorno à família existente. RN46/RN60: convite inicial direto e confirmação de reemissão. RN23/RN55: apresentação por perfil da tarefa sinalizada por Kids, preservando estado único. |

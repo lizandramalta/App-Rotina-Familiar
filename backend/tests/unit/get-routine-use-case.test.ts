@@ -34,7 +34,10 @@ const ROUTINE: RoutineRecord = {
 };
 
 describe('GetRoutineUseCase — SPEC-008', () => {
-  let routineRepository: Record<keyof RoutineRepositoryPort, ReturnType<typeof vi.fn>>;
+  let routineRepository: Record<
+    'insertRoutine' | 'findRoutine' | 'materializeBatch',
+    ReturnType<typeof vi.fn>
+  >;
   let familySettingsRepository: { findFamilyTimeZone: ReturnType<typeof vi.fn> };
   let transactionRunner: TransactionRunner;
   let useCase: GetRoutineUseCase;
@@ -117,6 +120,20 @@ describe('GetRoutineUseCase — SPEC-008', () => {
 
     expect(routineRepository.materializeBatch).not.toHaveBeenCalled();
     expect(result.materializationState).toBe('complete');
+  });
+
+  it('SPEC-008 CA-08 does not materialize an inactive routine even when its cursor is behind', async () => {
+    routineRepository.findRoutine.mockResolvedValue({
+      ...ROUTINE,
+      isActive: false,
+      generatedUntil: '2026-10-24',
+    });
+
+    const result = await useCase.execute(TEST_ACTOR, ROUTINE_ID);
+
+    expect(result.isActive).toBe(false);
+    expect(result.materializationState).toBe('complete');
+    expect(routineRepository.materializeBatch).not.toHaveBeenCalled();
   });
 
   it('CA-05 reports pending while generatedUntil still trails the horizon after a batch', async () => {

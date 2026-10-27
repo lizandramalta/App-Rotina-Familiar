@@ -1,8 +1,8 @@
 # Spec 008: Definir recorrência de rotina
 
 **Status:** aprovada
-**Autor:** Codex | **Criada em:** 2026-10-06 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-06
-**Base funcional:** RN 1.20 / RF 1.19 / UC 1.19 (revisada em 2026-10-27, E-05 a E-13)
+**Autor:** Codex | **Criada em:** 2026-10-06 | **Aprovada por:** Pessoa usuária | **Reaprovada em:** 2026-10-27
+**Base funcional:** RN 1.21 / RF 1.20 / UC 1.20 (revisada em 2026-10-27, E-05 a E-14)
 **UX-spec:** [UX-008-definir-recorrencia.md](UX-008-definir-recorrencia.md)
 **Projetos envolvidos:** ambos
 **Tema do backlog:** Tema 2 — Tarefas e rotina
@@ -50,7 +50,7 @@
 - Não existe `endDate` obrigatório, opcional ou aceito no contrato. O horizonte de materialização não encerra uma rotina.
 - Não há frequência mensal, semanal arbitrária, intervalo zero ou frequência fora de 1/7/14/21/28.
 - “Selecionada e futuras” inclui a ocorrência indicada por `fromTaskId`; não inclui passado, ocorrências concluídas nem registros protegidos por missão concluída.
-- “Selecionada e futuras” não altera `startDate`, `frequencyDays` nem a data prevista das ocorrências abrangidas; ela substitui edições individuais anteriores das futuras abrangidas (E-05, E-06).
+- “Selecionada e futuras” não altera `startDate`, `frequencyDays` nem a data prevista já gravada de cada ocorrência abrangida, mesmo após edição individual; ela substitui edições individuais anteriores dos campos permitidos nas futuras abrangidas (E-05, E-06).
 - “Selecionada e futuras” não altera o estado das ocorrências; a escolha do RN66 vale somente para a edição individual (E-08). As futuras são as ocorrências com `original_date` igual ou posterior ao da origem (E-09).
 - A configuração recorrente não conclui, reabre ou altera automaticamente outras ocorrências já preservadas.
 - Não há `Idempotency-Key`, replay automático de gravação ou controle de versão otimista. A última gravação válida persistida vence; materialização usa origem estável e transação para não duplicar ocorrências.
@@ -182,8 +182,8 @@ Uma consulta dependente de materialização incompleta pode devolver `202 Accept
   - **QUANDO** um adulto atualizar a rotina,
   - **ENTÃO O SISTEMA DEVE** aplicar a configuração à ocorrência indicada e às futuras elegíveis,
   - **E** preservar o passado, concluídas e dados protegidos por missão concluída,
-  - **E** substituir edições individuais anteriores das ocorrências futuras abrangidas,
-  - **E** manter data inicial, frequência e data prevista das ocorrências; `startDate` ou `frequencyDays` enviados são recusados com `400 UNKNOWN_FIELD`, sem mudança,
+  - **E** substituir edições individuais anteriores dos campos permitidos nas ocorrências futuras abrangidas,
+  - **E** manter data inicial, frequência e a data prevista já gravada de cada ocorrência, mesmo após edição individual; `startDate` ou `frequencyDays` enviados são recusados com `400 UNKNOWN_FIELD`, sem mudança,
   - **E** não alterar o estado das ocorrências abrangidas; `signalResolution` enviado é recusado com `400 UNKNOWN_FIELD`. *(RN17, RN66, RF13)*
 
 - **CA-08: encerrar geração futura preservando registros**
@@ -235,6 +235,7 @@ Segredos, tokens, conteúdo da observação e dados de outras famílias nunca s�
 | E-11 | O encerramento que deixaria uma missão em andamento sem tarefas responde `409 MISSION_WOULD_HAVE_NO_TASKS` sem mudança, como na exclusão individual. | Decidida em 2026-10-27 | Sim — contratos 1.21 |
 | E-12 | Encerrar a geração marca a rotina como inativa (`is_active=false`, `deactivated_at`); ela não materializa novas ocorrências e as anteriores à origem permanecem. | Decidida em 2026-10-27 | Sim — contratos 1.21 |
 | E-13 | Respostas `200`: alteração → `{ routine, updatedTaskIds, preservedTaskIds }`; encerramento → `{ routineId, deletedTaskIds, preservedTaskIds, generationEnded }`. | Decidida em 2026-10-27 | Sim — contratos 1.21 |
+| E-14 | A edição “selecionada e futuras” preserva a data prevista já gravada de cada ocorrência abrangida, inclusive quando alterada individualmente; a substituição de edições anteriores limita-se aos campos permitidos. | Decidida em 2026-10-27 | Sim — RN17 1.21, RF13 1.20, UC08 1.20 e contratos 1.22 |
 
 ## 10. Fases de implementação e conclusão
 
@@ -256,4 +257,4 @@ Segredos, tokens, conteúdo da observação e dados de outras famílias nunca s�
 - [x] Contratos, erros e resultado incerto definidos.
 - [x] UX-spec vinculada.
 - [x] Decisões E-01 a E-04 refletidas na base documental 1.8.
-- [x] Status `aprovada` autorizado explicitamente pela pessoa usuária em 2026-10-06.
+- [x] Status `aprovada` autorizado em 2026-10-06; esclarecimento E-14 e prévia técnica do SCRUM-45 confirmados pela pessoa usuária em 2026-10-27.
