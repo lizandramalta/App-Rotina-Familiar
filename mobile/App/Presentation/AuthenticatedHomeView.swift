@@ -70,7 +70,13 @@ struct AuthenticatedHomeView: View {
                         destination("destination.myTasks", icon: "checklist", identifier: "access.destination.kids", showsProfileButton: true)
                     }
                 }
-                .tabItem { Label("destination.myTasks", systemImage: "checklist") }
+                .tabItem {
+                    Label {
+                        Text("destination.myTasks")
+                    } icon: {
+                        Image(systemName: "checklist")
+                    }
+                }
                 .tag(0)
                 Group {
                     if let kidsMissionsTabView {
@@ -79,7 +85,13 @@ struct AuthenticatedHomeView: View {
                         destination("destination.missions", icon: "star", identifier: "access.destination.kids.missions", showsProfileButton: true)
                     }
                 }
-                .tabItem { Label("destination.missions", systemImage: "star") }
+                .tabItem {
+                    Label {
+                        Text("destination.missions")
+                    } icon: {
+                        Image(systemName: "flag")
+                    }
+                }
                 .tag(1)
             } else {
                 Group {
@@ -89,10 +101,22 @@ struct AuthenticatedHomeView: View {
                         destination("destination.myTasks", icon: "checklist", identifier: "access.destination.adult")
                     }
                 }
-                .tabItem { Label("destination.myTasks", systemImage: "checklist") }
+                .tabItem {
+                    Label {
+                        Text("tasks.adult.title")
+                    } icon: {
+                        Image(systemName: "checklist")
+                    }
+                }
                 .tag(0)
                 familyDestination()
-                    .tabItem { Label("destination.family", systemImage: "person.3") }
+                    .tabItem {
+                        Label {
+                            Text("destination.family")
+                        } icon: {
+                            Image(systemName: "person.2")
+                        }
+                    }
                     .tag(1)
                 Group {
                     if let missionsTab {
@@ -101,14 +125,26 @@ struct AuthenticatedHomeView: View {
                         destination("destination.missions", icon: "star", identifier: "access.destination.missions")
                     }
                 }
-                .tabItem { Label("destination.missions", systemImage: "star") }
+                .tabItem {
+                    Label {
+                        Text("tasks.adult.missionsTab")
+                    } icon: {
+                        Image(systemName: "flag")
+                    }
+                }
                 .tag(2)
                 NavigationStack {
                     ProfileView(viewModel: profileViewModel)
                         .accessibilityElement(children: .contain)
                         .accessibilityIdentifier("access.destination.profile")
                 }
-                .tabItem { Label("destination.myProfile", systemImage: "person.crop.circle") }
+                .tabItem {
+                    Label {
+                        Text("tasks.adult.profileTab")
+                    } icon: {
+                        Image(systemName: "person")
+                    }
+                }
             }
         }
         .id(role)

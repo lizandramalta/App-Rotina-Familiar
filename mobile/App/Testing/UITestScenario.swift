@@ -74,7 +74,11 @@ enum UITestScenario: String {
             sessionStore.apply(.session(Self.inviteSession(role: .member)))
             return
         }
-        if self == .taskManagement || self == .familySettings || self == .dailyTasks || self == .dailyTasksFailure
+        if self == .dailyTasks || self == .dailyTasksFailure {
+            sessionStore.apply(.session(Self.inviteSession(role: .administrator, memberID: UITestTaskFixtures.memberID)))
+            return
+        }
+        if self == .taskManagement || self == .familySettings
             || self == .taskCompletionConflict || self == .taskOptimisticDelayed || self == .taskOptimisticFailure
             || self == .routineCreation || self == .missionManagement {
             sessionStore.apply(.session(Self.inviteSession(role: .administrator)))
@@ -173,11 +177,15 @@ enum UITestScenario: String {
         }
     }
 
-    nonisolated static func inviteSession(role: MemberRole, refreshToken: String = "new-refresh") -> AuthenticatedSession {
+    nonisolated static func inviteSession(
+        role: MemberRole,
+        refreshToken: String = "new-refresh",
+        memberID: UUID = UUID()
+    ) -> AuthenticatedSession {
         AuthenticatedSession(
             sessionID: UUID(),
             profile: ActiveFamilySession(
-                memberID: UUID(),
+                memberID: memberID,
                 familyID: UUID(),
                 role: role,
                 isFamilyCreator: false
@@ -458,7 +466,7 @@ private actor UITestTaskRepository: TaskRepository {
     init(scenario: UITestScenario) {
         self.scenario = scenario
         let today = Self.wireString(from: Date())
-        // Within the carousel's -7..+6 day window (RN49) so UI tests can reach it by date, unlike
+        // Within the carousel's adjacent weeks (RN49) so UI tests can reach it by date, unlike
         // the other fixtures below, which use fixed dates reached only via `UI_TEST_TASK_ROUTE`.
         let threeDaysAgo = Self.wireString(
             from: Calendar(identifier: .gregorian).date(byAdding: .day, value: -3, to: Date())!
@@ -537,7 +545,7 @@ private actor UITestTaskRepository: TaskRepository {
                 title: "Escovar os dentes",
                 weight: .low,
                 scheduledDate: today,
-                assigneeIDs: [],
+                assigneeIDs: [UITestTaskFixtures.memberID],
                 note: nil,
                 status: .completed,
                 routineID: nil,

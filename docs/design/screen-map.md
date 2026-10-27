@@ -1,7 +1,7 @@
-# Screen map — versão 1.15
+# Screen map — versão 1.16
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do mapa:** 1.15\
+**Versão do mapa:** 1.16\
 **Base funcional:** RN 1.18 / RF 1.17 / UC 1.18\
 **Data:** 2026-10-26\
 **Situação:** referência inicial para design; organização de navegação proposta
@@ -12,7 +12,7 @@
 
 O [catálogo mobile](../architecture/mobile-feature-catalog.md#2-telas-e-arquivos-de-apresentação) mapeia estes IDs para Views, ViewModels e arquivos futuros em inglês, conforme a [arquitetura mobile](../architecture/mobile-architecture.md). Esse mapeamento técnico não modifica os destinos e as permissões definidos neste mapa.
 
-Este mapa organiza o MVP em telas e superfícies de interação. As permissões e comportamentos derivam da base funcional; os agrupamentos, nomes de telas e escolha entre tela e modal são decisões de design desta versão. As quatro telas principais adultas são destinos independentes: Minhas tarefas, Meu perfil, Missões e conquistas e Família. Minhas tarefas é o destino inicial. Cada uma é acessada diretamente pela navegação principal, sem passar por Minhas tarefas. Kids usam duas abas independentes, Minhas tarefas e Missões e conquistas. O mapa usa os nomes das telas; o layout, os campos ainda não especificados seguem para detalhamento visual; os user flows estão consolidados em documento próprio.
+Este mapa organiza o MVP em telas e superfícies de interação. As permissões e comportamentos derivam da base funcional; os agrupamentos, nomes de telas e escolha entre tela e modal são decisões de design desta versão. As quatro telas principais adultas são destinos independentes: Tarefas, Perfil, Missões e Família. Tarefas é o destino inicial. Cada uma é acessada diretamente pela navegação principal, sem passar por Tarefas. Kids usam duas abas independentes, Minhas tarefas e Missões e conquistas. O mapa usa os nomes das telas; o layout, os campos ainda não especificados seguem para detalhamento visual; os user flows estão consolidados em documento próprio.
 
 - `TEL-xxx`: tela com identidade estável; criar e editar podem ser modos da mesma tela.
 - `MOD-xxx`: modal ou painel sobre a tela de origem, com retorno ao fechá-lo.
@@ -36,7 +36,7 @@ flowchart TD
     T003["TEL-003 · Entrar por convite"]
     T004["TEL-004 · Orientação para recuperar acesso"]
     subgraph Adultos["Navegação principal adulta · destinos independentes"]
-      T010["TEL-010 · Minhas tarefas"]
+      T010["TEL-010 · Tarefas"]
       T050["TEL-050 · Família"]
       T020["TEL-020 · Missões e conquistas"]
       T030["TEL-030 · Meu perfil"]
@@ -73,7 +73,7 @@ Com sessão válida, a entrada é dispensada e o sistema abre TEL-010 ou TEL-040
 
 ```mermaid
 flowchart TD
-    T010["TEL-010 · Minhas tarefas"]
+    T010["TEL-010 · Tarefas"]
     T050["TEL-050 · Família · carga, progresso e lista de membros"]
     T032["TEL-032 · Detalhe do membro · tarefas por dia ou semana"]
     T033["TEL-033 · Criar ou editar membro · Admin"]
@@ -245,7 +245,7 @@ A = Administrador (inclui Criador); M = Membro; K = Kids. Códigos RF e RNF são
 | TEL-002 | Criar/editar família no onboarding | Futuro Criador; no retorno de TEL-056, Criador Administrador | Informar nome e fuso inicial (padrão America/Sao_Paulo); preparar, alterar ou retirar membros antes da criação atômica. No retorno, editar família existente e membros conforme permissão, sem nova criação ou gravação sem mudanças; fuso posterior segue TEL-053/MOD-012 | [UC01](../03-casos-de-uso.md#uc01), [UC02](../03-casos-de-uso.md#uc02); RF01–03, RF38, RF40, RF67 |
 | TEL-003 | Entrar por convite | Pessoa com link | Validar convite, informar senha e acessar perfil novo ou recuperado | [UC09](../03-casos-de-uso.md#uc09); RF42–46, RF54 |
 | TEL-004 | Recuperar acesso | Sem sessão | Orientar novo convite com Administrador; retorno Apple do Criador | [UC02](../03-casos-de-uso.md#uc02), [UC09](../03-casos-de-uso.md#uc09); RF41, RF46 |
-| TEL-010 | Minhas tarefas | A, M | Tela principal e inicial; somente tarefas em que o adulto é responsável ou corresponsável, com estado e progresso próprios diários. O círculo conclui/reabre quando permitido; o restante da linha abre TEL-012. Tarefa compartilhada sinalizada por Kids aparece Pendente aqui, sem alterar seu estado efetivo nem as ações permitidas | [UC11](../03-casos-de-uso.md#uc11), [UC12](../03-casos-de-uso.md#uc12), [UC17](../03-casos-de-uso.md#uc17); RF11, RF12, RF17, RF49, RF57 |
+| TEL-010 | Tarefas | A, M | Tela principal e inicial; somente tarefas em que o adulto é responsável ou corresponsável, com estado e progresso próprios diários. Carrossel pessoal visual de domingo a sábado, cartões individuais com responsáveis e P1/P2/P3, incentivo e cabeçalho datado; o status permanece no ícone e no VoiceOver, fora do subtítulo visual. O círculo conclui/reabre quando permitido; o restante do cartão abre TEL-012. Tarefa compartilhada sinalizada por Kids é apresentada como Pendente aqui, sem alterar seu estado efetivo nem as ações permitidas | [UC11](../03-casos-de-uso.md#uc11), [UC12](../03-casos-de-uso.md#uc12), [UC17](../03-casos-de-uso.md#uc17); RF11, RF12, RF17, RF49, RF57 |
 | TEL-011 | Tarefas da família | A, M | Consultar tarefas de outros e sem responsável por dia ou semana, preservando o período de Família; abrir e criar | [UC07](../03-casos-de-uso.md#uc07), [UC12](../03-casos-de-uso.md#uc12), [UC11](../03-casos-de-uso.md#uc11); RF07–12, RF60 |
 | TEL-012 | Detalhe da tarefa | A, M | Título, peso, responsáveis, estado, origem em rotina; concluir, editar, excluir ou reabrir conforme regra | [UC07](../03-casos-de-uso.md#uc07), [UC12](../03-casos-de-uso.md#uc12), [UC17](../03-casos-de-uso.md#uc17); RF08–12, RF47, RF56–59 |
 | TEL-013 | Criar/editar tarefa ou rotina | A, M | Título (1–60 car.), peso 1–3, data livre (padrão hoje), responsáveis, observação opcional (até 250 car.) e repetição com DatePicker inicial livre; identificar alcance e efeitos em concluídas; editar tarefa Aguardando confirmação abre MOD-014 | [UC07](../03-casos-de-uso.md#uc07), [UC08](../03-casos-de-uso.md#uc08); RF07–10, RF13–16, RF69, RF70 |
@@ -329,6 +329,7 @@ Campos funcionais de data/fuso e seleção de foto estão definidos; o layout vi
 
 | Versão do mapa | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.16 | RN 1.18 / RF 1.17 / UC 1.18 | 2026-10-26 | TEL-010 adota a apresentação adulta do Figma: aba “Tarefas”, semana visual domingo–sábado, cartões com responsáveis/P1–P3, progresso por extenso, incentivo e status apenas no ícone/VoiceOver; regras e período semanal familiar preservados. |
 | 1.15 | UC 1.18 | 2026-10-26 | TEL-010 e TEL-040 usam o círculo para concluir/reabrir quando permitido; a linha abre detalhe. MOD-006 pode partir da lista. |
 | 1.14 | RN 1.18 / RF 1.17 / UC 1.16 | 2026-10-19 | TEL-002 prepara membros para criação atômica e edita família existente no retorno; TEL-056 fica como convite após criação. Foto inicial enviada antes da criação; convite inicial direto e reemissão confirmada; estados pessoais distintos para adulto/Kids. |
 | 1.13 | 1.17 | 2026-10-10 | Consolida TEL-021/023/050/052 com listas paginadas de até 20 itens e rolagem infinita que preserva itens confirmados em falha. Para SPEC-003, SPEC-015, SPEC-016, SPEC-018 e SPEC-020. |
