@@ -1,7 +1,9 @@
 import type { ActorContext } from '../../../shared/application/actor-context.js';
 import type { TransactionRunner } from '../../../shared/application/transaction-runner.js';
-import { NotFoundError } from '../../../shared/domain/domain-error.js';
+import { ActionNotAllowedError, NotFoundError } from '../../../shared/domain/domain-error.js';
+import { MemberRole } from '../../../shared/domain/member-role.js';
 import {
+  MediaPurpose,
   MediaState,
   type MediaRepositoryPort,
   type ObjectStorageReaderPort,
@@ -38,6 +40,10 @@ export class GetMediaContentUseCase {
     );
     if (media === undefined || media.state !== MediaState.READY) {
       throw new NotFoundError('Media not found.');
+    }
+    if (media.purpose === MediaPurpose.TASK_SIGNAL) {
+      if (actor.role !== MemberRole.ADMINISTRATOR) throw new ActionNotAllowedError();
+      if (!media.currentSignalPhoto) throw new NotFoundError('Media not found.');
     }
 
     const body = await this.deps.storage.get(media.objectKey);

@@ -102,6 +102,18 @@ describe('HTTP Presentation Layer (Fastify)', () => {
       createMemberUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['createMemberUseCase'],
+      updateMemberUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['updateMemberUseCase'],
+      changeMemberRoleUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['changeMemberRoleUseCase'],
+      leaveAdministrationUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['leaveAdministrationUseCase'],
+      removeMemberUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['removeMemberUseCase'],
       issueMemberInviteUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['issueMemberInviteUseCase'],
@@ -147,6 +159,27 @@ describe('HTTP Presentation Layer (Fastify)', () => {
       getOwnProgressUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['getOwnProgressUseCase'],
+      getFamilyOverviewUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['getFamilyOverviewUseCase'],
+      getFamilyTasksUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['getFamilyTasksUseCase'],
+      getWeeklyReportSnapshotUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['getWeeklyReportSnapshotUseCase'],
+      signalTaskUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['signalTaskUseCase'],
+      listKidsSignalsUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['listKidsSignalsUseCase'],
+      getKidsSignalUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['getKidsSignalUseCase'],
+      decideKidsSignalUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['decideKidsSignalUseCase'],
       editTaskUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['editTaskUseCase'],
@@ -263,7 +296,7 @@ describe('HTTP Presentation Layer (Fastify)', () => {
     const spec = specResponse.json() as {
       openapi: string;
       info: { title: string };
-      paths: Record<string, unknown>;
+      paths: Record<string, Record<string, { security?: unknown[] }>>;
       components: { securitySchemes: Record<string, { scheme: string }> };
     };
     expect(spec.openapi).toBe('3.1.0');
@@ -276,6 +309,16 @@ describe('HTTP Presentation Layer (Fastify)', () => {
         '/v1/families',
         '/v1/family/members',
         '/v1/family/members/{memberId}',
+        '/v1/family/members/{memberId}/role-changes',
+        '/v1/me/administration-exit',
+        '/v1/family/overview',
+        '/v1/family/tasks',
+        '/v1/family/members/{memberId}/tasks',
+        '/v1/tasks/{taskId}/signals',
+        '/v1/kids/signals',
+        '/v1/kids/signals/{signalId}',
+        '/v1/kids/signals/{signalId}/decision',
+        '/v1/reports/weekly-snapshot',
         '/v1/media',
         '/v1/me/profile',
         '/v1/tasks',
@@ -283,6 +326,16 @@ describe('HTTP Presentation Layer (Fastify)', () => {
       ]),
     );
     expect(spec.components.securitySchemes.bearerAuth).toMatchObject({ scheme: 'bearer' });
+    for (const path of [
+      '/v1/family/overview',
+      '/v1/family/tasks',
+      '/v1/tasks/{taskId}/signals',
+      '/v1/kids/signals',
+      '/v1/reports/weekly-snapshot',
+    ]) {
+      const operations = Object.values(spec.paths[path] ?? {});
+      expect(operations[0]?.security).toEqual([{ bearerAuth: [] }]);
+    }
 
     await app.close();
   });

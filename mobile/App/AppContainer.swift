@@ -102,6 +102,7 @@ final class AppContainer {
             repository: profileRepository,
             sessionStore: sessionStore,
             session: session,
+            familyRepository: familyRepository,
             photoNormalizer: photoNormalizer
         )
     }

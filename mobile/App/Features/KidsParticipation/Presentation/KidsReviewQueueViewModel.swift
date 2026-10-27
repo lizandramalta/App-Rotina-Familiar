@@ -24,6 +24,10 @@ final class KidsReviewQueueViewModel {
     private let repository: any KidsSignalRepository
     private let accessTokenProvider: @MainActor () -> String?
 
+    func makeDetailViewModel(id: UUID) -> KidsSignalDetailViewModel {
+        KidsSignalDetailViewModel(id: id, repository: repository, accessTokenProvider: accessTokenProvider)
+    }
+
     init(repository: any KidsSignalRepository, accessTokenProvider: @escaping @MainActor () -> String?) {
         self.repository = repository
         self.accessTokenProvider = accessTokenProvider

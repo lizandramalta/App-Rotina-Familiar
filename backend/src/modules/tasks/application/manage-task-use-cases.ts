@@ -327,6 +327,14 @@ export class CompleteTaskUseCase {
         actorId: actor.memberId,
         now,
       });
+      if (task.status === 'awaitingConfirmation') {
+        await this.deps.repository.closeCurrentSignalByManualCompletion(tx, {
+          familyId: task.familyId,
+          taskId: task.id,
+          actorId: actor.memberId,
+          now,
+        });
+      }
       // SPEC-014 CA-15: a missão fecha no mesmo commit da conclusão.
       await this.deps.missionCloser.closeForCompletedTask(tx, {
         familyId: completed.familyId,

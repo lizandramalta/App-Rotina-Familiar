@@ -373,8 +373,79 @@ private actor UITestFamilyRepository: FamilyRepository {
         )
     }
 
+    func updateMemberName(memberID: UUID, name: String, accessToken: String) async throws -> FamilyMember {
+        FamilyMember(id: memberID, name: name, role: .member, isFamilyCreator: false)
+    }
+
+    func changeMemberRole(memberID: UUID, role: MemberRole, accessToken: String) async throws -> FamilyMember {
+        FamilyMember(id: memberID, name: "Rafa Silva", role: role, isFamilyCreator: false)
+    }
+
+    func removeMember(memberID: UUID, accessToken: String) async throws {}
+
+    func leaveAdministration(accessToken: String) async throws -> FamilyMember {
+        FamilyMember(id: UITestTaskFixtures.memberID, name: "Maria Silva", role: .member, isFamilyCreator: false)
+    }
+
     func getFamily(accessToken: String) async throws -> FamilyProfile {
         FamilyProfile(id: UITestTaskFixtures.familyID, name: familyName, timeZoneID: familyTimeZoneID)
+    }
+
+    func getFamilyOverview(range: FamilyDateRange?, accessToken: String) async throws -> FamilyOverview {
+        let selectedRange = range ?? FamilyDateRange(startDate: "2026-10-19", endDate: "2026-10-25")
+        let progress = FamilyProgress(
+            total: 25,
+            completed: 17,
+            pending: 6,
+            awaitingConfirmation: 2,
+            percentage: 68
+        )
+        return FamilyOverview(
+            range: selectedRange,
+            familyCreatedAt: "2026-10-01",
+            progress: progress,
+            members: [
+                FamilyMemberProgress(
+                    memberID: UITestTaskFixtures.memberID,
+                    name: "Maria Silva",
+                    role: .administrator,
+                    progress: progress
+                ),
+                FamilyMemberProgress(
+                    memberID: UITestTaskFixtures.kidMemberID,
+                    name: "Rafa Silva",
+                    role: .kid,
+                    progress: FamilyProgress(
+                        total: 8,
+                        completed: 5,
+                        pending: 2,
+                        awaitingConfirmation: 1,
+                        percentage: 62.5
+                    )
+                ),
+            ]
+        )
+    }
+
+    func listFamilyTasks(
+        range: FamilyDateRange,
+        memberID: UUID?,
+        status: FamilyTaskStatusFilter,
+        cursor: String?,
+        accessToken: String
+    ) async throws -> FamilyTaskPage {
+        FamilyTaskPage(range: range, items: [], nextCursor: nil)
+    }
+
+    func getWeeklyReport(referenceDate: String, accessToken: String) async throws -> WeeklyReportSnapshot {
+        WeeklyReportSnapshot(
+            period: FamilyDateRange(startDate: referenceDate, endDate: referenceDate),
+            timeZoneID: familyTimeZoneID, generatedAt: Date(timeIntervalSince1970: 1_782_400_000),
+            isPartial: false, isTransition: false,
+            progress: .init(total: 25, completed: 17, percentage: 68),
+            totalWeight: 42,
+            members: [.init(displayName: "Alex Silva", weight: 12, completedTasks: 5, percentage: 28.6)]
+        )
     }
 
     func updateFamilyName(_ name: String, accessToken: String) async throws -> FamilyProfile {
@@ -694,6 +765,18 @@ private actor UITestTaskRepository: TaskRepository {
         return completed
     }
 
+    func uploadSignalPhoto(_ jpeg: Data, accessToken: String) async throws -> String { "ui-test-signal-photo" }
+
+    func signalTask(id: UUID, photoMediaID: String?, accessToken: String) async throws -> FamilyTask {
+        guard let current = tasks[id] else { throw TaskError.notFound }
+        let changed = FamilyTask(id: current.id, title: current.title, weight: current.weight,
+                                 scheduledDate: current.scheduledDate, assigneeIDs: current.assigneeIDs,
+                                 note: current.note, status: .awaitingConfirmation,
+                                 routineID: current.routineID, createdAt: current.createdAt)
+        tasks[id] = changed
+        return changed
+    }
+
     /// Well before any fixture date and any plausible "today" during a test run (RN49's lower bound).
     private static let familyCreatedAt = "2020-01-01"
 
@@ -857,6 +940,20 @@ private struct UITestKidsSignalRepository: KidsSignalRepository {
             return KidsReviewQueuePage(items: [], nextCursor: nil)
         }
     }
+
+    func getSignalDetail(id: UUID, accessToken: String) async throws -> KidsSignalDetail {
+        guard let item = Self.items.first(where: { $0.id == id }) else { throw KidsSignalError.notFound }
+        return KidsSignalDetail(id: id, taskID: item.taskID, taskTitle: item.taskTitle,
+                                childName: item.childName, signaledAt: item.signaledAt,
+                                assignees: [item.childName], photoMediaID: nil)
+    }
+
+    func decideSignal(id: UUID, decision: KidsReviewDecision, accessToken: String) async throws -> KidsDecisionResult {
+        KidsDecisionResult(taskStatus: decision == .confirm ? .completed : .pending,
+                           outcome: decision == .confirm ? "confirmed" : "rejected", applied: true)
+    }
+
+    func getSignalPhoto(mediaID: UUID, accessToken: String) async throws -> Data { Data() }
 
     private static let items: [KidsSignalSummary] = [
         ("Arrumar a cama", "Rafa Silva", "2026-10-27T10:00:00.000Z", true),

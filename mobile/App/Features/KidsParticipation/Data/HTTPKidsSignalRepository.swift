@@ -23,6 +23,27 @@ nonisolated private struct KidsSignaledByDTO: Decodable {
     let name: String
 }
 
+nonisolated private struct KidsSignalDetailDTO: Decodable {
+    struct Assignee: Decodable { let id: UUID; let name: String }
+    let signalId: UUID
+    let task: KidsSignalTaskDTO
+    let signaledBy: KidsSignaledByDTO
+    let signaledAt: Date
+    let assignees: [Assignee]
+    let photoMediaId: UUID?
+}
+
+nonisolated private struct KidsDecisionRequestDTO: Encodable {
+    let decision: KidsReviewDecision
+}
+
+nonisolated private struct KidsDecisionResponseDTO: Decodable {
+    struct Task: Decodable { let status: TaskStatus }
+    let task: Task
+    let decisionOutcome: String
+    let applied: Bool
+}
+
 nonisolated private struct ProblemDetailsDTO: Decodable {
     let code: String?
 }
@@ -67,6 +88,37 @@ nonisolated struct HTTPKidsSignalRepository: KidsSignalRepository {
             },
             nextCursor: response.nextCursor
         )
+    }
+
+    func getSignalDetail(id: UUID, accessToken: String) async throws -> KidsSignalDetail {
+        var request = URLRequest(url: baseURL.appending(path: "kids/signals/\(id.uuidString.lowercased())"))
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        let data = try await send(request)
+        let detail = try Self.decoder.decode(KidsSignalDetailDTO.self, from: data)
+        return KidsSignalDetail(
+            id: detail.signalId, taskID: detail.task.id, taskTitle: detail.task.title,
+            childName: detail.signaledBy.name, signaledAt: detail.signaledAt,
+            assignees: detail.assignees.map(\.name), photoMediaID: detail.photoMediaId
+        )
+    }
+
+    func decideSignal(id: UUID, decision: KidsReviewDecision, accessToken: String) async throws -> KidsDecisionResult {
+        var request = URLRequest(url: baseURL.appending(path: "kids/signals/\(id.uuidString.lowercased())/decision"))
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(KidsDecisionRequestDTO(decision: decision))
+        let data = try await send(request)
+        let result = try Self.decoder.decode(KidsDecisionResponseDTO.self, from: data)
+        return KidsDecisionResult(taskStatus: result.task.status, outcome: result.decisionOutcome, applied: result.applied)
+    }
+
+    func getSignalPhoto(mediaID: UUID, accessToken: String) async throws -> Data {
+        var request = URLRequest(url: baseURL.appending(path: "media/\(mediaID.uuidString.lowercased())/content"))
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        return try await send(request)
     }
 
     private func send(_ request: URLRequest) async throws -> Data {

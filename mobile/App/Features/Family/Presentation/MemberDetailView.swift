@@ -4,9 +4,16 @@ import SwiftUI
 struct MemberDetailView: View {
     @State private var viewModel: MemberDetailViewModel
     @State private var showsReissueConfirmation = false
+    @State private var showsNameEditor = false
+    @State private var showsRolePicker = false
+    @State private var showsRemovalConfirmation = false
+    @State private var draftName = ""
+    @Environment(\.dismiss) private var dismiss
+    let onRemoved: () -> Void
 
-    init(viewModel: MemberDetailViewModel) {
+    init(viewModel: MemberDetailViewModel, onRemoved: @escaping () -> Void = {}) {
         _viewModel = State(initialValue: viewModel)
+        self.onRemoved = onRemoved
     }
 
     var body: some View {
@@ -20,7 +27,15 @@ struct MemberDetailView: View {
                     if viewModel.canIssueInvite {
                         inviteSection
                     }
-                    tasksPlaceholder
+                    if viewModel.canManageTarget {
+                        managementSection
+                    }
+                    if let taskViewModel = viewModel.taskViewModel {
+                        FamilyTasksView(viewModel: taskViewModel)
+                            .frame(minHeight: 360)
+                    } else {
+                        tasksPlaceholder
+                    }
                 } else if viewModel.isLoading {
                     ProgressView()
                         .frame(maxWidth: .infinity, minHeight: 200)
@@ -61,6 +76,52 @@ struct MemberDetailView: View {
             viewModel: viewModel,
             isPresented: viewModel.transientInvite != nil && !showsReissueConfirmation
         )
+        .alert("family.member.manage.edit_name", isPresented: $showsNameEditor) {
+            TextField("family.member.manage.name", text: $draftName)
+            Button("family.settings.hub.cancel", role: .cancel) {}
+            Button("family.settings.hub.save") { Task { await viewModel.updateName(draftName) } }
+        }
+        .confirmationDialog("family.member.manage.role", isPresented: $showsRolePicker) {
+            ForEach(viewModel.allowedRoles, id: \.self) { role in
+                Button(role.onboardingTitleKey) { Task { await viewModel.changeRole(role) } }
+            }
+        }
+        .alert("family.member.manage.remove", isPresented: $showsRemovalConfirmation) {
+            Button("family.settings.hub.cancel", role: .cancel) {}
+            Button("family.member.manage.remove", role: .destructive) { Task { await viewModel.remove() } }
+        } message: {
+            Text("family.member.manage.remove_message")
+        }
+        .onChange(of: viewModel.isRemoved) { _, removed in
+            if removed { onRemoved(); dismiss() }
+        }
+    }
+
+    private var managementSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("family.member.manage.title")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.secondary)
+            Button("family.member.manage.edit_name", systemImage: "pencil") {
+                draftName = viewModel.detail?.name ?? ""
+                showsNameEditor = true
+            }
+            Button("family.member.manage.role", systemImage: "person.crop.circle.badge.checkmark") {
+                showsRolePicker = true
+            }
+            Button("family.member.manage.remove", systemImage: "person.crop.circle.badge.minus", role: .destructive) {
+                showsRemovalConfirmation = true
+            }
+            if viewModel.isSaving { ProgressView() }
+            if viewModel.managementFailed {
+                Label("family.member.manage.error", systemImage: "exclamationmark.triangle")
+                    .foregroundStyle(.red)
+            }
+        }
+        .disabled(viewModel.isSaving)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 20))
     }
 
     /// UX-004 §5.1: first issuance is a direct tap; a previous invite routes to the TEL-034 confirmation.

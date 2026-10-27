@@ -62,7 +62,7 @@ export class PostgresInviteJoinRepository implements InviteJoinRepositoryPort {
     }>(
       `select i.id, i.family_id, i.member_id, i.status, m.role, m.is_family_creator
          from app.member_invites i
-         join app.members m on m.family_id = i.family_id and m.id = i.member_id
+         join app.members m on m.family_id = i.family_id and m.id = i.member_id and m.removed_at is null
         where i.id = $1
           for update of i`,
       [inviteId],

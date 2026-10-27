@@ -68,6 +68,15 @@ export interface TaskRepositoryPort {
   ): Promise<boolean>;
   hasCurrentSignal(tx: TransactionContext, familyId: string, taskId: string): Promise<boolean>;
   hasKidsAssignee(tx: TransactionContext, familyId: string, taskId: string): Promise<boolean>;
+  closeCurrentSignalByManualCompletion(
+    tx: TransactionContext,
+    params: {
+      readonly familyId: string;
+      readonly taskId: string;
+      readonly actorId: string;
+      readonly now: Date;
+    },
+  ): Promise<void>;
   completeTask(
     tx: TransactionContext,
     params: {

@@ -1,8 +1,8 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.22 · **Base funcional:** RN 1.21 / RF 1.20 / UC 1.20 · **Arquitetura backend:** 1.4\
+**Versão:** 1.23 · **Base funcional:** RN 1.22 / RF 1.21 / UC 1.21 · **Arquitetura backend:** 1.4\
 **Data:** 2026-10-27\
-**Situação:** rotas de rotina da SPEC-008 Fase 2 e consultas/edições de perfil e badges da SPEC-006 Fase 1 materializadas na API e OpenAPI; ampliações de onboarding ainda exigem implementação e atualização da OpenAPI
+**Situação:** contratos da aba Família, gestão de membros, sinalização/decisão Kids e snapshot semanal materializados na API; demais contratos alvo seguem por fases
 
 [Arquitetura](backend-architecture.md) · [Decisões](backend-decisions.md) · [Catálogo mobile](mobile-feature-catalog.md) · [UC](../03-casos-de-uso.md) · [Índice](../DOCUMENTACAO.md)
 
@@ -98,8 +98,8 @@ Preview de fuso é apenas leitura de suporte a MOD-012. A gravação pode reflet
 | Método e caminho | Caso de uso de aplicação | Campos / resposta | Permissão |
 |---|---|---|---|
 | `GET /me/tasks` | `GetOwnTasks` | `referenceDate`, cursor → tarefas do dia em que o ator é responsável ou corresponsável, com `status` canônico e `displayStatus` da lista pessoal | Todos |
-| `GET /family/tasks` | `GetFamilyTasks` | `period`, `referenceDate`, `memberId` opcional, `includeUnassigned` opcional, cursor | Adulto |
-| `GET /family/members/{memberId}/tasks` | `GetMemberTasks` | Período da origem e cursor | Adulto |
+| `GET /family/tasks` | `GetFamilyTasks` | `startDate` e `endDate` obrigatórios; `memberId`, `status` e cursor opcionais; intervalo livre inclusivo | Adulto |
+| `GET /family/members/{memberId}/tasks` | `GetMemberTasks` | `startDate`, `endDate` herdados da origem e cursor; filtro fixo do membro | Adulto |
 | `GET /tasks/{taskId}` | `GetTaskDetail` | Estado atual, origem, capacidades e detalhes autorizados | Adulto; Kids apenas responsável |
 | `POST /tasks` | `CreateTask` | `title` (1–60 car.), `weight`, `scheduledDate`, `assigneeIds`, `note` (opcional, ≤250 car.) → tarefa única | Adulto |
 | `PATCH /tasks/{taskId}` | `EditTask` | Campos editáveis de uma ocorrência, incluindo data e `note`; `signalResolution` (`resetToPending` \| `keepAwaitingConfirmation`) obrigatório quando o estado atual é `awaitingConfirmation` | Adulto; respeitar proteção |
@@ -115,10 +115,10 @@ Preview de fuso é apenas leitura de suporte a MOD-012. A gravação pode reflet
 | `GET /kids/signals/{signalId}` | `GetKidsSignal` | Tarefa, autor, foto opcional e estado da sinalização corrente | Admin |
 | `POST /kids/signals/{signalId}/decision` | `DecideKidsSignal` | `decision: confirm \| reject` → tarefa/resultado canônico | Admin |
 | `GET /me/progress` | `GetOwnProgress` | Totais próprios do dia; sem carga familiar | Todos |
-| `GET /family/overview` | `GetFamilyOverview` | Progresso familiar e membros num snapshot; sem carga | Adulto |
+| `GET /family/overview` | `GetFamilyOverview` | `startDate`/`endDate` opcionais (padrão semana corrente), `familyCreatedAt`, progresso e membros; sem carga | Adulto |
 | `GET /family/load` | `GetFamilyLoad` | Distribuição por membro e totais, sem ranking | Adulto |
 
-Nas rotas familiares, `period` aceita `day` ou `week`; `referenceDate` é a data selecionada, validada pelo limite de consulta RN49. As rotas pessoais são sempre diárias e não aceitam `period`. `memberId` restringe a lista familiar a um membro da família do ator; `includeUnassigned` inclui ou exclui tarefas sem responsável. O servidor devolve intervalo nominal e efetivo nas consultas familiares. `GET /tasks/{id}` resolve criação fora do carrossel quando o ator pode consultar aquela tarefa; isso não cria novo calendário de navegação. Cadastro/edição não bloqueiam passado, meses futuros ou datas anteriores à família.
+As consultas familiares de progresso e tarefas aceitam `startDate`/`endDate` livres e inclusivos dentro de RN49; o overview sem parâmetros usa a semana corrente. As rotas pessoais são sempre diárias. `memberId` restringe a lista familiar a um membro ativo da família do ator; sem filtro, a lista inclui tarefas sem responsável. `status=pending` para Membro inclui o estado canônico `awaitingConfirmation` e o projeta como Pendente; Administrador vê ambos separadamente. O cursor pertence ao intervalo e aos filtros escolhidos. `GET /tasks/{id}` resolve criação fora do carrossel quando o ator pode consultar aquela tarefa; isso não cria novo calendário de navegação. Cadastro/edição não bloqueiam passado, meses futuros ou datas anteriores à família.
 
 Em `GET /me/tasks`, cada item mantém `status: pending | awaitingConfirmation | completed` como estado efetivo. `displayStatus` usa os mesmos três valores: quando `status` é `awaitingConfirmation`, retorna `pending` para adulto responsável/corresponsável e `awaitingConfirmation` para Kids responsável; nos demais casos coincide com `status`. É projeção calculada para a lista pessoal, sem segundo estado persistido. Detalhe, fila de avaliação, permissões e progresso continuam usando `status` canônico. A consulta pessoal não inclui tarefas de outros responsáveis nem tarefas sem responsável.
 
@@ -230,12 +230,13 @@ Cada linha cobre um objetivo funcional completo, não apenas uma rota. RF/RN per
 | RNF26 | Snapshot para PDF, resultado semanal único e fila persistente |
 | RNF27 | Perfil por titularidade, PDF adulto e compartilhamento explícito no cliente |
 
-O documento OpenAPI 3.1 é gerado pelos schemas HTTP em `/docs/json`, e a interface interativa fica em `/docs`. A projeção `displayStatus` de `GET /me/tasks` já consta da OpenAPI; as demais ampliações aqui descritas só constarão depois de implementadas. Cada rota implementada mantém schema, segurança e respostas compatíveis com o recorte entregue.
+O documento OpenAPI 3.1 é gerado pelos schemas HTTP em `/docs/json`, e a interface interativa fica em `/docs`. As rotas de consulta familiar, gestão de membros, sinalização/decisão Kids e snapshot semanal constam na OpenAPI; contratos alvo de outras fases ainda podem não constar. Cada rota implementada mantém schema, segurança e respostas compatíveis com o recorte entregue.
 
 ## Histórico
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.23 | 2026-10-27 | Materializa consultas familiares por intervalo livre, gestão de membros, sinalização/decisão Kids e snapshot semanal; documenta projeção de Pendentes para Membro e origem do PDF em TEL-011. Base RN 1.22 / RF 1.21 / UC 1.21. |
 | 1.22 | 2026-10-27 | `UpdateFutureRoutine` preserva a data prevista já gravada em cada ocorrência abrangida, inclusive após edição individual; substitui somente os campos permitidos. Para SPEC-008 Fase 2 / SCRUM-45. Base funcional RN 1.21 / RF 1.20 / UC 1.20. |
 | 1.21 | 2026-10-27 | `PATCH /routines/{routineId}` (`UpdateFutureRoutine`) aceita somente `fromTaskId`, `title`, `weight`, `assigneeIds` e `note`; `startDate`/`frequencyDays` respondem `400 UNKNOWN_FIELD`. O alcance substitui edições individuais anteriores das futuras abrangidas, usa `original_date` para definir as futuras e não altera estados (`signalResolution` recusado). Define `409` para origem protegida e para missão sem tarefas, encerramento da geração e formatos de resposta `200` de alteração e encerramento. Base funcional RN 1.20 / RF 1.19 / UC 1.19 (SPEC-008 Fase 2). |
 | 1.20 | 2026-10-22 | §3: `GetOwnProfile`/`UpdateOwnProfile` passam a incluir `familyName`; `UpdateOwnProfile` aceita `name` opcional para titular adulto (`403 ACTION_NOT_ALLOWED` para Kids; `422 NAME_INVALID_LENGTH`). §6: `GET /media/{mediaId}/content` especifica `200 image/jpeg`, `Cache-Control: private, no-store` e `404` para mídia indisponível. Base funcional RN 1.19 / RF 1.18 / UC 1.17 (SPEC-006 Fase 2; SCRUM-52). |

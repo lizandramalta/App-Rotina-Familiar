@@ -9,6 +9,19 @@ nonisolated protocol FamilyRepository: Sendable {
     /// Consumed by Tasks' assignee picker (MOD-001); not paginated further there — families are small.
     func listMembers(accessToken: String, cursor: String?) async throws -> FamilyMemberPage
     func getMemberDetail(memberID: UUID, accessToken: String) async throws -> FamilyMemberDetail
+    func updateMemberName(memberID: UUID, name: String, accessToken: String) async throws -> FamilyMember
+    func changeMemberRole(memberID: UUID, role: MemberRole, accessToken: String) async throws -> FamilyMember
+    func removeMember(memberID: UUID, accessToken: String) async throws
+    func leaveAdministration(accessToken: String) async throws -> FamilyMember
+    func getFamilyOverview(range: FamilyDateRange?, accessToken: String) async throws -> FamilyOverview
+    func listFamilyTasks(
+        range: FamilyDateRange,
+        memberID: UUID?,
+        status: FamilyTaskStatusFilter,
+        cursor: String?,
+        accessToken: String
+    ) async throws -> FamilyTaskPage
+    func getWeeklyReport(referenceDate: String, accessToken: String) async throws -> WeeklyReportSnapshot
 
     func getFamily(accessToken: String) async throws -> FamilyProfile
     func updateFamilyName(_ name: String, accessToken: String) async throws -> FamilyProfile

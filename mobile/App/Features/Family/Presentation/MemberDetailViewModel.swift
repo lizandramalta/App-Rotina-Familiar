@@ -2,8 +2,7 @@ import Foundation
 import Observation
 import SwiftUI
 
-/// TEL-032 — Detalhe do membro (SPEC-003 Phase 1, UX-003 §5.2) and the invite issue/reissue flow of
-/// TEL-032/TEL-034 (SPEC-004 Phase 2, UX-004). Role change and removal belong to later phases.
+/// TEL-032 — member tasks, administrative management and explicit invitation.
 @MainActor
 @Observable
 final class MemberDetailViewModel {
@@ -16,6 +15,9 @@ final class MemberDetailViewModel {
     private(set) var detail: FamilyMemberDetail?
     private(set) var isLoading = false
     private(set) var failure: Failure?
+    private(set) var isSaving = false
+    private(set) var managementFailed = false
+    private(set) var isRemoved = false
 
     enum InviteFailure: Equatable {
         case rateLimited
@@ -32,6 +34,7 @@ final class MemberDetailViewModel {
     private(set) var transientInvite: MemberInvite?
     private(set) var inviteFailure: InviteFailure?
     private(set) var wasShareCancelled = false
+    let taskViewModel: FamilyTasksViewModel?
 
     private let memberID: UUID
     private let session: ActiveFamilySession
@@ -43,13 +46,27 @@ final class MemberDetailViewModel {
         session: ActiveFamilySession,
         familyRepository: any FamilyRepository,
         accessTokenProvider: @escaping @MainActor () -> String?,
-        hasPreviousInvite: Bool = false
+        hasPreviousInvite: Bool = false,
+        range: FamilyDateRange? = nil,
+        familyCreatedAt: String? = nil,
+        timeZoneID: String = FamilyCreationValidation.defaultTimeZoneID
     ) {
         self.hasPreviousInvite = hasPreviousInvite
         self.memberID = memberID
         self.session = session
         self.familyRepository = familyRepository
         self.accessTokenProvider = accessTokenProvider
+        self.taskViewModel = range.map {
+            FamilyTasksViewModel(
+                range: $0,
+                memberID: memberID,
+                role: session.role,
+                familyCreatedAt: familyCreatedAt,
+                timeZoneID: timeZoneID,
+                familyRepository: familyRepository,
+                accessTokenProvider: accessTokenProvider
+            )
+        }
     }
 
     var isCreator: Bool { detail?.isFamilyCreator ?? false }
@@ -60,6 +77,64 @@ final class MemberDetailViewModel {
 
     /// Hidden for non-managers and for the Creator, who never receives an invite (SPEC-004 CA-03, CA-04).
     var canIssueInvite: Bool { canManage && !isCreator }
+    var canManageTarget: Bool { canManage && !isCreator && detail?.id != session.memberID }
+
+    var allowedRoles: [MemberRole] {
+        guard let detail else { return [] }
+        return detail.role == .kid ? [.kid, .member] : [.administrator, .member, .kid]
+    }
+
+    func updateName(_ name: String) async {
+        guard canManageTarget, !isSaving, let token = accessTokenProvider() else { return }
+        isSaving = true
+        managementFailed = false
+        defer { isSaving = false }
+        do {
+            let member = try await familyRepository.updateMemberName(memberID: memberID, name: name, accessToken: token)
+            apply(member)
+        } catch {
+            managementFailed = true
+            await load()
+        }
+    }
+
+    func changeRole(_ role: MemberRole) async {
+        guard canManageTarget, allowedRoles.contains(role), !isSaving, let token = accessTokenProvider() else { return }
+        isSaving = true
+        managementFailed = false
+        defer { isSaving = false }
+        do {
+            let member = try await familyRepository.changeMemberRole(memberID: memberID, role: role, accessToken: token)
+            apply(member)
+        } catch {
+            managementFailed = true
+            await load()
+        }
+    }
+
+    func remove() async {
+        guard canManageTarget, !isSaving, let token = accessTokenProvider() else { return }
+        isSaving = true
+        managementFailed = false
+        defer { isSaving = false }
+        do {
+            try await familyRepository.removeMember(memberID: memberID, accessToken: token)
+            detail = nil
+            isRemoved = true
+        } catch {
+            managementFailed = true
+            await load()
+        }
+    }
+
+    private func apply(_ member: FamilyMember) {
+        guard let old = detail else { return }
+        detail = FamilyMemberDetail(
+            id: member.id, name: member.name, role: member.role,
+            isFamilyCreator: member.isFamilyCreator, createdAt: old.createdAt,
+            capabilities: old.capabilities
+        )
+    }
 
     /// Single message handed to the native share sheet (SPEC-004 E-01).
     var shareMessage: String? {

@@ -17,6 +17,7 @@ import {
 } from '../../src/shared/domain/domain-error.js';
 import { createRecordingLogger } from '../support/fake-logger.js';
 import { TEST_ACTOR } from '../support/build-test-app.js';
+import { MemberRole } from '../../src/shared/domain/member-role.js';
 
 const PROCESSED = {
   body: Buffer.from('jpeg-bytes'),
@@ -108,8 +109,8 @@ describe('UploadMediaUseCase', () => {
     });
   });
 
-  it.each([['taskSignal'], [undefined], ['avatar'], [42]])(
-    'accepts only the profilePhoto purpose (rejects %j)',
+  it.each([[undefined], ['avatar'], [42]])(
+    'rejects an unsupported purpose (%j)',
     async (purpose) => {
       const error = await upload(purpose).catch((e) => e);
 
@@ -118,6 +119,27 @@ describe('UploadMediaUseCase', () => {
       expect(repository.reserve).not.toHaveBeenCalled();
     },
   );
+
+  it('SPEC-012 CA-02: accepts taskSignal uploads only from Kids, in their own private path', async () => {
+    const adultError = await upload('taskSignal').catch((e) => e);
+    expect(adultError.code).toBe('ACTION_NOT_ALLOWED');
+    expect(repository.reserve).not.toHaveBeenCalled();
+
+    await useCase.execute({
+      actor: { ...TEST_ACTOR, role: MemberRole.KIDS },
+      purpose: 'taskSignal',
+      content: Buffer.from('raw-image'),
+    });
+    expect(repository.reserve).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ purpose: 'TASK_SIGNAL' }),
+    );
+    expect(storage.put).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: `test/families/${TEST_ACTOR.familyId}/task-signals/media-1.jpg`,
+      }),
+    );
+  });
 
   it('does not reserve or write anything when the image cannot be decoded', async () => {
     imageProcessor.processProfilePhoto.mockRejectedValue(new MediaFormatUnsupportedError());

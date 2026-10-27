@@ -9,14 +9,14 @@
 
 ## 1. Objetivo e jornada
 
-- **Visão da experiência:** a pessoa entende que Minhas tarefas é sua agenda diária; adultos distinguem claramente essa visão da consulta familiar por Dia/Semana.
+- **Visão da experiência:** a pessoa entende que Minhas tarefas é sua agenda diária; adultos distinguem claramente essa visão da consulta familiar por intervalo livre.
 - **Perfis:** Administrador, Membro e Kids na jornada pessoal; somente Administrador e Membro na jornada Família.
 
 | Origem | Ação | Destino | Retorno preservado |
 |---|---|---|---|
 | Navegação adulta | Abrir Minhas tarefas | TEL-010 | Data diária, posição e estado da lista |
 | Aba Kids | Abrir Minhas tarefas | TEL-040 | Data diária e estado da lista |
-| Navegação adulta | Abrir Família | TEL-050 | Dia/Semana e data de referência |
+| Navegação adulta | Abrir Família | TEL-050 | Início/Fim, inicialmente a semana corrente |
 | TEL-050 | Selecionar membro | TEL-032 | Membro e período; voltar restaura TEL-050 |
 | TEL-050 | Abrir Todas as tarefas | TEL-011 | Período e filtros familiares |
 
@@ -27,9 +27,9 @@
 - **Ícones:** usar SF Symbols nos controles do checklist e na barra de abas, preservando rótulos acessíveis e o significado de cada ação ou destino.
 - **TEL-040 Kids:** preserva “Minhas tarefas” e o status textual sob cada tarefa, inclusive “Aguardando confirmação”; não herda o subtítulo de responsáveis e esforço da variante adulta.
 - **TEL-010 sem tarefas:** mantém o cartão de progresso com “Sem tarefas” e barra vazia, sem incentivo; abaixo, um cartão branco apresenta “Sem tarefas para este dia”, “Tarefas atribuídas a você aparecem aqui.” e a ação “Nova tarefa”. **Falha ao atualizar:** apresenta cartão branco com ícone de alerta, mensagem e botão escuro “Tentar novamente”; quando há dados anteriores, preserva-os e oferece a mesma ação de recuperação.
-- **TEL-050:** seletor Dia/Semana, progresso familiar e membros. Carga não aparece nesta entrega.
-- **TEL-011:** lista familiar adulta por Dia/Semana, filtro de membro e controle de tarefas sem responsável.
-- **TEL-032:** tarefas do membro escolhido por Dia/Semana, com retorno contextual.
+- **TEL-050:** filtro Início/Fim livre, progresso familiar e anéis de membros; Configurações e Confirmações Kids aparecem apenas para Administrador. Carga não aparece na tela aprovada.
+- **TEL-011:** lista familiar adulta no mesmo intervalo, chips de membro incluindo Todos, status Todos/Pendentes/Concluídas e Aguardando confirmação somente para Administrador; o menu oferece PDF semanal.
+- **TEL-032:** tarefas do membro escolhido para exatamente o intervalo herdado, com retorno contextual, identificação e ações administrativas quando permitidas.
 - **Fora:** mudanças de tarefa, distribuição de carga, PDF e qualquer superfície familiar para Kids.
 
 ## 3. Estados e comportamento
@@ -42,8 +42,9 @@
 
 - Datas fora de RN49 aparecem indisponíveis e não disparam consulta.
 - Uma falha nunca usa a mensagem de vazio nem zera o progresso.
-- Em Semana, anunciar e apresentar intervalo segunda–domingo, incluindo bordas efetivas.
+- Anunciar e apresentar Início/Fim inclusivos, inclusive nos limites de RN49; TEL-032 mantém os mesmos valores da origem.
 - Após Kids sinalizar tarefa compartilhada, TEL-010 do adulto corresponsável anuncia “Pendente” no VoiceOver e TEL-040 Kids mostra “Aguardando confirmação”. A apresentação não altera o estado efetivo, a fila administrativa, o progresso ou as ações permitidas.
+- Na Família de Membro, `awaitingConfirmation` aparece e entra na contagem Pendentes; Administrador vê Aguardando confirmação separadamente. O estado real e a fila Kids não mudam.
 - No círculo da lista, a linha e o progresso mudam no toque. Toques seguintes registram a intenção mais recente enquanto o app envia um comando por vez para aquela tarefa. Uma recusa confirmada restaura o estado do servidor e abre um alerta; resposta incerta exige consulta antes de novo envio. A confirmação de missão continua obrigatória.
 
 ## 4. Microcopy localizável
@@ -59,9 +60,9 @@
 | `tasks.personal.noTasks` / `emptyHint` | `Sem tarefas` / `Tarefas atribuídas a você aparecem aqui.` |
 | `tasks.personal.status.pending` | `Pendente` anunciado na lista do adulto corresponsável, sem rótulo visual no subtítulo de TEL-010 |
 | `tasks.personal.status.awaitingConfirmation` | `Aguardando confirmação` na visualização Kids |
-| `family.period.day` | `Dia` |
-| `family.period.week` | `Semana` |
-| `family.tasks.includeUnassigned` | `Incluir tarefas sem responsável` |
+| `family.period.start` / `family.period.end` | `Início` / `Fim` |
+| `family.tasks.status.all` / `pending` / `completed` | `Todos` / `Pendentes` / `Concluídas` |
+| `family.tasks.status.awaitingConfirmation` | `Aguardando confirmação` somente para Administrador |
 | `family.load.comingSoon` | Não exibir nesta entrega |
 | `tasks.error.retry` | `Tentar novamente` |
 
@@ -69,7 +70,7 @@ Nenhum texto de interface embute título de tarefa em mensagem de erro ou acesso
 
 ## 5. Acessibilidade
 
-- Carrossel de data e seletor Dia/Semana são controles acessíveis por VoiceOver, com valor atual e limites anunciados.
+- Carrossel pessoal e filtro Início/Fim familiar são controles acessíveis por VoiceOver, com valores atuais e limites anunciados.
 - O carrossel pessoal preserva as sete posições de domingo a sábado ao mudar a seleção; dias fora de RN49 ficam indisponíveis. A paginação por semana não transforma a consulta pessoal em período semanal.
 - O progresso expõe texto equivalente, por exemplo: “3 de 5 tarefas concluídas, 60%”.
 - O estado da tarefa é anunciado com texto e ícone, sem depender apenas de cor. Em TEL-010, o subtítulo visual mostra responsáveis e esforço, enquanto o anúncio da linha inclui o estado apresentado ao perfil. O adulto não recebe anúncio de conclusão ou liberação de ação pela apresentação “Pendente” quando o estado efetivo aguarda confirmação. TEL-040 mantém o estado visível sob o título.
@@ -83,7 +84,7 @@ Nenhum texto de interface embute título de tarefa em mensagem de erro ou acesso
 - TEL-010 e TEL-040 não exibem Semana.
 - TEL-010 mostra apenas tarefas em que o adulto é responsável ou corresponsável; tarefas sem sua responsabilidade continuam na consulta familiar adulta.
 - Tarefa compartilhada sinalizada por Kids anuncia “Pendente” no VoiceOver do checklist pessoal do adulto corresponsável e mostra “Aguardando confirmação” no checklist Kids, sem mudar progresso nem permissões.
-- TEL-050, TEL-011 e TEL-032 exibem Dia/Semana apenas para adultos.
+- TEL-050, TEL-011 e TEL-032 exibem o mesmo intervalo livre apenas para adultos.
 - O retorno de TEL-032 e TEL-011 restaura filtros e período da origem.
 - O estado de falha é visual e semanticamente diferente do estado vazio.
 - Kids não encontram entrada navegável para Família.

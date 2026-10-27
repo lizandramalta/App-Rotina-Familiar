@@ -4,11 +4,11 @@
 **Autor:** Codex | **Criada em:** 2026-10-10 | **Aprovada por:** Usuária | **Em:** 2026-10-10  
 **Spec funcional vinculada:** [SPEC-019-gerar-relatorio-semanal-pdf.md](SPEC-019-gerar-relatorio-semanal-pdf.md)  
 **Base funcional:** 1.17  
-**Superfícies:** TEL-050, TEL-051, UF-14
+**Superfícies:** TEL-011, TEL-051, UF-14
 
 ## 1. Jornada
 
-Adulto abre “Gerar relatório PDF” em TEL-050, escolhe uma semana e recebe preview do arquivo local. A data ativa na origem sugere a semana correspondente; voltar preserva o período da Família.
+Adulto abre “Gerar relatório PDF” no menu de TEL-011. Se o intervalo consultado alcançar mais de uma semana, TEL-051 exige escolher uma das semanas antes de gerar; com uma só semana, usa-a diretamente. Voltar preserva o intervalo e os filtros de Tarefas da família.
 
 ## 2. TEL-051
 

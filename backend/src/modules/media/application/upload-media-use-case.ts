@@ -1,4 +1,5 @@
 import type { ActorContext } from '../../../shared/application/actor-context.js';
+import { MemberRole } from '../../../shared/domain/member-role.js';
 import type { TransactionRunner } from '../../../shared/application/transaction-runner.js';
 import {
   DependencyUnavailableError,
@@ -16,7 +17,7 @@ import {
 
 export interface UploadMediaCommand {
   readonly actor: ActorContext;
-  /** Valor bruto do campo `purpose`; só `profilePhoto` é aceito nesta entrega. */
+  /** Raw purpose: profile photo or an optional Kids task signal photo. */
   readonly purpose: unknown;
   readonly content: Buffer;
 }
@@ -49,10 +50,16 @@ export class UploadMediaUseCase {
   ) {}
 
   public async execute(command: UploadMediaCommand): Promise<UploadMediaResult> {
-    // `taskSignal` pertence à SPEC-012 e não é iniciado por este fluxo.
-    if (command.purpose !== 'profilePhoto') {
+    if (command.purpose !== 'profilePhoto' && command.purpose !== 'taskSignal') {
       throw new ValidationError('The media purpose is not supported.', {
         purpose: ['MEDIA_PURPOSE_INVALID'],
+      });
+    }
+    if (command.purpose === 'taskSignal' && command.actor.role !== MemberRole.KIDS) {
+      throw new DomainError({
+        message: 'Only Kids can upload task signal photos.',
+        code: 'ACTION_NOT_ALLOWED',
+        statusCode: 403,
       });
     }
 
@@ -60,7 +67,7 @@ export class UploadMediaUseCase {
 
     const { actor } = command;
     const mediaId = this.deps.crypto.newId();
-    const objectKey = `${this.deps.keyPrefix}/families/${actor.familyId}/profile-photos/${mediaId}.jpg`;
+    const objectKey = `${this.deps.keyPrefix}/families/${actor.familyId}/${command.purpose === 'taskSignal' ? 'task-signals' : 'profile-photos'}/${mediaId}.jpg`;
 
     try {
       await this.deps.transactionRunner.run((tx) =>
@@ -69,7 +76,10 @@ export class UploadMediaUseCase {
           familyId: actor.familyId,
           ownerMemberId: actor.memberId,
           objectKey,
-          purpose: MediaPurpose.PROFILE_PHOTO,
+          purpose:
+            command.purpose === 'taskSignal'
+              ? MediaPurpose.TASK_SIGNAL
+              : MediaPurpose.PROFILE_PHOTO,
         }),
       );
     } catch (error) {

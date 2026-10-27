@@ -9,7 +9,7 @@
 
 ## 1. Contexto e objetivo
 
-Adultos precisam perceber como a participação creditada se distribui na família, sem criar competição. Esta entrega integra carga diária ou semanal à área Família, a partir de um snapshot seguro e canônico.
+Adultos precisam perceber como a participação creditada se distribui na família, sem criar competição. Esta entrega fornece carga diária ou semanal a partir de um snapshot seguro e canônico. Sua apresentação na TEL-050 atual foi adiada; o snapshot também sustenta o relatório semanal da SPEC-019.
 
 ## 2. Rastreabilidade e dependências
 
@@ -32,7 +32,7 @@ Adultos precisam perceber como a participação creditada se distribui na famíl
 - `GET /v1/family/load` por Dia/Semana e data de referência.
 - Carga individual, total e participação percentual, conforme conclusões válidas.
 - Intervalo efetivo, fuso e transição; linha histórica “Membro removido” quando houver crédito válido.
-- TEL-050 com distribuição acessível, neutra e sem ranking.
+- Apresentação acessível, neutra e sem ranking em entrega visual posterior à aba Família aprovada em 2026-10-27.
 
 ### 3.2 Fora
 
@@ -98,7 +98,7 @@ Métricas agregadas registram período, papel, presença de carga e transição,
 | Fase | Objetivo | CAs | Status |
 |---|---|---|---|
 | 1 | Snapshot backend, autorização, isolamento e cálculo consistente | CA-01 a CA-06 | a fazer |
-| 2 | Integração acessível em TEL-050 | CA-07 a CA-08 | a fazer |
+| 2 | Integração acessível em uma superfície visual futura, fora da TEL-050 atual | CA-07 a CA-08 | a fazer — apresentação adiada pela pessoa usuária em 2026-10-27 |
 
 Fase 1 não é publicável isoladamente; depende da apresentação na Fase 2.
 

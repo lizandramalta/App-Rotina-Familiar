@@ -57,6 +57,8 @@ export interface MediaContentRecord {
   readonly objectKey: string;
   readonly contentType: string;
   readonly state: MediaState;
+  readonly purpose: MediaPurpose;
+  readonly currentSignalPhoto: boolean;
 }
 
 export interface MediaRepositoryPort {

@@ -1,6 +1,11 @@
 import Foundation
 @testable import FamilyRoutine
 
+extension TaskRepository {
+    func uploadSignalPhoto(_ jpeg: Data, accessToken: String) async throws -> String { throw TaskError.unavailable }
+    func signalTask(id: UUID, photoMediaID: String?, accessToken: String) async throws -> FamilyTask { throw TaskError.unavailable }
+}
+
 let taskRepositorySpyFixture = FamilyTask(
     id: UUID(uuidString: "00000000-0000-0000-0000-0000000000f1")!,
     title: "Arrumar os brinquedos",

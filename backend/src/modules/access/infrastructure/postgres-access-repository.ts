@@ -227,7 +227,7 @@ export class PostgresAccessRepository implements AccessRepositoryPort {
               s.revoked_at    as session_revoked_at
          from app.session_access_tokens t
          join app.sessions s on s.id = t.session_id
-         join app.members  m on m.family_id = s.family_id and m.id = s.member_id
+         join app.members  m on m.family_id = s.family_id and m.id = s.member_id and m.removed_at is null
         where t.token_hash = $1`,
       [tokenHash],
     );

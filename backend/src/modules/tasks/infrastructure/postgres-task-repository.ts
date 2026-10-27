@@ -9,6 +9,7 @@ import type {
 import { isValidMemberRole, type MemberRole } from '../../../shared/domain/member-role.js';
 import type {
   FamilyCalendarRecord,
+  FamilyOverviewRecord,
   OwnTaskPageCursor,
   OwnTaskProgressRecord,
   TaskQueryRepositoryPort,
@@ -162,7 +163,7 @@ export class PostgresTaskRepository implements TaskRepositoryPort, TaskQueryRepo
     memberId: string,
   ): Promise<MemberRole | undefined> {
     const result = await asPostgresClient(tx).query<{ role: string }>(
-      `select role from app.members where family_id = $1 and id = $2`,
+      `select role from app.members where family_id = $1 and id = $2 and removed_at is null`,
       [familyId, memberId],
     );
     const role = result.rows[0]?.role;
@@ -265,6 +266,139 @@ export class PostgresTaskRepository implements TaskRepositoryPort, TaskQueryRepo
     return row;
   }
 
+  public async findFamilyOverview(
+    tx: TransactionContext,
+    params: { readonly familyId: string; readonly startDate: string; readonly endDate: string },
+  ): Promise<FamilyOverviewRecord> {
+    const result = await asPostgresClient(tx).query<{
+      member_id: string;
+      name: string;
+      role: string;
+      family_total: number;
+      family_completed: number;
+      family_pending: number;
+      family_awaiting: number;
+      member_total: number;
+      member_completed: number;
+      member_pending: number;
+      member_awaiting: number;
+    }>(
+      `with family_tasks as (
+         select id, status from app.task_occurrences
+          where family_id = $1 and scheduled_date between $2::date and $3::date
+            and deleted_at is null
+       ),
+       family_counts as (
+         select count(*)::integer as total,
+                count(*) filter (where status = 'completed')::integer as completed,
+                count(*) filter (where status = 'pending')::integer as pending,
+                count(*) filter (where status = 'awaitingConfirmation')::integer as awaiting
+           from family_tasks
+       ),
+       member_counts as (
+         select a.member_id,
+                count(*)::integer as total,
+                count(*) filter (where t.status = 'completed')::integer as completed,
+                count(*) filter (where t.status = 'pending')::integer as pending,
+                count(*) filter (where t.status = 'awaitingConfirmation')::integer as awaiting
+           from family_tasks t
+           join app.task_assignees a on a.family_id = $1 and a.task_id = t.id
+          group by a.member_id
+       )
+       select m.id as member_id, coalesce(m.display_name, '') as name, m.role,
+              fc.total as family_total, fc.completed as family_completed,
+              fc.pending as family_pending, fc.awaiting as family_awaiting,
+              coalesce(mc.total, 0)::integer as member_total,
+              coalesce(mc.completed, 0)::integer as member_completed,
+              coalesce(mc.pending, 0)::integer as member_pending,
+              coalesce(mc.awaiting, 0)::integer as member_awaiting
+         from app.members m
+         cross join family_counts fc
+         left join member_counts mc on mc.member_id = m.id
+        where m.family_id = $1 and m.removed_at is null
+        order by m.created_at, m.id`,
+      [params.familyId, params.startDate, params.endDate],
+    );
+    const first = result.rows[0];
+    if (first === undefined) {
+      throw new TypeError('Family overview requires at least the creator member.');
+    }
+    return {
+      family: {
+        total: first.family_total,
+        completed: first.family_completed,
+        pending: first.family_pending,
+        awaitingConfirmation: first.family_awaiting,
+      },
+      members: result.rows.map((row) => ({
+        memberId: row.member_id,
+        name: row.name,
+        role: row.role,
+        total: row.member_total,
+        completed: row.member_completed,
+        pending: row.member_pending,
+        awaitingConfirmation: row.member_awaiting,
+      })),
+    };
+  }
+
+  public async findFamilyTasksPage(
+    tx: TransactionContext,
+    params: {
+      readonly familyId: string;
+      readonly startDate: string;
+      readonly endDate: string;
+      readonly memberId: string | undefined;
+      readonly statuses: readonly TaskStatus[];
+      readonly afterId: string | undefined;
+      readonly limit: number;
+    },
+  ): Promise<readonly TaskRecord[]> {
+    const result = await asPostgresClient(tx).query<TaskRow>(
+      `select t.id, t.family_id, t.title, t.weight,
+              to_char(t.scheduled_date, 'YYYY-MM-DD') as scheduled_date,
+              t.note, t.status, t.routine_id, t.created_at,
+              assignees.ids as assignee_ids
+         from app.task_occurrences t
+         cross join lateral (
+           select coalesce(array_agg(a.member_id order by a.member_id), '{}') as ids
+             from app.task_assignees a
+            where a.family_id = t.family_id and a.task_id = t.id
+         ) assignees
+        where t.family_id = $1
+          and t.scheduled_date between $2::date and $3::date
+          and t.deleted_at is null
+          and ($4::uuid is null or $4::uuid = any(assignees.ids))
+          and (cardinality($5::text[]) = 0 or t.status = any($5::text[]))
+          and ($6::uuid is null or t.id > $6::uuid)
+        order by t.id
+        limit $7`,
+      [
+        params.familyId,
+        params.startDate,
+        params.endDate,
+        params.memberId ?? null,
+        params.statuses,
+        params.afterId ?? null,
+        params.limit,
+      ],
+    );
+    return result.rows.map(toTask);
+  }
+
+  public async familyMemberExists(
+    tx: TransactionContext,
+    params: { readonly familyId: string; readonly memberId: string },
+  ): Promise<boolean> {
+    const result = await asPostgresClient(tx).query<{ exists: boolean }>(
+      `select exists(
+         select 1 from app.members where family_id = $1 and id = $2::uuid and removed_at is null
+       ) as exists`,
+      [params.familyId, params.memberId],
+    );
+    return result.rows[0]?.exists ?? false;
+  }
+
   public async countFamilyMembers(
     tx: TransactionContext,
     familyId: string,
@@ -272,7 +406,7 @@ export class PostgresTaskRepository implements TaskRepositoryPort, TaskQueryRepo
   ): Promise<number> {
     const result = await asPostgresClient(tx).query<{ total: string }>(
       `select count(*) as total from app.members
-        where family_id = $1 and id = any($2::uuid[])`,
+        where family_id = $1 and id = any($2::uuid[]) and removed_at is null`,
       [familyId, memberIds],
     );
     return Number(result.rows[0]?.total ?? 0);
@@ -392,6 +526,19 @@ export class PostgresTaskRepository implements TaskRepositoryPort, TaskQueryRepo
       now: params.now,
     });
     return this.requireTask(tx, params.task.familyId, params.task.id);
+  }
+
+  public async closeCurrentSignalByManualCompletion(
+    tx: TransactionContext,
+    params: { familyId: string; taskId: string; actorId: string; now: Date },
+  ): Promise<void> {
+    await asPostgresClient(tx).query(
+      `update app.kids_signals
+          set decision = 'closedByManualCompletion',
+              decided_by_id = $4, decided_at = $3
+        where family_id = $1 and task_id = $2 and discarded_at is null and decision is null`,
+      [params.familyId, params.taskId, params.now, params.actorId],
+    );
   }
 
   public async reopenTask(

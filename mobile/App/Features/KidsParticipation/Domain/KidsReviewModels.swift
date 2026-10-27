@@ -17,6 +17,27 @@ nonisolated struct KidsReviewQueuePage: Sendable, Equatable {
     let nextCursor: String?
 }
 
+nonisolated struct KidsSignalDetail: Sendable, Equatable {
+    let id: UUID
+    let taskID: UUID
+    let taskTitle: String
+    let childName: String
+    let signaledAt: Date
+    let assignees: [String]
+    let photoMediaID: UUID?
+}
+
+nonisolated enum KidsReviewDecision: String, Encodable, Sendable {
+    case confirm
+    case reject
+}
+
+nonisolated struct KidsDecisionResult: Sendable, Equatable {
+    let taskStatus: TaskStatus
+    let outcome: String
+    let applied: Bool
+}
+
 nonisolated enum KidsSignalError: Error, Equatable, Sendable {
     case actionNotAllowed
     case notFound

@@ -41,6 +41,10 @@ import { PreviewFamilyTimeZoneChangeUseCase } from '../modules/family/applicatio
 import { PostgresFamilySettingsRepository } from '../modules/family/infrastructure/postgres-family-settings-repository.js';
 import {
   CreateMemberUseCase,
+  UpdateMemberUseCase,
+  ChangeMemberRoleUseCase,
+  LeaveAdministrationUseCase,
+  RemoveMemberUseCase,
   GetMemberDetailUseCase,
   ListFamilyMembersUseCase,
 } from '../modules/family/application/member-management-use-cases.js';
@@ -77,7 +81,20 @@ import {
   GetOwnProgressUseCase,
   GetOwnTasksUseCase,
 } from '../modules/tasks/application/get-own-tasks-use-cases.js';
+import {
+  GetFamilyOverviewUseCase,
+  GetFamilyTasksUseCase,
+} from '../modules/tasks/application/get-family-tasks-use-cases.js';
 import { PostgresTaskRepository } from '../modules/tasks/infrastructure/postgres-task-repository.js';
+import { GetWeeklyReportSnapshotUseCase } from '../modules/reports/application/get-weekly-report-snapshot-use-case.js';
+import { PostgresWeeklyReportRepository } from '../modules/reports/infrastructure/postgres-weekly-report-repository.js';
+import { PostgresKidsSignalRepository } from '../modules/kids/infrastructure/postgres-kids-signal-repository.js';
+import {
+  SignalTaskUseCase,
+  ListKidsSignalsUseCase,
+  GetKidsSignalUseCase,
+  DecideKidsSignalUseCase,
+} from '../modules/kids/application/kids-signal-use-cases.js';
 import { CreateRoutineUseCase } from '../modules/routines/application/create-routine-use-case.js';
 import { GetRoutineUseCase } from '../modules/routines/application/get-routine-use-case.js';
 import {
@@ -127,6 +144,10 @@ export interface ApplicationContainer {
   readonly listFamilyMembersUseCase: ListFamilyMembersUseCase;
   readonly getMemberDetailUseCase: GetMemberDetailUseCase;
   readonly createMemberUseCase: CreateMemberUseCase;
+  readonly updateMemberUseCase: UpdateMemberUseCase;
+  readonly changeMemberRoleUseCase: ChangeMemberRoleUseCase;
+  readonly leaveAdministrationUseCase: LeaveAdministrationUseCase;
+  readonly removeMemberUseCase: RemoveMemberUseCase;
   readonly issueMemberInviteUseCase: IssueMemberInviteUseCase;
   readonly uploadMediaUseCase: UploadMediaUseCase;
   readonly getMediaContentUseCase: GetMediaContentUseCase;
@@ -142,6 +163,13 @@ export interface ApplicationContainer {
   readonly getTaskUseCase: GetTaskUseCase;
   readonly getOwnTasksUseCase: GetOwnTasksUseCase;
   readonly getOwnProgressUseCase: GetOwnProgressUseCase;
+  readonly getFamilyOverviewUseCase: GetFamilyOverviewUseCase;
+  readonly getFamilyTasksUseCase: GetFamilyTasksUseCase;
+  readonly getWeeklyReportSnapshotUseCase: GetWeeklyReportSnapshotUseCase;
+  readonly signalTaskUseCase: SignalTaskUseCase;
+  readonly listKidsSignalsUseCase: ListKidsSignalsUseCase;
+  readonly getKidsSignalUseCase: GetKidsSignalUseCase;
+  readonly decideKidsSignalUseCase: DecideKidsSignalUseCase;
   readonly editTaskUseCase: EditTaskUseCase;
   readonly deleteTaskUseCase: DeleteTaskUseCase;
   readonly createRoutineUseCase: CreateRoutineUseCase;
@@ -335,6 +363,15 @@ export function createContainer(config: Configuration): ApplicationContainer {
     transactionRunner,
     clock,
   });
+  const memberManagementDependencies = {
+    repository: memberManagementRepository,
+    transactionRunner,
+    clock,
+  };
+  const updateMemberUseCase = new UpdateMemberUseCase(memberManagementDependencies);
+  const changeMemberRoleUseCase = new ChangeMemberRoleUseCase(memberManagementDependencies);
+  const leaveAdministrationUseCase = new LeaveAdministrationUseCase(memberManagementDependencies);
+  const removeMemberUseCase = new RemoveMemberUseCase(memberManagementDependencies);
 
   const issueMemberInviteUseCase = new IssueMemberInviteUseCase({
     repository: new PostgresMemberInviteRepository(),
@@ -438,6 +475,24 @@ export function createContainer(config: Configuration): ApplicationContainer {
   const taskQueryDependencies = { repository: taskRepository, transactionRunner, clock };
   const getOwnTasksUseCase = new GetOwnTasksUseCase(taskQueryDependencies);
   const getOwnProgressUseCase = new GetOwnProgressUseCase(taskQueryDependencies);
+  const getFamilyOverviewUseCase = new GetFamilyOverviewUseCase(taskQueryDependencies);
+  const getFamilyTasksUseCase = new GetFamilyTasksUseCase(taskQueryDependencies);
+  const getWeeklyReportSnapshotUseCase = new GetWeeklyReportSnapshotUseCase({
+    repository: new PostgresWeeklyReportRepository(),
+    transactionRunner,
+    clock,
+  });
+  const kidsSignalDependencies = {
+    signals: new PostgresKidsSignalRepository(),
+    tasks: taskRepository,
+    transactionRunner,
+    missionCloser: closeEligibleMissions,
+    clock,
+  };
+  const signalTaskUseCase = new SignalTaskUseCase(kidsSignalDependencies);
+  const listKidsSignalsUseCase = new ListKidsSignalsUseCase(kidsSignalDependencies);
+  const getKidsSignalUseCase = new GetKidsSignalUseCase(kidsSignalDependencies);
+  const decideKidsSignalUseCase = new DecideKidsSignalUseCase(kidsSignalDependencies);
   const editTaskUseCase = new EditTaskUseCase(taskDependencies);
   const deleteTaskUseCase = new DeleteTaskUseCase({
     ...taskDependencies,
@@ -498,6 +553,10 @@ export function createContainer(config: Configuration): ApplicationContainer {
     listFamilyMembersUseCase,
     getMemberDetailUseCase,
     createMemberUseCase,
+    updateMemberUseCase,
+    changeMemberRoleUseCase,
+    leaveAdministrationUseCase,
+    removeMemberUseCase,
     issueMemberInviteUseCase,
     uploadMediaUseCase,
     getMediaContentUseCase,
@@ -513,6 +572,13 @@ export function createContainer(config: Configuration): ApplicationContainer {
     getTaskUseCase,
     getOwnTasksUseCase,
     getOwnProgressUseCase,
+    getFamilyOverviewUseCase,
+    getFamilyTasksUseCase,
+    getWeeklyReportSnapshotUseCase,
+    signalTaskUseCase,
+    listKidsSignalsUseCase,
+    getKidsSignalUseCase,
+    decideKidsSignalUseCase,
     editTaskUseCase,
     deleteTaskUseCase,
     createRoutineUseCase,

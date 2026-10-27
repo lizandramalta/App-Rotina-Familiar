@@ -1,7 +1,7 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.20\
+**Versão:** 1.21\
 **Data:** 2026-10-27\
 **Situação:** base documental consolidada
 
@@ -478,7 +478,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 **Regras relacionadas:** [RN16](01-regras-de-negocio.md#rn16), [RN22](01-regras-de-negocio.md#rn22), [RN23](01-regras-de-negocio.md#rn23), [RN26](01-regras-de-negocio.md#rn26), [RN27](01-regras-de-negocio.md#rn27), [RN28](01-regras-de-negocio.md#rn28), [RN33](01-regras-de-negocio.md#rn33), [RN49](01-regras-de-negocio.md#rn49), [RN55](01-regras-de-negocio.md#rn55), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61), [RN63](01-regras-de-negocio.md#rn63)\
 **Requisitos não funcionais:** [RNF01](02-requisitos.md#rnf01), [RNF02](02-requisitos.md#rnf02), [RNF04](02-requisitos.md#rnf04), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF08](02-requisitos.md#rnf08), [RNF09](02-requisitos.md#rnf09), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF14](02-requisitos.md#rnf14), [RNF22](02-requisitos.md#rnf22)
 
-**Objetivo:** consultar as próprias tarefas e o próprio progresso diário; para adultos, também consultar tarefas e progresso coletivo pela área Família, por dia ou semana.
+**Objetivo:** consultar as próprias tarefas e o próprio progresso diário; para adultos, também consultar tarefas e progresso coletivo pela área Família em qualquer intervalo válido.
 
 **Atores:** Administrador, Membro e Kids.
 
@@ -507,12 +507,12 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 **Consulta complementar — Família (Administrador e Membro):**
 
 1. O adulto seleciona Família na navegação principal.
-2. O sistema abre o dia atual e oferece Dia/Semana; apresenta concluídas/total de tarefas previstas no período, contando cada tarefa uma vez, inclusive compartilhadas ou sem responsável.
-3. O adulto seleciona dia ou semana dentro dos limites de RN49 e RN61; o progresso acompanha o período.
-4. Ao abrir as tarefas da família, o sistema mantém o período e permite consultar tarefas de outras pessoas e sem responsável. Gerenciar e concluir continuam sujeitos a UC07 e UC12.
-5. A própria área apresenta a carga diária ou semanal por UC13 e o botão Gerar relatório PDF por UC18. Também apresenta a lista de membros: selecionar uma pessoa abre TEL-032 com suas tarefas por dia/semana. O detalhe herda o período e mantém o filtro por pessoa; voltar restaura o contexto da Família. Somente Administradores têm Adicionar membro na Família e, no detalhe, Editar perfil e Gerar/reenviar convite quando permitidos por UC02. Confirmações Kids continuam exclusivas dos Administradores.
+2. O sistema abre a semana corrente e apresenta concluídas/total das tarefas previstas no intervalo, contando cada tarefa uma vez, inclusive compartilhadas ou sem responsável.
+3. O adulto escolhe qualquer intervalo Início/Fim dentro dos limites de RN49 e RN61; o progresso acompanha o intervalo inteiro.
+4. Ao abrir Tarefas da família, o sistema mantém exatamente o intervalo e permite consultar tarefas de outras pessoas e sem responsável, filtrando por membro e estado. Gerenciar e concluir continuam sujeitos a UC07 e UC12.
+5. O menu de Tarefas da família oferece Gerar relatório PDF por UC18. A Família apresenta a lista de membros: selecionar uma pessoa abre TEL-032 com suas tarefas no mesmo intervalo. Voltar restaura o contexto da Família. Somente Administradores acessam Configurações da família e Adicionar membro, bem como Editar perfil e Gerar/reenviar convite no detalhe quando permitidos por UC02. Confirmações Kids continuam exclusivas dos Administradores. A carga de UC13 terá apresentação posterior, fora da TEL-050 atual.
 
-Sem tarefas no período, o sistema informa essa condição sem divisão por zero. Tarefas aguardando confirmação não entram nas concluídas. Conclusão, reabertura e exclusão autorizadas atualizam o progresso. Kids não acessam esta área. UC11 também abrange a consulta familiar adulta por dia ou semana.
+Sem tarefas no período, o sistema informa essa condição sem divisão por zero. Tarefas aguardando confirmação não entram nas concluídas; para Membro, aparecem e são contadas como Pendentes na Família, enquanto Administrador vê Aguardando confirmação separadamente. O estado canônico e as permissões não mudam. Conclusão, reabertura e exclusão autorizadas atualizam o progresso. Kids não acessam esta área.
 
 **Pós-condição:** o usuário consulta um período permitido sem alterar o estado das tarefas.
 
@@ -780,8 +780,8 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 **Fluxo principal:**
 
-1. O adulto aciona Gerar relatório PDF na própria tela Minha família (TEL-050) e abre TEL-051.
-2. Seleciona uma `referenceDate`; o servidor resolve a semana de segunda a domingo no fuso da família, e a data da origem sugere a semana correspondente.
+1. O adulto aciona Gerar relatório PDF no menu de Tarefas da família (TEL-011). Se o intervalo consultado alcançar mais de uma semana, TEL-051 solicita a escolha de uma semana; caso contrário, usa a semana do intervalo.
+2. Seleciona uma `referenceDate` quando necessário; o servidor resolve a semana de segunda a domingo no fuso da família.
 3. O sistema identifica o período e, se atual, indica que o relatório é parcial até o momento da geração.
 4. O adulto confirma gerar. O backend fornece um snapshot consistente; o aplicativo gera o PDF e monta gráficos de carga semanal por membro e progresso total da família, com concluídas/total e percentual.
 5. Inclui tabela com o peso total creditado e o número de tarefas realizadas por membro, período, família, geração e explicação das métricas e do crédito compartilhado; crédito de removido aparece como “Membro removido” (RN62).
@@ -844,6 +844,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.21 | 2026-10-27 | UC02, UC11 e UC18: gestão em Configurações da família, consulta familiar por intervalo livre e seleção da semana do PDF no menu de TEL-011. |
 | 1.20 | 2026-10-27 | UC08: o alcance “esta e as futuras” preserva a data prevista já gravada de cada ocorrência, inclusive após edição individual. Para SPEC-008 Fase 2 / SCRUM-45. |
 | 1.19 | 2026-10-27 | UC08: editar ou excluir ocorrência de rotina sempre pergunta o alcance; “esta e as futuras” não altera repetição nem data prevista e substitui edições individuais anteriores das futuras. UC07: a escolha do RN66 vale para a edição individual; a edição de rotina não altera estados. Para SPEC-008 Fase 2. |
 | 1.18 | 2026-10-26 | UC12 e UC17 permitem concluir/reabrir pelo círculo da lista pessoal; o restante da linha abre o detalhe. Permissões e efeitos mantidos. |

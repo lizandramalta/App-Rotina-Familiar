@@ -11,6 +11,7 @@ struct AuthenticatedHomeView: View {
     let myTasksTab: MyTasksTabView?
     let makeFamilySettingsViewModel: (() -> FamilySettingsViewModel)?
     @State private var familyOverviewViewModel: FamilyOverviewViewModel
+    @State private var familyTaskPath: [FamilyTaskRoute] = []
     let kidsTasksTabView: KidsTasksTabView?
     let missionsTab: MissionsTabView?
     let kidsMissionsTabView: KidsMissionsTabView?
@@ -187,17 +188,71 @@ struct AuthenticatedHomeView: View {
     }
 
     private func familyDestination() -> some View {
-        NavigationStack {
+        NavigationStack(path: $familyTaskPath) {
             FamilyOverviewView(
                 viewModel: familyOverviewViewModel,
                 makeFamilySettingsViewModel: makeFamilySettingsViewModel
             )
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("access.destination.family")
+            .navigationDestination(for: FamilyTaskRoute.self) { route in
+                familyTaskDestination(route)
+            }
             .navigationDestination(isPresented: $showsFamilySettingsScenario) {
                 if let makeFamilySettingsViewModel {
                     FamilySettingsView(viewModel: makeFamilySettingsViewModel())
                 }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func familyTaskDestination(_ route: FamilyTaskRoute) -> some View {
+        if let myTasksTab {
+            switch route {
+            case let .detail(taskID):
+                TaskDetailView(
+                    taskID: taskID,
+                    role: session.role,
+                    currentMemberID: session.memberID,
+                    repository: myTasksTab.taskRepository,
+                    routineRepository: myTasksTab.routineRepository,
+                    familyRepository: myTasksTab.familyRepository,
+                    accessToken: myTasksTab.accessToken,
+                    onRequestEdit: { familyTaskPath.append(.edit(taskID)) },
+                    onDeleted: {
+                        familyTaskPath.removeAll()
+                        Task { await familyOverviewViewModel.loadInitial() }
+                    },
+                    onCompleted: { Task { await familyOverviewViewModel.loadInitial() } },
+                    onReopened: { Task { await familyOverviewViewModel.loadInitial() } }
+                )
+            case let .edit(taskID):
+                TaskEditorView(
+                    mode: .edit(taskID),
+                    repository: myTasksTab.taskRepository,
+                    routineRepository: myTasksTab.routineRepository,
+                    familyRepository: myTasksTab.familyRepository,
+                    accessToken: myTasksTab.accessToken,
+                    onSaved: { _ in
+                        if !familyTaskPath.isEmpty { familyTaskPath.removeLast() }
+                        Task { await familyOverviewViewModel.loadInitial() }
+                    },
+                    onRoutineSaved: { _ in }
+                )
+            case .create:
+                TaskEditorView(
+                    mode: .create,
+                    repository: myTasksTab.taskRepository,
+                    routineRepository: myTasksTab.routineRepository,
+                    familyRepository: myTasksTab.familyRepository,
+                    accessToken: myTasksTab.accessToken,
+                    onSaved: { _ in
+                        familyTaskPath.removeAll()
+                        Task { await familyOverviewViewModel.loadInitial() }
+                    },
+                    onRoutineSaved: { _ in }
+                )
             }
         }
     }

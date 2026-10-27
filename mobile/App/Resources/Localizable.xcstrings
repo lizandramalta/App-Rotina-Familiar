@@ -2,11 +2,57 @@
   "sourceLanguage": "pt-BR",
   "strings": {
     "": {},
+    "%@\n\n%@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@\n\n%2$@"
+          }
+        }
+      }
+    },
+    "%@ (próximo ciclo)": {},
+    "%@, %@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "%@, %@, %@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@, %2$@, %3$@"
+          }
+        }
+      }
+    },
+    "%lld": {},
+    "%lld%%": {},
+    "%lld/%lld": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld/%2$lld"
+          }
+        }
+      }
+    },
     "%lld/20": {},
     "%lld/60": {},
     "Cancelar": {},
     "Confirmar": {},
+    "Continuar editando": {},
     "Data": {},
+    "Descartar alterações": {},
+    "Descartar alterações?": {},
     "Editar": {},
     "Excluir": {},
     "Gerando...": {},
@@ -15,6 +61,7 @@
     "Indisponível - gere um convite primeiro": {},
     "Membros": {},
     "OK": {},
+    "Os dados não salvos serão perdidos.": {},
     "Salvar": {},
     "Tentar novamente": {},
     "Voltar": {},
@@ -218,6 +265,7 @@
         }
       }
     },
+    "family.common.error_network": {},
     "family.create.back": {
       "localizations": {
         "pt-BR": {
@@ -501,6 +549,76 @@
         }
       }
     },
+    "family.member.manage.edit_name": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar nome"
+          }
+        }
+      }
+    },
+    "family.member.manage.error": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível confirmar a alteração. Consulte o estado atual antes de tentar novamente."
+          }
+        }
+      }
+    },
+    "family.member.manage.name": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome do membro"
+          }
+        }
+      }
+    },
+    "family.member.manage.remove": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remover membro"
+          }
+        }
+      }
+    },
+    "family.member.manage.remove_message": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O acesso deste perfil será revogado. O histórico será preservado."
+          }
+        }
+      }
+    },
+    "family.member.manage.role": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alterar papel ou modo Kids"
+          }
+        }
+      }
+    },
+    "family.member.manage.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gestão"
+          }
+        }
+      }
+    },
     "family.member.role.administrator": {
       "localizations": {
         "pt-BR": {
@@ -527,6 +645,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Membro"
+          }
+        }
+      }
+    },
+    "family.member.tasks.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tarefas do membro"
           }
         }
       }
@@ -1112,6 +1240,16 @@
         }
       }
     },
+    "family.overview.completed_total": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d de %d tarefas concluídas"
+          }
+        }
+      }
+    },
     "family.overview.error_load": {
       "localizations": {
         "pt-BR": {
@@ -1132,6 +1270,16 @@
         }
       }
     },
+    "family.overview.member_completed": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d de %d concluídas"
+          }
+        }
+      }
+    },
     "family.overview.members_section": {
       "localizations": {
         "pt-BR": {
@@ -1142,12 +1290,222 @@
         }
       }
     },
+    "family.overview.no_tasks": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem tarefas neste período"
+          }
+        }
+      }
+    },
+    "family.overview.progress": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Progresso da família"
+          }
+        }
+      }
+    },
     "family.overview.title": {
       "localizations": {
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Família"
+          }
+        }
+      }
+    },
+    "family.period.apply": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aplicar"
+          }
+        }
+      }
+    },
+    "family.period.end": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fim"
+          }
+        }
+      }
+    },
+    "family.period.filter_title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filtrar período"
+          }
+        }
+      }
+    },
+    "family.period.start": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Início"
+          }
+        }
+      }
+    },
+    "family.report.error": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível gerar o relatório. Tente novamente."
+          }
+        }
+      }
+    },
+    "family.report.generated_at": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gerado em %@"
+          }
+        }
+      }
+    },
+    "family.report.load": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carga por membro"
+          }
+        }
+      }
+    },
+    "family.report.member_summary": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peso: %lld · tarefas realizadas: %lld"
+          }
+        }
+      }
+    },
+    "family.report.no_tasks": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem tarefas nesta semana"
+          }
+        }
+      }
+    },
+    "family.report.partial": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Semana atual parcial"
+          }
+        }
+      }
+    },
+    "family.report.preview": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prévia do PDF"
+          }
+        }
+      }
+    },
+    "family.report.progress": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Progresso das tarefas"
+          }
+        }
+      }
+    },
+    "family.report.share": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salvar ou compartilhar"
+          }
+        }
+      }
+    },
+    "family.report.shared_note": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compartilhadas: uma vez no total familiar; uma vez por responsável na linha individual."
+          }
+        }
+      }
+    },
+    "family.report.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relatório semanal"
+          }
+        }
+      }
+    },
+    "family.report.total_weight": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peso total: %lld"
+          }
+        }
+      }
+    },
+    "family.report.transition": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Semana com mudança de fuso"
+          }
+        }
+      }
+    },
+    "family.report.week": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolher data da semana"
+          }
+        }
+      }
+    },
+    "family.report.week_section": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Semana do relatório"
           }
         }
       }
@@ -1408,6 +1766,116 @@
           "stringUnit": {
             "state": "translated",
             "value": "Período de transição: ciclo adaptado ao novo fuso. As datas das tarefas não mudam."
+          }
+        }
+      }
+    },
+    "family.tasks.empty": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhuma tarefa encontrada"
+          }
+        }
+      }
+    },
+    "family.tasks.error": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível carregar as tarefas. Tente novamente."
+          }
+        }
+      }
+    },
+    "family.tasks.generate_pdf": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gerar relatório PDF"
+          }
+        }
+      }
+    },
+    "family.tasks.member_all": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todos"
+          }
+        }
+      }
+    },
+    "family.tasks.more": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mais opções"
+          }
+        }
+      }
+    },
+    "family.tasks.range": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ a %@"
+          }
+        }
+      }
+    },
+    "family.tasks.status.all": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todos"
+          }
+        }
+      }
+    },
+    "family.tasks.status.awaiting": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aguardando confirmação"
+          }
+        }
+      }
+    },
+    "family.tasks.status.completed": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concluídas"
+          }
+        }
+      }
+    },
+    "family.tasks.status.pending": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pendentes"
+          }
+        }
+      }
+    },
+    "family.tasks.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tarefas da família"
           }
         }
       }
@@ -1748,6 +2216,186 @@
           "stringUnit": {
             "state": "translated",
             "value": "Abrir perfil"
+          }
+        }
+      }
+    },
+    "kids.signal.explanation": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avise que terminou a tarefa. Um Administrador vai confirmar."
+          }
+        }
+      }
+    },
+    "kids.signal.failed": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível sinalizar. Tente novamente."
+          }
+        }
+      }
+    },
+    "kids.signal.open": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sinalizar conclusão"
+          }
+        }
+      }
+    },
+    "kids.signal.photo_failed": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível enviar a foto. Tente novamente ou siga sem foto."
+          }
+        }
+      }
+    },
+    "kids.signal.photo_preview": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto da tarefa"
+          }
+        }
+      }
+    },
+    "kids.signal.refresh_needed": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confira o estado atual da tarefa antes de tentar novamente."
+          }
+        }
+      }
+    },
+    "kids.signal.remove_photo": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remover foto"
+          }
+        }
+      }
+    },
+    "kids.signal.submit": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sinalizar"
+          }
+        }
+      }
+    },
+    "kids.signal.take_photo": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tirar foto"
+          }
+        }
+      }
+    },
+    "kids.signal.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sinalizar tarefa"
+          }
+        }
+      }
+    },
+    "kids.signal.without_photo": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sinalizar sem foto"
+          }
+        }
+      }
+    },
+    "kidsReview.detail.confirm": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirmar tarefa"
+          }
+        }
+      }
+    },
+    "kidsReview.detail.error": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível confirmar o estado. Atualize antes de tentar novamente."
+          }
+        }
+      }
+    },
+    "kidsReview.detail.photo": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto da sinalização"
+          }
+        }
+      }
+    },
+    "kidsReview.detail.photo_error": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível carregar a foto."
+          }
+        }
+      }
+    },
+    "kidsReview.detail.reject": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recusar sinalização"
+          }
+        }
+      }
+    },
+    "kidsReview.detail.resolved": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta sinalização já foi resolvida."
+          }
+        }
+      }
+    },
+    "kidsReview.detail.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avaliar sinalização"
           }
         }
       }
@@ -3516,6 +4164,26 @@
         }
       }
     },
+    "profile.role.leave_confirmation.error": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível confirmar a mudança. Confira seu papel atual e tente novamente."
+          }
+        }
+      }
+    },
+    "profile.role.leave_confirmation.message": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seu perfil passará a Membro. Você continuará na família, mas perderá as ações de administração."
+          }
+        }
+      }
+    },
     "profile.role.leave_placeholder.message": {
       "localizations": {
         "pt-BR": {
@@ -4795,7 +5463,8 @@
           }
         }
       }
-    }
+    },
+    "—": {}
   },
   "version": "1.0"
 }

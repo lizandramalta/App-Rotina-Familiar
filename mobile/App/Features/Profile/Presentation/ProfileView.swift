@@ -37,7 +37,7 @@ struct ProfileView: View {
                 BadgeDetailView(viewModel: detailViewModel)
             }
         }
-        .sheet(isPresented: $viewModel.isShowingLeaveAdminPlaceholder) { leaveAdministrationPlaceholder }
+        .sheet(isPresented: $viewModel.isShowingLeaveAdminPlaceholder) { leaveAdministrationConfirmation }
         .sheet(
             item: Binding(get: { viewModel.editor }, set: { if $0 == nil { viewModel.dismissEditor() } })
         ) { editor in
@@ -45,19 +45,30 @@ struct ProfileView: View {
         }
     }
 
-    /// Typed stand-in for MOD-010 (SPEC-003), which owns the real confirmation.
-    private var leaveAdministrationPlaceholder: some View {
+    /// MOD-010 — confirmation for SPEC-003 CA-05.
+    private var leaveAdministrationConfirmation: some View {
         NavigationStack {
-            ContentUnavailableView {
+            VStack(spacing: 20) {
                 Label("profile.role.leave_administration", systemImage: "person.badge.minus")
-            } description: {
-                Text("profile.role.leave_placeholder.message")
+                    .font(.headline)
+                Text("profile.role.leave_confirmation.message")
+                    .multilineTextAlignment(.center)
+                if viewModel.leaveAdministrationFailed {
+                    Label("profile.role.leave_confirmation.error", systemImage: "exclamationmark.triangle")
+                        .foregroundStyle(.red)
+                }
+                Button("profile.role.leave_administration", role: .destructive) {
+                    Task { await viewModel.leaveAdministration() }
+                }
+                .disabled(viewModel.isLeavingAdministration)
+                if viewModel.isLeavingAdministration { ProgressView() }
             }
-            .accessibilityIdentifier("profile.role.leave_placeholder")
+            .padding(24)
+            .accessibilityIdentifier("profile.role.leave_confirmation")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("profile.common.close") { viewModel.isShowingLeaveAdminPlaceholder = false }
-                        .accessibilityIdentifier("profile.role.leave_placeholder.close")
+                        .disabled(viewModel.isLeavingAdministration)
                 }
             }
         }

@@ -25,7 +25,7 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>NSCameraUsageDescription</key>
-	<string>A câmera é usada apenas para você tirar a foto do seu perfil.</string>
+	<string>A câmera é usada para tirar a foto do seu perfil ou de uma tarefa sinalizada.</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>
