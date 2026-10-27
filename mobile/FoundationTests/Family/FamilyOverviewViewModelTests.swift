@@ -202,4 +202,22 @@ struct FamilyOverviewViewModelTests {
         #expect(viewModel.nextCursor == nil)
         #expect(viewModel.loadFailed)
     }
+
+    @Test("SPEC-013 CA-05 only the Administrator sees the Kids confirmations shortcut")
+    func kidsConfirmationsShortcutIsAdminOnly() {
+        let repository = KidsSignalRepositorySpy(results: [])
+        for (role, expected) in [(MemberRole.administrator, true), (.member, false), (.kid, false)] {
+            let session = ActiveFamilySession(memberID: UUID(), familyID: UUID(), role: role, isFamilyCreator: false)
+            let viewModel = FamilyOverviewViewModel(
+                session: session,
+                familyRepository: FamilyRepositorySpy(),
+                accessTokenProvider: { "token-1" },
+                makeKidsReviewQueueViewModel: {
+                    KidsReviewQueueViewModel(repository: repository, accessTokenProvider: { "token-1" })
+                }
+            )
+
+            #expect(viewModel.canReviewKidsConfirmations == expected)
+        }
+    }
 }

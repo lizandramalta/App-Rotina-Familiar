@@ -28,6 +28,9 @@ enum UITestScenario: String {
     case familyOverviewMember = "family-overview-member"
     case memberInvite = "member-invite"
     case memberInviteUncertain = "member-invite-uncertain"
+    case kidsReviewQueue = "kids-review-queue"
+    case kidsReviewQueueEmpty = "kids-review-queue-empty"
+    case kidsReviewQueueFailure = "kids-review-queue-failure"
     case taskCompletionMember = "task-completion-member"
     case taskCompletionConflict = "task-completion-conflict"
     case taskOptimisticDelayed = "task-optimistic-delayed"
@@ -99,7 +102,7 @@ enum UITestScenario: String {
             )))
             return
         }
-        if self == .familyOverview || self == .memberInvite || self == .memberInviteUncertain {
+        if [.familyOverview, .memberInvite, .memberInviteUncertain, .kidsReviewQueue, .kidsReviewQueueEmpty, .kidsReviewQueueFailure].contains(self) {
             sessionStore.apply(.session(Self.inviteSession(role: .administrator)))
             return
         }
@@ -832,18 +835,42 @@ private enum UITestMissionFixtures {
     static let completedMissionID = UUID(uuidString: "00000000-0000-0000-0000-0000000000e2")!
 }
 
-/// SPEC-014 Fase 2 UI fixture: two missions pre-linked to tasks already seeded by
-/// `UITestTaskRepository`, so TEL-021/022's by-id hydration resolves end-to-end without a backend.
-/// The in-progress mission links one task assigned to the adult fixture member and one assigned to
-/// the Kids fixture member, so CA-19's own-task tap-through (and its absence for "de outra pessoa") is testable.
+/// Deterministic queue for TEL-015 (SPEC-013): three pending signals, oldest first, an empty queue or a failing load.
 private struct UITestKidsSignalRepository: KidsSignalRepository {
     let scenario: UITestScenario
 
     func getReviewQueue(accessToken: String, cursor: String?) async throws -> KidsReviewQueuePage {
-        KidsReviewQueuePage(items: [], nextCursor: nil)
+        switch scenario {
+        case .kidsReviewQueue:
+            return KidsReviewQueuePage(items: Self.items, nextCursor: nil)
+        case .kidsReviewQueueFailure:
+            throw KidsSignalError.network
+        default:
+            return KidsReviewQueuePage(items: [], nextCursor: nil)
+        }
+    }
+
+    private static let items: [KidsSignalSummary] = [
+        ("Arrumar a cama", "Rafa Silva", "2026-10-27T10:00:00.000Z", true),
+        ("Guardar os brinquedos", "Lucas Silva", "2026-10-27T11:30:00.000Z", false),
+        ("Lavar a louça", "Rafa Silva", "2026-10-27T13:15:00.000Z", true),
+    ].enumerated().map { index, row in
+        KidsSignalSummary(
+            id: UUID(uuidString: "00000000-0000-0000-0000-00000000050\(index + 1)")!,
+            taskID: UUID(),
+            taskTitle: row.0,
+            signaledByID: UUID(),
+            childName: row.1,
+            signaledAt: ISO8601DateFormatter().date(from: row.2.replacingOccurrences(of: ".000Z", with: "Z"))!,
+            hasPhoto: row.3
+        )
     }
 }
 
+/// SPEC-014 Fase 2 UI fixture: two missions pre-linked to tasks already seeded by
+/// `UITestTaskRepository`, so TEL-021/022's by-id hydration resolves end-to-end without a backend.
+/// The in-progress mission links one task assigned to the adult fixture member and one assigned to
+/// the Kids fixture member, so CA-19's own-task tap-through (and its absence for "de outra pessoa") is testable.
 private actor UITestMissionRepository: MissionRepository {
     private let scenario: UITestScenario
     private var missions: [UUID: Mission]

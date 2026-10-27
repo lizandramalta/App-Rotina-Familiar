@@ -34,7 +34,6 @@ struct KidsReviewQueueView: View {
                     .buttonStyle(.borderedProminent)
                     .accessibilityIdentifier("kidsReview.queue.retry")
                 }
-                .accessibilityIdentifier("kidsReview.queue.error")
             }
         }
         .background(Color(uiColor: .systemGroupedBackground).ignoresSafeArea())
