@@ -11,6 +11,7 @@ final class AppContainer {
     private let routineRepository: any RoutineRepository
     private let profileRepository: any ProfileRepository
     private let missionRepository: any MissionRepository
+    private let kidsSignalRepository: any KidsSignalRepository
     private let credentialStore: any SessionCredentialStoring
     private let installationProofStore: any InstallationProofProviding
     private let appleAuthenticator: any AppleAuthenticating
@@ -26,6 +27,7 @@ final class AppContainer {
         routineRepository: any RoutineRepository,
         profileRepository: any ProfileRepository,
         missionRepository: any MissionRepository,
+        kidsSignalRepository: any KidsSignalRepository,
         credentialStore: any SessionCredentialStoring,
         installationProofStore: any InstallationProofProviding,
         appleAuthenticator: any AppleAuthenticating,
@@ -40,6 +42,7 @@ final class AppContainer {
         self.routineRepository = routineRepository
         self.profileRepository = profileRepository
         self.missionRepository = missionRepository
+        self.kidsSignalRepository = kidsSignalRepository
         self.credentialStore = credentialStore
         self.installationProofStore = installationProofStore
         self.appleAuthenticator = appleAuthenticator
@@ -58,6 +61,7 @@ final class AppContainer {
             routineRepository: HTTPRoutineRepository(baseURL: configuration.apiBaseURL),
             profileRepository: HTTPProfileRepository(baseURL: configuration.apiBaseURL),
             missionRepository: HTTPMissionRepository(baseURL: configuration.apiBaseURL),
+            kidsSignalRepository: HTTPKidsSignalRepository(baseURL: configuration.apiBaseURL),
             credentialStore: KeychainSessionCredentialStore(secrets: secrets),
             installationProofStore: KeychainInstallationProofStore(secrets: secrets),
             appleAuthenticator: AppleSignInAdapter()

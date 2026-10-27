@@ -53,6 +53,7 @@ enum UITestScenario: String {
             routineRepository: UITestRoutineRepository(),
             profileRepository: UITestProfileRepository(scenario: self),
             missionRepository: UITestMissionRepository(scenario: self),
+            kidsSignalRepository: UITestKidsSignalRepository(scenario: self),
             credentialStore: UITestCredentialStore(),
             installationProofStore: UITestInstallationProof(),
             appleAuthenticator: UITestAppleAuthenticator()
@@ -835,6 +836,14 @@ private enum UITestMissionFixtures {
 /// `UITestTaskRepository`, so TEL-021/022's by-id hydration resolves end-to-end without a backend.
 /// The in-progress mission links one task assigned to the adult fixture member and one assigned to
 /// the Kids fixture member, so CA-19's own-task tap-through (and its absence for "de outra pessoa") is testable.
+private struct UITestKidsSignalRepository: KidsSignalRepository {
+    let scenario: UITestScenario
+
+    func getReviewQueue(accessToken: String, cursor: String?) async throws -> KidsReviewQueuePage {
+        KidsReviewQueuePage(items: [], nextCursor: nil)
+    }
+}
+
 private actor UITestMissionRepository: MissionRepository {
     private let scenario: UITestScenario
     private var missions: [UUID: Mission]
