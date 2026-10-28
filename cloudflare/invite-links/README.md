@@ -11,5 +11,6 @@ O backend emite links com `INVITE_LINK_BASE_URL=https://convites.rotina-familiar
 
 Na branch `release-testflight`, a página de fallback usa o nome Mutua e o AASA
 inclui `55Z24S2H7V.com.lizandramalta.mutua` junto ao identificador antigo.
-Implante esta versão no Worker existente e confira o AASA público antes de
-testar os Universal Links.
+Esta versão foi publicada no Worker existente em 2026-10-28. Confira o AASA
+público e teste os Universal Links em um dispositivo com o app instalado.
+O `wrangler.jsonc` mantém a URL de produção ativa e desativa URLs de prévia.

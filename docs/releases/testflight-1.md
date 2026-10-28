@@ -1,6 +1,6 @@
 # Mutua — primeira distribuição no TestFlight
 
-**Versão:** 1.3
+**Versão:** 1.4
 **Data:** 2026-10-28  
 **Branch:** `release-testflight`, criada de `origin/develop` (`e2af94a`)
 
@@ -64,8 +64,11 @@ contrato HTTP `/v1`.
 - Em 2026-10-28, `/health/live` e `/health/ready` do Render responderam `200`
   (banco saudável). O AASA público declarava apenas o ID antigo
   `55Z24S2H7V.com.lizandramalta.familyroutine` para `/invite/*`.
-  O código do Worker nesta branch agora inclui os dois IDs; a publicação no
-  Worker existente e a conferência do AASA público ainda estão pendentes.
+  O Worker existente foi publicado em 2026-10-28 com os dois IDs. O AASA
+  público atualizado e a página de fallback Mutua foram conferidos após o
+  deploy; respostas em cache podem continuar mostrando o ID antigo por até
+  uma hora. O domínio de produção segue ativo e as URLs de prévia estão
+  desativadas.
 
 ## Antes de convidar testadores
 
