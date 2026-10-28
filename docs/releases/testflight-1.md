@@ -1,6 +1,6 @@
 # Mutua — primeira distribuição no TestFlight
 
-**Versão:** 1.6
+**Versão:** 1.7
 **Data:** 2026-10-28  
 **Branch:** `release-testflight`, criada de `origin/develop` (`e2af94a`)
 
@@ -74,6 +74,8 @@ contrato HTTP `/v1`.
   `dep-dbh2ekm7bikc73ei9st0` terminou como **Live**; nenhuma migration nova
   foi aplicada. Após o deploy, a usuária confirmou que conseguiu entrar no
   app Mutua com o login Apple.
+- A usuária confirmou que o link de convite abre no app Mutua. A conclusão
+  do ingresso na família pelo convite ainda não foi registrada.
 
 ## Antes de convidar testadores
 
@@ -82,16 +84,15 @@ contrato HTTP `/v1`.
    pela usuária. O canal `RELEASE_CHANNEL=testflight`
    desta branch só passa a valer se o código backend for implantado no serviço
    existente; até lá, as rotas adiadas continuam disponíveis na API.
-2. Atualizar o Worker existente para incluir o novo App ID no AASA e testar
-   o convite real em iPhone/iPad com o build assinado. Não é necessário criar
-   outro Worker ou domínio.
-3. Registrar o App ID `com.lizandramalta.mutua` no time `55Z24S2H7V` com
-   Sign in with Apple, Associated Domains e Push Notifications quando usado;
-   gerar assinatura de distribuição.
-   Este Mac ainda não tem uma identidade de assinatura válida instalada.
-4. Criar ou conferir o registro **Mutua** no App Store Connect com o bundle
-   ID existente. Confirmar versão `1.0`, aumentar o build number se `1` já
-   tiver sido enviado, arquivar em Release e validar em dispositivo físico.
+2. O Worker existente já inclui o novo App ID no AASA; o link abre no app
+   Mutua, segundo a usuária. Concluir e validar o ingresso na família pelo
+   convite em iPhone/iPad. Não é necessário criar outro Worker ou domínio.
+3. O App ID `com.lizandramalta.mutua` foi registrado no time `55Z24S2H7V`;
+   a usuária informou que a validação da assinatura passou. Confirmar Push
+   Notifications se o app usar APNs nesta distribuição.
+4. O registro **Mutua** foi criado no App Store Connect e a usuária informou
+   que o arquivo passou na validação. Nenhum build foi enviado até então;
+   confirmar versão `1.0` e enviar o primeiro build após o QA.
 5. Preencher descrição beta, o que testar e e-mail de feedback. Para teste
    externo, preencher os dados de revisão beta, dar instruções de acesso
    por convite e submeter o primeiro build à revisão. Responder à declaração
