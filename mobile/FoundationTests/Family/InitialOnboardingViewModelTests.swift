@@ -66,6 +66,19 @@ struct InitialOnboardingViewModelTests {
         #expect(harness.viewModel.photoSelectionFailed)
     }
 
+    @Test("release-testflight R2 scope creates a family without uploading a selected photo")
+    func releaseSkipsPhotoMedia() async {
+        let harness = Harness(includePhotos: false)
+        await harness.fill(pickingPhoto: true)
+
+        await harness.viewModel.createFamily()
+
+        #expect(harness.viewModel.photo == nil)
+        #expect(await harness.repository.uploadCalls == 0)
+        #expect(await harness.repository.linkedMediaIDs.isEmpty)
+        #expect(harness.sessionStore.state == .authenticated(Harness.session.profile))
+    }
+
     @Test("SPEC-002 TEL-033 creates, edits and removes local draft members with validation")
     func memberDraftCRUD() {
         let harness = Harness()
@@ -182,7 +195,8 @@ struct InitialOnboardingViewModelTests {
             repository: harness.repository,
             installationProofProvider: FamilyInstallationProofStub(),
             photoNormalizer: PhotoNormalizerStub(result: .success(Data())),
-            sessionStore: harness.sessionStore
+            sessionStore: harness.sessionStore,
+            includePhotos: true
         )
 
         #expect(harness.sessionStore.state == .initialProfile(newGrant))
@@ -420,7 +434,8 @@ struct InitialOnboardingViewModelTests {
 
         init(
             repository: FamilyRepositorySpy = FamilyRepositorySpy(),
-            normalizer: PhotoNormalizerStub = PhotoNormalizerStub(result: .success(Data()))
+            normalizer: PhotoNormalizerStub = PhotoNormalizerStub(result: .success(Data())),
+            includePhotos: Bool = true
         ) {
             self.repository = repository
             sessionStore = AppSessionStore(
@@ -433,7 +448,8 @@ struct InitialOnboardingViewModelTests {
                 repository: repository,
                 installationProofProvider: FamilyInstallationProofStub(),
                 photoNormalizer: normalizer,
-                sessionStore: sessionStore
+                sessionStore: sessionStore,
+                includePhotos: includePhotos
             )
         }
 

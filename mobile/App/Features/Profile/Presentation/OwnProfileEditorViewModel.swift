@@ -25,6 +25,7 @@ final class OwnProfileEditorViewModel: Identifiable {
     private let repository: any ProfileRepository
     private let photoNormalizer: any ProfilePhotoNormalizing
     private let sessionStore: AppSessionStore
+    private let allowPhotos: Bool
     private let onSaved: @MainActor (OwnProfile, Data??) -> Void
     private let onDismiss: @MainActor () -> Void
 
@@ -57,6 +58,7 @@ final class OwnProfileEditorViewModel: Identifiable {
         repository: any ProfileRepository,
         photoNormalizer: any ProfilePhotoNormalizing,
         sessionStore: AppSessionStore,
+        allowPhotos: Bool = false,
         onSaved: @escaping @MainActor (OwnProfile, Data??) -> Void,
         onDismiss: @escaping @MainActor () -> Void
     ) {
@@ -66,11 +68,12 @@ final class OwnProfileEditorViewModel: Identifiable {
         self.repository = repository
         self.photoNormalizer = photoNormalizer
         self.sessionStore = sessionStore
+        self.allowPhotos = allowPhotos
         self.onSaved = onSaved
         self.onDismiss = onDismiss
         name = initialProfile.name
         nickname = initialProfile.nickname ?? ""
-        currentAvatarData = initialAvatarData
+        currentAvatarData = allowPhotos ? initialAvatarData : nil
         currentMediaID = initialProfile.photoMediaID
     }
 
@@ -94,7 +97,8 @@ final class OwnProfileEditorViewModel: Identifiable {
     var hasUnsavedChanges: Bool {
         if isUploadingPhoto { return true }
         if !isKid, trimmedName != initialProfile.name { return true }
-        return trimmedNickname != (initialProfile.nickname ?? "") || currentMediaID != initialProfile.photoMediaID
+        return trimmedNickname != (initialProfile.nickname ?? "") ||
+            (allowPhotos && currentMediaID != initialProfile.photoMediaID)
     }
 
     var canSave: Bool {
@@ -107,6 +111,7 @@ final class OwnProfileEditorViewModel: Identifiable {
     // MARK: Photo (CA-02, CA-07, CA-08, CA-09)
 
     func selectPhoto(from rawData: Data) async {
+        guard allowPhotos else { return }
         await beginUpload(raw: rawData, jpeg: nil)
     }
 
@@ -116,6 +121,7 @@ final class OwnProfileEditorViewModel: Identifiable {
     }
 
     func retryPhotoUpload() async {
+        guard allowPhotos else { return }
         guard case let .uploadFailed(jpeg) = photoError else { return }
         await beginUpload(raw: nil, jpeg: jpeg)
     }
@@ -131,6 +137,7 @@ final class OwnProfileEditorViewModel: Identifiable {
     }
 
     func removePhoto() {
+        guard allowPhotos else { return }
         cancelPhotoUpload()
         currentMediaID = nil
         currentAvatarData = nil
@@ -194,7 +201,7 @@ final class OwnProfileEditorViewModel: Identifiable {
         }
 
         let newPhoto: OptionalFieldUpdate<String>
-        if currentMediaID == initialProfile.photoMediaID {
+        if !allowPhotos || currentMediaID == initialProfile.photoMediaID {
             newPhoto = .unchanged
         } else if let currentMediaID {
             newPhoto = .set(currentMediaID)
@@ -206,7 +213,7 @@ final class OwnProfileEditorViewModel: Identifiable {
 
     /// `nil`: photo untouched; `.some(nil)`: removed; `.some(bytes)`: replaced.
     private var avatarUpdate: Data?? {
-        if currentMediaID == initialProfile.photoMediaID { return nil }
+        if !allowPhotos || currentMediaID == initialProfile.photoMediaID { return nil }
         return .some(currentAvatarData)
     }
 

@@ -1,6 +1,7 @@
 # Configuração do mobile
 
 O aplicativo fica em `mobile/` e usa SwiftUI para iOS/iPadOS 26 ou posterior.
+Na branch `release-testflight`, o app não usa fotos de perfil nem depende do R2.
 O passo a passo completo de onboarding do repositório está no
 [README principal](../README.md#como-executar-localmente-onboarding-rápido);
 este documento detalha a parte mobile.

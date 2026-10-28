@@ -17,6 +17,7 @@ final class ProfileViewModel {
     private let sessionStore: AppSessionStore
     private let photoNormalizer: any ProfilePhotoNormalizing
     private let includeAchievements: Bool
+    private let includePhotos: Bool
     let session: ActiveFamilySession
 
     private(set) var state: State = .loading
@@ -40,13 +41,15 @@ final class ProfileViewModel {
         session: ActiveFamilySession,
         familyRepository: (any FamilyRepository)? = nil,
         photoNormalizer: any ProfilePhotoNormalizing = ProfilePhotoNormalizer(),
-        includeAchievements: Bool = false
+        includeAchievements: Bool = false,
+        includePhotos: Bool = false
     ) {
         self.repository = repository
         self.familyRepository = familyRepository
         self.sessionStore = sessionStore
         self.photoNormalizer = photoNormalizer
         self.includeAchievements = includeAchievements
+        self.includePhotos = includePhotos
         self.session = session
     }
 
@@ -69,6 +72,7 @@ final class ProfileViewModel {
             repository: repository,
             photoNormalizer: photoNormalizer,
             sessionStore: sessionStore,
+            allowPhotos: includePhotos,
             onSaved: { [weak self] updated, avatar in
                 self?.applyUpdatedProfile(updated, avatarData: avatar)
             },
@@ -114,7 +118,12 @@ final class ProfileViewModel {
             guard !Task.isCancelled else { return }
             self.profile = profile
             state = .loaded
-            await loadAvatar(for: profile, accessToken: accessToken)
+            if includePhotos {
+                await loadAvatar(for: profile, accessToken: accessToken)
+            } else {
+                avatarData = nil
+                avatarMediaID = nil
+            }
         } catch {
             guard !Task.isCancelled else { return }
             // A refresh failure keeps the content already on screen; only the first load shows the error card.

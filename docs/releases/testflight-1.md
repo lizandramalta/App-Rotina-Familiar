@@ -1,6 +1,6 @@
 # Mutua — primeira distribuição no TestFlight
 
-**Versão:** 1.1
+**Versão:** 1.2
 **Data:** 2026-10-28  
 **Branch:** `release-testflight`, criada de `origin/develop` (`e2af94a`)
 
@@ -55,12 +55,12 @@ contrato HTTP `/v1`.
 
 - Backend: typecheck, lint, build e testes unitários; o teste
   `testflight-release-routes.test.ts` cobre CA-01/02.
-- Mobile: build `Release` para iOS Simulator e 345 testes unitários aprovados
-  com Xcode 27 e assinatura desativada; o teste de interface da entrada
-  confirmou o título Mutua e a ação de acesso com Apple.
+- Mobile: build `Release` para iOS Simulator e 348 testes unitários aprovados
+  com Xcode 27 e assinatura desativada; testes de interface confirmaram a
+  entrada Mutua e a ausência de fotos no onboarding e no perfil.
 - Ícone 1024×1024 sem canal alfa integrado ao catálogo `AppIcon`.
-- A remoção dos controles e chamadas de foto no mobile é a próxima etapa;
-  o build atual ainda contém esses fluxos e não deve ser enviado ao TestFlight.
+- O mobile não oferece captura ou seleção de foto, não envia mídia no
+  onboarding e não baixa fotos de perfil. A permissão de câmera foi removida.
 - Em 2026-10-28, `/health/live` e `/health/ready` do Render responderam `200`
   (banco saudável), e
   o AASA público declarou apenas o ID antigo

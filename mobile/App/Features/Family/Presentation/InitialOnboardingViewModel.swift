@@ -35,6 +35,7 @@ final class InitialOnboardingViewModel {
     private let installationProofProvider: any InstallationProofProviding
     private let photoNormalizer: any ProfilePhotoNormalizing
     private let sessionStore: AppSessionStore
+    private let includePhotos: Bool
 
     var path: [OnboardingRoute] = []
     var name = ""
@@ -77,18 +78,20 @@ final class InitialOnboardingViewModel {
         repository: any FamilyRepository,
         installationProofProvider: any InstallationProofProviding,
         photoNormalizer: any ProfilePhotoNormalizing,
-        sessionStore: AppSessionStore
+        sessionStore: AppSessionStore,
+        includePhotos: Bool = false
     ) {
         self.grant = grant
         self.repository = repository
         self.installationProofProvider = installationProofProvider
         self.photoNormalizer = photoNormalizer
         self.sessionStore = sessionStore
+        self.includePhotos = includePhotos
 
         if let draft = sessionStore.onboardingDraft {
             name = draft.name
             nickname = draft.nickname
-            photo = draft.photo
+            photo = includePhotos ? draft.photo : nil
             familyName = draft.familyName
             timeZoneID = draft.timeZoneID
             members = draft.members
@@ -128,7 +131,7 @@ final class InitialOnboardingViewModel {
         OnboardingDraft(
             name: name,
             nickname: nickname,
-            photo: photo,
+            photo: includePhotos ? photo : nil,
             familyName: familyName,
             timeZoneID: timeZoneID,
             members: members
@@ -150,6 +153,7 @@ final class InitialOnboardingViewModel {
     // MARK: TEL-055
 
     func selectPhoto(from data: Data) async {
+        guard includePhotos else { return }
         do {
             photo = try await photoNormalizer.normalize(data)
             photoSelectionFailed = false
@@ -260,7 +264,11 @@ final class InitialOnboardingViewModel {
 
         createdFamily = created
         sessionStore.establishOnboardingSession(created.session)
-        await uploadPhotoThenContinue()
+        if includePhotos {
+            await uploadPhotoThenContinue()
+        } else {
+            await continueAfterPhoto()
+        }
     }
 
     /// Keeps the draft and returns to TEL-001; a new Apple sign-in either opens the family or issues a new grant.
@@ -271,14 +279,14 @@ final class InitialOnboardingViewModel {
     // MARK: CA-10 — optional photo after the session exists
 
     func retryPhoto() async {
-        guard photoStatus == .failed, !isCreating else {
+        guard includePhotos, photoStatus == .failed, !isCreating else {
             return
         }
         await uploadPhotoThenContinue()
     }
 
     func skipPhoto() async {
-        guard photoStatus == .failed, !isCreating else {
+        guard includePhotos, photoStatus == .failed, !isCreating else {
             return
         }
         photoStatus = .idle

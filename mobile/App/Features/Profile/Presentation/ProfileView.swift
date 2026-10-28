@@ -115,26 +115,16 @@ struct ProfileView: View {
         .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 22))
     }
 
-    @ViewBuilder
     private var avatar: some View {
-        if let data = viewModel.avatarData, let image = UIImage(data: data) {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFill()
-                .frame(width: 96, height: 96)
-                .clipShape(Circle())
-                .accessibilityLabel("profile.avatar.photo")
-        } else {
-            Circle()
-                .fill(Color(uiColor: .systemGray5))
-                .frame(width: 96, height: 96)
-                .overlay {
-                    Image(systemName: "person.fill")
-                        .font(.system(size: 40))
-                        .foregroundStyle(.secondary)
-                }
-                .accessibilityLabel("profile.avatar.default")
-        }
+        Circle()
+            .fill(Color(uiColor: .systemGray5))
+            .frame(width: 96, height: 96)
+            .overlay {
+                Image(systemName: "person.fill")
+                    .font(.system(size: 40))
+                    .foregroundStyle(.secondary)
+            }
+            .accessibilityLabel("profile.avatar.default")
     }
 
     // MARK: Achievements

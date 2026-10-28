@@ -53,6 +53,20 @@ struct ProfileViewModelTests {
         #expect(harness.viewModel.avatarData == nil)
     }
 
+    @Test("release-testflight R2 scope never fetches an existing profile photo")
+    func releaseSkipsAvatarMedia() async {
+        let harness = Harness(
+            profile: Fixtures.profile(photoMediaID: "media-1"),
+            includePhotos: false
+        )
+
+        await harness.viewModel.load()
+
+        #expect(harness.viewModel.state == .loaded)
+        #expect(harness.viewModel.avatarData == nil)
+        #expect(await harness.repository.requestedMedia.isEmpty)
+    }
+
     @Test("loading failure shows the error state and a retry recovers")
     func errorThenRetry() async {
         let harness = Harness(profileResults: [.failure(ProfileError.network), .success(Fixtures.profile())])
@@ -388,7 +402,8 @@ private struct Harness {
         badgesResult: Result<BadgesOverview, Error>? = nil,
         mediaResult: Result<Data, Error> = .success(Data([1])),
         signedIn: Bool = true,
-        includeAchievements: Bool = true
+        includeAchievements: Bool = true,
+        includePhotos: Bool = true
     ) {
         repository = ProfileRepositorySpy(
             profileResults: profileResults ?? [.success(profile)],
@@ -413,7 +428,8 @@ private struct Harness {
         }
         viewModel = ProfileViewModel(
             repository: repository, sessionStore: sessionStore, session: active,
-            includeAchievements: includeAchievements
+            includeAchievements: includeAchievements,
+            includePhotos: includePhotos
         )
     }
 }

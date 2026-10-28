@@ -1,12 +1,9 @@
 import SwiftUI
-import UIKit
 
-/// MOD-011 — optional direct camera photo before signaling a Kids task.
+/// Legacy Kids signal sheet kept for the full product; the TestFlight app cannot reach it.
 struct KidsSignalSheet: View {
     @Bindable var viewModel: TaskDetailViewModel
     @Environment(\.dismiss) private var dismiss
-    @State private var capturedPhoto: Data?
-    @State private var showsCamera = false
 
     var body: some View {
         NavigationStack {
@@ -14,27 +11,13 @@ struct KidsSignalSheet: View {
                 VStack(alignment: .leading, spacing: 20) {
                     Text("kids.signal.explanation")
                         .font(.body)
-                    if let capturedPhoto, let image = UIImage(data: capturedPhoto) {
-                        Image(uiImage: image)
-                            .resizable().scaledToFit()
-                            .accessibilityLabel("kids.signal.photo_preview")
-                        Button("kids.signal.remove_photo", role: .destructive) { self.capturedPhoto = nil }
-                    }
-                    if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                        Button("kids.signal.take_photo", systemImage: "camera") { showsCamera = true }
-                    }
-                    if viewModel.photoUploadFailed {
-                        Label("kids.signal.photo_failed", systemImage: "exclamationmark.triangle")
-                            .foregroundStyle(.red)
-                        Button("kids.signal.without_photo") { Task { await submit(photo: nil) } }
-                    }
                     if viewModel.signalNeedsRefresh {
                         Label("kids.signal.refresh_needed", systemImage: "arrow.clockwise")
                         Button("kidsReview.queue.retry") { Task { await viewModel.load() } }
                     } else if viewModel.signalFailed {
                         Label("kids.signal.failed", systemImage: "exclamationmark.triangle")
                     }
-                    Button("kids.signal.submit") { Task { await submit(photo: capturedPhoto) } }
+                    Button("kids.signal.submit") { Task { await submit() } }
                         .buttonStyle(.borderedProminent)
                         .disabled(viewModel.isSignaling || viewModel.signalNeedsRefresh || !viewModel.canSignal)
                     if viewModel.isSignaling { ProgressView() }
@@ -50,17 +33,10 @@ struct KidsSignalSheet: View {
             }
         }
         .presentationSizing(.form)
-        .fullScreenCover(isPresented: $showsCamera) {
-            CameraPicker { data in
-                showsCamera = false
-                if let data { capturedPhoto = data }
-            }
-            .ignoresSafeArea()
-        }
     }
 
-    private func submit(photo: Data?) async {
-        await viewModel.sendSignal(photoData: photo)
+    private func submit() async {
+        await viewModel.sendSignal(photoData: nil)
         if viewModel.task?.status == .awaitingConfirmation { dismiss() }
     }
 }

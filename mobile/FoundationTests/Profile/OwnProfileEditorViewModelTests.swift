@@ -4,6 +4,21 @@ import Testing
 
 @MainActor
 struct OwnProfileEditorViewModelTests {
+    @Test("release-testflight R2 scope does not upload or change the existing photo")
+    func releaseSkipsPhotoChanges() async {
+        let harness = Harness(allowPhotos: false)
+        await harness.viewModel.selectPhoto(from: Data([1]))
+        harness.viewModel.removePhoto()
+        harness.viewModel.nickname = "Mi"
+
+        await harness.viewModel.save()
+
+        #expect(await harness.repository.uploadCalls == 0)
+        #expect(await harness.repository.commands == [
+            UpdateOwnProfileCommand(name: nil, nickname: .set("Mi"), photoMediaID: .unchanged)
+        ])
+    }
+
     // MARK: Initial state and closing
 
     @Test("initial state: nothing to save and closing does not ask for confirmation")
@@ -374,7 +389,8 @@ private struct Harness {
         uploadResults: [Result<String, Error>] = [],
         updateResult: Result<OwnProfile, Error>? = nil,
         uploadDelay: Duration? = nil,
-        normalizeDelay: Duration? = nil
+        normalizeDelay: Duration? = nil,
+        allowPhotos: Bool = true
     ) {
         let profile = OwnProfile(
             memberID: UUID(),
@@ -411,6 +427,7 @@ private struct Harness {
             repository: repository,
             photoNormalizer: SlowNormalizer(result: normalized, delay: normalizeDelay),
             sessionStore: sessionStore,
+            allowPhotos: allowPhotos,
             onSaved: { recorder.didSave($0, $1) },
             onDismiss: { recorder.didDismiss() }
         )

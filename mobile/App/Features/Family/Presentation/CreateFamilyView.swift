@@ -34,9 +34,8 @@ struct CreateFamilyView: View {
                 }
                 .padding(.horizontal, 4)
 
-                // Banners de erro / resultado incerto / foto
+                // Banners de erro / resultado incerto
                 bannerSection
-                photoStatusSection
 
                 // Seção: Nome da família
                 VStack(alignment: .leading, spacing: 6) {
@@ -325,64 +324,6 @@ struct CreateFamilyView: View {
         case .unavailable:
             bannerLabel("family.create.error_network", identifier: "family.create.unavailable_banner")
         case nil:
-            EmptyView()
-        }
-    }
-
-    @ViewBuilder
-    private var photoStatusSection: some View {
-        switch viewModel.photoStatus {
-        case .uploading:
-            HStack(spacing: 8) {
-                ProgressView()
-                Text("onboarding.profile.photo.uploading")
-                    .font(.footnote)
-                    .foregroundStyle(Color(uiColor: .secondaryLabel))
-            }
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(uiColor: .secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .accessibilityIdentifier("profile.initial.photo_uploading")
-
-        case .failed:
-            VStack(alignment: .leading, spacing: 12) {
-                bannerLabel("onboarding.profile.photo.error_upload", identifier: "profile.initial.photo_error_banner")
-
-                HStack(spacing: 12) {
-                    Button {
-                        Task { await viewModel.retryPhoto() }
-                    } label: {
-                        Text("onboarding.profile.photo.retry")
-                            .font(.footnote.weight(.semibold))
-                            .foregroundStyle(Color(uiColor: .label))
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(Color(uiColor: .systemBackground))
-                            .clipShape(Capsule())
-                    }
-                    .accessibilityIdentifier("profile.initial.photo_retry")
-
-                    Button {
-                        Task { await viewModel.skipPhoto() }
-                    } label: {
-                        Text("onboarding.profile.photo.skip")
-                            .font(.footnote.weight(.semibold))
-                            .foregroundStyle(Color(uiColor: .secondaryLabel))
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(Color(uiColor: .systemBackground))
-                            .clipShape(Capsule())
-                    }
-                    .accessibilityIdentifier("profile.initial.photo_skip")
-                }
-            }
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(uiColor: .secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-
-        case .idle:
             EmptyView()
         }
     }

@@ -16,7 +16,7 @@ final class ProfileUITests: XCTestCase {
     }
 
     private func openAdultProfile() {
-        let tab = app.buttons["Meu perfil"].firstMatch
+        let tab = app.buttons["Perfil"].firstMatch
         XCTAssertTrue(tab.waitForExistence(timeout: 5))
         tab.tap()
         XCTAssertTrue(app.staticTexts["profile.identity.title"].waitForExistence(timeout: 5))
@@ -42,6 +42,14 @@ final class ProfileUITests: XCTestCase {
         let current = (field.value as? String) ?? ""
         field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: current.count))
         field.typeText(text)
+    }
+
+    func testReleaseProfileHasNoPhotoControl() {
+        launch("profile-adult")
+        openAdultProfile()
+        openEditor()
+
+        XCTAssertFalse(app.buttons["profile.edit.photo_button"].exists)
     }
 
     func testAdultProfileAndBadgeDetailNavigation() {

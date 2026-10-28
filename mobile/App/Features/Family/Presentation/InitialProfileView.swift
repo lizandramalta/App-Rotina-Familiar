@@ -1,12 +1,8 @@
-import PhotosUI
 import SwiftUI
-import UIKit
 
 /// TEL-055 — Perfil inicial do Criador (Figma node 268:1362).
 struct InitialProfileView: View {
     @Bindable var viewModel: InitialOnboardingViewModel
-    @State private var pickerItem: PhotosPickerItem?
-    @State private var isPhotosPickerPresented = false
     @FocusState private var focusedField: Field?
 
     private enum Field {
@@ -28,10 +24,6 @@ struct InitialProfileView: View {
                         .foregroundStyle(Color(uiColor: .secondaryLabel))
                 }
                 .padding(.horizontal, 4)
-
-                // Foto de perfil com ações
-                avatarSection
-                    .frame(maxWidth: .infinity)
 
                 // Campo: Seu nome (obrigatório)
                 VStack(alignment: .leading, spacing: 6) {
@@ -164,87 +156,10 @@ struct InitialProfileView: View {
             .padding(.bottom, 8)
             .onboardingColumn()
         }
-        .photosPicker(isPresented: $isPhotosPickerPresented, selection: $pickerItem, matching: .images)
-        .onChange(of: pickerItem) { _, item in
-            guard let item else { return }
-            Task {
-                if let data = try? await item.loadTransferable(type: Data.self) {
-                    await viewModel.selectPhoto(from: data)
-                } else {
-                    viewModel.reportPhotoSelectionFailure()
-                }
-                pickerItem = nil
-            }
-        }
     }
 
     private var isNameValid: Bool {
         if case .success = FamilyCreationValidation.validatedName(viewModel.name) { return true }
         return false
-    }
-
-    private var avatarSection: some View {
-        VStack(spacing: 8) {
-            Menu {
-                Button {
-                    isPhotosPickerPresented = true
-                } label: {
-                    Label("onboarding.profile.photo.choose", systemImage: "photo.on.rectangle")
-                }
-
-                if viewModel.photo != nil {
-                    Button(role: .destructive) {
-                        viewModel.removePhoto()
-                    } label: {
-                        Label("onboarding.profile.photo.remove", systemImage: "trash")
-                    }
-                }
-            } label: {
-                VStack(spacing: 6) {
-                    avatar
-                        .frame(width: 96, height: 96)
-                        .clipShape(Circle())
-                        .overlay(
-                            Circle()
-                                .stroke(Color(uiColor: .separator), lineWidth: 1)
-                        )
-
-                    Text(viewModel.photo == nil ? "onboarding.profile.photo.add" : "onboarding.profile.photo.change")
-                        .font(.body.weight(.medium))
-                        .foregroundStyle(Color.primary)
-
-                    Text("onboarding.profile.photo.optional")
-                        .font(.footnote)
-                        .foregroundStyle(Color(uiColor: .secondaryLabel))
-                }
-            }
-            .accessibilityIdentifier("profile.initial.photo")
-
-            if viewModel.photoSelectionFailed {
-                FieldErrorText(
-                    key: "onboarding.profile.photo.error_selection",
-                    identifier: "profile.initial.photo_selection_error"
-                )
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var avatar: some View {
-        if let data = viewModel.photo, let image = UIImage(data: data) {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFill()
-        } else {
-            ZStack {
-                Circle()
-                    .fill(Color(uiColor: .tertiarySystemFill))
-                Image(systemName: "person.fill")
-                    .resizable()
-                    .scaledToFit()
-                    .padding(26)
-                    .foregroundStyle(Color(uiColor: .secondaryLabel))
-            }
-        }
     }
 }

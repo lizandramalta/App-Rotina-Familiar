@@ -183,33 +183,13 @@ final class OnboardingUITests: XCTestCase {
         XCTAssertTrue(app.buttons["access.entry.apple_button"].waitForExistence(timeout: 3))
     }
 
-    func testPhotoFailureCanBeRetriedWithoutRecreatingTheFamily() {
-        launch("onboarding-photo-failure")
-        app.buttons["profile.initial.continue"].tap()
-        XCTAssertTrue(app.textFields["family.create.name"].waitForExistence(timeout: 3))
-        type("Casa Silva", into: "family.create.name")
-
-        app.buttons["family.create.submit"].tap()
-
-        XCTAssertTrue(app.buttons["profile.initial.photo_retry"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["profile.initial.photo_skip"].exists)
-        XCTAssertFalse(app.buttons["family.create.submit"].exists)
-
-        app.buttons["profile.initial.photo_retry"].tap()
-
-        assertMainAppOpened()
-    }
-
-    func testPhotoFailureCanBeSkipped() {
-        launch("onboarding-photo-failure")
-        app.buttons["profile.initial.continue"].tap()
-        XCTAssertTrue(app.textFields["family.create.name"].waitForExistence(timeout: 3))
+    func testReleaseOnboardingHasNoPhotoStep() {
+        launch("onboarding")
+        XCTAssertFalse(app.buttons["profile.initial.photo"].exists)
+        openFamilyStep()
         type("Casa Silva", into: "family.create.name")
         app.buttons["family.create.submit"].tap()
-
-        XCTAssertTrue(app.buttons["profile.initial.photo_skip"].waitForExistence(timeout: 5))
-        app.buttons["profile.initial.photo_skip"].tap()
-
+        XCTAssertFalse(app.buttons["profile.initial.photo_retry"].exists)
         assertMainAppOpened()
     }
 }
