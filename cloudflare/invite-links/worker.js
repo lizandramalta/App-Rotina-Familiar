@@ -1,10 +1,13 @@
-const APP_ID = "55Z24S2H7V.com.lizandramalta.familyroutine";
+const APP_IDS = [
+  "55Z24S2H7V.com.lizandramalta.familyroutine",
+  "55Z24S2H7V.com.lizandramalta.mutua",
+];
 
 const association = JSON.stringify({
   applinks: {
     details: [
       {
-        appIDs: [APP_ID],
+        appIDs: APP_IDS,
         components: [{ "/": "/invite/*" }],
       },
     ],

@@ -1,6 +1,6 @@
 # Mutua — primeira distribuição no TestFlight
 
-**Versão:** 1.2
+**Versão:** 1.3
 **Data:** 2026-10-28  
 **Branch:** `release-testflight`, criada de `origin/develop` (`e2af94a`)
 
@@ -62,10 +62,10 @@ contrato HTTP `/v1`.
 - O mobile não oferece captura ou seleção de foto, não envia mídia no
   onboarding e não baixa fotos de perfil. A permissão de câmera foi removida.
 - Em 2026-10-28, `/health/live` e `/health/ready` do Render responderam `200`
-  (banco saudável), e
-  o AASA público declarou apenas o ID antigo
+  (banco saudável). O AASA público declarava apenas o ID antigo
   `55Z24S2H7V.com.lizandramalta.familyroutine` para `/invite/*`.
-  O novo ID ainda depende da atualização do Worker.
+  O código do Worker nesta branch agora inclui os dois IDs; a publicação no
+  Worker existente e a conferência do AASA público ainda estão pendentes.
 
 ## Antes de convidar testadores
 
