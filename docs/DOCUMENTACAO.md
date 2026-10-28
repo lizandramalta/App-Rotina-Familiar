@@ -1,7 +1,7 @@
-# Documentação do projeto — versão 1.39
+# Documentação do projeto — versão 1.40
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.39\
+**Versão:** 1.40\
 **Data:** 2026-10-28\
 **Situação:** base documental consolidada
 
@@ -146,6 +146,7 @@ A fundação backend adota Node.js, TypeScript, Fastify e `pg`. Parte da API de 
 
 | Versão | Data | Alteração |
 | --- | --- | --- |
+| 1.40 | 2026-10-28 | TestFlight Mutua recorta apenas a interface mobile; API de produção e contrato `/v1` seguem compartilhados com `develop`, sem canal ou bloqueio de rotas para a release. |
 | 1.39 | 2026-10-28 | Plano de distribuição Mutua no TestFlight: recorte inicial sem Kids, missões, recompensas coletivas, badges ou PDF; base funcional do produto completo preservada. |
 | 1.38 | 2026-10-28 | TEL-032 retorna à variante compacta Dia/Semana domingo–sábado; Parabenizar fica na Família, edição de nome Kids é possível no detalhe para Admin, e folhas de filtros TEL-050/TEL-011 são distintas. RN/RF/UC, SPEC/UX-003/009, mapa 1.23, fluxos 1.24 e catálogo 1.13 alinhados. |
 | 1.37 | 2026-10-28 | UX-009 e convenções mobile 1.1 padronizam SF Symbols para ícones de interface; removem SVGs de ícones da Família e da entrada por convite. |

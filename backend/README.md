@@ -60,7 +60,6 @@ cp .env.example .env
 | Variável               | Tipo      | Padrão                                 | Obrigatória        | Descrição                                                                                           |
 | ---------------------- | --------- | -------------------------------------- | ------------------ | --------------------------------------------------------------------------------------------------- |
 | `NODE_ENV`             | `enum`    | `development`                          | Sim                | Ambiente de execução: `development`, `test` ou `production`.                                        |
-| `RELEASE_CHANNEL`      | `enum`    | `testflight` em produção; `full` em dev/test | Não          | Controla a exposição das capacidades adiadas na primeira distribuição Mutua.                        |
 | `PORT`                 | `number`  | `3000`                                 | Não                | Porta TCP onde o servidor HTTP Fastify escutará.                                                    |
 | `HOST`                 | `string`  | `0.0.0.0`                              | Não                | Interface de rede para bind do servidor.                                                            |
 | `API_BASE_URL`         | `url`     | `http://localhost:3000`                | Não                | URL base pública do backend.                                                                        |

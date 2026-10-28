@@ -11,7 +11,8 @@ Organização colaborativa das responsabilidades domésticas, com tarefas compar
 A primeira distribuição se chama **Mutua** e usa a branch `release-testflight`.
 Ela concentra acesso, família, membros adultos, tarefas, rotinas e perfil;
 Kids, missões, recompensas coletivas, badges e relatório PDF ficam para
-versões posteriores. O [plano de release](docs/releases/testflight-1.md)
+versões posteriores no app. A API de produção permanece compartilhada e com
+o contrato completo. O [plano de release](docs/releases/testflight-1.md)
 registra o recorte e as pendências de publicação. As seções abaixo continuam
 a descrever o produto completo planejado.
 

@@ -6,7 +6,7 @@ import swaggerUi from '@fastify/swagger-ui';
 import { randomUUID } from 'node:crypto';
 import type { ApplicationContainer } from '../../bootstrap/container.js';
 import type { Configuration } from '../../bootstrap/configuration.js';
-import { ActionNotAllowedError, DomainError } from '../../shared/domain/domain-error.js';
+import { DomainError } from '../../shared/domain/domain-error.js';
 import { RateLimitedError } from '../../modules/access/domain/invite-errors.js';
 import { createProblemDetails } from './problem-details.js';
 import { registerAccessRoutes } from './access-routes.js';
@@ -65,36 +65,14 @@ export function buildHttpApp(
         url === '/v1/onboarding/media'
           ? { ...schema, body: onboardingUploadBodyDocumentation }
           : url === '/v1/families'
-            ? {
-                ...schema,
-                body:
-                  config.RELEASE_CHANNEL === 'testflight'
-                    ? {
-                        ...createFamilyBodyDocumentation,
-                        properties: {
-                          ...createFamilyBodyDocumentation.properties,
-                          initialMembers: {
-                            ...createFamilyBodyDocumentation.properties.initialMembers,
-                            items: {
-                              ...createFamilyBodyDocumentation.properties.initialMembers.items,
-                              properties: {
-                                ...createFamilyBodyDocumentation.properties.initialMembers.items
-                                  .properties,
-                                role: { type: 'string', enum: ['administrator', 'member'] },
-                              },
-                            },
-                          },
-                        },
-                      }
-                    : createFamilyBodyDocumentation,
-              }
+            ? { ...schema, body: createFamilyBodyDocumentation }
             : schema,
       url,
     }),
     openapi: {
       openapi: '3.1.0',
       info: {
-        title: 'Mutua API',
+        title: 'App Rotina Familiar API',
         version: '0.1.0',
         description: 'API HTTP do MVP. Os recursos protegidos usam Bearer tokens opacos.',
       },
@@ -107,25 +85,14 @@ export function buildHttpApp(
         { name: 'Media', description: 'Upload de mídia privada.' },
         { name: 'Profile', description: 'Dados do próprio perfil.' },
         { name: 'Tasks', description: 'Gestão de tarefas únicas.' },
-        ...(config.RELEASE_CHANNEL === 'full'
-          ? [
-              {
-                name: 'Kids',
-                description: 'Sinalização de tarefas Kids e avaliação administrativa.',
-              },
-              { name: 'Reports', description: 'Snapshots para relatórios locais.' },
-            ]
-          : []),
+        { name: 'Kids', description: 'Sinalização de tarefas Kids e avaliação administrativa.' },
+        { name: 'Reports', description: 'Snapshots para relatórios locais.' },
         {
           name: 'Routines',
           description: 'Configuração de recorrência e materialização de ocorrências.',
         },
-        ...(config.RELEASE_CHANNEL === 'full'
-          ? [
-              { name: 'Missions', description: 'Missões coletivas, participações e badges.' },
-              { name: 'Rewards', description: 'Catálogo de recompensas coletivas.' },
-            ]
-          : []),
+        { name: 'Missions', description: 'Missões coletivas, participações e badges.' },
+        { name: 'Rewards', description: 'Catálogo de recompensas coletivas.' },
       ],
       components: {
         securitySchemes: {
@@ -329,7 +296,7 @@ export function buildHttpApp(
       { schema: { tags: ['Operational'], summary: 'API metadata' } },
       async (_req, reply) => {
         return reply.status(200).send({
-          name: 'Mutua API',
+          name: 'App Rotina Familiar API',
           version: '0.1.0',
           status: 'operational',
           environment: config.NODE_ENV,
@@ -357,28 +324,18 @@ export function buildHttpApp(
         }
       });
 
-      if (config.RELEASE_CHANNEL === 'testflight') {
-        scope.addHook('preHandler', async (request) => {
-          if (request.actor?.role === 'kids') {
-            throw new ActionNotAllowedError('Kids profiles are not available in this release.');
-          }
-        });
-      }
-
       registerAccessRoutes(scope, container);
       registerSessionRoutes(scope, container);
-      registerFamilyRoutes(scope, container, config.RELEASE_CHANNEL);
-      registerMemberRoutes(scope, container, config.RELEASE_CHANNEL);
-      registerMediaRoutes(scope, container, config.RELEASE_CHANNEL);
-      registerProfileRoutes(scope, container, config.RELEASE_CHANNEL);
+      registerFamilyRoutes(scope, container);
+      registerMemberRoutes(scope, container);
+      registerMediaRoutes(scope, container);
+      registerProfileRoutes(scope, container);
       registerTaskRoutes(scope, container);
       registerRoutineRoutes(scope, container);
-      if (config.RELEASE_CHANNEL === 'full') {
-        registerMissionRoutes(scope, container);
-        registerRewardRoutes(scope, container);
-        registerReportRoutes(scope, container);
-        registerKidsSignalRoutes(scope, container);
-      }
+      registerMissionRoutes(scope, container);
+      registerRewardRoutes(scope, container);
+      registerReportRoutes(scope, container);
+      registerKidsSignalRoutes(scope, container);
       registerFamilyApplauseRoutes(scope, container);
     },
     { prefix: '/v1' },

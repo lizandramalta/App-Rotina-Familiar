@@ -173,11 +173,7 @@ const getBadgeContributionsSchema = {
 } as const;
 
 /** Rotas do módulo Profile. Registradas sob `/v1` (BA-20). */
-export function registerProfileRoutes(
-  app: FastifyInstance,
-  container: ApplicationContainer,
-  releaseChannel: 'full' | 'testflight' = 'full',
-): void {
+export function registerProfileRoutes(app: FastifyInstance, container: ApplicationContainer): void {
   app.register(async (scope) => {
     scope.addHook('onRequest', createAuthenticationHook(container));
 
@@ -203,28 +199,26 @@ export function registerProfileRoutes(
       },
     );
 
-    if (releaseChannel === 'full') {
-      scope.get('/me/badges', { schema: getOwnBadgesSchema }, async (request, reply) =>
+    scope.get('/me/badges', { schema: getOwnBadgesSchema }, async (request, reply) =>
+      reply
+        .status(200)
+        .header('Cache-Control', 'no-store')
+        .send(await container.getOwnBadgesUseCase.execute(requireActor(request))),
+    );
+
+    scope.get<{ Params: BadgeAwardParams }>(
+      '/me/badges/:awardId',
+      { schema: getBadgeContributionsSchema },
+      async (request, reply) =>
         reply
           .status(200)
           .header('Cache-Control', 'no-store')
-          .send(await container.getOwnBadgesUseCase.execute(requireActor(request))),
-      );
-
-      scope.get<{ Params: BadgeAwardParams }>(
-        '/me/badges/:awardId',
-        { schema: getBadgeContributionsSchema },
-        async (request, reply) =>
-          reply
-            .status(200)
-            .header('Cache-Control', 'no-store')
-            .send(
-              await container.getBadgeContributionsUseCase.execute(
-                requireActor(request),
-                request.params.awardId,
-              ),
+          .send(
+            await container.getBadgeContributionsUseCase.execute(
+              requireActor(request),
+              request.params.awardId,
             ),
-      );
-    }
+          ),
+    );
   });
 }

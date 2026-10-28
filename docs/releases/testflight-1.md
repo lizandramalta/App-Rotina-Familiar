@@ -1,6 +1,6 @@
 # Mutua — primeira distribuição no TestFlight
 
-**Versão:** 1.7
+**Versão:** 1.9
 **Data:** 2026-10-28  
 **Branch:** `release-testflight`, criada de `origin/develop` (`e2af94a`)
 
@@ -13,12 +13,11 @@ e o incentivo “Parabenizar” permanecem quando já disponíveis.
 
 Ficam adiados: criação e uso de perfis Kids, sinalização/validação Kids,
 missões, recompensas coletivas, badges, relatório PDF e upload de fotos via R2.
-Sessões Kids antigas
-recebem uma tela de indisponibilidade com ação **Sair**, sem acesso a operações
-protegidas. O canal `RELEASE_CHANNEL=testflight` retira as rotas adiadas da
-API, rejeita novo papel Kids e bloqueia sessões Kids antigas. Nesta branch,
-`NODE_ENV=production` usa esse canal por padrão; `development` e `test` usam
-`full`. As migrations e os dados antigos são preservados.
+O recorte é exclusivo do app Mutua: suas telas não oferecem esses recursos nem
+acionam suas rotas. Se receber uma sessão Kids, o app mostra uma tela de
+indisponibilidade com ação **Sair**. A API de produção continua compartilhada
+com o desenvolvimento, com as mesmas rotas, permissões e dados; não há canal
+de backend para TestFlight nem deploy de backend exigido por este recorte.
 
 O bundle ID do app e dos testes passou a usar `com.lizandramalta.mutua`.
 Esta troca exige registrar um novo App ID na Apple e alinhar a configuração
@@ -28,20 +27,24 @@ o tópico de push. Até esses vínculos serem atualizados, o build novo não
 consegue concluir o acesso Apple nem abrir convites por Universal Link.
 O serviço do Keychain do app também passou a usar o novo identificador; a
 instalação nova não reaproveita a sessão local da instalação antiga.
+O Render aceita o `APPLE_CLIENT_ID` do Mutua. A usuária confirmou que não é
+necessário manter login Apple para o bundle ID antigo; a versão de
+desenvolvimento será atualizada depois para o novo nome/identificador.
 
 Esta é uma decisão de **escopo de distribuição**; a base funcional e as specs
 aprovadas continuam a descrever o produto completo. Rastreabilidade afetada:
 RN21–24, RN38, RN42, RN53–58, RN62–64; RF23–24, RF34, RF48, RF55–56,
 RF61–66; UC03, UC05–06, UC10, UC15–18; SPEC/UX-003, 006, 007,
 009–017 e 019. O corte afeta a navegação, o perfil, a família, TEL-011 e o
-contrato HTTP `/v1`.
+uso das rotas HTTP `/v1` pelo app, sem alterar o contrato da API.
 
 ## Critérios da branch
 
-- **CA-01 — API:** em `testflight`, recursos adiados não aparecem no OpenAPI
-  nem respondem; tarefas e membros adultos permanecem registrados.
-- **CA-02 — Papéis:** criação/transição para Kids é recusada; sessão Kids
-  antiga não acessa recursos protegidos e pode encerrar a sessão.
+- **CA-01 — API compartilhada:** o backend e seu OpenAPI permanecem iguais aos
+  de `develop`; a distribuição Mutua não registra nem exige um canal próprio.
+- **CA-02 — Papéis na interface:** o app não oferece criação/transição para
+  Kids nem sua navegação; ao receber uma sessão Kids, mostra indisponibilidade
+  com ação **Sair**.
 - **CA-03 — App:** o build mostra Mutua e o ícone fornecido, com abas adultas
   Tarefas, Família e Perfil; não oferece missões, recompensas, badges,
   confirmação Kids nem PDF.
@@ -53,8 +56,8 @@ contrato HTTP `/v1`.
 
 ## Verificado localmente
 
-- Backend: typecheck, lint, build e testes unitários; o teste
-  `testflight-release-routes.test.ts` cobre CA-01/02.
+- Backend: o código da branch é igual ao de `origin/develop`; não há teste ou
+  configuração de rotas exclusivos do TestFlight.
 - Mobile: build `Release` para iOS Simulator e 348 testes unitários aprovados
   com Xcode 27 e assinatura desativada; testes de interface confirmaram a
   entrada Mutua e a ausência de fotos no onboarding e no perfil.
@@ -74,19 +77,18 @@ contrato HTTP `/v1`.
   `dep-dbh2ekm7bikc73ei9st0` terminou como **Live**; nenhuma migration nova
   foi aplicada. Após o deploy, a usuária confirmou que conseguiu entrar no
   app Mutua com o login Apple.
-- A usuária confirmou que o link de convite abre no app Mutua. A conclusão
-  do ingresso na família pelo convite ainda não foi registrada.
+- A usuária confirmou que o link de convite abre no app Mutua e que o ingresso
+  na família pelo convite foi concluído.
 
 ## Antes de convidar testadores
 
 1. Usar a API de produção existente, já configurada com
    `APPLE_CLIENT_ID=com.lizandramalta.mutua`; o login Apple foi confirmado
-   pela usuária. O canal `RELEASE_CHANNEL=testflight`
-   desta branch só passa a valer se o código backend for implantado no serviço
-   existente; até lá, as rotas adiadas continuam disponíveis na API.
+   pela usuária. A API mantém todas as rotas de `develop`; o app Mutua não
+   apresenta nem chama as capacidades adiadas.
 2. O Worker existente já inclui o novo App ID no AASA; o link abre no app
-   Mutua, segundo a usuária. Concluir e validar o ingresso na família pelo
-   convite em iPhone/iPad. Não é necessário criar outro Worker ou domínio.
+   Mutua e a usuária confirmou o ingresso pelo convite. Não é necessário
+   criar outro Worker ou domínio.
 3. O App ID `com.lizandramalta.mutua` foi registrado no time `55Z24S2H7V`;
    a usuária informou que a validação da assinatura passou. Confirmar Push
    Notifications se o app usar APNs nesta distribuição.
@@ -99,7 +101,7 @@ contrato HTTP `/v1`.
    de criptografia/export compliance.
 6. Fazer QA em iPhone e iPad: Apple Sign In, onboarding, convite, sessão,
    tarefa, recorrência, perfil sem foto, rede intermitente e isolamento entre
-   famílias. Confirmar a ausência dos recursos adiados no app e na API beta.
+   famílias. Confirmar a ausência dos recursos adiados no app.
 
 Fontes da Apple: [registro do app](https://developer.apple.com/help/app-store-connect/create-an-app-record/add-a-new-app/),
 [upload de builds](https://developer.apple.com/help/app-store-connect/manage-builds/upload-builds/),

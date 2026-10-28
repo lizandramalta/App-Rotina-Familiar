@@ -278,7 +278,7 @@ describe('HTTP Presentation Layer (Fastify)', () => {
 
     expect(response.statusCode).toBe(200);
     const body = JSON.parse(response.payload);
-    expect(body.name).toBe('Mutua API');
+    expect(body.name).toBe('App Rotina Familiar API');
     expect(body.version).toBe('0.1.0');
     expect(body.status).toBe('operational');
   });
@@ -300,7 +300,7 @@ describe('HTTP Presentation Layer (Fastify)', () => {
       components: { securitySchemes: Record<string, { scheme: string }> };
     };
     expect(spec.openapi).toBe('3.1.0');
-    expect(spec.info.title).toBe('Mutua API');
+    expect(spec.info.title).toBe('App Rotina Familiar API');
     expect(Object.keys(spec.paths)).toEqual(
       expect.arrayContaining([
         '/health/live',
