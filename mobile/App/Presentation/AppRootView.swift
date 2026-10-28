@@ -39,7 +39,7 @@ struct AppRootView: View {
                 AuthenticatedHomeView(
                     session: profile,
                     myTasksTab: sessionStore.accessToken.map {
-                        container.makeMyTasksTabView(session: profile, accessToken: $0)
+                        container.makeMyTasksTabView(session: profile, accessToken: $0, sessionStore: sessionStore)
                     },
                     makeFamilyOverviewViewModel: {
                         container.makeFamilyOverviewViewModel(session: profile, sessionStore: sessionStore)
@@ -55,6 +55,15 @@ struct AppRootView: View {
                     if let token = sessionStore.accessToken {
                         await container.registerPushDevice(accessToken: token, registration: pushRegistration)
                     }
+                }
+                .task(id: sessionStore.tokenExpiresAt) {
+                    // Renews shortly before expiry so screens reading `accessToken` synchronously stay
+                    // authorized; after a suspension the elapsed sleep fires on return to foreground.
+                    guard let expiresAt = sessionStore.tokenExpiresAt else { return }
+                    let delay = min(max(expiresAt.timeIntervalSinceNow - 60, 0), 86_400)
+                    try? await Task.sleep(for: .seconds(delay))
+                    guard !Task.isCancelled else { return }
+                    _ = try? await sessionStore.validAccessToken()
                 }
                 }
             case let .initialProfile(grant):

@@ -34,6 +34,25 @@ struct FamilyOverviewViewModelTests {
         #expect(viewModel.timeZoneDisplayName == "Horário de Brasília")
     }
 
+    @Test("TestFlight fix: an unexpected 401 renews the token once and the load succeeds without an error")
+    func rejectedLoadRenewsTokenAndRetries() async {
+        let repository = FamilyRepositorySpy(listMembersResults: [.failure(FamilyError.rejected), page([member("Ana")])])
+        let session = ActiveFamilySession(memberID: UUID(), familyID: UUID(), role: .administrator, isFamilyCreator: false)
+        var forcedRefreshes: [Bool] = []
+        let viewModel = FamilyOverviewViewModel(
+            session: session,
+            familyRepository: repository,
+            accessTokenProvider: { "token-1" },
+            validAccessToken: { force in forcedRefreshes.append(force); return force ? "token-2" : "token-1" }
+        )
+
+        await viewModel.loadInitial()
+
+        #expect(forcedRefreshes == [false, true])
+        #expect(viewModel.members.map(\.name) == ["Ana"])
+        #expect(viewModel.errorMessage == nil)
+    }
+
     @Test("SPEC-002 renaming shows only the server-confirmed name and skips empty or unchanged input")
     func renamesFamily() async throws {
         let (viewModel, repository) = makeViewModel([page([])])

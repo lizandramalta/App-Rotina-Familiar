@@ -22,7 +22,7 @@ struct DailyTaskListViewModelTests {
             currentMemberID: currentMemberID,
             repository: repository,
             familyRepository: familyRepository,
-            accessToken: "access-1",
+            accessTokenProvider: { _ in "access-1" },
             today: today
         )
     }
@@ -362,6 +362,23 @@ struct DailyTaskListViewModelTests {
         await viewModel.selectDate(tomorrow)
         #expect(viewModel.selectedDate == calendar.startOfDay(for: tomorrow))
         #expect(repository.dailyTasksCalls.count == 1)
+    }
+
+    @Test("TestFlight fix: a rejected load (401) forces one token renewal and retries")
+    func rejectedLoadForcesTokenRenewal() async {
+        let repository = TaskRepositorySpy(dailyTasksResult: .failure(TaskError.rejected))
+        var forcedRefreshes: [Bool] = []
+        let viewModel = DailyTaskListViewModel(
+            audience: .adult, role: .administrator, currentMemberID: UUID(),
+            repository: repository,
+            accessTokenProvider: { force in forcedRefreshes.append(force); return "access-1" },
+            today: { Self.fixedToday }
+        )
+
+        await viewModel.load()
+
+        #expect(forcedRefreshes == [false, true])
+        #expect(viewModel.loadFailed)
     }
 
     @Test("Reloading preserves the currently selected date")
