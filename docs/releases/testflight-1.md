@@ -1,6 +1,6 @@
 # Mutua — primeira distribuição no TestFlight
 
-**Versão:** 1.11
+**Versão:** 1.12
 **Data:** 2026-10-28  
 **Branch:** `release-testflight`, criada de `origin/develop` (`e2af94a`)
 
@@ -91,6 +91,14 @@ uso das rotas HTTP `/v1` pelo app, sem alterar o contrato da API.
   respondida como **Nenhum dos algoritmos mencionados acima**, após conferir
   que o app usa APIs do sistema Apple para HTTPS/Keychain/Sign in with Apple
   e SHA-256 do CryptoKit apenas para o nonce do login.
+- Os dados de feedback, contato e notas para a revisão beta foram preenchidos
+  com as informações fornecidas pela usuária. As notas explicam que o revisor
+  pode entrar com o próprio Apple ID e criar uma família. Em 2026-10-28, o
+  build `1.0 (1)` foi vinculado ao grupo externo **Beta Mutua** e submetido à
+  revisão beta da Apple; o status é **Aguardando revisão**. A notificação
+  automática dos testadores ficou desligada. O grupo externo tem zero
+  testadores, portanto nenhum convite foi enviado. Ainda não há URL de
+  política de privacidade cadastrada.
 
 ## Antes de convidar testadores
 
@@ -105,11 +113,12 @@ uso das rotas HTTP `/v1` pelo app, sem alterar o contrato da API.
    a usuária informou que a validação da assinatura passou. Confirmar Push
    Notifications se o app usar APNs nesta distribuição.
 4. O registro **Mutua** foi criado no App Store Connect; o build `1.0 (1)`
-   passou na validação, foi enviado e já pode ser usado em testes internos.
-5. Para teste externo, preencher e-mail de feedback e contato da revisão beta,
-   definir as instruções de acesso ao app e vincular `1.0 (1)` ao grupo
-   **Beta Mutua** para submeter o primeiro build à revisão da Apple. O grupo
-   externo ainda não tem build nem testadores.
+   passou na validação, foi enviado e está vinculado ao grupo interno.
+5. Aguardar a decisão da revisão beta da Apple. Depois da aprovação, decidir
+   entre convite por e-mail ou link público e adicionar os testadores ao grupo
+   **Beta Mutua**. Publicar uma política de privacidade e cadastrar sua URL
+   antes de uma distribuição pública; avaliar eventual exigência da Apple
+   também para a revisão beta em andamento.
 6. A usuária confirmou o QA do fluxo principal e a ausência dos recursos
    adiados no app. Antes de convidar outros testadores, conferir também em
    iPhone e iPad a rede intermitente e o isolamento entre famílias, se esses
