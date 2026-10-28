@@ -1,36 +1,6 @@
 {
   "sourceLanguage" : "pt-BR",
   "strings" : {
-    "release.kids_unavailable.title" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Perfil Kids indisponível nesta versão"
-          }
-        }
-      }
-    },
-    "release.kids_unavailable.message" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esta versão de teste é para Administradores e Membros adultos. Peça a um Administrador para atualizar seu perfil ou aguarde uma próxima versão."
-          }
-        }
-      }
-    },
-    "release.kids_unavailable.sign_out" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sair"
-          }
-        }
-      }
-    },
     "" : {
 
     },
@@ -275,6 +245,7 @@
       }
     },
     "destination.missions" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -782,6 +753,7 @@
       }
     },
     "family.member.detail.edit" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -1031,6 +1003,7 @@
       }
     },
     "family.member.manage.name" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -2020,6 +1993,7 @@
       }
     },
     "family.report.cancel" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -2040,6 +2014,7 @@
       }
     },
     "family.report.failure_message" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -2050,6 +2025,7 @@
       }
     },
     "family.report.failure_title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -2070,6 +2046,7 @@
       }
     },
     "family.report.generating" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -2100,6 +2077,7 @@
       }
     },
     "family.report.menu_week" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -2150,6 +2128,7 @@
       }
     },
     "family.report.retry" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -2160,6 +2139,7 @@
       }
     },
     "family.report.select_week" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -2300,6 +2280,7 @@
       }
     },
     "family.settings.hub.edit_kids_name" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -2580,6 +2561,7 @@
       }
     },
     "family.tasks.more" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -3093,6 +3075,7 @@
       }
     },
     "kids.signal.photo_failed" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -3103,6 +3086,7 @@
       }
     },
     "kids.signal.photo_preview" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -3123,6 +3107,7 @@
       }
     },
     "kids.signal.remove_photo" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -3143,6 +3128,7 @@
       }
     },
     "kids.signal.take_photo" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -3163,6 +3149,7 @@
       }
     },
     "kids.signal.without_photo" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4154,6 +4141,7 @@
       }
     },
     "onboarding.profile.photo.error_selection" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4164,6 +4152,7 @@
       }
     },
     "onboarding.profile.photo.error_upload" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4196,6 +4185,7 @@
       }
     },
     "onboarding.profile.photo.retry" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4206,6 +4196,7 @@
       }
     },
     "onboarding.profile.photo.skip" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4227,6 +4218,7 @@
       }
     },
     "onboarding.profile.photo.uploading" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4283,6 +4275,7 @@
       }
     },
     "profile.avatar.photo" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4613,6 +4606,7 @@
       }
     },
     "profile.edit.error_photo_format" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4623,6 +4617,7 @@
       }
     },
     "profile.edit.error_photo_processing" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4633,6 +4628,7 @@
       }
     },
     "profile.edit.error_photo_too_large" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4643,6 +4639,7 @@
       }
     },
     "profile.edit.error_photo_upload" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4743,6 +4740,7 @@
       }
     },
     "profile.edit.photo_add" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4753,6 +4751,7 @@
       }
     },
     "profile.edit.photo_cancel_upload" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4763,6 +4762,7 @@
       }
     },
     "profile.edit.photo_caption" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4773,6 +4773,7 @@
       }
     },
     "profile.edit.photo_caption_kids" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4783,6 +4784,7 @@
       }
     },
     "profile.edit.photo_change" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4793,6 +4795,7 @@
       }
     },
     "profile.edit.photo_choose_another" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4803,6 +4806,7 @@
       }
     },
     "profile.edit.photo_dialog_cancel" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4813,6 +4817,7 @@
       }
     },
     "profile.edit.photo_dialog_title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4823,6 +4828,7 @@
       }
     },
     "profile.edit.photo_keep" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4833,6 +4839,7 @@
       }
     },
     "profile.edit.photo_pick" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4843,6 +4850,7 @@
       }
     },
     "profile.edit.photo_remove" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4853,6 +4861,7 @@
       }
     },
     "profile.edit.photo_retry" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4863,6 +4872,7 @@
       }
     },
     "profile.edit.photo_take" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4873,6 +4883,7 @@
       }
     },
     "profile.edit.photo_uploading" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -5153,6 +5164,47 @@
         }
       }
     },
+    "release.kids_unavailable.message" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta versão de teste é para Administradores e Membros adultos. Peça a um Administrador para atualizar seu perfil ou aguarde uma próxima versão."
+          }
+        }
+      }
+    },
+    "release.kids_unavailable.sign_out" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sair"
+          }
+        }
+      }
+    },
+    "release.kids_unavailable.title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perfil Kids indisponível nesta versão"
+          }
+        }
+      }
+    },
+    "routines.detail.origin_hint" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faz parte de uma rotina. Ao editar ou excluir, você escolhe se vale só para esta tarefa ou também para as próximas."
+          }
+        }
+      }
+    },
     "routines.error_frequency_invalid" : {
       "localizations" : {
         "pt-BR" : {
@@ -5169,6 +5221,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Não foi possível confirmar se a rotina foi salva. Confira o estado antes de tentar novamente."
+          }
+        }
+      }
+    },
+    "routines.error_source_task_invalid" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta tarefa não pode definir o alcance da rotina. Atualize e tente novamente."
           }
         }
       }
@@ -5329,6 +5391,86 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Repetição"
+          }
+        }
+      }
+    },
+    "routines.scope.cancel_hint" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar volta ao detalhe sem gravar."
+          }
+        }
+      }
+    },
+    "routines.scope.delete_hint" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Depois você confirma a exclusão.\nCancelar volta ao detalhe sem gravar."
+          }
+        }
+      }
+    },
+    "routines.scope.delete_title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que excluir?"
+          }
+        }
+      }
+    },
+    "routines.scope.only_this" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Somente esta tarefa"
+          }
+        }
+      }
+    },
+    "routines.scope.only_this_hint" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As outras ocorrências da rotina não mudam."
+          }
+        }
+      }
+    },
+    "routines.scope.selected_and_future" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta tarefa e as futuras"
+          }
+        }
+      }
+    },
+    "routines.scope.selected_and_future_hint" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inclui esta tarefa. As anteriores e as concluídas permanecem preservadas."
+          }
+        }
+      }
+    },
+    "routines.scope.title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Onde aplicar esta alteração?"
           }
         }
       }
@@ -5518,6 +5660,7 @@
       }
     },
     "tasks.adult.missionsTab" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -5543,6 +5686,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tarefas"
+          }
+        }
+      }
+    },
+    "tasks.assignee_picker.kids_tag" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kids"
           }
         }
       }
@@ -5628,12 +5782,21 @@
       }
     },
     "tasks.delete.error_mission_would_be_empty" : {
-      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vincule outra tarefa à missão antes de excluir esta"
+          }
+        }
+      }
+    },
+    "tasks.delete.error_uncertain" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível confirmar a exclusão. Confira as tarefas antes de tentar novamente."
           }
         }
       }
@@ -5838,6 +6001,36 @@
         }
       }
     },
+    "tasks.form.assignees_row" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quem faz"
+          }
+        }
+      }
+    },
+    "tasks.form.assignees_row_none" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ninguém"
+          }
+        }
+      }
+    },
+    "tasks.form.date_section_title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data e repetição"
+          }
+        }
+      }
+    },
     "tasks.form.discard_message" : {
       "localizations" : {
         "pt-BR" : {
@@ -5888,12 +6081,12 @@
         }
       }
     },
-    "tasks.form.note_counter": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Observação %lld/250"
+    "tasks.form.note_counter" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Observação %lld/250"
           }
         }
       }
@@ -5938,12 +6131,12 @@
         }
       }
     },
-    "tasks.form.title_counter": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Título %lld/60"
+    "tasks.form.title_counter" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Título %lld/60"
           }
         }
       }
@@ -5958,6 +6151,16 @@
         }
       }
     },
+    "tasks.form.weight_hint" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O esforço entra na carga de quem concluir:\n• P1 = peso 1  • P2 = peso 2  • P3 = peso 3"
+          }
+        }
+      }
+    },
     "tasks.form.weight_label" : {
       "localizations" : {
         "pt-BR" : {
@@ -5968,32 +6171,32 @@
         }
       }
     },
-    "tasks.form.weight_option_high": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "P3 - Alto Esforço"
+    "tasks.form.weight_option_high" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "P3 - Alto Esforço"
           }
         }
       }
     },
-    "tasks.form.weight_option_low": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "P1 - Baixo Esforço"
+    "tasks.form.weight_option_low" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "P1 - Baixo Esforço"
           }
         }
       }
     },
-    "tasks.form.weight_option_medium": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "P2 - Médio Esforço"
+    "tasks.form.weight_option_medium" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "P2 - Médio Esforço"
           }
         }
       }
@@ -6323,167 +6526,6 @@
     },
     "Voltar" : {
 
-    },
-    "routines.detail.origin_hint": {
-      "extractionState": "stale",
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Faz parte de uma rotina. Ao editar ou excluir, você escolhe se vale só para esta tarefa ou também para as próximas."
-          }
-        }
-      }
-    },
-    "routines.error_source_task_invalid": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Esta tarefa não pode definir o alcance da rotina. Atualize e tente novamente."
-          }
-        }
-      }
-    },
-    "routines.scope.cancel_hint": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cancelar volta ao detalhe sem gravar."
-          }
-        }
-      }
-    },
-    "routines.scope.delete_hint": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Depois você confirma a exclusão.\nCancelar volta ao detalhe sem gravar."
-          }
-        }
-      }
-    },
-    "routines.scope.delete_title": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O que excluir?"
-          }
-        }
-      }
-    },
-    "routines.scope.only_this": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Somente esta tarefa"
-          }
-        }
-      }
-    },
-    "routines.scope.only_this_hint": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "As outras ocorrências da rotina não mudam."
-          }
-        }
-      }
-    },
-    "routines.scope.selected_and_future": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Esta tarefa e as futuras"
-          }
-        }
-      }
-    },
-    "routines.scope.selected_and_future_hint": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Inclui esta tarefa. As anteriores e as concluídas permanecem preservadas."
-          }
-        }
-      }
-    },
-    "routines.scope.title": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Onde aplicar esta alteração?"
-          }
-        }
-      }
-    },
-    "tasks.assignee_picker.kids_tag": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kids"
-          }
-        }
-      }
-    },
-    "tasks.delete.error_uncertain": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Não foi possível confirmar a exclusão. Confira as tarefas antes de tentar novamente."
-          }
-        }
-      }
-    },
-    "tasks.form.assignees_row": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quem faz"
-          }
-        }
-      }
-    },
-    "tasks.form.assignees_row_none": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ninguém"
-          }
-        }
-      }
-    },
-    "tasks.form.date_section_title": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Data e repetição"
-          }
-        }
-      }
-    },
-    "tasks.form.weight_hint": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O esforço entra na carga de quem concluir:\n• P1 = peso 1  • P2 = peso 2  • P3 = peso 3"
-          }
-        }
-      }
     }
   },
   "version" : "1.0"
