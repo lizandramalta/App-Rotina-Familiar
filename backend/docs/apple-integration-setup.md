@@ -58,8 +58,9 @@ outra origem invalidaria a autenticação.
 
 - A conta da organização deve ter acesso ao Apple Developer Program e ao App ID
   configurado para o aplicativo.
-- O `APPLE_CLIENT_ID` precisa ser o Bundle ID exato do app: atualmente
-  `com.lizandramalta.familyroutine`.
+- O `APPLE_CLIENT_ID` precisa ser o Bundle ID exato do app. A branch
+  `release-testflight` usa `com.lizandramalta.mutua`; o valor de produção
+  precisa ser atualizado antes do login com o novo build.
 - A conta usada no simulador deve ser uma conta Apple comum que consiga iniciar
   sessão no dispositivo. **Sandbox Apple Accounts** são destinadas a testes de
   compras no App Store e não servem para entrar no simulador e testar Sign in

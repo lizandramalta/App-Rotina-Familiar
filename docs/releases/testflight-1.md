@@ -1,27 +1,33 @@
 # Mutua — primeira distribuição no TestFlight
 
-**Versão:** 1.0  
+**Versão:** 1.1
 **Data:** 2026-10-28  
 **Branch:** `release-testflight`, criada de `origin/develop` (`e2af94a`)
 
 ## Escopo
 
 Esta distribuição se chama **Mutua** e atende Administradores e Membros adultos:
-acesso Apple/convites, família, membros adultos, perfil, tarefas únicas,
+acesso Apple/convites, família, membros adultos, perfil sem fotos, tarefas únicas,
 rotinas, conclusão/reabertura e consultas pessoais/familiares. A carga familiar
 e o incentivo “Parabenizar” permanecem quando já disponíveis.
 
 Ficam adiados: criação e uso de perfis Kids, sinalização/validação Kids,
-missões, recompensas coletivas, badges e relatório PDF. Sessões Kids antigas
+missões, recompensas coletivas, badges, relatório PDF e upload de fotos via R2.
+Sessões Kids antigas
 recebem uma tela de indisponibilidade com ação **Sair**, sem acesso a operações
 protegidas. O canal `RELEASE_CHANNEL=testflight` retira as rotas adiadas da
 API, rejeita novo papel Kids e bloqueia sessões Kids antigas. Nesta branch,
 `NODE_ENV=production` usa esse canal por padrão; `development` e `test` usam
 `full`. As migrations e os dados antigos são preservados.
 
-O bundle ID técnico continua `com.lizandramalta.familyroutine` para manter
-Sign in with Apple, assinatura, Universal Links e APNs. A mudança do nome de
-exibição não exige trocar o identificador.
+O bundle ID do app e dos testes passou a usar `com.lizandramalta.mutua`.
+Esta troca exige registrar um novo App ID na Apple e alinhar a configuração
+do backend de produção (`APPLE_CLIENT_ID`), a associação de Universal Links
+no Worker (`55Z24S2H7V.com.lizandramalta.mutua`) e, se APNs estiver ativo,
+o tópico de push. Até esses vínculos serem atualizados, o build novo não
+consegue concluir o acesso Apple nem abrir convites por Universal Link.
+O serviço do Keychain do app também passou a usar o novo identificador; a
+instalação nova não reaproveita a sessão local da instalação antiga.
 
 Esta é uma decisão de **escopo de distribuição**; a base funcional e as specs
 aprovadas continuam a descrever o produto completo. Rastreabilidade afetada:
@@ -39,7 +45,7 @@ contrato HTTP `/v1`.
 - **CA-03 — App:** o build mostra Mutua e o ícone fornecido, com abas adultas
   Tarefas, Família e Perfil; não oferece missões, recompensas, badges,
   confirmação Kids nem PDF.
-- **CA-04 — Convites:** bundle ID, Team ID, entitlement e AASA concordam;
+- **CA-04 — Convites:** bundle ID, Team ID, entitlement e AASA devem concordar;
   a página de fallback e a mensagem de convite mostram Mutua.
 - **CA-05 — Release:** um arquivo iOS Release assinado abre em dispositivo,
   usa a API publicada e completa Apple → família → convite → tarefa →
@@ -53,21 +59,27 @@ contrato HTTP `/v1`.
   com Xcode 27 e assinatura desativada; o teste de interface da entrada
   confirmou o título Mutua e a ação de acesso com Apple.
 - Ícone 1024×1024 sem canal alfa integrado ao catálogo `AppIcon`.
+- A remoção dos controles e chamadas de foto no mobile é a próxima etapa;
+  o build atual ainda contém esses fluxos e não deve ser enviado ao TestFlight.
 - Em 2026-10-28, `/health/live` e `/health/ready` do Render responderam `200`
   (banco saudável), e
-  o AASA público declarou `55Z24S2H7V.com.lizandramalta.familyroutine`
-  para `/invite/*`. Isso não confirma a versão do código implantado.
+  o AASA público declarou apenas o ID antigo
+  `55Z24S2H7V.com.lizandramalta.familyroutine` para `/invite/*`.
+  O novo ID ainda depende da atualização do Worker.
 
 ## Antes de convidar testadores
 
-1. Implantar o backend desta branch, conferir `RELEASE_CHANNEL=testflight`,
-   migrations e `/health/ready`. Se outros clientes usam as rotas adiadas,
-   publicar a API beta em serviço separado e apontar o `Production.xcconfig`
-   para ele. Conferir R2, credenciais Apple e URL de convite.
-2. Publicar a nova cópia do Worker e testar o convite real em iPhone/iPad
-   com o build assinado. O AASA publicado já tem o identificador correto.
-3. Confirmar App ID do time `55Z24S2H7V` com Sign in with Apple,
-   Associated Domains e Push Notifications; gerar assinatura de distribuição.
+1. Usar a API de produção existente. Atualizar `APPLE_CLIENT_ID` nela para
+   `com.lizandramalta.mutua` antes do teste de login Apple; confirmar se a
+   chave Apple atual cobre o novo App ID. O canal `RELEASE_CHANNEL=testflight`
+   desta branch só passa a valer se o código backend for implantado no serviço
+   existente; até lá, as rotas adiadas continuam disponíveis na API.
+2. Atualizar o Worker existente para incluir o novo App ID no AASA e testar
+   o convite real em iPhone/iPad com o build assinado. Não é necessário criar
+   outro Worker ou domínio.
+3. Registrar o App ID `com.lizandramalta.mutua` no time `55Z24S2H7V` com
+   Sign in with Apple, Associated Domains e Push Notifications quando usado;
+   gerar assinatura de distribuição.
    Este Mac ainda não tem uma identidade de assinatura válida instalada.
 4. Criar ou conferir o registro **Mutua** no App Store Connect com o bundle
    ID existente. Confirmar versão `1.0`, aumentar o build number se `1` já
@@ -77,7 +89,7 @@ contrato HTTP `/v1`.
    por convite e submeter o primeiro build à revisão. Responder à declaração
    de criptografia/export compliance.
 6. Fazer QA em iPhone e iPad: Apple Sign In, onboarding, convite, sessão,
-   tarefa, recorrência, perfil/foto, rede intermitente e isolamento entre
+   tarefa, recorrência, perfil sem foto, rede intermitente e isolamento entre
    famílias. Confirmar a ausência dos recursos adiados no app e na API beta.
 
 Fontes da Apple: [registro do app](https://developer.apple.com/help/app-store-connect/create-an-app-record/add-a-new-app/),
