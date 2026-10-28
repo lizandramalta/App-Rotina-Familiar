@@ -25,7 +25,11 @@ enum UITestScenario: String {
     case dailyTasksKids = "daily-tasks-kids"
     case dailyTasksFailure = "daily-tasks-failure"
     case familyOverview = "family-overview"
+    case familyOverviewIncentives = "family-overview-incentives"
+    case familyOverviewOwnMostTasks = "family-overview-own-most-tasks"
     case familyOverviewMember = "family-overview-member"
+    case familyTasks = "family-tasks"
+    case dailyTasksKidsApplause = "daily-tasks-kids-applause"
     case memberInvite = "member-invite"
     case memberInviteUncertain = "member-invite-uncertain"
     case kidsReviewQueue = "kids-review-queue"
@@ -106,7 +110,14 @@ enum UITestScenario: String {
             )))
             return
         }
-        if [.familyOverview, .memberInvite, .memberInviteUncertain, .kidsReviewQueue, .kidsReviewQueueEmpty, .kidsReviewQueueFailure].contains(self) {
+        if self == .familyOverviewOwnMostTasks || self == .familyTasks {
+            sessionStore.apply(.session(Self.inviteSession(
+                role: .administrator,
+                memberID: UITestTaskFixtures.memberID
+            )))
+            return
+        }
+        if [.familyOverview, .familyOverviewIncentives, .memberInvite, .memberInviteUncertain, .kidsReviewQueue, .kidsReviewQueueEmpty, .kidsReviewQueueFailure].contains(self) {
             sessionStore.apply(.session(Self.inviteSession(role: .administrator)))
             return
         }
@@ -114,7 +125,7 @@ enum UITestScenario: String {
             sessionStore.apply(.session(Self.inviteSession(role: .member)))
             return
         }
-        if self == .dailyTasksKids {
+        if self == .dailyTasksKids || self == .dailyTasksKidsApplause {
             // Must match `UITestTaskFixtures.kidMemberID`, the assignee on the Kids-owned fixture
             // tasks, so SPEC-011's `canReopen` check (assignee == current member) finds them.
             sessionStore.apply(.session(AuthenticatedSession(
@@ -326,10 +337,13 @@ private struct UITestAccessRepository: AccessRepository {
 }
 
 private actor UITestFamilyRepository: FamilyRepository {
+    private var kidName = "Rafa Silva"
     private let scenario: UITestScenario
     private var photoUploadAttempts = 0
     private var familyName = "Família Silva"
     private let familyTimeZoneID = "America/Sao_Paulo"
+    private var applauseCount = 0
+    private var applauseDismissed = false
 
     init(scenario: UITestScenario) {
         self.scenario = scenario
@@ -386,7 +400,7 @@ private actor UITestFamilyRepository: FamilyRepository {
         FamilyMemberPage(
             items: [
                 FamilyMember(id: UITestTaskFixtures.memberID, name: "Maria Silva", role: .administrator, isFamilyCreator: true),
-                FamilyMember(id: UITestTaskFixtures.kidMemberID, name: "Rafa Silva", role: .kid, isFamilyCreator: false),
+                FamilyMember(id: UITestTaskFixtures.kidMemberID, name: kidName, role: .kid, isFamilyCreator: false),
             ],
             nextCursor: nil
         )
@@ -397,7 +411,7 @@ private actor UITestFamilyRepository: FamilyRepository {
         let isKid = memberID == UITestTaskFixtures.kidMemberID
         return FamilyMemberDetail(
             id: memberID,
-            name: isKid ? "Rafa Silva" : "Maria Silva",
+            name: isKid ? kidName : "Maria Silva",
             role: isKid ? .kid : .administrator,
             isFamilyCreator: !isKid,
             createdAt: "2026-10-01T12:00:00.000Z",
@@ -406,7 +420,8 @@ private actor UITestFamilyRepository: FamilyRepository {
     }
 
     func updateMemberName(memberID: UUID, name: String, accessToken: String) async throws -> FamilyMember {
-        FamilyMember(id: memberID, name: name, role: .member, isFamilyCreator: false)
+        kidName = name
+        return FamilyMember(id: memberID, name: name, role: .kid, isFamilyCreator: false)
     }
 
     func changeMemberRole(memberID: UUID, role: MemberRole, accessToken: String) async throws -> FamilyMember {
@@ -424,6 +439,48 @@ private actor UITestFamilyRepository: FamilyRepository {
     }
 
     func getFamilyOverview(range: FamilyDateRange?, accessToken: String) async throws -> FamilyOverview {
+        if scenario == .familyTasks {
+            return FamilyOverview(
+                range: range ?? FamilyDateRange(startDate: "2026-10-26", endDate: "2026-10-31"),
+                familyCreatedAt: "2026-10-01",
+                progress: FamilyProgress(total: 6, completed: 2, pending: 3, awaitingConfirmation: 1, percentage: 33.3),
+                members: [
+                    FamilyMemberProgress(
+                        memberID: UITestTaskFixtures.memberID, name: "Maria Silva", role: .administrator,
+                        progress: FamilyProgress(total: 3, completed: 1, pending: 1, awaitingConfirmation: 1, percentage: 33.3)
+                    ),
+                    FamilyMemberProgress(
+                        memberID: UITestTaskFixtures.kidMemberID, name: "Rafa Silva", role: .kid,
+                        progress: FamilyProgress(total: 2, completed: 1, pending: 1, awaitingConfirmation: 0, percentage: 50)
+                    ),
+                ]
+            )
+        }
+        if scenario == .familyOverviewOwnMostTasks {
+            return FamilyOverview(
+                range: range ?? FamilyDateRange(startDate: "2026-10-19", endDate: "2026-10-25"),
+                familyCreatedAt: "2026-10-01",
+                progress: FamilyProgress(total: 20, completed: 8, pending: 12, awaitingConfirmation: 0, percentage: 40),
+                members: [
+                    FamilyMemberProgress(memberID: UITestTaskFixtures.memberID, name: "Maria Silva", role: .administrator,
+                        progress: FamilyProgress(total: 10, completed: 4, pending: 6, awaitingConfirmation: 0, percentage: 40)),
+                    FamilyMemberProgress(memberID: UITestTaskFixtures.kidMemberID, name: "Rafa Silva", role: .kid,
+                        progress: FamilyProgress(total: 10, completed: 4, pending: 6, awaitingConfirmation: 0, percentage: 40))
+                ]
+            )
+        }
+        if scenario == .familyOverviewIncentives, let range, range.startDate == range.endDate {
+            return FamilyOverview(
+                range: range, familyCreatedAt: "2026-10-01",
+                progress: FamilyProgress(total: 5, completed: 4, pending: 1, awaitingConfirmation: 0, percentage: 80),
+                members: [
+                    FamilyMemberProgress(memberID: UITestTaskFixtures.memberID, name: "Maria Silva", role: .administrator,
+                        progress: FamilyProgress(total: 2, completed: 1, pending: 1, awaitingConfirmation: 0, percentage: 50)),
+                    FamilyMemberProgress(memberID: UITestTaskFixtures.kidMemberID, name: "Rafa Silva", role: .kid,
+                        progress: FamilyProgress(total: 3, completed: 3, pending: 0, awaitingConfirmation: 0, percentage: 100))
+                ]
+            )
+        }
         let selectedRange = range ?? FamilyDateRange(startDate: "2026-10-19", endDate: "2026-10-25")
         let progress = FamilyProgress(
             total: 25,
@@ -441,22 +498,45 @@ private actor UITestFamilyRepository: FamilyRepository {
                     memberID: UITestTaskFixtures.memberID,
                     name: "Maria Silva",
                     role: .administrator,
-                    progress: progress
+                    progress: scenario == .familyOverviewIncentives
+                        ? FamilyProgress(total: 5, completed: 3, pending: 2, awaitingConfirmation: 0, percentage: 60)
+                        : progress
                 ),
                 FamilyMemberProgress(
                     memberID: UITestTaskFixtures.kidMemberID,
                     name: "Rafa Silva",
                     role: .kid,
                     progress: FamilyProgress(
-                        total: 8,
+                        total: scenario == .familyOverviewIncentives ? 20 : 8,
                         completed: 5,
                         pending: 2,
                         awaitingConfirmation: 1,
-                        percentage: 62.5
+                        percentage: scenario == .familyOverviewIncentives ? 25 : 62.5
                     )
                 ),
             ]
         )
+    }
+
+    func listFamilyApplause(range: FamilyDateRange, accessToken: String) async throws -> [FamilyApplauseSummary] {
+        guard scenario == .familyOverviewIncentives, applauseCount > 0 else { return [] }
+        return [FamilyApplauseSummary(memberID: UITestTaskFixtures.kidMemberID, count: 1, sentByMe: true)]
+    }
+
+    func sendFamilyApplause(memberID: UUID, range: FamilyDateRange, accessToken: String) async throws {
+        guard scenario == .familyOverviewIncentives, memberID == UITestTaskFixtures.kidMemberID else { throw FamilyError.unavailable }
+        applauseCount += 1
+    }
+
+    func listReceivedFamilyApplause(accessToken: String) async throws -> [ReceivedFamilyApplause] {
+        guard scenario == .dailyTasksKidsApplause, !applauseDismissed else { return [] }
+        return [ReceivedFamilyApplause(id: UUID(uuidString: "00000000-0000-0000-0000-0000000000aa")!,
+            senderNames: ["Alex", "Sam"], createdAt: .now)]
+    }
+
+    func dismissFamilyApplause(id: UUID, accessToken: String) async throws {
+        guard scenario == .dailyTasksKidsApplause else { throw FamilyError.unavailable }
+        applauseDismissed = true
     }
 
     func listFamilyTasks(
@@ -466,7 +546,27 @@ private actor UITestFamilyRepository: FamilyRepository {
         cursor: String?,
         accessToken: String
     ) async throws -> FamilyTaskPage {
-        FamilyTaskPage(range: range, items: [], nextCursor: nil)
+        if scenario == .familyTasks {
+            let items = UITestTaskFixtures.familyListTasks.enumerated().compactMap { index, fixture -> FamilyTaskItem? in
+                let (title, state, assignees) = fixture
+                if let memberID, !assignees.contains(memberID) { return nil }
+                guard status == .all || status.rawValue == state.rawValue else { return nil }
+                let task = FamilyTask(
+                    id: UITestTaskFixtures.familyListTaskID(index),
+                    title: title, weight: .low, scheduledDate: "2026-10-28",
+                    assigneeIDs: assignees, note: nil, status: state, routineID: nil,
+                    createdAt: Date(timeIntervalSince1970: 1_782_400_000)
+                )
+                return FamilyTaskItem(
+                    task: task,
+                    displayStatus: state,
+                    completedAt: state == .completed
+                        ? ISO8601DateFormatter().date(from: "2026-10-28T12:00:00Z") : nil
+                )
+            }
+            return FamilyTaskPage(range: range, items: items, nextCursor: nil)
+        }
+        return FamilyTaskPage(range: range, items: [], nextCursor: nil)
     }
 
     func getWeeklyReport(referenceDate: String, accessToken: String) async throws -> WeeklyReportSnapshot {
@@ -560,6 +660,18 @@ private enum UITestTaskFixtures {
     static let missionReopenTaskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000d2")!
     /// SPEC-011: completed, assigned to Kids — Kids can reopen it (CA-04).
     static let kidsOwnCompletedTaskID = UUID(uuidString: "00000000-0000-0000-0000-0000000000d3")!
+    static let familyListTasks: [(String, TaskStatus, [UUID])] = [
+        ("Lavar a louça do jantar", .pending, [memberID]),
+        ("Regar as plantas", .pending, [memberID, kidMemberID]),
+        ("Tirar o lixo", .pending, []),
+        ("Arrumar a mesa do jantar", .awaitingConfirmation, [kidMemberID]),
+        ("Guardar a roupa", .completed, [memberID]),
+        ("Organizar os brinquedos", .completed, [kidMemberID]),
+    ]
+
+    static func familyListTaskID(_ index: Int) -> UUID {
+        UUID(uuidString: String(format: "00000000-0000-0000-0000-%012d", index + 1))!
+    }
 }
 
 /// Deterministic, backend-free double for the `.taskManagement`/`.dailyTasks*` UI scenarios.
@@ -702,10 +814,21 @@ private actor UITestTaskRepository: TaskRepository {
                 createdAt: Date(timeIntervalSince1970: 1_760_000_400)
             ),
         ]
+        if scenario == .familyTasks {
+            for (index, fixture) in UITestTaskFixtures.familyListTasks.enumerated() {
+                let (title, status, assignees) = fixture
+                let id = UITestTaskFixtures.familyListTaskID(index)
+                tasks[id] = FamilyTask(
+                    id: id, title: title, weight: .low, scheduledDate: "2026-10-28",
+                    assigneeIDs: assignees, note: nil, status: status, routineID: nil,
+                    createdAt: Date(timeIntervalSince1970: 1_782_400_000)
+                )
+            }
+        }
     }
 
     private var role: MemberRole {
-        if scenario == .dailyTasksKids { return .kid }
+        if scenario == .dailyTasksKids || scenario == .dailyTasksKidsApplause { return .kid }
         if scenario == .taskCompletionMember { return .member }
         return .administrator
     }

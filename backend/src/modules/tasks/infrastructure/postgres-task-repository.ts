@@ -25,6 +25,7 @@ interface TaskRow {
   status: TaskStatus;
   routine_id: string | null;
   created_at: Date;
+  completed_at?: Date | null;
   assignee_ids: string[] | null;
 }
 
@@ -358,13 +359,18 @@ export class PostgresTaskRepository implements TaskRepositoryPort, TaskQueryRepo
       `select t.id, t.family_id, t.title, t.weight,
               to_char(t.scheduled_date, 'YYYY-MM-DD') as scheduled_date,
               t.note, t.status, t.routine_id, t.created_at,
-              assignees.ids as assignee_ids
+              assignees.ids as assignee_ids, completion.completed_at
          from app.task_occurrences t
          cross join lateral (
            select coalesce(array_agg(a.member_id order by a.member_id), '{}') as ids
              from app.task_assignees a
             where a.family_id = t.family_id and a.task_id = t.id
          ) assignees
+         left join lateral (
+           select c.completed_at
+             from app.completions c
+            where c.family_id = t.family_id and c.task_id = t.id and c.undone_at is null
+         ) completion on true
         where t.family_id = $1
           and t.scheduled_date between $2::date and $3::date
           and t.deleted_at is null
@@ -383,7 +389,7 @@ export class PostgresTaskRepository implements TaskRepositoryPort, TaskQueryRepo
         params.limit,
       ],
     );
-    return result.rows.map(toTask);
+    return result.rows.map((row) => ({ ...toTask(row), completedAt: row.completed_at ?? null }));
   }
 
   public async familyMemberExists(

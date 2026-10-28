@@ -41,7 +41,7 @@
 
 ### 3.2. Fora do escopo (desta spec)
 
-- Gestão administrativa de membros (nome administrativo, papel, modo Kids, remoção, convites) — `SPEC-003`.
+- Gestão administrativa de membros (correção do nome administrativo de Kids, papel, modo Kids, remoção, convites) — `SPEC-003`.
 - Ação "Sair da administração" em TEL-030 — já entregue por `SPEC-003`.
 - Progresso, participações e recompensa de missões na tela de Missões e conquistas — `SPEC-016`.
 - `purpose: taskSignal` do upload de mídia (sinalização Kids) — `SPEC-012`.
@@ -307,6 +307,7 @@ Todos os campos são opcionais; omitir preserva o valor vigente. `name` só é a
 | E-03 | O texto original do CA-06 e da tabela §5.3 definia `400 Bad Request` para `NICKNAME_INVALID_LENGTH`, divergindo da convenção geral do contrato (`backend-contracts.md` §1: `400` é formato/campo desconhecido, `422` é valor semanticamente inválido) e de todo código equivalente já implementado (`TITLE_INVALID_LENGTH`, `WEIGHT_INVALID`, `FREQUENCY_DAYS_INVALID`, `NOTE_TOO_LONG`), todos `422`. | Inconsistência de redação corrigida: `NICKNAME_INVALID_LENGTH` responde `422 Unprocessable Entity`, por consistência com o restante do contrato. Decidido na implementação do SCRUM-51, sem objeção explícita à recomendação técnica. | Pessoa usuária / 2026-10-21 | Sim — CA-06 e tabela §5.3 corrigidos nesta revisão. |
 | E-04 | O protótipo do Figma (`566:37`, TEL-030) exibe o nome da família na identificação (`"<Papel> · <Nome da Família>"`; com apelido, título = apelido e apoio `"<Nome> · <Papel>"`), mas `OwnProfileView` não o retornava. | `GET`/`PATCH /v1/me/profile` passam a retornar `familyName: string`. O papel continua vindo da sessão. | Pessoa usuária / 2026-10-22 | Sim — RN63, RF48 e UC10; `backend-contracts.md` §3. |
 | E-05 | O Figma de MOD-009 (`567:294`, `568:81`, iPad) inclui o campo obrigatório "Seu nome" para adultos; no Modo Kids (`568:185`) só há "Seu apelido" e foto. Antes, o nome só era editável por Administradores (SPEC-003). | `PATCH /v1/me/profile` aceita `name?: string` opcional, só para titular adulto, com a validação de RF02 (1–60 caracteres visíveis após trim, sem controle). Sessão `kids` que o envie recebe `403 ACTION_NOT_ALLOWED`; valor inválido responde `422 VALIDATION_FAILED` com `fieldErrors.name`/`NAME_INVALID_LENGTH`. A edição administrativa do nome (SPEC-003) permanece. | Pessoa usuária / 2026-10-22 | Sim — RN63, RF48, UC10; `backend-contracts.md` §3. |
+| E-06 | Adultos editam apenas o próprio nome em Meu perfil; a edição administrativa de nome na SPEC-003 fica restrita a Kids em Configurações da família. | Pessoa usuária / 2026-10-28 | Sim — RN07/RN63, RF03/RF48, UC02/UC10 e contrato backend. |
 | E-06 | `GET /v1/media/{mediaId}/content` constava no escopo, mas sem contrato de resposta; o mobile precisa exibir a foto salva. | Responde `200 OK` com `image/jpeg` e `Cache-Control: private, no-store` para mídia `READY` da família do ator; `404 RESOURCE_NOT_FOUND` se inexistente, não `READY` ou de outra família. | Pessoa usuária / 2026-10-22 | Sim — `backend-contracts.md` §6. |
 
 ## 10. Fases de Implementação e Critérios de Conclusão

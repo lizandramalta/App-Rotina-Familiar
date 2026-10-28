@@ -181,6 +181,7 @@ nonisolated private struct FamilyTaskPageDTO: Decodable {
         let displayStatus: TaskStatus
         let routineId: UUID?
         let createdAt: Date
+        let completedAt: Date?
 
         var model: FamilyTaskItem {
             FamilyTaskItem(
@@ -195,7 +196,8 @@ nonisolated private struct FamilyTaskPageDTO: Decodable {
                     routineID: routineId,
                     createdAt: createdAt
                 ),
-                displayStatus: displayStatus
+                displayStatus: displayStatus,
+                completedAt: completedAt
             )
         }
     }
@@ -291,6 +293,35 @@ nonisolated private struct TimeZoneChangePreviewResponseDTO: Decodable {
 nonisolated private struct ProblemDetailsDTO: Decodable {
     let code: String?
     let fieldErrors: [String: [String]]?
+}
+
+nonisolated private struct ApplauseSummaryResponse: Decodable {
+    struct Item: Decodable {
+        let memberId: UUID
+        let count: Int
+        let sentByMe: Bool
+    }
+    let items: [Item]
+}
+
+nonisolated private struct ReceivedApplauseResponse: Decodable {
+    struct Item: Decodable {
+        let id: UUID
+        let senderNames: [String]
+        let createdAt: Date
+    }
+    let items: [Item]
+}
+
+nonisolated private struct SendApplauseRequest: Encodable {
+    let recipientMemberId: UUID
+    let startDate: String
+    let endDate: String
+}
+
+nonisolated private struct PushDeviceRequest: Encodable {
+    let deviceToken: String
+    let environment: String
 }
 
 nonisolated struct HTTPFamilyRepository: FamilyRepository {
@@ -487,6 +518,37 @@ nonisolated struct HTTPFamilyRepository: FamilyRepository {
             rawBody: Data()
         )
         return try decode(FamilyOverviewDTO.self, from: data).model
+    }
+
+    func listFamilyApplause(range: FamilyDateRange, accessToken: String) async throws -> [FamilyApplauseSummary] {
+        let path = Self.queryPath("family/applause", query: [
+            URLQueryItem(name: "startDate", value: range.startDate),
+            URLQueryItem(name: "endDate", value: range.endDate)
+        ])
+        let data = try await send(path: path, method: "GET", headers: ["Authorization": "Bearer \(accessToken)"], rawBody: Data())
+        return try decode(ApplauseSummaryResponse.self, from: data).items.map {
+            FamilyApplauseSummary(memberID: $0.memberId, count: $0.count, sentByMe: $0.sentByMe)
+        }
+    }
+
+    func sendFamilyApplause(memberID: UUID, range: FamilyDateRange, accessToken: String) async throws {
+        let body = SendApplauseRequest(recipientMemberId: memberID, startDate: range.startDate, endDate: range.endDate)
+        _ = try await send(path: "family/applause", method: "POST", headers: ["Authorization": "Bearer \(accessToken)"], json: body)
+    }
+
+    func listReceivedFamilyApplause(accessToken: String) async throws -> [ReceivedFamilyApplause] {
+        let data = try await send(path: "me/applause", method: "GET", headers: ["Authorization": "Bearer \(accessToken)"], rawBody: Data())
+        return try decode(ReceivedApplauseResponse.self, from: data).items.map {
+            ReceivedFamilyApplause(id: $0.id, senderNames: $0.senderNames, createdAt: $0.createdAt)
+        }
+    }
+
+    func dismissFamilyApplause(id: UUID, accessToken: String) async throws {
+        _ = try await send(path: "me/applause/\(id.uuidString.lowercased())", method: "DELETE", headers: ["Authorization": "Bearer \(accessToken)"], rawBody: Data())
+    }
+
+    func registerPushDevice(token: String, environment: String, accessToken: String) async throws {
+        _ = try await send(path: "me/push-device", method: "PUT", headers: ["Authorization": "Bearer \(accessToken)"], json: PushDeviceRequest(deviceToken: token, environment: environment))
     }
 
     func listFamilyTasks(

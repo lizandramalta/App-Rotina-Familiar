@@ -1,11 +1,11 @@
-# User flows — versão 1.19
+# User flows — versão 1.24
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão dos fluxos:** 1.19\
-**Base funcional:** RN 1.22 / RF 1.21 / UC 1.21\
-**Screen map:** 1.17 — revisão de 2026-10-27\
-**Data:** 2026-10-27\
-**Situação:** primeira versão para revisão de design
+**Versão dos fluxos:** 1.24\
+**Base funcional:** RN 1.26 / RF 1.25 / UC 1.25\
+**Screen map:** 1.23 — revisão de 2026-10-28\
+**Data:** 2026-10-28\
+**Situação:** referência de navegação aprovada
 
 [Projeto](../../README.md) · [Índice documental](../DOCUMENTACAO.md) · [Screen map](screen-map.md) · [Regras](../01-regras-de-negocio.md) · [Requisitos](../02-requisitos.md) · [Casos de uso](../03-casos-de-uso.md) · [Diagrama de classes](../06-diagrama-de-classes.md)
 
@@ -184,7 +184,7 @@ flowchart TD
     C --> F["Escolher data diária"]
     D --> F
     E -->|Consultar totais da família| FF["Escolher Início e Fim livres no intervalo disponível"]
-    E -->|Selecionar membro da lista| PM["TEL-032 · Tarefas daquele membro · intervalo herdado"]
+    E -->|Selecionar membro da lista| PM["TEL-032 · Tarefas em Dia/Semana"]
     PM --> FF
     F --> G{"Data no intervalo permitido?"}
     FF --> G
@@ -202,9 +202,11 @@ flowchart TD
     P --> N
 ```
 
-Em Minhas tarefas, todos os perfis consultam somente o dia de referência e seu progresso diário. TEL-010 mostra ao adulto apenas tarefas em que é responsável ou corresponsável. Após Kids sinalizar uma tarefa compartilhada, a lista pessoal do adulto corresponsável a apresenta como Pendente e a visualização pessoal Kids como Aguardando confirmação; o estado efetivo continua Aguardando confirmação, sem alterar permissões ou progresso. TEL-050, TEL-011 e TEL-032 aceitam qualquer intervalo válido entre Início e Fim. O intervalo vai da criação da família ao último dia do mês corrente, incluindo dias futuros desse mês. Na visão familiar, cada tarefa prevista no período conta uma vez no total e, se concluída, uma vez no numerador; peso e quantidade de responsáveis não multiplicam o progresso. Tarefas sem responsável entram no total. Aguardando confirmação não conta como concluída e aparece como Pendente para Membros.
+Em Minhas tarefas, todos os perfis consultam somente o dia de referência e seu progresso diário. TEL-010 mostra ao adulto apenas tarefas em que é responsável ou corresponsável. Após Kids sinalizar uma tarefa compartilhada, a lista pessoal do adulto corresponsável a apresenta como Pendente e a visualização pessoal Kids como Aguardando confirmação; o estado efetivo continua Aguardando confirmação, sem alterar permissões ou progresso. TEL-050 e TEL-011 aceitam qualquer intervalo válido entre Início e Fim; TEL-032 inicia em Dia e permite Semana visual domingo–sábado no fuso familiar, recortada por RN49. O intervalo vai da criação da família ao último dia do mês corrente, incluindo dias futuros desse mês. Na visão familiar, cada tarefa prevista no período conta uma vez no total e, se concluída, uma vez no numerador; peso e quantidade de responsáveis não multiplicam o progresso. Tarefas sem responsável entram no total. Aguardando confirmação não conta como concluída e aparece como Pendente para Membros.
 
-TEL-032 mantém o membro selecionado e o intervalo exato herdado de TEL-050; o filtro pode ser alterado localmente. Voltar restaura a seleção anterior de TEL-050. Membro sem tarefas mostra estado vazio; falha de consulta não é apresentada como ausência de tarefas. A carga não integra TEL-050 nesta entrega e fica para SPEC-018. Ações administrativas no detalhe seguem UF-12.
+TEL-032 mantém o membro selecionado, inicia no dia atual e permite Semana visual de domingo a sábado no fuso familiar. Voltar restaura a seleção anterior de TEL-050; outros intervalos são consultados em TEL-011. A semana visual não altera a semana familiar de segunda a domingo para métricas, PDF e apuração. TEL-011 escolhe membro nos chips da tela e Início/Fim/status juntos na folha Filtros; “Limpar” retorna à semana corrente e a Todos sem mudar o membro. Grupos e botão “Mostrar N tarefas” usam contagens do intervalo inteiro, inclusive com lista paginada. Membro sem tarefas mostra estado vazio; falha de consulta não é apresentada como ausência de tarefas. A carga não integra TEL-050 nesta entrega e fica para SPEC-018. Ações administrativas no detalhe seguem UF-12.
+
+TEL-050 consulta o progresso de hoje no fuso familiar para destacar quem concluiu todas as tarefas atribuídas no dia, sem mudar o intervalo visível. A maior quantidade de tarefas atribuídas usa o intervalo visível e inclui todos os empatados. Administrador pode enviar parabéns repetidas vezes a outro membro ativo, inclusive Kids, a partir do cartão da Família. Cada envio registra mensagem interna e intenção de push. O destinatário consulta a mensagem em TEL-010/TEL-040 e a fecha pelo X, ocultando-a da interface; o evento permanece registrado.
 
 **Continuação:** adultos podem seguir UF-05, UF-06 ou UF-08 a partir das telas permitidas; Kids seguem UF-07 somente para tarefa própria pendente. Voltar do detalhe restaura a origem, que pode ser uma lista pessoal, familiar ou missão. Consultar outra data não altera tarefas. Ao abrir o checklist em um novo dia, o padrão volta a ser o dia atual.
 
@@ -213,7 +215,7 @@ TEL-032 mantém o membro selecionado e o intervalo exato herdado de TEL-050; o f
 ## UF-05 — Criar ou editar tarefa e rotina
 
 **Objetivo:** salvar tarefa única ou rotina com esforço e responsáveis opcionais.  
-**Entrada:** TEL-010/TEL-011 para criar; TEL-012 para editar. Adultos apenas.  
+**Entrada:** TEL-010 para criar; TEL-012 para editar. Adultos apenas.
 **Referências:** [UC07](../03-casos-de-uso.md#uc07), [UC08](../03-casos-de-uso.md#uc08); RF07–10, RF13–16, RF58, RF69, RF70.
 
 ```mermaid
@@ -365,14 +367,16 @@ No círculo de TEL-010/TEL-040, linha e progresso mudam no toque quando a ação
 
 ```mermaid
 flowchart TD
-    A["TEL-011 · Tarefas da família · relatório semanal"] --> C["Escolher a semana do relatório"]
+    A["TEL-011 · Tarefas da família · relatório semanal"] --> B{"Intervalo toca várias semanas?"}
+    B -->|Sim| C["TEL-051 · Escolher a semana do relatório"]
+    B -->|Não| H(["UF-14 · Gerar PDF da semana diretamente"])
     C --> D{"Há conclusões válidas no período?"}
     D -->|Não| E["Informar ausência de carga"]
     D -->|Sim| F["Mostrar peso por membro e participação no total"]
     E --> G{"Próxima ação"}
     F --> G
-    G -->|Outro período| C
-    G -->|Gerar PDF semanal| H(["UF-14 · TEL-051"])
+    G -->|Outra semana| C
+    G -->|Gerar PDF semanal| I(["UF-14 · Gerar PDF da semana escolhida"])
     G -->|Voltar| A
 ```
 
@@ -458,7 +462,7 @@ Cadastrar um item é opcional e independente: a roleta já dispõe dos itens pre
 
 ## UF-12 — Gerenciar membros e permissões
 
-**Objetivo:** ajustar perfil, modo Kids e papel, ou remover membro com efeitos claros.  
+**Objetivo:** alterar papel, corrigir nome administrativo de Kids em Configurações e remover membro com efeitos claros.
 **Entrada:** selecionar um item da lista de membros na própria Família → Detalhe do membro; Administrador para gestão.  
 **Referências:** [UC02](../03-casos-de-uso.md#uc02); RN01–10; RF02–06, RF40–41.
 
@@ -466,15 +470,14 @@ Cadastrar um item é opcional e independente: a roleta já dispõe dos itens pre
 flowchart TD
     A["TEL-050 · Família · lista de membros"] -->|Selecionar membro| C["TEL-032 · Detalhe e tarefas do membro"]
     C --> D{"Ação"}
-    D -->|Editar| E["TEL-033 · Alterar dados ou configuração"]
-    E --> F{"Mudança permitida?"}
-    F -->|Não| G["Explicar restrição e corrigir"]
-    G --> E
-    F -->|Sim · dados comuns| H["Salvar alteração"]
-    F -->|Sim · papel ou modo| I["MOD-010 · Confirmar alteração"]
-    I -->|Confirmar| H
+    D -->|Alterar papel| E["Seleção modal · papéis permitidos"]
+    E --> I["MOD-010 · Confirmar alteração"]
+    I -->|Confirmar| H["Salvar alteração"]
     I -->|Cancelar| C
-    H --> J(["TEL-032 · Perfil atualizado"])
+    H --> J(["TEL-032 · Papel atualizado"])
+    A -->|Configurações| S["TEL-057 · Configurações da família"]
+    S -->|Corrigir nome Kids| KNE["Folha · Editar nome Kids"]
+    KNE -->|Salvar e confirmar| S
     D -->|Remover| K{"É o Criador?"}
     K -->|Sim| L(["Remoção impedida"])
     K -->|Não| M["MOD-010 · Explicar efeitos e confirmar remoção"]
@@ -484,7 +487,7 @@ flowchart TD
     D -->|Reemitir| P(["TEL-034 · Confirmar efeitos · UF-02 ou UF-03"])
 ```
 
-Administradores e Membros podem consultar as tarefas em TEL-032; somente Administradores acessam ações de gestão quando permitidas. A primeira emissão abre diretamente o compartilhamento após a ação explícita; reenviar exige confirmação prévia da invalidação de convites e revogação da sessão anterior do mesmo perfil. Cancelar volta ao detalhe preservando membro/período; falha não cria membro duplicado. O Criador recupera acesso por Apple. No onboarding, membros são preparados em TEL-002 e criados com a família; TEL-056 apenas oferece seus convites. Novos membros após a criação usam TEL-033.
+Administradores e Membros podem consultar as tarefas em TEL-032; somente Administradores acessam ações de gestão quando permitidas. O nome administrativo de Kids é corrigido em TEL-057 ou no topo do detalhe Kids por Administrador autorizado, e adultos editam o próprio nome em Meu perfil. A primeira emissão abre diretamente o compartilhamento após a ação explícita; reenviar exige confirmação prévia da invalidação de convites e revogação da sessão anterior do mesmo perfil. Cancelar volta ao detalhe preservando o membro e o período Dia/Semana; falha não cria membro duplicado. O Criador recupera acesso por Apple. No onboarding, membros são preparados em TEL-002 e criados com a família; TEL-056 apenas oferece seus convites. Novos membros após a criação usam TEL-033.
 
 **Restrições:** o Criador não pode ser removido, rebaixado nem sair. Um Administrador não pode permanecer em modo Kids; Kids devem sair desse modo antes da promoção. Alterações obedecem à permissão corrente de quem executa.
 
@@ -526,16 +529,21 @@ O formulário permite adicionar/substituir/remover foto opcional e configurar et
 
 ```mermaid
 flowchart TD
-    A["TEL-011 · Gerar relatório PDF"] --> B["TEL-051 · Selecionar semana segunda–domingo quando o intervalo tocar várias semanas"]
-    B --> C{"Semana atual ou passada válida?"}
+    A["TEL-011 · Gerar relatório PDF"] --> J{"Intervalo toca várias semanas?"}
+    J -->|Sim| B["TEL-051 · Selecionar semana segunda–domingo"]
+    J -->|Não| C{"Semana atual ou passada válida?"}
+    B --> C
     C -->|Não| B
     C -->|Sim| D["Backend fornece snapshot / app gera PDF · atual parcial"]
     D --> E{"Arquivo gerado?"}
-    E -->|Falha · informar e tentar novamente| B
-    E -->|Sim| F["Visualizar gráficos, progresso e tabela por membro"]
+    E -->|Falha · uma semana · alerta e tentar novamente| A
+    E -->|Falha · seleção de semana · manter seleção| B
+    E -->|Sim · uma semana| H1[["Folha nativa de salvar / compartilhar"]]
+    E -->|Sim · seleção em TEL-051| F["Visualizar gráficos, progresso e tabela por membro"]
     F --> G{"Ação"}
-    G -->|Salvar ou compartilhar| H[["Interface do dispositivo"]]
-    H -->|Concluir ou cancelar| F
+    G -->|Salvar ou compartilhar| H2[["Interface do dispositivo"]]
+    H2 -->|Concluir ou cancelar| F
+    H1 -->|Concluir ou cancelar| I
     G -->|Outra semana| B
     G -->|Voltar| I(["Retornar à origem preservando período"])
 ```
@@ -612,6 +620,11 @@ Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imedi
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.24 | RN 1.26 / RF 1.25 / UC 1.25 | 1.23 | 2026-10-28 | UF-04: TEL-032 compacta em Dia/Semana domingo–sábado, Parabenizar apenas na Família; filtros TEL-050 e TEL-011 distintos. |
+| 1.23 | RN 1.25 / RF 1.24 / UC 1.24 | 1.22 | 2026-10-28 | UF-12: papel por seleção modal no detalhe; nome Kids em TEL-057, nome adulto em Meu perfil. |
+| 1.22 | RN 1.24 / RF 1.23 / UC 1.23 | 1.21 | 2026-10-28 | UF-04/UF-12: TEL-032 mostra hoje, com menu de gestão no cabeçalho; outros dias por TEL-011. |
+| 1.21 | RN 1.23 / RF 1.22 / UC 1.22 | 1.20 | 2026-10-28 | UF-04 detalha a folha de filtros e contagens completas de TEL-011; UF-14 abre a folha nativa diretamente quando o intervalo cobre uma semana. |
+| 1.20 | RN 1.23 / RF 1.22 / UC 1.22 | 1.18 | 2026-10-27 | Família destaca conclusão de hoje e maior quantidade no intervalo; Admin envia parabéns e destinatário fecha mensagem. |
 | 1.19 | RN 1.22 / RF 1.21 / UC 1.21 | 1.17 | 2026-10-27 | UF-04 usa Início/Fim livres e herda intervalo exato em TEL-032/TEL-011; UF-02 acessa inclusão por TEL-057; UF-14 parte de TEL-011 e seleciona semana quando o intervalo tocar várias; carga de TEL-050 adiada. |
 | 1.18 | UC 1.18 | 1.16 | 2026-10-26 | Alinha os nomes das abas adultas ao protótipo de TEL-010; percursos, ações e permissões permanecem iguais. |
 | 1.17 | UC 1.18 | 1.15 | 2026-10-26 | UF-06/UF-08: atualização imediata no círculo, última intenção por tarefa, comandos em sequência e restauração/reconciliação após falhas. |

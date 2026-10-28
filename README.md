@@ -3,8 +3,8 @@
 Organização colaborativa das responsabilidades domésticas, com tarefas compartilhadas, participação infantil e conquistas coletivas.
 
 **Escopo:** MVP  
-**Versão da base do projeto:** 1.19\
-**Data:** 2026-10-19
+**Versão da base do projeto:** 1.22\
+**Data:** 2026-10-28
 
 ## Por que este projeto existe
 
@@ -192,7 +192,7 @@ A Sprint 0 implementou a fundação técnica de mobile, backend, migrations e CI
 
 ## Área Família
 
-A tela Família apresenta diretamente carga e progresso por dia/semana, lista de membros, botão Gerar relatório PDF e, para Administradores, Adicionar membro. Selecionar uma pessoa abre seu detalhe com tarefas por dia/semana; edição de perfil e reenvio de convite ficam nesse detalhe, quando permitidos. A consulta da lista e das tarefas é adulta; a gestão continua exclusiva dos Administradores. O relatório permanece semanal.
+A tela Família apresenta progresso no intervalo escolhido, lista de membros e, para Administradores, acesso às configurações e à inclusão de membros. A lista Tarefas da família reúne filtros por intervalo, membro e status; agrupa tarefas com contagens completas por estado e oferece Gerar relatório PDF no menu. Se o intervalo estiver em uma única semana, o PDF abre diretamente na folha nativa de compartilhamento; se tocar várias semanas, a pessoa escolhe a semana antes. Selecionar um membro abre seu detalhe com progresso e tarefas de hoje, enquanto outros dias são consultados pelo filtro da Família; edição de perfil e reenvio de convite ficam nesse detalhe, quando permitidos. A consulta familiar é adulta; a gestão continua exclusiva dos Administradores.
 
 ## Continuidade e recuperação de acesso
 
@@ -224,6 +224,9 @@ A arquitetura backend 1.0 está em [backend-architecture.md](docs/architecture/b
 
 | Versão | Data | Marco |
 |---|---|---|
+| 1.22 | 2026-10-28 | TEL-032 usa Dia/Semana domingo–sábado, sem Parabenizar no detalhe; Admin autorizado edita nome Kids no topo. Folhas de filtros da Família e de Tarefas da família seguem variantes distintas. |
+| 1.21 | 2026-10-28 | TEL-032 mostra progresso e tarefas de hoje com menu de gestão; a consulta de outros dias permanece em Tarefas da família. |
+| 1.20 | 2026-10-28 | Resumo da navegação e apresentação da área Família atualizado conforme UX-009/UX-019 e TEL-011; base funcional preservada. |
 | 1.19 | 2026-10-19 | RN38, RF59 e UC07: exclusão de tarefa que deixa a missão apenas com tarefas concluídas a conclui na mesma transação (SPEC-014/SPEC-007). Onboarding alinhado à criação conjunta de família e membros; revisão dos pares SPEC/UX-002, 003, 004 e 009 aprovada. |
 | 1.18 | 2026-10-10 | Consolidação das SPECs 015–020 com as implementações de acesso, família, convites, tarefas e sessão do `develop`; registros técnicos preservados na documentação de arquitetura. |
 | 1.17 | 2026-10-10 | Snapshot semanal passa a usar `referenceDate` e identifica crédito histórico como “Membro removido”. Para SPEC-019. |

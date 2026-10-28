@@ -138,7 +138,7 @@ private struct FamilyPDFPreview: UIViewRepresentable {
 }
 
 @MainActor
-private enum FamilyPDFRenderer {
+enum FamilyPDFRenderer {
     static func render(snapshot: WeeklyReportSnapshot, familyName: String) -> Data {
         let page = CGRect(x: 0, y: 0, width: 595, height: 842)
         return UIGraphicsPDFRenderer(bounds: page).pdfData { context in

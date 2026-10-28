@@ -1,8 +1,8 @@
-# Documentação do projeto — versão 1.31
+# Documentação do projeto — versão 1.38
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.31\
-**Data:** 2026-10-27\
+**Versão:** 1.38\
+**Data:** 2026-10-28\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Modelo de dados](05-modelo-de-dados.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -14,21 +14,21 @@
 | [Apresentação do projeto](../README.md) | Propósito, público, jornada e escopo do MVP. |
 | [Visão do produto](00-visao-do-produto.md) | Contexto, objetivos, princípios, escopo e critérios de sucesso. |
 | [Índice e versões](DOCUMENTACAO.md) | Organização documental, rastreabilidade e política de versões. |
-| [Regras de negócio](01-regras-de-negocio.md) | Regras vigentes e suas relações com RF, RNF e UC; versão 1.22. |
-| [Requisitos](02-requisitos.md) | 71 requisitos funcionais e 27 não funcionais, com vínculos às regras e aos casos de uso; versão 1.21. |
-| [Especificação dos casos de uso](03-casos-de-uso.md) | 19 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições; versão 1.21. |
+| [Regras de negócio](01-regras-de-negocio.md) | Regras vigentes e suas relações com RF, RNF e UC; versão 1.26. |
+| [Requisitos](02-requisitos.md) | 71 requisitos funcionais e 27 não funcionais, com vínculos às regras e aos casos de uso; versão 1.25. |
+| [Especificação dos casos de uso](03-casos-de-uso.md) | 19 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições; versão 1.25. |
 | [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) | Visão geral e cinco recortes UML, com fontes PlantUML e imagens SVG. |
-| [Screen map](design/screen-map.md) | Mapa 1.17: seção Família com intervalo livre, configurações, tarefas e PDF; base RN 1.22 / RF 1.21 / UC 1.21. |
-| [User flows](design/user-flows.md) | Fluxos 1.19: percursos de Família por intervalo, membros, Kids e PDF; base RN 1.22 / RF 1.21 / UC 1.21 e screen map 1.17. |
-| [Modelo de dados (DER)](05-modelo-de-dados.md) | Modelo 1.9: preparação de foto por grant antes da família, criação conjunta de membros e estado visual apenas projetado; base RN 1.18 / RF 1.17 / UC 1.16. |
+| [Screen map](design/screen-map.md) | Mapa 1.23: TEL-032 compacta em Dia/Semana domingo–sábado; nome Kids editável também no detalhe; base RN 1.26 / RF 1.25 / UC 1.25. |
+| [User flows](design/user-flows.md) | Fluxos 1.24: TEL-032 em Dia/Semana, gestão e nome Kids autorizado; base RN 1.26 / RF 1.25 / UC 1.25 e screen map 1.23. |
+| [Modelo de dados (DER)](05-modelo-de-dados.md) | Modelo 1.10: parabéns persistido e fila de push por dispositivo; base RN 1.23 / RF 1.22 / UC 1.22. |
 | [Diagrama de classes](06-diagrama-de-classes.md) | Modelo 1.9: rascunho de membros, resultado de criação, foto antecipada e item pessoal com estado efetivo/exibido; base RN 1.18 / RF 1.17 / UC 1.16. |
 | [Arquitetura mobile](architecture/mobile-architecture.md) | Arquitetura 1.6: Swift + SwiftUI, View + ViewModel, integração do onboarding e projeção pessoal de tarefas. |
-| [Catálogo mobile](architecture/mobile-feature-catalog.md) | Catálogo 1.9: navegação e ViewModels da Família por intervalo livre, PDF em TEL-011 e carga visual adiada. |
-| [Decisões da arquitetura mobile](architecture/mobile-decisions.md) | MA-01–MA-19 e P-01–P-09, incluindo criação conjunta, retorno sem recriação e estado exibido por perfil. |
-| [Convenções de código mobile](architecture/mobile-code-conventions.md) | Convenções de Swift/SwiftUI, camadas, concorrência, segurança, testes e revisão. |
+| [Catálogo mobile](architecture/mobile-feature-catalog.md) | Catálogo 1.13: TEL-032 Dia/Semana com gestão e nome Kids autorizado. |
+| [Decisões da arquitetura mobile](architecture/mobile-decisions.md) | Versão 1.8: MA-01–MA-21 e P-01–P-09, incluindo TEL-032 Dia/Semana, totais de TEL-011, incentivos e mensagens internas. |
+| [Convenções de código mobile](architecture/mobile-code-conventions.md) | Convenções 1.1 de Swift/SwiftUI, SF Symbols, camadas, concorrência, segurança, testes e revisão. |
 | [Arquitetura backend](architecture/backend-architecture.md) | Backend 1.4: Node.js, Clean Architecture, monólito modular, Supabase/R2 e criação conjunta com foto antecipada. |
-| [Contratos backend](architecture/backend-contracts.md) | Contratos 1.23 da API `/v1`: consultas familiares por intervalo livre, gestão de membros, sinalização e decisão Kids, e snapshot semanal materializados na API e OpenAPI; demais contratos alvo seguem por fase. |
-| [Decisões backend](architecture/backend-decisions.md) | BA-01–BA-37: escolhas confirmadas e propostas técnicas, inclusive preparação de foto e projeção pessoal. |
+| [Contratos backend](architecture/backend-contracts.md) | Contratos 1.27 da API `/v1`: `completedAt` permanece disponível para acessibilidade em TEL-032; sem mudança de API. |
+| [Decisões backend](architecture/backend-decisions.md) | BA-01–BA-38: escolhas confirmadas e propostas técnicas, incluindo outbox de parabéns e APNs. |
 | [Convenções de código backend](architecture/backend-code-conventions.md) | Convenções de TypeScript/Fastify, camadas, contratos, SQL, segurança, testes e revisão. |
 | [Specs de entrega](../specs/README.md) | Recortes aprovados de implementação compartilhados entre mobile e backend. |
 
@@ -87,7 +87,7 @@ As relações RN–UC são derivadas de RN–RF–UC. As relações de RNF repre
 - Reabrir retira a contribuição da conclusão anterior da carga e do progresso. A exclusão posterior não desconta o peso novamente.
 - Missões concluídas preservam dados e vínculos contra edição/exclusão. A exceção é a reabertura confirmada de tarefa vinculada, que retorna a missão para Em andamento e remove recompensa, participações e badges derivados. A exclusão de tarefa não pode deixar uma missão sem tarefas.
 
-A tela Família apresenta progresso do intervalo livre e por membro, lista de membros e entrada para Tarefas da família. O detalhe mantém exatamente o intervalo escolhido. Gerar relatório PDF fica em Tarefas da família; Administradores acessam Configurações (TEL-057) para inclusão/gestão e Confirmações Kids. A consulta é adulta; a gestão continua exclusiva dos Administradores. Crédito histórico removido aparece sem dado pessoal no relatório semanal. Referências: RN23/RN30–31/RN60–62, RF60–61/RF66, UC02/03/11/18.
+A tela Família apresenta progresso do intervalo livre e por membro, lista de membros e entrada para Tarefas da família. O detalhe mostra hoje e preserva o intervalo da Família no retorno. Gerar relatório PDF fica em Tarefas da família; Administradores acessam Configurações (TEL-057) para inclusão/gestão e Confirmações Kids. A consulta é adulta; a gestão continua exclusiva dos Administradores. Crédito histórico removido aparece sem dado pessoal no relatório semanal. Referências: RN23/RN30–31/RN60–62, RF60–61/RF66, UC02/03/11/18.
 
 ## Decisões de produto consolidadas em 2026-10-05
 
@@ -117,7 +117,7 @@ Novas superfícies: TEL-053 (Configurações da família), TEL-054 (Detalhe do b
 
 ## Revisão da navegação da Família
 
-A tela Família apresenta progresso por Início/Fim livres, membros e entrada para tarefas. Selecionar uma pessoa abre o detalhe com exatamente esse intervalo; edição, remoção e convite ficam no detalhe quando permitidos. Administradores incluem membros em Configurações da família (TEL-057) e abrem Confirmações Kids. Gerar relatório PDF fica em Tarefas da família (TEL-011) e solicita semana em TEL-051 quando o intervalo tocar mais de uma.
+A tela Família apresenta progresso por Início/Fim livres, membros e entrada para tarefas. Selecionar uma pessoa abre o detalhe com progresso e tarefas de hoje; o intervalo da Família é restaurado ao voltar. Edição, remoção e convite ficam no menu do detalhe quando permitidos. Administradores incluem membros em Configurações da família (TEL-057) e abrem Confirmações Kids. Gerar relatório PDF fica em Tarefas da família (TEL-011) e solicita semana em TEL-051 quando o intervalo tocar mais de uma.
 
 TEL-014 e TEL-031 permanecem reservadas e fora da navegação; a carga visual fica para entrega posterior, e a lista administrativa está em TEL-057. TEL-032 é consultável por Administradores e Membros, com ações de gestão restritas. Os períodos familiares aceitam qualquer intervalo válido entre Início e Fim, sem modo mensal.
 
@@ -132,7 +132,7 @@ TEL-014 e TEL-031 permanecem reservadas e fora da navegação; a carga visual fi
 
 ## Política de versionamento
 
-1. A base funcional vigente está na versão **1.22** (regras 1.22, requisitos 1.21 e casos de uso 1.21). O índice documental está na versão **1.31** por consolidar também registros técnicos e de apresentação. Screen map e user flows têm versionamento independente; as arquiteturas mobile e backend também. Documentos alinhados a uma versão funcional anterior devem ser atualizados quando o comportamento que descrevem for afetado.
+1. A base funcional vigente está na versão **1.26** (regras 1.26, requisitos 1.25 e casos de uso 1.25). O índice documental está na versão **1.38** por consolidar também registros técnicos e de apresentação. Screen map e user flows têm versionamento independente; as arquiteturas mobile e backend também. Documentos alinhados a uma versão funcional anterior devem ser atualizados quando o comportamento que descrevem for afetado.
 2. Preserve os identificadores RN, RF, RNF, UC, TEL, MOD e UF. Novos itens recebem novos códigos; códigos retirados não são reutilizados.
 3. A edição vigente fica na raiz e em `docs/`. O Git mantém o histórico e permite comparar ou recuperar versões anteriores por commits e, quando adotadas, tags. Não mantenha cópias da documentação em pastas de versões.
 4. Alterações funcionais e suas referências devem evoluir juntas, com versão, data e histórico dos códigos e comportamentos afetados. Use 1.1, 1.2... para revisões incrementais e 2.0 para mudanças substanciais da base funcional.
@@ -145,6 +145,13 @@ A fundação backend adota Node.js, TypeScript, Fastify e `pg`. Parte da API de 
 
 | Versão | Data | Alteração |
 | --- | --- | --- |
+| 1.38 | 2026-10-28 | TEL-032 retorna à variante compacta Dia/Semana domingo–sábado; Parabenizar fica na Família, edição de nome Kids é possível no detalhe para Admin, e folhas de filtros TEL-050/TEL-011 são distintas. RN/RF/UC, SPEC/UX-003/009, mapa 1.23, fluxos 1.24 e catálogo 1.13 alinhados. |
+| 1.37 | 2026-10-28 | UX-009 e convenções mobile 1.1 padronizam SF Symbols para ícones de interface; removem SVGs de ícones da Família e da entrada por convite. |
+| 1.36 | 2026-10-28 | RN07/RN63, RF03/RF60, UC02/UC10, SPEC/UX-003, mapa 1.22, fluxos 1.23 e contrato 1.26: adulto edita próprio nome, Admin corrige nome Kids em TEL-057; TEL-032 mantém papel, convite e remoção. |
+| 1.35 | 2026-10-28 | TEL-032 aprovada na variante diária com horário da conclusão: RN60–61, RF60/RF66, UC11, SPEC/UX-009, contrato 1.25, mapa 1.21 e fluxos 1.22 alinhados. |
+| 1.34 | 2026-10-28 | TEL-011 alinhada ao protótipo aprovado, com filtros, grupos e PDF; mapa 1.20 e fluxos 1.21. |
+| 1.33 | 2026-10-28 | TEL-050 distingue o próprio usuário no destaque de maior quantidade com cartão compacto; SPEC/UX-009 e screen map 1.19 atualizados sem mudar regras funcionais. |
+| 1.32 | 2026-10-27 | RN60/RF60/UC11 e SPEC/UX-009 incluem incentivos, parabéns repetível, mensagem interna e push; screen map 1.18, fluxos 1.20 e contratos backend 1.24. |
 | 1.31 | 2026-10-27 | RN23/RN60–62, RF60–61/RF66 e UC11/18 alinhados à seção Família aprovada do Figma: Início/Fim livres, TEL-032 herda intervalo, estado Kids projetado para Membro, PDF em TEL-011 com seleção de semana e carga visual adiada. Screen map 1.17, fluxos 1.19, SPEC/UX-009/018/019 e contratos 1.23. |
 | 1.30 | 2026-10-27 | RN17/RF13/UC08, SPEC-008 E-14 e contratos backend 1.22: a edição “selecionada e futuras” preserva a data prevista já gravada, inclusive após edição individual; substitui apenas os campos permitidos. Para SCRUM-45. |
 | 1.29 | 2026-10-27 | RN17/RF13/UC08: editar ou excluir ocorrência de rotina sempre pergunta o alcance; “esta e as futuras” altera somente título, peso, responsáveis e observação, sem mudar repetição ou data prevista, e substitui edições individuais anteriores das futuras. RN66/UC07: a escolha entre Pendente e Aguardando confirmação vale para a edição individual; a edição de rotina não altera estados. Contratos backend 1.21, SPEC-008 (E-05 a E-13), UX-008 e UX-007 (anatomia da TEL-013/MOD-001) alinhados. |

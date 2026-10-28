@@ -1,8 +1,8 @@
 # Requisitos funcionais e não funcionais
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.21\
-**Data:** 2026-10-27\
+**Versão:** 1.25\
+**Data:** 2026-10-28\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -34,7 +34,7 @@ O sistema deve permitir somente a Administradores adicionar membros à família,
 
 ### RF03
 
-O sistema deve permitir somente a Administradores editar os dados e o perfil de outros membros, respeitando as condições de promoção, rebaixamento e ativação ou desativação do Modo Kids. A edição do nome administrativo deve obedecer à validação de RF02. No retorno da etapa de convites ao formulário da família já criada, alterações em membros persistidos seguem essas mesmas restrições; sem alteração, não há nova gravação.
+O sistema deve permitir somente a Administradores alterar papel e Modo Kids de outros membros, respeitando as condições de promoção e rebaixamento. Apenas o nome administrativo de perfis Kids pode ser corrigido pelo Administrador, em Configurações da família ou no detalhe Kids, com a validação de RF02. Adultos alteram o próprio nome por RF48. No retorno da etapa de convites ao formulário da família já criada, alterações em membros persistidos seguem essas mesmas restrições; sem alteração, não há nova gravação.
 
 **Regras de negócio:** [RN02](01-regras-de-negocio.md#rn02), [RN03](01-regras-de-negocio.md#rn03), [RN07](01-regras-de-negocio.md#rn07), [RN08](01-regras-de-negocio.md#rn08)  
 **Casos de uso:** [UC02](03-casos-de-uso.md#uc02)
@@ -433,11 +433,13 @@ Ao excluir uma tarefa não concluída, o sistema deve remover seus vínculos de 
 
 ### RF60
 
-O sistema deve oferecer a Administradores e Membros a área Família (Minha família) na navegação principal, apresentando progresso total no intervalo selecionado e uma lista de membros. A seleção inicial é a semana corrente; Início/Fim permite qualquer intervalo válido dentro de RN49. Cada item abre o detalhe com as tarefas daquele membro e preserva exatamente o intervalo, inclusive quando não coincide com Dia ou Semana; voltar restaura o contexto da origem. Tarefas da família mantém o intervalo e apresenta todas as tarefas, inclusive sem responsável. A carga de UC13 terá apresentação própria em entrega posterior, fora da TEL-050 atual.
+O sistema deve oferecer a Administradores e Membros a área Família (Minha família) na navegação principal, apresentando progresso total no intervalo selecionado e uma lista de membros. A seleção inicial é a semana corrente; Início/Fim permite qualquer intervalo válido dentro de RN49. Cada item abre o detalhe inicialmente no dia atual, com abas Dia e Semana (domingo a sábado no fuso da família, dentro de RN49); voltar restaura o intervalo e os filtros da origem. Outros intervalos são consultados por Tarefas da família. Tarefas da família mantém o intervalo e apresenta todas as tarefas, inclusive sem responsável. A carga de UC13 terá apresentação própria em entrega posterior, fora da TEL-050 atual.
 
 O progresso deve mostrar concluídas/total e percentual, contar cada tarefa uma vez e apresentar “Sem tarefas” quando o total for zero. Carga e progresso seguem RN60–61 e são atualizados após alterações válidas.
 
-Gerar relatório semanal PDF fica no menu de Tarefas da família para ambos os perfis adultos. Adicionar membro fica em Configurações da família, somente para Administradores. Editar perfil e gerar/reenviar convite ficam no detalhe do membro, somente para Administradores quando permitido, respeitando o acesso Apple do Criador e a edição exclusiva do próprio apelido. Confirmações Kids permanecem exclusivas dos Administradores. Kids não acessam a área Família.
+Na Família, o sistema deve destacar membros que concluíram todas as tarefas atribuídas no dia atual e, quando há ao menos dois membros ativos e tarefas atribuídas no intervalo selecionado, todos os empatados na maior quantidade. Apenas Administradores podem acionar Parabenizar para outro membro ativo, inclusive Kids; repetições são permitidas. Cada ação confirmada deve registrar mensagem para o destinatário e intenção de push sem depender da entrega externa. Minhas tarefas deve apresentar a mensagem recebida e permitir fechá-la, ocultando-a da interface.
+
+Gerar relatório semanal PDF fica no menu de Tarefas da família para ambos os perfis adultos. Adicionar membro fica em Configurações da família, somente para Administradores. Alterar papel, remover membro e gerar/reenviar convite ficam no detalhe do membro, somente para Administradores quando permitido; a correção do nome de Kids fica em Configurações da família e no topo do detalhe Kids para Administrador autorizado. Adultos editam o próprio nome em Meu perfil, respeitando o acesso Apple do Criador e a edição exclusiva do próprio apelido. Confirmações Kids permanecem exclusivas dos Administradores. Kids não acessam a área Família.
 
 **Regras de negócio:** [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61)  
 **Casos de uso:** [UC11](03-casos-de-uso.md#uc11)
@@ -479,7 +481,7 @@ O sistema deve oferecer ao perfil Kids exatamente duas abas independentes: “Mi
 
 ### RF66
 
-O sistema deve oferecer filtro Início/Fim livre nos indicadores de progresso familiar em Minha família e nas tarefas do membro selecionado em seu detalhe. Minhas tarefas é diária para todos os perfis. Deve informar as datas, preservar exatamente o intervalo ao navegar para detalhes e listas e aplicar as fórmulas e limites de RN61. O intervalo familiar não altera o período livre de prazo das missões.
+O sistema deve oferecer filtro Início/Fim livre nos indicadores de progresso familiar em Minha família e em Tarefas da família, inclusive ao filtrar por membro nessa lista. Minhas tarefas é diária para todos os perfis. O detalhe do membro inicia no dia atual, permite alternar para a semana visual de domingo a sábado no fuso da família, respeita RN49 e, ao voltar, preserva o intervalo da Família. A semana visual não altera a semana familiar de segunda a domingo de RN28. Deve informar as datas e aplicar as fórmulas e limites de RN61. O intervalo familiar não altera o período livre de prazo das missões.
 
 **Regras de negócio:** [RN28](01-regras-de-negocio.md#rn28), [RN33](01-regras-de-negocio.md#rn33), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61)  
 **Casos de uso:** [UC11](03-casos-de-uso.md#uc11), [UC13](03-casos-de-uso.md#uc13)
@@ -773,6 +775,10 @@ A configuração de apelido deve ser protegida por titularidade no backend, incl
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.25 | 2026-10-28 | RF03/RF60/RF66: detalhe do membro com Dia/Semana domingo–sábado; nome Kids editável também no detalhe; Parabenizar permanece na Família. |
+| 1.24 | 2026-10-28 | RF03/RF60: nome administrativo de adultos é editado pelo titular; somente o nome de Kids pode ser corrigido por Administrador em Configurações. TEL-032 mantém papel, convite e remoção. |
+| 1.23 | 2026-10-28 | RF60/RF66: TEL-032 passa a mostrar o dia atual e horário de conclusão válida, com retorno ao intervalo da Família; TEL-011 mantém o filtro livre. |
+| 1.22 | 2026-10-27 | RF60: incentivos na Família, Parabenizar por Administrador e mensagem recebida em Minhas tarefas. |
 | 1.21 | 2026-10-27 | RF11, RF22, RF24, RF60–61 e RF66: intervalo livre, projeção de Pendentes para Membro, menu do PDF em TEL-011 e configurações em TEL-057. |
 | 1.20 | 2026-10-27 | RF13: explicita a preservação da data prevista já gravada, inclusive após edição individual, no alcance “selecionada e futuras”. Para SPEC-008 Fase 2 / SCRUM-45. |
 | 1.19 | 2026-10-27 | RF13: alcance “selecionada e futuras” limitado a título, peso, responsáveis e observação, sem alterar data inicial, frequência ou data prevista, e substituindo edições individuais anteriores das futuras abrangidas. Para SPEC-008 Fase 2. |

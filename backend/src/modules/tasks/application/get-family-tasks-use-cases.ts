@@ -55,6 +55,7 @@ export interface FamilyTaskView {
   readonly displayStatus: Status;
   readonly routineId: string | null;
   readonly createdAt: string;
+  readonly completedAt: string | null;
 }
 
 export interface FamilyTasksView {
@@ -348,6 +349,7 @@ export class GetFamilyTasksUseCase {
             : task.status,
         routineId: task.routineId,
         createdAt: task.createdAt.toISOString(),
+        completedAt: task.status === 'completed' ? task.completedAt?.toISOString() ?? null : null,
       })),
       nextCursor:
         records.length > PAGE_SIZE && last !== undefined ? encodeCursor(last.id, scope) : null,

@@ -55,6 +55,58 @@ struct MemberDetailViewModelTests {
         #expect(!viewModel.isLoading)
     }
 
+    @Test("SPEC-003 CA-04 role selection offers only valid changes")
+    func roleSelectionExcludesCurrentRoleAndDirectKidsPromotion() async {
+        let (adult, _) = makeViewModel(.success(detail(manageMembers: true)))
+        await adult.load()
+        #expect(adult.allowedRoles == [.member, .kid])
+
+        let kidsDetail = FamilyMemberDetail(
+            id: memberID, name: "Rafa", role: .kid, isFamilyCreator: false,
+            createdAt: "2026-10-01T12:00:00.000Z",
+            capabilities: MemberCapabilities(manageMembers: true)
+        )
+        let (kid, _) = makeViewModel(.success(kidsDetail))
+        await kid.load()
+        #expect(kid.allowedRoles == [.member])
+    }
+
+    @Test("SPEC-009 CA-07 TEL-032 starts today and switches to the Sunday–Saturday family week")
+    func loadsTodayInsteadOfFamilyInterval() async {
+        let repository = FamilyRepositorySpy(memberDetailResult: .success(detail(manageMembers: true)))
+        let today = FamilyDateRange(startDate: "2026-10-28", endDate: "2026-10-28")
+        repository.setFamilyOverviewResult(.success(FamilyOverview(
+            range: today, familyCreatedAt: "2026-10-01",
+            progress: FamilyProgress(total: 2, completed: 2, pending: 0, awaitingConfirmation: 0, percentage: 100),
+            members: [FamilyMemberProgress(
+                memberID: memberID, name: "Maria Silva", role: .administrator,
+                progress: FamilyProgress(total: 2, completed: 2, pending: 0, awaitingConfirmation: 0, percentage: 100)
+            )]
+        )))
+        repository.setFamilyTaskPageResult(.success(FamilyTaskPage(range: today, items: [], nextCursor: nil)))
+        let viewModel = MemberDetailViewModel(
+            memberID: memberID,
+            session: ActiveFamilySession(memberID: UUID(), familyID: UUID(), role: .administrator, isFamilyCreator: false),
+            familyRepository: repository,
+            accessTokenProvider: { "token-1" },
+            timeZoneID: "America/Sao_Paulo",
+            now: ISO8601DateFormatter().date(from: "2026-10-28T15:00:00Z")!
+        )
+
+        await viewModel.load()
+
+        #expect(viewModel.taskViewModel.range == today)
+        #expect(repository.familyTaskRequests.count == 1)
+        #expect(repository.familyTaskRequests.first?.0 == today)
+        #expect(repository.familyTaskRequests.first?.1 == memberID)
+        #expect(viewModel.taskViewModel.progress?.completed == 2)
+        #expect(viewModel.period == .day)
+        await viewModel.selectPeriod(.week)
+        #expect(viewModel.period == .week)
+        #expect(viewModel.taskViewModel.range == FamilyDateRange(startDate: "2026-10-25", endDate: "2026-10-31"))
+        #expect(repository.familyTaskRequests.last?.1 == memberID)
+    }
+
     @Test("SPEC-003 CA-02 exposes the Creator condition")
     func exposesCreator() async {
         let (viewModel, _) = makeViewModel(.success(detail(isCreator: true, manageMembers: true)))

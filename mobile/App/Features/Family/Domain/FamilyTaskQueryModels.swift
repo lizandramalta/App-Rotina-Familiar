@@ -30,6 +30,18 @@ nonisolated struct FamilyOverview: Equatable, Sendable {
     let members: [FamilyMemberProgress]
 }
 
+nonisolated struct FamilyApplauseSummary: Equatable, Sendable {
+    let memberID: UUID
+    let count: Int
+    let sentByMe: Bool
+}
+
+nonisolated struct ReceivedFamilyApplause: Equatable, Sendable, Identifiable {
+    let id: UUID
+    let senderNames: [String]
+    let createdAt: Date
+}
+
 nonisolated enum FamilyTaskStatusFilter: String, CaseIterable, Sendable {
     case all
     case pending
@@ -40,6 +52,13 @@ nonisolated enum FamilyTaskStatusFilter: String, CaseIterable, Sendable {
 nonisolated struct FamilyTaskItem: Equatable, Sendable, Identifiable {
     let task: FamilyTask
     let displayStatus: TaskStatus
+    let completedAt: Date?
+
+    init(task: FamilyTask, displayStatus: TaskStatus, completedAt: Date? = nil) {
+        self.task = task
+        self.displayStatus = displayStatus
+        self.completedAt = completedAt
+    }
 
     var id: UUID { task.id }
 }

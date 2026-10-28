@@ -33,6 +33,8 @@ final class DailyTaskListViewModel {
     private(set) var selectedDate: Date
     private(set) var items: [OwnTaskListItem] = []
     private(set) var progress: DailyProgress?
+    private(set) var receivedApplause: [ReceivedFamilyApplause] = []
+    private(set) var applauseDismissFailed = false
     private(set) var isLoading = false
     private(set) var loadFailed = false
     private(set) var actionInFlight: Set<UUID> = []
@@ -108,6 +110,8 @@ final class DailyTaskListViewModel {
         loadFailed = false
         defer { isLoading = false }
 
+        await loadReceivedApplause()
+
         let referenceDate = Self.wireString(from: selectedDate)
         do {
             async let tasksResult = getDailyTasks.execute(referenceDate: referenceDate, cursor: nil, accessToken: accessToken)
@@ -146,6 +150,26 @@ final class DailyTaskListViewModel {
             loadFailed = true
         }
     }
+
+    private func loadReceivedApplause() async {
+        guard let familyRepository else { return }
+        do { receivedApplause = try await familyRepository.listReceivedFamilyApplause(accessToken: accessToken) }
+        catch { /* Checklist remains usable when optional messages are unavailable. */ }
+    }
+
+    func refreshReceivedApplause() async { await loadReceivedApplause() }
+
+    func dismissApplause(_ id: UUID) async {
+        guard let familyRepository else { return }
+        do {
+            try await familyRepository.dismissFamilyApplause(id: id, accessToken: accessToken)
+            receivedApplause.removeAll { $0.id == id }
+        } catch {
+            applauseDismissFailed = true
+        }
+    }
+
+    func dismissApplauseFailure() { applauseDismissFailed = false }
 
     /// Uses the effective status, never the role-specific display label (SPEC-009 CA-11).
     func showsToggle(_ item: OwnTaskListItem) -> Bool {

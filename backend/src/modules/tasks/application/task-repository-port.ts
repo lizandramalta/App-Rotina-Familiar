@@ -13,6 +13,8 @@ export interface TaskRecord {
   readonly status: TaskStatus;
   readonly routineId: string | null;
   readonly createdAt: Date;
+  /** Current valid completion, populated by family list queries when requested. */
+  readonly completedAt?: Date | null;
   readonly assigneeIds: readonly string[];
 }
 

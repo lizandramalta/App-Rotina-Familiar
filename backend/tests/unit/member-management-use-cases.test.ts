@@ -7,6 +7,7 @@ import {
   ListFamilyMembersUseCase,
   MEMBERS_PAGE_SIZE,
   RemoveMemberUseCase,
+  UpdateMemberUseCase,
 } from '../../src/modules/family/application/member-management-use-cases.js';
 import type {
   MemberManagementRepositoryPort,
@@ -122,6 +123,38 @@ describe('Member management use cases — SPEC-003 phase 1', () => {
       useCase.execute({ actor: TEST_ACTOR, name: 'Marina', role: MemberRole.MEMBER }),
     ).rejects.toBeInstanceOf(ActionNotAllowedError);
     expect(repository.insertMember).not.toHaveBeenCalled();
+  });
+
+  it('SPEC-003 CA-02/03 permits an administrator to correct only a Kids name', async () => {
+    const target = member('11111111-2222-4333-8444-555555555555');
+    const update = new UpdateMemberUseCase(managementDependencies());
+    repository.findMember.mockResolvedValue({ ...target, role: MemberRole.MEMBER });
+    await expect(update.execute(TEST_ACTOR, target.id, 'New name')).rejects.toBeInstanceOf(
+      ActionNotAllowedError,
+    );
+    await expect(update.execute(TEST_ACTOR, target.id, '')).rejects.toBeInstanceOf(
+      ActionNotAllowedError,
+    );
+    expect(repository.updateMember).not.toHaveBeenCalled();
+
+    repository.findMember.mockResolvedValue({ ...target, role: MemberRole.KIDS });
+    repository.updateMember.mockResolvedValue({
+      ...target,
+      name: 'New name',
+      role: MemberRole.KIDS,
+    });
+    await expect(update.execute(TEST_ACTOR, target.id, ' New name ')).resolves.toMatchObject({
+      name: 'New name',
+      role: MemberRole.KIDS,
+    });
+    expect(repository.updateMember).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        familyId: TEST_ACTOR.familyId,
+        memberId: target.id,
+        name: 'New name',
+      }),
+    );
   });
 
   it('CA-07 reports an unavailable dependency without claiming the member was created', async () => {

@@ -2,10 +2,12 @@ import Foundation
 import Observation
 import SwiftUI
 
-/// TEL-032 — member tasks, administrative management and explicit invitation.
+/// TEL-032 — current day or Sunday–Saturday member tasks, with permitted administrative actions.
 @MainActor
 @Observable
 final class MemberDetailViewModel {
+    enum Period: String, CaseIterable { case day, week }
+    enum KidsNameUpdateResult { case saved, failed, reconciliationRequired, noLongerEligible }
     enum Failure: Equatable {
         case notAllowed
         case notFound
@@ -18,6 +20,7 @@ final class MemberDetailViewModel {
     private(set) var isSaving = false
     private(set) var managementFailed = false
     private(set) var isRemoved = false
+    private(set) var period: Period = .day
 
     enum InviteFailure: Equatable {
         case rateLimited
@@ -34,7 +37,9 @@ final class MemberDetailViewModel {
     private(set) var transientInvite: MemberInvite?
     private(set) var inviteFailure: InviteFailure?
     private(set) var wasShareCancelled = false
-    let taskViewModel: FamilyTasksViewModel?
+    let taskViewModel: FamilyTasksViewModel
+    private let todayRange: FamilyDateRange
+    private let weekRange: FamilyDateRange
 
     private let memberID: UUID
     private let session: ActiveFamilySession
@@ -47,26 +52,42 @@ final class MemberDetailViewModel {
         familyRepository: any FamilyRepository,
         accessTokenProvider: @escaping @MainActor () -> String?,
         hasPreviousInvite: Bool = false,
-        range: FamilyDateRange? = nil,
         familyCreatedAt: String? = nil,
-        timeZoneID: String = FamilyCreationValidation.defaultTimeZoneID
+        timeZoneID: String = FamilyCreationValidation.defaultTimeZoneID,
+        now: Date = .now
     ) {
         self.hasPreviousInvite = hasPreviousInvite
         self.memberID = memberID
         self.session = session
         self.familyRepository = familyRepository
         self.accessTokenProvider = accessTokenProvider
-        self.taskViewModel = range.map {
-            FamilyTasksViewModel(
-                range: $0,
-                memberID: memberID,
-                role: session.role,
-                familyCreatedAt: familyCreatedAt,
-                timeZoneID: timeZoneID,
-                familyRepository: familyRepository,
-                accessTokenProvider: accessTokenProvider
-            )
-        }
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: timeZoneID) ?? .current
+        let formatter = DateFormatter()
+        formatter.calendar = calendar
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = calendar.timeZone
+        formatter.dateFormat = "yyyy-MM-dd"
+        let today = formatter.string(from: now)
+        let todayDate = calendar.startOfDay(for: now)
+        let weekday = calendar.component(.weekday, from: todayDate)
+        let sunday = calendar.date(byAdding: .day, value: -(weekday - 1), to: todayDate) ?? todayDate
+        let saturday = calendar.date(byAdding: .day, value: 6, to: sunday) ?? todayDate
+        let lastDay = calendar.dateInterval(of: .month, for: todayDate)?.end.addingTimeInterval(-1) ?? todayDate
+        todayRange = FamilyDateRange(startDate: today, endDate: today)
+        weekRange = FamilyDateRange(
+            startDate: max(formatter.string(from: sunday), familyCreatedAt ?? formatter.string(from: sunday)),
+            endDate: formatter.string(from: min(saturday, lastDay))
+        )
+        self.taskViewModel = FamilyTasksViewModel(
+            range: todayRange,
+            memberID: memberID,
+            role: session.role,
+            familyCreatedAt: familyCreatedAt,
+            timeZoneID: timeZoneID,
+            familyRepository: familyRepository,
+            accessTokenProvider: accessTokenProvider
+        )
     }
 
     var isCreator: Bool { detail?.isFamilyCreator ?? false }
@@ -76,26 +97,49 @@ final class MemberDetailViewModel {
     }
 
     /// Hidden for non-managers and for the Creator, who never receives an invite (SPEC-004 CA-03, CA-04).
-    var canIssueInvite: Bool { canManage && !isCreator }
+    var canIssueInvite: Bool { canManage && !isCreator && detail?.id != session.memberID }
     var canManageTarget: Bool { canManage && !isCreator && detail?.id != session.memberID }
+    var canEditKidsName: Bool { canManageTarget && detail?.role == .kid }
 
-    var allowedRoles: [MemberRole] {
-        guard let detail else { return [] }
-        return detail.role == .kid ? [.kid, .member] : [.administrator, .member, .kid]
+    func selectPeriod(_ selected: Period) async {
+        guard selected != period else { return }
+        await taskViewModel.applyRange(selected == .day ? todayRange : weekRange)
+        if !taskViewModel.failed { period = selected }
     }
 
-    func updateName(_ name: String) async {
-        guard canManageTarget, !isSaving, let token = accessTokenProvider() else { return }
-        isSaving = true
-        managementFailed = false
-        defer { isSaving = false }
+    func updateKidsName(_ name: String) async -> KidsNameUpdateResult {
+        guard canEditKidsName, let token = accessTokenProvider() else { return .noLongerEligible }
         do {
-            let member = try await familyRepository.updateMemberName(memberID: memberID, name: name, accessToken: token)
-            apply(member)
+            let updated = try await familyRepository.updateMemberName(
+                memberID: memberID, name: name, accessToken: token
+            )
+            apply(updated)
+            return .saved
         } catch {
-            managementFailed = true
-            await load()
+            guard let current = await reconcileMember() else { return .reconciliationRequired }
+            guard current.role == .kid else { return .noLongerEligible }
+            return current.name == name ? .saved : .failed
         }
+    }
+
+    func reconcileKidsName() async -> FamilyMemberDetail? {
+        await reconcileMember()
+    }
+
+    private func reconcileMember() async -> FamilyMemberDetail? {
+        guard let token = accessTokenProvider() else { return nil }
+        do {
+            let current = try await familyRepository.getMemberDetail(memberID: memberID, accessToken: token)
+            detail = current
+            return current
+        } catch { return nil }
+    }
+    var allowedRoles: [MemberRole] {
+        guard let detail else { return [] }
+        let candidates: [MemberRole] = detail.role == .kid
+            ? [.member]
+            : [.administrator, .member, .kid]
+        return candidates.filter { $0 != detail.role }
     }
 
     func changeRole(_ role: MemberRole) async {
@@ -175,6 +219,7 @@ final class MemberDetailViewModel {
         defer { isLoading = false }
         do {
             detail = try await familyRepository.getMemberDetail(memberID: memberID, accessToken: token)
+            await taskViewModel.load()
         } catch FamilyError.actionNotAllowed {
             // Access was refused: stale content of a member the viewer may no longer see must not stay on screen.
             detail = nil

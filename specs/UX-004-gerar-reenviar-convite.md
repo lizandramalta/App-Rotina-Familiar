@@ -3,7 +3,7 @@
 **Status:** aprovada\
 **Autor:** Codex | **Criada em:** 2026-10-06 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-19
 **Spec funcional vinculada:** [SPEC-004-gerar-reenviar-convite.md](SPEC-004-gerar-reenviar-convite.md)  
-**Base funcional:** RN 1.18 / RF 1.17 / UC 1.16\
+**Base funcional:** RN 1.26 / RF 1.25 / UC 1.25\
 **Superfícies de interface:** TEL-032, TEL-034, TEL-050, TEL-056, UF-01, UF-12
 
 ## 1. Objetivo da experiência e jornada
@@ -31,9 +31,9 @@ As regras de domínio, autorização e contrato de dados são integralmente herd
 
 | Origem | Ação | Destino | Retorno / cancelamento | Contexto preservado |
 |---|---|---|---|---|
-| TEL-050 | Adulto seleciona integrante | TEL-032 | Voltar retorna à Família | Dia/semana e rolagem da Família |
+| TEL-050 | Adulto seleciona integrante | TEL-032 | Voltar retorna à Família | Intervalo e rolagem da Família |
 | TEL-056 | Criador escolhe primeiro convite para membro já criado com a família | Folha nativa após emissão confirmada | Fechar retorna a TEL-056 | Lista de membros permanece; não há segunda criação |
-| TEL-032 | Admin escolhe primeiro convite para membro elegível | Folha nativa após emissão confirmada | Fechar retorna a TEL-032 | Membro e período preservados; sem confirmação intermediária |
+| TEL-032 | Admin escolhe primeiro convite no bloco de convite do membro elegível | Folha nativa após emissão confirmada | Fechar retorna a TEL-032 | Membro e período Dia/Semana preservados; sem confirmação intermediária |
 | TEL-032/TEL-056 | Admin escolhe reemitir | TEL-034 com aviso e confirmação | Cancelar antes de confirmar retorna à origem, sem emissão | Origem e membro preservados |
 | TEL-034 | Admin confirma reemissão | Folha de compartilhamento nativa | Fechar a folha não desfaz a emissão | O app não conserva link ou senha; retorna à origem |
 | Emissão | Falha ou resultado incerto | Origem com erro contextual | Nova emissão exige verificar estado e confirmar efeitos quando for reemissão | Não há credencial exibida |
@@ -45,7 +45,7 @@ As regras de domínio, autorização e contrato de dados são integralmente herd
 
 ### 5.1. TEL-032 — Detalhe do membro
 
-- **Objetivo:** apresentar o membro e suas tarefas no período, preservando a capacidade administrativa já determinada pelo backend.
+- **Objetivo:** apresentar o membro e suas tarefas de hoje no fuso da família, preservando a capacidade administrativa já determinada pelo backend.
 - **Ação autorizada:** Administrador vê “Gerar convite” ou “Reenviar convite” apenas se a projeção confirmar que o perfil está ativo, pertence à família e é elegível. A nomenclatura acompanha se há convite/sessão anterior, sem expor credenciais ou estado confidencial.
 - **Ações ocultas:** Membro, Kids, alvo Criador, alvo removido ou detalhe que perdeu a capacidade não mostram a entrada para TEL-034.
 
@@ -102,6 +102,7 @@ As regras de domínio, autorização e contrato de dados são integralmente herd
 | UX-01 | A entrega usa exclusivamente a folha de compartilhamento nativa; link e senha são uma única mensagem e não há cópia individual. | Pessoa usuária, 2026-10-06 | Não; registrada também como E-01 na SPEC-004 |
 | UX-02 | Fechar a folha depois da emissão não reverte as credenciais e não as mantém para novo compartilhamento; nova emissão exige nova confirmação. | RN46, RF54 e ausência de recuperação de senha | Não |
 | UX-03 | Revisada: TEL-056 lista membros já criados com a família e oferece primeiro convite explícito; “Avançar” permanece disponível mesmo se a folha nativa for fechada. | Pessoa usuária, 2026-10-19 | Sim; aplica UC01/RF41. |
+| UX-05 | Na TEL-032, Gerar convite e Reenviar convite são acessados no bloco de convite; a emissão inicial e a reemissão preservam os mesmos efeitos e confirmações. | Pessoa usuária, 2026-10-28 | Apresentação — UX-009 e screen map; contrato e regra não mudam. |
 | UX-04 | Primeiro convite abre a folha nativa diretamente após emissão confirmada; somente reemissão exibe aviso e confirmação. | Pessoa usuária, 2026-10-19 | Sim — RN46, RF41 e UC01/UC02. |
 
 ## 10. Checklist de aprovação

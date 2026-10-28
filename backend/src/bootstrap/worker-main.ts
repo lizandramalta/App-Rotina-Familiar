@@ -1,5 +1,7 @@
 import { loadConfiguration, ConfigurationError } from './configuration.js';
 import { createContainer } from './container.js';
+import { ApnsPushGateway } from '../integrations/apple/apns-push-gateway.js';
+import { FamilyApplausePushWorker } from '../modules/family/infrastructure/family-applause-push-worker.js';
 
 async function bootstrapWorker(): Promise<void> {
   let config;
@@ -46,12 +48,43 @@ async function bootstrapWorker(): Promise<void> {
     15 * 60 * 1000,
   );
 
+  const { APNS_KEY_ID, APNS_TEAM_ID, APNS_TOPIC, APNS_PRIVATE_KEY } = config;
+  const applauseWorker =
+    APNS_KEY_ID && APNS_TEAM_ID && APNS_TOPIC && APNS_PRIVATE_KEY
+      ? new FamilyApplausePushWorker(
+          container.dbPool,
+          new ApnsPushGateway({
+            keyId: APNS_KEY_ID,
+            teamId: APNS_TEAM_ID,
+            topic: APNS_TOPIC,
+            privateKey: APNS_PRIVATE_KEY,
+          }),
+        )
+      : undefined;
+  let deliveringApplause = false;
+  const deliverApplause = async () => {
+    if (!isRunning || deliveringApplause || !applauseWorker) return;
+    deliveringApplause = true;
+    try {
+      await applauseWorker.run();
+    } catch (error) {
+      logger.error('family_applause_push_run_failed', error);
+    } finally {
+      deliveringApplause = false;
+    }
+  };
+  void deliverApplause();
+  const applauseTimer = setInterval(() => {
+    void deliverApplause();
+  }, 30_000);
+
   const handleShutdown = async (signal: string) => {
     if (!isRunning) {
       return;
     }
     isRunning = false;
     clearInterval(cleanupTimer);
+    clearInterval(applauseTimer);
     logger.info(`Received ${signal}. Shutting down worker process...`);
 
     try {

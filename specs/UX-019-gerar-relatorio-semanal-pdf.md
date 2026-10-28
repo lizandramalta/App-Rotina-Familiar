@@ -3,12 +3,13 @@
 **Status:** aprovada  
 **Autor:** Codex | **Criada em:** 2026-10-10 | **Aprovada por:** Usuária | **Em:** 2026-10-10  
 **Spec funcional vinculada:** [SPEC-019-gerar-relatorio-semanal-pdf.md](SPEC-019-gerar-relatorio-semanal-pdf.md)  
-**Base funcional:** 1.17  
+**Base funcional:** RN 1.23 / RF 1.22 / UC 1.22
+**Revisão de interface:** 2026-10-28 — TEL-011 aprovada no Figma; geração direta em intervalo de uma semana e seleção em TEL-051 quando abranger mais de uma.
 **Superfícies:** TEL-011, TEL-051, UF-14
 
 ## 1. Jornada
 
-Adulto abre “Gerar relatório PDF” no menu de TEL-011. Se o intervalo consultado alcançar mais de uma semana, TEL-051 exige escolher uma das semanas antes de gerar; com uma só semana, usa-a diretamente. Voltar preserva o intervalo e os filtros de Tarefas da família.
+Adulto abre “Gerar relatório PDF” no menu ••• de TEL-011, que mostra a semana de referência. Se o intervalo consultado alcançar mais de uma semana, TEL-051 exige escolher uma delas antes de gerar; com uma só semana, a geração começa diretamente na TEL-011. Durante a geração, o menu mostra progresso e a tela informa “Gerando relatório...”. Em sucesso, abre a folha nativa de salvar/compartilhar. Em falha, um alerta oferece Cancelar e Tentar de novo, sem alterar tarefa ou entregar arquivo parcial. Voltar preserva o intervalo e os filtros de Tarefas da família.
 
 ## 2. TEL-051
 
@@ -23,8 +24,8 @@ Adulto abre “Gerar relatório PDF” no menu de TEL-011. Se o intervalo consul
 | Estado | Comportamento |
 |---|---|
 | Seleção | Semana editável e dados anteriores preservados |
-| Gerando | Progresso acessível; evita ação duplicada |
-| Pronto | Preview, salvar ou compartilhar |
+| Gerando | Progresso acessível no menu de TEL-011 e aviso inferior; evita ação duplicada |
+| Pronto | Uma semana: folha nativa de salvar/compartilhar; seleção em TEL-051: preview e ações explícitas |
 | Sem dados | Gera PDF íntegro com “Sem tarefas” |
 | Falha | Preserva semana e oferece nova tentativa; nenhum arquivo parcial |
 | Compartilhamento cancelado | Retorna ao preview sem afirmar envio |

@@ -11,7 +11,7 @@ struct AuthenticatedHomeView: View {
     let myTasksTab: MyTasksTabView?
     let makeFamilySettingsViewModel: (() -> FamilySettingsViewModel)?
     @State private var familyOverviewViewModel: FamilyOverviewViewModel
-    @State private var familyTaskPath: [FamilyTaskRoute] = []
+    @State private var familyTaskPath: [FamilyNavigationRoute] = []
     let kidsTasksTabView: KidsTasksTabView?
     let missionsTab: MissionsTabView?
     let kidsMissionsTabView: KidsMissionsTabView?
@@ -26,7 +26,7 @@ struct AuthenticatedHomeView: View {
     @State private var selectedTab: Int = {
         #if DEBUG
         let scenario = ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"]
-        if scenario == "family-settings" || scenario == "family-overview" || scenario == "family-overview-member" || scenario == "member-invite" || scenario == "member-invite-uncertain" || scenario == "kids-review-queue" || scenario == "kids-review-queue-empty" || scenario == "kids-review-queue-failure" {
+        if scenario == "family-settings" || scenario == "family-overview" || scenario == "family-overview-incentives" || scenario == "family-overview-own-most-tasks" || scenario == "family-overview-member" || scenario == "family-tasks" || scenario == "member-invite" || scenario == "member-invite-uncertain" || scenario == "kids-review-queue" || scenario == "kids-review-queue-empty" || scenario == "kids-review-queue-failure" {
             return 1
         }
         if scenario == "mission-management" || scenario == "mission-management-member" {
@@ -148,6 +148,7 @@ struct AuthenticatedHomeView: View {
                 }
             }
         }
+        .tint(Color.primary)
         .id(role)
     }
 
@@ -189,13 +190,10 @@ struct AuthenticatedHomeView: View {
 
     private func familyDestination() -> some View {
         NavigationStack(path: $familyTaskPath) {
-            FamilyOverviewView(
-                viewModel: familyOverviewViewModel,
-                makeFamilySettingsViewModel: makeFamilySettingsViewModel
-            )
+            FamilyOverviewView(viewModel: familyOverviewViewModel)
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("access.destination.family")
-            .navigationDestination(for: FamilyTaskRoute.self) { route in
+            .navigationDestination(for: FamilyNavigationRoute.self) { route in
                 familyTaskDestination(route)
             }
             .navigationDestination(isPresented: $showsFamilySettingsScenario) {
@@ -207,8 +205,26 @@ struct AuthenticatedHomeView: View {
     }
 
     @ViewBuilder
-    private func familyTaskDestination(_ route: FamilyTaskRoute) -> some View {
-        if let myTasksTab {
+    private func familyTaskDestination(_ route: FamilyNavigationRoute) -> some View {
+        switch route {
+        case let .member(memberID):
+            MemberDetailView(
+                viewModel: familyOverviewViewModel.makeMemberDetailViewModel(memberID: memberID),
+                onOpenTask: { familyTaskPath.append(.detail($0)) },
+                onRemoved: { Task { await familyOverviewViewModel.loadInitial() } },
+                onUpdated: { Task { await familyOverviewViewModel.loadInitial() } }
+            )
+        case .familyTasks:
+            if let tasks = familyOverviewViewModel.makeFamilyTasksViewModel() {
+                FamilyTasksView(viewModel: tasks, onOpenTask: { familyTaskPath.append(.detail($0)) })
+            }
+        case .settingsHub:
+            FamilySettingsHubView(
+                viewModel: familyOverviewViewModel,
+                makeFamilySettingsViewModel: makeFamilySettingsViewModel
+            )
+        case .create, .detail, .edit:
+            if let myTasksTab {
             switch route {
             case let .detail(taskID):
                 TaskDetailView(
@@ -254,6 +270,9 @@ struct AuthenticatedHomeView: View {
                     },
                     onRoutineSaved: { _ in }
                 )
+            case .member, .familyTasks, .settingsHub:
+                EmptyView()
+            }
             }
         }
     }

@@ -8,6 +8,13 @@ struct FamilySettingsHubView: View {
     @State private var isEditingFamilyName = false
     @State private var draftFamilyName = ""
     @State private var familyNameSaveFailed = false
+    @State private var editingKid: FamilyMember?
+    @State private var draftKidName = ""
+    @State private var kidNameIsInvalid = false
+    @State private var kidNameSaveFailed = false
+    @State private var kidNameRequiresRefresh = false
+    @State private var kidNameIsSaving = false
+    @State private var showsKidNameDiscard = false
 
     var body: some View {
         List {
@@ -56,14 +63,29 @@ struct FamilySettingsHubView: View {
                     ProgressView().frame(maxWidth: .infinity)
                 }
                 ForEach(viewModel.members) { member in
-                    NavigationLink {
-                        MemberDetailView(viewModel: viewModel.makeMemberDetailViewModel(memberID: member.id)) {
-                            Task { await viewModel.loadInitial() }
+                    HStack(spacing: 8) {
+                        NavigationLink(value: FamilyNavigationRoute.member(member.id)) {
+                            row(member)
                         }
-                    } label: {
-                        row(member)
+                        .accessibilityIdentifier("family.member.row.\(member.id.uuidString.lowercased())")
+                        if viewModel.canConfigureFamily && member.role == .kid {
+                            Button {
+                                draftKidName = member.name
+                                kidNameIsInvalid = false
+                                kidNameSaveFailed = false
+                                kidNameRequiresRefresh = false
+                                editingKid = member
+                            } label: {
+                                Image(systemName: "pencil")
+                                    .frame(width: 44, height: 44)
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .frame(width: 44, height: 44)
+                            .accessibilityLabel("family.settings.hub.edit_kids_name")
+                            .accessibilityIdentifier("family.settings.hub.edit_kids_name.\(member.id.uuidString.lowercased())")
+                        }
                     }
-                    .accessibilityIdentifier("family.member.row.\(member.id.uuidString.lowercased())")
                     .task { await viewModel.loadMoreIfNeeded(currentMember: member) }
                 }
                 if viewModel.isLoadingMore {
@@ -119,6 +141,74 @@ struct FamilySettingsHubView: View {
                 }
             }
         }
+        .sheet(item: $editingKid) { kid in
+            NavigationStack { kidsNameEditor(for: kid) }
+        }
+    }
+
+    private func kidsNameEditor(for kid: FamilyMember) -> some View {
+        Form {
+            TextField("family.member.manage.name", text: $draftKidName)
+                .onChange(of: draftKidName) { _, _ in kidNameIsInvalid = false }
+                .accessibilityIdentifier("family.settings.hub.kids_name")
+            if kidNameIsInvalid {
+                Text("family.members.name.error_invalid").foregroundStyle(.red)
+            }
+            if kidNameSaveFailed || kidNameRequiresRefresh {
+                Text("family.member.manage.error").foregroundStyle(.red)
+            }
+            if kidNameRequiresRefresh {
+                Button("family.member.detail.retry") {
+                    Task {
+                        if let current = await viewModel.refreshMember(memberID: kid.id) {
+                            kidNameRequiresRefresh = false
+                            kidNameSaveFailed = current.role != .kid
+                        }
+                    }
+                }
+            }
+        }
+        .navigationTitle("family.settings.hub.edit_kids_name")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button("family.settings.hub.cancel") {
+                    if draftKidName != kid.name { showsKidNameDiscard = true }
+                    else { editingKid = nil }
+                }
+                .disabled(kidNameIsSaving)
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("family.settings.hub.save") {
+                    guard case .success = FamilyCreationValidation.validatedName(draftKidName) else {
+                        kidNameIsInvalid = true
+                        return
+                    }
+                    kidNameIsSaving = true
+                    kidNameSaveFailed = false
+                    Task {
+                        let result = await viewModel.updateKidsName(
+                            memberID: kid.id,
+                            name: draftKidName.trimmingCharacters(in: .whitespacesAndNewlines)
+                        )
+                        kidNameIsSaving = false
+                        switch result {
+                        case .saved: editingKid = nil
+                        case .failed, .noLongerEligible: kidNameSaveFailed = true
+                        case .reconciliationRequired: kidNameRequiresRefresh = true
+                        }
+                    }
+                }
+                .disabled(kidNameIsSaving || kidNameRequiresRefresh || draftKidName == kid.name)
+            }
+        }
+        .confirmationDialog("family.members.discard.title", isPresented: $showsKidNameDiscard) {
+            Button("family.members.discard.confirm", role: .destructive) { editingKid = nil }
+            Button("family.members.discard.keep_editing", role: .cancel) {}
+        } message: {
+            Text("family.members.discard.message")
+        }
+        .interactiveDismissDisabled(kidNameIsSaving || draftKidName != kid.name)
     }
 
     private func settingsRow(icon: String, title: LocalizedStringKey, value: String, showsChevron: Bool = false) -> some View {

@@ -3,12 +3,14 @@ import SwiftUI
 
 struct AppRootView: View {
     let container: AppContainer
+    let pushRegistration: PushDeviceRegistration
     @Bindable var sessionStore: AppSessionStore
     @State private var inviteJoin: InviteJoinCoordinator
     @State private var didBootstrap = false
 
-    init(container: AppContainer, sessionStore: AppSessionStore) {
+    init(container: AppContainer, sessionStore: AppSessionStore, pushRegistration: PushDeviceRegistration) {
         self.container = container
+        self.pushRegistration = pushRegistration
         self.sessionStore = sessionStore
         _inviteJoin = State(initialValue: container.makeInviteJoinCoordinator(sessionStore: sessionStore))
     }
@@ -57,6 +59,11 @@ struct AppRootView: View {
                     container.makeProfileViewModel(session: profile, sessionStore: sessionStore)
                 }
                 .id(profile)
+                .task(id: profile.memberID) {
+                    if let token = sessionStore.accessToken {
+                        await container.registerPushDevice(accessToken: token, registration: pushRegistration)
+                    }
+                }
             case let .initialProfile(grant):
                 InitialOnboardingFlowView(
                     viewModel: container.makeOnboardingViewModel(grant: grant, sessionStore: sessionStore)

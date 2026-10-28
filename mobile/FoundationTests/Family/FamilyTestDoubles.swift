@@ -35,9 +35,13 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
     private var changeTimeZoneResults: [Result<FamilySettings, Error>]
     private var listMembersResults: [Result<FamilyMemberPage, Error>]
     private var memberDetailResult: Result<FamilyMemberDetail, Error>
+    private var memberNameUpdateResult: Result<FamilyMember, Error> = .failure(FamilyError.unavailable)
+    private var _memberNameUpdateRequests: [(UUID, String)] = []
     private var inviteResults: [Result<MemberInvite, Error>]
     private var _invitedMemberIDs: [UUID] = []
     private var familyResult: Result<FamilyProfile, Error> = .success(FamilyRepositorySpy.defaultFamilyProfile)
+    private var familyOverviewResult: Result<FamilyOverview, Error> = .failure(FamilyError.unavailable)
+    private var familyTaskPageResult: Result<FamilyTaskPage, Error> = .failure(FamilyError.unavailable)
     private var leaveAdministrationResult: Result<FamilyMember, Error> = .failure(FamilyError.unavailable)
     private var _updatedFamilyNames: [String] = []
     private let createDelay: Duration?
@@ -49,6 +53,7 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
     private var _previewCalls = 0
     private var _changeTimeZoneCalls = 0
     private var _memberDetailRequests: [UUID] = []
+    private var _familyTaskRequests: [(FamilyDateRange, UUID?)] = []
     private var _createMemberCalls = 0
     private var _listMembersCalls = 0
     private var _lastCommand: CreateFamilyCommand?
@@ -73,8 +78,37 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
         lock.withLock { memberDetailResult = result }
     }
 
+    func setMemberNameUpdateResult(_ result: Result<FamilyMember, Error>) {
+        lock.withLock { memberNameUpdateResult = result }
+    }
+
+    var memberNameUpdateRequests: [(UUID, String)] { lock.withLock { _memberNameUpdateRequests } }
+
     func setFamilyResult(_ result: Result<FamilyProfile, Error>) {
         lock.withLock { familyResult = result }
+    }
+
+    func setFamilyOverviewResult(_ result: Result<FamilyOverview, Error>) {
+        lock.withLock { familyOverviewResult = result }
+    }
+
+    func setFamilyTaskPageResult(_ result: Result<FamilyTaskPage, Error>) {
+        lock.withLock { familyTaskPageResult = result }
+    }
+
+    func getFamilyOverview(range: FamilyDateRange?, accessToken: String) async throws -> FamilyOverview {
+        try lock.withLock { familyOverviewResult }.get()
+    }
+
+    func listFamilyTasks(
+        range: FamilyDateRange,
+        memberID: UUID?,
+        status: FamilyTaskStatusFilter,
+        cursor: String?,
+        accessToken: String
+    ) async throws -> FamilyTaskPage {
+        lock.withLock { _familyTaskRequests.append((range, memberID)) }
+        return try lock.withLock { familyTaskPageResult }.get()
     }
 
     func setLeaveAdministrationResult(_ result: Result<FamilyMember, Error>) {
@@ -83,6 +117,7 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
 
     var updatedFamilyNames: [String] { lock.withLock { _updatedFamilyNames } }
     var memberDetailRequests: [UUID] { lock.withLock { _memberDetailRequests } }
+    var familyTaskRequests: [(FamilyDateRange, UUID?)] { lock.withLock { _familyTaskRequests } }
     var lastCommand: CreateFamilyCommand? { lock.withLock { _lastCommand } }
     var uploadedPhotos: [Data] { lock.withLock { _uploadedPhotos } }
     var linkedMediaIDs: [String] { lock.withLock { _linkedMediaIDs } }
@@ -232,6 +267,13 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
         try lock.withLock {
             _memberDetailRequests.append(memberID)
             return try memberDetailResult.get()
+        }
+    }
+
+    func updateMemberName(memberID: UUID, name: String, accessToken: String) async throws -> FamilyMember {
+        try lock.withLock {
+            _memberNameUpdateRequests.append((memberID, name))
+            return try memberNameUpdateResult.get()
         }
     }
 

@@ -2,6 +2,7 @@ import SwiftUI
 
 @main
 struct FamilyRoutineApp: App {
+    @UIApplicationDelegateAdaptor(PushDeviceRegistration.self) private var pushRegistration
     private let container: AppContainer
     @State private var sessionStore: AppSessionStore
 
@@ -26,7 +27,7 @@ struct FamilyRoutineApp: App {
 
     var body: some Scene {
         WindowGroup {
-            AppRootView(container: container, sessionStore: sessionStore)
+            AppRootView(container: container, sessionStore: sessionStore, pushRegistration: pushRegistration)
         }
     }
 }

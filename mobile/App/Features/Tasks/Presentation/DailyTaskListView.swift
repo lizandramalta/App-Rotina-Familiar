@@ -4,6 +4,7 @@ import SwiftUI
 /// Never shows a Semana selector (CA-01). Row tap opens TEL-012 for both audiences: SPEC-011
 /// requires Kids to reach their own completed task to reopen it (TEL-012/MOD-006).
 struct DailyTaskListView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @State private var viewModel: DailyTaskListViewModel
     @State private var visibleWeekStart: Date
     private let currentMemberID: UUID
@@ -65,6 +66,9 @@ struct DailyTaskListView: View {
                     routineStatus(routineFeedback)
                 }
                 carousel
+                ForEach(viewModel.receivedApplause) { applause in
+                    applauseCard(applause)
+                }
                 Group {
                     if viewModel.isLoading, viewModel.items.isEmpty, viewModel.progress == nil {
                         ProgressView()
@@ -103,6 +107,12 @@ struct DailyTaskListView: View {
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(viewModel.audience == .adult ? .hidden : .visible, for: .navigationBar)
+        .alert("family.applause.dismiss_error", isPresented: Binding(
+            get: { viewModel.applauseDismissFailed },
+            set: { if !$0 { viewModel.dismissApplauseFailure() } }
+        )) {
+            Button("OK") { viewModel.dismissApplauseFailure() }
+        }
         .sheet(isPresented: Binding(
             get: { viewModel.missionReopenPrompt != nil },
             set: { if !$0 { viewModel.cancelMissionReopen() } }
@@ -141,6 +151,12 @@ struct DailyTaskListView: View {
         .task(id: refreshRevision) {
             await viewModel.load()
         }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { Task { await viewModel.refreshReceivedApplause() } }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .familyApplauseDidArrive)) { _ in
+            Task { await viewModel.refreshReceivedApplause() }
+        }
         .onChange(of: viewModel.selectedDate) { _, _ in
             visibleWeekStart = Self.startOfSundayWeek(containing: viewModel.selectedDate)
             isHeaderFocused = true
@@ -156,6 +172,35 @@ struct DailyTaskListView: View {
         .onChange(of: viewModel.actionFailure) { _, failure in
             if failure != nil { isErrorFocused = true }
         }
+    }
+
+    private func applauseCard(_ applause: ReceivedFamilyApplause) -> some View {
+        let messageFormat = applause.senderNames.count > 1
+            ? String(localized: "family.applause.received.message_plural")
+            : String(localized: "family.applause.received.message")
+        return HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "hands.clap.fill").font(.title2)
+            VStack(alignment: .leading, spacing: 5) {
+                Text("family.applause.received.title").font(.headline)
+                Text(String(format: messageFormat,
+                    ListFormatter.localizedString(byJoining: applause.senderNames)))
+                    .font(.subheadline)
+            }
+            Spacer(minLength: 0)
+            Button {
+                Task { await viewModel.dismissApplause(applause.id) }
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.caption.weight(.bold))
+                    .frame(width: 30, height: 30)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("family.applause.dismiss")
+        }
+        .foregroundStyle(.primary)
+        .padding(16)
+        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 20))
+        .accessibilityIdentifier("family.applause.received.\(applause.id.uuidString.lowercased())")
     }
 
     private func routineStatus(_ routine: Routine) -> some View {
