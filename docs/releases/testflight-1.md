@@ -1,6 +1,6 @@
 # Mutua — primeira distribuição no TestFlight
 
-**Versão:** 1.4
+**Versão:** 1.5
 **Data:** 2026-10-28  
 **Branch:** `release-testflight`, criada de `origin/develop` (`e2af94a`)
 
@@ -69,11 +69,15 @@ contrato HTTP `/v1`.
   deploy; respostas em cache podem continuar mostrando o ID antigo por até
   uma hora. O domínio de produção segue ativo e as URLs de prévia estão
   desativadas.
+- Em 2026-10-28, `APPLE_CLIENT_ID=com.lizandramalta.mutua` foi salvo no
+  serviço de produção existente no Render. O deploy
+  `dep-dbh2ekm7bikc73ei9st0` terminou como **Live**; nenhuma migration nova
+  foi aplicada. O login Apple do novo build ainda precisa ser testado.
 
 ## Antes de convidar testadores
 
-1. Usar a API de produção existente. Atualizar `APPLE_CLIENT_ID` nela para
-   `com.lizandramalta.mutua` antes do teste de login Apple; confirmar se a
+1. Usar a API de produção existente, já configurada com
+   `APPLE_CLIENT_ID=com.lizandramalta.mutua`; confirmar no teste de login se a
    chave Apple atual cobre o novo App ID. O canal `RELEASE_CHANNEL=testflight`
    desta branch só passa a valer se o código backend for implantado no serviço
    existente; até lá, as rotas adiadas continuam disponíveis na API.
