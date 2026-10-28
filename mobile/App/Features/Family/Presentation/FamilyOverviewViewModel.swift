@@ -6,6 +6,7 @@ import SwiftUI
 @MainActor
 @Observable
 final class FamilyOverviewViewModel {
+    enum KidsNameUpdateResult { case saved, failed, reconciliationRequired, noLongerEligible }
     private(set) var members: [FamilyMember] = []
     private(set) var nextCursor: String?
     private(set) var isLoading = false
@@ -15,6 +16,11 @@ final class FamilyOverviewViewModel {
     private(set) var familyName = ""
     private(set) var timeZoneID = FamilyCreationValidation.defaultTimeZoneID
     private(set) var overview: FamilyOverview?
+    private(set) var todayOverview: FamilyOverview?
+    private(set) var applauseSummary: [UUID: FamilyApplauseSummary] = [:]
+    private(set) var sendingApplauseIDs: Set<UUID> = []
+    private(set) var sentApplauseIDs: Set<UUID> = []
+    private(set) var applauseFailed = false
     private(set) var isLoadingOverview = false
     private(set) var overviewFailed = false
     private(set) var selectedRange: FamilyDateRange?
@@ -63,6 +69,8 @@ final class FamilyOverviewViewModel {
         defer { isLoading = false }
         await loadFamilyProfile(token: token)
         await loadOverview(token: token, range: selectedRange)
+        await loadTodayOverview(token: token)
+        await loadApplauseSummary(token: token)
         do {
             let page = try await familyRepository.listMembers(accessToken: token, cursor: nil)
             members = page.items
@@ -94,13 +102,71 @@ final class FamilyOverviewViewModel {
         }
     }
 
+    /// TEL-050 incentive cards use today's progress even when the visible family range is wider.
+    private func loadTodayOverview(token: String) async {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: timeZoneID) ?? .current
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = calendar
+        formatter.timeZone = calendar.timeZone
+        formatter.dateFormat = "yyyy-MM-dd"
+        let today = formatter.string(from: .now)
+        let todayRange = FamilyDateRange(startDate: today, endDate: today)
+        if overview?.range == todayRange {
+            todayOverview = overview
+            return
+        }
+        do {
+            todayOverview = try await familyRepository.getFamilyOverview(range: todayRange, accessToken: token)
+        } catch {
+            // The optional cards never present stale eligibility as confirmed data.
+            todayOverview = nil
+        }
+    }
+
     func applyRange(_ range: FamilyDateRange) async {
         guard range.startDate <= range.endDate,
               let firstDate = overview?.familyCreatedAt,
               range.startDate >= firstDate,
               let token = accessTokenProvider() else { return }
+        if range != selectedRange { sentApplauseIDs = [] }
         await loadOverview(token: token, range: range)
+        await loadApplauseSummary(token: token)
     }
+
+    func previewTaskCount(for range: FamilyDateRange) async throws -> Int {
+        guard let token = accessTokenProvider() else { throw FamilyError.unavailable }
+        return try await familyRepository.getFamilyOverview(range: range, accessToken: token).progress.total
+    }
+
+    private func loadApplauseSummary(token: String) async {
+        guard let range = selectedRange else { return }
+        do {
+            let items = try await familyRepository.listFamilyApplause(range: range, accessToken: token)
+            applauseSummary = Dictionary(uniqueKeysWithValues: items.map { ($0.memberID, $0) })
+        } catch {
+            applauseSummary = [:]
+        }
+    }
+
+    func sendApplause(to memberID: UUID) async {
+        guard canConfigureFamily, memberID != currentMemberID,
+              let range = selectedRange, let token = accessTokenProvider(),
+              !sendingApplauseIDs.contains(memberID) else { return }
+        sendingApplauseIDs.insert(memberID)
+        applauseFailed = false
+        defer { sendingApplauseIDs.remove(memberID) }
+        do {
+            try await familyRepository.sendFamilyApplause(memberID: memberID, range: range, accessToken: token)
+            sentApplauseIDs.insert(memberID)
+            await loadApplauseSummary(token: token)
+        } catch {
+            applauseFailed = true
+        }
+    }
+
+    func dismissApplauseFailure() { applauseFailed = false }
 
     /// Name and time zone are confirmed by the server; a failure keeps what is already shown.
     private func loadFamilyProfile(token: String) async {
@@ -163,6 +229,47 @@ final class FamilyOverviewViewModel {
         await loadInitial()
     }
 
+    /// SPEC-003 CA-02/03/07: only Kids names are corrected here; the server rechecks the role.
+    func updateKidsName(memberID: UUID, name: String) async -> KidsNameUpdateResult {
+        guard canConfigureFamily,
+              let member = members.first(where: { $0.id == memberID }),
+              member.role == .kid,
+              memberID != currentMemberID,
+              let token = accessTokenProvider() else { return .noLongerEligible }
+        do {
+            let updated = try await familyRepository.updateMemberName(
+                memberID: memberID, name: name, accessToken: token
+            )
+            replaceMember(updated)
+            return .saved
+        } catch {
+            // A lost PATCH response is reconciled before offering another write (CA-07).
+            guard let current = await refreshMember(memberID: memberID) else {
+                return .reconciliationRequired
+            }
+            guard current.role == .kid else { return .noLongerEligible }
+            return current.name == name ? .saved : .failed
+        }
+    }
+
+    @discardableResult
+    func refreshMember(memberID: UUID) async -> FamilyMemberDetail? {
+        guard let token = accessTokenProvider() else { return nil }
+        do {
+            let current = try await familyRepository.getMemberDetail(memberID: memberID, accessToken: token)
+            replaceMember(FamilyMember(
+                id: current.id, name: current.name, role: current.role,
+                isFamilyCreator: current.isFamilyCreator
+            ))
+            return current
+        } catch { return nil }
+    }
+
+    private func replaceMember(_ member: FamilyMember) {
+        guard let index = members.firstIndex(where: { $0.id == member.id }) else { return }
+        members[index] = member
+    }
+
     func makeKidsReviewQueue() -> KidsReviewQueueViewModel? {
         makeKidsReviewQueueViewModel?()
     }
@@ -173,7 +280,6 @@ final class FamilyOverviewViewModel {
             session: session,
             familyRepository: familyRepository,
             accessTokenProvider: accessTokenProvider,
-            range: selectedRange,
             familyCreatedAt: overview?.familyCreatedAt,
             timeZoneID: timeZoneID
         )
@@ -185,6 +291,7 @@ final class FamilyOverviewViewModel {
             range: range,
             memberID: memberID,
             members: overview?.members ?? [],
+            currentMemberID: session.memberID,
             role: session.role,
             familyName: familyName,
             familyCreatedAt: overview?.familyCreatedAt,

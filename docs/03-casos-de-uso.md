@@ -1,8 +1,8 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.21\
-**Data:** 2026-10-27\
+**Versão:** 1.25\
+**Data:** 2026-10-28\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -117,7 +117,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Pré-condição:** família existente e permissão de Administrador para operações persistentes de gestão e convite. A preparação de membros em UC01 ocorre antes da criação, como rascunho do futuro Criador, sem perfil ou sessão de Administrador e sem persistência própria.
 
-**Entrada de edição/convite:** Família → selecionar item da lista → TEL-032; no onboarding, a etapa de convites apresenta os membros criados com a família. Consultar o detalhe e suas tarefas é permitido aos adultos por UC11; as ações administrativas seguem este caso de uso. A primeira emissão abre diretamente o compartilhamento após a ação explícita. Reenviar exige confirmação, emite novo link e senha, invalida os convites anteriores e revoga a sessão anterior do mesmo perfil, sem recriar o membro. O Criador retorna por Apple; a configuração de apelido só pode ser alterada pelo titular em UC10.
+**Entrada de gestão/convite:** Família → selecionar item da lista → TEL-032; correção do nome Kids: Família → Configurações da família (TEL-057) ou detalhe Kids (TEL-032); no onboarding, a etapa de convites apresenta os membros criados com a família. Consultar o detalhe e suas tarefas é permitido aos adultos por UC11; as ações administrativas seguem este caso de uso. A primeira emissão abre diretamente o compartilhamento após a ação explícita. Reenviar exige confirmação, emite novo link e senha, invalida os convites anteriores e revoga a sessão anterior do mesmo perfil, sem recriar o membro. O Criador retorna por Apple; a configuração de apelido só pode ser alterada pelo titular em UC10.
 
 **Fluxo principal — Adicionar membro:**
 
@@ -133,7 +133,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 **Alternativas e exceções:**
 
 - Se um usuário perder a sessão, o Administrador pode selecionar seu perfil ativo existente e gerar um novo convite com link e senha de uso único. A recuperação preserva o perfil, o histórico, as tarefas e os vínculos; não exige adicionar outro membro.
-- O Administrador pode editar os dados permitidos de outros perfis.
+- O Administrador pode corrigir o nome administrativo de perfis Kids em Configurações da família ou no detalhe Kids; adultos alteram o próprio nome por UC10.
 - Pode promover um Membro adulto a Administrador; perfis Kids devem sair desse modo antes da promoção.
 - Pode rebaixar outro Administrador, exceto o Criador. Um Administrador também pode deixar seu próprio papel, exceto o Criador.
 - Pode ativar ou desativar o Modo Kids; um Administrador não pode permanecer nesse modo.
@@ -510,11 +510,12 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 2. O sistema abre a semana corrente e apresenta concluídas/total das tarefas previstas no intervalo, contando cada tarefa uma vez, inclusive compartilhadas ou sem responsável.
 3. O adulto escolhe qualquer intervalo Início/Fim dentro dos limites de RN49 e RN61; o progresso acompanha o intervalo inteiro.
 4. Ao abrir Tarefas da família, o sistema mantém exatamente o intervalo e permite consultar tarefas de outras pessoas e sem responsável, filtrando por membro e estado. Gerenciar e concluir continuam sujeitos a UC07 e UC12.
-5. O menu de Tarefas da família oferece Gerar relatório PDF por UC18. A Família apresenta a lista de membros: selecionar uma pessoa abre TEL-032 com suas tarefas no mesmo intervalo. Voltar restaura o contexto da Família. Somente Administradores acessam Configurações da família e Adicionar membro, bem como Editar perfil e Gerar/reenviar convite no detalhe quando permitidos por UC02. Confirmações Kids continuam exclusivas dos Administradores. A carga de UC13 terá apresentação posterior, fora da TEL-050 atual.
+5. O menu de Tarefas da família oferece Gerar relatório PDF por UC18. A Família apresenta a lista de membros: selecionar uma pessoa abre TEL-032 inicialmente em Dia, com opção Semana de domingo a sábado no fuso da família e limites de RN49. Voltar restaura o intervalo e os filtros da Família; outros intervalos são consultados por TEL-011. Somente Administradores acessam Configurações da família e Adicionar membro, bem como Alterar papel, Remover membro e Gerar/reenviar convite no detalhe quando permitidos por UC02. O nome administrativo de Kids pode ser corrigido em Configurações da família ou no detalhe Kids por Administrador autorizado; adultos alteram o próprio nome em Meu perfil. Confirmações Kids continuam exclusivas dos Administradores. A carga de UC13 terá apresentação posterior, fora da TEL-050 atual.
+6. A Família destaca quem concluiu todas as tarefas de hoje e quem tem a maior quantidade de tarefas atribuídas no intervalo selecionado, conforme RN60. Um Administrador pode tocar Parabenizar para outro membro ativo, inclusive Kids. O sistema registra cada envio, permite repeti-lo e disponibiliza mensagem em Minhas tarefas do destinatário, com intenção de push. O destinatário pode fechar a mensagem para ocultá-la da interface.
 
 Sem tarefas no período, o sistema informa essa condição sem divisão por zero. Tarefas aguardando confirmação não entram nas concluídas; para Membro, aparecem e são contadas como Pendentes na Família, enquanto Administrador vê Aguardando confirmação separadamente. O estado canônico e as permissões não mudam. Conclusão, reabertura e exclusão autorizadas atualizam o progresso. Kids não acessam esta área.
 
-**Pós-condição:** o usuário consulta um período permitido sem alterar o estado das tarefas.
+**Pós-condição:** o usuário consulta um período permitido sem alterar o estado das tarefas; parabéns enviados ficam registrados separadamente.
 
 ## UC12
 
@@ -844,6 +845,10 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.25 | 2026-10-28 | UC02/UC11: TEL-032 usa Dia/Semana domingo–sábado e permite editar nome Kids ao Administrador; Parabenizar fica na Família. |
+| 1.24 | 2026-10-28 | UC02/UC10/UC11: adulto edita o próprio nome; Administrador corrige nome de Kids em TEL-057. TEL-032 mantém papel, convite e remoção. |
+| 1.23 | 2026-10-28 | UC11: TEL-032 mostra o dia atual e horário de conclusão válida; retorna ao intervalo da Família, enquanto outros dias usam TEL-011. |
+| 1.22 | 2026-10-27 | UC11: destaques por dia atual/intervalo, parabéns repetível, mensagem interna, push e fechamento pelo destinatário. |
 | 1.21 | 2026-10-27 | UC02, UC11 e UC18: gestão em Configurações da família, consulta familiar por intervalo livre e seleção da semana do PDF no menu de TEL-011. |
 | 1.20 | 2026-10-27 | UC08: o alcance “esta e as futuras” preserva a data prevista já gravada de cada ocorrência, inclusive após edição individual. Para SPEC-008 Fase 2 / SCRUM-45. |
 | 1.19 | 2026-10-27 | UC08: editar ou excluir ocorrência de rotina sempre pergunta o alcance; “esta e as futuras” não altera repetição nem data prevista e substitui edições individuais anteriores das futuras. UC07: a escolha do RN66 vale para a edição individual; a edição de rotina não altera estados. Para SPEC-008 Fase 2. |

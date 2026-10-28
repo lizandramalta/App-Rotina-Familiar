@@ -198,7 +198,7 @@ export function registerMemberRoutes(app: FastifyInstance, container: Applicatio
       {
         schema: {
           tags: ['Members'],
-          summary: 'Edit a family member administrative name',
+          summary: 'Correct a Kids member administrative name as a family administrator',
           security: [{ bearerAuth: [] }],
           params: {
             type: 'object',

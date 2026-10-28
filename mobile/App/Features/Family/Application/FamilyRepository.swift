@@ -14,6 +14,11 @@ nonisolated protocol FamilyRepository: Sendable {
     func removeMember(memberID: UUID, accessToken: String) async throws
     func leaveAdministration(accessToken: String) async throws -> FamilyMember
     func getFamilyOverview(range: FamilyDateRange?, accessToken: String) async throws -> FamilyOverview
+    func listFamilyApplause(range: FamilyDateRange, accessToken: String) async throws -> [FamilyApplauseSummary]
+    func sendFamilyApplause(memberID: UUID, range: FamilyDateRange, accessToken: String) async throws
+    func listReceivedFamilyApplause(accessToken: String) async throws -> [ReceivedFamilyApplause]
+    func dismissFamilyApplause(id: UUID, accessToken: String) async throws
+    func registerPushDevice(token: String, environment: String, accessToken: String) async throws
     func listFamilyTasks(
         range: FamilyDateRange,
         memberID: UUID?,
@@ -30,6 +35,15 @@ nonisolated protocol FamilyRepository: Sendable {
     func getFamilySettings(accessToken: String) async throws -> FamilySettings
     func previewFamilyTimeZoneChange(timeZoneID: String, application: TimeZoneApplication, accessToken: String) async throws -> TimeZoneChangePreview
     func changeFamilyTimeZone(timeZoneID: String, application: TimeZoneApplication, accessToken: String) async throws -> FamilySettings
+}
+
+// Test doubles predating SPEC-009 CA-13–15 can opt in only when those flows are exercised.
+extension FamilyRepository {
+    func listFamilyApplause(range: FamilyDateRange, accessToken: String) async throws -> [FamilyApplauseSummary] { [] }
+    func sendFamilyApplause(memberID: UUID, range: FamilyDateRange, accessToken: String) async throws { throw FamilyError.unavailable }
+    func listReceivedFamilyApplause(accessToken: String) async throws -> [ReceivedFamilyApplause] { [] }
+    func dismissFamilyApplause(id: UUID, accessToken: String) async throws { throw FamilyError.unavailable }
+    func registerPushDevice(token: String, environment: String, accessToken: String) async throws { throw FamilyError.unavailable }
 }
 
 nonisolated protocol ProfilePhotoNormalizing: Sendable {

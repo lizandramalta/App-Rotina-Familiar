@@ -102,7 +102,11 @@ describe('Member routes — SPEC-003 phase 1', () => {
     const spec = response.json() as {
       paths: Record<
         string,
-        { get?: { security?: unknown }; post?: { responses: Record<string, unknown> } }
+        {
+          get?: { security?: unknown };
+          post?: { responses: Record<string, unknown> };
+          patch?: { summary?: string; security?: unknown; responses: Record<string, unknown> };
+        }
       >;
     };
     expect(spec.paths['/v1/family/members']?.get?.security).toEqual([{ bearerAuth: [] }]);
@@ -115,5 +119,10 @@ describe('Member routes — SPEC-003 phase 1', () => {
     expect(spec.paths['/v1/family/members/{memberId}']?.get?.security).toEqual([
       { bearerAuth: [] },
     ]);
+    expect(spec.paths['/v1/family/members/{memberId}']?.patch).toMatchObject({
+      summary: 'Correct a Kids member administrative name as a family administrator',
+      security: [{ bearerAuth: [] }],
+      responses: { 200: expect.anything(), 403: expect.anything(), 404: expect.anything() },
+    });
   });
 });

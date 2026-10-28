@@ -76,6 +76,19 @@ final class AppContainer {
         )
     }
 
+    func registerPushDevice(accessToken: String, registration: PushDeviceRegistration) async {
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"] != nil { return }
+        #endif
+        guard let token = try? await registration.requestToken() else { return }
+        #if DEBUG
+        let environment = "development"
+        #else
+        let environment = "production"
+        #endif
+        try? await familyRepository.registerPushDevice(token: token, environment: environment, accessToken: accessToken)
+    }
+
     func makeEntryViewModel(sessionStore: AppSessionStore) -> EntryViewModel {
         EntryViewModel(
             appleAuthenticator: appleAuthenticator,
@@ -158,6 +171,7 @@ final class AppContainer {
         KidsTasksTabView(
             taskRepository: taskRepository,
             routineRepository: routineRepository,
+            familyRepository: familyRepository,
             currentMemberID: session.memberID,
             accessToken: accessToken,
             makeProfileViewModel: makeProfileViewModel

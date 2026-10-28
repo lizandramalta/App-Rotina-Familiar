@@ -11,6 +11,7 @@ import SwiftUI
 struct KidsTasksTabView: View {
     let taskRepository: any TaskRepository
     let routineRepository: any RoutineRepository
+    let familyRepository: (any FamilyRepository)?
     let currentMemberID: UUID
     let accessToken: String
     let makeProfileViewModel: () -> ProfileViewModel
@@ -22,12 +23,14 @@ struct KidsTasksTabView: View {
     init(
         taskRepository: any TaskRepository,
         routineRepository: any RoutineRepository,
+        familyRepository: (any FamilyRepository)? = nil,
         currentMemberID: UUID,
         accessToken: String,
         makeProfileViewModel: @escaping () -> ProfileViewModel
     ) {
         self.taskRepository = taskRepository
         self.routineRepository = routineRepository
+        self.familyRepository = familyRepository
         self.currentMemberID = currentMemberID
         self.accessToken = accessToken
         self.makeProfileViewModel = makeProfileViewModel
@@ -41,6 +44,7 @@ struct KidsTasksTabView: View {
                 role: .kid,
                 currentMemberID: currentMemberID,
                 repository: taskRepository,
+                familyRepository: familyRepository,
                 accessToken: accessToken,
                 refreshRevision: listRevision,
                 onSelectTask: { path.append($0) },

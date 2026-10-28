@@ -22,6 +22,7 @@ import { registerMemberRoutes } from './member-routes.js';
 import { registerRewardRoutes } from './reward-routes.js';
 import { registerReportRoutes } from './report-routes.js';
 import { registerKidsSignalRoutes } from './kids-signal-routes.js';
+import { registerFamilyApplauseRoutes } from './family-applause-routes.js';
 
 export function buildHttpApp(
   container: ApplicationContainer,
@@ -335,6 +336,7 @@ export function buildHttpApp(
       registerRewardRoutes(scope, container);
       registerReportRoutes(scope, container);
       registerKidsSignalRoutes(scope, container);
+      registerFamilyApplauseRoutes(scope, container);
     },
     { prefix: '/v1' },
   );

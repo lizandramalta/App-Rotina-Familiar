@@ -83,10 +83,12 @@ cp .env.example .env
 | `APPLE_ISSUER`         | `url`     | `https://appleid.apple.com`            | Sim                | Emissor esperado no `identityToken`.                                                                |
 | `APPLE_JWKS_URL`       | `url`     | `https://appleid.apple.com/auth/keys`  | Sim                | JWKS com as chaves públicas da Apple.                                                               |
 | `APPLE_TOKEN_URL`      | `url`     | `https://appleid.apple.com/auth/token` | Sim                | Endpoint de troca do `authorizationCode`.                                                           |
-| `APNS_KEY_ID`          | `string`  | -                                      | Não (Fase 0)       | Key ID para notificações push via APNs.                                                             |
-| `APNS_TEAM_ID`         | `string`  | -                                      | Não (Fase 0)       | Team ID da Apple para notificações APNs.                                                            |
-| `APNS_TOPIC`           | `string`  | -                                      | Não (Fase 0)       | Bundle ID do app iOS para push notifications.                                                       |
-| `APNS_PRIVATE_KEY`     | `string`  | -                                      | Não (Fase 0)       | Chave privada `.p8` do APNs.                                                                        |
+| `APNS_KEY_ID`          | `string`  | -                                      | Para enviar push   | Key ID para notificações push via APNs.                                                             |
+| `APNS_TEAM_ID`         | `string`  | -                                      | Para enviar push   | Team ID da Apple para notificações APNs.                                                            |
+| `APNS_TOPIC`           | `string`  | -                                      | Para enviar push   | Bundle ID do app iOS para push notifications.                                                       |
+| `APNS_PRIVATE_KEY`     | `string`  | -                                      | Para enviar push   | Chave privada `.p8` do APNs.                                                                        |
+
+Para entregar o push de Parabenizar (SPEC-009 CA-14), configure as quatro variáveis `APNS_*` no processo worker e habilite Push Notifications no App ID/assinatura iOS. O evento e a mensagem interna são gravados antes do envio; sem essas credenciais, a fila espera e a mensagem continua visível no aplicativo.
 
 As variáveis do Sign in with Apple são opcionais em `development` e `test` para não
 bloquear o desenvolvimento local, e obrigatórias com validação estrita em `production`,

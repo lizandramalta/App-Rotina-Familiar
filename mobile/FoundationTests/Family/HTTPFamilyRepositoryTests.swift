@@ -204,6 +204,28 @@ struct HTTPFamilyRepositoryTests {
         #expect(detail.capabilities == MemberCapabilities(manageMembers: true))
     }
 
+    @Test("SPEC-009 CA-07 decodes the current completion time in a member's family task list")
+    func memberTaskCompletionTime() async throws {
+        let taskID = "00000000-0000-0000-0000-0000000000c2"
+        let json = """
+        {"startDate":"2026-10-28","endDate":"2026-10-28","nextCursor":null,"items":[
+          {"id":"\(taskID)","title":"Regar as plantas","weight":1,"scheduledDate":"2026-10-28",
+           "assigneeIds":["\(memberID)"],"note":null,"status":"completed","displayStatus":"completed",
+           "routineId":null,"createdAt":"2026-10-28T08:00:00.000Z","completedAt":"2026-10-28T11:10:00.000Z"}
+        ]}
+        """
+        let stub = StubHTTP.make(status: 200, json: json)
+
+        let page = try await stub.repository.listFamilyTasks(
+            range: FamilyDateRange(startDate: "2026-10-28", endDate: "2026-10-28"),
+            memberID: UUID(uuidString: memberID), status: .all, cursor: nil,
+            accessToken: "token-1"
+        )
+
+        #expect(stub.requests().first?.url.path == "/v1/family/members/\(memberID)/tasks")
+        #expect(page.items.first?.completedAt == ISO8601DateFormatter().date(from: "2026-10-28T11:10:00Z"))
+    }
+
     @Test("SPEC-002 gets and renames the family through GET and PATCH /v1/family")
     func getAndUpdateFamily() async throws {
         let json = """

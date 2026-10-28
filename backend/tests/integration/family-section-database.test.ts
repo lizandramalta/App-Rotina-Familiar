@@ -157,6 +157,7 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
         id: family.taskId,
         status: 'awaitingConfirmation',
         displayStatus: 'pending',
+        completedAt: null,
       });
       const queue = await new ListKidsSignalsUseCase(signalDeps).execute(family.admin);
       expect(queue.items[0]?.signalId).toBe(signal.signal.id);
@@ -167,6 +168,10 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
       expect((await decision.execute(family.admin, signal.signal.id, 'confirm')).applied).toBe(
         false,
       );
+      const completedMemberTasks = await tasks.execute(family.member, {
+        ...range, memberId: family.member.memberId, status: 'completed',
+      });
+      expect(completedMemberTasks.items[0]?.completedAt).toBe(NOW.toISOString());
       expect(
         (await new ListKidsSignalsUseCase(signalDeps).execute(family.admin)).items,
       ).toHaveLength(0);

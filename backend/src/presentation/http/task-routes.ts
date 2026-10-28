@@ -269,7 +269,17 @@ const familyTasksResponseSchema = {
   properties: {
     startDate: { type: 'string' },
     endDate: { type: 'string' },
-    items: ownTasksResponseSchema.properties.items,
+    items: {
+      ...ownTasksResponseSchema.properties.items,
+      items: {
+        ...ownTasksResponseSchema.properties.items.items,
+        required: [...ownTasksResponseSchema.properties.items.items.required, 'completedAt'],
+        properties: {
+          ...ownTasksResponseSchema.properties.items.items.properties,
+          completedAt: { type: ['string', 'null'] },
+        },
+      },
+    },
     nextCursor: { type: ['string', 'null'] },
   },
 } as const;

@@ -1,7 +1,7 @@
 # Convenções de código mobile
 
-**Versão:** 1.0  
-**Data:** 2026-10-08  
+**Versão:** 1.1\
+**Data:** 2026-10-28\
 **Situação:** norma técnica para implementações Swift/SwiftUI
 
 [Arquitetura mobile](mobile-architecture.md) · [Catálogo mobile](mobile-feature-catalog.md) · [Decisões mobile](mobile-decisions.md) · [Índice](../DOCUMENTACAO.md)
@@ -28,6 +28,7 @@ Código, tipos, arquivos, chaves de localização e comentários técnicos usam 
 - Use `@State` para estado local de apresentação que pertence à View. ViewModels e routers que coordenam estado observável pertencem ao `@MainActor`; componentes estáticos podem permanecer somente como Views.
 - Use `NavigationStack` com rotas tipadas. A View não constrói URLs nem faz parsing de deep link: isso pertence ao router/parser da camada App.
 - Todo texto visível deve vir de catálogo de strings. Inclua `accessibilityLabel`, `accessibilityHint` ou valores equivalentes quando o controle não for autoexplicativo para VoiceOver.
+- Use SF Symbols para ícones de ação, navegação e estado da interface. Preserve o significado do símbolo, tamanho de toque e rótulo acessível; assets vetoriais próprios ficam para ilustrações ou identidade visual, não para duplicar ícones do sistema.
 
 ## 4. Concorrência, dados e segurança
 
@@ -54,4 +55,5 @@ Código, tipos, arquivos, chaves de localização e comentários técnicos usam 
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.1 | 2026-10-28 | Padroniza ícones de interface com SF Symbols; assets próprios ficam para ilustrações e identidade visual. |
 | 1.0 | 2026-10-08 | Convenções iniciais de Swift/SwiftUI, Clean Architecture, concorrência, segurança, testes e revisão. |

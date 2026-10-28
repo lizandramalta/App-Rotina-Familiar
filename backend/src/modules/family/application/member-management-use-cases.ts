@@ -236,13 +236,12 @@ interface ManagementDependencies {
   readonly clock: Clock;
 }
 
-/** SPEC-003 CA-02/03/07: administrative name is distinct from a private nickname. */
+/** SPEC-003 CA-02/03/07: only an administrator may correct a Kids administrative name. */
 export class UpdateMemberUseCase {
   constructor(private readonly deps: ManagementDependencies) {}
 
   async execute(actor: ActorContext, memberId: string, nameInput: unknown): Promise<MemberView> {
     requireAdministrator(actor.role);
-    const name = validateName(nameInput);
     return translateDependencyFailure(() =>
       this.deps.transactionRunner.forFamily(actor.familyId, async (tx) => {
         await requireCurrentAdministrator(this.deps.repository, tx, actor);
@@ -252,6 +251,8 @@ export class UpdateMemberUseCase {
         });
         if (!member) throw new NotFoundError('Family member not found.');
         if (member.id === actor.memberId) throw new ActionNotAllowedError();
+        if (member.role !== MemberRole.KIDS) throw new ActionNotAllowedError();
+        const name = validateName(nameInput);
         return toMemberView(
           await this.deps.repository.updateMember(tx, {
             familyId: actor.familyId,

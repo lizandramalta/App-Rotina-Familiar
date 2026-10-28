@@ -2,7 +2,7 @@
 
 **Status:** aprovada
 **Autor:** Codex | **Criada em:** 2026-10-06 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-19
-**Base funcional:** RN 1.18 / RF 1.17 / UC 1.16
+**Base funcional:** RN 1.26 / RF 1.25 / UC 1.25
 **UX-spec:** [UX-009-visualizar-minhas-tarefas.md](UX-009-visualizar-minhas-tarefas.md)
 **Projetos envolvidos:** ambos
 **Tema do backlog:** Tema 2 — Tarefas e rotina
@@ -21,7 +21,7 @@
 | Requisitos funcionais | RF11, RF17, RF22, RF49, RF60, RF65, RF66 |
 | Requisitos não funcionais | RNF01, RNF02, RNF04, RNF05, RNF06, RNF07, RNF08, RNF09, RNF12, RNF13, RNF14, RNF22 |
 | Telas e fluxo | TEL-010, TEL-011, TEL-032, TEL-040, TEL-050, UF-04 |
-| Decisões arquiteturais | MA-07, MA-19; BA-07, BA-37 |
+| Decisões arquiteturais | MA-07, MA-19, MA-20; BA-07, BA-37, BA-38 |
 
 - **Documentos consultados:** `docs/01-regras-de-negocio.md`, `docs/02-requisitos.md`, `docs/03-casos-de-uso.md`, `docs/design/screen-map.md`, `docs/design/user-flows.md`, `docs/architecture/mobile-feature-catalog.md`, `docs/architecture/mobile-decisions.md`, `docs/architecture/backend-contracts.md` e `docs/architecture/backend-decisions.md`.
 - **Depende de:** [SPEC-007-gerenciar-tarefas.md](SPEC-007-gerenciar-tarefas.md), aprovada. Ela fornece a tarefa, os estados e o detalhe consultado.
@@ -33,7 +33,8 @@
 - Minhas tarefas em TEL-010 e TEL-040: lista e progresso próprios exclusivamente do dia de referência. TEL-010 inclui apenas tarefas em que o adulto é responsável ou corresponsável.
 - Tarefa compartilhada sinalizada por Kids: estado efetivo único `awaitingConfirmation`; na lista pessoal do adulto corresponsável aparece Pendente e na visualização pessoal Kids, Aguardando confirmação, sem alterar progresso, fila administrativa ou ações permitidas.
 - Navegação pessoal por data entre a criação da família e o último dia do mês corrente, incluindo dias futuros do mês atual.
-- Área Família adulta em TEL-050: progresso familiar e membros para Início/Fim livre; detalhe de membro em TEL-032 e lista complementar em TEL-011 preservam exatamente o intervalo escolhido. A seleção inicial é a semana corrente.
+- Área Família adulta em TEL-050: progresso familiar e membros para Início/Fim livre; TEL-011 preserva exatamente o intervalo escolhido; o detalhe de membro em TEL-032 inicia em Dia e alterna para a semana visual de domingo a sábado no fuso da família. A seleção inicial é a semana corrente.
+- Cartões de incentivo na Família: conclusão de todas as tarefas atribuídas hoje e maior quantidade de tarefas atribuídas no intervalo visível, com empates. Administrador pode parabenizar outro membro ativo, inclusive Kids; cada ação gera mensagem interna e intenção de push, repetível. O destinatário fecha a mensagem para ocultá-la da interface.
 - Filtros familiares `memberId` e status; TEL-011 inclui tarefas sem responsável em Todos. Para Membro, `awaitingConfirmation` é projetado e contado como Pendente, sem mudar o estado canônico.
 - Estados vazio, carregando, falha e acesso negado, com autorização e isolamento familiar desde a primeira fase.
 
@@ -68,8 +69,8 @@
 | `GET /v1/me/tasks` | `referenceDate` (`YYYY-MM-DD`), `cursor` opcional | Tarefas próprias do dia, paginação e `familyCreatedAt` | Todos |
 | `GET /v1/me/progress` | `referenceDate` (`YYYY-MM-DD`) | Total, concluídas, progresso próprios do dia e `familyCreatedAt` | Todos |
 | `GET /v1/family/overview` | `startDate`, `endDate` juntos ou ambos omitidos | Progresso familiar e membros, `familyCreatedAt`; sem carga. Sem datas, retorna semana corrente recortada | Adulto |
-| `GET /v1/family/tasks` | `startDate`, `endDate`, `memberId` e `status` opcionais, `cursor` opcional | Tarefas familiares filtradas e intervalo efetivo, inclusive sem responsável em Todos | Adulto |
-| `GET /v1/family/members/{memberId}/tasks` | `startDate`, `endDate`, `cursor` opcional | Tarefas daquele membro e intervalo efetivo | Adulto |
+| `GET /v1/family/tasks` | `startDate`, `endDate`, `memberId` e `status` opcionais, `cursor` opcional | Tarefas familiares filtradas e intervalo efetivo, inclusive sem responsável em Todos; `completedAt` da conclusão válida corrente ou `null` | Adulto |
+| `GET /v1/family/members/{memberId}/tasks` | `startDate`, `endDate`, `cursor` opcional | Tarefas daquele membro e intervalo efetivo; `completedAt` da conclusão válida corrente ou `null` | Adulto |
 
 - `startDate` e `endDate` são datas inclusivas, com início menor ou igual a fim, dentro de RN49. A seleção inicial no aplicativo é a semana corrente, recortada nas bordas permitidas. As rotas retornam o intervalo efetivo.
 - Nas rotas pessoais, `period` é campo desconhecido e deve ser recusado; a consulta é sempre diária.
@@ -93,7 +94,7 @@
 - **CA-04: Kids restrito ao próprio dia** — **DADO QUE** a sessão é Kids, **QUANDO** acessar a aba inicial, **ENTÃO** consulta somente suas tarefas/progresso diários, **E** não recebe dados nem caminhos familiares. *(RN27, RF22, RF65)*
 - **CA-05: consulta familiar adulta por intervalo** — **DADO QUE** um Administrador ou Membro abre Família, **QUANDO** escolher Início/Fim válido, **ENTÃO** vê progresso familiar e membros do intervalo inclusivo; a seleção inicial é a semana corrente. *(RN60, RN61, RF60)*
 - **CA-06: lista familiar e sem responsável** — **DADO QUE** um adulto abre Tarefas da família, **QUANDO** aplicar o intervalo e o filtro Todos, **ENTÃO** vê também tarefas sem responsável, preservando o intervalo ao abrir detalhes. *(UC11, RN60)*
-- **CA-07: filtro e detalhe de membro** — **DADO QUE** um adulto seleciona membro ou envia `memberId`, **QUANDO** o membro pertence à família, **ENTÃO** a lista é restringida a ele e TEL-032 preserva membro e exatamente o intervalo livre; voltar restaura a origem. *(RN60, RF66)*
+- **CA-07: filtro e detalhe de membro** — **DADO QUE** um adulto seleciona membro ou envia `memberId`, **QUANDO** o membro pertence à família, **ENTÃO** TEL-011 restringe a lista a ele no intervalo livre e TEL-032 inicia em Dia e alterna para Semana de domingo a sábado no fuso da família, respeitando RN49; voltar restaura o intervalo e os filtros da Família. *(RN60, RF60/RF66)*
 - **CA-08: isolamento familiar** — **DADO QUE** a rota recebe ID de outra família, **QUANDO** o backend validar a requisição, **ENTÃO** responde `404 RESOURCE_NOT_FOUND`, **E** não vaza qualquer dado. *(RNF06, RNF07)*
 - **CA-09: erro distinto de vazio** — **DADO QUE** a consulta falha ou retorna indisponível, **QUANDO** a interface tratar a resposta, **ENTÃO** mostra falha recuperável e não “Sem tarefas”. *(RNF12, RNF13)*
 - **CA-10: overview sem carga** — **DADO QUE** um adulto consulta `GET /family/overview`, **QUANDO** recebe sucesso, **ENTÃO** a resposta contém somente progresso familiar e membros definidos nesta entrega, **E NÃO** simula distribuição de carga. *(E-02)*
@@ -104,6 +105,10 @@
   - **E** estado efetivo `awaitingConfirmation`, progresso, fila de validação e permissões permanecem os mesmos. *(RN23/RN55, RF11/RF22/RF24, UC11)*
 
 - **CA-12: estado familiar apresentado por perfil** — **DADO QUE** há tarefas `awaitingConfirmation`, **QUANDO** Membro abre Família ou Tarefas da família, **ENTÃO** elas entram na contagem e no filtro Pendentes; Administrador vê a categoria Aguardando confirmação separada, **E** o estado efetivo, a fila Kids e as permissões permanecem iguais. *(RN23/RN60, RF60, UC11)*
+
+- **CA-13: incentivos e empates** — **DADO QUE** há membros ativos com tarefas atribuídas, **QUANDO** Família carrega, **ENTÃO** mostra cada membro com todas as tarefas de hoje concluídas e, se houver ao menos dois membros ativos e alguma tarefa atribuída no intervalo visível, todos os empatados no maior número; o dia atual segue o fuso familiar e independe do filtro. Se o titular da sessão estiver entre os empatados no máximo, seu cartão de maior quantidade usa a variante compacta “Você está entre quem teve mais tarefas neste período” com “Ver minhas tarefas” para TEL-032 no dia atual, sem Parabenizar. *(RN60, RF60, UC11)*
+- **CA-14: parabenizar** — **DADO QUE** Administrador escolhe outro membro ativo da mesma família, inclusive Kids, **QUANDO** confirma Parabenizar, **ENTÃO** cada ação registra nova mensagem interna e intenção de push, mesmo repetida no mesmo intervalo; ator não administrador, destinatário inativo, próprio ou de outra família são recusados sem vazamento. *(RN60, RF60, UC11)*
+- **CA-15: mensagem recebida** — **DADO QUE** existe parabéns para a sessão atual, **QUANDO** abrir Minhas tarefas, **ENTÃO** a mensagem fica visível independentemente do push; fechar oculta somente da interface do destinatário e não apaga o evento. *(RN60, RF60, UC11)*
 
 ## 7. Observabilidade
 
@@ -124,8 +129,13 @@ Não registrar título, observação, foto, tokens ou conteúdo de outra famíli
 | E-03 | Minhas tarefas é diária para todos os perfis; a consulta familiar adulta usa intervalo livre conforme E-06. | Decidida pela pessoa usuária em 2026-10-06; revisada em 2026-10-27 | Sim |
 | E-04 | Para tarefa compartilhada sinalizada por Kids, a lista do adulto corresponsável apresenta Pendente e a visualização Kids apresenta Aguardando confirmação; o estado efetivo permanece único. | Pessoa usuária / 2026-10-19 | Sim — RN23/RN55, RF11/RF22 e UC11. |
 | E-05 | `GET /v1/me/tasks` e `GET /v1/me/progress` passam a devolver `familyCreatedAt` (`YYYY-MM-DD`), derivado direto de `app.families.created_at` (sem lógica nova). Motivo: antes desta decisão, nenhum perfil tinha acesso à data de criação da família numa sessão já existente — `GET /v1/family` não a expõe e, além disso, é bloqueada para Kids — o que impedia o mobile de bloquear client-side as datas do carrossel pessoal anteriores à criação da família (RN49/RF11/RF22), tanto para adulto quanto para Kids. Expor o campo nas duas rotas pessoais resolve simetricamente para os dois perfis, já que ambos as chamam igualmente. | Architect / 2026-10-22 | Sim — RF11/RF22, RN49; `docs/architecture/backend-contracts.md` e `mobile-decisions.md` (MA-19) devem registrar o campo. |
-| E-06 | Filtro familiar Início/Fim aceita qualquer intervalo inclusivo válido; TEL-032 herda exatamente esse intervalo. TEL-011 inclui tarefas sem responsável em Todos. | Pessoa usuária / 2026-10-27 | Sim — RN60/RN61, RF60/RF66, UC11. |
+| E-06 | Filtro familiar Início/Fim aceita qualquer intervalo inclusivo válido; TEL-011 inclui tarefas sem responsável em Todos. A revisão E-11 substitui a herança do intervalo em TEL-032. | Pessoa usuária / 2026-10-27 | Sim — RN60/RN61, RF60/RF66, UC11. |
 | E-07 | Nas consultas familiares de Membro, `awaitingConfirmation` é apresentado e contado como Pendente; Administrador mantém categoria própria. | Pessoa usuária / 2026-10-27 | Sim — RN23/RN60, RF60, UC11. |
+| E-08 | Incentivo “concluiu tudo” considera hoje no fuso familiar, independente do filtro; “teve muitas tarefas” considera o intervalo visível e inclui empates. | Pessoa usuária / 2026-10-27 | Sim — RN60, RF60, UC11; UX-009, TEL-050. |
+| E-09 | Administrador pode repetir Parabenizar para qualquer outro membro ativo, inclusive Kids; cada ação gera mensagem interna e intenção de push. Fechar oculta a mensagem da interface, preservando o evento. | Pessoa usuária / 2026-10-27 | Sim — RN60, RF60, UC11; contratos, backend, mobile e testes. |
+| E-11 | Substituída por E-12: a variante diária de 2026-10-21 deixa de ser referência para TEL-032. | Pessoa usuária / 2026-10-28 | Sim — RN60–61, RF60/RF66, UC11, UX-009, contrato de consulta familiar, screen map, fluxos, backend, mobile e testes. |
+| E-12 | TEL-032 usa a variante compacta anterior de Dia/Semana: inicia no dia atual e alterna para semana visual de domingo a sábado, dentro de RN49. Parabenizar fica apenas nos cartões da Família; a tela mostra gestão em linhas e Editar no topo somente para Kids visto por Administrador autorizado. A semana familiar de segunda a domingo permanece para progresso agregado, carga, PDF e apuração. | Pessoa usuária / 2026-10-28 | Sim — RN60/RN61/RN63, RF03/RF60/RF66, UC02/UC11, UX-003/009, mapa, fluxos, mobile e testes. |
+| E-10 | Quando o próprio usuário estiver no destaque de maior quantidade, TEL-050 usa cartão compacto com texto em segunda pessoa e acesso às próprias tarefas de hoje; outros membros mantêm a variante com Parabenizar quando permitido. | Pessoa usuária / 2026-10-28 | Apresentação somente — UX-009, screen map, mobile e testes; RN60/RF60/UC11 e contratos não mudam. |
 
 **Contrato técnico revisado:** `backend-contracts.md` 1.23 e BA-37/MA-19 definem `status` e `displayStatus`. A projeção foi implementada no backend e no mobile; permissões e fila permanecem pelo estado efetivo.
 
@@ -134,8 +144,9 @@ Não registrar título, observação, foto, tokens ou conteúdo de outra famíli
 | Fase | Objetivo | CAs | Prontidão | Status |
 |---|---|---|---|---|
 | 1 | Consulta própria diária, estado por perfil, validação, autorização e isolamento | CA-01 a CA-04, CA-08, CA-11 | Contrato de projeção reconciliado e testes unitários, integração e interface por perfil verdes | em andamento — backend anterior SCRUM-38 concluído; Mobile pendente (SCRUM-39) |
-| 2 | Consulta familiar adulta, filtros, contexto e detalhe de membro | CA-05 a CA-07, CA-10, CA-12 | Testes de intervalo, filtros, perfil e navegação verdes | em implementação — backend e telas integrados; validação visual específica pendente |
+| 2 | Consulta familiar adulta, filtros, contexto e detalhe de membro | CA-05 a CA-07, CA-10, CA-12 | Testes de intervalo, filtros, perfil e navegação verdes | implementada localmente — TEL-032 conferida visualmente e navegação testada no simulador; integração com banco local pendente |
 | 3 | Falhas, acessibilidade e observabilidade | CA-09 | Estados de erro e telemetria verificados | a fazer |
+| 4 | Incentivos e parabéns na Família | CA-13 a CA-15 | Elegibilidade, acesso, mensagem interna, push e fechamento verificados | implementada localmente; entrega APNs real depende da configuração do ambiente |
 
 **Registro de execução (2026-10-19):** SCRUM-38 concluiu a consulta própria diária anterior no backend. A Fase 1 requer verificar a projeção do estado por perfil e a interface Mobile (SCRUM-39).
 

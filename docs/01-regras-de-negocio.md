@@ -1,13 +1,13 @@
 # Regras de negócio
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.22\
-**Data:** 2026-10-27\
+**Versão:** 1.26\
+**Data:** 2026-10-28\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
 
-Este documento contém as regras vigentes da versão 1.22. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
+Este documento contém as regras vigentes da versão 1.26. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
 
 **Identificadores preservados:** RN15, RN29 e RN32 não estavam definidos na base recebida e permanecem não utilizados. Não representam conteúdo faltante desta versão.
 
@@ -71,7 +71,7 @@ Existem três perfis: Administrador, Membro e Kids. O Criador da Família é um 
 
 ## RN07
 
-Apenas Administradores podem adicionar, editar e remover membros administrativamente. A edição do próprio perfil é permitida a todos conforme RN63; a configuração de etiqueta/apelido pertence exclusivamente ao titular, inclusive quando o titular é Kids. Antes de existir família ou sessão de Administrador, o futuro Criador pode apenas preparar a lista de membros do próprio onboarding, sem persistir perfis ou exercer outras capacidades administrativas. Os perfis preparados são criados junto com a família conforme RN01. Depois da criação, o Criador atua como Administrador; alterações na lista ao voltar da etapa de convites obedecem às permissões e proteções normais de gestão de membros.
+Apenas Administradores podem adicionar, alterar papel e remover membros administrativamente, e corrigir o nome administrativo de perfis Kids. Adultos alteram o próprio nome pelo perfil, conforme RN63; a configuração de etiqueta/apelido pertence exclusivamente ao titular, inclusive quando o titular é Kids. Antes de existir família ou sessão de Administrador, o futuro Criador pode apenas preparar a lista de membros do próprio onboarding, sem persistir perfis ou exercer outras capacidades administrativas. Os perfis preparados são criados junto com a família conforme RN01. Depois da criação, o Criador atua como Administrador; alterações na lista ao voltar da etapa de convites obedecem às permissões e proteções normais de gestão de membros.
 
 **Requisitos funcionais:** [RF02](02-requisitos.md#rf02), [RF03](02-requisitos.md#rf03), [RF04](02-requisitos.md#rf04), [RF40](02-requisitos.md#rf40)  
 **Requisitos não funcionais específicos:** [RNF07](02-requisitos.md#rnf07)  
@@ -472,11 +472,15 @@ A exclusão de tarefa não concluída remove seus vínculos com missões em anda
 
 ## RN60
 
-Administradores e Membros acessam a área Família (Minha família), que apresenta o progresso coletivo e a lista de membros para um intervalo de datas. A consulta inicial usa a semana corrente. O filtro Início/Fim aceita qualquer intervalo válido dentro de RN49. Selecionar um membro abre o detalhe com suas tarefas para exatamente o intervalo escolhido; ao voltar, a Família recupera o mesmo intervalo e os filtros. A consulta complementar Tarefas da família mantém o intervalo e inclui tarefas sem responsável.
+Administradores e Membros acessam a área Família (Minha família), que apresenta o progresso coletivo e a lista de membros para um intervalo de datas. A consulta inicial usa a semana corrente. O filtro Início/Fim aceita qualquer intervalo válido dentro de RN49. Selecionar um membro abre o detalhe inicialmente no dia atual, com abas Dia e Semana. A aba Semana consulta domingo a sábado no fuso da família, recortada pelos limites de RN49; ao voltar, a Família recupera o mesmo intervalo e os filtros. Para consultar outros intervalos do membro, usa-se Tarefas da família. A consulta complementar Tarefas da família mantém o intervalo e inclui tarefas sem responsável.
 
 O progresso familiar é a quantidade de tarefas concluídas dentre as tarefas previstas para o período dividida pelo total de tarefas previstas para esse período. Cada tarefa conta uma vez, independentemente do peso ou dos responsáveis, incluindo as sem responsável no total. Pendentes e Aguardando confirmação não entram no numerador. Sem tarefas, apresentar “Sem tarefas”, sem divisão por zero. Alterações válidas atualizam o indicador.
 
-Gerar relatório semanal em PDF fica no menu de Tarefas da família para adultos. Configurações da família reúne Adicionar membro, exclusivamente para Administradores, e o acesso às configurações de nome e fuso. Editar perfil e gerar/reenviar convite ficam no detalhe do membro, exclusivamente para Administradores e conforme as restrições do perfil; não permitem editar apelido de terceiros. A emissão inicial ocorre por ação explícita; na reemissão, informar os efeitos sobre convites e sessão anteriores antes de confirmar. O Criador retorna por Apple. Confirmações Kids permanecem exclusivas dos Administradores. Kids não acessam esta área.
+Na Família, um cartão destaca cada membro ativo que concluiu todas as tarefas atribuídas **hoje**, desde que tenha ao menos uma tarefa no dia. Outro cartão destaca cada membro ativo com a maior quantidade positiva de tarefas atribuídas no intervalo visível, incluindo todos os empatados no máximo quando há ao menos dois membros ativos. O primeiro cartão usa sempre o dia atual no fuso da família, mesmo quando o filtro da tela cobre outro período. Esses destaques não alteram o progresso nem o crédito de carga.
+
+Um Administrador pode parabenizar qualquer **outro** membro ativo da mesma família, inclusive Kids, a partir do destaque da Família. Cada confirmação gera uma mensagem no aplicativo para o destinatário e uma intenção de notificação push, mesmo se o mesmo Administrador já o parabenizou no intervalo. O envio push depende de dispositivo registrado e não condiciona a mensagem no aplicativo. O destinatário pode fechar a mensagem para ocultá-la da interface; o evento permanece registrado. A reabertura posterior de tarefa não apaga os parabéns já enviados. Membros e Kids não podem enviar parabéns.
+
+Gerar relatório semanal em PDF fica no menu de Tarefas da família para adultos. Configurações da família reúne Adicionar membro, exclusivamente para Administradores, e o acesso às configurações de nome e fuso. Alterar papel, remover membro e gerar/reenviar convite ficam no detalhe do membro, exclusivamente para Administradores e conforme as restrições do perfil; a correção do nome administrativo de Kids fica em Configurações da família e no topo do detalhe Kids para Administrador autorizado; não permitem editar apelido de terceiros. A emissão inicial ocorre por ação explícita; na reemissão, informar os efeitos sobre convites e sessão anteriores antes de confirmar. O Criador retorna por Apple. Confirmações Kids permanecem exclusivas dos Administradores. Kids não acessam esta área.
 
 **Requisitos funcionais:** [RF60](02-requisitos.md#rf60), [RF66](02-requisitos.md#rf66)  
 **Requisitos não funcionais específicos:** [RNF01](02-requisitos.md#rnf01), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF09](02-requisitos.md#rnf09)  
@@ -486,7 +490,7 @@ Gerar relatório semanal em PDF fica no menu de Tarefas da família para adultos
 
 **Tema:** Períodos e métricas
 
-Minhas tarefas (todos os perfis) é uma consulta diária: mostra as tarefas próprias e o progresso da data selecionada. Minha família, Tarefas da família e as tarefas no detalhe do membro (adultos) compartilham um filtro Início/Fim livre, inclusivo, com Início menor ou igual a Fim e ambas as datas dentro de RN49. A seleção inicial é a semana corrente (segunda a domingo), recortada pelos limites de RN49 quando necessário. O progresso pessoal conta tarefas próprias concluídas sobre o total próprio previsto no dia; o familiar usa RN60 e calcula concluídas/total do intervalo inteiro, nunca a média dos percentuais diários.
+Minhas tarefas (todos os perfis) é uma consulta diária: mostra as tarefas próprias e o progresso da data selecionada. Minha família e Tarefas da família (adultos) compartilham um filtro Início/Fim livre, inclusivo, com Início menor ou igual a Fim e ambas as datas dentro de RN49. O detalhe do membro inicia no dia atual e permite alternar para a semana visual de domingo a sábado no fuso da família, recortada pelos limites de RN49. Essa semana visual não altera a semana de segunda a domingo usada para progresso familiar, carga, PDF e apuração. A seleção inicial é a semana corrente (segunda a domingo), recortada pelos limites de RN49 quando necessário. O progresso pessoal conta tarefas próprias concluídas sobre o total próprio previsto no dia; o familiar usa RN60 e calcula concluídas/total do intervalo inteiro, nunca a média dos percentuais diários.
 
 A carga/sobrecarga usa a data da conclusão válida, enquanto o progresso usa as tarefas previstas para o período e seu estado atual. Uma tarefa atrasada pode contribuir para a carga de hoje e para o progresso do dia em que estava prevista. Crédito histórico de perfil removido permanece em linha identificada como “Membro removido”. A carga indica participação creditada, sem limiar de diagnóstico de sobrecarga definido. Seleção, gráficos e rótulos devem explicitar período e métrica. Sem tarefas ou carga, informar ausência de dados; não simular 100%.
 
@@ -514,7 +518,7 @@ Todos os perfis, inclusive Kids, podem adicionar, substituir ou remover a própr
 
 O apelido é opcional: vazio ou nulo remove a configuração vigente. Admite até 20 caracteres não-espaço após remover espaços nas extremidades; espaços internos não contam para esse limite. Não admite caracteres de controle.
 
-O titular adulto (Administrador ou Membro) também pode editar o próprio nome de identificação pelo mesmo fluxo, com as regras do nome administrativo (obrigatório, de 1 a 60 caracteres Unicode visíveis após remover espaços nas extremidades, sem caracteres de controle, RF02); a edição administrativa do nome por Administradores (RF03) permanece inalterada. Kids editam somente foto e apelido e não alteram o próprio nome. Quando o perfil não tem apelido, a identificação exibe o nome; quando tem, o apelido é o título e o nome aparece como apoio, sempre junto ao papel e ao nome da família.
+O titular adulto (Administrador ou Membro) também pode editar o próprio nome de identificação pelo mesmo fluxo, com as regras do nome administrativo (obrigatório, de 1 a 60 caracteres Unicode visíveis após remover espaços nas extremidades, sem caracteres de controle, RF02); Administradores corrigem apenas o nome administrativo de perfis Kids em Configurações da família ou no topo do detalhe Kids (RF03). Kids editam somente foto e apelido e não alteram o próprio nome. Quando o perfil não tem apelido, a identificação exibe o nome; quando tem, o apelido é o título e o nome aparece como apoio, sempre junto ao papel e ao nome da família.
 
 O apelido é visível à família, com edição exclusiva do titular. A foto de perfil pode ser escolhida por câmera ou galeria, inclusive por Kids; isso não altera a câmera direta da sinalização Kids. Kids acessam Meu perfil pelo avatar/cabeçalho, sem terceira aba no tab bar.
 
@@ -576,6 +580,10 @@ A missão admite uma observação opcional de até 250 caracteres, contando espa
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.26 | 2026-10-28 | RN60/RN61/RN63: TEL-032 inicia em Dia e alterna para Semana de domingo a sábado; Parabenizar permanece na Família; Administrador pode editar nome Kids também no detalhe. |
+| 1.25 | 2026-10-28 | RN07/RN63: adulto altera o próprio nome; Administrador corrige nome administrativo somente de Kids em Configurações da família. TEL-032 concentra ações de papel, convite e remoção. |
+| 1.24 | 2026-10-28 | RN60–61: TEL-032 apresenta progresso e tarefas de hoje; o intervalo livre permanece na Família e em Tarefas da família. |
+| 1.23 | 2026-10-27 | RN60: cartões de incentivo por dia atual e intervalo, empates, parabéns repetíveis a outro membro ativo inclusive Kids, mensagem interna, intenção de push e ocultação da interface. |
 | 1.22 | 2026-10-27 | RN23, RN60–62: aba Família usa intervalo Início/Fim livre, detalhe herda o intervalo, PDF parte de Tarefas da família e Membro conta sinalizações Kids como Pendentes na projeção. |
 | 1.21 | 2026-10-27 | RN17: a edição “selecionada e futuras” preserva a data prevista já gravada em cada ocorrência, inclusive após edição individual; substitui apenas edições dos campos permitidos. Para SPEC-008 Fase 2 / SCRUM-45. |
 | 1.20 | 2026-10-27 | RN17: o alcance “selecionada e futuras” altera somente título, peso, responsáveis e observação, sem mudar data inicial, frequência ou data prevista das ocorrências, e substitui edições individuais anteriores das futuras abrangidas. RN66: a escolha entre Pendente e Aguardando confirmação vale para a edição individual; a edição de rotina “selecionada e futuras” não muda estados. Para SPEC-008 Fase 2. |

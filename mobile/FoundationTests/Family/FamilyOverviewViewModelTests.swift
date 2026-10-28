@@ -84,6 +84,41 @@ struct FamilyOverviewViewModelTests {
         #expect(!adult.canConfigureFamily)
     }
 
+    @Test("SPEC-003 CA-02/03/07 corrects only Kids names and publishes confirmed results")
+    func correctsKidsName() async {
+        let kid = FamilyMember(id: UUID(), name: "Rafa", role: .kid, isFamilyCreator: false)
+        let adult = member("Ana")
+        let (viewModel, repository) = makeViewModel([page([kid, adult])])
+        await viewModel.loadInitial()
+        repository.setMemberNameUpdateResult(.success(FamilyMember(
+            id: kid.id, name: "Rafa Novo", role: .kid, isFamilyCreator: false
+        )))
+
+        #expect(await viewModel.updateKidsName(memberID: adult.id, name: "Outro") == .noLongerEligible)
+        #expect(repository.memberNameUpdateRequests.isEmpty)
+        #expect(await viewModel.updateKidsName(memberID: kid.id, name: "Rafa Novo") == .saved)
+        #expect(viewModel.members.first?.name == "Rafa Novo")
+        #expect(repository.memberNameUpdateRequests.count == 1)
+    }
+
+    @Test("SPEC-003 CA-07 a lost Kids name response is reconciled before another write")
+    func reconcilesKidsNameResponse() async {
+        let kid = FamilyMember(id: UUID(), name: "Rafa", role: .kid, isFamilyCreator: false)
+        let (viewModel, repository) = makeViewModel([page([kid])])
+        await viewModel.loadInitial()
+        repository.setMemberNameUpdateResult(.failure(FamilyError.uncertainOutcome))
+        repository.setMemberDetailResult(.success(FamilyMemberDetail(
+            id: kid.id, name: "Rafa Novo", role: .kid, isFamilyCreator: false,
+            createdAt: "2026-10-28T10:00:00.000Z",
+            capabilities: MemberCapabilities(manageMembers: true)
+        )))
+
+        #expect(await viewModel.updateKidsName(memberID: kid.id, name: "Rafa Novo") == .saved)
+        #expect(viewModel.members.first?.name == "Rafa Novo")
+        #expect(repository.memberNameUpdateRequests.count == 1)
+        #expect(repository.memberDetailRequests == [kid.id])
+    }
+
     @Test("SPEC-003 UX-06 loads the next page with the cursor and appends without duplicates")
     func pagination() async {
         let first = member("Ana")

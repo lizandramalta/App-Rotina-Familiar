@@ -46,6 +46,14 @@ final class DailyTaskListUITests: XCTestCase {
         XCTAssertFalse(app.buttons["tasks.daily.new"].exists)
     }
 
+    func testKidsReceivesGroupedApplauseAndCanHideIt() {
+        launch(scenario: "daily-tasks-kids-applause")
+
+        XCTAssertTrue(app.staticTexts["Alex e Sam bateram palmas para você!"].waitForExistence(timeout: 5))
+        app.buttons["Fechar mensagem"].tap()
+        XCTAssertFalse(app.staticTexts["Alex e Sam bateram palmas para você!"].exists)
+    }
+
     func testSelectingAnEmptyDayShowsSemTarefas() {
         launch(scenario: "daily-tasks")
         XCTAssertTrue(app.staticTexts["Passear com o cachorro"].waitForExistence(timeout: 5))

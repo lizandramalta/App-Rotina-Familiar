@@ -12,19 +12,19 @@ struct InviteJoinView: View {
                 case .inspecting, .recovering:
                     progressContent
                 case .unavailable:
-                    messageContent(icon: "InvitePerson", title: "inviteJoin.error.unavailable", detail: nil)
+                    messageContent(icon: "person", title: "inviteJoin.error.unavailable", detail: nil)
                 case .rateLimited:
-                    messageContent(icon: "InvitePerson", title: "inviteJoin.error.rateLimited", detail: nil)
+                    messageContent(icon: "person", title: "inviteJoin.error.rateLimited", detail: nil)
                 case .recoveryUnavailable, .help:
                     recoveryContent
                 case .recoveryRetryable:
                     messageContent(
-                        icon: "InvitePerson",
+                        icon: "person",
                         title: "inviteJoin.recovery.inProgress",
                         detail: "access.common.error_network"
                     )
                 case .networkFailure:
-                    messageContent(icon: "InvitePerson", title: "access.common.error_network", detail: nil)
+                    messageContent(icon: "person", title: "access.common.error_network", detail: nil)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -59,7 +59,9 @@ struct InviteJoinView: View {
 
             Section("inviteJoin.password.label") {
                 HStack(spacing: 12) {
-                    Image("InviteLock")
+                    Image(systemName: "lock")
+                        .font(.system(size: 20))
+                        .foregroundStyle(.secondary)
                         .frame(width: 20, height: 20)
                         .accessibilityHidden(true)
                     SecureField("inviteJoin.password.label", text: $coordinator.password)
@@ -126,7 +128,7 @@ struct InviteJoinView: View {
 
     private var recoveryContent: some View {
         messageContent(
-            icon: "InvitePerson",
+            icon: "person",
             title: "accessRecovery.title",
             detail: coordinator.screen == .recoveryUnavailable
                 ? "inviteJoin.recovery.unavailable"
@@ -145,7 +147,9 @@ struct InviteJoinView: View {
         VStack(spacing: 0) {
             Spacer()
             VStack(spacing: 8) {
-                Image(icon)
+                Image(systemName: icon)
+                    .font(.system(size: 48, weight: .light))
+                    .foregroundStyle(.secondary)
                     .frame(width: 48, height: 48)
                     .accessibilityHidden(true)
                 Text(title)

@@ -1,8 +1,8 @@
 # Modelo de dados (DER)
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do modelo:** 1.9 · **Base funcional:** RN 1.18 / RF 1.17 / UC 1.16\
-**Data:** 2026-10-19\
+**Versão do modelo:** 1.10 · **Base funcional:** RN 1.23 / RF 1.22 / UC 1.22\
+**Data:** 2026-10-27\
 **Situação:** modelo alvo atualizado; a preparação de mídia anterior à família ainda exige migração
 
 [Projeto](../README.md) · [Índice](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Classes](06-diagrama-de-classes.md#classe-familytask) · [Arquitetura mobile](architecture/mobile-architecture.md)
@@ -18,6 +18,7 @@ Backend único com PostgreSQL no Supabase. Fotos ficam no R2; o banco armazena a
 - FKs compostas por família isolam relações. Sem exclusão em cascata que apague histórico ou conquistas. Omissões de índices físicos não dispensam as restrições abaixo.
 - Foto enviada antes da família é preparação vinculada ao grant, sem `familia_id` ou `titular_id`. Quando a criação confirma, a referência passa a `MIDIA` com família e Criador no mesmo commit; o objeto privado no R2 não precisa ser copiado.
 - `displayStatus` da lista pessoal é calculado a partir do estado efetivo e do perfil do ator. Não há coluna, tabela ou transição de domínio adicional para esse rótulo.
+- Cada toque em Parabenizar gera `PARABENS`, preservado mesmo após reabertura de tarefa ou fechamento da mensagem. `FILA_PARABENS_PUSH` registra intenção por dispositivo ativo no mesmo commit. `oculto_em` é por evento do destinatário; a interface agrupa eventos visíveis do mesmo intervalo.
 
 ## Diagrama
 
@@ -33,6 +34,11 @@ erDiagram
     GRANT_CRIACAO ||--o{ MIDIA_ONBOARDING : prepara
     SESSAO ||--o{ TOKEN_ACESSO : emite
     SESSAO ||--o{ DISPOSITIVO_PUSH : registra
+    FAMILIA ||--o{ PARABENS : registra
+    MEMBRO ||--o{ PARABENS : envia
+    MEMBRO ||--o{ PARABENS : recebe
+    PARABENS ||--o{ FILA_PARABENS_PUSH : enfileira
+    DISPOSITIVO_PUSH ||--o{ FILA_PARABENS_PUSH : destino
     FAMILIA ||--o{ TAREFA : possui
     TAREFA ||--o{ TAREFA_RESPONSAVEL : atribui
     MEMBRO ||--o{ TAREFA_RESPONSAVEL : participa
@@ -160,6 +166,25 @@ erDiagram
         enum ambiente "DEVELOPMENT, PRODUCTION"
         timestamptz atualizado_em
         timestamptz invalidado_em
+    }
+    PARABENS {
+        uuid id PK
+        uuid familia_id FK
+        uuid remetente_id FK
+        uuid destinatario_id FK
+        date inicio_periodo
+        date fim_periodo
+        timestamptz criado_em
+        timestamptz oculto_em "nulo enquanto visivel"
+    }
+    FILA_PARABENS_PUSH {
+        uuid id PK
+        uuid parabens_id FK
+        uuid dispositivo_push_id FK
+        enum estado "PENDING, ACCEPTED_BY_PROVIDER, FAILED"
+        integer tentativas
+        timestamptz proxima_tentativa_em
+        timestamptz aceito_em
     }
     TAREFA {
         uuid id PK
@@ -382,6 +407,7 @@ A versão 1.1 representava somente um access token na sessão. A versão 1.2 sep
 
 | Versão | Base | Data | Alteração |
 |---|---|---|---|
+| 1.10 | RN 1.23 / RF 1.22 / UC 1.22 | 2026-10-27 | Parabéns persistido por envio e fila de push por dispositivo; ocultação da mensagem preserva eventos. |
 | 1.9 | RN 1.18 / RF 1.17 / UC 1.16 | 2026-10-19 | Preparação de mídia ligada ao grant antes da família, criação conjunta de membros sem tabela de rascunho e `displayStatus` somente como projeção; migração futura explicitada. |
 | 1.8 | 1.17 | 2026-10-10 | Consolida `RECOMPENSA` com autor, descrição opcional e título normalizado único por família (SPEC-015) e `invite_attempt_log` para o limite de tentativas de ingresso (RNF21/SCRUM-32). |
 | 1.7 | 1.15 | 2026-10-10 | `RECOMPENSA` ganha autor, descrição opcional e título normalizado; restrição registra limite e unicidade do item personalizado. Para SPEC-015. |

@@ -94,7 +94,18 @@ describe('Family range queries — SPEC-009 CA-05 to CA-10 and CA-12', () => {
     expect(page.items[0]).toMatchObject({
       status: 'awaitingConfirmation',
       displayStatus: 'pending',
+      completedAt: null,
     });
+  });
+
+  it('SPEC-009 CA-07 exposes the current valid completion time for a completed member task', async () => {
+    repository.findFamilyTasksPage.mockResolvedValueOnce([
+      { ...TASK, status: 'completed', completedAt: new Date('2026-10-09T12:30:00Z') },
+    ]);
+    const page = await tasks.execute(TEST_ACTOR, {
+      startDate: '2026-10-09', endDate: '2026-10-09', memberId: TEST_ACTOR.memberId,
+    });
+    expect(page.items[0]?.completedAt).toBe('2026-10-09T12:30:00.000Z');
   });
 
   it('keeps awaiting confirmation separate for an Administrator', async () => {
