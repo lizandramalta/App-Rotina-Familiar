@@ -1,6 +1,6 @@
 # Mutua — primeira distribuição no TestFlight
 
-**Versão:** 1.9
+**Versão:** 1.10
 **Data:** 2026-10-28  
 **Branch:** `release-testflight`, criada de `origin/develop` (`e2af94a`)
 
@@ -79,6 +79,11 @@ uso das rotas HTTP `/v1` pelo app, sem alterar o contrato da API.
   app Mutua com o login Apple.
 - A usuária confirmou que o link de convite abre no app Mutua e que o ingresso
   na família pelo convite foi concluído.
+- A usuária confirmou o QA do fluxo principal e a ausência dos recursos
+  adiados antes do envio. O Xcode concluiu o upload do arquivo iOS `1.0 (1)`
+  em 2026-10-28 às 14:02 BRT. O App Store Connect recebeu a compilação com
+  status **Processando**; a liberação para testadores depende do fim desse
+  processamento e das informações de teste exigidas pela Apple.
 
 ## Antes de convidar testadores
 
@@ -92,16 +97,17 @@ uso das rotas HTTP `/v1` pelo app, sem alterar o contrato da API.
 3. O App ID `com.lizandramalta.mutua` foi registrado no time `55Z24S2H7V`;
    a usuária informou que a validação da assinatura passou. Confirmar Push
    Notifications se o app usar APNs nesta distribuição.
-4. O registro **Mutua** foi criado no App Store Connect e a usuária informou
-   que o arquivo passou na validação. Nenhum build foi enviado até então;
-   confirmar versão `1.0` e enviar o primeiro build após o QA.
+4. O registro **Mutua** foi criado no App Store Connect, o arquivo passou na
+   validação e o build `1.0 (1)` foi enviado. Acompanhar o processamento da
+   Apple e conferir se há erros ou avisos antes de atribuí-lo a um grupo.
 5. Preencher descrição beta, o que testar e e-mail de feedback. Para teste
    externo, preencher os dados de revisão beta, dar instruções de acesso
    por convite e submeter o primeiro build à revisão. Responder à declaração
    de criptografia/export compliance.
-6. Fazer QA em iPhone e iPad: Apple Sign In, onboarding, convite, sessão,
-   tarefa, recorrência, perfil sem foto, rede intermitente e isolamento entre
-   famílias. Confirmar a ausência dos recursos adiados no app.
+6. A usuária confirmou o QA do fluxo principal e a ausência dos recursos
+   adiados no app. Antes de convidar outros testadores, conferir também em
+   iPhone e iPad a rede intermitente e o isolamento entre famílias, se esses
+   cenários ainda não estiverem cobertos pela validação realizada.
 
 Fontes da Apple: [registro do app](https://developer.apple.com/help/app-store-connect/create-an-app-record/add-a-new-app/),
 [upload de builds](https://developer.apple.com/help/app-store-connect/manage-builds/upload-builds/),
