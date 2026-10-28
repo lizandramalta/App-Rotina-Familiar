@@ -1,9 +1,6 @@
 import SwiftUI
 
-/// Role-specific navigation shell. Mission content belongs to its own approved card.
-/// The adult "Minhas tarefas" tab hosts TEL-010/TEL-012/TEL-013 (SCRUM-37/39); the Kids tab
-/// hosts TEL-040 (SCRUM-39), its own own-daily checklist, no family navigation (CA-04).
-/// Adults reach Meu perfil (TEL-030) through the tab bar; Kids through the avatar button of each tab (no third tab).
+/// Adult navigation for the first TestFlight release.
 struct AuthenticatedHomeView: View {
     let session: ActiveFamilySession
     /// `nil` only if the session has no access token while authenticated, which should not happen;
@@ -12,9 +9,6 @@ struct AuthenticatedHomeView: View {
     let makeFamilySettingsViewModel: (() -> FamilySettingsViewModel)?
     @State private var familyOverviewViewModel: FamilyOverviewViewModel
     @State private var familyTaskPath: [FamilyNavigationRoute] = []
-    let kidsTasksTabView: KidsTasksTabView?
-    let missionsTab: MissionsTabView?
-    let kidsMissionsTabView: KidsMissionsTabView?
     @State private var profileViewModel: ProfileViewModel
     @State private var showsFamilySettingsScenario: Bool = {
         #if DEBUG
@@ -26,13 +20,7 @@ struct AuthenticatedHomeView: View {
     @State private var selectedTab: Int = {
         #if DEBUG
         let scenario = ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"]
-        if scenario == "family-settings" || scenario == "family-overview" || scenario == "family-overview-incentives" || scenario == "family-overview-own-most-tasks" || scenario == "family-overview-member" || scenario == "family-tasks" || scenario == "member-invite" || scenario == "member-invite-uncertain" || scenario == "kids-review-queue" || scenario == "kids-review-queue-empty" || scenario == "kids-review-queue-failure" {
-            return 1
-        }
-        if scenario == "mission-management" || scenario == "mission-management-member" {
-            return 2
-        }
-        if scenario == "mission-management-kids" {
+        if scenario == "family-settings" || scenario == "family-overview" || scenario == "family-overview-incentives" || scenario == "family-overview-own-most-tasks" || scenario == "family-overview-member" || scenario == "family-tasks" || scenario == "member-invite" || scenario == "member-invite-uncertain" {
             return 1
         }
         #endif
@@ -44,57 +32,17 @@ struct AuthenticatedHomeView: View {
         myTasksTab: MyTasksTabView?,
         makeFamilyOverviewViewModel: () -> FamilyOverviewViewModel,
         makeFamilySettingsViewModel: (() -> FamilySettingsViewModel)? = nil,
-        kidsTasksTabView: KidsTasksTabView?,
-        missionsTab: MissionsTabView?,
-        kidsMissionsTabView: KidsMissionsTabView?,
         makeProfileViewModel: () -> ProfileViewModel
     ) {
         self.session = session
         self.myTasksTab = myTasksTab
         self.makeFamilySettingsViewModel = makeFamilySettingsViewModel
-        self.kidsTasksTabView = kidsTasksTabView
-        self.missionsTab = missionsTab
-        self.kidsMissionsTabView = kidsMissionsTabView
         _familyOverviewViewModel = State(initialValue: makeFamilyOverviewViewModel())
         _profileViewModel = State(initialValue: makeProfileViewModel())
     }
 
-    private var role: MemberRole { session.role }
-
     var body: some View {
         TabView(selection: $selectedTab) {
-            if role == .kid {
-                Group {
-                    if let kidsTasksTabView {
-                        kidsTasksTabView
-                    } else {
-                        destination("destination.myTasks", icon: "checklist", identifier: "access.destination.kids", showsProfileButton: true)
-                    }
-                }
-                .tabItem {
-                    Label {
-                        Text("destination.myTasks")
-                    } icon: {
-                        Image(systemName: "checklist")
-                    }
-                }
-                .tag(0)
-                Group {
-                    if let kidsMissionsTabView {
-                        kidsMissionsTabView
-                    } else {
-                        destination("destination.missions", icon: "star", identifier: "access.destination.kids.missions", showsProfileButton: true)
-                    }
-                }
-                .tabItem {
-                    Label {
-                        Text("destination.missions")
-                    } icon: {
-                        Image(systemName: "flag")
-                    }
-                }
-                .tag(1)
-            } else {
                 Group {
                     if let myTasksTab {
                         myTasksTab
@@ -119,21 +67,6 @@ struct AuthenticatedHomeView: View {
                         }
                     }
                     .tag(1)
-                Group {
-                    if let missionsTab {
-                        missionsTab
-                    } else {
-                        destination("destination.missions", icon: "star", identifier: "access.destination.missions")
-                    }
-                }
-                .tabItem {
-                    Label {
-                        Text("tasks.adult.missionsTab")
-                    } icon: {
-                        Image(systemName: "flag")
-                    }
-                }
-                .tag(2)
                 NavigationStack {
                     ProfileView(viewModel: profileViewModel)
                         .accessibilityElement(children: .contain)
@@ -146,29 +79,15 @@ struct AuthenticatedHomeView: View {
                         Image(systemName: "person")
                     }
                 }
-            }
         }
         .tint(Color.primary)
-        .id(role)
-    }
-
-    private var profileButton: some View {
-        NavigationLink {
-            ProfileView(viewModel: profileViewModel)
-        } label: {
-            Image(systemName: "person.crop.circle")
-                .font(.title2)
-                .frame(minWidth: 56, minHeight: 56)
-        }
-        .accessibilityLabel("kids.home.profile_button")
-        .accessibilityIdentifier("kids.home.profile_button")
+        .id(session.role)
     }
 
     private func destination(
         _ title: LocalizedStringKey,
         icon: String,
-        identifier: String,
-        showsProfileButton: Bool = false
+        identifier: String
     ) -> some View {
         NavigationStack {
             ContentUnavailableView {
@@ -178,13 +97,6 @@ struct AuthenticatedHomeView: View {
             }
             .navigationTitle(title)
             .accessibilityIdentifier(identifier)
-            .toolbar {
-                if showsProfileButton {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        profileButton
-                    }
-                }
-            }
         }
     }
 

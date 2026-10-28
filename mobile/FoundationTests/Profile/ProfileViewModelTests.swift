@@ -74,6 +74,19 @@ struct ProfileViewModelTests {
         #expect(harness.viewModel.state == .error)
     }
 
+    @Test("release-testflight CA-03 loads the profile without requesting badges")
+    func testflightProfileDoesNotRequestBadges() async {
+        let harness = Harness(
+            badgesResult: .failure(ProfileError.unavailable),
+            includeAchievements: false
+        )
+        await harness.viewModel.load()
+
+        #expect(harness.viewModel.state == .loaded)
+        #expect(harness.viewModel.badgeItems.isEmpty)
+        #expect(await harness.repository.tokens == ["access-1"])
+    }
+
     @Test("without an access token the load ends in the error state")
     func noToken() async {
         let harness = Harness(signedIn: false)
@@ -374,7 +387,8 @@ private struct Harness {
         badges: BadgesOverview = Fixtures.badges(),
         badgesResult: Result<BadgesOverview, Error>? = nil,
         mediaResult: Result<Data, Error> = .success(Data([1])),
-        signedIn: Bool = true
+        signedIn: Bool = true,
+        includeAchievements: Bool = true
     ) {
         repository = ProfileRepositorySpy(
             profileResults: profileResults ?? [.success(profile)],
@@ -397,6 +411,9 @@ private struct Harness {
                 )
             )))
         }
-        viewModel = ProfileViewModel(repository: repository, sessionStore: sessionStore, session: active)
+        viewModel = ProfileViewModel(
+            repository: repository, sessionStore: sessionStore, session: active,
+            includeAchievements: includeAchievements
+        )
     }
 }

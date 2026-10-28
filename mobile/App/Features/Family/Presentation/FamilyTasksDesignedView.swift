@@ -8,11 +8,6 @@ struct FamilyTasksDesignedView: View {
     @State var viewModel: FamilyTasksViewModel
     let onOpenTask: (UUID) -> Void
     @State private var showsFilter = false
-    @State private var showsReportMenu = false
-    @State private var showsWeekSelector = false
-    @State private var isGeneratingReport = false
-    @State private var reportFailed = false
-    @State private var reportFile: ReportFile?
 
     var body: some View {
         ScrollView {
@@ -77,27 +72,6 @@ struct FamilyTasksDesignedView: View {
                 )
             }
         }
-        .navigationDestination(isPresented: $showsWeekSelector) {
-            if let report = viewModel.makeReportView() { report }
-        }
-        .sheet(item: $reportFile) { FamilyReportShareSheet(url: $0.url) }
-        .alert("family.report.failure_title", isPresented: $reportFailed) {
-            Button("family.report.cancel", role: .cancel) {}
-            Button("family.report.retry") { Task { await generateReport() } }
-        } message: {
-            Text("family.report.failure_message")
-        }
-        .overlay(alignment: .bottom) {
-            if isGeneratingReport {
-                Label("family.report.generating", systemImage: "arrow.triangle.2.circlepath")
-                    .font(.subheadline.weight(.medium))
-                    .padding(.horizontal, 18)
-                    .padding(.vertical, 12)
-                    .background(.regularMaterial, in: Capsule())
-                    .padding(.bottom, 18)
-                    .accessibilityIdentifier("family.report.generating")
-            }
-        }
     }
 
     private var header: some View {
@@ -109,46 +83,6 @@ struct FamilyTasksDesignedView: View {
             }
             .disabled(viewModel.familyCreatedAt == nil)
             .accessibilityIdentifier("family.tasks.range")
-            Button { showsReportMenu = true } label: {
-                if isGeneratingReport {
-                    ProgressView().frame(width: 44, height: 44)
-                } else {
-                    Image(systemName: "ellipsis")
-                        .font(.system(size: 20, weight: .semibold))
-                        .frame(width: 20, height: 20)
-                        .frame(width: 44, height: 44)
-                        .contentShape(Circle())
-                        .accessibilityHidden(true)
-                }
-            }
-            .buttonStyle(.plain)
-            .background(Color(uiColor: .secondarySystemGroupedBackground), in: Circle())
-            .overlay(Circle().strokeBorder(Color(uiColor: .separator), lineWidth: 0.5))
-            .disabled(isGeneratingReport || viewModel.makeReportView() == nil)
-            .accessibilityLabel("family.tasks.more")
-            .accessibilityIdentifier("family.tasks.more")
-            .popover(isPresented: $showsReportMenu, arrowEdge: .top) {
-                Button {
-                    showsReportMenu = false
-                    if viewModel.reportSpansMultipleWeeks {
-                        showsWeekSelector = true
-                    } else {
-                        Task { await generateReport() }
-                    }
-                } label: {
-                    HStack(spacing: 12) {
-                        Image(systemName: "square.and.arrow.up")
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("family.tasks.generate_pdf").font(.subheadline.weight(.semibold))
-                            Text(reportWeekLabel).font(.caption).foregroundStyle(.secondary)
-                        }
-                    }
-                    .frame(minWidth: 210, alignment: .leading)
-                    .padding(12)
-                }
-                .buttonStyle(.plain)
-                .presentationCompactAdaptation(.popover)
-            }
         }
     }
 
@@ -388,17 +322,6 @@ struct FamilyTasksDesignedView: View {
         return viewModel.range.startDate <= today && today <= viewModel.range.endDate
     }
 
-    private var reportWeekLabel: String {
-        if viewModel.reportSpansMultipleWeeks { return String(localized: "family.report.select_week") }
-        guard let start = civilDate(viewModel.range.startDate) else { return "" }
-        let weekday = familyCalendar.component(.weekday, from: start)
-        let monday = familyCalendar.date(byAdding: .day, value: -((weekday + 5) % 7), to: start) ?? start
-        let sunday = familyCalendar.date(byAdding: .day, value: 6, to: monday) ?? monday
-        return String(format: String(localized: "family.report.menu_week"),
-                      dateText(monday, pattern: "d"),
-                      dateText(sunday, pattern: "d"),
-                      dateText(sunday, pattern: "MMM"))
-    }
 
     private var familyCalendar: Calendar {
         var calendar = Calendar(identifier: .gregorian)
@@ -424,17 +347,6 @@ struct FamilyTasksDesignedView: View {
         return formatter.string(from: date)
     }
 
-    private func generateReport() async {
-        guard !isGeneratingReport else { return }
-        isGeneratingReport = true
-        reportFailed = false
-        defer { isGeneratingReport = false }
-        do {
-            reportFile = ReportFile(url: try await viewModel.generateCurrentWeekReport())
-        } catch {
-            reportFailed = true
-        }
-    }
 }
 
 private struct ReportFile: Identifiable {

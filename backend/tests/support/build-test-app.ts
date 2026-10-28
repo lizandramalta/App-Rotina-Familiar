@@ -66,9 +66,10 @@ export const TEST_ACTOR: ActorContext = {
  * Monta o app HTTP real com os casos de uso substituídos por dublês: o que está
  * sob teste é o contrato de transporte (schema, status, corpo, autenticação).
  */
-export function buildTestApp(): TestApp {
+export function buildTestApp(releaseChannel: 'full' | 'testflight' = 'full'): TestApp {
   const config = validateConfiguration({
     NODE_ENV: 'test',
+    RELEASE_CHANNEL: releaseChannel,
     DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/postgres_test',
     LOG_LEVEL: 'fatal',
   });

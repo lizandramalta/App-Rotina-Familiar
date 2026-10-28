@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// MOD-001 — edits a local draft; Cancelar discards it, Confirmar returns the selection to TEL-013.
-/// Kids members can be assignees like anyone else (RN12); the "Kids" tag only identifies them (UX-007 UX-08).
+/// The TestFlight release offers adult assignees only.
 struct AssigneePickerView: View {
     @Bindable var viewModel: TaskEditorViewModel
     @Environment(\.dismiss) private var dismiss
@@ -20,7 +20,7 @@ struct AssigneePickerView: View {
                         Button("Tentar novamente") { Task { await viewModel.loadAssigneeCandidatesIfNeeded() } }
                     }
                 } else {
-                    List(viewModel.orderedMembers) { member in
+                    List(viewModel.orderedMembers.filter { $0.role != .kid }) { member in
                         Button {
                             toggle(member.id)
                         } label: {
@@ -68,6 +68,9 @@ struct AssigneePickerView: View {
         .task {
             draftSelection = viewModel.assigneeIDs
             await viewModel.loadAssigneeCandidatesIfNeeded()
+            draftSelection = draftSelection.intersection(
+                Set(viewModel.orderedMembers.filter { $0.role != .kid }.map(\.id))
+            )
         }
     }
 
@@ -84,14 +87,6 @@ struct AssigneePickerView: View {
                 .foregroundStyle(.primary)
                 // The separator starts under the name, not under the avatar.
                 .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
-            if member.role == .kid {
-                Text("tasks.assignee_picker.kids_tag")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(Color(uiColor: .separator)))
-            }
             Spacer()
             if isSelected {
                 Image(systemName: "checkmark")

@@ -103,6 +103,7 @@ const APPLE_CANONICAL_URLS = {
 const environmentSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+    RELEASE_CHANNEL: z.enum(['full', 'testflight']),
     PORT: z.coerce.number().int().min(1024).max(65535).default(3000),
     HOST: z.string().default('0.0.0.0'),
     API_BASE_URL: z.string().url().default('http://localhost:3000'),
@@ -232,7 +233,11 @@ export type Configuration = z.infer<typeof environmentSchema>;
  * Validates a dictionary of environment variables with fail-fast behavior.
  */
 export function validateConfiguration(rawEnv: Record<string, unknown>): Configuration {
-  const result = environmentSchema.safeParse(rawEnv);
+  const result = environmentSchema.safeParse({
+    ...rawEnv,
+    RELEASE_CHANNEL:
+      rawEnv.RELEASE_CHANNEL ?? (rawEnv.NODE_ENV === 'production' ? 'testflight' : 'full'),
+  });
 
   if (!result.success) {
     const errorDetails = result.error.issues

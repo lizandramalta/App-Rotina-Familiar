@@ -16,6 +16,7 @@ final class ProfileViewModel {
     private let familyRepository: (any FamilyRepository)?
     private let sessionStore: AppSessionStore
     private let photoNormalizer: any ProfilePhotoNormalizing
+    private let includeAchievements: Bool
     let session: ActiveFamilySession
 
     private(set) var state: State = .loading
@@ -38,12 +39,14 @@ final class ProfileViewModel {
         sessionStore: AppSessionStore,
         session: ActiveFamilySession,
         familyRepository: (any FamilyRepository)? = nil,
-        photoNormalizer: any ProfilePhotoNormalizing = ProfilePhotoNormalizer()
+        photoNormalizer: any ProfilePhotoNormalizing = ProfilePhotoNormalizer(),
+        includeAchievements: Bool = false
     ) {
         self.repository = repository
         self.familyRepository = familyRepository
         self.sessionStore = sessionStore
         self.photoNormalizer = photoNormalizer
+        self.includeAchievements = includeAchievements
         self.session = session
     }
 
@@ -102,19 +105,20 @@ final class ProfileViewModel {
         }
 
         do {
-            async let loadedProfile = repository.getOwnProfile(accessToken: accessToken)
-            async let loadedBadges = repository.getOwnBadges(accessToken: accessToken)
-            let (profile, badges) = try await (loadedProfile, loadedBadges)
+            let profile = try await repository.getOwnProfile(accessToken: accessToken)
+            if includeAchievements {
+                let badges = try await repository.getOwnBadges(accessToken: accessToken)
+                self.badges = badges
+                badgeItems = badges.displayItems()
+            }
             guard !Task.isCancelled else { return }
             self.profile = profile
-            self.badges = badges
-            badgeItems = badges.displayItems()
             state = .loaded
             await loadAvatar(for: profile, accessToken: accessToken)
         } catch {
             guard !Task.isCancelled else { return }
             // A refresh failure keeps the content already on screen; only the first load shows the error card.
-            if profile == nil || badges == nil {
+            if profile == nil || (includeAchievements && badges == nil) {
                 state = .error
             }
         }

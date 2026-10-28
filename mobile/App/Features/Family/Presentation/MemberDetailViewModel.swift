@@ -138,7 +138,7 @@ final class MemberDetailViewModel {
         guard let detail else { return [] }
         let candidates: [MemberRole] = detail.role == .kid
             ? [.member]
-            : [.administrator, .member, .kid]
+            : [.administrator, .member]
         return candidates.filter { $0 != detail.role }
     }
 

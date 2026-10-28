@@ -17,7 +17,7 @@ const invitationPage = `<!doctype html>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow, noarchive">
-  <title>Convite | Rotina Familiar</title>
+  <title>Convite | Mutua</title>
   <style>
     :root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
     body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #f7f5f0; color: #202b28; }
@@ -28,7 +28,7 @@ const invitationPage = `<!doctype html>
 </head>
 <body>
   <main>
-    <h1>Abra o convite no app Rotina Familiar</h1>
+    <h1>Abra o convite no app Mutua</h1>
     <p>Se o app já está instalado, abra este mesmo link no seu iPhone ou iPad.</p>
     <p>Se ainda não está instalado, obtenha a versão do app com quem enviou o convite e depois abra o link novamente. Quando estiver disponível na App Store, você também poderá instalá-lo por lá.</p>
     <p>A senha enviada com o convite será solicitada dentro do app.</p>

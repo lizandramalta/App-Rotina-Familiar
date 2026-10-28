@@ -23,6 +23,19 @@ struct AppRootView: View {
             case .entry:
                 EntryView(viewModel: container.makeEntryViewModel(sessionStore: sessionStore))
             case let .authenticated(profile):
+                if profile.role == .kid {
+                    NavigationStack {
+                        ContentUnavailableView {
+                            Label("release.kids_unavailable.title", systemImage: "person.crop.circle.badge.xmark")
+                        } description: {
+                            Text("release.kids_unavailable.message")
+                        } actions: {
+                            Button("release.kids_unavailable.sign_out") {
+                                Task { await sessionStore.signOut() }
+                            }
+                        }
+                    }
+                } else {
                 AuthenticatedHomeView(
                     session: profile,
                     myTasksTab: sessionStore.accessToken.map {
@@ -33,27 +46,6 @@ struct AppRootView: View {
                     },
                     makeFamilySettingsViewModel: {
                         container.makeFamilySettingsViewModel(session: profile, sessionStore: sessionStore)
-                    },
-                    kidsTasksTabView: sessionStore.accessToken.map { accessToken in
-                        container.makeKidsTasksTabView(
-                            session: profile,
-                            accessToken: accessToken,
-                            makeProfileViewModel: {
-                                container.makeProfileViewModel(session: profile, sessionStore: sessionStore)
-                            }
-                        )
-                    },
-                    missionsTab: sessionStore.accessToken.map {
-                        container.makeMissionsTabView(session: profile, accessToken: $0)
-                    },
-                    kidsMissionsTabView: sessionStore.accessToken.map { accessToken in
-                        container.makeKidsMissionsTabView(
-                            session: profile,
-                            accessToken: accessToken,
-                            makeProfileViewModel: {
-                                container.makeProfileViewModel(session: profile, sessionStore: sessionStore)
-                            }
-                        )
                     }
                 ) {
                     container.makeProfileViewModel(session: profile, sessionStore: sessionStore)
@@ -63,6 +55,7 @@ struct AppRootView: View {
                     if let token = sessionStore.accessToken {
                         await container.registerPushDevice(accessToken: token, registration: pushRegistration)
                     }
+                }
                 }
             case let .initialProfile(grant):
                 InitialOnboardingFlowView(

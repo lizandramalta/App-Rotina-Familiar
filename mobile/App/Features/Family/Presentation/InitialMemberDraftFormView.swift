@@ -89,7 +89,7 @@ struct InitialMemberDraftFormView: View {
                         .padding(.horizontal, 4)
 
                     VStack(spacing: 0) {
-                        ForEach(Array(MemberRole.allCases.enumerated()), id: \.element) { index, option in
+                        ForEach(Array(MemberRole.allCases.filter { $0 != .kid }.enumerated()), id: \.element) { index, option in
                             Button {
                                 role = option
                             } label: {
@@ -113,7 +113,7 @@ struct InitialMemberDraftFormView: View {
                             .buttonStyle(.plain)
                             .accessibilityIdentifier("family.members.draft.role.\(option.rawValue)")
 
-                            if index < MemberRole.allCases.count - 1 {
+                            if index < MemberRole.allCases.filter({ $0 != .kid }).count - 1 {
                                 Divider()
                                     .padding(.leading, 20)
                             }

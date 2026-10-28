@@ -65,8 +65,9 @@ xcodebuild test \
 O nome do simulador varia por máquina e por versão do Xcode, por isso a CI resolve o UDID
 do primeiro iPhone disponível em vez de fixar um modelo.
 
-## Destinos ainda não implementados
+## Primeira distribuição TestFlight
 
-O ingresso por convite usa a sessão validada para abrir a navegação de Kids ou de adultos.
-O conteúdo de tarefas, família, missões e perfil ainda é placeholder até a implementação
-dos respectivos cards; as opções de navegação já respeitam o papel recebido na sessão.
+A branch `release-testflight` mostra Mutua para perfis adultos. O ícone está em
+`AppIcon`, e o recorte da release está em
+[docs/releases/testflight-1.md](../docs/releases/testflight-1.md). Antes de
+arquivar, confira o `Production.xcconfig` local, a API beta e a assinatura.

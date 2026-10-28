@@ -118,7 +118,7 @@ struct MemberEditorView: View {
                 .padding(.horizontal, 4)
 
             VStack(spacing: 0) {
-                ForEach(Array(MemberRole.allCases.enumerated()), id: \.element) { index, option in
+                ForEach(Array(MemberRole.allCases.filter { $0 != .kid }.enumerated()), id: \.element) { index, option in
                     Button {
                         viewModel.role = option
                     } label: {
@@ -147,7 +147,7 @@ struct MemberEditorView: View {
                     .accessibilityAddTraits(viewModel.role == option ? .isSelected : [])
                     .accessibilityIdentifier("family.members.editor.role.\(option.rawValue)")
 
-                    if index < MemberRole.allCases.count - 1 {
+                    if index < MemberRole.allCases.filter({ $0 != .kid }).count - 1 {
                         Divider().padding(.leading, 20)
                     }
                 }

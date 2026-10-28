@@ -32,11 +32,6 @@ struct ProfileView: View {
             }
         }
         .task { await viewModel.load() }
-        .navigationDestination(item: $viewModel.selectedBadgeForDetail) { item in
-            if let detailViewModel = viewModel.makeBadgeDetailViewModel(for: item) {
-                BadgeDetailView(viewModel: detailViewModel)
-            }
-        }
         .sheet(isPresented: $viewModel.isShowingLeaveAdminPlaceholder) { leaveAdministrationConfirmation }
         .sheet(
             item: Binding(get: { viewModel.editor }, set: { if $0 == nil { viewModel.dismissEditor() } })
@@ -90,12 +85,10 @@ struct ProfileView: View {
                         if viewModel.showsRoleSection { roleSection }
                     }
                     .frame(width: 420)
-                    achievements.frame(maxWidth: .infinity)
                 }
             } else {
                 VStack(spacing: 18) {
                     identityCard
-                    achievements
                     if viewModel.showsRoleSection { roleSection }
                 }
                 .frame(maxWidth: isRegular ? 600 : .infinity)

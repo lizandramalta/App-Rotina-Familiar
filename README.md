@@ -6,6 +6,15 @@ Organização colaborativa das responsabilidades domésticas, com tarefas compar
 **Versão da base do projeto:** 1.22\
 **Data:** 2026-10-28
 
+## Primeira versão no TestFlight
+
+A primeira distribuição se chama **Mutua** e usa a branch `release-testflight`.
+Ela concentra acesso, família, membros adultos, tarefas, rotinas e perfil;
+Kids, missões, recompensas coletivas, badges e relatório PDF ficam para
+versões posteriores. O [plano de release](docs/releases/testflight-1.md)
+registra o recorte e as pendências de publicação. As seções abaixo continuam
+a descrever o produto completo planejado.
+
 ## Por que este projeto existe
 
 Em muitas famílias, uma pessoa concentra o trabalho de lembrar, distribuir e acompanhar as tarefas da casa. Mesmo quando a execução é dividida, a gestão pode continuar centralizada.

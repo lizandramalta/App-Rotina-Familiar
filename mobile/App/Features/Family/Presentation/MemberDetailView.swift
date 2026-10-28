@@ -8,13 +8,6 @@ struct MemberDetailView: View {
     @State private var pendingRole: MemberRole?
     @State private var showsRemovalConfirmation = false
     @State private var showsReissueConfirmation = false
-    @State private var showsKidsNameEditor = false
-    @State private var draftKidsName = ""
-    @State private var kidsNameIsInvalid = false
-    @State private var kidsNameSaveFailed = false
-    @State private var kidsNameRequiresRefresh = false
-    @State private var kidsNameIsSaving = false
-    @State private var showsKidsNameDiscard = false
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
     let onOpenTask: (UUID) -> Void
@@ -80,7 +73,6 @@ struct MemberDetailView: View {
         }) {
             rolePickerSheet
         }
-        .sheet(isPresented: $showsKidsNameEditor) { NavigationStack { kidsNameEditor } }
         .alert("family.member.manage.role_confirm", isPresented: Binding(
             get: { pendingRole != nil },
             set: { if !$0 { pendingRole = nil } }
@@ -111,20 +103,6 @@ struct MemberDetailView: View {
             circleButton("chevron.left", label: "family.tasks.back") { dismiss() }
                 .accessibilityIdentifier("family.member.detail.back")
             Spacer()
-            if viewModel.canEditKidsName {
-                Button("family.member.detail.edit") {
-                    draftKidsName = viewModel.detail?.name ?? ""
-                    kidsNameIsInvalid = false
-                    kidsNameSaveFailed = false
-                    kidsNameRequiresRefresh = false
-                    showsKidsNameEditor = true
-                }
-                .font(.system(size: 17))
-                .padding(.horizontal, 14)
-                .frame(minHeight: 34)
-                .background(.white, in: Capsule())
-                .accessibilityIdentifier("family.member.detail.edit_kids_name")
-            }
         }
     }
 
@@ -287,79 +265,6 @@ struct MemberDetailView: View {
         }
         .presentationDetents([.medium])
         .presentationDragIndicator(.visible)
-    }
-
-    private var kidsNameEditor: some View {
-        Form {
-            TextField("family.member.manage.name", text: $draftKidsName)
-                .onChange(of: draftKidsName) { _, _ in kidsNameIsInvalid = false }
-                .accessibilityIdentifier("family.member.detail.kids_name")
-            if kidsNameIsInvalid {
-                Text("family.members.name.error_invalid").foregroundStyle(.red)
-            }
-            if kidsNameSaveFailed || kidsNameRequiresRefresh {
-                Text("family.member.manage.error").foregroundStyle(.red)
-            }
-            if kidsNameRequiresRefresh {
-                Button("family.member.detail.retry") {
-                    Task {
-                        if let current = await viewModel.reconcileKidsName() {
-                            kidsNameRequiresRefresh = false
-                            if current.name == draftKidsName && current.role == .kid {
-                                showsKidsNameEditor = false
-                                onUpdated()
-                            } else {
-                                kidsNameSaveFailed = current.role != .kid
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        .navigationTitle("family.settings.hub.edit_kids_name")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button("family.settings.hub.cancel") {
-                    if draftKidsName != viewModel.detail?.name { showsKidsNameDiscard = true }
-                    else { showsKidsNameEditor = false }
-                }
-                .disabled(kidsNameIsSaving)
-            }
-            ToolbarItem(placement: .confirmationAction) {
-                Button("family.settings.hub.save") {
-                    guard case .success = FamilyCreationValidation.validatedName(draftKidsName) else {
-                        kidsNameIsInvalid = true
-                        return
-                    }
-                    kidsNameIsSaving = true
-                    kidsNameSaveFailed = false
-                    Task {
-                        let result = await viewModel.updateKidsName(
-                            draftKidsName.trimmingCharacters(in: .whitespacesAndNewlines)
-                        )
-                        kidsNameIsSaving = false
-                        switch result {
-                        case .saved:
-                            showsKidsNameEditor = false
-                            onUpdated()
-                        case .failed, .noLongerEligible:
-                            kidsNameSaveFailed = true
-                        case .reconciliationRequired:
-                            kidsNameRequiresRefresh = true
-                        }
-                    }
-                }
-                .disabled(kidsNameIsSaving || kidsNameRequiresRefresh || draftKidsName == viewModel.detail?.name)
-            }
-        }
-        .confirmationDialog("family.members.discard.title", isPresented: $showsKidsNameDiscard) {
-            Button("family.members.discard.confirm", role: .destructive) { showsKidsNameEditor = false }
-            Button("family.members.discard.keep_editing", role: .cancel) {}
-        } message: {
-            Text("family.members.discard.message")
-        }
-        .interactiveDismissDisabled(kidsNameIsSaving || draftKidsName != viewModel.detail?.name)
     }
 
     private var periodSummary: String {

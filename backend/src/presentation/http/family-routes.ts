@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import type { ApplicationContainer } from '../../bootstrap/container.js';
+import { ValidationError } from '../../shared/domain/domain-error.js';
 import { createAuthenticationHook, requireActor } from './authentication.js';
 
 interface CreateFamilyBody {
@@ -246,11 +247,26 @@ const changeTimeZoneSchema = {
 } as const;
 
 /** Rotas do módulo Family. Registradas sob `/v1` (BA-20). */
-export function registerFamilyRoutes(app: FastifyInstance, container: ApplicationContainer): void {
+export function registerFamilyRoutes(
+  app: FastifyInstance,
+  container: ApplicationContainer,
+  releaseChannel: 'full' | 'testflight' = 'full',
+): void {
   app.post<{ Body: CreateFamilyBody; Headers: CreateFamilyHeaders }>(
     '/families',
     { schema: createFamilySchema },
     async (request, reply) => {
+      if (releaseChannel === 'testflight' && Array.isArray(request.body.initialMembers)) {
+        const kidsIndex = request.body.initialMembers.findIndex(
+          (item: unknown) =>
+            typeof item === 'object' && item !== null && 'role' in item && item.role === 'kids',
+        );
+        if (kidsIndex >= 0) {
+          throw new ValidationError('Kids are not available in this release.', {
+            [`initialMembers[${kidsIndex}].role`]: ['MEMBER_ROLE_INVALID'],
+          });
+        }
+      }
       const result = await container.createFamilyUseCase.execute({
         creationGrant: request.body.creationGrant,
         creatorName: request.body.creatorName,

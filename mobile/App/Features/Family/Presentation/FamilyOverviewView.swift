@@ -19,9 +19,6 @@ struct FamilyOverviewView: View {
                     members(overview.members)
                     progressCard(overview)
                     incentiveCards(overview)
-                    if viewModel.canReviewKidsConfirmations {
-                        kidsConfirmationsCard
-                    }
                 } else if viewModel.isLoadingOverview {
                     loadingContent
                 }

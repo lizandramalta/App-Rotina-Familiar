@@ -1,6 +1,36 @@
 {
   "sourceLanguage" : "pt-BR",
   "strings" : {
+    "release.kids_unavailable.title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perfil Kids indisponível nesta versão"
+          }
+        }
+      }
+    },
+    "release.kids_unavailable.message" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta versão de teste é para Administradores e Membros adultos. Peça a um Administrador para atualizar seu perfil ou aguarde uma próxima versão."
+          }
+        }
+      }
+    },
+    "release.kids_unavailable.sign_out" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sair"
+          }
+        }
+      }
+    },
     "" : {
 
     },
@@ -134,7 +164,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bem-vindo ao App Família"
+            "value" : "Bem-vindo ao Mutua"
           }
         }
       }
@@ -1635,7 +1665,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Convite para entrar na família no Rotina Familiar:\n\nLink: %@\nSenha: %@"
+            "value" : "Convite para entrar na família no Mutua:\n\nLink: %@\nSenha: %@"
           }
         }
       }

@@ -56,7 +56,11 @@ export const onboardingUploadBodyDocumentation = {
 } as const;
 
 /** Rotas do módulo Media. Registradas sob `/v1` (BA-20). */
-export function registerMediaRoutes(app: FastifyInstance, container: ApplicationContainer): void {
+export function registerMediaRoutes(
+  app: FastifyInstance,
+  container: ApplicationContainer,
+  releaseChannel: 'full' | 'testflight' = 'full',
+): void {
   app.register(async (scope) => {
     await scope.register(multipart, {
       limits: { fileSize: MAX_UPLOAD_INPUT_BYTES, files: 1, fields: 4, parts: 5 },
@@ -215,6 +219,12 @@ export function registerMediaRoutes(app: FastifyInstance, container: Application
         if (content === undefined || content.length === 0) {
           throw new ValidationError('The upload must include one file.', {
             file: ['MEDIA_FILE_REQUIRED'],
+          });
+        }
+
+        if (releaseChannel === 'testflight' && purpose === 'taskSignal') {
+          throw new ValidationError('Task signal media is not available in this release.', {
+            purpose: ['MEDIA_PURPOSE_INVALID'],
           });
         }
 

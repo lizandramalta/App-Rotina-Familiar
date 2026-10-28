@@ -59,7 +59,7 @@ struct MemberDetailViewModelTests {
     func roleSelectionExcludesCurrentRoleAndDirectKidsPromotion() async {
         let (adult, _) = makeViewModel(.success(detail(manageMembers: true)))
         await adult.load()
-        #expect(adult.allowedRoles == [.member, .kid])
+        #expect(adult.allowedRoles == [.member])
 
         let kidsDetail = FamilyMemberDetail(
             id: memberID, name: "Rafa", role: .kid, isFamilyCreator: false,

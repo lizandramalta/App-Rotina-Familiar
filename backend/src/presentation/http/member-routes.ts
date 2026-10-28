@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import type { ApplicationContainer } from '../../bootstrap/container.js';
+import { ValidationError } from '../../shared/domain/domain-error.js';
 import { createAuthenticationHook, requireActor } from './authentication.js';
 
 interface MemberParams {
@@ -85,7 +86,11 @@ const inviteCredentialsResponseSchema = {
 } as const;
 
 /** Rotas de consulta e criação de membros — SPEC-003 Fase 1. */
-export function registerMemberRoutes(app: FastifyInstance, container: ApplicationContainer): void {
+export function registerMemberRoutes(
+  app: FastifyInstance,
+  container: ApplicationContainer,
+  releaseChannel: 'full' | 'testflight' = 'full',
+): void {
   app.register(async (scope) => {
     scope.addHook('onRequest', createAuthenticationHook(container));
 
@@ -179,6 +184,11 @@ export function registerMemberRoutes(app: FastifyInstance, container: Applicatio
         },
       },
       async (request, reply) => {
+        if (releaseChannel === 'testflight' && request.body.role === 'kids') {
+          throw new ValidationError('Kids are not available in this release.', {
+            role: ['MEMBER_ROLE_INVALID'],
+          });
+        }
         const member = await container.createMemberUseCase.execute({
           actor: requireActor(request),
           name: request.body.name,
@@ -192,48 +202,51 @@ export function registerMemberRoutes(app: FastifyInstance, container: Applicatio
       },
     );
 
-    // SPEC-003 CA-02–06: each command is scoped and revalidated after the family lock.
-    scope.patch<{ Params: MemberParams; Body: UpdateMemberBody }>(
-      '/family/members/:memberId',
-      {
-        schema: {
-          tags: ['Members'],
-          summary: 'Correct a Kids member administrative name as a family administrator',
-          security: [{ bearerAuth: [] }],
-          params: {
-            type: 'object',
-            required: ['memberId'],
-            properties: { memberId: { type: 'string', format: 'uuid' } },
-          },
-          body: {
-            type: 'object',
-            additionalProperties: false,
-            required: ['name'],
-            properties: { name: {} },
-          },
-          response: {
-            200: memberResponseSchema,
-            400: problemResponseSchema,
-            401: problemResponseSchema,
-            403: problemResponseSchema,
-            404: problemResponseSchema,
-            422: problemResponseSchema,
-            503: problemResponseSchema,
+    // SPEC-003 CA-02–06: only the full product exposes Kids name correction.
+    if (releaseChannel === 'full') {
+      scope.patch<{ Params: MemberParams; Body: UpdateMemberBody }>(
+        '/family/members/:memberId',
+        {
+          schema: {
+            tags: ['Members'],
+            summary: 'Correct a Kids member administrative name as a family administrator',
+            security: [{ bearerAuth: [] }],
+            params: {
+              type: 'object',
+              required: ['memberId'],
+              properties: { memberId: { type: 'string', format: 'uuid' } },
+            },
+            body: {
+              type: 'object',
+              additionalProperties: false,
+              required: ['name'],
+              properties: { name: {} },
+            },
+            response: {
+              200: memberResponseSchema,
+              400: problemResponseSchema,
+              401: problemResponseSchema,
+              403: problemResponseSchema,
+              404: problemResponseSchema,
+              422: problemResponseSchema,
+              503: problemResponseSchema,
+            },
           },
         },
-      },
-      async (request, reply) =>
-        reply
-          .status(200)
-          .header('Cache-Control', 'no-store')
-          .send(
-            await container.updateMemberUseCase.execute(
-              requireActor(request),
-              request.params.memberId,
-              request.body.name,
-            ),
-          ),
-    );
+        async (request, reply) => {
+          return reply
+            .status(200)
+            .header('Cache-Control', 'no-store')
+            .send(
+              await container.updateMemberUseCase.execute(
+                requireActor(request),
+                request.params.memberId,
+                request.body.name,
+              ),
+            );
+        },
+      );
+    }
 
     scope.post<{ Params: MemberParams; Body: ChangeRoleBody }>(
       '/family/members/:memberId/role-changes',
@@ -265,8 +278,13 @@ export function registerMemberRoutes(app: FastifyInstance, container: Applicatio
           },
         },
       },
-      async (request, reply) =>
-        reply
+      async (request, reply) => {
+        if (releaseChannel === 'testflight' && request.body.role === 'kids') {
+          throw new ValidationError('Kids are not available in this release.', {
+            role: ['MEMBER_ROLE_INVALID'],
+          });
+        }
+        return reply
           .status(200)
           .header('Cache-Control', 'no-store')
           .send(
@@ -275,7 +293,8 @@ export function registerMemberRoutes(app: FastifyInstance, container: Applicatio
               request.params.memberId,
               request.body.role,
             ),
-          ),
+          );
+      },
     );
 
     scope.post(

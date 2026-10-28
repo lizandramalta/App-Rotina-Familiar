@@ -1,7 +1,7 @@
-# Documentação do projeto — versão 1.38
+# Documentação do projeto — versão 1.39
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.38\
+**Versão:** 1.39\
 **Data:** 2026-10-28\
 **Situação:** base documental consolidada
 
@@ -31,6 +31,7 @@
 | [Decisões backend](architecture/backend-decisions.md) | BA-01–BA-38: escolhas confirmadas e propostas técnicas, incluindo outbox de parabéns e APNs. |
 | [Convenções de código backend](architecture/backend-code-conventions.md) | Convenções de TypeScript/Fastify, camadas, contratos, SQL, segurança, testes e revisão. |
 | [Specs de entrega](../specs/README.md) | Recortes aprovados de implementação compartilhados entre mobile e backend. |
+| [Primeiro TestFlight](releases/testflight-1.md) | Recorte da distribuição Mutua, verificação e pendências operacionais. |
 
 ## Como usar
 
@@ -145,6 +146,7 @@ A fundação backend adota Node.js, TypeScript, Fastify e `pg`. Parte da API de 
 
 | Versão | Data | Alteração |
 | --- | --- | --- |
+| 1.39 | 2026-10-28 | Plano de distribuição Mutua no TestFlight: recorte inicial sem Kids, missões, recompensas coletivas, badges ou PDF; base funcional do produto completo preservada. |
 | 1.38 | 2026-10-28 | TEL-032 retorna à variante compacta Dia/Semana domingo–sábado; Parabenizar fica na Família, edição de nome Kids é possível no detalhe para Admin, e folhas de filtros TEL-050/TEL-011 são distintas. RN/RF/UC, SPEC/UX-003/009, mapa 1.23, fluxos 1.24 e catálogo 1.13 alinhados. |
 | 1.37 | 2026-10-28 | UX-009 e convenções mobile 1.1 padronizam SF Symbols para ícones de interface; removem SVGs de ícones da Família e da entrada por convite. |
 | 1.36 | 2026-10-28 | RN07/RN63, RF03/RF60, UC02/UC10, SPEC/UX-003, mapa 1.22, fluxos 1.23 e contrato 1.26: adulto edita próprio nome, Admin corrige nome Kids em TEL-057; TEL-032 mantém papel, convite e remoção. |
