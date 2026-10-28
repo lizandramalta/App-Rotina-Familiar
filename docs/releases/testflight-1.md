@@ -1,6 +1,6 @@
 # Mutua — primeira distribuição no TestFlight
 
-**Versão:** 1.10
+**Versão:** 1.11
 **Data:** 2026-10-28  
 **Branch:** `release-testflight`, criada de `origin/develop` (`e2af94a`)
 
@@ -81,9 +81,16 @@ uso das rotas HTTP `/v1` pelo app, sem alterar o contrato da API.
   na família pelo convite foi concluído.
 - A usuária confirmou o QA do fluxo principal e a ausência dos recursos
   adiados antes do envio. O Xcode concluiu o upload do arquivo iOS `1.0 (1)`
-  em 2026-10-28 às 14:02 BRT. O App Store Connect recebeu a compilação com
-  status **Processando**; a liberação para testadores depende do fim desse
-  processamento e das informações de teste exigidas pela Apple.
+  em 2026-10-28 às 14:02 BRT. O App Store Connect concluiu o processamento
+  e mostra o estado do binário como **Validado**, com bundle ID
+  `com.lizandramalta.mutua` e suporte a iPhone e iPad.
+- No TestFlight, foram criados os grupos **Equipe Mutua** (interno, sem
+  distribuição automática) e **Beta Mutua** (externo). O build `1.0 (1)` foi
+  vinculado ao grupo interno, ainda sem testadores. A descrição beta e o texto
+  “O que testar” foram salvos. A pergunta sobre criptografia do build foi
+  respondida como **Nenhum dos algoritmos mencionados acima**, após conferir
+  que o app usa APIs do sistema Apple para HTTPS/Keychain/Sign in with Apple
+  e SHA-256 do CryptoKit apenas para o nonce do login.
 
 ## Antes de convidar testadores
 
@@ -97,13 +104,12 @@ uso das rotas HTTP `/v1` pelo app, sem alterar o contrato da API.
 3. O App ID `com.lizandramalta.mutua` foi registrado no time `55Z24S2H7V`;
    a usuária informou que a validação da assinatura passou. Confirmar Push
    Notifications se o app usar APNs nesta distribuição.
-4. O registro **Mutua** foi criado no App Store Connect, o arquivo passou na
-   validação e o build `1.0 (1)` foi enviado. Acompanhar o processamento da
-   Apple e conferir se há erros ou avisos antes de atribuí-lo a um grupo.
-5. Preencher descrição beta, o que testar e e-mail de feedback. Para teste
-   externo, preencher os dados de revisão beta, dar instruções de acesso
-   por convite e submeter o primeiro build à revisão. Responder à declaração
-   de criptografia/export compliance.
+4. O registro **Mutua** foi criado no App Store Connect; o build `1.0 (1)`
+   passou na validação, foi enviado e já pode ser usado em testes internos.
+5. Para teste externo, preencher e-mail de feedback e contato da revisão beta,
+   definir as instruções de acesso ao app e vincular `1.0 (1)` ao grupo
+   **Beta Mutua** para submeter o primeiro build à revisão da Apple. O grupo
+   externo ainda não tem build nem testadores.
 6. A usuária confirmou o QA do fluxo principal e a ausência dos recursos
    adiados no app. Antes de convidar outros testadores, conferir também em
    iPhone e iPad a rede intermitente e o isolamento entre famílias, se esses
