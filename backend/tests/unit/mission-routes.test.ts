@@ -20,6 +20,23 @@ const MISSION = {
   createdAt: '2026-10-19T12:00:00.000Z',
 };
 
+const MISSION_DETAIL = {
+  id: MISSION_ID,
+  familyId: '11112222-3333-4444-5555-666677778888',
+  title: 'Arrumar o quintal',
+  note: null,
+  status: 'inProgress',
+  tasks: [
+    { id: '9f1c2b0e-5b8a-4d0f-9d6e-1f7a8b9c0d1e', title: 'Lavar o carro', status: 'pending' },
+  ],
+  completedAt: null,
+  progressPercent: 0,
+  isRedemptionAvailable: false,
+  acceptedReward: null,
+  participations: [],
+  createdAt: '2026-10-19T12:00:00.000Z',
+};
+
 describe('Mission routes — SPEC-014 phase 1', () => {
   let test: TestApp;
 
@@ -27,8 +44,8 @@ describe('Mission routes — SPEC-014 phase 1', () => {
     test = buildTestApp();
     test.createMission.execute.mockResolvedValue(MISSION);
     test.editMission.execute.mockResolvedValue(MISSION);
-    test.getMissionDetail.execute.mockResolvedValue(MISSION);
-    test.listMissions.execute.mockResolvedValue({ items: [], nextCursor: null });
+    test.getMissionDetail.execute.mockResolvedValue(MISSION_DETAIL);
+    test.listMissions.execute.mockResolvedValue({ inProgress: [], completed: [] });
     test.getMissionTaskOptions.execute.mockResolvedValue({ items: [], nextCursor: null });
   });
 
@@ -85,8 +102,13 @@ describe('Mission routes — SPEC-014 phase 1', () => {
     });
   });
 
-  it('CA-19 serializes the Kids projection without redemption or family data', async () => {
-    const { familyId: _familyId, isRedemptionAvailable: _redemption, ...kids } = MISSION;
+  it('CA-03 serializes the Kids detail without participations or family data', async () => {
+    const {
+      familyId: _familyId,
+      isRedemptionAvailable: _redemption,
+      participations: _participations,
+      ...kids
+    } = MISSION_DETAIL;
     test.getMissionDetail.execute.mockResolvedValue({ ...kids, reward: 'secret' });
 
     const response = await test.app.inject({

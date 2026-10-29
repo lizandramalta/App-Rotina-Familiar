@@ -26,15 +26,16 @@ import {
 } from '../domain/mission-validation.js';
 import type { CloseEligibleMissions } from './close-eligible-missions.js';
 import type {
+  MissionParticipantRecord,
   MissionRecord,
   MissionRepositoryPort,
   MissionStatus,
   MissionSummaryRecord,
   MissionTaskOptionRecord,
+  MissionTaskRecord,
   PageCursor,
 } from './mission-repository-port.js';
 
-export const MISSIONS_PAGE_SIZE = 20;
 export const TASK_OPTIONS_PAGE_SIZE = 20;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const QUERY_MAX_LENGTH = 60;
@@ -51,23 +52,73 @@ export interface MissionResponse {
   readonly createdAt: string;
 }
 
-/** Projeção Kids: sem dados de gestão, resgate ou participações (CA-19). */
-export interface KidsMissionResponse {
+export interface MissionTaskProjection {
   readonly id: string;
   readonly title: string;
-  readonly note: string | null;
-  readonly status: MissionStatus;
-  readonly taskIds: readonly string[];
-  readonly completedAt: string | null;
-  readonly createdAt: string;
+  readonly status: MissionTaskRecord['status'];
 }
 
+export interface MissionParticipantProjection {
+  readonly memberId: string;
+  readonly displayName: string;
+}
+
+/** SPEC-016 CA-01: contagens e percentual canônicos, visíveis a toda a família. */
 export interface MissionListItem {
   readonly id: string;
   readonly title: string;
   readonly status: MissionStatus;
   readonly taskCount: number;
   readonly completedTaskCount: number;
+  readonly progressPercent: number;
+  readonly isRedemptionAvailable: boolean;
+  // Aceite de recompensa é introduzido pela SPEC-017; nenhum registro existe ainda (CA-05).
+  readonly acceptedReward: null;
+}
+
+/** Projeção Kids da lista: sem a situação de resgate (RF36/RN33). */
+export interface KidsMissionListItem {
+  readonly id: string;
+  readonly title: string;
+  readonly status: MissionStatus;
+  readonly taskCount: number;
+  readonly completedTaskCount: number;
+  readonly progressPercent: number;
+  readonly acceptedReward: null;
+}
+
+export interface MissionListResponse {
+  readonly inProgress: readonly (MissionListItem | KidsMissionListItem)[];
+  readonly completed: readonly (MissionListItem | KidsMissionListItem)[];
+}
+
+/** SPEC-016 CA-03: detalhe completo para Administrador/Membro, com participações. */
+export interface MissionDetailResponse {
+  readonly id: string;
+  readonly familyId: string;
+  readonly title: string;
+  readonly note: string | null;
+  readonly status: MissionStatus;
+  readonly tasks: readonly MissionTaskProjection[];
+  readonly completedAt: string | null;
+  readonly progressPercent: number;
+  readonly isRedemptionAvailable: boolean;
+  readonly acceptedReward: null;
+  readonly participations: readonly MissionParticipantProjection[];
+  readonly createdAt: string;
+}
+
+/** Projeção Kids do detalhe: sem participações nem situação de resgate (CA-03, RF36). */
+export interface KidsMissionDetailResponse {
+  readonly id: string;
+  readonly title: string;
+  readonly note: string | null;
+  readonly status: MissionStatus;
+  readonly tasks: readonly MissionTaskProjection[];
+  readonly completedAt: string | null;
+  readonly progressPercent: number;
+  readonly acceptedReward: null;
+  readonly createdAt: string;
 }
 
 export interface Page<T> {
@@ -111,14 +162,50 @@ function toResponse(mission: MissionRecord): MissionResponse {
   };
 }
 
-function toKidsResponse(mission: MissionRecord): KidsMissionResponse {
+/** Tarefas vinculadas concluídas / total vinculado × 100; sem tarefa vinculada não há divisão (RF30). */
+function progressPercentOf(totalTasks: number, completedTasks: number): number {
+  return totalTasks === 0 ? 0 : (completedTasks / totalTasks) * 100;
+}
+
+function completedTasksOf(tasks: readonly MissionTaskRecord[]): number {
+  // `awaitingConfirmation` nunca conta como concluída (RN26/RN35).
+  return tasks.filter((task) => task.status === 'completed').length;
+}
+
+function toMissionDetailResponse(
+  mission: MissionRecord,
+  participations: readonly MissionParticipantRecord[],
+): MissionDetailResponse {
+  return {
+    id: mission.id,
+    familyId: mission.familyId,
+    title: mission.title,
+    note: mission.note,
+    status: statusOf(mission),
+    tasks: mission.tasks,
+    completedAt: mission.completedAt?.toISOString() ?? null,
+    progressPercent: progressPercentOf(mission.tasks.length, completedTasksOf(mission.tasks)),
+    isRedemptionAvailable: mission.completedAt !== null,
+    // Aceite de recompensa é introduzido pela SPEC-017; nenhum registro existe ainda (CA-05).
+    acceptedReward: null,
+    participations: participations.map((participant) => ({
+      memberId: participant.memberId,
+      displayName: participant.displayName,
+    })),
+    createdAt: mission.createdAt.toISOString(),
+  };
+}
+
+function toKidsMissionDetailResponse(mission: MissionRecord): KidsMissionDetailResponse {
   return {
     id: mission.id,
     title: mission.title,
     note: mission.note,
     status: statusOf(mission),
-    taskIds: mission.taskIds,
+    tasks: mission.tasks,
     completedAt: mission.completedAt?.toISOString() ?? null,
+    progressPercent: progressPercentOf(mission.tasks.length, completedTasksOf(mission.tasks)),
+    acceptedReward: null,
     createdAt: mission.createdAt.toISOString(),
   };
 }
@@ -301,28 +388,46 @@ export class GetMissionDetailUseCase {
   public async execute(
     actor: ActorContext,
     missionId: string,
-  ): Promise<MissionResponse | KidsMissionResponse> {
+  ): Promise<MissionDetailResponse | KidsMissionDetailResponse> {
     assertUuid(missionId);
-    const mission = await translateDependencyFailure(() =>
-      this.deps.transactionRunner.run((tx) =>
-        this.deps.repository.findMission(tx, actor.familyId, missionId),
-      ),
+    const isKids = actor.role === MemberRole.KIDS;
+    // Missão e participações são lidas na mesma transação: uma reabertura
+    // confirmada entre as duas consultas nunca aparece misturada (CA-06).
+    return translateDependencyFailure(() =>
+      this.deps.transactionRunner.run(async (tx) => {
+        const mission = await this.deps.repository.findMission(tx, actor.familyId, missionId);
+        if (mission === undefined) {
+          throw new NotFoundError('Mission not found.');
+        }
+        if (isKids) {
+          return toKidsMissionDetailResponse(mission);
+        }
+        const participations = await this.deps.repository.listParticipations(
+          tx,
+          actor.familyId,
+          missionId,
+        );
+        return toMissionDetailResponse(mission, participations);
+      }),
     );
-    if (mission === undefined) {
-      throw new NotFoundError('Mission not found.');
-    }
-    return actor.role === MemberRole.KIDS ? toKidsResponse(mission) : toResponse(mission);
   }
 }
 
-function toListItem(record: MissionSummaryRecord): MissionListItem {
-  return {
+function toListItem(
+  record: MissionSummaryRecord,
+  isKids: boolean,
+): MissionListItem | KidsMissionListItem {
+  const base = {
     id: record.id,
     title: record.title,
     status: statusOf(record),
     taskCount: record.taskCount,
     completedTaskCount: record.completedTaskCount,
+    progressPercent: progressPercentOf(record.taskCount, record.completedTaskCount),
+    // Aceite de recompensa é introduzido pela SPEC-017; nenhum registro existe ainda (CA-05).
+    acceptedReward: null,
   };
+  return isKids ? base : { ...base, isRedemptionAvailable: record.completedAt !== null };
 }
 
 function encodeCursor(cursor: PageCursor): string {
@@ -367,22 +472,20 @@ function paginate<T>(rows: readonly T[], size: number, cursorOf: (row: T) => Pag
 export class ListMissionsUseCase {
   constructor(private readonly deps: Deps) {}
 
-  public async execute(actor: ActorContext, cursorInput: unknown): Promise<Page<MissionListItem>> {
-    const after = decodeCursor(cursorInput);
+  public async execute(actor: ActorContext): Promise<MissionListResponse> {
     const rows = await translateDependencyFailure(() =>
       this.deps.transactionRunner.run((tx) =>
-        this.deps.repository.listMissions(tx, {
-          familyId: actor.familyId,
-          after,
-          limit: MISSIONS_PAGE_SIZE + 1,
-        }),
+        this.deps.repository.listMissions(tx, { familyId: actor.familyId }),
       ),
     );
-    const page = paginate(rows, MISSIONS_PAGE_SIZE, (row) => ({
-      sortKey: row.createdAt.toISOString(),
-      id: row.id,
-    }));
-    return { items: page.items.map(toListItem), nextCursor: page.nextCursor };
+    const isKids = actor.role === MemberRole.KIDS;
+    const inProgress: (MissionListItem | KidsMissionListItem)[] = [];
+    const completed: (MissionListItem | KidsMissionListItem)[] = [];
+    for (const row of rows) {
+      const bucket = row.completedAt === null ? inProgress : completed;
+      bucket.push(toListItem(row, isKids));
+    }
+    return { inProgress, completed };
   }
 }
 

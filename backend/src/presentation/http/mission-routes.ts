@@ -36,25 +36,91 @@ const missionResponseSchema = {
   },
 } as const;
 
+// Compartilhado por `GET /missions` (SPEC-016 CA-01/CA-02); `isRedemptionAvailable`
+// está ausente na projeção Kids (CA-03, RF36).
+const missionListItemSchema = {
+  type: 'object',
+  required: [
+    'id',
+    'title',
+    'status',
+    'taskCount',
+    'completedTaskCount',
+    'progressPercent',
+    'acceptedReward',
+  ],
+  properties: {
+    id: { type: 'string' },
+    title: { type: 'string' },
+    status: { type: 'string', enum: ['inProgress', 'completed'] },
+    taskCount: { type: 'integer', minimum: 0 },
+    completedTaskCount: { type: 'integer', minimum: 0 },
+    progressPercent: { type: 'number', minimum: 0, maximum: 100 },
+    isRedemptionAvailable: { type: 'boolean' },
+    // Sempre `null` nesta fase: aceite de recompensa é SPEC-017 (CA-05).
+    acceptedReward: { type: 'null' },
+  },
+} as const;
+
 const missionListSchema = {
   type: 'object',
-  required: ['items', 'nextCursor'],
+  required: ['inProgress', 'completed'],
   properties: {
-    items: {
+    inProgress: { type: 'array', items: missionListItemSchema },
+    completed: { type: 'array', items: missionListItemSchema },
+  },
+} as const;
+
+// `GET /missions/{missionId}` (SPEC-016 CA-01 a CA-06). `participations` está
+// ausente na projeção Kids (CA-03, RF36); `acceptedReward` é sempre `null` nesta
+// fase, pois o aceite de recompensa é SPEC-017 (CA-05).
+const missionDetailResponseSchema = {
+  type: 'object',
+  required: [
+    'id',
+    'title',
+    'note',
+    'status',
+    'tasks',
+    'completedAt',
+    'progressPercent',
+    'acceptedReward',
+    'createdAt',
+  ],
+  properties: {
+    id: { type: 'string' },
+    familyId: { type: 'string' },
+    title: { type: 'string' },
+    note: { type: ['string', 'null'] },
+    status: { type: 'string', enum: ['inProgress', 'completed'] },
+    tasks: {
       type: 'array',
       items: {
         type: 'object',
-        required: ['id', 'title', 'status', 'taskCount', 'completedTaskCount'],
+        required: ['id', 'title', 'status'],
         properties: {
           id: { type: 'string' },
           title: { type: 'string' },
-          status: { type: 'string', enum: ['inProgress', 'completed'] },
-          taskCount: { type: 'integer', minimum: 0 },
-          completedTaskCount: { type: 'integer', minimum: 0 },
+          status: { type: 'string', enum: ['pending', 'awaitingConfirmation', 'completed'] },
         },
       },
     },
-    nextCursor: { type: ['string', 'null'] },
+    completedAt: { type: ['string', 'null'] },
+    progressPercent: { type: 'number', minimum: 0, maximum: 100 },
+    isRedemptionAvailable: { type: 'boolean' },
+    acceptedReward: { type: 'null' },
+    participations: {
+      type: 'array',
+      items: {
+        type: 'object',
+        required: ['memberId', 'displayName'],
+        properties: {
+          memberId: { type: 'string' },
+          displayName: { type: 'string' },
+        },
+      },
+    },
+    createdAt: { type: 'string' },
   },
 } as const;
 
@@ -145,18 +211,13 @@ export function registerMissionRoutes(app: FastifyInstance, container: Applicati
       },
     );
 
-    scope.get<{ Querystring: PageQuery }>(
+    scope.get(
       '/missions',
       {
         schema: {
           tags: ['Missions'],
-          summary: 'List family missions with minimal progress',
+          summary: 'List family missions grouped by in-progress/completed, with canonical progress',
           security: [{ bearerAuth: [] }],
-          querystring: {
-            type: 'object',
-            additionalProperties: false,
-            properties: { cursor: { type: 'string' } },
-          },
           response: { 200: missionListSchema, ...errorResponses },
         },
       },
@@ -164,12 +225,7 @@ export function registerMissionRoutes(app: FastifyInstance, container: Applicati
         reply
           .status(200)
           .header('Cache-Control', 'no-store')
-          .send(
-            await container.listMissionsUseCase.execute(
-              requireActor(request),
-              request.query.cursor,
-            ),
-          ),
+          .send(await container.listMissionsUseCase.execute(requireActor(request))),
     );
 
     // Rota estática registrada antes de `/missions/:missionId`.
@@ -206,10 +262,10 @@ export function registerMissionRoutes(app: FastifyInstance, container: Applicati
       {
         schema: {
           tags: ['Missions'],
-          summary: 'Get a mission (Kids receive a simplified projection)',
+          summary: 'Get mission progress, tasks and redemption status (Kids omit participations)',
           security: [{ bearerAuth: [] }],
           params: missionParamsSchema,
-          response: { 200: missionResponseSchema, ...errorResponses },
+          response: { 200: missionDetailResponseSchema, ...errorResponses },
         },
       },
       async (request, reply) =>

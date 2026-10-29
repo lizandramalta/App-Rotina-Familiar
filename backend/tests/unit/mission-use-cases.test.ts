@@ -31,6 +31,10 @@ const MISSION: MissionRecord = {
   completedAt: null,
   createdAt: NOW,
   taskIds: [TASK_A, TASK_B],
+  tasks: [
+    { id: TASK_A, title: 'Lavar o carro', status: 'pending' },
+    { id: TASK_B, title: 'Cortar a grama', status: 'pending' },
+  ],
 };
 
 const MEMBER_ACTOR = { ...TEST_ACTOR, role: MemberRole.MEMBER, isFamilyCreator: false };
@@ -51,6 +55,7 @@ describe('Mission use cases — SPEC-014 phase 1', () => {
       findMission: vi.fn().mockResolvedValue(MISSION),
       updateMission: vi.fn().mockResolvedValue(undefined),
       listMissions: vi.fn().mockResolvedValue([]),
+      listParticipations: vi.fn().mockResolvedValue([]),
       listTaskOptions: vi.fn().mockResolvedValue([]),
       closeEligible: vi.fn().mockResolvedValue([]),
       findMissionIdsByTask: vi.fn().mockResolvedValue([]),
@@ -305,36 +310,114 @@ describe('Mission use cases — SPEC-014 phase 1', () => {
     expect(repository.closeEligible).not.toHaveBeenCalled();
   });
 
-  it('CA-19 shapes the Kids projection without redemption or management data', async () => {
+  it('CA-03 shapes the Kids detail without participations or redemption status', async () => {
     const result = await new GetMissionDetailUseCase(base()).execute(KIDS_ACTOR, MISSION_ID);
 
     expect(result).not.toHaveProperty('isRedemptionAvailable');
     expect(result).not.toHaveProperty('familyId');
-    expect(result).toMatchObject({ title: MISSION.title, taskIds: MISSION.taskIds });
+    expect(result).not.toHaveProperty('participations');
+    expect(repository.listParticipations).not.toHaveBeenCalled();
+    expect(result).toMatchObject({
+      title: MISSION.title,
+      tasks: MISSION.tasks,
+      progressPercent: 0,
+      acceptedReward: null,
+    });
   });
 
-  it('lists missions with a cursor and restricts task options to administrators', async () => {
-    const summary = (id: string) => ({
-      id,
-      title: 'Missão',
-      completedAt: null,
-      createdAt: NOW,
-      taskCount: 2,
-      completedTaskCount: 1,
-    });
-    repository.listMissions.mockResolvedValue(
-      Array.from({ length: 21 }, (_, index) =>
-        summary(`00000000-0000-4000-8000-${String(index).padStart(12, '0')}`),
-      ),
+  it('CA-03 detail for Administrator/Membro includes participations and redemption status', async () => {
+    repository.listParticipations.mockResolvedValue([
+      { memberId: 'a1000000-0000-4000-8000-000000000001', displayName: 'Ana' },
+    ]);
+    repository.findMission.mockResolvedValue({ ...MISSION, completedAt: NOW });
+
+    const result = await new GetMissionDetailUseCase(base()).execute(TEST_ACTOR, MISSION_ID);
+
+    expect(repository.listParticipations).toHaveBeenCalledWith(
+      expect.anything(),
+      TEST_ACTOR.familyId,
+      MISSION_ID,
     );
+    expect(result).toMatchObject({
+      isRedemptionAvailable: true,
+      acceptedReward: null,
+      participations: [{ memberId: 'a1000000-0000-4000-8000-000000000001', displayName: 'Ana' }],
+    });
+  });
 
-    const page = await new ListMissionsUseCase(base()).execute(KIDS_ACTOR, undefined);
+  it('CA-02 excludes an awaitingConfirmation task from the completed count', async () => {
+    repository.findMission.mockResolvedValue({
+      ...MISSION,
+      tasks: [
+        { id: TASK_A, title: 'Lavar o carro', status: 'completed' },
+        { id: TASK_B, title: 'Cortar a grama', status: 'awaitingConfirmation' },
+      ],
+    });
 
-    expect(page.items).toHaveLength(20);
-    expect(page.nextCursor).not.toBeNull();
-    await expect(
-      new ListMissionsUseCase(base()).execute(KIDS_ACTOR, 'not-a-cursor'),
-    ).rejects.toMatchObject({ code: 'VALIDATION_FAILED' });
+    const result = await new GetMissionDetailUseCase(base()).execute(TEST_ACTOR, MISSION_ID);
+
+    expect(result).toMatchObject({ status: 'inProgress', progressPercent: 50 });
+  });
+
+  it('CA-01/CA-02 lists missions grouped by in-progress/completed with canonical progress', async () => {
+    repository.listMissions.mockResolvedValue([
+      {
+        id: '00000000-0000-4000-8000-000000000001',
+        title: 'Em andamento',
+        completedAt: null,
+        createdAt: NOW,
+        taskCount: 2,
+        completedTaskCount: 1,
+      },
+      {
+        id: '00000000-0000-4000-8000-000000000002',
+        title: 'Concluída',
+        completedAt: NOW,
+        createdAt: NOW,
+        taskCount: 2,
+        completedTaskCount: 2,
+      },
+    ]);
+
+    const result = await new ListMissionsUseCase(base()).execute(TEST_ACTOR);
+
+    expect(result.inProgress).toEqual([
+      expect.objectContaining({
+        id: '00000000-0000-4000-8000-000000000001',
+        progressPercent: 50,
+        isRedemptionAvailable: false,
+        acceptedReward: null,
+      }),
+    ]);
+    expect(result.completed).toEqual([
+      expect.objectContaining({
+        id: '00000000-0000-4000-8000-000000000002',
+        progressPercent: 100,
+        isRedemptionAvailable: true,
+        acceptedReward: null,
+      }),
+    ]);
+  });
+
+  it('CA-03 Kids list items omit isRedemptionAvailable', async () => {
+    repository.listMissions.mockResolvedValue([
+      {
+        id: '00000000-0000-4000-8000-000000000001',
+        title: 'Em andamento',
+        completedAt: null,
+        createdAt: NOW,
+        taskCount: 2,
+        completedTaskCount: 1,
+      },
+    ]);
+
+    const result = await new ListMissionsUseCase(base()).execute(KIDS_ACTOR);
+
+    expect(result.inProgress[0]).not.toHaveProperty('isRedemptionAvailable');
+    expect(result.inProgress[0]).toMatchObject({ progressPercent: 50, acceptedReward: null });
+  });
+
+  it('restricts task options to administrators', async () => {
     await expect(
       new GetMissionTaskOptionsUseCase(base()).execute(MEMBER_ACTOR, undefined, undefined),
     ).rejects.toMatchObject({ code: 'ACTION_NOT_ALLOWED' });
