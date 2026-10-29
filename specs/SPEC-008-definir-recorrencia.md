@@ -1,8 +1,8 @@
 # Spec 008: Definir recorrência de rotina
 
 **Status:** aprovada
-**Autor:** Codex | **Criada em:** 2026-10-06 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-06
-**Base funcional:** 1.8
+**Autor:** Codex | **Criada em:** 2026-10-06 | **Aprovada por:** Pessoa usuária | **Reaprovada em:** 2026-10-27
+**Base funcional:** RN 1.21 / RF 1.20 / UC 1.20 (revisada em 2026-10-27, E-05 a E-14)
 **UX-spec:** [UX-008-definir-recorrencia.md](UX-008-definir-recorrencia.md)
 **Projetos envolvidos:** ambos
 **Tema do backlog:** Tema 2 — Tarefas e rotina
@@ -33,7 +33,7 @@
 
 - `POST /v1/routines` para criar a configuração de rotina e iniciar a materialização das ocorrências.
 - `GET /v1/routines/{routineId}` para consultar configuração, versão vigente e progresso de materialização.
-- `PATCH /v1/routines/{routineId}` para alterar a ocorrência de origem indicada por `fromTaskId` e as futuras elegíveis.
+- `PATCH /v1/routines/{routineId}` para alterar título, peso, responsáveis e observação da ocorrência de origem indicada por `fromTaskId` e das futuras elegíveis.
 - `POST /v1/routines/{routineId}/future-task-deletions` para encerrar a geração no alcance que começa na ocorrência de origem e preserva os registros obrigatórios.
 - Frequências diária, ou a cada 7, 14, 21 ou 28 dias; início livre; título, peso, responsáveis opcionais e observação opcional.
 - Materialização até o fim do mês seguinte no fuso familiar, reposição diária e complemento em consulta sem duplicação.
@@ -50,6 +50,8 @@
 - Não existe `endDate` obrigatório, opcional ou aceito no contrato. O horizonte de materialização não encerra uma rotina.
 - Não há frequência mensal, semanal arbitrária, intervalo zero ou frequência fora de 1/7/14/21/28.
 - “Selecionada e futuras” inclui a ocorrência indicada por `fromTaskId`; não inclui passado, ocorrências concluídas nem registros protegidos por missão concluída.
+- “Selecionada e futuras” não altera `startDate`, `frequencyDays` nem a data prevista já gravada de cada ocorrência abrangida, mesmo após edição individual; ela substitui edições individuais anteriores dos campos permitidos nas futuras abrangidas (E-05, E-06).
+- “Selecionada e futuras” não altera o estado das ocorrências; a escolha do RN66 vale somente para a edição individual (E-08). As futuras são as ocorrências com `original_date` igual ou posterior ao da origem (E-09).
 - A configuração recorrente não conclui, reabre ou altera automaticamente outras ocorrências já preservadas.
 - Não há `Idempotency-Key`, replay automático de gravação ou controle de versão otimista. A última gravação válida persistida vence; materialização usa origem estável e transação para não duplicar ocorrências.
 - O mobile não grava rotinas offline. Em falha, preserva apenas o rascunho local e aguarda nova ação explícita.
@@ -75,8 +77,8 @@
 | `weight` | integer | Sim ao criar; opcional ao alterar | 1, 2 ou 3 | `WEIGHT_REQUIRED`, `WEIGHT_INVALID` |
 | `assigneeIds` | array de UUID | Não | Todos pertencem à família; lista vazia remove responsáveis; duplicados são deduplicados | `ASSIGNEE_NOT_IN_FAMILY` |
 | `note` | string ou `null` | Não | Até 250 caracteres contando espaços; `null` remove a observação | `NOTE_TOO_LONG` |
-| `startDate` | string | Sim ao criar; opcional ao alterar | Data civil `YYYY-MM-DD`, passada ou futura, sem limite de produto | `START_DATE_INVALID` |
-| `frequencyDays` | integer | Sim ao criar; opcional ao alterar | Somente 1, 7, 14, 21 ou 28 | `FREQUENCY_DAYS_INVALID` |
+| `startDate` | string | Sim ao criar; não aceito ao alterar (`400 UNKNOWN_FIELD`) | Data civil `YYYY-MM-DD`, passada ou futura, sem limite de produto | `START_DATE_INVALID` |
+| `frequencyDays` | integer | Sim ao criar; não aceito ao alterar (`400 UNKNOWN_FIELD`) | Somente 1, 7, 14, 21 ou 28 | `FREQUENCY_DAYS_INVALID` |
 | `fromTaskId` | UUID | Sim em alteração e encerramento futuro | Ocorrência da rotina na família do ator; define o primeiro registro alcançado. ID de outra família é indisponível | `ROUTINE_SOURCE_TASK_INVALID` |
 
 Campos omitidos em `PATCH` são preservados; campos desconhecidos ou protegidos são recusados. Não existe `endDate`.
@@ -106,8 +108,8 @@ Campos omitidos em `PATCH` são preservados; campos desconhecidos ou protegidos 
 | Rota | Finalidade | Entrada | Sucesso |
 |---|---|---|---|
 | `GET /v1/routines/{routineId}` | Consultar rotina | — | Configuração, versão vigente e progresso de materialização |
-| `PATCH /v1/routines/{routineId}` | Atualizar selecionada e futuras | `fromTaskId` e campos do dicionário | `200` com estado canônico e recursos afetados |
-| `POST /v1/routines/{routineId}/future-task-deletions` | Encerrar geração selecionada e futura | `fromTaskId` | `200` com alcance aplicado, registros preservados e fim de geração |
+| `PATCH /v1/routines/{routineId}` | Atualizar selecionada e futuras | `fromTaskId` e, opcionalmente, `title`, `weight`, `assigneeIds`, `note` | `200` com `{ routine, updatedTaskIds, preservedTaskIds }` (E-13) |
+| `POST /v1/routines/{routineId}/future-task-deletions` | Encerrar geração selecionada e futura | `fromTaskId` | `200` com `{ routineId, deletedTaskIds, preservedTaskIds, generationEnded }` (E-13) |
 
 Uma consulta dependente de materialização incompleta pode devolver `202 Accepted`, com estado `preparing` e `Retry-After`. A interface mantém o estado de preparação e não apresenta totais como finais.
 
@@ -115,10 +117,11 @@ Uma consulta dependente de materialização incompleta pode devolver `202 Accept
 
 | HTTP | Código | Situação |
 |---:|---|---|
-| 400 | `UNKNOWN_FIELD` | Campo desconhecido, protegido ou `endDate` enviado |
+| 400 | `UNKNOWN_FIELD` | Campo desconhecido, protegido ou `endDate` enviado; `startDate`/`frequencyDays` enviados em alteração |
 | 403 | `ACTION_NOT_ALLOWED` | Perfil Kids ou capacidade revogada |
 | 404 | `RESOURCE_NOT_FOUND` | Rotina/ocorrência inexistente ou de outra família |
-| 409 | `MISSION_COMPLETED_PROTECTED` | Alcance alcançaria dado preservado de missão concluída |
+| 409 | `MISSION_COMPLETED_PROTECTED` | A ocorrência de origem está protegida por missão concluída; futuras protegidas são apenas preservadas (E-10) |
+| 409 | `MISSION_WOULD_HAVE_NO_TASKS` | O encerramento deixaria uma missão em andamento sem tarefas; nada é excluído (E-11) |
 | 422 | `VALIDATION_FAILED` | Campo inválido; inclui os códigos da tabela 5.1 em `fieldErrors` |
 | 503 | `DEPENDENCY_UNAVAILABLE` | Persistência ou materialização incerta; não afirmar reversão |
 
@@ -178,13 +181,18 @@ Uma consulta dependente de materialização incompleta pode devolver `202 Accept
   - **DADO QUE** uma ocorrência válida de rotina foi indicada em `fromTaskId`,
   - **QUANDO** um adulto atualizar a rotina,
   - **ENTÃO O SISTEMA DEVE** aplicar a configuração à ocorrência indicada e às futuras elegíveis,
-  - **E** preservar o passado, concluídas e dados protegidos por missão concluída. *(RN17, RF13)*
+  - **E** preservar o passado, concluídas e dados protegidos por missão concluída,
+  - **E** substituir edições individuais anteriores dos campos permitidos nas ocorrências futuras abrangidas,
+  - **E** manter data inicial, frequência e a data prevista já gravada de cada ocorrência, mesmo após edição individual; `startDate` ou `frequencyDays` enviados são recusados com `400 UNKNOWN_FIELD`, sem mudança,
+  - **E** não alterar o estado das ocorrências abrangidas; `signalResolution` enviado é recusado com `400 UNKNOWN_FIELD`. *(RN17, RN66, RF13)*
 
 - **CA-08: encerrar geração futura preservando registros**
   - **DADO QUE** uma ocorrência válida de rotina foi indicada em `fromTaskId`,
   - **QUANDO** um adulto encerrar a geração futura,
   - **ENTÃO O SISTEMA DEVE** alcançar a ocorrência indicada e as futuras elegíveis,
-  - **E** não excluir diretamente ocorrências concluídas ou protegidas. *(RN18, RNF09)*
+  - **E** não excluir diretamente ocorrências concluídas ou protegidas,
+  - **E** recusar sem mudança, com `409 MISSION_WOULD_HAVE_NO_TASKS`, quando deixaria uma missão em andamento sem tarefas,
+  - **E** encerrar a geração da rotina, sem criar novas ocorrências. *(RN18, RN38, RNF09)*
 
 - **CA-09: origem inválida**
   - **DADO QUE** `fromTaskId` identifica uma ocorrência da família do ator, mas não da rotina solicitada,
@@ -218,6 +226,16 @@ Segredos, tokens, conteúdo da observação e dados de outras famílias nunca s�
 | E-02 | “Selecionada e futuras” inclui a ocorrência indicada por `fromTaskId`. | Decidida em 2026-10-06 | Sim — RN17, RF13, UC08, design e contratos |
 | E-03 | Validações de rotina usam `FREQUENCY_DAYS_INVALID`, `START_DATE_INVALID` e `ROUTINE_SOURCE_TASK_INVALID`. | Decidida em 2026-10-06 | Sim — contratos backend |
 | E-04 | Não há data final obrigatória nem campo `endDate`; o horizonte de materialização não encerra a rotina. | Confirmada pela base vigente em 2026-10-06 | Sim — RN14, RF13, UC08, UX e contratos foram explicitados |
+| E-05 | “Selecionada e futuras” não altera a repetição: `startDate` e `frequencyDays` não são aceitos no `PATCH`; somente título, peso, responsáveis e observação mudam. | Decidida em 2026-10-27 | Sim — RN17 1.20, RF13 1.19, UC08 1.19 e contratos 1.21 |
+| E-06 | “Selecionada e futuras” substitui edições individuais anteriores das ocorrências futuras abrangidas. | Decidida em 2026-10-27 | Sim — RN17 1.20, RF13 1.19, UC08 1.19 e contratos 1.21 |
+| E-07 | A data prevista fica somente leitura no alcance “selecionada e futuras”; em “somente esta tarefa” (edição individual, SPEC-007) ela continua editável. | Decidida em 2026-10-27 | Sim — RN17 1.20, UC08 1.19; apresentação na UX-008 |
+| E-08 | “Selecionada e futuras” altera somente dados e não muda o estado das ocorrências; a escolha entre Pendente e Aguardando confirmação (RN66, MOD-014) vale somente para a edição individual. | Decidida em 2026-10-27 | Sim — RN66 1.20, UC07 1.19 e contratos 1.21 |
+| E-09 | As futuras são as ocorrências com `original_date` igual ou posterior ao da origem, inclusive as que tiveram a data prevista alterada individualmente. | Decidida em 2026-10-27 | Sim — contratos 1.21 |
+| E-10 | Origem protegida por missão concluída responde `409 MISSION_COMPLETED_PROTECTED` sem mudança; futuras protegidas são preservadas e listadas em `preservedTaskIds`. | Decidida em 2026-10-27 | Sim — contratos 1.21 |
+| E-11 | O encerramento que deixaria uma missão em andamento sem tarefas responde `409 MISSION_WOULD_HAVE_NO_TASKS` sem mudança, como na exclusão individual. | Decidida em 2026-10-27 | Sim — contratos 1.21 |
+| E-12 | Encerrar a geração marca a rotina como inativa (`is_active=false`, `deactivated_at`); ela não materializa novas ocorrências e as anteriores à origem permanecem. | Decidida em 2026-10-27 | Sim — contratos 1.21 |
+| E-13 | Respostas `200`: alteração → `{ routine, updatedTaskIds, preservedTaskIds }`; encerramento → `{ routineId, deletedTaskIds, preservedTaskIds, generationEnded }`. | Decidida em 2026-10-27 | Sim — contratos 1.21 |
+| E-14 | A edição “selecionada e futuras” preserva a data prevista já gravada de cada ocorrência abrangida, inclusive quando alterada individualmente; a substituição de edições anteriores limita-se aos campos permitidos. | Decidida em 2026-10-27 | Sim — RN17 1.21, RF13 1.20, UC08 1.20 e contratos 1.22 |
 
 ## 10. Fases de implementação e conclusão
 
@@ -239,4 +257,4 @@ Segredos, tokens, conteúdo da observação e dados de outras famílias nunca s�
 - [x] Contratos, erros e resultado incerto definidos.
 - [x] UX-spec vinculada.
 - [x] Decisões E-01 a E-04 refletidas na base documental 1.8.
-- [x] Status `aprovada` autorizado explicitamente pela pessoa usuária em 2026-10-06.
+- [x] Status `aprovada` autorizado em 2026-10-06; esclarecimento E-14 e prévia técnica do SCRUM-45 confirmados pela pessoa usuária em 2026-10-27.

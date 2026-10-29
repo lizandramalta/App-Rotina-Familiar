@@ -1,13 +1,13 @@
 # Modelo de dados (DER)
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do modelo:** 1.6 · **Base funcional:** 1.12\
-**Data:** 2026-10-07\
-**Situação:** modelo conceitual atualizado; sem migrações implementadas
+**Versão do modelo:** 1.10 · **Base funcional:** RN 1.23 / RF 1.22 / UC 1.22\
+**Data:** 2026-10-27\
+**Situação:** modelo alvo atualizado; a preparação de mídia anterior à família ainda exige migração
 
 [Projeto](../README.md) · [Índice](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Classes](06-diagrama-de-classes.md#classe-familytask) · [Arquitetura mobile](architecture/mobile-architecture.md)
 
-Backend único com PostgreSQL no Supabase. Fotos ficam no R2; o banco armazena sua URL estável privada. O mobile usa a API, sem receber segredos do banco/armazenamento. O diagrama é conceitual; o backend será Node.js/Clean Architecture, conforme a [arquitetura backend](architecture/backend-architecture.md). Os nomes portugueses preservam a terminologia documental; SQL, código e arquivos futuros usam inglês conforme o glossário ao final.
+Backend único com PostgreSQL no Supabase. Fotos ficam no R2; o banco armazena a referência estável do objeto privado. O mobile usa a API, sem receber segredos do banco/armazenamento. O diagrama é conceitual; o backend usa Node.js/Clean Architecture, conforme a [arquitetura backend](architecture/backend-architecture.md). Os nomes portugueses preservam a terminologia documental; SQL, código e arquivos usam inglês conforme o glossário ao final.
 
 ## Convenções de modelagem
 
@@ -16,6 +16,9 @@ Backend único com PostgreSQL no Supabase. Fotos ficam no R2; o banco armazena s
 - Carga e progresso são projeções derivadas do estado/crédito vigente. Destaque final é snapshot imutável; badges e participações são concessões persistidas.
 - Edições usam última gravação válida, sem precondição de versão do cliente. Transações e unicidade preservam invariantes. Não há tabela geral de idempotência; recuperação de ingresso é um protocolo específico e restrito.
 - FKs compostas por família isolam relações. Sem exclusão em cascata que apague histórico ou conquistas. Omissões de índices físicos não dispensam as restrições abaixo.
+- Foto enviada antes da família é preparação vinculada ao grant, sem `familia_id` ou `titular_id`. Quando a criação confirma, a referência passa a `MIDIA` com família e Criador no mesmo commit; o objeto privado no R2 não precisa ser copiado.
+- `displayStatus` da lista pessoal é calculado a partir do estado efetivo e do perfil do ator. Não há coluna, tabela ou transição de domínio adicional para esse rótulo.
+- Cada toque em Parabenizar gera `PARABENS`, preservado mesmo após reabertura de tarefa ou fechamento da mensagem. `FILA_PARABENS_PUSH` registra intenção por dispositivo ativo no mesmo commit. `oculto_em` é por evento do destinatário; a interface agrupa eventos visíveis do mesmo intervalo.
 
 ## Diagrama
 
@@ -28,8 +31,14 @@ erDiagram
     MEMBRO ||--o{ SESSAO : acessa
     IDENTIDADE_CRIADOR ||--o| MEMBRO : autentica
     IDENTIDADE_CRIADOR ||--o{ GRANT_CRIACAO : autoriza
+    GRANT_CRIACAO ||--o{ MIDIA_ONBOARDING : prepara
     SESSAO ||--o{ TOKEN_ACESSO : emite
     SESSAO ||--o{ DISPOSITIVO_PUSH : registra
+    FAMILIA ||--o{ PARABENS : registra
+    MEMBRO ||--o{ PARABENS : envia
+    MEMBRO ||--o{ PARABENS : recebe
+    PARABENS ||--o{ FILA_PARABENS_PUSH : enfileira
+    DISPOSITIVO_PUSH ||--o{ FILA_PARABENS_PUSH : destino
     FAMILIA ||--o{ TAREFA : possui
     TAREFA ||--o{ TAREFA_RESPONSAVEL : atribui
     MEMBRO ||--o{ TAREFA_RESPONSAVEL : participa
@@ -112,6 +121,18 @@ erDiagram
         char prova_instalacao_hash
         timestamptz expira_em
         timestamptz usado_em
+        timestamptz revogado_em
+        timestamptz criado_em
+    }
+    MIDIA_ONBOARDING {
+        uuid id PK "mesmo mediaId apos vinculo"
+        uuid grant_criacao_id FK
+        varchar chave_objeto UK "R2 privado; sem URL publica"
+        enum finalidade "PROFILE_PHOTO"
+        enum estado "UPLOADING, READY, DELETING, DELETED, FAILED"
+        bigint tamanho_bytes
+        varchar tipo_conteudo
+        timestamptz criado_em
     }
     CONVITE {
         uuid id PK
@@ -145,6 +166,25 @@ erDiagram
         enum ambiente "DEVELOPMENT, PRODUCTION"
         timestamptz atualizado_em
         timestamptz invalidado_em
+    }
+    PARABENS {
+        uuid id PK
+        uuid familia_id FK
+        uuid remetente_id FK
+        uuid destinatario_id FK
+        date inicio_periodo
+        date fim_periodo
+        timestamptz criado_em
+        timestamptz oculto_em "nulo enquanto visivel"
+    }
+    FILA_PARABENS_PUSH {
+        uuid id PK
+        uuid parabens_id FK
+        uuid dispositivo_push_id FK
+        enum estado "PENDING, ACCEPTED_BY_PROVIDER, FAILED"
+        integer tentativas
+        timestamptz proxima_tentativa_em
+        timestamptz aceito_em
     }
     TAREFA {
         uuid id PK
@@ -269,7 +309,10 @@ erDiagram
     RECOMPENSA {
         uuid id PK
         uuid familia_id FK "nulo para catalogo"
+        uuid criado_por_id FK "nulo para catalogo"
         varchar titulo
+        varchar titulo_normalizado "customizado; trim/case-insensitive"
+        varchar descricao "opcional; até 255 caracteres"
         timestamptz criado_em
     }
     APURACAO_SEMANAL {
@@ -302,6 +345,8 @@ erDiagram
 |---|---|
 | Um Criador por família, sempre Administrador; membro pertence a uma família. Troca de acesso não transfere nem remove perfil anterior | RN01, RN05, RN09, RF68 |
 | Uma sessão ativa por perfil, comprovada pela instalação; checar revogação em toda operação. Refresh sem vencimento temporal | RN47, RNF22 |
+| `GRANT_CRIACAO` não é membro/sessão: mídia de onboarding pertence a um grant e à prova da instalação, sem chave de família. Só a criação confirmada pode convertê-la em foto do próprio Criador | RN01, RN63, RF01/48, RNF06/07/24 |
+| Família, Criador, membros iniciais, ciclo, sessão e vínculo opcional da foto confirmam juntos. `MEMBRO` mantém uma linha por pessoa; não há tabela de rascunho de membros antes do commit | RN01, RN07, RF01/02/40 |
 | Emitir/reenviar convite invalida anteriores e revoga sessão antes de disponibilizar nova credencial; sem prazo temporal de convite | RN46, RF41/54 |
 | Uma recorrência ativa por template; origem imutável identifica ocorrência mesmo quando data prevista muda | RN14, RN16/17 |
 | No máximo uma conclusão vigente por ocorrência; estado concluído exige conclusão vigente. Zero responsáveis/zero créditos é permitido após edição autorizada | RN17, RN22, RNF11 |
@@ -311,9 +356,11 @@ erDiagram
 | Participação única por membro/missão: exige ao menos um crédito válido em tarefa vinculada no encerramento; é removida quando a missão é reaberta | RN64 |
 | Badge por membro/marco é recalculado após reabertura de missão para refletir participações vigentes | RN64 |
 | Resgate único e item de catálogo ou da mesma família; reabertura de missão remove o aceite | RN43, RN53, RNF23 |
+| Item personalizado: título obrigatório sem controle, até 60 caracteres não-espaço após `trim`; descrição opcional até 255 caracteres contando espaços; `titulo_normalizado` único por família para itens personalizados | RN42, RF34, UC06 |
 | Ciclos contíguos, não sobrepostos; transição de fuso não reapura intervalos encerrados. Uma mudança programada vigente por família | RN28, RN65 |
 | Uma apuração por ciclo; resultado final imutável. Fila de notificação gravada com resultado, sem confundir aceitação APNs com leitura | RN65, RNF26 |
 | Família do recurso, titularidade e estado ativo conferidos no backend; URL de mídia não é permissão de leitura | RNF06/07/24/27 |
+| Lista pessoal filtra por `OCORRENCIA_RESPONSAVEL` do ator. `AWAITING_CONFIRMATION` permanece em `OCORRENCIA_TAREFA`; a projeção adulta pode exibir Pendente sem alterar persistência, crédito ou fila Kids | RN23/55, RF11/22/24, UC11 |
 
 A recuperação de ingresso perdido é uma troca de credenciais específica, vinculada à tentativa e prova da instalação original por dez minutos. Seu estado protegido não é histórico de negócio nem tabela geral de idempotência. Não devolver tokens com base apenas em ID público ou permitir reconsumo do convite. Não persistir senha legível permanente para essa recuperação.
 
@@ -329,7 +376,7 @@ Consultas/PDF usam snapshot consistente. Última gravação vence somente entre 
 | ALTERACAO_FUSO / CICLO_SEMANAL | `TimeZoneChange` / `WeeklyCycle` |
 | MISSAO / PARTICIPACAO_MISSAO | `Mission` / `MissionParticipation` |
 | BADGE / MEMBRO_BADGE / BADGE_PARTICIPACAO | `Badge` / `BadgeAward` / `BadgeContribution` |
-| MIDIA / DISPOSITIVO_PUSH / NOTIFICACAO | `MediaAsset` / `PushDevice` / `NotificationDelivery` |
+| MIDIA_ONBOARDING / MIDIA / DISPOSITIVO_PUSH / NOTIFICACAO | `OnboardingPhoto` / `MediaAsset` / `PushDevice` / `NotificationDelivery` |
 | APURACAO_SEMANAL / DESTAQUE_SEMANAL | `WeeklyHighlight` / `WeeklyRecognition` |
 
 ## Decisões incorporadas
@@ -343,11 +390,13 @@ A [arquitetura backend](architecture/backend-architecture.md) complementa este m
 | Estrutura técnica | Dados e invariantes |
 |---|---|
 | `creator_identities` / `family_creation_grants` | Identidade Apple verificada antes de existir família; grant restrito, temporário, com hash e vínculo à instalação. No máximo um membro Criador por identidade; grant não é convite/sessão de membro |
+| `onboarding_media` (a migrar) | Reserva separada por grant com ID, chave privada de objeto, finalidade única `PROFILE_PHOTO`, estado e metadados. FK em `family_creation_grants(id)` com índice próprio; índice de estado/data para limpeza. A exclusão do grant não pode descartar a única referência a um objeto R2 ainda existente: a limpeza da mídia precede a remoção do registro. O grant/prova autorizam upload, mas não leitura familiar. No commit da criação, bloquear grant e reserva, exigir `READY`, inserir `media_assets` com o mesmo ID/chave e titular Criador e remover a reserva; sem chamada ao R2 dentro da transação. Reservas não vinculadas são limpas após 24 horas com revalidação de estado sob lock. |
 | `session_access_tokens` | Um hash por access token/validade; vários tokens de 15 minutos podem coexistir sob a mesma sessão. Revogar sessão invalida todos, sem criar múltiplos aparelhos |
 | `invite_join_recoveries` | Tentativa e verificadores originais, sessão criada, envelope autenticado criptografado, expiração em dez minutos. Chave fora do banco; nenhuma senha de convite armazenada em claro |
+| `invite_attempt_log` | Um registro por tentativa contada pelo limite do ingresso (por convite e por origem), com hash do identificador e instante. Sem token, senha ou endereço em claro; linhas fora da janela de 15 minutos são removidas na própria contagem. Não expira convite nem sessão |
 | `background_jobs` | Tipo, chave natural, referências de recurso, estado, próxima tentativa, contador, lease/dono/versão do claim e erro sanitizado; sem payload com credenciais |
 | `routine_materialization_state` | Versão vigente, cursor/horizonte e estado de preparação. Origem/tombstones preservados; revalidar versão antes de avançar |
-| `media_assets` | Reserva anterior ao upload, URL privada gerada pelo backend, estado/finalidade, tamanho/tipo e vínculo. Nunca armazenar imagem binária no banco |
+| `media_assets` | Mídia de membro/família com FKs obrigatórias e compostas, chave/URL privada gerada pelo backend, estado/finalidade, tamanho/tipo e vínculo. Recebe a foto antecipada somente no commit de criação; nunca armazena imagem binária. A migração da preparação preserva os `NOT NULL` e FKs existentes desta tabela |
 | `notification_deliveries` | Intenção única ligada à apuração/membro; claim recuperável por job, tentativas, aceitação APNs e abertura distinta |
 
 `appleUserID` do modelo de classes é projeção protegida da identidade do Criador; sua persistência é `creator_identities`, não um campo editável do perfil. Credenciais operacionais possuem limpeza por validade própria; convite e refresh continuam sem expiração temporal. Upload já vinculado não vira órfão automaticamente quando uma foto é substituída.
@@ -358,6 +407,10 @@ A versão 1.1 representava somente um access token na sessão. A versão 1.2 sep
 
 | Versão | Base | Data | Alteração |
 |---|---|---|---|
+| 1.10 | RN 1.23 / RF 1.22 / UC 1.22 | 2026-10-27 | Parabéns persistido por envio e fila de push por dispositivo; ocultação da mensagem preserva eventos. |
+| 1.9 | RN 1.18 / RF 1.17 / UC 1.16 | 2026-10-19 | Preparação de mídia ligada ao grant antes da família, criação conjunta de membros sem tabela de rascunho e `displayStatus` somente como projeção; migração futura explicitada. |
+| 1.8 | 1.17 | 2026-10-10 | Consolida `RECOMPENSA` com autor, descrição opcional e título normalizado único por família (SPEC-015) e `invite_attempt_log` para o limite de tentativas de ingresso (RNF21/SCRUM-32). |
+| 1.7 | 1.15 | 2026-10-10 | `RECOMPENSA` ganha autor, descrição opcional e título normalizado; restrição registra limite e unicidade do item personalizado. Para SPEC-015. |
 | 1.6 | 1.12 | 2026-10-07 | `MISSAO` ganha `observacao` opcional (até 250 caracteres). Para SPEC-014. |
 | 1.5 | 1.11 | 2026-10-07 | Reabertura de missão concluída remove recompensa, participações e badges derivados na mesma transação. |
 | 1.4 | 1.8 | 2026-10-06 | `TAREFA` passa a armazenar `observacao` opcional (até 250 caracteres), herdada pelas ocorrências geradas por rotina. Para SPEC-008. |

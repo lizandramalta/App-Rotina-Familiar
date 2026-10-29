@@ -13,11 +13,14 @@ export function createProblemDetails(params: {
   code: string;
   title: string;
   requestId: string;
+  type?: string;
   detail?: string;
   fieldErrors?: Record<string, string[]>;
 }): ProblemDetails {
   const result: ProblemDetails = {
-    type: `https://api.rotinafamiliar.com/errors/${params.code.toLowerCase().replace(/_/g, '-')}`,
+    type:
+      params.type ??
+      `https://api.rotinafamiliar.com/errors/${params.code.toLowerCase().replace(/_/g, '-')}`,
     title: params.title,
     status: params.status,
     code: params.code,

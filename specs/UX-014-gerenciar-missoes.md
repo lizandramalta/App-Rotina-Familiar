@@ -23,7 +23,7 @@
 ## 3. Escopo da experiência
 
 - **Dentro:** formulário de criação/edição de missão (título, observação, tarefas vinculadas) com atalho para criar tarefa nova; seletor de tarefas com bloqueio local contra ficar sem nenhuma selecionada; lista (TEL-020) e detalhe (TEL-021) na fatia mínima — título, observação, tarefas vinculadas e status — para todos os perfis, com variante Kids simplificada.
-- **Fora:** progresso formatado, participações, exibição de recompensa e navegação por marco de badge (UX-016/SPEC-016); roleta e resgate (UX-017/SPEC-017); cadastro de itens de recompensa (UX-015/SPEC-015).
+- **Fora:** progresso formatado, participações, exibição da recompensa aceita e navegação por marco de badge (UX-016/SPEC-016); roleta e resgate (UX-017/SPEC-017); cadastro de itens de recompensa (UX-015/SPEC-015).
 
 ## 4. Jornada, navegação e preservação de contexto
 

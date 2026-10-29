@@ -1,15 +1,15 @@
 # Spec 003: Gerenciar membros
 
-**Status:** aprovada  
-**Autor:** Codex | **Criada em:** 2026-10-06 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-06  
-**Base funcional:** 1.14\
+**Status:** aprovada\
+**Autor:** Codex | **Criada em:** 2026-10-06 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-19
+**Base funcional:** RN 1.26 / RF 1.25 / UC 1.25\
 **UX-spec:** [UX-003-gerenciar-membros.md](UX-003-gerenciar-membros.md)  
 **Projetos envolvidos:** ambos  
 **Tema do backlog:** Tema 1 - Acesso, família e perfis
 
 ## 1. Contexto e objetivo
 
-- **Problema / necessidade:** após a criação da família, Administradores precisam formar e manter o grupo de pessoas que participa da rotina, sem conceder gestão a quem não a possui, expor dados entre famílias ou perder o histórico quando alguém sai.
+- **Problema / necessidade:** membros iniciais já podem nascer com a família em SPEC-002; após a criação, Administradores precisam incluir outros e manter os perfis sem conceder gestão indevida, expor dados entre famílias ou perder histórico.
 - **Objetivo da entrega:** permitir que um Administrador crie, consulte e administre perfis da própria família — inclusive papel, modo Kids e remoção — preservando as proteções do Criador, a revogação de acesso e os vínculos históricos.
 
 ## 2. Rastreabilidade e dependências
@@ -20,11 +20,11 @@
 | Regras de negócio | RN01–RN08, RN10 |
 | Requisitos funcionais | RF02–RF06, RF38, RF40 |
 | Requisitos não funcionais | RNF01, RNF05–RNF09, RNF12–RNF14, RNF22 |
-| Telas e fluxos | TEL-030 (saída da administração), TEL-032, TEL-033, TEL-050, MOD-010, UF-12 |
-| Decisões arquiteturais | MA-07–MA-11, MA-15; BA-07, BA-08, BA-10, BA-20 |
+| Telas e fluxos | TEL-002 (retorno em edição), TEL-030 (saída da administração), TEL-032, TEL-033, TEL-050, TEL-057, MOD-010, UF-01, UF-12 |
+| Decisões arquiteturais | MA-07–MA-11, MA-15, MA-18; BA-07, BA-08, BA-10, BA-20, BA-36 |
 
 - **Documentos consultados:** `docs/01-regras-de-negocio.md`, `docs/02-requisitos.md`, `docs/03-casos-de-uso.md`, `docs/05-modelo-de-dados.md`, `docs/06-diagrama-de-classes.md`, `docs/design/screen-map.md`, `docs/design/user-flows.md`, `docs/architecture/mobile-feature-catalog.md`, `docs/architecture/mobile-decisions.md`, `docs/architecture/backend-contracts.md` e `docs/architecture/backend-decisions.md`.
-- **Depende de:** [SPEC-002-criar-configurar-familia.md](SPEC-002-criar-configurar-familia.md), aprovada. A sessão criada para o Criador delimita a família e o ator de todas as operações desta entrega.
+- **Depende de:** [SPEC-002-criar-configurar-familia.md](SPEC-002-criar-configurar-familia.md), aprovada na revisão de 2026-10-19. A sessão criada para o Criador delimita a família e o ator das operações persistentes desta entrega.
 - **Dependências externas e infraestrutura:** sessão própria do backend, banco transacional e prova de instalação já previstos para sessões. Não depende de Sign in with Apple, geração de convite ou envio externo nesta entrega.
 
 ## 3. Escopo da entrega
@@ -32,12 +32,12 @@
 ### 3.1. Dentro do escopo
 
 - Consultar a projeção de membros e o detalhe administrativo da própria família, para adultos, em `GET /v1/family/members` e `GET /v1/family/members/{memberId}`.
-- Criar, por Administrador, perfil sem sessão nos papéis `administrator`, `member` ou `kids`, inclusive quando o Criador usa o mesmo fluxo em TEL-056 durante o onboarding.
-- Editar exclusivamente o nome administrativo de outro membro; apelido, foto e identidade Apple continuam fora do comando administrativo.
+- Criar, por Administrador, perfil sem sessão nos papéis `administrator`, `member` ou `kids` depois que a família existir, inclusive se o Criador retornar de TEL-056 a TEL-002 e adicionar novo membro.
+- Corrigir exclusivamente o nome administrativo de perfil Kids da própria família; adultos alteram o próprio nome em Meu perfil (SPEC-006). Apelido, foto e identidade Apple continuam fora do comando administrativo.
 - Alterar papel entre `administrator`, `member` e `kids`, aplicando as restrições de Criador e de modo Kids.
 - Permitir que Administrador que não seja Criador deixe a administração e se torne Membro.
 - Remover logicamente membro que não seja Criador, revogar seu acesso e ajustar, de forma consistente, somente suas responsabilidades futuras não concluídas e não protegidas.
-- Expor as ações administrativas em TEL-050, TEL-032, TEL-033, TEL-030 e MOD-010 somente quando a capacidade confirmada do ator permitir.
+- Expor criação em TEL-033, correção de nome Kids em TEL-057 ou TEL-032 e ações de papel, convite e remoção em TEL-032 somente quando a capacidade confirmada do ator permitir.
 
 ### 3.2. Fora do escopo
 
@@ -46,6 +46,7 @@
 - Editar apelido, foto, badges ou outros dados pessoais do titular: `SPEC-006`.
 - Consulta e detalhes das tarefas de um membro; TEL-032 apenas preserva o ponto de entrada e o contexto visual necessários à gestão. A capacidade funcional de tarefas é entregue nas specs de tarefas.
 - Remoção física, transferência de histórico, troca de família ou reativação de membro removido.
+- Preparação em rascunho e criação atômica dos membros iniciais com a família: SPEC-002.
 
 ### 3.3. Fora de questão
 
@@ -59,7 +60,7 @@
 
 | Perfil / situação | Pode | Não pode | Reação a tentativa não autorizada |
 |---|---|---|---|
-| Administrador não-Criador | Gerir membros da própria família; deixar a própria administração | Gerir outra família; editar foto/apelido de terceiros; alterar o Criador; emitir convite nesta spec | `403 ACTION_NOT_ALLOWED` ou `404 RESOURCE_NOT_FOUND`; ação oculta quando a projeção já permite saber a restrição |
+| Administrador não-Criador | Gerir membros da própria família, corrigir nome de Kids; deixar a própria administração | Gerir outra família; editar nome de outro adulto, foto/apelido de terceiros; alterar o Criador; emitir convite nesta spec | `403 ACTION_NOT_ALLOWED` ou `404 RESOURCE_NOT_FOUND`; ação oculta quando a projeção já permite saber a restrição |
 | Criador / Administrador | Gerir outros membros da própria família | Ser removido, rebaixado ou deixar a administração | `409 MEMBER_STATE_CONFLICT`; ação não é apresentada |
 | Membro | Consultar lista e detalhe permitidos a adultos | Criar, editar, mudar papel/modo ou remover membro | `403 ACTION_NOT_ALLOWED`; controles ocultos |
 | Kids | Nenhuma capacidade desta entrega | Acessar Família ou gerir membros | `403 ACTION_NOT_ALLOWED`; sem entrada visual |
@@ -87,10 +88,10 @@ Todas as rotas usam `/v1`, HTTPS, JSON em inglês, `Authorization: Bearer <acces
 
 | Método e rota | Caso de uso | Acesso | Entrada | Resultado confirmado |
 |---|---|---|---|---|
-| `GET /family/members` | `ListFamilyMembers` | Adulto | Paginação conforme contrato compartilhado | Projeção paginada da própria família |
+| `GET /family/members` | `ListFamilyMembers` | Adulto | `cursor` opaco opcional | `{ items, nextCursor }` da própria família, em páginas de até 20 perfis |
 | `GET /family/members/{memberId}` | `GetMemberDetail` | Adulto da família | `memberId` na rota | Dados públicos do perfil e capacidades administrativas do ator |
 | `POST /family/members` | `CreateMember` | Administrador | `name`, `role` | `201 Created` e projeção do perfil, ainda sem sessão/convite |
-| `PATCH /family/members/{memberId}` | `UpdateMember` | Administrador | `name` | `200 OK` e projeção confirmada |
+| `PATCH /family/members/{memberId}` | `UpdateMember` | Administrador; alvo Kids | `name` | `200 OK` e projeção confirmada |
 | `POST /family/members/{memberId}/role-changes` | `ChangeMemberRole` | Administrador | `role` | `200 OK` e projeção confirmada |
 | `POST /me/administration-exit` | `LeaveAdministration` | Administrador não-Criador | Sem corpo | `200 OK` e sessão/projeção com papel `member` |
 | `DELETE /family/members/{memberId}` | `RemoveMember` | Administrador; alvo não-Criador | Sem corpo | `204 No Content` após a remoção lógica e seus efeitos confirmados |
@@ -114,10 +115,10 @@ Todos os erros usam `application/problem+json` com `type`, `title`, `status`, `c
 |---:|---|---|
 | 400 | `UNKNOWN_FIELD` | Campo não reconhecido ou protegido, inclusive `familyId`, `isFamilyCreator`, apelido ou foto |
 | 401 | `SESSION_INVALID` | Credencial inválida, expirada ou sessão revogada |
-| 403 | `ACTION_NOT_ALLOWED` | Ator sem capacidade administrativa |
+| 403 | `ACTION_NOT_ALLOWED` | Ator sem capacidade administrativa ou tentativa de editar nome de adulto por esta rota |
 | 404 | `RESOURCE_NOT_FOUND` | Membro ausente, removido ou de outra família |
 | 409 | `MEMBER_STATE_CONFLICT` | Estado atual impede a operação, inclusive proteção do Criador ou mudança incompatível com o estado atual |
-| 422 | `VALIDATION_FAILED` | Nome ou papel semanticamente inválidos; inclui `fieldErrors` |
+| 422 | `VALIDATION_FAILED` | Nome, papel ou cursor semanticamente inválidos; inclui `fieldErrors` (`CURSOR_INVALID` para cursor opaco malformado) |
 | 503 | `DEPENDENCY_UNAVAILABLE` | Persistência ou dependência indisponível; não afirmar reversão de escrita incerta |
 
 - **Concorrência:** aplica-se última gravação válida persistida para edição de nome. Mudanças de papel e remoção usam transação curta, lock por família e revalidação das invariantes no commit (BA-07, BA-08).
@@ -144,7 +145,7 @@ Todos os erros usam `application/problem+json` com `type`, `title`, `status`, `c
   - **E** responder `201 Created` com a projeção canônica, sem sessão, convite ou credencial. *(UC02, RF02, RF40, RN07)*
 
 - **CA-02: validação do nome e do papel**
-  - **DADO QUE** um Administrador cria ou edita um perfil,
+  - **DADO QUE** um Administrador cria um perfil ou corrige o nome de um perfil Kids,
   - **QUANDO** enviar nome vazio, fora de 1–60 caracteres visíveis, com caractere de controle, ou papel fora do enum,
   - **ENTÃO O SISTEMA DEVE** rejeitar a persistência com `422 VALIDATION_FAILED`,
   - **E** devolver o erro de campo estável correspondente. *(RF02, RF03, RF40)*
@@ -154,6 +155,7 @@ Todos os erros usam `application/problem+json` com `type`, `title`, `status`, `c
   - **QUANDO** executar qualquer comando ou consulta protegida,
   - **ENTÃO O SISTEMA DEVE** recusar Membro/Kids com `403 ACTION_NOT_ALLOWED` e recurso externo com `404 RESOURCE_NOT_FOUND`,
   - **E** não persistir nem revelar dados de outra família. *(RN07, RNF06, RNF07)*
+  - **E** negar com `403 ACTION_NOT_ALLOWED` a tentativa de Administrador corrigir o nome de outro adulto; adultos usam o próprio perfil. *(RF03, RF48)*
 
 - **CA-04: papel, modo Kids e Criador protegido**
   - **DADO QUE** um Administrador muda o papel de um perfil,
@@ -198,15 +200,19 @@ Segredos, tokens, provas de instalação, hashes, apelido privado configurável 
 | E-02 | Os papéis permitidos na criação são `administrator`, `member` e `kids`; `kids` não possui booleano separado. | Aprovação da prévia em 2026-10-06 | Sim — RF40 e base 1.7 atualizadas |
 | E-03 | A saída voluntária de Administrador não-Criador pertence a esta entrega, embora sua entrada visual exista em TEL-030. | Aprovação da prévia em 2026-10-06 | Não — aplica UC02/RN04 existentes |
 | E-04 | A emissão e o reenvio de convite não integram esta entrega; criação de perfil e convite continuam comandos distintos. | Mapa de specs e contrato backend | Não |
-| E-05 | TEL-056 reutiliza a criação de membro sem alterar payload, autorização ou estados desta SPEC; após salvar, a orquestração decide oferecer convite explícito ou avançar. | Pessoa usuária / 2026-10-07 | Não |
+| E-05 | Revisada: membros iniciais são preparados em TEL-002 e criados com a família por SPEC-002; TEL-056 só oferece convite. Inclusões após a criação usam a gestão persistente desta SPEC. | Pessoa usuária / 2026-10-19 | Sim — RN01/RN07, RF02/RF40 e UC01/UC02. |
+| E-07 | Adultos editam o próprio nome pela SPEC-006; Administrador corrige apenas o nome administrativo de Kids por esta SPEC, em TEL-057 ou TEL-032. A rota de atualização administrativa responde 403 para alvo adulto da mesma família. | Pessoa usuária / 2026-10-28 | Sim — RN07/RN63, RF03/RF60, UC02/UC10 e contrato backend. |
+| E-06 | A lista de membros usa cursor opaco, ordenação estável e páginas de até 20 perfis; `nextCursor: null` encerra a consulta. O Mobile carrega as páginas seguintes por rolagem infinita. | Pessoa usuária / 2026-10-08 | Não — detalha o contrato e a experiência de consulta, sem alterar RN/RF. |
 
 ## 10. Fases de implementação e conclusão
 
 | Fase | Objetivo | CAs | Prontidão | Status |
 |---|---|---|---|---|
-| 1 | Consulta e criação segura: projeções adultas, criação e validação de perfil, RBAC e isolamento | CA-01 a CA-03, CA-07 | Testes unitários, integração e UI dos fluxos publicados verdes | a fazer |
+| 1 | Consulta e criação segura: projeções adultas, criação e validação de perfil, RBAC e isolamento | CA-01 a CA-03, CA-07 | Testes unitários, integração e UI dos fluxos publicados verdes | em andamento — backend concluído (SCRUM-27); Mobile pendente (SCRUM-29) |
 | 2 | Administração de papel e modo Kids, incluindo saída voluntária | CA-04, CA-05, CA-07 | Transições e recusas por papel/Criador cobertas por testes de integração e UI | a fazer |
 | 3 | Remoção consistente, revogação e regressão | CA-06, CA-07 | Transação de remoção, sessão revogada e regressão de responsabilidades verificadas | a fazer |
+
+**Registro de execução (2026-10-19):** SCRUM-27 concluiu a criação e consulta posterior de membros no backend. A criação atômica dos membros iniciais pertence à revisão de SPEC-002. A Fase 1 desta SPEC não é considerada concluída porque a interface Mobile correspondente (SCRUM-29) ainda não foi entregue.
 
 - **Fase 1:** não expõe mudança de papel, saída voluntária ou remoção; o perfil recém-criado permanece sem convite, que pertence à SPEC-004.
 - **Fase 2:** não emite convite nem implementa edição de foto/apelido; pode ser publicada depois da Fase 1.
@@ -215,9 +221,9 @@ Segredos, tokens, provas de instalação, hashes, apelido privado configurável 
 ## 11. Checklist de aprovação
 
 - [x] Códigos funcionais, UX e arquiteturais pesquisados e existentes.
-- [x] Dependência SPEC-002 validada como aprovada e mapa de specs corrigido.
+- [x] Revisão de SPEC-002 e deste par SPEC/UX aprovada para o novo onboarding.
 - [x] Autorização, isolamento e validação fazem parte da primeira fase exposta.
 - [x] Contratos, validações, erros e política de falha definidos.
 - [x] UX-spec vinculada.
 - [x] Decisões E-01 a E-04 registradas e alterações de base efetuadas quando necessárias.
-- [x] Status autorizado explicitamente como `aprovada` pela pessoa usuária em 2026-10-06.
+- [x] Revisão de 2026-10-19 aprovada; aprovação anterior de 2026-10-06 preservada no histórico.

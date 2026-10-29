@@ -1,7 +1,7 @@
 # Catálogo de funcionalidades e rastreabilidade mobile
 
-**Versão:** 1.6 · **Base funcional:** 1.11 · **Design:** 1.6\
-**Data:** 2026-10-07 · **Situação:** especificação para implementação futura
+**Versão:** 1.13 · **Base funcional:** RN 1.26 / RF 1.25 / UC 1.25 · **Design:** screen map 1.23 / fluxos 1.24\
+**Data:** 2026-10-28 · **Situação:** catálogo alvo revisado; jornadas recentes ainda exigem implementação
 
 [Arquitetura mobile](mobile-architecture.md) · [Decisões](mobile-decisions.md) · [Índice documental](../DOCUMENTACAO.md) · [Screen map](../design/screen-map.md) · [User flows](../design/user-flows.md)
 
@@ -29,16 +29,16 @@ As dependências cruzadas são restritas a contratos/projeções. `Routines` e `
 
 ## 2. Telas e arquivos de apresentação
 
-Para cada par abaixo, os arquivos são `<View>.swift` e `<ViewModel>.swift`, dentro de `Features/<Feature>/Presentation/<Screen>/`. O nome do arquivo coincide com o tipo principal. As variantes Kids compartilham modelos e componentes apropriados, mas têm estado e capacidades próprios. A tabela cobre as **26 telas ativas**; os **2 IDs retirados** são indicados separadamente.
+Para cada par abaixo, os arquivos são `<View>.swift` e `<ViewModel>.swift`, dentro de `Features/<Feature>/Presentation/<Screen>/`. O nome do arquivo coincide com o tipo principal. As variantes Kids compartilham modelos e componentes apropriados, mas têm estado e capacidades próprios. A tabela cobre as **29 telas ativas**; os **2 IDs retirados** são indicados separadamente.
 
 | ID | Feature | View | ViewModel | Responsabilidade/entrada |
 |---|---|---|---|---|
 | TEL-001 | `Access` | `EntryView` | `EntryViewModel` | Entrada Apple e orientação para convidados |
-| TEL-002 | `Family` | `CreateFamilyView` | `CreateFamilyViewModel` | Criador autenticado sem família |
+| TEL-002 | `Family` | `CreateFamilyView` | `CreateFamilyViewModel` | Rascunho de família e membros antes da criação; no retorno de TEL-056, edita a família existente sem recriação |
 | TEL-003 | `Access` | `JoinInviteView` | `JoinInviteViewModel` | Validar link e efetivar ingresso com senha |
 | TEL-004 | `Access` | `AccessRecoveryView` | `AccessRecoveryViewModel` | Orientar novo convite ou Apple; não envia solicitação |
-| TEL-010 | `Tasks` | `PersonalTasksView` | `PersonalTasksViewModel` | Aba inicial adulta, tarefas e progresso próprios diários |
-| TEL-011 | `Tasks` | `FamilyTasksView` | `FamilyTasksViewModel` | Consulta familiar adulta por Dia/Semana, incluindo sem responsável |
+| TEL-010 | `Tasks` | `DailyTaskListView` | `DailyTaskListViewModel` | Aba inicial adulta, tarefas/progresso próprios diários e parabéns recebido |
+| TEL-011 | `Tasks` | `FamilyTasksView` | `FamilyTasksViewModel` | Consulta familiar adulta por intervalo Início/Fim, incluindo sem responsável e menu do PDF |
 | TEL-012 | `Tasks` | `TaskDetailView` | `TaskDetailViewModel` | Detalhe e ações adultas conforme estado |
 | TEL-013 | `Tasks` + `Routines` | `TaskEditorView` | `TaskEditorViewModel` | Rascunho único; salva tarefa ou configuração recorrente pelo caso de uso adequado |
 | TEL-015 | `KidsParticipation` | `KidsReviewQueueView` | `KidsReviewQueueViewModel` | Fila exclusiva de Administrador |
@@ -46,21 +46,24 @@ Para cada par abaixo, os arquivos são `<View>.swift` e `<ViewModel>.swift`, den
 | TEL-020 | `Missions` | `MissionsView` | `MissionsViewModel` | Aba independente adulta/Kids; lista em andamento e concluída |
 | TEL-021 | `Missions` | `MissionDetailView` | `MissionDetailViewModel` | Progresso, participações e recompensa; detalhe operacional de tarefa limitado por perfil |
 | TEL-022 | `Missions` | `MissionEditorView` | `MissionEditorViewModel` | Administrador, ao menos uma tarefa e nenhum prazo |
-| TEL-023 | `Rewards` | `RewardItemsView` | `RewardItemsViewModel` | Catálogo e itens personalizados, com origem preservada |
+| TEL-023 | `Rewards` | `RewardItemsView` | `RewardItemsViewModel` | Catálogo e itens personalizados, com origem, título e descrição preservados |
 | TEL-024 | `Rewards` | `RewardWheelView` | `RewardWheelViewModel` | Resultado, novo sorteio, aceitação ou saída sem resgate |
 | TEL-030 | `Profile` | `ProfileView` | `ProfileViewModel` | Aba adulta ou avatar Kids; foto, apelido e badges; saída do papel Admin quando permitida |
-| TEL-032 | `Family` | `MemberDetailView` | `MemberDetailViewModel` | Consulta adulta Dia/Semana das tarefas do membro; gestão só Admin |
-| TEL-033 | `Family` | `MemberEditorView` | `MemberEditorViewModel` | Criar/editar dados administrativos, papel e modo |
+| TEL-032 | `Family` | `MemberDetailView` | `MemberDetailViewModel` | Tarefas do membro em Dia/Semana visual domingo–sábado; convite e gestão em blocos Admin; Editar no topo apenas para Kids visto por Admin |
+| TEL-033 | `Family` | `MemberEditorView` | `MemberEditorViewModel` | Criar membro com nome e papel |
 | TEL-034 | `Family` | `MemberInviteView` | `MemberInviteViewModel` | Emitir novo link e senha, revogando convites e sessão anteriores |
-| TEL-040 | `Tasks` | `KidsTasksView` | `KidsTasksViewModel` | Aba inicial Kids; tarefas/progresso próprios diários |
+| TEL-040 | `Tasks` | `DailyTaskListView` | `DailyTaskListViewModel` | Aba inicial Kids; tarefas/progresso próprios diários e parabéns recebido |
 | TEL-041 | `Tasks` | `KidsTaskDetailView` | `KidsTaskDetailViewModel` | Detalhe somente de tarefa própria; abre sinalização |
-| TEL-050 | `Family` | `FamilyOverviewView` | `FamilyOverviewViewModel` | Progresso familiar Dia/Semana, membros, PDF e ações permitidas; carga na SPEC-018 |
-| TEL-051 | `Reports` | `WeeklyReportView` | `WeeklyReportViewModel` | Semana, geração, visualização e exportação |
+| TEL-050 | `Family` | `FamilyOverviewView` | `FamilyOverviewViewModel` | Progresso familiar por intervalo livre, membros e incentivos; Admin pode Parabenizar; carga visual adiada |
+| TEL-051 | `Reports` | `FamilyWeeklyReportView` | — | Seleção de semana, geração local, visualização e exportação |
 | TEL-052 | `Recognition` | `WeeklyRecognitionView` | `WeeklyRecognitionViewModel` | Reconhecimento próprio; texto editável e compartilhamento |
 | TEL-053 | `Family` | `FamilySettingsView` | `FamilySettingsViewModel` | Admin configura fuso e momento de aplicação |
 | TEL-054 | `Profile` | `BadgeDetailView` | `BadgeDetailViewModel` | Titular consulta marco e missões contribuintes |
+| TEL-055 | `Access` + `Profile` | `CreatorProfileSetupView` | `CreatorProfileSetupViewModel` | Nome/apelido e foto inicial opcional; upload com grant antes da família |
+| TEL-056 | `Family` | `InitialInvitesView` | `InitialInvitesViewModel` | Membros já criados; convite inicial explícito com compartilhamento direto e opção de adiar |
+| TEL-057 | `Family` | `FamilySettingsHubView` | `FamilyOverviewViewModel` | Configurações da família; criação de membro e correção do nome administrativo de Kids somente para Admin |
 
-**TEL-014 e TEL-031:** IDs reservados, sem View, ViewModel ou rota. Carga e lista de membros estão integradas à TEL-050. Uma ViewModel não é obrigatória para uma tela que se revele estritamente estática na implementação; TEL-004 pode ser somente View e saídas de navegação, sem classe vazia para cumprir tabela.
+**TEL-014 e TEL-031:** IDs reservados, sem View, ViewModel ou rota. A lista de membros está em TEL-050; a carga visual será entregue em superfície futura. Uma ViewModel não é obrigatória para uma tela que se revele estritamente estática na implementação; TEL-004 pode ser somente View e saídas de navegação, sem classe vazia para cumprir tabela.
 
 Telas adultas iniciais usam `AdultTab` com `personalTasks`, `profile`, `missions` e `family`. Kids usam `KidsTab` com `personalTasks` e `missions`. Perfil e destaque Kids são destinos dentro de um fluxo, sem terceira aba. A posição visual final das abas adultas deve seguir o detalhamento de design.
 
@@ -77,7 +80,7 @@ Modais não se tornam automaticamente novos casos de uso ou novas ViewModels. Se
 | MOD-005 | `TaskDeletionConfirmationView.swift` | `TaskDetailViewModel`; confirma alcance autorizado |
 | MOD-006 | `TaskReopeningConfirmationView.swift` | `TaskDetailViewModel`; exibido quando reabrir afetar missão concluída/recompensa e informa reversão dos dados derivados |
 | MOD-007 | `MissionTaskPickerView.swift` | Rascunho de `MissionEditorViewModel`; IDs individuais, sem selecionar rotina inteira |
-| MOD-008 | `RewardItemEditorView.swift` | `RewardItemEditorViewModel`; gravação independente do resgate |
+| MOD-008 | `RewardItemEditorView.swift` | `RewardItemEditorViewModel`; título validado, descrição opcional e gravação independente do resgate |
 | MOD-009 | `OwnProfileEditorView.swift` | `OwnProfileEditorViewModel`; foto/apelido do titular e upload |
 | MOD-010 | `MemberChangeConfirmationView.swift` | Fluxo chamador: `ProfileViewModel`, `MemberDetailViewModel` ou `MemberEditorViewModel` |
 | MOD-011 | `KidsSignalComposerView.swift` | `KidsSignalComposerViewModel`; captura, revisão, upload e sinalização |
@@ -93,8 +96,8 @@ Modais não se tornam automaticamente novos casos de uso ou novas ViewModels. Se
 
 | UC | Casos de uso mobile propostos | TEL/MOD principais | UF | Referências centrais |
 |---|---|---|---|---|
-| [UC01](../03-casos-de-uso.md#uc01) | `CreateFamilyUseCase`, `ResolveCreatorFamilyUseCase`, `GetFamilySettingsUseCase`, `ChangeFamilyTimeZoneUseCase` | TEL-002/053; MOD-012 | [UF-01](../design/user-flows.md#uf-01), [UF-16](../design/user-flows.md#uf-16) | RF01/38/39/67; RN01/09/28/44/65 |
-| [UC02](../03-casos-de-uso.md#uc02) | `CreateMemberUseCase`, `UpdateMemberUseCase`, `ChangeMemberRoleUseCase`, `SetKidsModeUseCase`, `LeaveAdministrationUseCase`, `RemoveMemberUseCase`, `GenerateMemberInviteUseCase`, `ResendMemberInviteUseCase` | TEL-050/030/032/033/034; MOD-010 | [UF-02](../design/user-flows.md#uf-02), [UF-03](../design/user-flows.md#uf-03), [UF-12](../design/user-flows.md#uf-12) | RF02–06/40/41/54; RN01–10/45–47 |
+| [UC01](../03-casos-de-uso.md#uc01) | `UploadCreatorPhotoUseCase`, `CreateFamilyUseCase`, `ResolveCreatorFamilyUseCase`, `GetFamilyUseCase`, `UpdateFamilyUseCase`, `GetFamilySettingsUseCase`, `ChangeFamilyTimeZoneUseCase` | TEL-055/002/056/053; MOD-012 | [UF-01](../design/user-flows.md#uf-01), [UF-16](../design/user-flows.md#uf-16) | RF01/02/38/39/40/48/67; RN01/07/09/28/44/63/65 |
+| [UC02](../03-casos-de-uso.md#uc02) | `CreateMemberUseCase`, `UpdateMemberUseCase`, `ChangeMemberRoleUseCase`, `SetKidsModeUseCase`, `LeaveAdministrationUseCase`, `RemoveMemberUseCase`, `GenerateMemberInviteUseCase`, `ResendMemberInviteUseCase` | TEL-002/056/050/030/032/033/034; MOD-010 | [UF-01](../design/user-flows.md#uf-01), [UF-02](../design/user-flows.md#uf-02), [UF-03](../design/user-flows.md#uf-03), [UF-12](../design/user-flows.md#uf-12) | RF02–06/40/41/54; RN01–10/45–47 |
 | [UC03](../03-casos-de-uso.md#uc03) | `GetKidsReviewQueueUseCase`, `GetKidsSignalUseCase`, `ConfirmKidsSignalUseCase`, `RejectKidsSignalUseCase` | TEL-015/016 | [UF-07](../design/user-flows.md#uf-07) | RF25/26/55/56; RN22–26/54/55 |
 | [UC04](../03-casos-de-uso.md#uc04) | `SignInWithAppleUseCase` | TEL-001 | [UF-01](../design/user-flows.md#uf-01), [UF-03](../design/user-flows.md#uf-03) | RF37/39; RN44; RNF15/16 |
 | [UC05](../03-casos-de-uso.md#uc05) | `CreateMissionUseCase`, `UpdateMissionUseCase`, `GetMissionTaskOptionsUseCase` | TEL-020/021/022; MOD-007 | [UF-10](../design/user-flows.md#uf-10) | RF28/29/31/32/50/58; RN35–40/50/51/58/64 |
@@ -103,9 +106,9 @@ Modais não se tornam automaticamente novos casos de uso ou novas ViewModels. Se
 | [UC08](../03-casos-de-uso.md#uc08) | `CreateRoutineUseCase`, `UpdateRoutineUseCase`, `DeleteFutureTasksUseCase` | TEL-013; MOD-002/003 | [UF-05](../design/user-flows.md#uf-05) | RF13/14/70; RN14/16–18/67 |
 | [UC09](../03-casos-de-uso.md#uc09) | `InspectInviteUseCase`, `JoinInviteUseCase`, `RestoreSessionUseCase` | TEL-003/004; MOD-013 | [UF-02](../design/user-flows.md#uf-02), [UF-03](../design/user-flows.md#uf-03) | RF42–46/54/68; RN09/10/45–47; RNF17–22 |
 | [UC10](../03-casos-de-uso.md#uc10) | `GetOwnProfileUseCase`, `UpdateOwnProfileUseCase`, `GetOwnBadgesUseCase`, `GetBadgeContributionsUseCase` | TEL-030/054; MOD-009 | [UF-13](../design/user-flows.md#uf-13) | RF48/62/65; RN63/64; RNF27 |
-| [UC11](../03-casos-de-uso.md#uc11) | `GetPersonalTasksUseCase`, `GetFamilyTasksUseCase`, `GetMemberTasksUseCase`, `GetPersonalProgressUseCase`, `GetFamilyOverviewUseCase` | TEL-010/011/032/040/050 | [UF-04](../design/user-flows.md#uf-04) | RF11/17/22/49/60/65/66; RN26/27/33/49/60/61 |
+| [UC11](../03-casos-de-uso.md#uc11) | `GetPersonalTasksUseCase`, `GetFamilyTasksUseCase`, `GetMemberTasksUseCase`, `GetPersonalProgressUseCase`, `GetFamilyOverviewUseCase` | TEL-010/011/032/040/050 | [UF-04](../design/user-flows.md#uf-04) | RF11/17/22/24/49/60/65/66; RN23/26/27/33/49/55/60/61 |
 | [UC12](../03-casos-de-uso.md#uc12) | `CompleteTaskUseCase` | TEL-012 | [UF-06](../design/user-flows.md#uf-06) | RF12/47/56; RN21/22/30/48/55/56 |
-| [UC13](../03-casos-de-uso.md#uc13) | `GetFamilyLoadUseCase` | TEL-050 | [UF-09](../design/user-flows.md#uf-09) | RF18–21/56/57/66; RN28/30/31/33/34/57/61 |
+| [UC13](../03-casos-de-uso.md#uc13) | `GetFamilyLoadUseCase` | Superfície futura | [UF-09](../design/user-flows.md#uf-09) | RF18–21/56/57/66; RN28/30/31/33/34/57/61 |
 | [UC14](../03-casos-de-uso.md#uc14) | `GetMissionsUseCase`, `GetMissionDetailUseCase` | TEL-020/021 | [UF-10](../design/user-flows.md#uf-10) | RF30–32/36/58/62/65; RN35–39/43/51–53/58/64 |
 | [UC15](../03-casos-de-uso.md#uc15) | `UploadTaskPhotoUseCase`, `SignalTaskUseCase` | TEL-041; MOD-011 | [UF-07](../design/user-flows.md#uf-07) | RF23/24/55/56; RN21–26/54/55 |
 | [UC16](../03-casos-de-uso.md#uc16) | `DrawRewardUseCase`, `AcceptRewardUseCase` | TEL-024 | [UF-11](../design/user-flows.md#uf-11) | RF35/51–53; RN42/43/52/53; RNF23 |
@@ -166,6 +169,13 @@ Os contratos remotos e sua cobertura por UC estão no [catálogo backend](backen
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.13 | 2026-10-28 | TEL-032 compacta em Dia/Semana domingo–sábado, sem Parabenizar; nome Kids editável pelo Admin também no detalhe. |
+| 1.12 | 2026-10-28 | TEL-032 sem edição de nome; TEL-057 corrige nome de Kids; adultos usam Meu perfil. |
+| 1.11 | 2026-10-28 | TEL-032 separa visão diária do membro da lista familiar por intervalo e move gestão para menu. |
+| 1.10 | 2026-10-27 | TEL-050/TEL-032 incluem Parabenizar; TEL-010/TEL-040 exibem e ocultam mensagens recebidas; registro APNs por sessão. |
+| 1.9 | 2026-10-27 | TEL-050, TEL-011 e TEL-032 usam intervalo livre; TEL-051 gera PDF a partir de TEL-011; carga visual adiada. |
+| 1.8 | 2026-10-19 | Inclui TEL-055/056, criação conjunta e edição posterior, convites iniciais e estado exibido por perfil em tarefas pessoais. |
+| 1.7 | 2026-10-10 | TEL-023/MOD-008 passam a transportar título normalizado único e descrição opcional de item de recompensa. Para SPEC-015. |
 | 1.5 | 2026-10-06 | Consulta própria passa a ser diária; consultas familiares adultas usam Dia/Semana, com `memberId` e tarefas sem responsável; carga fica para SPEC-018. Para SPEC-009; base funcional 1.9, design 1.4. |
 | 1.4 | 2026-10-06 | Rotina passa a aceitar observação; MOD-002 não exige data final e MOD-003 inclui a ocorrência de origem no alcance futuro. Para SPEC-008; base funcional 1.8, design 1.3. |
 | 1.3 | 2026-10-06 | MOD-014 (novo) resolve sinalização Kids pendente ao editar tarefa; TEL-013 ganha campo de observação; título limitado a 60 caracteres. Para SPEC-007; base funcional 1.7, design 1.2. |

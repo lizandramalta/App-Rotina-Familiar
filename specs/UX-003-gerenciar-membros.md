@@ -1,10 +1,10 @@
 # UX Spec 003: Gerenciar membros
 
-**Status:** aprovada  
-**Autor:** Codex | **Criada em:** 2026-10-06 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-06  
+**Status:** aprovada\
+**Autor:** Codex | **Criada em:** 2026-10-06 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-19
 **Spec funcional vinculada:** [SPEC-003-gerenciar-membros.md](SPEC-003-gerenciar-membros.md)  
-**Base funcional:** 1.14\
-**Superfícies de interface:** TEL-030, TEL-032, TEL-033, TEL-050, TEL-056, MOD-010, UF-01, UF-12
+**Base funcional:** RN 1.26 / RF 1.25 / UC 1.25\
+**Superfícies de interface:** TEL-002 (retorno), TEL-030, TEL-032, TEL-033, TEL-050, TEL-057, MOD-010, UF-01, UF-12
 
 ## 1. Objetivo da experiência e jornada
 
@@ -16,50 +16,50 @@
 | Referência | Código / documento |
 |---|---|
 | Spec funcional vinculada | `SPEC-003-gerenciar-membros.md` |
-| Telas e modal | TEL-030, TEL-032, TEL-033, TEL-050, TEL-056, MOD-010 |
+| Telas e modal | TEL-002 (retorno), TEL-030, TEL-032, TEL-033, TEL-050, TEL-057, MOD-010 |
 | Fluxo | UF-01, UF-12 |
 | Design consultado | `docs/design/screen-map.md`, `docs/design/user-flows.md` |
 
 ## 3. Escopo da experiência
 
-- **Dentro:** entrada “Adicionar membro” em TEL-050 ou TEL-056 para Admin; criação e edição administrativa em TEL-033; ações autorizadas no detalhe TEL-032; confirmação de papel, modo Kids, remoção e saída de administração em MOD-010; retorno coerente à origem.
+- **Dentro:** inclusão persistente por Admin após criar a família, inclusive no retorno de TEL-056 a TEL-002; entrada “Adicionar membro” em Configurações da família (TEL-057); criação em TEL-033; correção do nome administrativo Kids em TEL-057 ou no detalhe Kids TEL-032; ações autorizadas em TEL-032 e MOD-010.
 - **Fora:** credenciais e compartilhamento de convite em TEL-034; entrada por convite; formulário de apelido/foto próprio; conteúdo das tarefas do detalhe, seus filtros e sua consulta funcional.
 
 ## 4. Jornada, navegação e preservação de contexto
 
 | Origem | Ação | Destino | Retorno / cancelamento | Contexto preservado |
 |---|---|---|---|---|
-| TEL-050 | Admin toca em “Adicionar membro” | TEL-033 | Cancelar retorna à Família | Período e rolagem da Família permanecem |
+| TEL-050 → TEL-057 | Admin toca em “Adicionar membro” | TEL-033 | Cancelar retorna à origem | Período e rolagem da Família permanecem |
 | TEL-033 | Salva nome e papel válidos | TEL-032 | — | Exibe somente estado confirmado; não abre TEL-034 |
-| TEL-056 | Criador toca em “Adicionar membro” | TEL-033 | Cancelar retorna ao onboarding | Lista de integrantes iniciais permanece |
-| TEL-033 | Salva membro iniciado em TEL-056 | TEL-056 | — | A orquestração oferece convite explícito ou “Avançar”; não cria convite automaticamente |
-| TEL-032 | Admin toca em editar | TEL-033 | Cancelar retorna ao detalhe | Membro e período selecionados permanecem |
-| TEL-033 / TEL-032 | Alterar papel/modo ou remover | MOD-010 | Cancelar retorna sem gravar | Campos e detalhe permanecem íntegros |
+| TEL-056 | Criador volta para alterar os dados da família | TEL-002 em edição | Prosseguir sem mudanças retorna sem gravar | Família e membros iniciais já existem; nova inclusão usa persistência normal autorizada |
+| TEL-057 ou TEL-032 | Admin toca em Editar de um perfil Kids | Folha “Editar nome Kids” | Cancelar retorna à origem | Nome só muda após resposta confirmada; filtro da Família permanece |
+| TEL-032 | Alterar papel | Seleção modal dos papéis permitidos → MOD-010 | Cancelar retorna sem gravar | Membro e período selecionado permanecem íntegros |
+| TEL-032 | Remover membro | MOD-010 | Cancelar retorna sem gravar | Membro e período selecionado permanecem íntegros |
 | MOD-010 | Confirma mudança | TEL-032 | — | Recarrega capacidades e perfil confirmados |
 | MOD-010 | Confirma remoção | TEL-050 | — | Lista confirmada sem o perfil removido; período preservado |
 | TEL-030 | Admin não-Criador escolhe deixar administração | MOD-010 | Cancelar retorna ao perfil | Só muda navegação após confirmação da API |
 
-- **Prevenção de perda:** fechar TEL-033 com alterações não salvas solicita confirmação de descarte. Erro de validação ou rede preserva o formulário; resposta incerta não é interpretada como sucesso.
-- **Capacidades por perfil:** TEL-032 não apresenta editar, remover ou alterar papel a Membros. O Criador não recebe caminhos para remoção, rebaixamento ou saída da administração. TEL-050 não mostra “Adicionar membro” para Membro; Kids não entram na área Família.
+- **Prevenção de perda:** fechar TEL-033 ou a folha de nome Kids com alterações não salvas solicita confirmação de descarte. Erro de validação ou rede preserva o formulário; resposta incerta exige consulta do estado confirmado antes de nova tentativa.
+- **Capacidades por perfil:** TEL-032 não apresenta remover ou alterar papel a Membros; Editar no topo aparece somente para Kids visto por Administrador autorizado. TEL-057 também apresenta correção de nome Kids a Administradores. O Criador não recebe caminhos para remoção, rebaixamento ou saída da administração. TEL-057 não mostra “Adicionar membro” para Membro; Kids não entram na área Família.
 
 ## 5. Superfícies e componentes
 
 ### 5.1. TEL-050 — Família
 
-- **Objetivo nesta entrega:** iniciar a criação para Administradores e abrir o detalhe de qualquer membro para adultos.
-- **Anatomia:** a lista de membros continua como conteúdo existente; o botão “Adicionar membro” aparece apenas quando a capacidade `manageMembers` estiver confirmada.
-- **Transição:** criar não gera credenciais. Pela origem TEL-050, abre TEL-032; pela origem TEL-056, retorna ao onboarding, que pode oferecer TEL-034 por ação explícita.
+- **Objetivo nesta entrega:** abrir o detalhe de qualquer membro para adultos e dar acesso às Configurações para Administradores.
+- **Anatomia:** o progresso e a lista de membros compartilham o intervalo da Família; a lista carrega a próxima página de até 20 perfis ao se aproximar do fim da rolagem. “Adicionar membro” aparece em Configurações da família (TEL-057) apenas quando a capacidade `manageMembers` estiver confirmada.
+- **Transição:** criar não gera credenciais. Pela origem TEL-050, abre TEL-032; pelo botão Configurações abre TEL-057 e dali TEL-033. No retorno de TEL-056 a TEL-002, uma nova inclusão após a criação usa as mesmas permissões de gestão, sem recriar a família.
 
 ### 5.2. TEL-032 — Detalhe e tarefas do membro
 
 - **Objetivo nesta entrega:** identificar o membro e oferecer gestão administrativa somente a Administradores autorizados.
-- **Anatomia:** identificação do membro, papel e indicador textual de Criador; ações “Editar”, “Alterar papel ou modo Kids” e “Remover” apenas quando aplicáveis. O conteúdo de tarefas permanece sob sua spec própria.
+- **Anatomia:** identificação do membro, papel e indicador textual de Criador; blocos separados oferecem “Gerar convite”, “Alterar papel” e “Remover membro” apenas quando aplicáveis. O topo oferece Editar apenas para Kids com Administrador autorizado. “Alterar papel” abre uma folha modal própria, com título, papel atual, opções permitidas e Cancelar; a seleção fecha a folha e abre MOD-010 antes de salvar. Fechar a folha sem selecionar não altera o papel. A seleção não usa popover nem menu ancorado ao botão. O conteúdo de Dia/Semana segue UX-009.
 - **Proteções visuais:** para Criador, mostrar a identificação especial sem ações proibidas. Para Membro consultando, não exibir controles de gestão nem configuração de apelido.
 
-### 5.3. TEL-033 — Criar/editar membro
+### 5.3. TEL-033 — Criar membro; TEL-057 — corrigir nome Kids
 
-- **Objetivo:** coletar nome administrativo e papel, com a mesma superfície para criar e editar.
-- **Anatomia:** título contextual; campo de nome; seletor de papel (`Administrador`, `Membro`, `Kids`); explicação curta e não-promissória do papel; ação primária Salvar/Criar e cancelar.
+- **Objetivo:** TEL-033 coleta nome e papel ao criar; TEL-057 e o topo do detalhe Kids em TEL-032 oferecem folha separada para o Administrador corrigir apenas o nome administrativo de Kids.
+- **Anatomia:** TEL-033 tem campo de nome e seletor de papel (`Administrador`, `Membro`, `Kids`); a folha em TEL-057 tem somente nome, Salvar e Cancelar. Adultos alteram o próprio nome em Meu perfil.
 - **Validação local:** mostrar contador e erro de nome; o servidor continua autoridade. Não inclui foto, apelido, convite ou senha.
 
 ### 5.4. MOD-010 — Confirmar alteração de membro
@@ -71,7 +71,7 @@
 
 ## 6. Estados de interface
 
-| Estado | TEL-050 / TEL-032 | TEL-033 / MOD-010 |
+| Estado | TEL-050 / TEL-032 / TEL-057 | TEL-033 / folha de nome Kids / MOD-010 |
 |---|---|---|
 | Initial / Loading | Skeleton de lista, detalhe ou capacidades; nenhuma ação antecipada | Formulário pronto após dados necessários; modal não abre sem resumo carregado |
 | Content | Lista, detalhe e controles condizentes com a capacidade atual | Campos editáveis e resumo da ação |
@@ -85,13 +85,14 @@
 
 | Elemento | Chave | Texto pt-BR proposto | Cenário |
 |---|---|---|---|
-| Ação de criação | `family.members.add.action` | “Adicionar membro” | TEL-050, somente Admin |
+| Ação de criação | `family.members.add.action` | “Adicionar membro” | TEL-057, somente Admin |
 | Título de criação | `family.members.create.title` | “Adicionar membro” | TEL-033 |
-| Título de edição | `family.members.edit.title` | “Editar membro” | TEL-033 |
+| Título de correção Kids | `family.settings.hub.edit_kids_name` | “Editar nome Kids” | TEL-057 ou TEL-032 Kids, somente Admin |
 | Campo nome | `family.members.name.label` | “Nome” | TEL-033 |
 | Ajuda do campo | `family.members.name.hint` | “Use de 1 a 60 caracteres.” | TEL-033 |
 | Erro de nome | `family.members.name.error_invalid` | “Informe um nome válido.” | Validação local ou `422` |
 | Papel | `family.members.role.label` | “Papel na família” | TEL-033 |
+| Alterar papel | `family.member.manage.role` | “Alterar papel” | Bloco de gestão de TEL-032; abre seleção modal |
 | Confirmação de papel | `family.members.role_change.title` | “Confirmar alteração de papel” | MOD-010 |
 | Remoção | `family.members.remove.title` | “Remover membro?” | MOD-010 |
 | Efeito da remoção | `family.members.remove.message` | “O acesso será removido. O histórico da família será preservado.” | MOD-010 |
@@ -107,7 +108,7 @@ As mensagens recebem o código de erro estável da API como chave de decisão; t
 - Rótulos e dicas: controles de papel anunciam o valor atual e a ação; remover anuncia que abre confirmação; a mensagem de Criador protegido é texto, não somente botão indisponível.
 - Dynamic Type deve permitir múltiplas linhas em nomes, papéis e explicações, sem ocultar as ações essenciais.
 - Papel, Kids, erro e remoção usam texto e ícone semântico, além de cor, conforme RNF05. Os alvos interativos têm ao menos 44×44 pt.
-- Em iPhone, TEL-033 usa fluxo de navegação; em iPad, usa formulário centralizado e MOD-010 como `Form Sheet`, respeitando área segura e orientação.
+- Em iPhone, TEL-033 usa fluxo de navegação; a seleção de papel em TEL-032 e a correção do nome Kids em TEL-057/TEL-032 usam folhas. Em iPad, a seleção de papel, os formulários e MOD-010 usam apresentação modal centralizada, respeitando área segura e orientação.
 
 ## 9. Decisões de UX
 
@@ -117,7 +118,9 @@ As mensagens recebem o código de erro estável da API como chave de decisão; t
 | UX-02 | Controles proibidos são ocultos, enquanto a API permanece a autoridade. | Não; aplica RNF07. |
 | UX-03 | MOD-010 é obrigatório para remover, mudar papel/modo e sair da administração. | Não; apresenta efeitos já definidos. |
 | UX-04 | Ao falhar ou haver resposta incerta, formulário e contexto são preservados e a tela recarrega o estado confirmado antes de nova ação. | Não; aplica RNF12. |
-| UX-05 | No onboarding, TEL-033 preserva os campos e retorna a TEL-056 após criação confirmada; não abre o convite automaticamente. | Não; aplica RF02 e RF41. |
+| UX-05 | Revisada: os membros iniciais são preparados em TEL-002 antes da criação; TEL-056 recebe a lista já persistida e só oferece convites. Novos membros após a criação usam a gestão normal. | Sim; decisão da pessoa usuária em 2026-10-19, registrada em RN01/RN07, RF02/RF40 e UC01/UC02. |
+| UX-07 | Na TEL-032 com Dia/Semana, a gestão autorizada fica em blocos separados; Alterar papel abre seleção modal e confirmação, e remover exige confirmação. Nome Kids é corrigido em TEL-057 ou TEL-032; adulto edita o próprio nome em Meu perfil. | Sim; decisão da pessoa usuária em 2026-10-28, registrada em RN07/RN63, RF03/RF60 e UC02/UC10. |
+| UX-06 | Listas paginadas carregam continuamente a próxima página durante a rolagem; falha ao carregar uma página preserva os itens confirmados e oferece nova tentativa. | Não; aplica o contrato de consulta da SPEC-003 e RNF12. |
 
 ## 10. Checklist de aprovação
 
@@ -126,4 +129,5 @@ As mensagens recebem o código de erro estável da API como chave de decisão; t
 - [x] Estados de interface, i18n e acessibilidade definidos.
 - [x] Ações proibidas ficam ocultas sem substituir autorização no backend.
 - [x] Não cria convite, edição de perfil próprio ou comportamento de tarefas.
-- [x] Status autorizado explicitamente como `aprovada` pela pessoa usuária em 2026-10-06.
+- [x] Revisão de 2026-10-19 aprovada; aprovação anterior de 2026-10-06 preservada no histórico.
+- [x] Aprovação anterior registrada em 2026-10-06.

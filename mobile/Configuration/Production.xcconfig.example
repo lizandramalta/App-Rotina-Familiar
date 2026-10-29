@@ -1,3 +1,6 @@
-// Copy this file to Production.xcconfig only when preparing a production build.
+// Copy this file to Production.xcconfig when preparing a production build.
 APP_ENVIRONMENT = production
-API_BASE_URL = https://api.example.invalid/v1
+API_BASE_URL = https:/$()/app-rotina-familiar.onrender.com/v1
+// Match backend INVITE_LINK_BASE_URL and the host serving AASA.
+INVITE_LINK_HOST = convites.rotina-familiar.workers.dev
+INVITE_LINK_BASE_URL = https:/$()/$(INVITE_LINK_HOST)

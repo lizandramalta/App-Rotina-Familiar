@@ -3,8 +3,8 @@
 Organização colaborativa das responsabilidades domésticas, com tarefas compartilhadas, participação infantil e conquistas coletivas.
 
 **Escopo:** MVP  
-**Versão da base do projeto:** 1.14\
-**Data:** 2026-10-07
+**Versão da base do projeto:** 1.22\
+**Data:** 2026-10-28
 
 ## Por que este projeto existe
 
@@ -19,7 +19,7 @@ Famílias que compartilham a rotina doméstica e desejam organizar melhor suas r
 ## Como funciona
 
 1. O Criador entra com Apple e acessa a família já vinculada ou configura seu perfil — nome obrigatório, foto e etiqueta opcionais — antes de criar uma nova família.
-2. Após criar a família, o Criador pode adicionar zero ou mais membros e gerar explicitamente um convite com link e senha para cada perfil. Depois, a sessão válida permite continuar acessando o aplicativo.
+2. Na criação da família, o Criador pode preparar zero ou mais membros, que são criados junto com ela. Depois, pode gerar explicitamente um convite com link e senha para cada perfil ou adiar os convites. A sessão válida permite continuar acessando o aplicativo.
 3. Administradores e Membros criam tarefas únicas ou rotinas, definem o esforço e escolhem nenhum, um ou vários responsáveis.
 4. Todos acompanham suas tarefas e seu progresso diário. Adultos também consultam tarefas e progresso familiares por dia ou semana. Kids sinalizam a realização com foto opcional; um Administrador confirma ou recusa, ou um adulto conclui manualmente.
 5. A conclusão vale para todos os responsáveis finais. Adultos acompanham a distribuição da carga diária ou semanal, sem ranking.
@@ -91,9 +91,11 @@ As possibilidades de evolução estão no [documento de visão](docs/00-visao-do
 | [Arquitetura mobile](docs/architecture/mobile-architecture.md) | Arquitetura 1.2 em Swift e SwiftUI: View + ViewModel com Clean Architecture, dependências, navegação, sessão, consistência e integrações. |
 | [Catálogo mobile](docs/architecture/mobile-feature-catalog.md) | Funcionalidades, nomes de arquivos em inglês e cobertura das 26 telas, 13 modais, 19 casos de uso e 16 fluxos. |
 | [Decisões da arquitetura mobile](docs/architecture/mobile-decisions.md) | Escolhas técnicas consolidadas, pendências resolvidas e temas fora desta etapa. |
-| [Arquitetura backend](docs/architecture/backend-architecture.md) | Backend 1.0: Node.js, Clean Architecture, monólito modular, Supabase/R2, transações, acesso e jobs. |
+| [Convenções de código mobile](docs/architecture/mobile-code-conventions.md) | Convenções de Swift/SwiftUI, arquitetura, concorrência, segurança e testes. |
+| [Arquitetura backend](docs/architecture/backend-architecture.md) | Backend 1.3: Node.js, Clean Architecture, monólito modular, Supabase/R2, transações, acesso e jobs. |
 | [Contratos backend](docs/architecture/backend-contracts.md) | API `/v1`, permissões, erros, projeções e cobertura dos 19 UC e 27 RNF. |
 | [Decisões backend](docs/architecture/backend-decisions.md) | BA-01–BA-20: escolhas confirmadas, propostas técnicas, alternativas e limites. |
+| [Convenções de código backend](docs/architecture/backend-code-conventions.md) | Convenções de TypeScript/Fastify, contratos, SQL, segurança e testes. |
 | [Índice e controle documental](docs/DOCUMENTACAO.md) | Rastreabilidade e convenções para manter a documentação consistente. |
 | [Specs de entrega](specs/README.md) | Recortes aprovados que orientam a implementação conjunta de mobile e backend. |
 
@@ -175,10 +177,10 @@ Detalhes e limites da fundação mobile estão em [mobile/SETUP.md](mobile/SETUP
 `.env` e os `*.xcconfig` são locais e ignorados pelo Git. Versione apenas os templates
 `.env.example` e `*.xcconfig.example`, e nunca inclua credenciais reais neles.
 
-## Estrutura para implementação
+## Estrutura de implementação
 
-- `mobile/` será a raiz do aplicativo iOS/iPadOS.
-- `backend/` será a raiz da API e dos jobs do servidor.
+- `mobile/` é a raiz do aplicativo iOS/iPadOS.
+- `backend/` é a raiz da API e dos jobs do servidor.
 - `specs/` reúne as entregas aprovadas que conectam os dois projetos à base documental.
 - `docs/` continua sendo a fonte de verdade para comportamento, UX, modelo e arquitetura.
 
@@ -186,11 +188,11 @@ Antes de desenvolver uma funcionalidade, a equipe deve partir de uma spec aprova
 consultar somente as referências rastreáveis que ela indica. As instruções completas
 para agentes estão em [AGENTS.md](AGENTS.md).
 
-A arquitetura mobile 1.2, documentada em 2026-10-05, consolida as decisões para implementação futura. O código e os nomes dos arquivos de código serão em inglês; os textos da experiência serão localizados. As estruturas e os exemplos nas docs não representam arquivos Swift já implementados.
+A Sprint 0 implementou a fundação técnica de mobile, backend, migrations e CI, sem introduzir comportamento de produto. As arquiteturas mantêm as funcionalidades, telas e integrações de produto como implementação futura orientada por SPECs aprovadas. O código e os nomes dos arquivos de código são em inglês; os textos da experiência são localizáveis.
 
 ## Área Família
 
-A tela Família apresenta diretamente carga e progresso por dia/semana, lista de membros, botão Gerar relatório PDF e, para Administradores, Adicionar membro. Selecionar uma pessoa abre seu detalhe com tarefas por dia/semana; edição de perfil e reenvio de convite ficam nesse detalhe, quando permitidos. A consulta da lista e das tarefas é adulta; a gestão continua exclusiva dos Administradores. O relatório permanece semanal.
+A tela Família apresenta progresso no intervalo escolhido, lista de membros e, para Administradores, acesso às configurações e à inclusão de membros. A lista Tarefas da família reúne filtros por intervalo, membro e status; agrupa tarefas com contagens completas por estado e oferece Gerar relatório PDF no menu. Se o intervalo estiver em uma única semana, o PDF abre diretamente na folha nativa de compartilhamento; se tocar várias semanas, a pessoa escolhe a semana antes. Selecionar um membro abre seu detalhe com progresso e tarefas de hoje, enquanto outros dias são consultados pelo filtro da Família; edição de perfil e reenvio de convite ficam nesse detalhe, quando permitidos. A consulta familiar é adulta; a gestão continua exclusiva dos Administradores.
 
 ## Continuidade e recuperação de acesso
 
@@ -222,6 +224,14 @@ A arquitetura backend 1.0 está em [backend-architecture.md](docs/architecture/b
 
 | Versão | Data | Marco |
 |---|---|---|
+| 1.22 | 2026-10-28 | TEL-032 usa Dia/Semana domingo–sábado, sem Parabenizar no detalhe; Admin autorizado edita nome Kids no topo. Folhas de filtros da Família e de Tarefas da família seguem variantes distintas. |
+| 1.21 | 2026-10-28 | TEL-032 mostra progresso e tarefas de hoje com menu de gestão; a consulta de outros dias permanece em Tarefas da família. |
+| 1.20 | 2026-10-28 | Resumo da navegação e apresentação da área Família atualizado conforme UX-009/UX-019 e TEL-011; base funcional preservada. |
+| 1.19 | 2026-10-19 | RN38, RF59 e UC07: exclusão de tarefa que deixa a missão apenas com tarefas concluídas a conclui na mesma transação (SPEC-014/SPEC-007). Onboarding alinhado à criação conjunta de família e membros; revisão dos pares SPEC/UX-002, 003, 004 e 009 aprovada. |
+| 1.18 | 2026-10-10 | Consolidação das SPECs 015–020 com as implementações de acesso, família, convites, tarefas e sessão do `develop`; registros técnicos preservados na documentação de arquitetura. |
+| 1.17 | 2026-10-10 | Snapshot semanal passa a usar `referenceDate` e identifica crédito histórico como “Membro removido”. Para SPEC-019. |
+| 1.16 | 2026-10-10 | Carga histórica preserva crédito de perfil removido como “Membro removido”. Para SPEC-018. |
+| 1.15 | 2026-10-10 | Itens de recompensa coletiva ganham catálogo inicial, título personalizado único por família e descrição opcional de até 255 caracteres. Para SPEC-015. |
 | 1.14 | 2026-10-07 | Onboarding do Criador: perfil antes da família, membros opcionais e convite explícito antes da área principal. Base funcional 1.14. |
 | 1.13 | 2026-10-07 | Apelido do perfil ganha limite explícito: até 20 caracteres não-espaço após trim, sem caracteres de controle. Para SPEC-006. |
 | 1.12 | 2026-10-07 | Missão ganha observação opcional (até 250 caracteres); criação de tarefa durante a vinculação de missão; consulta explícita por todos os perfis, inclusive Kids, em experiência simplificada. Para SPEC-014. |

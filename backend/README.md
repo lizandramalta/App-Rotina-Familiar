@@ -57,33 +57,45 @@ cp .env.example .env
 
 ### 4.2 Dicionário de Variáveis de Ambiente
 
-| Variável               | Tipo      | Padrão                  | Obrigatória  | Descrição                                                                                          |
-| ---------------------- | --------- | ----------------------- | ------------ | -------------------------------------------------------------------------------------------------- |
-| `NODE_ENV`             | `enum`    | `development`           | Sim          | Ambiente de execução: `development`, `test` ou `production`.                                       |
-| `PORT`                 | `number`  | `3000`                  | Não          | Porta TCP onde o servidor HTTP Fastify escutará.                                                   |
-| `HOST`                 | `string`  | `0.0.0.0`               | Não          | Interface de rede para bind do servidor.                                                           |
-| `API_BASE_URL`         | `url`     | `http://localhost:3000` | Não          | URL base pública do backend.                                                                       |
-| `LOG_LEVEL`            | `enum`    | `info`                  | Não          | Nível de log estruturado: `trace`, `debug`, `info`, `warn`, `error`, `fatal`.                      |
-| `DATABASE_URL`         | `string`  | -                       | **Sim**      | String de conexão PostgreSQL do Supabase (detalhes na seção 5).                                    |
-| `DATABASE_SCHEMA`      | `string`  | `app`                   | Não          | Schema privado do banco onde ficam as tabelas do produto (BA-19).                                  |
-| `DATABASE_POOL_MIN`    | `number`  | `2`                     | Não          | Número mínimo de conexões mantidas no pool `pg`.                                                   |
-| `DATABASE_POOL_MAX`    | `number`  | `10`                    | Não          | Número máximo de conexões no pool `pg`.                                                            |
-| `DATABASE_SSL`         | `boolean` | `false`                 | Não          | Ativa SSL/TLS para a conexão com o banco (`true` no Supabase remoto).                              |
-| `SESSION_SECRET`       | `string`  | -                       | **Sim**      | Segredo para hash e autenticação das sessões próprias. Mínimo de 32 caracteres em `production`.    |
-| `INVITE_ENVELOPE_KEY`  | `string`  | -                       | **Sim**      | Chave para envelope de recuperação de ingresso (AES-GCM). Mínimo de 32 caracteres em `production`. |
-| `R2_ACCOUNT_ID`        | `string`  | -                       | Não (Fase 0) | ID da conta Cloudflare para armazenamento privado R2.                                              |
-| `R2_ACCESS_KEY_ID`     | `string`  | -                       | Não (Fase 0) | Credencial de acesso compatível com S3 para o R2.                                                  |
-| `R2_SECRET_ACCESS_KEY` | `string`  | -                       | Não (Fase 0) | Segredo de acesso compatível com S3 para o R2.                                                     |
-| `R2_BUCKET_NAME`       | `string`  | -                       | Não (Fase 0) | Nome do bucket R2 onde as mídias privadas serão gravadas.                                          |
-| `R2_ENDPOINT`          | `url`     | -                       | Não (Fase 0) | Endpoint do bucket R2 no Cloudflare.                                                               |
-| `APPLE_CLIENT_ID`      | `string`  | -                       | Não (Fase 0) | Service ID / Bundle ID do Sign in with Apple.                                                      |
-| `APPLE_TEAM_ID`        | `string`  | -                       | Não (Fase 0) | Team ID da Apple Developer Account.                                                                |
-| `APPLE_KEY_ID`         | `string`  | -                       | Não (Fase 0) | Key ID da chave privada do Sign in with Apple.                                                     |
-| `APPLE_PRIVATE_KEY`    | `string`  | -                       | Não (Fase 0) | Chave privada `.p8` do Sign in with Apple.                                                         |
-| `APNS_KEY_ID`          | `string`  | -                       | Não (Fase 0) | Key ID para notificações push via APNs.                                                            |
-| `APNS_TEAM_ID`         | `string`  | -                       | Não (Fase 0) | Team ID da Apple para notificações APNs.                                                           |
-| `APNS_TOPIC`           | `string`  | -                       | Não (Fase 0) | Bundle ID do app iOS para push notifications.                                                      |
-| `APNS_PRIVATE_KEY`     | `string`  | -                       | Não (Fase 0) | Chave privada `.p8` do APNs.                                                                       |
+| Variável               | Tipo      | Padrão                                 | Obrigatória        | Descrição                                                                                           |
+| ---------------------- | --------- | -------------------------------------- | ------------------ | --------------------------------------------------------------------------------------------------- |
+| `NODE_ENV`             | `enum`    | `development`                          | Sim                | Ambiente de execução: `development`, `test` ou `production`.                                        |
+| `PORT`                 | `number`  | `3000`                                 | Não                | Porta TCP onde o servidor HTTP Fastify escutará.                                                    |
+| `HOST`                 | `string`  | `0.0.0.0`                              | Não                | Interface de rede para bind do servidor.                                                            |
+| `API_BASE_URL`         | `url`     | `http://localhost:3000`                | Não                | URL base pública do backend.                                                                        |
+| `LOG_LEVEL`            | `enum`    | `info`                                 | Não                | Nível de log estruturado: `trace`, `debug`, `info`, `warn`, `error`, `fatal`.                       |
+| `DATABASE_URL`         | `string`  | -                                      | **Sim**            | String de conexão PostgreSQL do Supabase (detalhes na seção 5).                                     |
+| `DATABASE_SCHEMA`      | `string`  | `app`                                  | Não                | Schema privado do banco onde ficam as tabelas do produto (BA-19).                                   |
+| `DATABASE_POOL_MIN`    | `number`  | `2`                                    | Não                | Número mínimo de conexões mantidas no pool `pg`.                                                    |
+| `DATABASE_POOL_MAX`    | `number`  | `10`                                   | Não                | Número máximo de conexões no pool `pg`.                                                             |
+| `DATABASE_SSL`         | `boolean` | `false`                                | Não                | Ativa SSL/TLS para a conexão com o banco (`true` no Supabase remoto).                               |
+| `SESSION_SECRET`       | `string`  | -                                      | **Sim**            | Segredo para hash e autenticação das sessões próprias. Mínimo de 32 caracteres em `production`.     |
+| `INVITE_ENVELOPE_KEY`  | `string`  | -                                      | **Sim**            | Chave para envelope de recuperação de ingresso (AES-GCM). Mínimo de 32 caracteres em `production`.  |
+| `R2_ACCOUNT_ID`        | `string`  | -                                      | Não (Fase 0)       | ID da conta Cloudflare para armazenamento privado R2.                                               |
+| `R2_ACCESS_KEY_ID`     | `string`  | -                                      | Não (Fase 0)       | Credencial de acesso compatível com S3 para o R2.                                                   |
+| `R2_SECRET_ACCESS_KEY` | `string`  | -                                      | Não (Fase 0)       | Segredo de acesso compatível com S3 para o R2.                                                      |
+| `R2_BUCKET_NAME`       | `string`  | -                                      | Não (Fase 0)       | Nome do bucket R2 onde as mídias privadas serão gravadas.                                           |
+| `R2_ENDPOINT`          | `url`     | -                                      | Não (Fase 0)       | Endpoint do bucket R2 no Cloudflare.                                                                |
+| `APPLE_CLIENT_ID`      | `string`  | `com.lizandramalta.familyroutine`      | Sim                | Bundle ID do app iOS; audiência esperada no `identityToken`.                                        |
+| `APPLE_TEAM_ID`        | `string`  | -                                      | Só em `production` | Team ID da Apple Developer Account (10 caracteres alfanuméricos).                                   |
+| `APPLE_KEY_ID`         | `string`  | -                                      | Só em `production` | Key ID da chave do Sign in with Apple (10 caracteres alfanuméricos).                                |
+| `APPLE_PRIVATE_KEY`    | `string`  | -                                      | Só em `production` | Chave privada `.p8` do Sign in with Apple, em PEM (`\n` literal aceito). Em `production`, EC P-256. |
+| `APPLE_ISSUER`         | `url`     | `https://appleid.apple.com`            | Sim                | Emissor esperado no `identityToken`.                                                                |
+| `APPLE_JWKS_URL`       | `url`     | `https://appleid.apple.com/auth/keys`  | Sim                | JWKS com as chaves públicas da Apple.                                                               |
+| `APPLE_TOKEN_URL`      | `url`     | `https://appleid.apple.com/auth/token` | Sim                | Endpoint de troca do `authorizationCode`.                                                           |
+| `APNS_KEY_ID`          | `string`  | -                                      | Para enviar push   | Key ID para notificações push via APNs.                                                             |
+| `APNS_TEAM_ID`         | `string`  | -                                      | Para enviar push   | Team ID da Apple para notificações APNs.                                                            |
+| `APNS_TOPIC`           | `string`  | -                                      | Para enviar push   | Bundle ID do app iOS para push notifications.                                                       |
+| `APNS_PRIVATE_KEY`     | `string`  | -                                      | Para enviar push   | Chave privada `.p8` do APNs.                                                                        |
+
+Para entregar o push de Parabenizar (SPEC-009 CA-14), configure as quatro variáveis `APNS_*` no processo worker e habilite Push Notifications no App ID/assinatura iOS. O evento e a mensagem interna são gravados antes do envio; sem essas credenciais, a fila espera e a mensagem continua visível no aplicativo.
+
+As variáveis do Sign in with Apple são opcionais em `development` e `test` para não
+bloquear o desenvolvimento local, e obrigatórias com validação estrita em `production`,
+onde a chave privada precisa ser criptograficamente válida e EC na curva P-256 (exigência
+do client secret ES256) e os três endpoints precisam ser exatamente os canônicos da Apple
+(stubs valem apenas em `development` e `test`). O passo a passo de obtenção, formatação e rotação das credenciais está em
+[docs/apple-integration-setup.md](docs/apple-integration-setup.md).
 
 ---
 
@@ -171,10 +183,12 @@ O comando lê a `DATABASE_URL` do `.env`, aplica os arquivos pendentes em ordem 
 nome (cada um em sua própria transação) e registra versão e hash em
 `app.schema_migrations`. Rodar de novo sem mudanças não faz nada.
 
-Arquivos seguem `NNNN_descricao_em_ingles.sql`, com número sequencial nunca
-reaproveitado. Editar uma migration já aplicada é erro: o hash deixa de bater e o
-comando aborta antes de tocar no banco, porque quem já aplicou não receberia a
-alteração.
+Arquivos seguem `NNNN_descricao_em_ingles.sql` e são identificados pelo nome completo
+no registro de migrations. Há prefixos históricos repetidos (`0005` e `0007`), que
+não devem ser renomeados após aplicação; para novos arquivos, use o próximo prefixo
+ainda não usado (atualmente `0015`). Editar uma migration já aplicada é erro: o hash
+deixa de bater e o comando aborta antes de tocar no banco, porque quem já aplicou não
+receberia a alteração.
 
 Detalhes da convenção em [`database/migrations/README.md`](database/migrations/README.md).
 
@@ -195,6 +209,17 @@ npm run dev
 ```
 
 O servidor iniciará em `http://0.0.0.0:3000`.
+
+### 6.1.1 Documentação OpenAPI / Swagger
+
+Com a API em execução, abra a documentação interativa em
+`http://localhost:3000/docs`. A especificação OpenAPI 3.1 gerada pelos schemas
+das rotas fica disponível em `http://localhost:3000/docs/json`.
+
+Os endpoints protegidos mostram o esquema **Bearer**. Depois de obter um access
+token em um fluxo válido, use o botão **Authorize** para incluí-lo nos testes
+interativos. A documentação não gera tokens nem substitui a autorização real da
+API.
 
 Para iniciar o processo de Worker (background jobs) em desenvolvimento:
 
@@ -220,6 +245,15 @@ npm run test:coverage
 ### 6.3 Ambiente de Produção (`production`)
 
 No ambiente de produção, o TypeScript é compilado para JavaScript ESM puro no diretório `dist/`:
+
+O serviço público existente usa `https://app-rotina-familiar.onrender.com` como
+`API_BASE_URL` no backend. O app Release usa essa origem com `/v1` em
+`mobile/Configuration/Production.xcconfig`. Para a emissão de convites, configure
+`INVITE_LINK_BASE_URL=https://convites.rotina-familiar.workers.dev` no ambiente do
+serviço; o Worker do Cloudflare serve o Universal Link e o arquivo AASA, enquanto
+as chamadas de ingresso vão diretamente à API no Render. As duas URLs têm funções
+diferentes. Mantenha as credenciais de banco, sessão e Apple nas variáveis privadas
+do serviço, nunca no repositório.
 
 1. **Compilar a aplicação:**
    ```bash

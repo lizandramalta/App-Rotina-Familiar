@@ -2,7 +2,7 @@
 
 **Status:** aprovada
 **Autor:** Claude | **Criada em:** 2026-10-07 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-07
-**Base funcional:** 1.12
+**Base funcional:** 1.18
 **UX-spec:** [UX-014-gerenciar-missoes.md](UX-014-gerenciar-missoes.md)
 **Projetos envolvidos:** ambos
 **Tema do backlog:** Tema 4 - Missões e recompensas
@@ -35,7 +35,7 @@
 - `PATCH /v1/missions/{missionId}`: editar `title`/`note`/conjunto completo de `taskIds` de missão em andamento; rejeita deixar `taskIds` vazio.
 - `GET /v1/missions/task-options`: tarefas da família elegíveis para vínculo, com busca textual opcional e paginação; qualquer status, inclusive `completed`.
 - `GET /v1/missions` e `GET /v1/missions/{missionId}`: leitura mínima (id, title, note, status, taskIds/resumo de tarefas, completedAt, isRedemptionAvailable) para todos os perfis da família, incluindo Kids em projeção simplificada sem dados de gestão.
-- Mecanismo interno `CloseEligibleMissions`: ao salvar (criar/editar) ou quando acionado por `CompleteTask` (SPEC-010), fecha a missão se todas as tarefas vinculadas estiverem concluídas — registra `MissionParticipation` por responsável creditado, concede `BadgeAward` nos marcos 5/10/25/50 e habilita `isRedemptionAvailable`, tudo na mesma transação.
+- Mecanismo interno `CloseEligibleMissions`: ao salvar (criar/editar), quando acionado por `CompleteTask` (SPEC-010) ou por `DeleteTask` (SPEC-007), fecha a missão se todas as tarefas vinculadas estiverem concluídas — registra `MissionParticipation` por responsável creditado, concede `BadgeAward` nos marcos 5/10/25/50 e habilita `isRedemptionAvailable`, tudo na mesma transação.
 - Atalho "+ Nova tarefa" no seletor de tarefas: reaproveita o fluxo e o contrato existentes de `POST /v1/tasks` (SPEC-007), sem nenhuma mudança de contrato; a tarefa criada volta pré-selecionada no rascunho da missão.
 - Proteção "uma missão nunca fica sem tarefas" nas duas camadas: bloqueio local no mobile (sem chamar o servidor) e validação/erro estável no backend.
 - Autorização exclusiva de Administrador para mutações (RN37); leitura liberada a todos os perfis da família (RNF07).
@@ -58,7 +58,7 @@
 - Sem `Idempotency-Key` nem controle de versão otimista (BA-07/MA-08); última gravação válida vence.
 - Nenhuma gravação offline no mobile (MA-07).
 - O atalho "+ Nova tarefa" não adiciona `missionId` à tarefa nem muda o contrato de `POST /v1/tasks`: o vínculo é sempre lido/gravado do lado da missão (`taskIds`), nunca da tarefa.
-- Kids não têm ação de criar, editar, vincular/desvincular tarefas, nem veem participações ou recompensa.
+- Kids não têm ação de criar, editar, vincular/desvincular tarefas, nem veem participações. A recompensa aceita é consultável por todos os perfis conforme RF36; a ação de resgate permanece exclusiva de Administrador.
 
 ## 4. Perfis, Atores e Regras de Autorização (RBAC)
 
@@ -66,7 +66,7 @@
 |---|---|---|---|
 | Administrador | Criar, editar e consultar qualquer missão da família | Alterar dados/vínculos de missão concluída (exceto por reabertura de tarefa, fora desta spec) | `409 MISSION_COMPLETED_PROTECTED` |
 | Membro | Consultar missões (leitura mínima) | Criar ou editar missão | `403 ACTION_NOT_ALLOWED` / ação oculta na UI |
-| Kids | Consultar título, observação, tarefas vinculadas e status, em apresentação simplificada | Criar, editar, vincular/desvincular tarefas; ver participações ou recompensa | `403 ACTION_NOT_ALLOWED` / ação oculta na UI |
+| Kids | Consultar título, observação, tarefas vinculadas, status e recompensa aceita, em apresentação simplificada | Criar, editar, vincular/desvincular tarefas; ver participações ou resgatar recompensa | `403 ACTION_NOT_ALLOWED` / ação oculta na UI |
 
 - **Isolamento familiar (RNF06):** missão de outra família responde `404 RESOURCE_NOT_FOUND`, sem revelar metadados.
 - **Autorização no backend (RNF07):** o backend revalida o perfil em toda chamada, independentemente da ocultação visual no mobile.
@@ -137,7 +137,7 @@
 
 - Todas as falhas usam `application/problem+json`, com `type`, `title`, `status`, `code`, `requestId` e `fieldErrors` quando aplicável.
 - Não existe `Idempotency-Key`, replay automático nem controle de versão otimista (BA-07). A última gravação válida persistida vence.
-- `CloseEligibleMissions` é serializado pelo lock por família (BA-08): se duas transações puderem fechar a mesma missão simultaneamente (ex.: edição e conclusão de tarefa concorrentes), apenas uma registra participações e badges; a outra encontra a missão já `completed` e não duplica efeitos.
+- `CloseEligibleMissions` é serializado pelo lock por família (BA-08): se duas transações puderem fechar a mesma missão simultaneamente (ex.: edição, conclusão ou exclusão de tarefa concorrentes), apenas uma registra participações e badges; a outra encontra a missão já `completed` e não duplica efeitos.
 - Em resposta perdida de `POST`/`PATCH`, o mobile não repete a gravação automaticamente; consulta `GET /v1/missions/{missionId}` para descobrir o estado antes de orientar nova tentativa.
 
 ## 6. Estados de Domínio e Transições
@@ -149,6 +149,7 @@
 | `inProgress` | `EditMission` (título/observação/vínculos, restam tarefas não concluídas) | `inProgress` | Administrador | Progresso recalculado | — |
 | `inProgress` | `EditMission` (vínculos passam a conter só tarefas concluídas) | `completed` | Administrador | RN35/RN38 | `CloseEligibleMissions` |
 | `inProgress` | `CompleteTask` conclui a última tarefa vinculada pendente (gatilho externo, SPEC-010) | `completed` | Adulto que conclui a tarefa | RN38/RF31 | `CloseEligibleMissions` no mesmo commit de `CompleteTask` |
+| `inProgress` | `DeleteTask` exclui a última tarefa vinculada pendente, restando só concluídas (gatilho externo, SPEC-007) | `completed` | Administrador/Membro que exclui a tarefa | RN38/RF59 | `CloseEligibleMissions` no mesmo commit de `DeleteTask` |
 | `completed` | `EditMission` | — | — | Bloqueada com `409 MISSION_COMPLETED_PROTECTED` (RN58) | — |
 | `completed` | Reabertura de tarefa vinculada (UC17) | `inProgress` | — | Fora desta spec — apenas referência (SPEC-011) | — |
 
@@ -260,13 +261,18 @@
   - **ENTÃO O SISTEMA DEVE** conceder o badge `bronze` ao primeiro (atinge 5) e `silver` ao segundo (atinge 10), uma única vez por pessoa/marco,
   - **E** contar a missão uma única vez mesmo que a pessoa seja responsável em várias tarefas vinculadas. *(RN64, RF32)*
 
+- **CA-21: fechamento acionado pela exclusão de tarefa (SPEC-007)**
+  - **DADO QUE** uma missão em andamento tem tarefas concluídas e exatamente uma tarefa pendente,
+  - **QUANDO** `DeleteTask` (UC07/SPEC-007) excluir essa tarefa pendente,
+  - **ENTÃO O SISTEMA DEVE** invocar `CloseEligibleMissions` no mesmo commit, fechando a missão e registrando participações/badges. *(RN38, RF59)*
+
 ## 8. Observabilidade, Métricas e Auditoria
 
 | Evento | Gatilho | Dados permitidos |
 |---|---|---|
 | `mission_created` | Missão criada com sucesso | `missionId`, `familyId`, `taskCount`, `initialStatus` |
 | `mission_edited` | Edição persistida | `missionId`, `familyId`, `taskCountDelta` |
-| `mission_closed` | Fechamento automático (criação, edição ou `CompleteTask`) | `missionId`, `familyId`, `participationCount`, `badgesAwardedCount`, `trigger` |
+| `mission_closed` | Fechamento automático (criação, edição, `CompleteTask` ou `DeleteTask`) | `missionId`, `familyId`, `participationCount`, `badgesAwardedCount`, `trigger` |
 | `mission_management_denied` | Tentativa bloqueada por permissão ou proteção | `requestId`, `actorId`, `targetFamilyId`, `code` |
 
 Segredos, tokens e dados de autenticação nunca entram em logs ou telemetria. `note` não é registrado em telemetria, apenas sua presença (`hasNote`).
@@ -280,6 +286,7 @@ Segredos, tokens e dados de autenticação nunca entram em logs ou telemetria. `
 | E-03 | Códigos de erro `MISSION_TASKS_REQUIRED` e `TASK_NOT_IN_FAMILY`, seguindo o padrão de `fieldErrors` já usado em tarefas/rotinas; proteção equivalente obrigatória no mobile antes de chamar o backend. | Decidida em 2026-10-07 | Não — convenção de contrato desta spec |
 | E-04 | `GET /missions/task-options` aceita `query` (busca textual opcional) e `cursor`; retorna tarefas de qualquer status, inclusive `completed`. | Decidida em 2026-10-07 | Não |
 | E-05 | `CompleteTask` (SPEC-010, aprovada) passa a invocar `CloseEligibleMissions` definido aqui; não exige reabrir SPEC-010. | Decidida em 2026-10-07 | Não |
+| E-09 | `DeleteTask` (SPEC-007) também invoca `CloseEligibleMissions` quando a exclusão deixa a missão apenas com tarefas concluídas; reabre o CA-09 da SPEC-007 apenas no efeito, sem mudar o contrato HTTP. | Decidida em 2026-10-19 | Sim — RN38 (1.18), RF59 (1.17), UC07 (1.16) |
 | E-06 | Missão ganha campo `note` opcional de até 250 caracteres, mesma régua da observação de tarefa. | Decidida em 2026-10-07 | Sim — RN68/RF71 (novos) em `docs/01-regras-de-negocio.md` 1.11 e `docs/02-requisitos.md` 1.12; `docs/05-modelo-de-dados.md` 1.6; `docs/06-diagrama-de-classes.md` 1.7; `docs/architecture/backend-contracts.md` 1.7 |
 | E-07 | Atalho "+ Nova tarefa" no seletor de tarefas da missão, reaproveitando o fluxo de criação já existente (SPEC-007), sem novo endpoint. | Decidida em 2026-10-07 | Sim — UC05 (fluxo principal), `docs/design/screen-map.md` 1.7 e `docs/design/user-flows.md` 1.7 (MOD-007) |
 | E-08 | Kids consultam a missão (título, observação, tarefas vinculadas, status) em apresentação simplificada, antecipando essa fatia de UC14 para esta spec. | Decidida em 2026-10-07 | Sim — UC05 passa a citar a consulta por todos os perfis; `docs/design/screen-map.md` 1.7 e `docs/design/user-flows.md` 1.7 |
@@ -288,7 +295,7 @@ Segredos, tokens e dados de autenticação nunca entram em logs ou telemetria. `
 
 | Fase | Objetivo da Entrega | Critérios de Aceite Atendidos | Critério de Prontidão (Definition of Done) | Status |
 |---|---|---|---|---|
-| **1** | **Núcleo mínimo (Core API + Isolamento):** `CreateMission`, `EditMission`, `GetMissionTaskOptions`, `CloseEligibleMissions` (incluindo o gancho a partir de `CompleteTask`), autorização, isolamento e validação. | CA-01 a CA-08, CA-10, CA-11, CA-13 a CA-16, CA-20 | Testes unitários e de integração verdes cobrindo os CAs listados. | a fazer |
+| **1** | **Núcleo mínimo (Core API + Isolamento):** `CreateMission`, `EditMission`, `GetMissionTaskOptions`, `CloseEligibleMissions` (incluindo o gancho a partir de `CompleteTask`), autorização, isolamento e validação. | CA-01 a CA-08, CA-10, CA-11, CA-13 a CA-16, CA-20, CA-21 | Testes unitários e de integração verdes cobrindo os CAs listados. | a fazer |
 | **2** | **Experiência Mobile + Integração:** TEL-022, MOD-007, leitura mínima de TEL-020/021, bloqueio local de "sem tarefas", atalho de criação de tarefa e consulta Kids simplificada. | CA-09, CA-12, CA-18, CA-19 | Telas integradas com a API, testes de UI/E2E e UX-spec verificada. | a fazer |
 | **3** | **Polimento e Casos Raros:** resiliência de rede. | CA-17 | Suíte de regressão verde. | a fazer |
 

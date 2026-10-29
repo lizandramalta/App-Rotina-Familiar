@@ -2,12 +2,187 @@ import type { Configuration } from './configuration.js';
 import { ConsoleLogger, type Logger } from '../shared/infrastructure/observability/logger.js';
 import { SystemClock, type Clock } from '../shared/application/clock.js';
 import { PostgresConnectionPool } from '../shared/infrastructure/postgres/connection-pool.js';
+import {
+  createAppleConfiguration,
+  type AppleConfiguration,
+} from '../integrations/apple/apple-configuration.js';
+import { AppleJwksClient } from '../integrations/apple/apple-jwks-client.js';
+import { AppleTokenVerifier } from '../integrations/apple/apple-token-verifier.js';
+import { AppleTokenClient } from '../integrations/apple/apple-token-client.js';
+import { PostgresTransactionRunner } from '../shared/infrastructure/postgres/postgres-transaction-runner.js';
+import type { TransactionRunner } from '../shared/application/transaction-runner.js';
+import { PostgresAccessRepository } from '../modules/access/infrastructure/postgres-access-repository.js';
+import { CryptoTokenService } from '../modules/access/infrastructure/crypto-token-service.js';
+import { SignInWithAppleUseCase } from '../modules/access/application/sign-in-with-apple-use-case.js';
+import { GetCurrentSessionUseCase } from '../modules/access/application/get-current-session-use-case.js';
+import { RefreshSessionUseCase } from '../modules/access/application/refresh-session-use-case.js';
+import { RevokeSessionUseCase } from '../modules/access/application/revoke-session-use-case.js';
+import type { AccessRepositoryPort } from '../modules/access/application/access-repository-port.js';
+import { SessionIssuer } from '../modules/access/application/session-issuer.js';
+import { AuthenticateSessionUseCase } from '../modules/access/application/authenticate-session-use-case.js';
+import { PostgresSessionLookup } from '../modules/access/infrastructure/postgres-session-lookup.js';
+import { InspectInviteUseCase } from '../modules/access/application/inspect-invite-use-case.js';
+import { JoinFamilyByInviteUseCase } from '../modules/access/application/join-family-by-invite-use-case.js';
+import { RecoverInviteJoinUseCase } from '../modules/access/application/recover-invite-join-use-case.js';
+import { PostgresInviteJoinRepository } from '../modules/access/infrastructure/postgres-invite-join-repository.js';
+import { PostgresInviteAttemptLimiter } from '../modules/access/infrastructure/postgres-invite-attempt-limiter.js';
+import { ScryptInvitePasswordVerifier } from '../modules/access/infrastructure/scrypt-invite-password-verifier.js';
+import { AesGcmInviteJoinEnvelope } from '../modules/access/infrastructure/aes-gcm-invite-join-envelope.js';
+import { CreateFamilyUseCase } from '../modules/family/application/create-family-use-case.js';
+import { PostgresFamilyCreationRepository } from '../modules/family/infrastructure/postgres-family-creation-repository.js';
+import {
+  GetFamilyUseCase,
+  UpdateFamilyUseCase,
+} from '../modules/family/application/family-profile-use-cases.js';
+import { PostgresFamilyProfileRepository } from '../modules/family/infrastructure/postgres-family-profile-repository.js';
+import { ChangeFamilyTimeZoneUseCase } from '../modules/family/application/change-family-time-zone-use-case.js';
+import { GetFamilySettingsUseCase } from '../modules/family/application/get-family-settings-use-case.js';
+import { PreviewFamilyTimeZoneChangeUseCase } from '../modules/family/application/preview-family-time-zone-change-use-case.js';
+import { PostgresFamilySettingsRepository } from '../modules/family/infrastructure/postgres-family-settings-repository.js';
+import {
+  CreateMemberUseCase,
+  UpdateMemberUseCase,
+  ChangeMemberRoleUseCase,
+  LeaveAdministrationUseCase,
+  RemoveMemberUseCase,
+  GetMemberDetailUseCase,
+  ListFamilyMembersUseCase,
+} from '../modules/family/application/member-management-use-cases.js';
+import { IssueMemberInviteUseCase } from '../modules/family/application/issue-member-invite-use-case.js';
+import { CryptoInviteCredentials } from '../modules/family/infrastructure/crypto-invite-credentials.js';
+import { PostgresMemberInviteRepository } from '../modules/family/infrastructure/postgres-member-invite-repository.js';
+import { PostgresMemberManagementRepository } from '../modules/family/infrastructure/postgres-member-management-repository.js';
+import { GetMediaContentUseCase } from '../modules/media/application/get-media-content-use-case.js';
+import { UploadMediaUseCase } from '../modules/media/application/upload-media-use-case.js';
+import { UploadOnboardingMediaUseCase } from '../modules/media/application/upload-onboarding-media-use-case.js';
+import { CleanOrphanOnboardingMedia } from '../modules/media/application/clean-orphan-onboarding-media.js';
+import type { ObjectStorageMaintenancePort } from '../modules/media/application/media-ports.js';
+import { PostgresOnboardingMediaRepository } from '../modules/media/infrastructure/postgres-onboarding-media-repository.js';
+import { PostgresMediaRepository } from '../modules/media/infrastructure/postgres-media-repository.js';
+import { R2ObjectStorage } from '../modules/media/infrastructure/r2-object-storage.js';
+import { SharpImageProcessor } from '../modules/media/infrastructure/sharp-image-processor.js';
+import { UnavailableObjectStorage } from '../modules/media/infrastructure/unavailable-object-storage.js';
+import { UpdateOwnProfileUseCase } from '../modules/profile/application/update-own-profile-use-case.js';
+import { GetOwnProfileUseCase } from '../modules/profile/application/get-own-profile-use-case.js';
+import {
+  GetBadgeContributionsUseCase,
+  GetOwnBadgesUseCase,
+} from '../modules/profile/application/get-own-badges-use-cases.js';
+import { PostgresProfileRepository } from '../modules/profile/infrastructure/postgres-profile-repository.js';
+import type { AppleTokenVerifierPort } from '../integrations/apple/apple-token-verifier-port.js';
+import {
+  CreateTaskUseCase,
+  CompleteTaskUseCase,
+  DeleteTaskUseCase,
+  EditTaskUseCase,
+  GetTaskUseCase,
+} from '../modules/tasks/application/manage-task-use-cases.js';
+import {
+  GetOwnProgressUseCase,
+  GetOwnTasksUseCase,
+} from '../modules/tasks/application/get-own-tasks-use-cases.js';
+import {
+  GetFamilyOverviewUseCase,
+  GetFamilyTasksUseCase,
+} from '../modules/tasks/application/get-family-tasks-use-cases.js';
+import { PostgresTaskRepository } from '../modules/tasks/infrastructure/postgres-task-repository.js';
+import { GetWeeklyReportSnapshotUseCase } from '../modules/reports/application/get-weekly-report-snapshot-use-case.js';
+import { PostgresWeeklyReportRepository } from '../modules/reports/infrastructure/postgres-weekly-report-repository.js';
+import { PostgresKidsSignalRepository } from '../modules/kids/infrastructure/postgres-kids-signal-repository.js';
+import {
+  SignalTaskUseCase,
+  ListKidsSignalsUseCase,
+  GetKidsSignalUseCase,
+  DecideKidsSignalUseCase,
+} from '../modules/kids/application/kids-signal-use-cases.js';
+import { CreateRoutineUseCase } from '../modules/routines/application/create-routine-use-case.js';
+import { GetRoutineUseCase } from '../modules/routines/application/get-routine-use-case.js';
+import {
+  DeleteFutureRoutineTasksUseCase,
+  UpdateFutureRoutineUseCase,
+} from '../modules/routines/application/manage-routine-use-cases.js';
+import { PostgresRoutineRepository } from '../modules/routines/infrastructure/postgres-routine-repository.js';
+import { ReopenTaskUseCase } from '../modules/tasks/application/reopen-task-use-case.js';
+import { CloseEligibleMissions } from '../modules/missions/application/close-eligible-missions.js';
+import {
+  CreateMissionUseCase,
+  EditMissionUseCase,
+  GetMissionDetailUseCase,
+  GetMissionTaskOptionsUseCase,
+  ListMissionsUseCase,
+} from '../modules/missions/application/mission-use-cases.js';
+import { PostgresMissionRepository } from '../modules/missions/infrastructure/postgres-mission-repository.js';
+import {
+  AddRewardItemUseCase,
+  ListRewardItemsUseCase,
+} from '../modules/rewards/application/reward-use-cases.js';
+import { PostgresRewardRepository } from '../modules/rewards/infrastructure/postgres-reward-repository.js';
 
 export interface ApplicationContainer {
   readonly config: Configuration;
   readonly logger: Logger;
   readonly clock: Clock;
   readonly dbPool: PostgresConnectionPool;
+  readonly appleConfig: AppleConfiguration;
+  readonly appleTokenVerifier: AppleTokenVerifierPort;
+  readonly accessRepository: AccessRepositoryPort;
+  readonly transactionRunner: TransactionRunner;
+  readonly signInWithAppleUseCase: SignInWithAppleUseCase;
+  readonly getCurrentSessionUseCase: GetCurrentSessionUseCase;
+  readonly refreshSessionUseCase: RefreshSessionUseCase;
+  readonly revokeSessionUseCase: RevokeSessionUseCase;
+  readonly authenticateSessionUseCase: AuthenticateSessionUseCase;
+  readonly inspectInviteUseCase: InspectInviteUseCase;
+  readonly joinFamilyByInviteUseCase: JoinFamilyByInviteUseCase;
+  readonly recoverInviteJoinUseCase: RecoverInviteJoinUseCase;
+  readonly createFamilyUseCase: CreateFamilyUseCase;
+  readonly getFamilyUseCase: GetFamilyUseCase;
+  readonly updateFamilyUseCase: UpdateFamilyUseCase;
+  readonly getFamilySettingsUseCase: GetFamilySettingsUseCase;
+  readonly previewFamilyTimeZoneChangeUseCase: PreviewFamilyTimeZoneChangeUseCase;
+  readonly changeFamilyTimeZoneUseCase: ChangeFamilyTimeZoneUseCase;
+  readonly listFamilyMembersUseCase: ListFamilyMembersUseCase;
+  readonly getMemberDetailUseCase: GetMemberDetailUseCase;
+  readonly createMemberUseCase: CreateMemberUseCase;
+  readonly updateMemberUseCase: UpdateMemberUseCase;
+  readonly changeMemberRoleUseCase: ChangeMemberRoleUseCase;
+  readonly leaveAdministrationUseCase: LeaveAdministrationUseCase;
+  readonly removeMemberUseCase: RemoveMemberUseCase;
+  readonly issueMemberInviteUseCase: IssueMemberInviteUseCase;
+  readonly uploadMediaUseCase: UploadMediaUseCase;
+  readonly getMediaContentUseCase: GetMediaContentUseCase;
+  readonly uploadOnboardingMediaUseCase: UploadOnboardingMediaUseCase;
+  readonly cleanOrphanOnboardingMedia: CleanOrphanOnboardingMedia;
+  readonly updateOwnProfileUseCase: UpdateOwnProfileUseCase;
+  readonly getOwnProfileUseCase: GetOwnProfileUseCase;
+  readonly getOwnBadgesUseCase: GetOwnBadgesUseCase;
+  readonly getBadgeContributionsUseCase: GetBadgeContributionsUseCase;
+  readonly createTaskUseCase: CreateTaskUseCase;
+  readonly completeTaskUseCase: CompleteTaskUseCase;
+  readonly reopenTaskUseCase: ReopenTaskUseCase;
+  readonly getTaskUseCase: GetTaskUseCase;
+  readonly getOwnTasksUseCase: GetOwnTasksUseCase;
+  readonly getOwnProgressUseCase: GetOwnProgressUseCase;
+  readonly getFamilyOverviewUseCase: GetFamilyOverviewUseCase;
+  readonly getFamilyTasksUseCase: GetFamilyTasksUseCase;
+  readonly getWeeklyReportSnapshotUseCase: GetWeeklyReportSnapshotUseCase;
+  readonly signalTaskUseCase: SignalTaskUseCase;
+  readonly listKidsSignalsUseCase: ListKidsSignalsUseCase;
+  readonly getKidsSignalUseCase: GetKidsSignalUseCase;
+  readonly decideKidsSignalUseCase: DecideKidsSignalUseCase;
+  readonly editTaskUseCase: EditTaskUseCase;
+  readonly deleteTaskUseCase: DeleteTaskUseCase;
+  readonly createRoutineUseCase: CreateRoutineUseCase;
+  readonly getRoutineUseCase: GetRoutineUseCase;
+  readonly updateFutureRoutineUseCase: UpdateFutureRoutineUseCase;
+  readonly deleteFutureRoutineTasksUseCase: DeleteFutureRoutineTasksUseCase;
+  readonly createMissionUseCase: CreateMissionUseCase;
+  readonly editMissionUseCase: EditMissionUseCase;
+  readonly listMissionsUseCase: ListMissionsUseCase;
+  readonly getMissionDetailUseCase: GetMissionDetailUseCase;
+  readonly getMissionTaskOptionsUseCase: GetMissionTaskOptionsUseCase;
+  readonly listRewardItemsUseCase: ListRewardItemsUseCase;
+  readonly addRewardItemUseCase: AddRewardItemUseCase;
   dispose(): Promise<void>;
 }
 
@@ -22,16 +197,426 @@ export function createContainer(config: Configuration): ApplicationContainer {
 
   const clock = new SystemClock();
   const dbPool = new PostgresConnectionPool(config, logger);
+  const appleConfig = createAppleConfiguration(config);
+  const transactionRunner = new PostgresTransactionRunner(dbPool);
+
+  const appleTokenVerifier = new AppleTokenVerifier(
+    appleConfig,
+    new AppleJwksClient(appleConfig, logger),
+    new AppleTokenClient(appleConfig, logger),
+  );
+
+  const accessRepository = new PostgresAccessRepository();
+  // Uma instância só: a chave AES vem de uma derivação scrypt, que é custosa.
+  const accessCrypto = new CryptoTokenService(config.SESSION_SECRET);
+
+  const signInWithAppleUseCase = new SignInWithAppleUseCase({
+    repository: accessRepository,
+    tokenVerifier: appleTokenVerifier,
+    crypto: accessCrypto,
+    transactionRunner,
+    clock,
+    logger,
+  });
+
+  const getCurrentSessionUseCase = new GetCurrentSessionUseCase({
+    repository: accessRepository,
+    crypto: accessCrypto,
+    transactionRunner,
+    clock,
+  });
+
+  const refreshSessionUseCase = new RefreshSessionUseCase({
+    repository: accessRepository,
+    crypto: accessCrypto,
+    transactionRunner,
+    clock,
+  });
+
+  const revokeSessionUseCase = new RevokeSessionUseCase({
+    repository: accessRepository,
+    crypto: accessCrypto,
+    transactionRunner,
+    clock,
+    logger,
+  });
+
+  const authenticateSessionUseCase = new AuthenticateSessionUseCase({
+    sessionLookup: new PostgresSessionLookup(dbPool),
+    crypto: accessCrypto,
+    clock,
+  });
+
+  // Ingresso por convite (SPEC-005). Mesmo `SessionIssuer` do login Apple: a
+  // sessão nasce pelo mesmo caminho, com a mesma garantia de uma ativa por perfil.
+  const inviteJoinRepository = new PostgresInviteJoinRepository();
+  const inviteAttemptLimiter = new PostgresInviteAttemptLimiter(dbPool);
+  const inviteAttemptPolicy = {
+    originLimit: config.INVITE_ORIGIN_ATTEMPT_LIMIT,
+    inviteLimit: config.INVITE_ATTEMPT_LIMIT,
+    windowMs: config.INVITE_ATTEMPT_WINDOW_MINUTES * 60 * 1000,
+  };
+  const inviteJoinEnvelope = new AesGcmInviteJoinEnvelope(config.INVITE_ENVELOPE_KEY);
+
+  const inspectInviteUseCase = new InspectInviteUseCase({
+    repository: inviteJoinRepository,
+    limiter: inviteAttemptLimiter,
+    crypto: accessCrypto,
+    transactionRunner,
+    clock,
+    logger,
+    policy: inviteAttemptPolicy,
+  });
+
+  const joinFamilyByInviteUseCase = new JoinFamilyByInviteUseCase({
+    repository: inviteJoinRepository,
+    accessRepository,
+    sessionIssuer: new SessionIssuer({
+      repository: accessRepository,
+      crypto: accessCrypto,
+      logger,
+    }),
+    authenticate: authenticateSessionUseCase,
+    passwordVerifier: new ScryptInvitePasswordVerifier(),
+    envelope: inviteJoinEnvelope,
+    limiter: inviteAttemptLimiter,
+    crypto: accessCrypto,
+    transactionRunner,
+    clock,
+    logger,
+    policy: inviteAttemptPolicy,
+  });
+
+  const recoverInviteJoinUseCase = new RecoverInviteJoinUseCase({
+    repository: inviteJoinRepository,
+    envelope: inviteJoinEnvelope,
+    limiter: inviteAttemptLimiter,
+    crypto: accessCrypto,
+    transactionRunner,
+    clock,
+    logger,
+    policy: inviteAttemptPolicy,
+  });
+
+  const onboardingMediaRepository = new PostgresOnboardingMediaRepository();
+  const createFamilyUseCase = new CreateFamilyUseCase({
+    repository: new PostgresFamilyCreationRepository(),
+    onboardingMedia: onboardingMediaRepository,
+    sessionIssuer: new SessionIssuer({
+      repository: accessRepository,
+      crypto: accessCrypto,
+      logger,
+    }),
+    crypto: accessCrypto,
+    transactionRunner,
+    clock,
+    logger,
+  });
+
+  const familyProfileRepository = new PostgresFamilyProfileRepository();
+  const getFamilyUseCase = new GetFamilyUseCase({
+    repository: familyProfileRepository,
+    transactionRunner,
+  });
+  const updateFamilyUseCase = new UpdateFamilyUseCase({
+    repository: familyProfileRepository,
+    transactionRunner,
+    clock,
+  });
+
+  const familySettingsRepository = new PostgresFamilySettingsRepository();
+
+  const getFamilySettingsUseCase = new GetFamilySettingsUseCase({
+    repository: familySettingsRepository,
+    crypto: accessCrypto,
+    transactionRunner,
+    clock,
+    logger,
+  });
+
+  const previewFamilyTimeZoneChangeUseCase = new PreviewFamilyTimeZoneChangeUseCase({
+    repository: familySettingsRepository,
+    transactionRunner,
+    clock,
+    logger,
+  });
+
+  const changeFamilyTimeZoneUseCase = new ChangeFamilyTimeZoneUseCase({
+    repository: familySettingsRepository,
+    crypto: accessCrypto,
+    transactionRunner,
+    clock,
+    logger,
+  });
+
+  const memberManagementRepository = new PostgresMemberManagementRepository();
+  const listFamilyMembersUseCase = new ListFamilyMembersUseCase({
+    repository: memberManagementRepository,
+    transactionRunner,
+  });
+  const getMemberDetailUseCase = new GetMemberDetailUseCase({
+    repository: memberManagementRepository,
+    transactionRunner,
+  });
+  const createMemberUseCase = new CreateMemberUseCase({
+    repository: memberManagementRepository,
+    transactionRunner,
+    clock,
+  });
+  const memberManagementDependencies = {
+    repository: memberManagementRepository,
+    transactionRunner,
+    clock,
+  };
+  const updateMemberUseCase = new UpdateMemberUseCase(memberManagementDependencies);
+  const changeMemberRoleUseCase = new ChangeMemberRoleUseCase(memberManagementDependencies);
+  const leaveAdministrationUseCase = new LeaveAdministrationUseCase(memberManagementDependencies);
+  const removeMemberUseCase = new RemoveMemberUseCase(memberManagementDependencies);
+
+  const issueMemberInviteUseCase = new IssueMemberInviteUseCase({
+    repository: new PostgresMemberInviteRepository(),
+    credentials: new CryptoInviteCredentials(config.INVITE_LINK_BASE_URL),
+    transactionRunner,
+    clock,
+    logger,
+  });
+
+  // Sem R2 configurado o upload responde 503; a criação da família não depende
+  // dele, já que a foto é opcional (SPEC-002 CA-10).
+  const mediaRepository = new PostgresMediaRepository();
+  const objectStorage = createObjectStorage(config, logger);
+
+  const uploadMediaUseCase = new UploadMediaUseCase({
+    repository: mediaRepository,
+    storage: objectStorage,
+    imageProcessor: new SharpImageProcessor(),
+    crypto: accessCrypto,
+    transactionRunner,
+    logger,
+    keyPrefix: config.NODE_ENV,
+  });
+
+  const getMediaContentUseCase = new GetMediaContentUseCase({
+    repository: mediaRepository,
+    storage: objectStorage,
+    transactionRunner,
+  });
+
+  const uploadOnboardingMediaUseCase = new UploadOnboardingMediaUseCase({
+    repository: onboardingMediaRepository,
+    storage: objectStorage,
+    imageProcessor: new SharpImageProcessor(),
+    crypto: accessCrypto,
+    transactionRunner,
+    clock,
+    logger,
+    keyPrefix: config.NODE_ENV,
+  });
+  const cleanOrphanOnboardingMedia = new CleanOrphanOnboardingMedia({
+    repository: onboardingMediaRepository,
+    storage: objectStorage,
+    transactionRunner,
+    clock,
+    logger,
+  });
+
+  const profileRepository = new PostgresProfileRepository();
+  const updateOwnProfileUseCase = new UpdateOwnProfileUseCase({
+    profileRepository,
+    mediaRepository,
+    transactionRunner,
+    clock,
+  });
+  const getOwnProfileUseCase = new GetOwnProfileUseCase({ profileRepository, transactionRunner });
+  const getOwnBadgesUseCase = new GetOwnBadgesUseCase({ profileRepository, transactionRunner });
+  const getBadgeContributionsUseCase = new GetBadgeContributionsUseCase({
+    profileRepository,
+    transactionRunner,
+  });
+
+  const missionRepository = new PostgresMissionRepository();
+  const missionDependencies = { repository: missionRepository, transactionRunner, clock, logger };
+  const closeEligibleMissions = new CloseEligibleMissions({
+    repository: missionRepository,
+    logger,
+  });
+  const createMissionUseCase = new CreateMissionUseCase({
+    ...missionDependencies,
+    closer: closeEligibleMissions,
+  });
+  const editMissionUseCase = new EditMissionUseCase({
+    ...missionDependencies,
+    closer: closeEligibleMissions,
+  });
+  const listMissionsUseCase = new ListMissionsUseCase(missionDependencies);
+  const getMissionDetailUseCase = new GetMissionDetailUseCase(missionDependencies);
+  const getMissionTaskOptionsUseCase = new GetMissionTaskOptionsUseCase(missionDependencies);
+
+  const rewardRepository = new PostgresRewardRepository();
+  const rewardDependencies = { repository: rewardRepository, transactionRunner, logger };
+  const listRewardItemsUseCase = new ListRewardItemsUseCase(rewardDependencies);
+  const addRewardItemUseCase = new AddRewardItemUseCase({ ...rewardDependencies, clock });
+
+  const taskRepository = new PostgresTaskRepository();
+  const taskDependencies = { repository: taskRepository, transactionRunner, clock };
+  const createTaskUseCase = new CreateTaskUseCase(taskDependencies);
+  const completeTaskUseCase = new CompleteTaskUseCase({
+    ...taskDependencies,
+    missionCloser: closeEligibleMissions,
+  });
+  const reopenTaskUseCase = new ReopenTaskUseCase({
+    tasks: taskRepository,
+    missions: missionRepository,
+    transactionRunner,
+    clock,
+    logger,
+  });
+  const getTaskUseCase = new GetTaskUseCase({ repository: taskRepository, transactionRunner });
+  const taskQueryDependencies = { repository: taskRepository, transactionRunner, clock };
+  const getOwnTasksUseCase = new GetOwnTasksUseCase(taskQueryDependencies);
+  const getOwnProgressUseCase = new GetOwnProgressUseCase(taskQueryDependencies);
+  const getFamilyOverviewUseCase = new GetFamilyOverviewUseCase(taskQueryDependencies);
+  const getFamilyTasksUseCase = new GetFamilyTasksUseCase(taskQueryDependencies);
+  const getWeeklyReportSnapshotUseCase = new GetWeeklyReportSnapshotUseCase({
+    repository: new PostgresWeeklyReportRepository(),
+    transactionRunner,
+    clock,
+  });
+  const kidsSignalDependencies = {
+    signals: new PostgresKidsSignalRepository(),
+    tasks: taskRepository,
+    transactionRunner,
+    missionCloser: closeEligibleMissions,
+    clock,
+  };
+  const signalTaskUseCase = new SignalTaskUseCase(kidsSignalDependencies);
+  const listKidsSignalsUseCase = new ListKidsSignalsUseCase(kidsSignalDependencies);
+  const getKidsSignalUseCase = new GetKidsSignalUseCase(kidsSignalDependencies);
+  const decideKidsSignalUseCase = new DecideKidsSignalUseCase(kidsSignalDependencies);
+  const editTaskUseCase = new EditTaskUseCase(taskDependencies);
+  const deleteTaskUseCase = new DeleteTaskUseCase({
+    ...taskDependencies,
+    missionCloser: closeEligibleMissions,
+  });
+
+  const routineRepository = new PostgresRoutineRepository();
+  const routineDependencies = {
+    taskRepository,
+    routineRepository,
+    familySettingsRepository,
+    transactionRunner,
+    clock,
+  };
+  const createRoutineUseCase = new CreateRoutineUseCase(routineDependencies);
+  const getRoutineUseCase = new GetRoutineUseCase({
+    routineRepository,
+    familySettingsRepository,
+    transactionRunner,
+    clock,
+  });
+  const updateFutureRoutineUseCase = new UpdateFutureRoutineUseCase({
+    ...routineDependencies,
+    logger,
+  });
+  const deleteFutureRoutineTasksUseCase = new DeleteFutureRoutineTasksUseCase({
+    routineRepository,
+    taskRepository,
+    missionCloser: closeEligibleMissions,
+    transactionRunner,
+    clock,
+    logger,
+  });
 
   return {
     config,
     logger,
     clock,
     dbPool,
+    appleConfig,
+    appleTokenVerifier,
+    accessRepository,
+    transactionRunner,
+    signInWithAppleUseCase,
+    getCurrentSessionUseCase,
+    refreshSessionUseCase,
+    revokeSessionUseCase,
+    authenticateSessionUseCase,
+    inspectInviteUseCase,
+    joinFamilyByInviteUseCase,
+    recoverInviteJoinUseCase,
+    createFamilyUseCase,
+    getFamilyUseCase,
+    updateFamilyUseCase,
+    getFamilySettingsUseCase,
+    previewFamilyTimeZoneChangeUseCase,
+    changeFamilyTimeZoneUseCase,
+    listFamilyMembersUseCase,
+    getMemberDetailUseCase,
+    createMemberUseCase,
+    updateMemberUseCase,
+    changeMemberRoleUseCase,
+    leaveAdministrationUseCase,
+    removeMemberUseCase,
+    issueMemberInviteUseCase,
+    uploadMediaUseCase,
+    getMediaContentUseCase,
+    uploadOnboardingMediaUseCase,
+    cleanOrphanOnboardingMedia,
+    updateOwnProfileUseCase,
+    getOwnProfileUseCase,
+    getOwnBadgesUseCase,
+    getBadgeContributionsUseCase,
+    createTaskUseCase,
+    completeTaskUseCase,
+    reopenTaskUseCase,
+    getTaskUseCase,
+    getOwnTasksUseCase,
+    getOwnProgressUseCase,
+    getFamilyOverviewUseCase,
+    getFamilyTasksUseCase,
+    getWeeklyReportSnapshotUseCase,
+    signalTaskUseCase,
+    listKidsSignalsUseCase,
+    getKidsSignalUseCase,
+    decideKidsSignalUseCase,
+    editTaskUseCase,
+    deleteTaskUseCase,
+    createRoutineUseCase,
+    getRoutineUseCase,
+    updateFutureRoutineUseCase,
+    deleteFutureRoutineTasksUseCase,
+    createMissionUseCase,
+    editMissionUseCase,
+    listMissionsUseCase,
+    getMissionDetailUseCase,
+    getMissionTaskOptionsUseCase,
+    listRewardItemsUseCase,
+    addRewardItemUseCase,
     async dispose(): Promise<void> {
       logger.info('Disposing application container...');
       await dbPool.close();
       logger.info('Application container disposed.');
     },
   };
+}
+
+function createObjectStorage(config: Configuration, logger: Logger): ObjectStorageMaintenancePort {
+  const { R2_ENDPOINT, R2_BUCKET_NAME, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY } = config;
+
+  if (
+    R2_ENDPOINT === undefined ||
+    R2_BUCKET_NAME === undefined ||
+    R2_ACCESS_KEY_ID === undefined ||
+    R2_SECRET_ACCESS_KEY === undefined
+  ) {
+    logger.warn('r2_not_configured', { effect: 'media uploads respond 503' });
+    return new UnavailableObjectStorage();
+  }
+
+  return new R2ObjectStorage({
+    endpoint: R2_ENDPOINT,
+    bucketName: R2_BUCKET_NAME,
+    accessKeyId: R2_ACCESS_KEY_ID,
+    secretAccessKey: R2_SECRET_ACCESS_KEY,
+  });
 }

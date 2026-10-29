@@ -1,9 +1,9 @@
 # Arquitetura backend — Node.js e Clean Architecture
 
-**Versão:** 1.1\
-**Base funcional:** 1.5 · Mobile: 1.2 · Design: 1.1 · DER: 1.2\
-**Data:** 2026-10-05\
-**Situação:** arquitetura para implementação futura; sem servidor, migrações ou infraestrutura implementados
+**Versão:** 1.4\
+**Base funcional:** RN 1.18 / RF 1.17 / UC 1.16 · Contratos: 1.16\
+**Data:** 2026-10-19\
+**Situação:** arquitetura alvo revisada; ampliações de onboarding e projeção pessoal exigem implementação
 
 [Índice](../DOCUMENTACAO.md) · [Contratos e rastreabilidade](backend-contracts.md) · [Decisões](backend-decisions.md) · [Mobile](mobile-architecture.md) · [DER](../05-modelo-de-dados.md)
 
@@ -255,7 +255,9 @@ export class CompleteTask {
 
 Validar assinatura/chaves, emissor, audiência, validade e nonce da prova Apple; o cliente verifica também o contexto/state. Trocar authorization code conforme a integração oficial, sem confiar em email ou Apple ID isolado. Chaves públicas podem ter cache limitado e atualização; prova inválida não abre sessão. [Validação Apple](https://developer.apple.com/documentation/signinwithapple/verifying-a-user).
 
-Identidade sem família recebe `creationGrant` opaco, restrito a UC01, de curta duração configurada (dez minutos, confirmado em [BA-21](backend-decisions.md)). Não é sessão de membro e não autoriza consultas de família. `CreateFamily` bloqueia a identidade, cria família, Criador, ciclo inicial e sessão na mesma transação. Concorrência retorna a família já vinculada, sem duplicá-la. Grant expirado exige Apple novamente. Identidade existente abre sessão do Criador e revoga a anterior. Cadastro por convite não cria/associa identidade Apple.
+Identidade sem família recebe `creationGrant` opaco, restrito a UC01, de curta duração configurada (dez minutos, confirmado em [BA-21](backend-decisions.md)). Não é sessão de membro e não autoriza consultas de família. O grant e a prova da instalação autorizam apenas o upload protegido da foto inicial e `CreateFamily`. Este bloqueia a identidade e cria família, Criador, membros iniciais, ciclo, vínculo opcional da foto e sessão na mesma transação. Concorrência não duplica família; após resposta perdida, novo acesso Apple descobre a associação já confirmada. Grant expirado exige Apple novamente e novo upload se a foto anterior estava ligada ao grant. Identidade existente abre sessão do Criador e revoga a anterior. Cadastro por convite não cria/associa identidade Apple.
+
+Depois do commit, TEL-056 lida com convites dos membros já criados. Retornar a TEL-002 consulta a família persistida; edição de nome e gestão posterior de membros usam comandos autorizados próprios, e fuso posterior usa a confirmação existente de fuso. Não há segundo `CreateFamily` nem gravação quando o rascunho permanece igual. Cada comando posterior tem seu próprio resultado confirmado/incerto.
 
 ### Credenciais e ingresso
 
@@ -332,6 +334,8 @@ O servidor persiste `WeeklyCycle` com início inclusivo, fim exclusivo, fuso, re
 
 Admin escolhe `immediate` ou `nextCycle` em RF67. Sob lock, fechar/apurar ciclos já vencidos antes de alterar o ciclo aberto. Imediata conserva seu início e define fim na próxima segunda 00:00 no novo fuso, estritamente futura. Programada conserva fim atual, aplica fuso ao começar o seguinte e usa a primeira segunda 00:00 posterior àquele início. Primeiro instante válido da data cobre transições de calendário. Ciclos permanecem contíguos; uma alteração programada nova substitui a anterior ainda não aplicada, com auditoria, segundo última gravação válida.
 
+Enquanto não houver worker de apuração, a liquidação de ciclos vencidos acontece sob o lock da família, ao ler ou alterar as configurações de fuso. O servidor cria os ciclos semanais contíguos até o instante atual, sem apurar destaque (SPEC-020), e a alteração programada passa a valer no primeiro ciclo que começa em ou depois do seu encerramento. A prévia calcula o mesmo resultado em memória e não grava. Toda mudança de fuso marca o ciclo afetado como transição. O worker futuro reutiliza essa operação.
+
 Mudança de fuso não desloca datas previstas nem reabre ciclos encerrados. O servidor devolve limites civis e absolutos explícitos, inclusive transição; o mobile não reconstrói o período usando o fuso do aparelho. Em período de transição, não prometer que carga semanal é soma de sete dias normais: o intervalo efetivo está identificado no retorno/PDF.
 
 Scheduler busca ciclos vencidos pelo relógio do banco e ordena os atrasados. Às 00:00 locais o ciclo se torna elegível; processamento não depende de app aberto nem de um cron por fuso. Proposta operacional: varredura a cada minuto e também no início do worker. Um lease permite recuperar trabalho interrompido.
@@ -359,7 +363,7 @@ PDFKit/renderização/paginação e compartilhamento são locais. Não há endpo
 
 ## 13. Fotos no R2 e consistência com o banco
 
-Upload passa pelo backend, conforme decisão do usuário. Receber conteúdo com limite, validar bytes/formato, converter para JPEG com lado maior até 1.600 pixels e até 5 MB após processamento, removendo metadados desnecessários. Limites de entrada/decodificação protegem o processo; não confiar em extensão/MIME informado. CPU de imagem usa concorrência limitada, sem bloquear o event loop.
+Upload passa pelo backend, conforme decisão do usuário. Receber conteúdo com limite, validar bytes/formato, converter para JPEG com lado maior até 1.600 pixels e até 5 MB após processamento, removendo metadados desnecessários. Limites de entrada/decodificação protegem o processo; não confiar em extensão/MIME informado. CPU de imagem usa concorrência limitada, sem bloquear o event loop. A foto anterior à família requer reserva de mídia associada ao grant e à instalação, sem `family_id`/`owner_member_id`; o schema atual de `media_assets` não atende esse estágio e precisa de migração. O vínculo ao Criador ocorre só no commit de `CreateFamily`.
 
 O servidor gera chave sob prefixo de ambiente/família e nunca aceita URL remota arbitrária para buscar ou vincular. `ObjectStorage` encapsula `put/get/delete` compatíveis com o R2; não depender de funcionalidades AWS ausentes. [Compatibilidade S3 do R2](https://developers.cloudflare.com/r2/api/s3/api/).
 
@@ -420,5 +424,8 @@ Validação futura se concentra em comportamentos: acesso entre famílias, privi
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.4 | 2026-10-19 | Criação conjunta de membros e vínculo de foto antecipada, edição posterior sem recriação e necessidade de migração de mídia de onboarding. |
+| 1.3 | 2026-10-08 | Liquidação preguiçosa de ciclos vencidos e aplicação de mudança programada de fuso (SPEC-002 Fase 3). Sem mudança funcional. |
+| 1.2 | 2026-10-08 | Registra a fundação backend da Sprint 0: API Fastify, configuração, migrations, PostgreSQL de integração e CI; não introduz capacidades de produto. |
 | 1.1 | 2026-10-07 | Conclusão direta mantém responsáveis ou atribui adulto sem responsável; reabertura pode reverter dados derivados de missão concluída na mesma transação. |
 | 1.0 | 2026-10-05 | Arquitetura Node.js/Clean Architecture com Supabase/R2, módulos, transações, acesso, jobs, contratos e preservação da base funcional 1.5. |

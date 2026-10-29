@@ -1,8 +1,8 @@
 # Requisitos funcionais e não funcionais
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.14\
-**Data:** 2026-10-07\
+**Versão:** 1.25\
+**Data:** 2026-10-28\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -20,21 +20,21 @@ RF descreve o comportamento que o sistema deve oferecer. RNF define condições 
 
 ### RF01
 
-O sistema deve criar a família e atribuir ao criador o perfil Administrador e a identificação de Criador. Antes da criação, o futuro Criador informa nome administrativo obrigatório, com a mesma validação de nome de RF02, e pode configurar foto e etiqueta/apelido opcionais conforme RF48. O nome da família é obrigatório e, após remover espaços nas extremidades, deve ter de 1 a 60 caracteres Unicode visíveis, sem caracteres de controle. Deve manter o vínculo único por usuário e redirecionar o Criador para a família existente quando já houver associação.
+O sistema deve criar a família e atribuir ao criador o perfil Administrador e a identificação de Criador. Antes da criação, o futuro Criador informa nome administrativo obrigatório, com a mesma validação de nome de RF02, pode configurar foto e etiqueta/apelido opcionais conforme RF48 e pode preparar zero ou mais membros com nome e papel. O nome da família é obrigatório e, após remover espaços nas extremidades, deve ter de 1 a 60 caracteres Unicode visíveis, sem caracteres de controle. A criação deve persistir família, Criador e membros iniciais em uma única operação; se qualquer parte falhar, nenhum deles deve ficar parcialmente criado. Deve manter o vínculo único por usuário e redirecionar o Criador para a família existente quando já houver associação. Voltar da etapa de convites aos dados da família já criada não deve executar nova criação: sem mudanças, não há nova gravação; com mudanças, salvar somente alterações autorizadas da família existente.
 
 **Regras de negócio:** [RN01](01-regras-de-negocio.md#rn01), [RN09](01-regras-de-negocio.md#rn09), [RN63](01-regras-de-negocio.md#rn63)\
 **Casos de uso:** [UC01](03-casos-de-uso.md#uc01)
 
 ### RF02
 
-O sistema deve permitir somente a Administradores adicionar membros à família, criando os perfis que serão utilizados para o ingresso por convite. No onboarding de uma família recém-criada, o Criador Administrador pode adicionar zero ou mais membros antes de avançar para a área principal. O nome administrativo é obrigatório e, após remover espaços nas extremidades, deve ter de 1 a 60 caracteres Unicode visíveis, sem caracteres de controle.
+O sistema deve permitir somente a Administradores adicionar membros à família, criando os perfis que serão utilizados para o ingresso por convite. Antes da criação, o futuro Criador pode preparar zero ou mais membros no formulário da família; esses dados permanecem em rascunho e os perfis são criados atomicamente com a família, sem convite automático. Depois da criação, novas inclusões e alterações seguem as permissões administrativas normais. O nome administrativo é obrigatório e, após remover espaços nas extremidades, deve ter de 1 a 60 caracteres Unicode visíveis, sem caracteres de controle.
 
-**Regras de negócio:** [RN07](01-regras-de-negocio.md#rn07)  
-**Casos de uso:** [UC02](03-casos-de-uso.md#uc02)
+**Regras de negócio:** [RN01](01-regras-de-negocio.md#rn01), [RN07](01-regras-de-negocio.md#rn07)\
+**Casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02)
 
 ### RF03
 
-O sistema deve permitir somente a Administradores editar os dados e o perfil de outros membros, respeitando as condições de promoção, rebaixamento e ativação ou desativação do Modo Kids. A edição do nome administrativo deve obedecer à validação de RF02.
+O sistema deve permitir somente a Administradores alterar papel e Modo Kids de outros membros, respeitando as condições de promoção e rebaixamento. Apenas o nome administrativo de perfis Kids pode ser corrigido pelo Administrador, em Configurações da família ou no detalhe Kids, com a validação de RF02. Adultos alteram o próprio nome por RF48. No retorno da etapa de convites ao formulário da família já criada, alterações em membros persistidos seguem essas mesmas restrições; sem alteração, não há nova gravação.
 
 **Regras de negócio:** [RN02](01-regras-de-negocio.md#rn02), [RN03](01-regras-de-negocio.md#rn03), [RN07](01-regras-de-negocio.md#rn07), [RN08](01-regras-de-negocio.md#rn08)  
 **Casos de uso:** [UC02](03-casos-de-uso.md#uc02)
@@ -90,9 +90,9 @@ O sistema permite a adultos atribuir, reatribuir ou remover responsáveis. Em co
 
 ### RF11
 
-O sistema deve permitir consultar tarefas pelo carrossel, da criação da família até o último dia do mês corrente, respeitando o perfil, e bloquear datas fora desse intervalo.
+O sistema deve permitir consultar tarefas pelo carrossel, da criação da família até o último dia do mês corrente, respeitando o perfil, e bloquear datas fora desse intervalo. A lista pessoal do adulto inclui apenas tarefas em que ele é responsável ou corresponsável. Se uma tarefa compartilhada com Kids estiver Aguardando confirmação, essa lista a apresenta como Pendente, sem alterar o estado efetivo, o progresso ou as permissões de ação.
 
-**Regras de negócio:** [RN27](01-regras-de-negocio.md#rn27), [RN49](01-regras-de-negocio.md#rn49)  
+**Regras de negócio:** [RN23](01-regras-de-negocio.md#rn23), [RN27](01-regras-de-negocio.md#rn27), [RN49](01-regras-de-negocio.md#rn49), [RN55](01-regras-de-negocio.md#rn55)\
 **Casos de uso:** [UC11](03-casos-de-uso.md#uc11)
 
 ### RF12
@@ -104,7 +104,7 @@ O sistema deve permitir a Administradores e Membros concluir tarefas Pendentes o
 
 ### RF13
 
-O sistema deve configurar início por DatePicker sem limites de produto, frequência da rotina e observação opcional de até 250 caracteres, sem exigir data final. Deve gerar ocorrências independentes sem duplicação. Materializar até o fim do mês seguinte, repor diariamente e completar em consulta se necessário; início além do horizonte permanece programado. Concluir uma ocorrência não altera outras. A alteração “selecionada e futuras” inclui a ocorrência de origem, preservando passado e ocorrências concluídas ou protegidas.
+O sistema deve configurar início por DatePicker sem limites de produto, frequência da rotina e observação opcional de até 250 caracteres, sem exigir data final. Deve gerar ocorrências independentes sem duplicação. Materializar até o fim do mês seguinte, repor diariamente e completar em consulta se necessário; início além do horizonte permanece programado. Concluir uma ocorrência não altera outras. A alteração “selecionada e futuras” inclui a ocorrência de origem, preservando passado e ocorrências concluídas ou protegidas; altera somente título, peso, responsáveis e observação, sem mudar data inicial, frequência ou a data prevista já gravada em cada ocorrência, mesmo após edição individual, e substitui edições individuais anteriores dos campos permitidos nas futuras abrangidas.
 
 **Regras de negócio:** [RN11](01-regras-de-negocio.md#rn11), [RN14](01-regras-de-negocio.md#rn14), [RN16](01-regras-de-negocio.md#rn16), [RN17](01-regras-de-negocio.md#rn17), [RN67](01-regras-de-negocio.md#rn67)
 **Casos de uso:** [UC08](03-casos-de-uso.md#uc08)
@@ -139,7 +139,7 @@ O sistema deve abrir o checklist no dia atual, exibir o estado único de cada ta
 
 ### RF18
 
-O sistema deve calcular a carga por dia ou semana (segunda a domingo), somando, para cada membro, os pesos integrais das tarefas com conclusão válida no período em que ele figure como responsável da conclusão. Deve ajustar o dia e a semana originais quando uma conclusão for desfeita por reabertura autorizada.
+O sistema deve calcular a carga por dia ou semana (segunda a domingo), somando, para cada membro, os pesos integrais das tarefas com conclusão válida no período em que ele figure como responsável da conclusão. Crédito válido de membro removido deve permanecer no período histórico, identificado como “Membro removido”. Deve ajustar o dia e a semana originais quando uma conclusão for desfeita por reabertura autorizada.
 
 **Regras de negócio:** [RN28](01-regras-de-negocio.md#rn28), [RN30](01-regras-de-negocio.md#rn30), [RN55](01-regras-de-negocio.md#rn55), [RN57](01-regras-de-negocio.md#rn57), [RN61](01-regras-de-negocio.md#rn61)  
 **Casos de uso:** [UC13](03-casos-de-uso.md#uc13)
@@ -153,7 +153,7 @@ O sistema deve excluir da carga tarefas Pendentes ou Aguardando confirmação e 
 
 ### RF20
 
-O sistema deve apresentar a Administradores e Membros a carga de todos e a participação de cada um na soma das cargas individuais, sem ranking e sem divisão por zero.
+O sistema deve apresentar a Administradores e Membros a carga de todos e a participação de cada um na soma das cargas individuais, incluindo linha histórica “Membro removido” quando aplicável, sem ranking e sem divisão por zero.
 
 **Regras de negócio:** [RN30](01-regras-de-negocio.md#rn30), [RN31](01-regras-de-negocio.md#rn31), [RN33](01-regras-de-negocio.md#rn33), [RN34](01-regras-de-negocio.md#rn34)  
 **Casos de uso:** [UC13](03-casos-de-uso.md#uc13)
@@ -167,9 +167,9 @@ O sistema deve apresentar a distribuição da carga de forma que Administradores
 
 ### RF22
 
-O sistema deve permitir a Kids consultar suas próprias tarefas por dia, da criação da família até o último dia do mês corrente, bloqueando datas fora desse intervalo.
+O sistema deve permitir a Kids consultar suas próprias tarefas por dia, da criação da família até o último dia do mês corrente, bloqueando datas fora desse intervalo. A tarefa sinalizada por Kids deve aparecer como Aguardando confirmação nessa consulta até uma decisão válida, inclusive quando houver adulto corresponsável.
 
-**Regras de negócio:** [RN27](01-regras-de-negocio.md#rn27), [RN49](01-regras-de-negocio.md#rn49)  
+**Regras de negócio:** [RN23](01-regras-de-negocio.md#rn23), [RN27](01-regras-de-negocio.md#rn27), [RN49](01-regras-de-negocio.md#rn49), [RN55](01-regras-de-negocio.md#rn55)\
 **Casos de uso:** [UC11](03-casos-de-uso.md#uc11)
 
 ### RF23
@@ -181,7 +181,7 @@ O sistema deve permitir a Kids sinalizar a realização de tarefa sob sua respon
 
 ### RF24
 
-O sistema deve alterar de Pendente para Aguardando confirmação a tarefa sinalizada por Kids. Esse estado deve permanecer até confirmação, recusa ou conclusão manual válida por adulto.
+O sistema deve alterar de Pendente para Aguardando confirmação a tarefa sinalizada por Kids. Esse estado deve permanecer até confirmação, recusa ou conclusão manual válida por Administrador; a apresentação da lista pessoal do adulto corresponsável segue RF11 sem converter o estado efetivo em Pendente.
 
 **Regras de negócio:** [RN22](01-regras-de-negocio.md#rn22), [RN23](01-regras-de-negocio.md#rn23), [RN24](01-regras-de-negocio.md#rn24)  
 **Casos de uso:** [UC15](03-casos-de-uso.md#uc15)
@@ -251,7 +251,7 @@ O sistema deve disponibilizar recompensas de caráter coletivo, vinculadas às c
 
 ### RF34
 
-O sistema deve oferecer itens predefinidos para a roleta e permitir somente a Administradores adicionar itens personalizados que passarão a participar dos sorteios. Adicionar um item não deve atribuí-lo automaticamente a uma missão.
+O sistema deve oferecer para a roleta os seis itens predefinidos definidos em RN42 e permitir somente a Administradores adicionar itens personalizados que passarão a participar dos sorteios. O título personalizado é obrigatório, sem caracteres de controle e limitado a 60 caracteres não-espaço após `trim`; a descrição é opcional e limitada a 255 caracteres, contando espaços. Títulos personalizados devem ser únicos na família após `trim`, sem distinção entre maiúsculas e minúsculas. Adicionar um item não deve atribuí-lo automaticamente a uma missão.
 
 **Regras de negócio:** [RN41](01-regras-de-negocio.md#rn41), [RN42](01-regras-de-negocio.md#rn42)  
 **Casos de uso:** [UC06](03-casos-de-uso.md#uc06)
@@ -279,9 +279,9 @@ O sistema deve permitir ao Criador da Família autenticar-se por Sign in with Ap
 
 ### RF38
 
-Após autenticação Apple, o sistema deve encaminhar a pessoa sem vínculo ao onboarding: configurar o rascunho do próprio perfil, criar a família e, já como Criador Administrador, adicionar zero ou mais membros antes de avançar à área principal. A criação atribui ao Criador o papel de Administrador e sua identificação de Criador. Havendo vínculo, deve redirecioná-lo à família existente.
+Após autenticação Apple, o sistema deve encaminhar a pessoa sem vínculo ao onboarding: configurar o rascunho do próprio perfil, preparar zero ou mais membros no formulário da família e então criar a família junto com todos esses perfis. A criação atribui ao Criador o papel de Administrador e sua identificação de Criador. Havendo membros, o sistema oferece convites explícitos após a criação; sem membros, abre diretamente a área principal. O Criador pode adiar os convites. Voltar da etapa de convites reabre os dados já persistidos para edição autorizada, sem repetir a criação. Havendo vínculo na autenticação, deve redirecioná-lo à família existente.
 
-**Regras de negócio:** [RN01](01-regras-de-negocio.md#rn01), [RN09](01-regras-de-negocio.md#rn09), [RN44](01-regras-de-negocio.md#rn44), [RN63](01-regras-de-negocio.md#rn63)\
+**Regras de negócio:** [RN01](01-regras-de-negocio.md#rn01), [RN07](01-regras-de-negocio.md#rn07), [RN09](01-regras-de-negocio.md#rn09), [RN44](01-regras-de-negocio.md#rn44), [RN63](01-regras-de-negocio.md#rn63)\
 **Casos de uso:** [UC01](03-casos-de-uso.md#uc01)
 
 ### RF39
@@ -293,17 +293,17 @@ O sistema deve vincular a família ao identificador Apple do Criador obtido no f
 
 ### RF40
 
-O sistema deve permitir somente a Administradores criar os perfis dos demais membros antes do ingresso no aplicativo, nos papéis Administrador, Membro ou Kids. O perfil criado deve ser utilizado na geração do convite correspondente.
+O sistema deve permitir criar os perfis dos demais membros antes do ingresso no aplicativo, nos papéis Administrador, Membro ou Kids: na criação inicial da família, a partir do rascunho informado pelo futuro Criador e persistido na mesma operação; depois, somente por Administradores da família já criada. Cada perfil criado pode ser usado na geração explícita do convite correspondente.
 
-**Regras de negócio:** [RN07](01-regras-de-negocio.md#rn07), [RN45](01-regras-de-negocio.md#rn45)  
-**Casos de uso:** [UC02](03-casos-de-uso.md#uc02)
+**Regras de negócio:** [RN01](01-regras-de-negocio.md#rn01), [RN07](01-regras-de-negocio.md#rn07), [RN45](01-regras-de-negocio.md#rn45)\
+**Casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02)
 
 ### RF41
 
-O Administrador pode gerar ou reenviar convite para perfil ativo existente, inclusive imediatamente após criá-lo no onboarding. Cada emissão gera novo link e senha, invalida convites anteriores e revoga a sessão anterior atomicamente. A emissão é sempre uma ação explícita, não automática: deve mostrar os efeitos para confirmação, preservar perfil, histórico e vínculos e disponibilizar novas credenciais para envio conjunto.
+O Administrador pode gerar ou reenviar convite para perfil ativo existente, inclusive para membro criado com a família no onboarding. Cada emissão gera novo link e senha, invalida convites anteriores e revoga a sessão anterior atomicamente. A emissão é sempre uma ação explícita, não automática. A primeira emissão gera as credenciais e abre diretamente o compartilhamento, sem confirmação intermediária; a reemissão deve mostrar seus efeitos e exigir confirmação antes de gerar novas credenciais. Em todos os casos, perfil, histórico e vínculos são preservados, e link e senha são disponibilizados para envio conjunto.
 
 **Regras de negócio:** [RN45](01-regras-de-negocio.md#rn45), [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47)  
-**Casos de uso:** [UC02](03-casos-de-uso.md#uc02)
+**Casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02)
 
 ### RF42
 
@@ -349,10 +349,10 @@ Ao concluir tarefa sem responsável, o sistema deve atribuí-la ao adulto que co
 
 ### RF48
 
-O sistema deve permitir a Administradores, Membros e Kids editar os dados permitidos do próprio perfil, adicionar, substituir ou remover foto opcional por câmera ou galeria e configurar etiqueta/apelido. Para o futuro Criador, esses dados são oferecidos no rascunho inicial antes da criação da família; a foto e a etiqueta podem ser omitidas. O apelido é opcional, com até 20 caracteres não-espaço após remover espaços nas extremidades, sem caracteres de controle; vazio ou nulo remove a configuração vigente. Deve impedir acesso de terceiros à configuração de apelido, inclusive por operação administrativa. A edição não altera papel, família nem modo Kids.
+O sistema deve permitir a Administradores, Membros e Kids editar os dados permitidos do próprio perfil, adicionar, substituir ou remover foto opcional por câmera ou galeria e configurar etiqueta/apelido. Para o futuro Criador, esses dados são oferecidos no rascunho inicial antes da criação da família. A foto escolhida deve ser enviada nessa etapa, sem criar perfil ou conceder acesso familiar; somente mídia protegida do próprio futuro Criador pode ser vinculada após a criação confirmada. Falha do envio deve permitir nova tentativa ou continuação sem foto, sem bloquear a criação; foto e etiqueta podem ser omitidas. O apelido é opcional, com até 20 caracteres não-espaço após remover espaços nas extremidades, sem caracteres de controle; vazio ou nulo remove a configuração vigente. Administradores e Membros também podem editar o próprio nome de identificação por esse fluxo, com a validação do nome administrativo (RF02: de 1 a 60 caracteres visíveis após remover espaços nas extremidades, sem caracteres de controle); Kids não alteram o nome. Deve impedir acesso de terceiros à configuração de apelido, inclusive por operação administrativa. A edição não altera papel, família nem modo Kids. A consulta do próprio perfil retorna também o nome da família, para compor a identificação exibida.
 
-**Regras de negócio:** [RN63](01-regras-de-negocio.md#rn63).  
-**Casos de uso:** [UC10](03-casos-de-uso.md#uc10)
+**Regras de negócio:** [RN01](01-regras-de-negocio.md#rn01), [RN63](01-regras-de-negocio.md#rn63).\
+**Casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC10](03-casos-de-uso.md#uc10)
 
 ### RF49
 
@@ -426,25 +426,27 @@ O sistema deve impedir edição, exclusão ou mudança de vínculos da missão c
 
 ### RF59
 
-Ao excluir uma tarefa não concluída, o sistema deve remover seus vínculos de missões em andamento e recalcular o progresso. Deve impedir a operação quando afetar missão concluída ou deixar missão sem tarefas. A exclusão após reabertura não deve retirar carga novamente.
+Ao excluir uma tarefa não concluída, o sistema deve remover seus vínculos de missões em andamento e recalcular o progresso. Deve impedir a operação quando afetar missão concluída ou deixar missão sem tarefas. A exclusão após reabertura não deve retirar carga novamente. Se, após remover o vínculo, restarem apenas tarefas concluídas, o sistema deve concluir a missão na mesma transação, conforme RN38.
 
 **Regras de negócio:** [RN50](01-regras-de-negocio.md#rn50), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59)  
 **Casos de uso:** [UC07](03-casos-de-uso.md#uc07), [UC17](03-casos-de-uso.md#uc17)
 
 ### RF60
 
-O sistema deve oferecer a Administradores e Membros a área Família (Minha família) na navegação principal, apresentando diretamente progresso total por dia ou semana e uma lista de membros. Cada item abre o detalhe com as tarefas daquele membro e seletor Dia/Semana. Deve abrir no dia atual, herdar o período ao abrir o detalhe e preservar membro e período ao consultar suas tarefas; voltar restaura o contexto da origem. Todas as tarefas, inclusive sem responsável, permanecem acessíveis pela consulta familiar complementar. A carga é integrada na entrega específica de UC13.
+O sistema deve oferecer a Administradores e Membros a área Família (Minha família) na navegação principal, apresentando progresso total no intervalo selecionado e uma lista de membros. A seleção inicial é a semana corrente; Início/Fim permite qualquer intervalo válido dentro de RN49. Cada item abre o detalhe inicialmente no dia atual, com abas Dia e Semana (domingo a sábado no fuso da família, dentro de RN49); voltar restaura o intervalo e os filtros da origem. Outros intervalos são consultados por Tarefas da família. Tarefas da família mantém o intervalo e apresenta todas as tarefas, inclusive sem responsável. A carga de UC13 terá apresentação própria em entrega posterior, fora da TEL-050 atual.
 
 O progresso deve mostrar concluídas/total e percentual, contar cada tarefa uma vez e apresentar “Sem tarefas” quando o total for zero. Carga e progresso seguem RN60–61 e são atualizados após alterações válidas.
 
-O botão Gerar relatório semanal PDF fica na própria Família para ambos os perfis adultos. O botão Adicionar membro também fica em Família, somente para Administradores. Editar perfil e gerar/reenviar convite ficam no detalhe do membro, somente para Administradores quando permitido, respeitando o acesso Apple do Criador e a edição exclusiva do próprio apelido. Confirmações Kids permanecem exclusivas dos Administradores. Kids não acessam a área Família.
+Na Família, o sistema deve destacar membros que concluíram todas as tarefas atribuídas no dia atual e, quando há ao menos dois membros ativos e tarefas atribuídas no intervalo selecionado, todos os empatados na maior quantidade. Apenas Administradores podem acionar Parabenizar para outro membro ativo, inclusive Kids; repetições são permitidas. Cada ação confirmada deve registrar mensagem para o destinatário e intenção de push sem depender da entrega externa. Minhas tarefas deve apresentar a mensagem recebida e permitir fechá-la, ocultando-a da interface.
+
+Gerar relatório semanal PDF fica no menu de Tarefas da família para ambos os perfis adultos. Adicionar membro fica em Configurações da família, somente para Administradores. Alterar papel, remover membro e gerar/reenviar convite ficam no detalhe do membro, somente para Administradores quando permitido; a correção do nome de Kids fica em Configurações da família e no topo do detalhe Kids para Administrador autorizado. Adultos editam o próprio nome em Meu perfil, respeitando o acesso Apple do Criador e a edição exclusiva do próprio apelido. Confirmações Kids permanecem exclusivas dos Administradores. Kids não acessam a área Família.
 
 **Regras de negócio:** [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61)  
 **Casos de uso:** [UC11](03-casos-de-uso.md#uc11)
 
 ### RF61
 
-O sistema deve oferecer Gerar relatório PDF na própria tela Família e permitir selecionar uma semana, gerar, visualizar e salvar ou compartilhar o PDF de RN62, com gráficos de carga e progresso familiar e tabela com peso creditado e tarefas realizadas por membro. Deve mostrar geração em andamento, falha com nova tentativa e semana atual parcial. Selecionar Dia na carga não transforma o PDF em relatório diário.
+O sistema deve oferecer Gerar relatório PDF no menu de Tarefas da família e permitir selecionar uma semana, gerar, visualizar e salvar ou compartilhar o PDF de RN62, com gráficos de carga e progresso familiar e tabela com peso creditado e tarefas realizadas por membro. Se o intervalo consultado tocar mais de uma semana, deve pedir a escolha antes de gerar; com uma única semana, usa-a diretamente. Deve mostrar geração em andamento, falha com nova tentativa e semana atual parcial. O filtro livre da consulta não transforma o PDF em relatório de intervalo arbitrário.
 
 **Regras de negócio:** [RN62](01-regras-de-negocio.md#rn62)  
 **Casos de uso:** [UC18](03-casos-de-uso.md#uc18)
@@ -479,14 +481,14 @@ O sistema deve oferecer ao perfil Kids exatamente duas abas independentes: “Mi
 
 ### RF66
 
-O sistema deve oferecer seletor Dia/Semana nos indicadores de progresso familiar em Minha família e nas tarefas do membro selecionado em seu detalhe. Minhas tarefas é diária para todos os perfis. Deve informar datas, preservar período ao navegar para detalhes e listas e aplicar as fórmulas e limites de RN61. A consulta semanal não altera o período livre de prazo das missões.
+O sistema deve oferecer filtro Início/Fim livre nos indicadores de progresso familiar em Minha família e em Tarefas da família, inclusive ao filtrar por membro nessa lista. Minhas tarefas é diária para todos os perfis. O detalhe do membro inicia no dia atual, permite alternar para a semana visual de domingo a sábado no fuso da família, respeita RN49 e, ao voltar, preserva o intervalo da Família. A semana visual não altera a semana familiar de segunda a domingo de RN28. Deve informar as datas e aplicar as fórmulas e limites de RN61. O intervalo familiar não altera o período livre de prazo das missões.
 
 **Regras de negócio:** [RN28](01-regras-de-negocio.md#rn28), [RN33](01-regras-de-negocio.md#rn33), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61)  
 **Casos de uso:** [UC11](03-casos-de-uso.md#uc11), [UC13](03-casos-de-uso.md#uc13)
 
 ### RF67
 
-O sistema deve oferecer seleção do fuso na criação da família, com padrão `America/Sao_Paulo`, e Configurações da família para Administradores. Ao alterar, informar efeitos e escolher aplicação imediata ou no próximo ciclo; cancelar não salva. Mostrar fuso vigente e alteração programada. Consultas, relatório e apuração compartilham os limites de RN28.
+O sistema deve oferecer seleção do fuso na criação da família, com padrão `America/Sao_Paulo`, e Configurações da família para Administradores. Ao voltar da etapa de convites ao formulário da família já criada, mudar o fuso deve seguir o fluxo de Configurações da família, não a criação inicial nem a gravação simples das demais alterações. Ao alterar, informar efeitos e escolher aplicação imediata ou no próximo ciclo; cancelar não salva. Mostrar fuso vigente e alteração programada. Consultas, relatório e apuração compartilham os limites de RN28.
 
 **Regras de negócio:** [RN28](01-regras-de-negocio.md#rn28), [RN65](01-regras-de-negocio.md#rn65).\
 **Casos de uso:** [UC01](03-casos-de-uso.md#uc01).
@@ -773,6 +775,17 @@ A configuração de apelido deve ser protegida por titularidade no backend, incl
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.25 | 2026-10-28 | RF03/RF60/RF66: detalhe do membro com Dia/Semana domingo–sábado; nome Kids editável também no detalhe; Parabenizar permanece na Família. |
+| 1.24 | 2026-10-28 | RF03/RF60: nome administrativo de adultos é editado pelo titular; somente o nome de Kids pode ser corrigido por Administrador em Configurações. TEL-032 mantém papel, convite e remoção. |
+| 1.23 | 2026-10-28 | RF60/RF66: TEL-032 passa a mostrar o dia atual e horário de conclusão válida, com retorno ao intervalo da Família; TEL-011 mantém o filtro livre. |
+| 1.22 | 2026-10-27 | RF60: incentivos na Família, Parabenizar por Administrador e mensagem recebida em Minhas tarefas. |
+| 1.21 | 2026-10-27 | RF11, RF22, RF24, RF60–61 e RF66: intervalo livre, projeção de Pendentes para Membro, menu do PDF em TEL-011 e configurações em TEL-057. |
+| 1.20 | 2026-10-27 | RF13: explicita a preservação da data prevista já gravada, inclusive após edição individual, no alcance “selecionada e futuras”. Para SPEC-008 Fase 2 / SCRUM-45. |
+| 1.19 | 2026-10-27 | RF13: alcance “selecionada e futuras” limitado a título, peso, responsáveis e observação, sem alterar data inicial, frequência ou data prevista, e substituindo edições individuais anteriores das futuras abrangidas. Para SPEC-008 Fase 2. |
+| 1.18 | 2026-10-22 | RF48: titular adulto edita o próprio nome de identificação (RF02), Kids não; consulta do próprio perfil inclui o nome da família. Para SPEC-006 (SCRUM-52). |
+| 1.17 | 2026-10-19 | RF59: exclusão que deixa apenas tarefas concluídas conclui a missão na mesma transação (RN38; SPEC-014/SPEC-007). RF01–03/RF38/RF40/RF48/RF67: foto antecipada, membros no rascunho, criação atômica e edição da família existente. RF11/RF22/RF24: apresentação por perfil sem alterar estado. RF41: emissão inicial direta e confirmação de reemissão. |
+| 1.16 | 2026-10-10 | RF18 e RF20 preservam e identificam carga histórica de membro removido. Para SPEC-018. |
+| 1.15 | 2026-10-10 | RF34 passa a detalhar título, descrição, unicidade e catálogo inicial dos itens de recompensa coletiva. Para SPEC-015. |
 | 1.14 | 2026-10-07 | RF01, RF02, RF38, RF41 e RF48 passam a cobrir o onboarding do Criador: rascunho de perfil, criação da família, adição opcional de membros e emissão explícita de convite antes da área principal. |
 | 1.13 | 2026-10-07 | RF48 passa a definir o limite do apelido: até 20 caracteres não-espaço após trim, sem caracteres de controle; vazio/nulo remove a configuração. Para SPEC-006. |
 | 1.12 | 2026-10-07 | RF71 (novo) define observação opcional de até 250 caracteres na missão, espelhando RF70. Para SPEC-014. |
