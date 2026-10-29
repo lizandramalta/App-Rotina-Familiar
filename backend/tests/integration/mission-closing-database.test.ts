@@ -303,7 +303,10 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
       await container.deleteTaskUseCase.execute(admin(family), pending);
 
       const closed = await container.getMissionDetailUseCase.execute(admin(family), mission.id);
-      expect(closed).toMatchObject({ status: 'completed', taskIds: [done] });
+      expect(closed).toMatchObject({
+        status: 'completed',
+        tasks: [expect.objectContaining({ id: done })],
+      });
       expect(await participants(mission.id)).toEqual([family.memberId]);
     });
 
