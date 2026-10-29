@@ -23,6 +23,13 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
     afterAll(async () => {
       if (!container) return;
       for (const id of familyIds) {
+        await container.dbPool.query(
+          `delete from app.family_applause_push_outbox where applause_id in (
+            select id from app.family_applause where family_id = $1
+          )`,
+          [id],
+        );
+        await container.dbPool.query('delete from app.family_applause where family_id = $1', [id]);
         await container.dbPool.query('delete from app.families where id = $1', [id]);
       }
       await container.dispose();
