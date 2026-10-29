@@ -22,7 +22,8 @@ struct FamilyOverviewView: View {
                 } else if viewModel.isLoadingOverview {
                     loadingContent
                 }
-                if viewModel.overviewFailed || viewModel.errorMessage != nil {
+                // Data already on screen stays usable; a background refresh failure is not shown.
+                if viewModel.overview == nil, viewModel.overviewFailed || viewModel.errorMessage != nil {
                     failureCard
                 }
             }

@@ -23,7 +23,7 @@ describe('Apple configuration mapper', () => {
   it('maps canonical Apple endpoints and client id by default', () => {
     const appleConfig = createAppleConfiguration(buildConfig());
 
-    expect(appleConfig.clientId).toBe('com.lizandramalta.familyroutine');
+    expect(appleConfig.clientId).toBe('com.lizandramalta.mutua');
     expect(appleConfig.issuer).toBe('https://appleid.apple.com');
     expect(appleConfig.jwksUrl).toBe('https://appleid.apple.com/auth/keys');
     expect(appleConfig.tokenUrl).toBe('https://appleid.apple.com/auth/token');

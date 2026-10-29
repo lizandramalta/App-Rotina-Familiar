@@ -76,7 +76,7 @@ cp .env.example .env
 | `R2_SECRET_ACCESS_KEY` | `string`  | -                                      | Não (Fase 0)       | Segredo de acesso compatível com S3 para o R2.                                                      |
 | `R2_BUCKET_NAME`       | `string`  | -                                      | Não (Fase 0)       | Nome do bucket R2 onde as mídias privadas serão gravadas.                                           |
 | `R2_ENDPOINT`          | `url`     | -                                      | Não (Fase 0)       | Endpoint do bucket R2 no Cloudflare.                                                                |
-| `APPLE_CLIENT_ID`      | `string`  | `com.lizandramalta.familyroutine`      | Sim                | Bundle ID do app iOS; audiência esperada no `identityToken`.                                        |
+| `APPLE_CLIENT_ID`      | `string`  | `com.lizandramalta.mutua`              | Sim                | Bundle ID do app iOS; audiência esperada no `identityToken`.                                        |
 | `APPLE_TEAM_ID`        | `string`  | -                                      | Só em `production` | Team ID da Apple Developer Account (10 caracteres alfanuméricos).                                   |
 | `APPLE_KEY_ID`         | `string`  | -                                      | Só em `production` | Key ID da chave do Sign in with Apple (10 caracteres alfanuméricos).                                |
 | `APPLE_PRIVATE_KEY`    | `string`  | -                                      | Só em `production` | Chave privada `.p8` do Sign in with Apple, em PEM (`\n` literal aceito). Em `production`, EC P-256. |

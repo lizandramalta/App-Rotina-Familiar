@@ -46,11 +46,11 @@ final class DailyTaskListUITests: XCTestCase {
         XCTAssertFalse(app.buttons["tasks.daily.new"].exists)
     }
 
-    func testKidsReceivesGroupedApplauseAndCanHideIt() {
+    /// Applause reaches the person only as an APNs push, never as an in-app card (TestFlight feedback).
+    func testReceivedApplauseIsNotShownInsideTheChecklist() {
         launch(scenario: "daily-tasks-kids-applause")
 
-        XCTAssertTrue(app.staticTexts["Alex e Sam bateram palmas para você!"].waitForExistence(timeout: 5))
-        app.buttons["Fechar mensagem"].tap()
+        XCTAssertTrue(app.staticTexts["Guardar as roupas limpas"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.staticTexts["Alex e Sam bateram palmas para você!"].exists)
     }
 

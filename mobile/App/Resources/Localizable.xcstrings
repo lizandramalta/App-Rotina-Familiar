@@ -6471,6 +6471,16 @@
         }
       }
     },
+    "tasks.saved.toast" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tudo certo!"
+          }
+        }
+      }
+    },
     "tasks.signal_resolution.option_keep" : {
       "localizations" : {
         "pt-BR" : {

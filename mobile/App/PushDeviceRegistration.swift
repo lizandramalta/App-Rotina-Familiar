@@ -12,9 +12,6 @@ final class PushDeviceRegistration: NSObject, UIApplicationDelegate, UNUserNotif
     }
 
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        Task { @MainActor in
-            NotificationCenter.default.post(name: .familyApplauseDidArrive, object: nil)
-        }
         completionHandler([.banner, .sound])
     }
 
@@ -42,8 +39,4 @@ final class PushDeviceRegistration: NSObject, UIApplicationDelegate, UNUserNotif
         registrations = []
         waiting.forEach { $0.resume(throwing: error) }
     }
-}
-
-extension Notification.Name {
-    static let familyApplauseDidArrive = Notification.Name("familyApplauseDidArrive")
 }
