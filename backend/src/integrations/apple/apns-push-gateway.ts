@@ -36,10 +36,38 @@ export class ApnsPushGateway {
     applauseId: string,
     senderName: string,
   ): Promise<number> {
+    return this.sendPayload(deviceToken, environment, applauseId, {
+      aps: {
+        alert: { title: 'Parabéns!', body: `${senderName} bateu palmas para você!` },
+        sound: 'default',
+      },
+      applauseId,
+    });
+  }
+
+  sendRecognition(
+    deviceToken: string,
+    environment: string,
+    recognitionId: string,
+  ): Promise<number> {
+    return this.sendPayload(deviceToken, environment, recognitionId, {
+      aps: { alert: { 'loc-key': 'recognition.notification' }, sound: 'default' },
+      type: 'weeklyRecognition',
+      recognitionId,
+    });
+  }
+
+  private async sendPayload(
+    deviceToken: string,
+    environment: string,
+    notificationId: string,
+    payload: Readonly<Record<string, unknown>>,
+  ): Promise<number> {
     const host =
       environment === 'production'
         ? 'https://api.push.apple.com'
         : 'https://api.sandbox.push.apple.com';
+    const bearer = this.bearer();
     const client = http2.connect(host);
     return new Promise<number>((resolve, reject) => {
       let settled = false;
@@ -54,11 +82,12 @@ export class ApnsPushGateway {
       const stream = client.request({
         ':method': 'POST',
         ':path': `/3/device/${deviceToken}`,
-        authorization: `bearer ${this.bearer()}`,
+        authorization: `bearer ${bearer}`,
         'apns-topic': this.credentials.topic,
         'apns-push-type': 'alert',
         'apns-priority': '10',
-        'apns-id': applauseId,
+        'apns-id': notificationId,
+        'apns-collapse-id': notificationId,
       });
       let status = 500;
       stream.on('response', (headers) => {
@@ -70,15 +99,9 @@ export class ApnsPushGateway {
         stream.close();
         finish(new Error('APNs timeout'));
       });
-      stream.end(
-        JSON.stringify({
-          aps: {
-            alert: { title: 'Parabéns!', body: `${senderName} bateu palmas para você!` },
-            sound: 'default',
-          },
-          applauseId,
-        }),
-      );
+      // Consumir a resposta permite que o evento end também chegue em erros APNs.
+      stream.on('data', () => {});
+      stream.end(JSON.stringify(payload));
     });
   }
 }

@@ -1,8 +1,8 @@
 # Arquitetura backend — Node.js e Clean Architecture
 
-**Versão:** 1.4\
+**Versão:** 1.5\
 **Base funcional:** RN 1.18 / RF 1.17 / UC 1.16 · Contratos: 1.16\
-**Data:** 2026-10-19\
+**Data:** 2026-11-05\
 **Situação:** arquitetura alvo revisada; ampliações de onboarding e projeção pessoal exigem implementação
 
 [Índice](../DOCUMENTACAO.md) · [Contratos e rastreabilidade](backend-contracts.md) · [Decisões](backend-decisions.md) · [Mobile](mobile-architecture.md) · [DER](../05-modelo-de-dados.md)
@@ -334,11 +334,11 @@ O servidor persiste `WeeklyCycle` com início inclusivo, fim exclusivo, fuso, re
 
 Admin escolhe `immediate` ou `nextCycle` em RF67. Sob lock, fechar/apurar ciclos já vencidos antes de alterar o ciclo aberto. Imediata conserva seu início e define fim na próxima segunda 00:00 no novo fuso, estritamente futura. Programada conserva fim atual, aplica fuso ao começar o seguinte e usa a primeira segunda 00:00 posterior àquele início. Primeiro instante válido da data cobre transições de calendário. Ciclos permanecem contíguos; uma alteração programada nova substitui a anterior ainda não aplicada, com auditoria, segundo última gravação válida.
 
-Enquanto não houver worker de apuração, a liquidação de ciclos vencidos acontece sob o lock da família, ao ler ou alterar as configurações de fuso. O servidor cria os ciclos semanais contíguos até o instante atual, sem apurar destaque (SPEC-020), e a alteração programada passa a valer no primeiro ciclo que começa em ou depois do seu encerramento. A prévia calcula o mesmo resultado em memória e não grava. Toda mudança de fuso marca o ciclo afetado como transição. O worker futuro reutiliza essa operação.
+O worker de SPEC-020 liquida ciclos vencidos sob o lock familiar, aplica a mudança programada no primeiro ciclo elegível e finaliza os ciclos encerrados na mesma transação. A leitura de configurações mantém a liquidação de calendário; a alteração efetiva de fuso também finaliza vencidos antes de modificar o ciclo aberto. A prévia calcula os limites em memória e não grava. Toda mudança de fuso marca o ciclo afetado como transição. `settleCycles` é compartilhada pelo worker e pelas configurações.
 
 Mudança de fuso não desloca datas previstas nem reabre ciclos encerrados. O servidor devolve limites civis e absolutos explícitos, inclusive transição; o mobile não reconstrói o período usando o fuso do aparelho. Em período de transição, não prometer que carga semanal é soma de sete dias normais: o intervalo efetivo está identificado no retorno/PDF.
 
-Scheduler busca ciclos vencidos pelo relógio do banco e ordena os atrasados. Às 00:00 locais o ciclo se torna elegível; processamento não depende de app aberto nem de um cron por fuso. Proposta operacional: varredura a cada minuto e também no início do worker. Um lease permite recuperar trabalho interrompido.
+Scheduler busca ciclos vencidos pelo relógio do banco e ordena os atrasados. Às 00:00 locais o ciclo se torna elegível; processamento não depende de app aberto nem de um cron por fuso. Operação implementada: varredura a cada minuto e também no início do worker. Um lease permite recuperar trabalho interrompido.
 
 Apuração sob lock soma créditos válidos com `completedAt` dentro do ciclo, considerando os perfis ativos no snapshot da apuração, inclusive Kids. Sem soma positiva: resultado final sem vencedores. Empate reconhece todos. Persistir resultado e intenções de notificação juntos e marcar finalização; nenhuma leitura publica apuração parcial. Se houve atraso do worker, usar o estado válido no momento em que finaliza, registrando `processedAt`; não fingir que foi calculado à meia-noite. Correções anteriores à finalização podem refletir no resultado; posteriores não o alteram nem notificam outra vez.
 
@@ -424,6 +424,7 @@ Validação futura se concentra em comportamentos: acesso entre famílias, privi
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.5 | 2026-11-05 | SPEC-020 Fase 1: worker de apuração e entrega, snapshot imutável, recuperação persistida e integração com alteração de fuso. |
 | 1.4 | 2026-10-19 | Criação conjunta de membros e vínculo de foto antecipada, edição posterior sem recriação e necessidade de migração de mídia de onboarding. |
 | 1.3 | 2026-10-08 | Liquidação preguiçosa de ciclos vencidos e aplicação de mudança programada de fuso (SPEC-002 Fase 3). Sem mudança funcional. |
 | 1.2 | 2026-10-08 | Registra a fundação backend da Sprint 0: API Fastify, configuração, migrations, PostgreSQL de integração e CI; não introduz capacidades de produto. |

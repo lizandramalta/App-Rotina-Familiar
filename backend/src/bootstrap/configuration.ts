@@ -165,6 +165,8 @@ const environmentSchema = z
     APPLE_JWKS_URL: z.string().url().default(APPLE_CANONICAL_URLS.APPLE_JWKS_URL),
     APPLE_TOKEN_URL: z.string().url().default(APPLE_CANONICAL_URLS.APPLE_TOKEN_URL),
 
+    RECOGNITION_JOB_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(100).default(10),
+    RECOGNITION_PUSH_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(100).default(5),
     APNS_KEY_ID: z.string().optional(),
     APNS_TEAM_ID: z.string().optional(),
     APNS_TOPIC: z.string().optional(),

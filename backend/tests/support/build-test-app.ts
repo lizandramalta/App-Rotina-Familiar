@@ -11,6 +11,11 @@ import { ConsoleLogger } from '../../src/shared/infrastructure/observability/log
 type UseCaseMock = { execute: ReturnType<typeof vi.fn> };
 
 export interface TestApp {
+  readonly recognitions: {
+    list: ReturnType<typeof vi.fn>;
+    get: ReturnType<typeof vi.fn>;
+    open: ReturnType<typeof vi.fn>;
+  };
   readonly app: FastifyInstance;
   readonly createFamily: UseCaseMock;
   readonly getFamily: UseCaseMock;
@@ -73,6 +78,7 @@ export function buildTestApp(): TestApp {
     LOG_LEVEL: 'fatal',
   });
 
+  const recognitions = { list: vi.fn(), get: vi.fn(), open: vi.fn() };
   const createFamily: UseCaseMock = { execute: vi.fn() };
   const getFamily: UseCaseMock = { execute: vi.fn() };
   const updateFamily: UseCaseMock = { execute: vi.fn() };
@@ -115,6 +121,7 @@ export function buildTestApp(): TestApp {
   const addRewardItem: UseCaseMock = { execute: vi.fn() };
 
   const container = {
+    ownWeeklyRecognitions: recognitions,
     config,
     logger: new ConsoleLogger('fatal'),
     clock: new SystemClock(),
@@ -165,6 +172,7 @@ export function buildTestApp(): TestApp {
   } as unknown as ApplicationContainer;
 
   return {
+    recognitions,
     app: buildHttpApp(container, config),
     createFamily,
     getFamily,
