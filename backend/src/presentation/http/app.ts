@@ -1,3 +1,4 @@
+import { registerRecognitionRoutes } from './recognition-routes.js';
 import Fastify, { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import cors from '@fastify/cors';
 import sensible from '@fastify/sensible';
@@ -86,6 +87,7 @@ export function buildHttpApp(
         { name: 'Profile', description: 'Dados do próprio perfil.' },
         { name: 'Tasks', description: 'Gestão de tarefas únicas.' },
         { name: 'Kids', description: 'Sinalização de tarefas Kids e avaliação administrativa.' },
+        { name: 'Recognition', description: 'Destaque semanal exclusivo do titular.' },
         { name: 'Reports', description: 'Snapshots para relatórios locais.' },
         {
           name: 'Routines',
@@ -335,6 +337,7 @@ export function buildHttpApp(
       registerMissionRoutes(scope, container);
       registerRewardRoutes(scope, container);
       registerReportRoutes(scope, container);
+      registerRecognitionRoutes(scope, container);
       registerKidsSignalRoutes(scope, container);
       registerFamilyApplauseRoutes(scope, container);
     },
