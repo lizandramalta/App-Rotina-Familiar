@@ -1,6 +1,10 @@
 import type { TransactionContext } from '../../../shared/application/transaction-runner.js';
 import { isValidMemberRole, type MemberRole } from '../../../shared/domain/member-role.js';
 import { asPostgresClient } from '../../../shared/infrastructure/postgres/postgres-transaction-runner.js';
+import type {
+  EligibleRewardItem,
+  RewardCatalogPort,
+} from '../../missions/application/reward-catalog-port.js';
 import { RewardTitleAlreadyExistsError } from '../domain/reward-errors.js';
 import type {
   RewardItemRecord,
@@ -36,7 +40,7 @@ function isUniqueTitleViolation(error: unknown): boolean {
   );
 }
 
-export class PostgresRewardRepository implements RewardRepositoryPort {
+export class PostgresRewardRepository implements RewardRepositoryPort, RewardCatalogPort {
   public async findActorRole(
     tx: TransactionContext,
     actor: { readonly familyId: string; readonly memberId: string; readonly sessionId: string },
@@ -67,6 +71,24 @@ export class PostgresRewardRepository implements RewardRepositoryPort {
       [familyId],
     );
     return result.rows.map(toRecord);
+  }
+
+  public async findEligibleItem(
+    tx: TransactionContext,
+    familyId: string,
+    rewardItemId: string,
+  ): Promise<EligibleRewardItem | undefined> {
+    const result = await asPostgresClient(tx).query<RewardRow>(
+      `select id, title, details, source, created_at
+         from app.reward_items
+        where id = $2
+          and (source = 'predefined' or family_id = $1)`,
+      [familyId, rewardItemId],
+    );
+    const row = result.rows[0];
+    return row === undefined
+      ? undefined
+      : { id: row.id, title: row.title, details: row.details, source: row.source };
   }
 
   public async insertCustom(

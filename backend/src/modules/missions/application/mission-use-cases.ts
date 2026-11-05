@@ -26,6 +26,7 @@ import {
 } from '../domain/mission-validation.js';
 import type { CloseEligibleMissions } from './close-eligible-missions.js';
 import type {
+  AcceptedRewardRecord,
   MissionRecord,
   MissionRepositoryPort,
   MissionStatus,
@@ -39,6 +40,14 @@ export const TASK_OPTIONS_PAGE_SIZE = 20;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const QUERY_MAX_LENGTH = 60;
 
+export interface AcceptedRewardResponse {
+  readonly rewardItemId: string;
+  readonly title: string;
+  readonly details: string | null;
+  readonly source: 'predefined' | 'custom';
+  readonly acceptedAt: string;
+}
+
 export interface MissionResponse {
   readonly id: string;
   readonly familyId: string;
@@ -48,10 +57,11 @@ export interface MissionResponse {
   readonly taskIds: readonly string[];
   readonly completedAt: string | null;
   readonly isRedemptionAvailable: boolean;
+  readonly acceptedReward: AcceptedRewardResponse | null;
   readonly createdAt: string;
 }
 
-/** Projeção Kids: sem dados de gestão, resgate ou participações (CA-19). */
+/** Projeção Kids: sem dados de gestão ou participações, mas com o resgate (CA-19). */
 export interface KidsMissionResponse {
   readonly id: string;
   readonly title: string;
@@ -59,6 +69,7 @@ export interface KidsMissionResponse {
   readonly status: MissionStatus;
   readonly taskIds: readonly string[];
   readonly completedAt: string | null;
+  readonly acceptedReward: AcceptedRewardResponse | null;
   readonly createdAt: string;
 }
 
@@ -86,7 +97,7 @@ export interface EditMissionCommand extends MissionCommand {
   readonly missionId: string;
 }
 
-interface Deps {
+export interface Deps {
   readonly repository: MissionRepositoryPort;
   readonly transactionRunner: TransactionRunner;
   readonly clock: Clock;
@@ -97,7 +108,21 @@ function statusOf(mission: { readonly completedAt: Date | null }): MissionStatus
   return mission.completedAt === null ? 'inProgress' : 'completed';
 }
 
-function toResponse(mission: MissionRecord): MissionResponse {
+function toAcceptedRewardResponse(
+  reward: AcceptedRewardRecord | null,
+): AcceptedRewardResponse | null {
+  return reward === null
+    ? null
+    : {
+        rewardItemId: reward.rewardItemId,
+        title: reward.title,
+        details: reward.details,
+        source: reward.source,
+        acceptedAt: reward.acceptedAt.toISOString(),
+      };
+}
+
+export function toResponse(mission: MissionRecord): MissionResponse {
   return {
     id: mission.id,
     familyId: mission.familyId,
@@ -106,7 +131,8 @@ function toResponse(mission: MissionRecord): MissionResponse {
     status: statusOf(mission),
     taskIds: mission.taskIds,
     completedAt: mission.completedAt?.toISOString() ?? null,
-    isRedemptionAvailable: mission.completedAt !== null,
+    isRedemptionAvailable: mission.completedAt !== null && mission.acceptedReward === null,
+    acceptedReward: toAcceptedRewardResponse(mission.acceptedReward),
     createdAt: mission.createdAt.toISOString(),
   };
 }
@@ -119,11 +145,12 @@ function toKidsResponse(mission: MissionRecord): KidsMissionResponse {
     status: statusOf(mission),
     taskIds: mission.taskIds,
     completedAt: mission.completedAt?.toISOString() ?? null,
+    acceptedReward: toAcceptedRewardResponse(mission.acceptedReward),
     createdAt: mission.createdAt.toISOString(),
   };
 }
 
-async function translateDependencyFailure<T>(work: () => Promise<T>): Promise<T> {
+export async function translateDependencyFailure<T>(work: () => Promise<T>): Promise<T> {
   try {
     return await work();
   } catch (error) {
@@ -134,22 +161,27 @@ async function translateDependencyFailure<T>(work: () => Promise<T>): Promise<T>
   }
 }
 
-/** O papel é relido após adquirir o lock: a sessão não amplia privilégio. */
-async function requireAdministrator(
+/**
+ * O papel é relido após adquirir o lock: a sessão não amplia privilégio.
+ * `onDenied` permite que cada caso de uso reporte o código de erro do seu
+ * próprio contrato (p. ex. `INSUFFICIENT_PERMISSIONS` no aceite de recompensa).
+ */
+export async function requireAdministrator(
   deps: Deps,
   tx: TransactionContext,
   actor: ActorContext,
+  onDenied: () => DomainError = () => new MissionManagementNotAllowedError(),
 ): Promise<void> {
   const role = await deps.repository.findMemberRole(tx, actor.familyId, actor.memberId);
   if (role === undefined) {
     throw new NotFoundError('Mission not found.');
   }
   if (role !== MemberRole.ADMINISTRATOR) {
-    throw deniedBy(deps, actor, new MissionManagementNotAllowedError());
+    throw deniedBy(deps, actor, onDenied());
   }
 }
 
-function deniedBy<E extends DomainError>(deps: Deps, actor: ActorContext, error: E): E {
+export function deniedBy<E extends DomainError>(deps: Deps, actor: ActorContext, error: E): E {
   deps.logger.warn('mission_management_denied', {
     actorId: actor.memberId,
     targetFamilyId: actor.familyId,
@@ -170,7 +202,7 @@ async function requireTasksInFamily(
   }
 }
 
-function assertUuid(value: string): void {
+export function assertUuid(value: string): void {
   if (!UUID_PATTERN.test(value)) {
     throw new NotFoundError('Mission not found.');
   }

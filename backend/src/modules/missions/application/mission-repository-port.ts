@@ -3,6 +3,15 @@ import type { MemberRole } from '../../../shared/domain/member-role.js';
 
 export type MissionStatus = 'inProgress' | 'completed';
 
+/** Retrato do item no momento do aceite (SPEC-017); sobrevive à remoção do item do catálogo. */
+export interface AcceptedRewardRecord {
+  readonly rewardItemId: string;
+  readonly title: string;
+  readonly details: string | null;
+  readonly source: 'predefined' | 'custom';
+  readonly acceptedAt: Date;
+}
+
 export interface MissionRecord {
   readonly id: string;
   readonly familyId: string;
@@ -11,6 +20,7 @@ export interface MissionRecord {
   readonly completedAt: Date | null;
   readonly createdAt: Date;
   readonly taskIds: readonly string[];
+  readonly acceptedReward: AcceptedRewardRecord | null;
 }
 
 export interface MissionSummaryRecord {
@@ -112,4 +122,23 @@ export interface MissionRepositoryPort {
     familyId: string,
     taskId: string,
   ): Promise<readonly string[]>;
+  /**
+   * Grava o aceite único sob condição (CA-04/CA-05): só afeta a linha quando a
+   * missão está concluída e ainda sem aceite. `false` quando a condição não
+   * se sustentou (defesa adicional ao lock de família já serializado).
+   */
+  acceptReward(
+    tx: TransactionContext,
+    params: {
+      readonly familyId: string;
+      readonly missionId: string;
+      readonly reward: {
+        readonly id: string;
+        readonly title: string;
+        readonly details: string | null;
+        readonly source: 'predefined' | 'custom';
+      };
+      readonly now: Date;
+    },
+  ): Promise<boolean>;
 }

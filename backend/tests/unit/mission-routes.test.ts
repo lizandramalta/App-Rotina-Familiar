@@ -17,6 +17,7 @@ const MISSION = {
   taskIds: ['9f1c2b0e-5b8a-4d0f-9d6e-1f7a8b9c0d1e'],
   completedAt: null,
   isRedemptionAvailable: false,
+  acceptedReward: null,
   createdAt: '2026-10-19T12:00:00.000Z',
 };
 
@@ -128,6 +129,40 @@ describe('Mission routes — SPEC-014 phase 1', () => {
     expect(response.json()).toMatchObject({ code: 'MISSION_COMPLETED_PROTECTED' });
   });
 
+  it('CA-01 accepts a mission reward and answers 200 with no-store', async () => {
+    const accepted = { ...MISSION, status: 'completed', completedAt: '2026-10-19T12:00:00.000Z' };
+    test.acceptMissionReward.execute.mockResolvedValue(accepted);
+
+    const response = await test.app.inject({
+      method: 'POST',
+      url: `/v1/missions/${MISSION_ID}/reward-acceptance`,
+      headers: AUTH,
+      payload: { rewardItemId: 'b2811e28-9ad3-4000-8000-000000000001' },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['cache-control']).toBe('no-store');
+    expect(response.json()).toEqual(accepted);
+    expect(test.acceptMissionReward.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        missionId: MISSION_ID,
+        rewardItemId: 'b2811e28-9ad3-4000-8000-000000000001',
+      }),
+    );
+  });
+
+  it('rejects a reward-acceptance body without rewardItemId as 400', async () => {
+    const response = await test.app.inject({
+      method: 'POST',
+      url: `/v1/missions/${MISSION_ID}/reward-acceptance`,
+      headers: AUTH,
+      payload: {},
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(test.acceptMissionReward.execute).not.toHaveBeenCalled();
+  });
+
   it('serves the static task-options route before the :missionId route', async () => {
     const response = await test.app.inject({
       method: 'GET',
@@ -164,6 +199,7 @@ describe('Mission routes — SPEC-014 phase 1', () => {
       ['GET', '/v1/missions/task-options'],
       ['GET', `/v1/missions/${MISSION_ID}`],
       ['PATCH', `/v1/missions/${MISSION_ID}`],
+      ['POST', `/v1/missions/${MISSION_ID}/reward-acceptance`],
     ] as const) {
       const response = await test.app.inject({
         method,
@@ -184,6 +220,7 @@ describe('Mission routes — SPEC-014 phase 1', () => {
       ['/v1/missions/task-options', 'get'],
       ['/v1/missions/{missionId}', 'get'],
       ['/v1/missions/{missionId}', 'patch'],
+      ['/v1/missions/{missionId}/reward-acceptance', 'post'],
     ] as const) {
       expect(paths[path]?.[method]?.security, `${method} ${path}`).toEqual([{ bearerAuth: [] }]);
     }

@@ -12,12 +12,28 @@ interface MissionBody {
   readonly taskIds?: unknown;
 }
 
+interface RewardAcceptanceBody {
+  readonly rewardItemId?: unknown;
+}
+
 interface PageQuery {
   readonly cursor?: string;
   readonly query?: string;
 }
 
 const missionBodyProperties = { title: {}, note: {}, taskIds: {} } as const;
+
+const acceptedRewardSchema = {
+  type: ['object', 'null'],
+  required: ['rewardItemId', 'title', 'details', 'source', 'acceptedAt'],
+  properties: {
+    rewardItemId: { type: 'string' },
+    title: { type: 'string' },
+    details: { type: ['string', 'null'] },
+    source: { type: 'string', enum: ['predefined', 'custom'] },
+    acceptedAt: { type: 'string' },
+  },
+} as const;
 
 const missionResponseSchema = {
   type: 'object',
@@ -32,6 +48,7 @@ const missionResponseSchema = {
     completedAt: { type: ['string', 'null'] },
     // Ausente na projeção Kids (CA-19): resgate é ação de Administrador.
     isRedemptionAvailable: { type: 'boolean' },
+    acceptedReward: acceptedRewardSchema,
     createdAt: { type: 'string' },
   },
 } as const;
@@ -247,6 +264,36 @@ export function registerMissionRoutes(app: FastifyInstance, container: Applicati
               title: request.body.title,
               note: request.body.note,
               taskIds: request.body.taskIds,
+            }),
+          ),
+    );
+
+    scope.post<{ Params: MissionParams; Body: RewardAcceptanceBody }>(
+      '/missions/:missionId/reward-acceptance',
+      {
+        schema: {
+          tags: ['Missions'],
+          summary: 'Accept a reward item for a completed mission',
+          security: [{ bearerAuth: [] }],
+          params: missionParamsSchema,
+          body: {
+            type: 'object',
+            additionalProperties: false,
+            required: ['rewardItemId'],
+            properties: { rewardItemId: { type: 'string' } },
+          },
+          response: { 200: missionResponseSchema, ...errorResponses },
+        },
+      },
+      async (request, reply) =>
+        reply
+          .status(200)
+          .header('Cache-Control', 'no-store')
+          .send(
+            await container.acceptMissionRewardUseCase.execute({
+              actor: requireActor(request),
+              missionId: request.params.missionId,
+              rewardItemId: request.body.rewardItemId,
             }),
           ),
     );

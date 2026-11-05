@@ -31,6 +31,7 @@ const MISSION: MissionRecord = {
   completedAt: null,
   createdAt: NOW,
   taskIds: [TASK_A, TASK_B],
+  acceptedReward: null,
 };
 
 const MEMBER_ACTOR = { ...TEST_ACTOR, role: MemberRole.MEMBER, isFamilyCreator: false };
@@ -54,6 +55,7 @@ describe('Mission use cases — SPEC-014 phase 1', () => {
       listTaskOptions: vi.fn().mockResolvedValue([]),
       closeEligible: vi.fn().mockResolvedValue([]),
       findMissionIdsByTask: vi.fn().mockResolvedValue([]),
+      acceptReward: vi.fn().mockResolvedValue(true),
     };
     forFamily = vi.fn(
       async (_familyId: string, work: (tx: TransactionContext) => Promise<unknown>) =>

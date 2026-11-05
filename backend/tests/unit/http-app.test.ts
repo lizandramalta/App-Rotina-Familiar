@@ -213,6 +213,9 @@ describe('HTTP Presentation Layer (Fastify)', () => {
       getMissionTaskOptionsUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['getMissionTaskOptionsUseCase'],
+      acceptMissionRewardUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['acceptMissionRewardUseCase'],
       listRewardItemsUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['listRewardItemsUseCase'],

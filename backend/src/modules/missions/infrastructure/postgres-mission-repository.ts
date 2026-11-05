@@ -9,6 +9,7 @@ import type {
   RemovedBadge,
 } from '../../tasks/application/mission-reopening-port.js';
 import type {
+  AcceptedRewardRecord,
   ClosedMission,
   MissionRecord,
   MissionRepositoryPort,
@@ -25,6 +26,23 @@ interface MissionRow {
   completed_at: Date | null;
   created_at: Date;
   task_ids: string[] | null;
+  accepted_reward_item_id: string | null;
+  accepted_reward_title: string | null;
+  accepted_reward_details: string | null;
+  accepted_reward_source: 'predefined' | 'custom' | null;
+  accepted_reward_accepted_at: Date | null;
+}
+
+function acceptedRewardOf(row: MissionRow): AcceptedRewardRecord | null {
+  return row.accepted_reward_item_id === null
+    ? null
+    : {
+        rewardItemId: row.accepted_reward_item_id,
+        title: row.accepted_reward_title as string,
+        details: row.accepted_reward_details,
+        source: row.accepted_reward_source as 'predefined' | 'custom',
+        acceptedAt: row.accepted_reward_accepted_at as Date,
+      };
 }
 
 interface MissionSummaryRow {
@@ -59,16 +77,22 @@ export class PostgresMissionRepository implements MissionRepositoryPort, Mission
       id: string;
       title: string;
       completed: boolean;
+      has_accepted_reward: boolean;
     }>(
-      `select m.id, m.title, (m.completed_at is not null) as completed
+      `select m.id, m.title, (m.completed_at is not null) as completed,
+              (m.accepted_reward_item_id is not null) as has_accepted_reward
          from app.mission_tasks mt
          join app.missions m on m.family_id = mt.family_id and m.id = mt.mission_id
         where mt.family_id = $1 and mt.task_id = $2
         order by m.id`,
       [familyId, taskId],
     );
-    // Reward acceptance is introduced by SPEC-017; no accepted-reward record exists yet.
-    return result.rows.map((row) => ({ ...row, hasAcceptedReward: false }));
+    return result.rows.map((row) => ({
+      id: row.id,
+      title: row.title,
+      completed: row.completed,
+      hasAcceptedReward: row.has_accepted_reward,
+    }));
   }
 
   public async reopenCompletedMissions(
@@ -89,11 +113,28 @@ export class PostgresMissionRepository implements MissionRepositoryPort, Mission
         returning member_id`,
       [params.familyId, params.missionIds],
     );
-    await client.query(
-      `update app.missions set completed_at = null, updated_at = $3
-        where family_id = $1 and id = any($2::uuid[]) and completed_at is not null`,
+    // `before_state` lê o snapshot anterior ao UPDATE: no mesmo WITH, uma CTE que
+    // não depende da saída da CTE de escrita vê o estado pré-UPDATE, mesmo que o
+    // UPDATE zere as colunas em seguida — RETURNING sozinho só exporia o pós-SET.
+    const rewardState = await client.query<{ had_reward: boolean }>(
+      `with before_state as (
+         select id, (accepted_reward_item_id is not null) as had_reward
+           from app.missions
+          where family_id = $1 and id = any($2::uuid[])
+       ),
+       updated as (
+         update app.missions
+            set completed_at = null, updated_at = $3,
+                accepted_reward_item_id = null, accepted_reward_title = null,
+                accepted_reward_details = null, accepted_reward_source = null,
+                accepted_reward_accepted_at = null
+          where family_id = $1 and id = any($2::uuid[]) and completed_at is not null
+         returning id
+       )
+       select b.had_reward from before_state b join updated u on u.id = b.id`,
       [params.familyId, params.missionIds, params.now],
     );
+    const rewardRemoved = rewardState.rows.some((row) => row.had_reward);
 
     const badgesRemoved: RemovedBadge[] = [];
     for (const memberId of new Set(participants.rows.map((row) => row.member_id))) {
@@ -137,7 +178,7 @@ export class PostgresMissionRepository implements MissionRepositoryPort, Mission
     return {
       participationsRemoved: participants.rowCount ?? 0,
       badgesRemoved,
-      rewardRemoved: false,
+      rewardRemoved,
     };
   }
   public async findMemberRole(
@@ -202,6 +243,8 @@ export class PostgresMissionRepository implements MissionRepositoryPort, Mission
     }
     const result = await client.query<MissionRow>(
       `select m.id, m.family_id, m.title, m.note, m.completed_at, m.created_at,
+              m.accepted_reward_item_id, m.accepted_reward_title, m.accepted_reward_details,
+              m.accepted_reward_source, m.accepted_reward_accepted_at,
               coalesce(array_agg(mt.task_id::text order by mt.task_id)
                 filter (where mt.task_id is not null), '{}') as task_ids
          from app.missions m
@@ -221,7 +264,42 @@ export class PostgresMissionRepository implements MissionRepositoryPort, Mission
           completedAt: row.completed_at,
           createdAt: row.created_at,
           taskIds: row.task_ids ?? [],
+          acceptedReward: acceptedRewardOf(row),
         };
+  }
+
+  public async acceptReward(
+    tx: TransactionContext,
+    params: {
+      readonly familyId: string;
+      readonly missionId: string;
+      readonly reward: {
+        readonly id: string;
+        readonly title: string;
+        readonly details: string | null;
+        readonly source: 'predefined' | 'custom';
+      };
+      readonly now: Date;
+    },
+  ): Promise<boolean> {
+    const result = await asPostgresClient(tx).query(
+      `update app.missions
+          set accepted_reward_item_id = $3, accepted_reward_title = $4,
+              accepted_reward_details = $5, accepted_reward_source = $6,
+              accepted_reward_accepted_at = $7, updated_at = $7
+        where family_id = $1 and id = $2
+          and completed_at is not null and accepted_reward_item_id is null`,
+      [
+        params.familyId,
+        params.missionId,
+        params.reward.id,
+        params.reward.title,
+        params.reward.details,
+        params.reward.source,
+        params.now,
+      ],
+    );
+    return (result.rowCount ?? 0) > 0;
   }
 
   public async updateMission(

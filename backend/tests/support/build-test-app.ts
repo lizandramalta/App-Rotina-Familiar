@@ -50,6 +50,7 @@ export interface TestApp {
   readonly listMissions: UseCaseMock;
   readonly getMissionDetail: UseCaseMock;
   readonly getMissionTaskOptions: UseCaseMock;
+  readonly acceptMissionReward: UseCaseMock;
   readonly listRewardItems: UseCaseMock;
   readonly addRewardItem: UseCaseMock;
 }
@@ -111,6 +112,7 @@ export function buildTestApp(): TestApp {
   const listMissions: UseCaseMock = { execute: vi.fn() };
   const getMissionDetail: UseCaseMock = { execute: vi.fn() };
   const getMissionTaskOptions: UseCaseMock = { execute: vi.fn() };
+  const acceptMissionReward: UseCaseMock = { execute: vi.fn() };
   const listRewardItems: UseCaseMock = { execute: vi.fn() };
   const addRewardItem: UseCaseMock = { execute: vi.fn() };
 
@@ -159,6 +161,7 @@ export function buildTestApp(): TestApp {
     listMissionsUseCase: listMissions,
     getMissionDetailUseCase: getMissionDetail,
     getMissionTaskOptionsUseCase: getMissionTaskOptions,
+    acceptMissionRewardUseCase: acceptMissionReward,
     listRewardItemsUseCase: listRewardItems,
     addRewardItemUseCase: addRewardItem,
     dispose: vi.fn(),
@@ -204,6 +207,7 @@ export function buildTestApp(): TestApp {
     listMissions,
     getMissionDetail,
     getMissionTaskOptions,
+    acceptMissionReward,
     listRewardItems,
     addRewardItem,
   };
