@@ -74,8 +74,7 @@ const missionListItemSchema = {
     completedTaskCount: { type: 'integer', minimum: 0 },
     progressPercent: { type: 'number', minimum: 0, maximum: 100 },
     isRedemptionAvailable: { type: 'boolean' },
-    // Sempre `null` nesta fase: aceite de recompensa é SPEC-017 (CA-05).
-    acceptedReward: { type: 'null' },
+    acceptedReward: acceptedRewardSchema,
   },
 } as const;
 
@@ -89,8 +88,7 @@ const missionListSchema = {
 } as const;
 
 // `GET /missions/{missionId}` (SPEC-016 CA-01 a CA-06). `participations` está
-// ausente na projeção Kids (CA-03, RF36); `acceptedReward` é sempre `null` nesta
-// fase, pois o aceite de recompensa é SPEC-017 (CA-05).
+// ausente na projeção Kids (CA-03, RF36).
 const missionDetailResponseSchema = {
   type: 'object',
   required: [
@@ -125,7 +123,7 @@ const missionDetailResponseSchema = {
     completedAt: { type: ['string', 'null'] },
     progressPercent: { type: 'number', minimum: 0, maximum: 100 },
     isRedemptionAvailable: { type: 'boolean' },
-    acceptedReward: { type: 'null' },
+    acceptedReward: acceptedRewardSchema,
     participations: {
       type: 'array',
       items: {

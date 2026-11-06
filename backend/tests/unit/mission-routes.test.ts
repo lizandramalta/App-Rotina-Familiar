@@ -21,6 +21,14 @@ const MISSION = {
   createdAt: '2026-10-19T12:00:00.000Z',
 };
 
+const ACCEPTED_REWARD = {
+  rewardItemId: 'b2811e28-9ad3-4000-8000-000000000001',
+  title: 'Escolher o filme da noite',
+  details: null,
+  source: 'predefined',
+  acceptedAt: '2026-10-19T12:00:00.000Z',
+};
+
 const MISSION_DETAIL = {
   id: MISSION_ID,
   familyId: '11112222-3333-4444-5555-666677778888',
@@ -120,6 +128,50 @@ describe('Mission routes — SPEC-014 phase 1', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual(kids);
+  });
+
+  it('CA-05 serializes a real accepted reward on GET detail, not just the use case response', async () => {
+    test.getMissionDetail.execute.mockResolvedValue({
+      ...MISSION_DETAIL,
+      isRedemptionAvailable: false,
+      acceptedReward: ACCEPTED_REWARD,
+    });
+
+    const response = await test.app.inject({
+      method: 'GET',
+      url: `/v1/missions/${MISSION_ID}`,
+      headers: AUTH,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().acceptedReward).toEqual(ACCEPTED_REWARD);
+  });
+
+  it('CA-05 serializes a real accepted reward on GET list, not just the use case response', async () => {
+    test.listMissions.execute.mockResolvedValue({
+      inProgress: [],
+      completed: [
+        {
+          id: MISSION_ID,
+          title: MISSION.title,
+          status: 'completed',
+          taskCount: 1,
+          completedTaskCount: 1,
+          progressPercent: 100,
+          isRedemptionAvailable: false,
+          acceptedReward: ACCEPTED_REWARD,
+        },
+      ],
+    });
+
+    const response = await test.app.inject({
+      method: 'GET',
+      url: '/v1/missions',
+      headers: AUTH,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().completed[0].acceptedReward).toEqual(ACCEPTED_REWARD);
   });
 
   it('CA-02 maps a denied creation to 403 ACTION_NOT_ALLOWED', async () => {
