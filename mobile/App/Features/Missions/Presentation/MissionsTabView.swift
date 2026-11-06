@@ -8,6 +8,7 @@ struct MissionsTabView: View {
     let taskRepository: any TaskRepository
     let routineRepository: any RoutineRepository
     let familyRepository: any FamilyRepository
+    let rewardRepository: any RewardRepository
     let role: MemberRole
     let currentMemberID: UUID
     let accessToken: String
@@ -23,7 +24,8 @@ struct MissionsTabView: View {
                 accessToken: accessToken,
                 refreshRevision: listRevision,
                 onSelectMission: { path.append(.detail($0)) },
-                onCreateMission: { path.append(.create) }
+                onCreateMission: { path.append(.create) },
+                onOpenRewardItems: { path.append(.rewardItems) }
             )
             .accessibilityIdentifier("access.destination.missions")
             .navigationDestination(for: MissionRoute.self) { route in
@@ -82,6 +84,12 @@ struct MissionsTabView: View {
                 accessToken: accessToken,
                 onRequestEdit: { scope in path.append(.taskEdit(taskID, scope: scope)) },
                 onDeleted: { if !path.isEmpty { path.removeLast() } }
+            )
+        case .rewardItems:
+            RewardItemsView(
+                repository: rewardRepository,
+                role: role,
+                accessToken: accessToken
             )
         case let .taskEdit(taskID, scope):
             TaskEditorView(

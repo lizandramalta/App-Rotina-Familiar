@@ -47,7 +47,8 @@ struct KidsMissionsTabView: View {
                 role: .kid,
                 accessToken: accessToken,
                 onSelectMission: { path.append(.detail($0)) },
-                onCreateMission: {}
+                onCreateMission: {},
+                onOpenRewardItems: {}
             )
             .accessibilityIdentifier("access.destination.kids.missions")
             .toolbar {

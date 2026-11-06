@@ -7,6 +7,7 @@ struct MissionListView: View {
     let refreshRevision: Int
     let onSelectMission: (UUID) -> Void
     let onCreateMission: () -> Void
+    let onOpenRewardItems: () -> Void
 
     init(
         repository: any MissionRepository,
@@ -14,12 +15,14 @@ struct MissionListView: View {
         accessToken: String,
         refreshRevision: Int = 0,
         onSelectMission: @escaping (UUID) -> Void,
-        onCreateMission: @escaping () -> Void
+        onCreateMission: @escaping () -> Void,
+        onOpenRewardItems: @escaping () -> Void
     ) {
         _viewModel = State(initialValue: MissionListViewModel(repository: repository, role: role, accessToken: accessToken))
         self.refreshRevision = refreshRevision
         self.onSelectMission = onSelectMission
         self.onCreateMission = onCreateMission
+        self.onOpenRewardItems = onOpenRewardItems
     }
 
     private var isKidsPresentation: Bool {
@@ -49,6 +52,16 @@ struct MissionListView: View {
                     }
                     .accessibilityIdentifier("missions.list.create")
                     .accessibilityLabel(Text("missions.list.create_label"))
+                }
+                // TEL-023 (SPEC-015 Fase 1) — Administrador apenas (CA-05); Membro/Kids nunca veem este atalho.
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        onOpenRewardItems()
+                    } label: {
+                        Image(systemName: "gift")
+                    }
+                    .accessibilityIdentifier("missions.list.reward_items")
+                    .accessibilityLabel(Text("rewards.items.title"))
                 }
             }
         }
