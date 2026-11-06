@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CloseEligibleMissions } from '../../src/modules/missions/application/close-eligible-missions.js';
 import type {
+  AcceptedRewardRecord,
   MissionRecord,
   MissionRepositoryPort,
 } from '../../src/modules/missions/application/mission-repository-port.js';
@@ -35,6 +36,15 @@ const MISSION: MissionRecord = {
     { id: TASK_A, title: 'Lavar o carro', status: 'pending' },
     { id: TASK_B, title: 'Cortar a grama', status: 'pending' },
   ],
+  acceptedReward: null,
+};
+
+const ACCEPTED_REWARD: AcceptedRewardRecord = {
+  rewardItemId: 'b2811e28-9ad3-4000-8000-000000000001',
+  title: 'Escolher o filme da noite',
+  details: null,
+  source: 'predefined',
+  acceptedAt: NOW,
 };
 
 const MEMBER_ACTOR = { ...TEST_ACTOR, role: MemberRole.MEMBER, isFamilyCreator: false };
@@ -59,6 +69,7 @@ describe('Mission use cases — SPEC-014 phase 1', () => {
       listTaskOptions: vi.fn().mockResolvedValue([]),
       closeEligible: vi.fn().mockResolvedValue([]),
       findMissionIdsByTask: vi.fn().mockResolvedValue([]),
+      acceptReward: vi.fn().mockResolvedValue(true),
     };
     forFamily = vi.fn(
       async (_familyId: string, work: (tx: TransactionContext) => Promise<unknown>) =>
@@ -345,6 +356,46 @@ describe('Mission use cases — SPEC-014 phase 1', () => {
     });
   });
 
+  it.each([
+    ['Administrator', TEST_ACTOR],
+    ['Membro', MEMBER_ACTOR],
+  ])(
+    'CA-05 detail recovers an already-accepted reward by query for %s',
+    async (_name, actor) => {
+      repository.findMission.mockResolvedValue({
+        ...MISSION,
+        completedAt: NOW,
+        acceptedReward: ACCEPTED_REWARD,
+      });
+
+      const result = await new GetMissionDetailUseCase(base()).execute(actor, MISSION_ID);
+
+      expect(result).toMatchObject({
+        isRedemptionAvailable: false,
+        acceptedReward: {
+          rewardItemId: ACCEPTED_REWARD.rewardItemId,
+          title: ACCEPTED_REWARD.title,
+          source: ACCEPTED_REWARD.source,
+        },
+      });
+    },
+  );
+
+  it('CA-05 Kids detail recovers an already-accepted reward by query', async () => {
+    repository.findMission.mockResolvedValue({
+      ...MISSION,
+      completedAt: NOW,
+      acceptedReward: ACCEPTED_REWARD,
+    });
+
+    const result = await new GetMissionDetailUseCase(base()).execute(KIDS_ACTOR, MISSION_ID);
+
+    expect(result).not.toHaveProperty('isRedemptionAvailable');
+    expect(result).toMatchObject({
+      acceptedReward: { rewardItemId: ACCEPTED_REWARD.rewardItemId, title: ACCEPTED_REWARD.title },
+    });
+  });
+
   it('CA-02 excludes an awaitingConfirmation task from the completed count', async () => {
     repository.findMission.mockResolvedValue({
       ...MISSION,
@@ -368,6 +419,7 @@ describe('Mission use cases — SPEC-014 phase 1', () => {
         createdAt: NOW,
         taskCount: 2,
         completedTaskCount: 1,
+        acceptedReward: null,
       },
       {
         id: '00000000-0000-4000-8000-000000000002',
@@ -376,6 +428,7 @@ describe('Mission use cases — SPEC-014 phase 1', () => {
         createdAt: NOW,
         taskCount: 2,
         completedTaskCount: 2,
+        acceptedReward: null,
       },
     ]);
 
@@ -408,6 +461,7 @@ describe('Mission use cases — SPEC-014 phase 1', () => {
         createdAt: NOW,
         taskCount: 2,
         completedTaskCount: 1,
+        acceptedReward: null,
       },
     ]);
 
@@ -415,6 +469,56 @@ describe('Mission use cases — SPEC-014 phase 1', () => {
 
     expect(result.inProgress[0]).not.toHaveProperty('isRedemptionAvailable');
     expect(result.inProgress[0]).toMatchObject({ progressPercent: 50, acceptedReward: null });
+  });
+
+  it.each([
+    ['Administrator', TEST_ACTOR],
+    ['Membro', MEMBER_ACTOR],
+  ])('CA-05 list recovers an already-accepted reward by query for %s', async (_name, actor) => {
+    repository.listMissions.mockResolvedValue([
+      {
+        id: '00000000-0000-4000-8000-000000000002',
+        title: 'Concluída',
+        completedAt: NOW,
+        createdAt: NOW,
+        taskCount: 2,
+        completedTaskCount: 2,
+        acceptedReward: ACCEPTED_REWARD,
+      },
+    ]);
+
+    const result = await new ListMissionsUseCase(base()).execute(actor);
+
+    expect(result.completed).toEqual([
+      expect.objectContaining({
+        isRedemptionAvailable: false,
+        acceptedReward: expect.objectContaining({
+          rewardItemId: ACCEPTED_REWARD.rewardItemId,
+          title: ACCEPTED_REWARD.title,
+        }),
+      }),
+    ]);
+  });
+
+  it('CA-05 Kids list recovers an already-accepted reward by query', async () => {
+    repository.listMissions.mockResolvedValue([
+      {
+        id: '00000000-0000-4000-8000-000000000002',
+        title: 'Concluída',
+        completedAt: NOW,
+        createdAt: NOW,
+        taskCount: 2,
+        completedTaskCount: 2,
+        acceptedReward: ACCEPTED_REWARD,
+      },
+    ]);
+
+    const result = await new ListMissionsUseCase(base()).execute(KIDS_ACTOR);
+
+    expect(result.completed[0]).not.toHaveProperty('isRedemptionAvailable');
+    expect(result.completed[0]).toMatchObject({
+      acceptedReward: expect.objectContaining({ rewardItemId: ACCEPTED_REWARD.rewardItemId }),
+    });
   });
 
   it('restricts task options to administrators', async () => {
