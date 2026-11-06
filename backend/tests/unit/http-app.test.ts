@@ -32,6 +32,8 @@ describe('HTTP Presentation Layer (Fastify)', () => {
     mockDbCheckHealth = vi.fn().mockResolvedValue({ isHealthy: true, latencyMs: 2 });
 
     mockContainer = {
+      finalizeWeeklyHighlight: {} as ApplicationContainer['finalizeWeeklyHighlight'],
+      ownWeeklyRecognitions: {} as ApplicationContainer['ownWeeklyRecognitions'],
       config: testConfig,
       logger: new ConsoleLogger('fatal'),
       clock: new SystemClock(),

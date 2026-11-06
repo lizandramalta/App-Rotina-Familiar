@@ -6,6 +6,8 @@ nonisolated enum MissionRoute: Hashable {
     case detail(UUID)
     case create
     case edit(UUID)
+    /// TEL-023 (SPEC-015 Fase 1) — catálogo de recompensas, visível apenas a Administrador.
+    case rewardItems
     /// A linked task tapped from TEL-021, reusing `TaskDetailView` (TEL-012/TEL-041 are one view).
     case taskDetail(UUID)
     /// `TaskDetailView`'s own "Editar" button, reached from `.taskDetail` — reused as-is rather

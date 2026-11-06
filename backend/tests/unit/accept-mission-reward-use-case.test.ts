@@ -25,6 +25,7 @@ const COMPLETED_MISSION: MissionRecord = {
   completedAt: NOW,
   createdAt: NOW,
   taskIds: ['9f1c2b0e-5b8a-4d0f-9d6e-1f7a8b9c0d1e'],
+  tasks: [{ id: '9f1c2b0e-5b8a-4d0f-9d6e-1f7a8b9c0d1e', title: 'Lavar o carro', status: 'completed' }],
   acceptedReward: null,
 };
 
@@ -47,6 +48,7 @@ describe('AcceptMissionRewardUseCase — SPEC-017 phase 1', () => {
       findMission: vi.fn().mockResolvedValue(COMPLETED_MISSION),
       updateMission: vi.fn(),
       listMissions: vi.fn(),
+      listParticipations: vi.fn(),
       listTaskOptions: vi.fn(),
       closeEligible: vi.fn(),
       findMissionIdsByTask: vi.fn(),

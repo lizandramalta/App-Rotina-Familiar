@@ -1,7 +1,7 @@
 # Decisões da arquitetura backend
 
-**Versão:** 1.6 · **Base funcional:** RN 1.23 / RF 1.22 / UC 1.22\
-**Data:** 2026-10-19 · **Situação:** decisões vigentes e contrato alvo revisado; ampliações recentes ainda não implementadas
+**Versão:** 1.7 · **Base funcional:** RN 1.23 / RF 1.22 / UC 1.22\
+**Data:** 2026-11-05 · **Situação:** decisões vigentes e contrato alvo revisado; ampliações recentes ainda não implementadas
 
 [Arquitetura](backend-architecture.md) · [Contratos](backend-contracts.md) · [Decisões mobile](mobile-decisions.md) · [Índice](../DOCUMENTACAO.md)
 
@@ -40,6 +40,7 @@ Node.js passa a ser a plataforma backend definida pelo usuário. Hospedagem, dis
 | BA-36 | Proposta técnica para SPEC-002/003 | `CreateFamily` insere família, Criador, membros iniciais, ciclo, sessão e vínculo opcional de foto em um commit sob proteção da identidade Apple. Edição após retorno de TEL-056 usa sessão, leitura e comandos próprios de família/membros; não consome outro grant nem repete `CreateFamily`. |
 | BA-37 | Proposta técnica para SPEC-009 | `GetOwnTasks` devolve `status` canônico e `displayStatus` calculado para o ator. Apenas a lista pessoal adulta projeta `awaitingConfirmation` como `pending`; decisões, autorização, fila e progresso permanecem ligados ao estado canônico. Não há coluna de estado visual. |
 | BA-38 | Implementada para SPEC-009 CA-14/15 | Cada toque em Parabenizar grava um evento `family_applause` e uma intenção por dispositivo ativo no mesmo commit. Mensagem interna é consultada por destinatário e agrupada por intervalo; o X marca os eventos do grupo como ocultos. Worker envia via HTTP/2 ao APNs com JWT ES256, distingue aceitação de entrega, retenta falhas transitórias e revoga token após `410`. Sem configuração APNs, a mensagem interna continua disponível e a fila aguarda. |
+| BA-39 | Implementada para SPEC-020 CA-01–06 | `FinalizeWeeklyHighlight` reutiliza o calendário sob lock familiar e grava snapshot/resultados/outbox no mesmo commit; unicidade por ciclo e reconhecido. Worker varre no início e a cada minuto, usando relógio PostgreSQL, claims UUID, leases de 5 minutos para apuração e 1 minuto para push, com atualização condicionada ao claim. Limites de tentativas configuráveis (10/5), atraso exponencial com variação e estado de falha recuperável. Sem aparelho autorizado, a intenção aguarda 15 minutos sem consumir tentativa. O APNs ocorre fora da transação; consulta/primeira abertura são exclusivas do titular. Mudança efetiva de fuso finaliza vencidos antes de modificar o ciclo aberto. |
 
 ## 3. Alternativas consideradas
 
@@ -111,6 +112,7 @@ Sequência sugerida: composição e persistência → Apple/bootstrap/sessões/c
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.7 | 2026-11-05 | BA-39 registra persistência, claims recuperáveis e operação do reconhecimento semanal (SCRUM-102). |
 | 1.6 | 2026-10-27 | BA-38: parabéns persistido antes do push, fila por dispositivo de sessão ativa, mensagem interna e tratamento de falhas APNs. |
 | 1.5 | 2026-10-19 | BA-35–BA-37: preparação de foto vinculada ao grant, criação conjunta e edição posterior da família, projeção pessoal de tarefa. Registra migração e código ainda necessários. |
 | 1.4 | 2026-10-09 | BA-29–BA-34: decisões de implementação do ingresso por convite (SPEC-005 Fase 1), com limites de tentativas, envelope de recuperação e tratamento de falhas. Sem mudança funcional. |

@@ -1,3 +1,6 @@
+import { PostgresRecognitionRepository } from '../modules/recognition/infrastructure/postgres-recognition-repository.js';
+import { FinalizeWeeklyHighlight } from '../modules/recognition/application/finalize-weekly-highlight.js';
+import { OwnWeeklyRecognitions } from '../modules/recognition/application/own-weekly-recognitions.js';
 import type { Configuration } from './configuration.js';
 import { ConsoleLogger, type Logger } from '../shared/infrastructure/observability/logger.js';
 import { SystemClock, type Clock } from '../shared/application/clock.js';
@@ -120,6 +123,8 @@ import {
 import { PostgresRewardRepository } from '../modules/rewards/infrastructure/postgres-reward-repository.js';
 
 export interface ApplicationContainer {
+  readonly finalizeWeeklyHighlight: FinalizeWeeklyHighlight;
+  readonly ownWeeklyRecognitions: OwnWeeklyRecognitions;
   readonly config: Configuration;
   readonly logger: Logger;
   readonly clock: Clock;
@@ -328,6 +333,15 @@ export function createContainer(config: Configuration): ApplicationContainer {
 
   const familySettingsRepository = new PostgresFamilySettingsRepository();
 
+  const recognitionRepository = new PostgresRecognitionRepository();
+  const finalizeWeeklyHighlight = new FinalizeWeeklyHighlight({
+    repository: recognitionRepository,
+    calendar: familySettingsRepository,
+    transactionRunner,
+    newId: () => accessCrypto.newId(),
+  });
+  const ownWeeklyRecognitions = new OwnWeeklyRecognitions(recognitionRepository, transactionRunner);
+
   const getFamilySettingsUseCase = new GetFamilySettingsUseCase({
     repository: familySettingsRepository,
     crypto: accessCrypto,
@@ -344,6 +358,7 @@ export function createContainer(config: Configuration): ApplicationContainer {
   });
 
   const changeFamilyTimeZoneUseCase = new ChangeFamilyTimeZoneUseCase({
+    highlights: finalizeWeeklyHighlight,
     repository: familySettingsRepository,
     crypto: accessCrypto,
     transactionRunner,
@@ -535,6 +550,8 @@ export function createContainer(config: Configuration): ApplicationContainer {
   });
 
   return {
+    finalizeWeeklyHighlight,
+    ownWeeklyRecognitions,
     config,
     logger,
     clock,

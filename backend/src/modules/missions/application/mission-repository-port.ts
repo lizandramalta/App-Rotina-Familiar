@@ -12,6 +12,12 @@ export interface AcceptedRewardRecord {
   readonly acceptedAt: Date;
 }
 
+export interface MissionTaskRecord {
+  readonly id: string;
+  readonly title: string;
+  readonly status: 'pending' | 'awaitingConfirmation' | 'completed';
+}
+
 export interface MissionRecord {
   readonly id: string;
   readonly familyId: string;
@@ -20,6 +26,7 @@ export interface MissionRecord {
   readonly completedAt: Date | null;
   readonly createdAt: Date;
   readonly taskIds: readonly string[];
+  readonly tasks: readonly MissionTaskRecord[];
   readonly acceptedReward: AcceptedRewardRecord | null;
 }
 
@@ -30,6 +37,11 @@ export interface MissionSummaryRecord {
   readonly createdAt: Date;
   readonly taskCount: number;
   readonly completedTaskCount: number;
+}
+
+export interface MissionParticipantRecord {
+  readonly memberId: string;
+  readonly displayName: string;
 }
 
 export interface MissionTaskOptionRecord {
@@ -91,10 +103,16 @@ export interface MissionRepositoryPort {
       readonly now: Date;
     },
   ): Promise<void>;
+  /** Lista completa (sem paginação): coleções de missões por família são limitadas, SPEC-016 §5.1. */
   listMissions(
     tx: TransactionContext,
-    params: { readonly familyId: string; readonly after?: PageCursor; readonly limit: number },
+    params: { readonly familyId: string },
   ): Promise<readonly MissionSummaryRecord[]>;
+  listParticipations(
+    tx: TransactionContext,
+    familyId: string,
+    missionId: string,
+  ): Promise<readonly MissionParticipantRecord[]>;
   listTaskOptions(
     tx: TransactionContext,
     params: {

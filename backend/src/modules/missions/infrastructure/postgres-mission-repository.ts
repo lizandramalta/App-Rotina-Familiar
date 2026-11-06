@@ -11,10 +11,12 @@ import type {
 import type {
   AcceptedRewardRecord,
   ClosedMission,
+  MissionParticipantRecord,
   MissionRecord,
   MissionRepositoryPort,
   MissionSummaryRecord,
   MissionTaskOptionRecord,
+  MissionTaskRecord,
   PageCursor,
 } from '../application/mission-repository-port.js';
 
@@ -26,6 +28,7 @@ interface MissionRow {
   completed_at: Date | null;
   created_at: Date;
   task_ids: string[] | null;
+  tasks: MissionTaskRecord[] | null;
   accepted_reward_item_id: string | null;
   accepted_reward_title: string | null;
   accepted_reward_details: string | null;
@@ -43,6 +46,11 @@ function acceptedRewardOf(row: MissionRow): AcceptedRewardRecord | null {
         source: row.accepted_reward_source as 'predefined' | 'custom',
         acceptedAt: row.accepted_reward_accepted_at as Date,
       };
+}
+
+interface ParticipationRow {
+  member_id: string;
+  display_name: string;
 }
 
 interface MissionSummaryRow {
@@ -246,9 +254,12 @@ export class PostgresMissionRepository implements MissionRepositoryPort, Mission
               m.accepted_reward_item_id, m.accepted_reward_title, m.accepted_reward_details,
               m.accepted_reward_source, m.accepted_reward_accepted_at,
               coalesce(array_agg(mt.task_id::text order by mt.task_id)
-                filter (where mt.task_id is not null), '{}') as task_ids
+                filter (where mt.task_id is not null), '{}') as task_ids,
+              coalesce(jsonb_agg(jsonb_build_object('id', t.id, 'title', t.title, 'status', t.status)
+                order by t.id) filter (where t.id is not null), '[]') as tasks
          from app.missions m
          left join app.mission_tasks mt on mt.family_id = m.family_id and mt.mission_id = m.id
+         left join app.task_occurrences t on t.family_id = mt.family_id and t.id = mt.task_id
         where m.family_id = $1 and m.id = $2
         group by m.id`,
       [familyId, missionId],
@@ -264,6 +275,7 @@ export class PostgresMissionRepository implements MissionRepositoryPort, Mission
           completedAt: row.completed_at,
           createdAt: row.created_at,
           taskIds: row.task_ids ?? [],
+          tasks: row.tasks ?? [],
           acceptedReward: acceptedRewardOf(row),
         };
   }
@@ -322,7 +334,7 @@ export class PostgresMissionRepository implements MissionRepositoryPort, Mission
 
   public async listMissions(
     tx: TransactionContext,
-    params: { readonly familyId: string; readonly after?: PageCursor; readonly limit: number },
+    params: { readonly familyId: string },
   ): Promise<readonly MissionSummaryRecord[]> {
     const result = await asPostgresClient(tx).query<MissionSummaryRow>(
       `select m.id, m.title, m.completed_at, m.created_at,
@@ -332,11 +344,9 @@ export class PostgresMissionRepository implements MissionRepositoryPort, Mission
          left join app.mission_tasks mt on mt.family_id = m.family_id and mt.mission_id = m.id
          left join app.task_occurrences t on t.family_id = mt.family_id and t.id = mt.task_id
         where m.family_id = $1
-          and ($2::timestamptz is null or (m.created_at, m.id) < ($2::timestamptz, $3::uuid))
         group by m.id
-        order by m.created_at desc, m.id desc
-        limit $4`,
-      [params.familyId, params.after?.sortKey ?? null, params.after?.id ?? null, params.limit],
+        order by m.created_at desc, m.id desc`,
+      [params.familyId],
     );
     return result.rows.map((row) => ({
       id: row.id,
@@ -346,6 +356,22 @@ export class PostgresMissionRepository implements MissionRepositoryPort, Mission
       taskCount: Number(row.task_count),
       completedTaskCount: Number(row.completed_task_count),
     }));
+  }
+
+  public async listParticipations(
+    tx: TransactionContext,
+    familyId: string,
+    missionId: string,
+  ): Promise<readonly MissionParticipantRecord[]> {
+    const result = await asPostgresClient(tx).query<ParticipationRow>(
+      `select p.member_id, coalesce(m.display_name, '') as display_name
+         from app.mission_participations p
+         join app.members m on m.family_id = p.family_id and m.id = p.member_id
+        where p.family_id = $1 and p.mission_id = $2
+        order by p.recorded_at, p.member_id`,
+      [familyId, missionId],
+    );
+    return result.rows.map((row) => ({ memberId: row.member_id, displayName: row.display_name }));
   }
 
   public async listTaskOptions(

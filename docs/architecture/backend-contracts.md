@@ -1,7 +1,7 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.27 · **Base funcional:** RN 1.26 / RF 1.25 / UC 1.25 · **Arquitetura backend:** 1.4\
-**Data:** 2026-10-28\
+**Versão:** 1.28 · **Base funcional:** RN 1.26 / RF 1.25 / UC 1.25 · **Arquitetura backend:** 1.5\
+**Data:** 2026-11-05\
 **Situação:** contratos da aba Família, gestão de membros, sinalização/decisão Kids e snapshot semanal materializados na API; demais contratos alvo seguem por fases
 
 [Arquitetura](backend-architecture.md) · [Decisões](backend-decisions.md) · [Catálogo mobile](mobile-feature-catalog.md) · [UC](../03-casos-de-uso.md) · [Índice](../DOCUMENTACAO.md)
@@ -174,6 +174,36 @@ Resumo Kids de missão pode mostrar títulos/estados coletivos necessários ao U
 
 `GET /reports/weekly-snapshot?referenceDate=YYYY-MM-DD` exige sessão adulta; resolve a semana segunda–domingo no fuso da família e retorna `period`, `timeZoneId`, `isTransition`, `generatedAt`, `isPartial`, totais e linhas. Rejeita semana futura ou sem interseção com a família com `422 VALIDATION_FAILED`; Kids recebem `403 INSUFFICIENT_PERMISSIONS`; indisponibilidade retorna `503 DEPENDENCY_UNAVAILABLE`. Linhas históricas de perfil removido usam `memberId: null` e `displayName: "Membro removido"`, sem dados pessoais. `FinalizeWeeklyHighlight` é job com chave família/ciclo: persiste uma vez resultado sem vencedor ou reconhecimentos empatados e intenções de notificação. `GET /me/weekly-recognitions` retorna somente resultados finalizados do titular; `GET /me/weekly-recognitions/{recognitionId}` responde `404 RESOURCE_NOT_FOUND` quando não pertence ao titular; `POST /me/weekly-recognitions/{recognitionId}/opening` é monotônico e não comprova leitura/envio. Datas/pontos vêm do snapshot final, não de nova soma. Mensagem editável e abertura WhatsApp são locais; o backend não registra “enviado” por abrir o aplicativo externo.
 
+
+### Reconhecimento semanal — contrato implementado (SPEC-020 Fase 1 / SCRUM-102)
+
+As três rotas de reconhecimento retornam `200`; a lista usa `{ items: [...] }`, ordenada pelo fim do ciclo decrescente, e detalhe/abertura devolvem o mesmo objeto:
+
+```json
+{
+  "id": "11111111-2222-4333-8444-555555555555",
+  "period": {
+    "startsAt": "2026-10-19T03:00:00.000Z",
+    "endsAt": "2026-10-26T03:00:00.000Z",
+    "referenceWeek": "2026-10-19"
+  },
+  "timeZoneId": "America/Sao_Paulo",
+  "isTransition": false,
+  "points": 6,
+  "completedTasks": 2,
+  "isTie": true,
+  "processedAt": "2026-10-26T03:00:02.000Z",
+  "openedAt": null
+}
+```
+
+`startsAt` é inclusivo e `endsAt` exclusivo; `referenceWeek` é a segunda-feira civil de referência. Os limites, o fuso, a transição, os pontos e a quantidade são preservados no snapshot final. `processedAt` informa a finalização efetiva, inclusive quando o worker recupera atraso. `isTie` não revela nomes, pontuação ou classificação de terceiros. `openedAt` começa nulo; o POST não exige corpo e grava somente a primeira abertura, retornando o objeto atualizado. A lista de quem não foi reconhecido é vazia.
+
+Todas exigem Bearer e retornam `Cache-Control: no-store`. Identificador malformado recebe `400 VALIDATION_FAILED`; sessão ausente, inválida, revogada ou perfil removido recebe `401 SESSION_EXPIRED` neste recorte; reconhecimento ausente/alheio recebe `404 RESOURCE_NOT_FOUND`; falha de persistência recebe `503 DEPENDENCY_UNAVAILABLE`. Titularidade/sessão são revalidadas após obter o lock familiar. Não há rota de apuração manual nem endpoint de WhatsApp.
+
+APNs recebe `type: "weeklyRecognition"` e `recognitionId`, além do envelope `aps` com a chave localizável `recognition.notification`. A Fase 2 deve fornecer essa localização e revalidar a consulta ao abrir. O ID estável também preenche `apns-id`/`apns-collapse-id`; isso reduz repetição externa, sem garantir entrega única. Consulta e abertura não expõem o estado interno do envio e continuam disponíveis quando não há dispositivo, configuração APNs ou aceitação pelo provedor.
+
+
 ## 6. Mídia e rotas operacionais
 
 | Método e caminho | Contrato | Acesso |
@@ -244,6 +274,7 @@ O documento OpenAPI 3.1 é gerado pelos schemas HTTP em `/docs/json`, e a interf
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.28 | 2026-11-05 | Materializa SPEC-020 Fase 1 (SCRUM-102 CA-01–06): apuração e outbox atômicas, consultas próprias, abertura monotônica, payload APNs e OpenAPI. |
 | 1.27 | 2026-10-28 | `completedAt` permanece no contrato; TEL-032 compacta usa o horário na descrição acessível sem exibi-lo na linha. Sem mudança de API. |
 | 1.26 | 2026-10-28 | PATCH administrativo de nome restrito a Kids, mantendo isolamento familiar, validação e resposta 403 para alvo adulto da mesma família. Base RN 1.25 / RF 1.24 / UC 1.24. |
 | 1.25 | 2026-10-28 | Listas familiares incluem `completedAt` da conclusão válida corrente para a TEL-032 diária; projeção e isolamento por família preservados. Base RN 1.24 / RF 1.23 / UC 1.23. |
