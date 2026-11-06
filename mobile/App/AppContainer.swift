@@ -11,6 +11,7 @@ final class AppContainer {
     private let routineRepository: any RoutineRepository
     private let profileRepository: any ProfileRepository
     private let missionRepository: any MissionRepository
+    private let rewardRepository: any RewardRepository
     private let kidsSignalRepository: any KidsSignalRepository
     private let credentialStore: any SessionCredentialStoring
     private let installationProofStore: any InstallationProofProviding
@@ -27,6 +28,7 @@ final class AppContainer {
         routineRepository: any RoutineRepository,
         profileRepository: any ProfileRepository,
         missionRepository: any MissionRepository,
+        rewardRepository: any RewardRepository,
         kidsSignalRepository: any KidsSignalRepository,
         credentialStore: any SessionCredentialStoring,
         installationProofStore: any InstallationProofProviding,
@@ -42,6 +44,7 @@ final class AppContainer {
         self.routineRepository = routineRepository
         self.profileRepository = profileRepository
         self.missionRepository = missionRepository
+        self.rewardRepository = rewardRepository
         self.kidsSignalRepository = kidsSignalRepository
         self.credentialStore = credentialStore
         self.installationProofStore = installationProofStore
@@ -61,6 +64,7 @@ final class AppContainer {
             routineRepository: HTTPRoutineRepository(baseURL: configuration.apiBaseURL),
             profileRepository: HTTPProfileRepository(baseURL: configuration.apiBaseURL),
             missionRepository: HTTPMissionRepository(baseURL: configuration.apiBaseURL),
+            rewardRepository: HTTPRewardRepository(baseURL: configuration.apiBaseURL),
             kidsSignalRepository: HTTPKidsSignalRepository(baseURL: configuration.apiBaseURL),
             credentialStore: KeychainSessionCredentialStore(secrets: secrets),
             installationProofStore: KeychainInstallationProofStore(secrets: secrets),
@@ -184,6 +188,7 @@ final class AppContainer {
             taskRepository: taskRepository,
             routineRepository: routineRepository,
             familyRepository: familyRepository,
+            rewardRepository: rewardRepository,
             role: session.role,
             currentMemberID: session.memberID,
             accessToken: accessToken

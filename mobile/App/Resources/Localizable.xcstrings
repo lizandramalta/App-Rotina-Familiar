@@ -6454,6 +6454,306 @@
           }
         }
       }
+    },
+    "rewards.items.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Itens de recompensa"
+          }
+        }
+      }
+    },
+    "rewards.items.subtitle": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esses itens entram nos próximos sorteios."
+          }
+        }
+      }
+    },
+    "rewards.items.add": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar item"
+          }
+        }
+      }
+    },
+    "rewards.items.section.predefined": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sugestões para a família"
+          }
+        }
+      }
+    },
+    "rewards.items.section.custom": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Itens da sua família"
+          }
+        }
+      }
+    },
+    "rewards.items.badge.predefined": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sugestão"
+          }
+        }
+      }
+    },
+    "rewards.items.badge.custom": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Da sua família"
+          }
+        }
+      }
+    },
+    "rewards.items.custom.empty": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ainda não há itens personalizados. Você pode adicionar uma recompensa para os próximos sorteios."
+          }
+        }
+      }
+    },
+    "rewards.items.load_error": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível carregar os itens de recompensa."
+          }
+        }
+      }
+    },
+    "rewards.items.uncertain": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ainda estamos confirmando se o item foi adicionado."
+          }
+        }
+      }
+    },
+    "rewards.items.refresh": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atualizar lista"
+          }
+        }
+      }
+    },
+    "rewards.editor.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar recompensa"
+          }
+        }
+      }
+    },
+    "rewards.editor.field.title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome da recompensa"
+          }
+        }
+      }
+    },
+    "rewards.editor.field.details": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descrição opcional"
+          }
+        }
+      }
+    },
+    "rewards.editor.title_placeholder": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ex.: Noite de pizza"
+          }
+        }
+      }
+    },
+    "rewards.editor.details_placeholder": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ex.: Escolher juntos o sabor e o filme"
+          }
+        }
+      }
+    },
+    "rewards.editor.title_counter": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld/60"
+          }
+        }
+      }
+    },
+    "rewards.editor.details_counter": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld/255"
+          }
+        }
+      }
+    },
+    "rewards.editor.helper": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este item ficará disponível nos próximos sorteios. Ele não será vinculado a uma missão agora."
+          }
+        }
+      }
+    },
+    "rewards.editor.submit": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar item"
+          }
+        }
+      }
+    },
+    "rewards.editor.submitting": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionando…"
+          }
+        }
+      }
+    },
+    "rewards.editor.close": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fechar"
+          }
+        }
+      }
+    },
+    "rewards.editor.error.title_required": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informe o nome da recompensa."
+          }
+        }
+      }
+    },
+    "rewards.editor.error.title_too_long": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use no máximo 60 caracteres, sem contar espaços."
+          }
+        }
+      }
+    },
+    "rewards.editor.error.title_duplicate": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Já existe uma recompensa com esse nome na sua família."
+          }
+        }
+      }
+    },
+    "rewards.editor.error.details_too_long": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A descrição pode ter até 255 caracteres."
+          }
+        }
+      }
+    },
+    "rewards.editor.discard_title": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descartar alterações?"
+          }
+        }
+      }
+    },
+    "rewards.editor.discard_confirm": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descartar alterações"
+          }
+        }
+      }
+    },
+    "rewards.editor.discard_cancel": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar editando"
+          }
+        }
+      }
+    },
+    "rewards.editor.discard_message": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Os dados não salvos serão perdidos."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

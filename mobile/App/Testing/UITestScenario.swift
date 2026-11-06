@@ -43,6 +43,9 @@ enum UITestScenario: String {
     case missionManagement = "mission-management"
     case missionManagementMember = "mission-management-member"
     case missionManagementKids = "mission-management-kids"
+    case rewardManagement = "reward-management"
+    case rewardManagementEmpty = "reward-management-empty"
+    case rewardManagementMember = "reward-management-member"
 
     static var current: UITestScenario? {
         ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"].flatMap(UITestScenario.init(rawValue:))
@@ -60,6 +63,7 @@ enum UITestScenario: String {
             routineRepository: UITestRoutineRepository(),
             profileRepository: UITestProfileRepository(scenario: self),
             missionRepository: UITestMissionRepository(scenario: self),
+            rewardRepository: UITestRewardRepository(scenario: self),
             kidsSignalRepository: UITestKidsSignalRepository(scenario: self),
             credentialStore: UITestCredentialStore(),
             installationProofStore: UITestInstallationProof(),
@@ -84,11 +88,12 @@ enum UITestScenario: String {
         }
         if self == .taskManagement || self == .familySettings
             || self == .taskCompletionConflict || self == .taskOptimisticDelayed || self == .taskOptimisticFailure
-            || self == .routineCreation || self == .missionManagement {
+            || self == .routineCreation || self == .missionManagement
+            || self == .rewardManagement || self == .rewardManagementEmpty {
             sessionStore.apply(.session(Self.inviteSession(role: .administrator)))
             return
         }
-        if self == .missionManagementMember {
+        if self == .missionManagementMember || self == .rewardManagementMember {
             sessionStore.apply(.session(Self.inviteSession(role: .member)))
             return
         }
@@ -1267,6 +1272,48 @@ private actor UITestMissionRepository: MissionRepository {
         ]
         let filtered = query.map { text in allTasks.filter { $0.title.localizedCaseInsensitiveContains(text) } } ?? allTasks
         return MissionTaskOptionPage(items: filtered, nextCursor: nil)
+    }
+}
+
+/// SPEC-015 Fase 1 UI fixture: three predefined items and, unless `.rewardManagementEmpty`, one
+/// custom item. Supports adding a second custom item so CA-02/CA-04 are reachable in UI tests.
+private actor UITestRewardRepository: RewardRepository {
+    private let scenario: UITestScenario
+    private var custom: [RewardItem]
+
+    private static let predefinedItems: [RewardItem] = [
+        RewardItem(id: UUID(uuidString: "00000000-0000-0000-0000-0000000000f3")!, title: "Escolher o filme da noite", details: nil, source: .predefined, createdAt: nil),
+        RewardItem(id: UUID(uuidString: "00000000-0000-0000-0000-0000000000f4")!, title: "Escolher o jantar em família", details: nil, source: .predefined, createdAt: nil),
+        RewardItem(id: UUID(uuidString: "00000000-0000-0000-0000-0000000000f5")!, title: "Noite de jogos em família", details: nil, source: .predefined, createdAt: nil),
+    ]
+
+    init(scenario: UITestScenario) {
+        self.scenario = scenario
+        custom = scenario == .rewardManagementEmpty ? [] : [
+            RewardItem(
+                id: UUID(uuidString: "00000000-0000-0000-0000-0000000000f6")!,
+                title: "Noite de pizza",
+                details: "Escolher juntos o sabor e o filme",
+                source: .custom,
+                createdAt: Date(timeIntervalSince1970: 1_760_000_000)
+            ),
+        ]
+    }
+
+    func rewardItems(accessToken: String) async throws -> RewardCatalog {
+        if scenario == .rewardManagementMember {
+            throw RewardItemError.insufficientPermissions
+        }
+        return RewardCatalog(predefined: Self.predefinedItems, custom: custom)
+    }
+
+    func addRewardItem(_ command: AddRewardItemCommand, accessToken: String) async throws -> RewardItem {
+        if custom.contains(where: { $0.title.caseInsensitiveCompare(command.title) == .orderedSame }) {
+            throw RewardItemError.titleAlreadyExists
+        }
+        let item = RewardItem(id: UUID(), title: command.title, details: command.details, source: .custom, createdAt: Date())
+        custom.append(item)
+        return item
     }
 }
 
