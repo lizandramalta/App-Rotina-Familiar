@@ -179,6 +179,46 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
       expect(row.rows[0].accepted_reward_accepted_at).not.toBeNull();
     });
 
+    it('CA-05 a lost response is recovered by querying detail and list, for Admin and Kids', async () => {
+      const family = await seedFamily();
+      const missionId = await seedCompletedMission(family);
+      const admin = actor(family, family.adminId, MemberRole.ADMINISTRATOR);
+      const kid = actor(family, family.kidId, MemberRole.KIDS);
+
+      await container.acceptMissionRewardUseCase.execute({
+        actor: admin,
+        missionId,
+        rewardItemId: PREDEFINED_REWARD_ITEM_ID,
+      });
+
+      const detail = await container.getMissionDetailUseCase.execute(admin, missionId);
+      expect(detail).toMatchObject({
+        isRedemptionAvailable: false,
+        acceptedReward: { rewardItemId: PREDEFINED_REWARD_ITEM_ID, source: 'predefined' },
+      });
+
+      const kidsDetail = await container.getMissionDetailUseCase.execute(kid, missionId);
+      expect(kidsDetail).not.toHaveProperty('isRedemptionAvailable');
+      expect(kidsDetail).toMatchObject({
+        acceptedReward: { rewardItemId: PREDEFINED_REWARD_ITEM_ID, source: 'predefined' },
+      });
+
+      const list = await container.listMissionsUseCase.execute(admin);
+      expect(list.completed).toEqual([
+        expect.objectContaining({
+          id: missionId,
+          isRedemptionAvailable: false,
+          acceptedReward: expect.objectContaining({ rewardItemId: PREDEFINED_REWARD_ITEM_ID }),
+        }),
+      ]);
+
+      const kidsList = await container.listMissionsUseCase.execute(kid);
+      expect(kidsList.completed[0]).not.toHaveProperty('isRedemptionAvailable');
+      expect(kidsList.completed[0]).toMatchObject({
+        acceptedReward: expect.objectContaining({ rewardItemId: PREDEFINED_REWARD_ITEM_ID }),
+      });
+    });
+
     it('CA-03 hides a mission of another family as not found, without mutation', async () => {
       const family = await seedFamily();
       const other = await seedFamily();

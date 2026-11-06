@@ -82,8 +82,7 @@ export interface MissionListItem {
   readonly completedTaskCount: number;
   readonly progressPercent: number;
   readonly isRedemptionAvailable: boolean;
-  // Aceite de recompensa é introduzido pela SPEC-017; nenhum registro existe ainda (CA-05).
-  readonly acceptedReward: null;
+  readonly acceptedReward: AcceptedRewardResponse | null;
 }
 
 /** Projeção Kids da lista: sem a situação de resgate (RF36/RN33). */
@@ -94,7 +93,7 @@ export interface KidsMissionListItem {
   readonly taskCount: number;
   readonly completedTaskCount: number;
   readonly progressPercent: number;
-  readonly acceptedReward: null;
+  readonly acceptedReward: AcceptedRewardResponse | null;
 }
 
 export interface MissionListResponse {
@@ -113,7 +112,7 @@ export interface MissionDetailResponse {
   readonly completedAt: string | null;
   readonly progressPercent: number;
   readonly isRedemptionAvailable: boolean;
-  readonly acceptedReward: null;
+  readonly acceptedReward: AcceptedRewardResponse | null;
   readonly participations: readonly MissionParticipantProjection[];
   readonly createdAt: string;
 }
@@ -127,7 +126,7 @@ export interface KidsMissionDetailResponse {
   readonly tasks: readonly MissionTaskProjection[];
   readonly completedAt: string | null;
   readonly progressPercent: number;
-  readonly acceptedReward: null;
+  readonly acceptedReward: AcceptedRewardResponse | null;
   readonly createdAt: string;
 }
 
@@ -210,9 +209,8 @@ function toMissionDetailResponse(
     tasks: mission.tasks,
     completedAt: mission.completedAt?.toISOString() ?? null,
     progressPercent: progressPercentOf(mission.tasks.length, completedTasksOf(mission.tasks)),
-    isRedemptionAvailable: mission.completedAt !== null,
-    // Aceite de recompensa é introduzido pela SPEC-017; nenhum registro existe ainda (CA-05).
-    acceptedReward: null,
+    isRedemptionAvailable: mission.completedAt !== null && mission.acceptedReward === null,
+    acceptedReward: toAcceptedRewardResponse(mission.acceptedReward),
     participations: participations.map((participant) => ({
       memberId: participant.memberId,
       displayName: participant.displayName,
@@ -230,7 +228,7 @@ function toKidsMissionDetailResponse(mission: MissionRecord): KidsMissionDetailR
     tasks: mission.tasks,
     completedAt: mission.completedAt?.toISOString() ?? null,
     progressPercent: progressPercentOf(mission.tasks.length, completedTasksOf(mission.tasks)),
-    acceptedReward: null,
+    acceptedReward: toAcceptedRewardResponse(mission.acceptedReward),
     createdAt: mission.createdAt.toISOString(),
   };
 }
@@ -454,10 +452,14 @@ function toListItem(
     taskCount: record.taskCount,
     completedTaskCount: record.completedTaskCount,
     progressPercent: progressPercentOf(record.taskCount, record.completedTaskCount),
-    // Aceite de recompensa é introduzido pela SPEC-017; nenhum registro existe ainda (CA-05).
-    acceptedReward: null,
+    acceptedReward: toAcceptedRewardResponse(record.acceptedReward),
   };
-  return isKids ? base : { ...base, isRedemptionAvailable: record.completedAt !== null };
+  return isKids
+    ? base
+    : {
+        ...base,
+        isRedemptionAvailable: record.completedAt !== null && record.acceptedReward === null,
+      };
 }
 
 function encodeCursor(cursor: PageCursor): string {

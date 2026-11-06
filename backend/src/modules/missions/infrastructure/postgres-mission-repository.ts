@@ -20,7 +20,15 @@ import type {
   PageCursor,
 } from '../application/mission-repository-port.js';
 
-interface MissionRow {
+interface AcceptedRewardRow {
+  accepted_reward_item_id: string | null;
+  accepted_reward_title: string | null;
+  accepted_reward_details: string | null;
+  accepted_reward_source: 'predefined' | 'custom' | null;
+  accepted_reward_accepted_at: Date | null;
+}
+
+interface MissionRow extends AcceptedRewardRow {
   id: string;
   family_id: string;
   title: string;
@@ -29,14 +37,9 @@ interface MissionRow {
   created_at: Date;
   task_ids: string[] | null;
   tasks: MissionTaskRecord[] | null;
-  accepted_reward_item_id: string | null;
-  accepted_reward_title: string | null;
-  accepted_reward_details: string | null;
-  accepted_reward_source: 'predefined' | 'custom' | null;
-  accepted_reward_accepted_at: Date | null;
 }
 
-function acceptedRewardOf(row: MissionRow): AcceptedRewardRecord | null {
+function acceptedRewardOf(row: AcceptedRewardRow): AcceptedRewardRecord | null {
   return row.accepted_reward_item_id === null
     ? null
     : {
@@ -53,7 +56,7 @@ interface ParticipationRow {
   display_name: string;
 }
 
-interface MissionSummaryRow {
+interface MissionSummaryRow extends AcceptedRewardRow {
   id: string;
   title: string;
   completed_at: Date | null;
@@ -338,6 +341,8 @@ export class PostgresMissionRepository implements MissionRepositoryPort, Mission
   ): Promise<readonly MissionSummaryRecord[]> {
     const result = await asPostgresClient(tx).query<MissionSummaryRow>(
       `select m.id, m.title, m.completed_at, m.created_at,
+              m.accepted_reward_item_id, m.accepted_reward_title, m.accepted_reward_details,
+              m.accepted_reward_source, m.accepted_reward_accepted_at,
               count(t.id)::text as task_count,
               (count(t.id) filter (where t.status = 'completed'))::text as completed_task_count
          from app.missions m
@@ -355,6 +360,7 @@ export class PostgresMissionRepository implements MissionRepositoryPort, Mission
       createdAt: row.created_at,
       taskCount: Number(row.task_count),
       completedTaskCount: Number(row.completed_task_count),
+      acceptedReward: acceptedRewardOf(row),
     }));
   }
 

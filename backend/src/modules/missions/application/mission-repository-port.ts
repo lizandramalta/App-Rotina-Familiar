@@ -37,6 +37,7 @@ export interface MissionSummaryRecord {
   readonly createdAt: Date;
   readonly taskCount: number;
   readonly completedTaskCount: number;
+  readonly acceptedReward: AcceptedRewardRecord | null;
 }
 
 export interface MissionParticipantRecord {
