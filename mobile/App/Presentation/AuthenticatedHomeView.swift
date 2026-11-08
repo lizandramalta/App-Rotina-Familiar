@@ -29,7 +29,7 @@ struct AuthenticatedHomeView: View {
         if scenario == "family-settings" || scenario == "family-overview" || scenario == "family-overview-incentives" || scenario == "family-overview-own-most-tasks" || scenario == "family-overview-member" || scenario == "family-tasks" || scenario == "member-invite" || scenario == "member-invite-uncertain" || scenario == "kids-review-queue" || scenario == "kids-review-queue-empty" || scenario == "kids-review-queue-failure" {
             return 1
         }
-        if scenario == "mission-management" || scenario == "mission-management-member"
+        if scenario == "mission-management" || scenario == "mission-management-member" || scenario == "mission-tracking-refresh-failure"
             || scenario == "reward-management" || scenario == "reward-management-empty" || scenario == "reward-management-member" {
             return 2
         }
@@ -155,7 +155,9 @@ struct AuthenticatedHomeView: View {
 
     private var profileButton: some View {
         NavigationLink {
+            // Pushed here (root of the adult Profile tab only), so the tab bar hides.
             ProfileView(viewModel: profileViewModel)
+                .toolbar(.hidden, for: .tabBar)
         } label: {
             Image(systemName: "person.crop.circle")
                 .font(.title2)
@@ -195,11 +197,14 @@ struct AuthenticatedHomeView: View {
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("access.destination.family")
             .navigationDestination(for: FamilyNavigationRoute.self) { route in
+                // Tab bar only on each tab's root route; every pushed screen hides it.
                 familyTaskDestination(route)
+                    .toolbar(.hidden, for: .tabBar)
             }
             .navigationDestination(isPresented: $showsFamilySettingsScenario) {
                 if let makeFamilySettingsViewModel {
                     FamilySettingsView(viewModel: makeFamilySettingsViewModel())
+                        .toolbar(.hidden, for: .tabBar)
                 }
             }
         }

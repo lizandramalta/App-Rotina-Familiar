@@ -35,7 +35,9 @@ struct MyTasksTabView: View {
             )
             .accessibilityIdentifier("access.destination.adult")
             .navigationDestination(for: FamilyTaskRoute.self) { route in
+                // Tab bar only on each tab's root route; every pushed screen hides it.
                 destination(for: route)
+                    .toolbar(.hidden, for: .tabBar)
             }
         }
         #if DEBUG

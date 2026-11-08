@@ -27,7 +27,10 @@ struct BadgeDetailView: View {
         .background(Color(uiColor: .systemGroupedBackground))
         .navigationBarTitleDisplayMode(.inline)
         .task { await viewModel.load() }
-        .navigationDestination(item: $viewModel.selectedMission) { mission in missionPlaceholder(mission) }
+        .navigationDestination(item: $viewModel.selectedMission) { mission in
+            missionPlaceholder(mission)
+                .toolbar(.hidden, for: .tabBar)
+        }
     }
 
     private var header: some View {

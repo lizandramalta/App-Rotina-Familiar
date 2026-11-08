@@ -78,7 +78,10 @@ struct FamilyTasksDesignedView: View {
             }
         }
         .navigationDestination(isPresented: $showsWeekSelector) {
-            if let report = viewModel.makeReportView() { report }
+            if let report = viewModel.makeReportView() {
+                report
+                    .toolbar(.hidden, for: .tabBar)
+            }
         }
         .sheet(item: $reportFile) { FamilyReportShareSheet(url: $0.url) }
         .alert("family.report.failure_title", isPresented: $reportFailed) {

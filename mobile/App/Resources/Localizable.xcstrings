@@ -3467,6 +3467,120 @@
     "Membros" : {
 
     },
+    "mission.banner.completed" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Missão concluída!"
+          }
+        }
+      }
+    },
+    "mission.banner.remaining" : {
+      "localizations" : {
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld tarefa para abrir o baú"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld tarefas para abrir o baú"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "mission.load.error" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível atualizar esta missão. Tente novamente."
+          }
+        }
+      }
+    },
+    "mission.progress" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld de %2$lld tarefas concluídas (%3$lld%%)"
+          }
+        }
+      }
+    },
+    "mission.progress.short" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld / %2$lld"
+          }
+        }
+      }
+    },
+    "mission.reward.accepted" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recompensa escolhida: %@"
+          }
+        }
+      }
+    },
+    "mission.reward.available" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recompensa pronta para resgate"
+          }
+        }
+      }
+    },
+    "mission.reward.none" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhuma recompensa foi escolhida ainda."
+          }
+        }
+      }
+    },
+    "mission.tasks_remaining" : {
+      "localizations" : {
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld tarefa falta"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld tarefas faltam"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "missions.common.error_action_not_allowed" : {
       "localizations" : {
         "pt-BR" : {
@@ -3547,12 +3661,32 @@
         }
       }
     },
+    "missions.detail.loading" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carregando missão"
+          }
+        }
+      }
+    },
     "missions.detail.note_title" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Observação"
+          }
+        }
+      }
+    },
+    "missions.detail.participations_title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quem já ajudou"
           }
         }
       }
@@ -3707,6 +3841,90 @@
         }
       }
     },
+    "missions.hero.kids_summary" : {
+      "localizations" : {
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Vocês já concluíram %lld missão juntos!"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Vocês já concluíram %lld missões juntos!"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "missions.hero.summary" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@inProgress@ · %#@completed@"
+          },
+          "substitutions" : {
+            "completed" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg concluída"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg concluídas"
+                    }
+                  }
+                }
+              }
+            },
+            "inProgress" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg em andamento"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg em andamento"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "missions.hero.title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Missões da família"
+          }
+        }
+      }
+    },
     "missions.list.create_label" : {
       "localizations" : {
         "pt-BR" : {
@@ -3742,7 +3960,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nenhuma missão ainda"
+            "value" : "Nenhuma missão por aqui"
           }
         }
       }
@@ -3757,12 +3975,52 @@
         }
       }
     },
+    "missions.list.loading" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carregando missões"
+          }
+        }
+      }
+    },
     "missions.list.title" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Missões e conquistas"
+          }
+        }
+      }
+    },
+    "missions.refresh_error.dismiss" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fechar aviso"
+          }
+        }
+      }
+    },
+    "missions.section.completed" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Concluídas"
+          }
+        }
+      }
+    },
+    "missions.section.in_progress" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em andamento"
           }
         }
       }
@@ -3909,6 +4167,26 @@
     },
     "OK" : {
 
+    },
+    "missions.trail.own_task" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SUA TAREFA"
+          }
+        }
+      }
+    },
+    "missions.trail.own_task_kids" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SUA VEZ!"
+          }
+        }
+      }
     },
     "onboarding.discard.confirm" : {
       "localizations" : {

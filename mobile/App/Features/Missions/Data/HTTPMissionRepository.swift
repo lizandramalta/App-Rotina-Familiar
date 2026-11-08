@@ -14,17 +14,53 @@ nonisolated private struct MissionDTO: Decodable {
     let createdAt: Date
 }
 
+nonisolated private struct AcceptedRewardDTO: Decodable {
+    let rewardItemId: UUID
+    let title: String
+}
+
+/// SPEC-016 §5.1. `isRedemptionAvailable` is absent from the Kids projection (CA-03).
 nonisolated private struct MissionSummaryDTO: Decodable {
     let id: UUID
     let title: String
     let status: MissionStatus
     let taskCount: Int
     let completedTaskCount: Int
+    let progressPercent: Double
+    let isRedemptionAvailable: Bool?
+    let acceptedReward: AcceptedRewardDTO?
 }
 
 nonisolated private struct MissionListResponseDTO: Decodable {
-    let items: [MissionSummaryDTO]
-    let nextCursor: String?
+    let inProgress: [MissionSummaryDTO]
+    let completed: [MissionSummaryDTO]
+}
+
+nonisolated private struct MissionLinkedTaskDTO: Decodable {
+    let id: UUID
+    let title: String
+    let status: TaskStatus
+}
+
+nonisolated private struct MissionParticipationDTO: Decodable {
+    let memberId: UUID
+    let displayName: String
+}
+
+/// `GET /v1/missions/{missionId}` (SPEC-016 §5.1). Kids omit `isRedemptionAvailable` and
+/// `participations` (CA-03); both decode as `nil`, never as an empty/false substitute.
+nonisolated private struct MissionDetailDTO: Decodable {
+    let id: UUID
+    let title: String
+    let note: String?
+    let status: MissionStatus
+    let tasks: [MissionLinkedTaskDTO]
+    let completedAt: Date?
+    let progressPercent: Double
+    let isRedemptionAvailable: Bool?
+    let acceptedReward: AcceptedRewardDTO?
+    let participations: [MissionParticipationDTO]?
+    let createdAt: Date
 }
 
 nonisolated private struct MissionTaskOptionDTO: Decodable {
@@ -88,19 +124,18 @@ nonisolated struct HTTPMissionRepository: MissionRepository {
         }
     }
 
-    func mission(id: UUID, accessToken: String) async throws -> Mission {
+    func mission(id: UUID, accessToken: String) async throws -> MissionDetail {
         let data = try await send(path: "missions/\(id.uuidString.lowercased())", method: "GET", accessToken: accessToken)
-        return Self.toMission(try decode(MissionDTO.self, from: data))
+        return Self.toMissionDetail(try decode(MissionDetailDTO.self, from: data))
     }
 
-    func missions(cursor: String?, accessToken: String) async throws -> MissionPage {
-        var items: [URLQueryItem] = []
-        if let cursor {
-            items.append(URLQueryItem(name: "cursor", value: cursor))
-        }
-        let data = try await send(path: "missions", method: "GET", queryItems: items, accessToken: accessToken)
+    func missions(accessToken: String) async throws -> MissionCollections {
+        let data = try await send(path: "missions", method: "GET", accessToken: accessToken)
         let response = try decode(MissionListResponseDTO.self, from: data)
-        return MissionPage(items: response.items.map(Self.toMissionSummary), nextCursor: response.nextCursor)
+        return MissionCollections(
+            inProgress: response.inProgress.map(Self.toMissionSummary),
+            completed: response.completed.map(Self.toMissionSummary)
+        )
     }
 
     /// A network/server failure here is left as `.network`/`.unavailable`: unlike creation, the
@@ -149,8 +184,33 @@ nonisolated struct HTTPMissionRepository: MissionRepository {
             title: dto.title,
             status: dto.status,
             taskCount: dto.taskCount,
-            completedTaskCount: dto.completedTaskCount
+            completedTaskCount: dto.completedTaskCount,
+            progressPercent: dto.progressPercent,
+            isRedemptionAvailable: dto.isRedemptionAvailable,
+            acceptedReward: dto.acceptedReward.map(Self.toAcceptedReward)
         )
+    }
+
+    private static func toMissionDetail(_ dto: MissionDetailDTO) -> MissionDetail {
+        MissionDetail(
+            id: dto.id,
+            title: dto.title,
+            note: dto.note,
+            status: dto.status,
+            tasks: dto.tasks.map { MissionLinkedTask(id: $0.id, title: $0.title, status: $0.status) },
+            completedAt: dto.completedAt,
+            progressPercent: dto.progressPercent,
+            isRedemptionAvailable: dto.isRedemptionAvailable,
+            acceptedReward: dto.acceptedReward.map(Self.toAcceptedReward),
+            participations: dto.participations?.map {
+                MissionParticipation(memberID: $0.memberId, displayName: $0.displayName)
+            },
+            createdAt: dto.createdAt
+        )
+    }
+
+    private static func toAcceptedReward(_ dto: AcceptedRewardDTO) -> AcceptedMissionReward {
+        AcceptedMissionReward(rewardItemID: dto.rewardItemId, title: dto.title)
     }
 
     private static func toMissionTaskOption(_ dto: MissionTaskOptionDTO) throws -> MissionTaskOption {
