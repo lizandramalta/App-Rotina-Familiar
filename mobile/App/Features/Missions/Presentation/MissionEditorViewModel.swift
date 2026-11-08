@@ -115,7 +115,9 @@ final class MissionEditorViewModel {
             let mission = try await getMissionDetail.execute(missionID: missionID, accessToken: accessToken)
             // Only committed once both calls succeed, so a hydration failure never leaves the form
             // partially populated behind `loadFailed`'s full-screen error state.
-            let tasks = try await hydrateLinkedTasks.execute(taskIDs: mission.taskIDs, accessToken: accessToken)
+            // The detail projection only carries id/title/status per task (SPEC-016 §5.1); the
+            // picker still needs weight/date/assignees, so linked ids are hydrated as before.
+            let tasks = try await hydrateLinkedTasks.execute(taskIDs: mission.tasks.map(\.id), accessToken: accessToken)
             title = mission.title
             note = mission.note ?? ""
             currentStatus = mission.status

@@ -43,6 +43,8 @@ enum UITestScenario: String {
     case missionManagement = "mission-management"
     case missionManagementMember = "mission-management-member"
     case missionManagementKids = "mission-management-kids"
+    /// SPEC-016 CA-07: the first list load succeeds, every later one fails (non-blocking banner).
+    case missionTrackingRefreshFailure = "mission-tracking-refresh-failure"
     case rewardManagement = "reward-management"
     case rewardManagementEmpty = "reward-management-empty"
     case rewardManagementMember = "reward-management-member"
@@ -88,7 +90,7 @@ enum UITestScenario: String {
         }
         if self == .taskManagement || self == .familySettings
             || self == .taskCompletionConflict || self == .taskOptimisticDelayed || self == .taskOptimisticFailure
-            || self == .routineCreation || self == .missionManagement
+            || self == .routineCreation || self == .missionManagement || self == .missionTrackingRefreshFailure
             || self == .rewardManagement || self == .rewardManagementEmpty {
             sessionStore.apply(.session(Self.inviteSession(role: .administrator)))
             return
@@ -1098,6 +1100,8 @@ private actor UITestProfileRepository: ProfileRepository {
 private enum UITestMissionFixtures {
     static let inProgressMissionID = UUID(uuidString: "00000000-0000-0000-0000-0000000000e1")!
     static let completedMissionID = UUID(uuidString: "00000000-0000-0000-0000-0000000000e2")!
+    /// SPEC-016: completed mission whose reward was already accepted (CA-03).
+    static let rewardedMissionID = UUID(uuidString: "00000000-0000-0000-0000-0000000000e3")!
 }
 
 /// Deterministic queue for TEL-015 (SPEC-013): three pending signals, oldest first, an empty queue or a failing load.
@@ -1146,13 +1150,21 @@ private struct UITestKidsSignalRepository: KidsSignalRepository {
     }
 }
 
-/// SPEC-014 Fase 2 UI fixture: two missions pre-linked to tasks already seeded by
+/// SPEC-014 Fase 2 / SPEC-016 UI fixture: three missions (in progress, completed awaiting reward,
+/// completed with accepted reward) pre-linked to tasks already seeded by
 /// `UITestTaskRepository`, so TEL-021/022's by-id hydration resolves end-to-end without a backend.
 /// The in-progress mission links one task assigned to the adult fixture member and one assigned to
 /// the Kids fixture member, so CA-19's own-task tap-through (and its absence for "de outra pessoa") is testable.
 private actor UITestMissionRepository: MissionRepository {
     private let scenario: UITestScenario
     private var missions: [UUID: Mission]
+    private var acceptedRewards: [UUID: AcceptedMissionReward] = [
+        UITestMissionFixtures.rewardedMissionID: AcceptedMissionReward(
+            rewardItemID: UUID(uuidString: "00000000-0000-0000-0000-0000000000f6")!,
+            title: "Noite de pizza"
+        ),
+    ]
+    private var listCallCount = 0
 
     init(scenario: UITestScenario) {
         self.scenario = scenario
@@ -1180,6 +1192,17 @@ private actor UITestMissionRepository: MissionRepository {
                 isRedemptionAvailable: omitsRedemption ? nil : true,
                 createdAt: Date(timeIntervalSince1970: 1_760_050_000)
             ),
+            UITestMissionFixtures.rewardedMissionID: Mission(
+                id: UITestMissionFixtures.rewardedMissionID,
+                familyID: UITestTaskFixtures.familyID,
+                title: "Quarto arrumado",
+                note: nil,
+                status: .completed,
+                taskIDs: [UITestTaskFixtures.completedTaskID],
+                completedAt: Date(timeIntervalSince1970: 1_760_200_000),
+                isRedemptionAvailable: omitsRedemption ? nil : false,
+                createdAt: Date(timeIntervalSince1970: 1_760_060_000)
+            ),
         ]
     }
 
@@ -1199,26 +1222,75 @@ private actor UITestMissionRepository: MissionRepository {
         return mission
     }
 
-    func mission(id: UUID, accessToken: String) async throws -> Mission {
+    func mission(id: UUID, accessToken: String) async throws -> MissionDetail {
         guard let mission = missions[id] else {
             throw MissionError.notFound
         }
-        return mission
+        let isKids = scenario == .missionManagementKids
+        let tasks = mission.taskIDs.map { taskID in
+            let fixture = Self.linkedTasks[taskID]
+            return MissionLinkedTask(id: taskID, title: fixture?.title ?? "Nova tarefa", status: fixture?.status ?? .pending)
+        }
+        let reward = acceptedRewards[id]
+        return MissionDetail(
+            id: mission.id,
+            title: mission.title,
+            note: mission.note,
+            status: mission.status,
+            tasks: tasks,
+            completedAt: mission.completedAt,
+            progressPercent: Self.progressPercent(tasks),
+            isRedemptionAvailable: isKids ? nil : (mission.status == .completed && reward == nil),
+            acceptedReward: reward,
+            // Kids projection omits participations (SPEC-016 CA-03).
+            participations: isKids ? nil : (mission.status == .completed ? Self.participations : []),
+            createdAt: mission.createdAt
+        )
     }
 
-    func missions(cursor: String?, accessToken: String) async throws -> MissionPage {
-        let items = missions.values
+    func missions(accessToken: String) async throws -> MissionCollections {
+        listCallCount += 1
+        if scenario == .missionTrackingRefreshFailure, listCallCount > 1 {
+            throw MissionError.network
+        }
+        let isKids = scenario == .missionManagementKids
+        let summaries = missions.values
             .sorted { $0.createdAt < $1.createdAt }
-            .map {
-                MissionSummary(
-                    id: $0.id,
-                    title: $0.title,
-                    status: $0.status,
-                    taskCount: $0.taskIDs.count,
-                    completedTaskCount: $0.status == .completed ? $0.taskIDs.count : 0
+            .map { mission -> MissionSummary in
+                let statuses = mission.taskIDs.map { Self.linkedTasks[$0]?.status ?? .pending }
+                let completedCount = statuses.filter { $0 == .completed }.count
+                let reward = acceptedRewards[mission.id]
+                return MissionSummary(
+                    id: mission.id,
+                    title: mission.title,
+                    status: mission.status,
+                    taskCount: statuses.count,
+                    completedTaskCount: completedCount,
+                    progressPercent: statuses.isEmpty ? 0 : Double(completedCount) / Double(statuses.count) * 100,
+                    isRedemptionAvailable: isKids ? nil : (mission.status == .completed && reward == nil),
+                    acceptedReward: reward
                 )
             }
-        return MissionPage(items: items, nextCursor: nil)
+        return MissionCollections(
+            inProgress: summaries.filter { $0.status == .inProgress },
+            completed: summaries.filter { $0.status == .completed }
+        )
+    }
+
+    private static let linkedTasks: [UUID: (title: String, status: TaskStatus)] = [
+        UITestTaskFixtures.pendingTaskID: ("Arrumar os brinquedos", .pending),
+        UITestTaskFixtures.completedTaskID: ("Lavar a louça", .completed),
+        UITestTaskFixtures.awaitingConfirmationTaskID: ("Guardar a roupa", .awaitingConfirmation),
+    ]
+
+    private static let participations: [MissionParticipation] = [
+        MissionParticipation(memberID: UITestTaskFixtures.memberID, displayName: "Ana Silva"),
+        MissionParticipation(memberID: UITestTaskFixtures.kidMemberID, displayName: "Rafa Silva"),
+    ]
+
+    private static func progressPercent(_ tasks: [MissionLinkedTask]) -> Double {
+        guard !tasks.isEmpty else { return 0 }
+        return Double(tasks.filter { $0.status == .completed }.count) / Double(tasks.count) * 100
     }
 
     func updateMission(_ command: UpdateMissionCommand, accessToken: String) async throws -> Mission {

@@ -29,7 +29,16 @@ struct MissionsTabView: View {
             )
             .accessibilityIdentifier("access.destination.missions")
             .navigationDestination(for: MissionRoute.self) { route in
+                // Tab bar only on each tab's root route; every pushed screen hides it.
                 destination(for: route)
+                    .toolbar(.hidden, for: .tabBar)
+            }
+        }
+        // MA-15 / UX-016 §4: returning to TEL-020 reloads the canonical list, so a card reflects
+        // whatever TEL-021/022 confirmed (including saves, which pop back to the root too).
+        .onChange(of: path) { _, newPath in
+            if newPath.isEmpty {
+                listRevision += 1
             }
         }
         #if DEBUG
@@ -50,7 +59,7 @@ struct MissionsTabView: View {
                 routineRepository: routineRepository,
                 familyRepository: familyRepository,
                 accessToken: accessToken,
-                onSaved: { path.removeAll(); listRevision += 1 }
+                onSaved: { path.removeAll() }
             )
         case let .detail(missionID):
             MissionDetailView(

@@ -59,13 +59,67 @@ struct HTTPMissionRepositoryTests {
         }
     }
 
-    @Test("CA-19: isRedemptionAvailable absent from the Kids projection decodes to nil, not a thrown error")
-    func decodesMissingIsRedemptionAvailableAsNil() async throws {
-        let stub = MissionStubHTTP.make(status: 200, json: missionJSON(includeRedemption: false))
+    /// Shape of `GET /v1/missions/{missionId}` as served by the backend (SPEC-016 §5.1).
+    private func detailJSON(kids: Bool, accepted: Bool) -> String {
+        let reward = accepted
+            ? #"{"rewardItemId":"00000000-0000-0000-0000-0000000000f6","title":"Noite de pizza","details":null,"source":"custom","acceptedAt":"2026-10-08T10:00:00.000Z"}"#
+            : "null"
+        let adultOnly = kids ? "" : #""familyId":"\#(familyID)","isRedemptionAvailable":\#(!accepted),"participations":[{"memberId":"00000000-0000-0000-0000-0000000000a1","displayName":"Ana Silva"}],"#
+        return """
+        {"id":"\(missionID)",\(adultOnly)"title":"Semana organizada","note":null,"status":"completed",
+        "tasks":[{"id":"\(taskID)","title":"Lavar a louça","status":"completed"},{"id":"00000000-0000-0000-0000-0000000000b3","title":"Guardar a roupa","status":"awaitingConfirmation"}],
+        "completedAt":"2026-10-08T09:00:00.000Z","progressPercent":50,"acceptedReward":\(reward),"createdAt":"2026-10-07T15:00:00Z"}
+        """
+    }
 
-        let mission = try await stub.repository.mission(id: UUID(uuidString: missionID)!, accessToken: "access-1")
+    @Test("CA-01/CA-03: GET /v1/missions/:id decodes the adult projection with tasks, reward and participations")
+    func decodesAdultDetailProjection() async throws {
+        let stub = MissionStubHTTP.make(status: 200, json: detailJSON(kids: false, accepted: true))
 
-        #expect(mission.isRedemptionAvailable == nil)
+        let detail = try await stub.repository.mission(id: UUID(uuidString: missionID)!, accessToken: "access-1")
+
+        #expect(detail.tasks.map(\.status) == [.completed, .awaitingConfirmation])
+        #expect(detail.completedTaskCount == 1)
+        #expect(detail.progressPercent == 50)
+        #expect(detail.acceptedReward?.title == "Noite de pizza")
+        #expect(detail.isRedemptionAvailable == false)
+        #expect(detail.participations?.map(\.displayName) == ["Ana Silva"])
+        let request = try #require(stub.requests().first)
+        #expect(request.method == "GET")
+        #expect(request.url.path == "/v1/missions/\(missionID)")
+    }
+
+    @Test("CA-03: the Kids projection omits isRedemptionAvailable and participations — both decode as nil")
+    func decodesKidsDetailProjection() async throws {
+        let stub = MissionStubHTTP.make(status: 200, json: detailJSON(kids: true, accepted: true))
+
+        let detail = try await stub.repository.mission(id: UUID(uuidString: missionID)!, accessToken: "access-1")
+
+        #expect(detail.isRedemptionAvailable == nil)
+        #expect(detail.participations == nil)
+        #expect(detail.acceptedReward?.title == "Noite de pizza")
+    }
+
+    @Test("CA-05: a completed mission without acceptance decodes acceptedReward as nil")
+    func decodesDetailWithoutAcceptance() async throws {
+        let stub = MissionStubHTTP.make(status: 200, json: detailJSON(kids: false, accepted: false))
+
+        let detail = try await stub.repository.mission(id: UUID(uuidString: missionID)!, accessToken: "access-1")
+
+        #expect(detail.acceptedReward == nil)
+        #expect(detail.isRedemptionAvailable == true)
+    }
+
+    @Test("CA-04/CA-07: detail 404 maps to notFound and 503 to unavailable")
+    func detailErrorMapping() async {
+        await #expect(throws: MissionError.notFound) {
+            _ = try await MissionStubHTTP.make(status: 404, json: #"{"code":"RESOURCE_NOT_FOUND"}"#)
+                .repository.mission(id: UUID(uuidString: missionID)!, accessToken: "access-1")
+        }
+        await #expect(throws: MissionError.unavailable) {
+            _ = try await MissionStubHTTP.make(status: 503, json: #"{"code":"DEPENDENCY_UNAVAILABLE"}"#)
+                .repository.mission(id: UUID(uuidString: missionID)!, accessToken: "access-1")
+        }
     }
 
     @Test("PATCH /v1/missions/:id always sends title, note and taskIds — note explicitly null clears it")
@@ -90,19 +144,36 @@ struct HTTPMissionRepositoryTests {
         #expect(sentTaskIDs == [UUID(uuidString: taskID)!])
     }
 
-    @Test("GET /v1/missions decodes the minimal list projection")
-    func listMissionsDecodesSummaries() async throws {
+    @Test("CA-01: GET /v1/missions decodes the inProgress/completed collections with canonical progress")
+    func listMissionsDecodesCollections() async throws {
         let json = """
-        {"items":[{"id":"\(missionID)","title":"Casa pronta para o fim de semana","status":"inProgress","taskCount":2,"completedTaskCount":1}],"nextCursor":null}
+        {"inProgress":[{"id":"\(missionID)","title":"Casa pronta para o fim de semana","status":"inProgress","taskCount":3,"completedTaskCount":1,"progressPercent":33.333333333333336,"isRedemptionAvailable":false,"acceptedReward":null}],
+        "completed":[{"id":"00000000-0000-0000-0000-0000000000e3","title":"Quarto arrumado","status":"completed","taskCount":1,"completedTaskCount":1,"progressPercent":100,"isRedemptionAvailable":false,
+        "acceptedReward":{"rewardItemId":"00000000-0000-0000-0000-0000000000f6","title":"Noite de pizza","details":null,"source":"custom","acceptedAt":"2026-10-08T10:00:00.000Z"}}]}
         """
         let stub = MissionStubHTTP.make(status: 200, json: json)
 
-        let page = try await stub.repository.missions(cursor: nil, accessToken: "access-1")
+        let collections = try await stub.repository.missions(accessToken: "access-1")
 
-        #expect(page.items.count == 1)
-        #expect(page.items.first?.taskCount == 2)
-        #expect(page.items.first?.completedTaskCount == 1)
-        #expect(page.nextCursor == nil)
+        #expect(collections.inProgress.first?.completedTaskCount == 1)
+        #expect(collections.inProgress.first?.taskCount == 3)
+        #expect(collections.inProgress.first?.acceptedReward == nil)
+        #expect(collections.completed.first?.acceptedReward?.title == "Noite de pizza")
+        let request = try #require(stub.requests().first)
+        #expect(request.url.path == "/v1/missions")
+        #expect(request.url.query == nil)
+    }
+
+    @Test("CA-03: the Kids list projection omits isRedemptionAvailable and still decodes")
+    func listMissionsDecodesKidsProjection() async throws {
+        let json = """
+        {"inProgress":[],"completed":[{"id":"\(missionID)","title":"Semana organizada","status":"completed","taskCount":1,"completedTaskCount":1,"progressPercent":100,"acceptedReward":null}]}
+        """
+        let stub = MissionStubHTTP.make(status: 200, json: json)
+
+        let collections = try await stub.repository.missions(accessToken: "access-1")
+
+        #expect(collections.completed.first?.isRedemptionAvailable == nil)
     }
 
     @Test("GET /v1/missions/task-options sends query and cursor as query items")

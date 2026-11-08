@@ -21,6 +21,7 @@ struct KidsMissionsTabView: View {
     let makeProfileViewModel: () -> ProfileViewModel
 
     @State private var path: [KidsMissionRoute] = []
+    @State private var listRevision = 0
     @State private var profileViewModel: ProfileViewModel
 
     init(
@@ -46,6 +47,7 @@ struct KidsMissionsTabView: View {
                 repository: missionRepository,
                 role: .kid,
                 accessToken: accessToken,
+                refreshRevision: listRevision,
                 onSelectMission: { path.append(.detail($0)) },
                 onCreateMission: {},
                 onOpenRewardItems: {}
@@ -57,7 +59,15 @@ struct KidsMissionsTabView: View {
                 }
             }
             .navigationDestination(for: KidsMissionRoute.self) { route in
+                // Tab bar only on each tab's root route; every pushed screen hides it.
                 destination(for: route)
+                    .toolbar(.hidden, for: .tabBar)
+            }
+        }
+        // MA-15 / UX-016 §4: returning to TEL-020 reloads the canonical list.
+        .onChange(of: path) { _, newPath in
+            if newPath.isEmpty {
+                listRevision += 1
             }
         }
     }
@@ -92,7 +102,9 @@ struct KidsMissionsTabView: View {
 
     private var profileButton: some View {
         NavigationLink {
+            // Pushed here (root of the adult Profile tab only), so the tab bar hides.
             ProfileView(viewModel: profileViewModel)
+                .toolbar(.hidden, for: .tabBar)
         } label: {
             Image(systemName: "person.crop.circle")
                 .font(.title2)

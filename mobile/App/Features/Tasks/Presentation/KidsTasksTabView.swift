@@ -68,13 +68,16 @@ struct KidsTasksTabView: View {
                     onDeleted: { path.removeAll(); listRevision += 1 },
                     onReopened: { listRevision += 1 }
                 )
+                .toolbar(.hidden, for: .tabBar)
             }
         }
     }
 
     private var profileButton: some View {
         NavigationLink {
+            // Pushed here (root of the adult Profile tab only), so the tab bar hides.
             ProfileView(viewModel: profileViewModel)
+                .toolbar(.hidden, for: .tabBar)
         } label: {
             Image(systemName: "person.crop.circle")
                 .font(.title2)
