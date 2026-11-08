@@ -1,9 +1,9 @@
-# Screen map — versão 1.23
+# Screen map — versão 1.24
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do mapa:** 1.23\
+**Versão do mapa:** 1.24\
 **Base funcional:** RN 1.26 / RF 1.25 / UC 1.25\
-**Data:** 2026-10-28\
+**Data:** 2026-11-08\
 **Situação:** referência inicial para design; organização de navegação proposta
 
 [Projeto](../../README.md) · [Índice e versões](../DOCUMENTACAO.md) · [Visão](../00-visao-do-produto.md) · [Regras](../01-regras-de-negocio.md) · [Requisitos](../02-requisitos.md) · [Casos de uso](../03-casos-de-uso.md) · [Diagrama de classes](../06-diagrama-de-classes.md)
@@ -65,7 +65,7 @@ flowchart TD
     T004 -.->|Após receber novo link de um Administrador| T003
 ```
 
-As duas abas Kids têm o mesmo nível: “Minhas tarefas” e “Missões e conquistas”. Missões é acessível diretamente no tab bar. Meu perfil fica no avatar/cabeçalho de ambas, sem terceira aba. As quatro telas dentro do agrupamento adulto têm o mesmo nível de navegação. As setas de acesso para TEL-010 indicam apenas a tela inicial após autenticação ou ingresso; não tornam as outras telas dependentes dela. Nos recortes seguintes, cada tela principal inicia seu próprio conjunto de subtelas.
+As duas abas Kids têm o mesmo nível: “Minhas tarefas” e “Missões e conquistas”. Missões é acessível diretamente no tab bar. Meu perfil fica no avatar/cabeçalho de ambas, sem terceira aba. As quatro telas dentro do agrupamento adulto têm o mesmo nível de navegação. As setas de acesso para TEL-010 indicam apenas a tela inicial após autenticação ou ingresso; não tornam as outras telas dependentes dela. Nos recortes seguintes, cada tela principal inicia seu próprio conjunto de subtelas. A barra de abas aparece somente nas telas principais de cada aba; telas abertas por push a partir delas a ocultam e retornam por Voltar.
 
 Com sessão válida, a entrada é dispensada e o sistema abre TEL-010 ou TEL-040 conforme o perfil atual. Para uma identidade Apple sem família, TEL-055 envia a foto opcional antes da criação, sem persistir perfil; a falha permite repetir ou seguir sem foto. TEL-002 reúne nome, fuso e zero ou mais membros preparados em rascunho. A confirmação cria família, Criador e membros iniciais em uma operação e abre a sessão. Havendo membros, TEL-056 oferece os convites explícitos, sem gerar nenhum automaticamente; sem membros, a criação segue diretamente a TEL-010. Voltar de TEL-056 a TEL-002 abre a família existente para edição: prosseguir sem mudanças não grava, e mudanças autorizadas são salvas sem nova criação. Novo membro após a criação usa a gestão normal; mudança posterior de fuso segue TEL-053/MOD-012. A renovação da sessão é transparente. TEL-004 orienta a contatar um Administrador fora do aplicativo; não envia pedidos nem cria um canal de comunicação. O novo link abre TEL-003 para o mesmo perfil. O Criador usa Apple para retornar à família existente.
 
@@ -341,6 +341,7 @@ Campos funcionais de data/fuso e seleção de foto estão definidos; o layout vi
 
 | Versão do mapa | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.24 | RN 1.26 / RF 1.25 / UC 1.25 | 2026-11-08 | Barra de abas somente nas telas principais; telas abertas por push a ocultam. Para UX-016 (UX-08). |
 | 1.23 | RN 1.26 / RF 1.25 / UC 1.25 | 2026-10-28 | TEL-032 compacta em Dia/Semana domingo–sábado, com Editar apenas para Kids em visão Admin; filtros TEL-050/TEL-011 distintos. |
 | 1.22 | RN 1.25 / RF 1.24 / UC 1.24 | 2026-10-28 | TEL-032 sem edição de nome; seleção modal de papel. TEL-057 corrige nome Kids; adultos usam Meu perfil. |
 | 1.21 | RN 1.24 / RF 1.23 / UC 1.23 | 2026-10-28 | TEL-032 alinhada à visão do dia aprovada; menu de gestão no cabeçalho e consulta de outros dias por TEL-011. |

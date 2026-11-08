@@ -1,8 +1,8 @@
-# Documentação do projeto — versão 1.39
+# Documentação do projeto — versão 1.40
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.39\
-**Data:** 2026-11-05\
+**Versão:** 1.40\
+**Data:** 2026-11-08\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Modelo de dados](05-modelo-de-dados.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -18,7 +18,7 @@
 | [Requisitos](02-requisitos.md) | 71 requisitos funcionais e 27 não funcionais, com vínculos às regras e aos casos de uso; versão 1.25. |
 | [Especificação dos casos de uso](03-casos-de-uso.md) | 19 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições; versão 1.25. |
 | [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) | Visão geral e cinco recortes UML, com fontes PlantUML e imagens SVG. |
-| [Screen map](design/screen-map.md) | Mapa 1.23: TEL-032 compacta em Dia/Semana domingo–sábado; nome Kids editável também no detalhe; base RN 1.26 / RF 1.25 / UC 1.25. |
+| [Screen map](design/screen-map.md) | Mapa 1.24: barra de abas somente nas telas principais; TEL-032 compacta em Dia/Semana domingo–sábado; base RN 1.26 / RF 1.25 / UC 1.25. |
 | [User flows](design/user-flows.md) | Fluxos 1.24: TEL-032 em Dia/Semana, gestão e nome Kids autorizado; base RN 1.26 / RF 1.25 / UC 1.25 e screen map 1.23. |
 | [Modelo de dados (DER)](05-modelo-de-dados.md) | Modelo 1.10: parabéns persistido e fila de push por dispositivo; base RN 1.23 / RF 1.22 / UC 1.22. |
 | [Diagrama de classes](06-diagrama-de-classes.md) | Modelo 1.9: rascunho de membros, resultado de criação, foto antecipada e item pessoal com estado efetivo/exibido; base RN 1.18 / RF 1.17 / UC 1.16. |
@@ -145,6 +145,7 @@ A fundação backend adota Node.js, TypeScript, Fastify e `pg`. Parte da API de 
 
 | Versão | Data | Alteração |
 | --- | --- | --- |
+| 1.40 | 2026-11-08 | SCRUM-86 / SPEC-016 Fase 2: UX-016 revisada com a anatomia gamificada (Figma 579-59); SPEC-016 registra os esclarecimentos E-02/E-03; mapa 1.24 com barra de abas somente nas telas principais; sem mudança da base funcional. |
 | 1.39 | 2026-11-05 | SCRUM-102 / SPEC-020 Fase 1: contratos 1.28, arquitetura backend 1.5 e decisões 1.7; sem mudança da base funcional. |
 | 1.38 | 2026-10-28 | TEL-032 retorna à variante compacta Dia/Semana domingo–sábado; Parabenizar fica na Família, edição de nome Kids é possível no detalhe para Admin, e folhas de filtros TEL-050/TEL-011 são distintas. RN/RF/UC, SPEC/UX-003/009, mapa 1.23, fluxos 1.24 e catálogo 1.13 alinhados. |
 | 1.37 | 2026-10-28 | UX-009 e convenções mobile 1.1 padronizam SF Symbols para ícones de interface; removem SVGs de ícones da Família e da entrada por convite. |
