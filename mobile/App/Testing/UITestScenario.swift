@@ -48,6 +48,9 @@ enum UITestScenario: String {
     case rewardManagement = "reward-management"
     case rewardManagementEmpty = "reward-management-empty"
     case rewardManagementMember = "reward-management-member"
+    case weeklyRecognition = "weekly-recognition"
+    case weeklyRecognitionKidsTie = "weekly-recognition-kids-tie"
+    case weeklyRecognitionFailure = "weekly-recognition-failure"
 
     static var current: UITestScenario? {
         ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"].flatMap(UITestScenario.init(rawValue:))
@@ -67,6 +70,8 @@ enum UITestScenario: String {
             missionRepository: UITestMissionRepository(scenario: self),
             rewardRepository: UITestRewardRepository(scenario: self),
             kidsSignalRepository: UITestKidsSignalRepository(scenario: self),
+            recognitionRepository: UITestRecognitionRepository(scenario: self),
+            highlightSharing: UITestHighlightSharing(isWhatsAppAvailable: self == .weeklyRecognition),
             credentialStore: UITestCredentialStore(),
             installationProofStore: UITestInstallationProof(),
             appleAuthenticator: UITestAppleAuthenticator()
@@ -132,7 +137,11 @@ enum UITestScenario: String {
             sessionStore.apply(.session(Self.inviteSession(role: .member)))
             return
         }
-        if self == .dailyTasksKids || self == .dailyTasksKidsApplause {
+        if self == .weeklyRecognition || self == .weeklyRecognitionFailure {
+            sessionStore.apply(.session(Self.inviteSession(role: .administrator, memberID: UITestTaskFixtures.memberID)))
+            return
+        }
+        if self == .dailyTasksKids || self == .dailyTasksKidsApplause || self == .weeklyRecognitionKidsTie {
             // Must match `UITestTaskFixtures.kidMemberID`, the assignee on the Kids-owned fixture
             // tasks, so SPEC-011's `canReopen` check (assignee == current member) finds them.
             sessionStore.apply(.session(AuthenticatedSession(
@@ -1412,3 +1421,66 @@ private final class UITestAppleAuthenticator: AppleAuthenticating {
     }
 }
 #endif
+
+
+/// SCRUM-103: one featured recognition whose cycle ended last Monday, so the entry card shows today.
+private struct UITestRecognitionRepository: RecognitionRepository {
+    let scenario: UITestScenario
+
+    func listOwn(accessToken: String) async throws -> [WeeklyRecognition] {
+        switch scenario {
+        case .weeklyRecognition, .weeklyRecognitionKidsTie, .weeklyRecognitionFailure:
+            return [Self.featured(isTie: scenario == .weeklyRecognitionKidsTie)]
+        default:
+            return []
+        }
+    }
+
+    func recognition(id: UUID, accessToken: String) async throws -> WeeklyRecognition {
+        if scenario == .weeklyRecognitionFailure { throw RecognitionError.network }
+        guard id == Self.recognitionID else { throw RecognitionError.notFound }
+        return Self.featured(isTie: scenario == .weeklyRecognitionKidsTie)
+    }
+
+    func recordOpening(id: UUID, accessToken: String) async throws -> WeeklyRecognition {
+        try await recognition(id: id, accessToken: accessToken)
+    }
+
+    static let recognitionID = UUID(uuidString: "00000000-0000-0000-0000-00000000c052")!
+
+    private static func featured(isTie: Bool) -> WeeklyRecognition {
+        var calendar = Calendar(identifier: .gregorian)
+        let timeZone = TimeZone(identifier: "America/Sao_Paulo") ?? .current
+        calendar.timeZone = timeZone
+        calendar.firstWeekday = 2
+        let weekStart = calendar.dateInterval(of: .weekOfYear, for: Date())?.start ?? Date()
+        let startsAt = calendar.date(byAdding: .day, value: -7, to: weekStart) ?? weekStart
+        return WeeklyRecognition(
+            id: recognitionID,
+            startsAt: startsAt,
+            endsAt: weekStart,
+            timeZoneID: timeZone.identifier,
+            isTransition: false,
+            points: 42,
+            completedTasks: 12,
+            isTie: isTie,
+            openedAt: nil
+        )
+    }
+}
+
+/// Records sharing actions instead of opening WhatsApp or touching the real pasteboard.
+@MainActor
+private final class UITestHighlightSharing: HighlightSharing {
+    let isWhatsAppAvailable: Bool
+
+    init(isWhatsAppAvailable: Bool) {
+        self.isWhatsAppAvailable = isWhatsAppAvailable
+    }
+
+    var canOpenWhatsApp: Bool { isWhatsAppAvailable }
+
+    func openWhatsApp(text: String) async -> Bool { isWhatsAppAvailable }
+
+    func copy(text: String) {}
+}

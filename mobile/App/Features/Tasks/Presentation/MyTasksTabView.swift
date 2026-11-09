@@ -9,12 +9,33 @@ struct MyTasksTabView: View {
     let role: MemberRole
     let currentMemberID: UUID
     let accessToken: String
+    let recognition: RecognitionFeature?
 
     @State private var path: [FamilyTaskRoute] = []
     @State private var listRevision = 0
     @State private var routineFeedback: Routine?
     @State private var isRefreshingRoutine = false
     @State private var routineRefreshFailed = false
+    @State private var recognitionEntry: WeeklyRecognitionEntryViewModel?
+
+    init(
+        taskRepository: any TaskRepository,
+        routineRepository: any RoutineRepository,
+        familyRepository: any FamilyRepository,
+        role: MemberRole,
+        currentMemberID: UUID,
+        accessToken: String,
+        recognition: RecognitionFeature? = nil
+    ) {
+        self.taskRepository = taskRepository
+        self.routineRepository = routineRepository
+        self.familyRepository = familyRepository
+        self.role = role
+        self.currentMemberID = currentMemberID
+        self.accessToken = accessToken
+        self.recognition = recognition
+        _recognitionEntry = State(initialValue: recognition?.makeEntryViewModel())
+    }
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -31,7 +52,9 @@ struct MyTasksTabView: View {
                 routineRefreshFailed: routineRefreshFailed,
                 onSelectTask: { path.append(.detail($0)) },
                 onCreateTask: { routineFeedback = nil; path.append(.create) },
-                onRefreshRoutine: refreshRoutine
+                onRefreshRoutine: refreshRoutine,
+                recognitionEntry: recognitionEntry,
+                onOpenRecognition: { path.append(.weeklyRecognition($0)) }
             )
             .accessibilityIdentifier("access.destination.adult")
             .navigationDestination(for: FamilyTaskRoute.self) { route in
@@ -39,6 +62,10 @@ struct MyTasksTabView: View {
                 destination(for: route)
                     .toolbar(.hidden, for: .tabBar)
             }
+        }
+        .onChange(of: recognition?.notificationRouter.pendingRecognitionID, initial: true) { _, pending in
+            guard pending != nil, let id = recognition?.notificationRouter.consume() else { return }
+            path = [.weeklyRecognition(id)]
         }
         #if DEBUG
         .task {
@@ -91,6 +118,12 @@ struct MyTasksTabView: View {
                 onSaved: { _ in if !path.isEmpty { path.removeLast() }; listRevision += 1 },
                 onRoutineSaved: { _ in }
             )
+        case let .weeklyRecognition(recognitionID):
+            if let recognition {
+                WeeklyRecognitionView(
+                    viewModel: recognition.makeViewModel(recognitionID: recognitionID, audience: .adult)
+                )
+            }
         }
     }
 

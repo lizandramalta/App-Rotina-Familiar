@@ -13,6 +13,8 @@ struct AuthenticatedHomeView: View {
     @State private var familyOverviewViewModel: FamilyOverviewViewModel
     @State private var familyTaskPath: [FamilyNavigationRoute] = []
     let kidsTasksTabView: KidsTasksTabView?
+    /// A tapped recognition notification brings "Minhas tarefas" forward; that stack opens TEL-052.
+    let recognitionRouter: RecognitionNotificationRouter?
     let missionsTab: MissionsTabView?
     let kidsMissionsTabView: KidsMissionsTabView?
     @State private var profileViewModel: ProfileViewModel
@@ -46,6 +48,7 @@ struct AuthenticatedHomeView: View {
         makeFamilyOverviewViewModel: () -> FamilyOverviewViewModel,
         makeFamilySettingsViewModel: (() -> FamilySettingsViewModel)? = nil,
         kidsTasksTabView: KidsTasksTabView?,
+        recognitionRouter: RecognitionNotificationRouter? = nil,
         missionsTab: MissionsTabView?,
         kidsMissionsTabView: KidsMissionsTabView?,
         makeProfileViewModel: () -> ProfileViewModel
@@ -54,6 +57,7 @@ struct AuthenticatedHomeView: View {
         self.myTasksTab = myTasksTab
         self.makeFamilySettingsViewModel = makeFamilySettingsViewModel
         self.kidsTasksTabView = kidsTasksTabView
+        self.recognitionRouter = recognitionRouter
         self.missionsTab = missionsTab
         self.kidsMissionsTabView = kidsMissionsTabView
         _familyOverviewViewModel = State(initialValue: makeFamilyOverviewViewModel())
@@ -151,6 +155,9 @@ struct AuthenticatedHomeView: View {
         }
         .tint(Color.primary)
         .id(role)
+        .onChange(of: recognitionRouter?.pendingRecognitionID, initial: true) { _, pending in
+            if pending != nil { selectedTab = 0 }
+        }
     }
 
     private var profileButton: some View {

@@ -163,6 +163,31 @@ final class AppSessionStore {
         try? await repository.revokeSession(accessToken: accessToken)
     }
 
+    /// Refreshes the access token of the active session. A revoked or expired session goes back to
+    /// TEL-001 for recovery; a transient failure keeps the current state and returns `nil`.
+    func refreshAccessToken() async -> String? {
+        guard case .authenticated = state else { return nil }
+        do {
+            guard let refreshToken = try credentialStore.refreshToken() else {
+                throw AccessError.sessionExpired
+            }
+            let installationProof = try installationProofProvider.installationProof()
+            let token = try await refreshCoordinator.refresh(
+                repository: repository,
+                refreshToken: refreshToken,
+                installationProof: installationProof
+            )
+            accessToken = token.accessToken
+            return token.accessToken
+        } catch AccessError.sessionExpired, AccessError.sessionRevoked {
+            clearCredentials()
+            state = .entry
+            return nil
+        } catch {
+            return nil
+        }
+    }
+
     private func clearCredentials() {
         accessToken = nil
         try? credentialStore.clear()

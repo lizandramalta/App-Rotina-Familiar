@@ -23,10 +23,14 @@ struct AppRootView: View {
             case .entry:
                 EntryView(viewModel: container.makeEntryViewModel(sessionStore: sessionStore))
             case let .authenticated(profile):
+                let recognition = container.makeRecognitionFeature(
+                    sessionStore: sessionStore,
+                    router: pushRegistration.recognitionRouter
+                )
                 AuthenticatedHomeView(
                     session: profile,
                     myTasksTab: sessionStore.accessToken.map {
-                        container.makeMyTasksTabView(session: profile, accessToken: $0)
+                        container.makeMyTasksTabView(session: profile, accessToken: $0, recognition: recognition)
                     },
                     makeFamilyOverviewViewModel: {
                         container.makeFamilyOverviewViewModel(session: profile, sessionStore: sessionStore)
@@ -38,11 +42,13 @@ struct AppRootView: View {
                         container.makeKidsTasksTabView(
                             session: profile,
                             accessToken: accessToken,
+                            recognition: recognition,
                             makeProfileViewModel: {
                                 container.makeProfileViewModel(session: profile, sessionStore: sessionStore)
                             }
                         )
                     },
+                    recognitionRouter: pushRegistration.recognitionRouter,
                     missionsTab: sessionStore.accessToken.map {
                         container.makeMissionsTabView(session: profile, accessToken: $0)
                     },

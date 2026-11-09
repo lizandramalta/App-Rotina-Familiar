@@ -7,6 +7,8 @@ nonisolated enum FamilyTaskRoute: Hashable {
     case detail(UUID)
     /// `scope` comes from MOD-003 when the task is a routine occurrence (UX-008 §4).
     case edit(UUID, scope: RoutineScope?)
+    /// TEL-052, from the entry card or a recognition notification (SPEC-020 · SCRUM-103).
+    case weeklyRecognition(UUID)
 }
 
 /// Routes in the Family tab share one path so task details return to the member or list that opened them.
