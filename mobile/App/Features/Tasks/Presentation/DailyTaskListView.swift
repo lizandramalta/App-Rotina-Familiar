@@ -9,12 +9,8 @@ struct DailyTaskListView: View {
     @State private var visibleWeekStart: Date
     private let currentMemberID: UUID
     let refreshRevision: Int
-    let routineFeedback: Routine?
-    let isRefreshingRoutine: Bool
-    let routineRefreshFailed: Bool
     let onSelectTask: (UUID) -> Void
     let onCreateTask: () -> Void
-    let onRefreshRoutine: () -> Void
     /// SCRUM-103: internal access to TEL-052, shown on today's list only (E-1).
     let recognitionEntry: WeeklyRecognitionEntryViewModel?
     let onOpenRecognition: (UUID) -> Void
@@ -32,14 +28,10 @@ struct DailyTaskListView: View {
         currentMemberID: UUID,
         repository: any TaskRepository,
         familyRepository: (any FamilyRepository)? = nil,
-        accessToken: String,
+        accessTokenProvider: @escaping AccessTokenProvider,
         refreshRevision: Int = 0,
-        routineFeedback: Routine? = nil,
-        isRefreshingRoutine: Bool = false,
-        routineRefreshFailed: Bool = false,
         onSelectTask: @escaping (UUID) -> Void,
         onCreateTask: @escaping () -> Void,
-        onRefreshRoutine: @escaping () -> Void = {},
         recognitionEntry: WeeklyRecognitionEntryViewModel? = nil,
         onOpenRecognition: @escaping (UUID) -> Void = { _ in }
     ) {
@@ -49,18 +41,14 @@ struct DailyTaskListView: View {
             currentMemberID: currentMemberID,
             repository: repository,
             familyRepository: familyRepository,
-            accessToken: accessToken
+            accessTokenProvider: accessTokenProvider
         )
         _viewModel = State(initialValue: model)
         _visibleWeekStart = State(initialValue: Self.startOfSundayWeek(containing: model.selectedDate))
         self.currentMemberID = currentMemberID
         self.refreshRevision = refreshRevision
-        self.routineFeedback = routineFeedback
-        self.isRefreshingRoutine = isRefreshingRoutine
-        self.routineRefreshFailed = routineRefreshFailed
         self.onSelectTask = onSelectTask
         self.onCreateTask = onCreateTask
-        self.onRefreshRoutine = onRefreshRoutine
         self.recognitionEntry = recognitionEntry
         self.onOpenRecognition = onOpenRecognition
     }
@@ -69,9 +57,6 @@ struct DailyTaskListView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
                 header
-                if let routineFeedback, viewModel.audience == .adult {
-                    routineStatus(routineFeedback)
-                }
                 carousel
                 if let featured = recognitionEntry?.featured, viewModel.isToday(viewModel.selectedDate) {
                     WeeklyRecognitionEntryCard(recognition: featured, onOpen: onOpenRecognition)
@@ -222,36 +207,6 @@ struct DailyTaskListView: View {
         .padding(16)
         .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 20))
         .accessibilityIdentifier("family.applause.received.\(applause.id.uuidString.lowercased())")
-    }
-
-    private func routineStatus(_ routine: Routine) -> some View {
-        let statusKey: LocalizedStringKey = routine.materializationState == .pending
-            ? "routines.materialization.preparing"
-            : "routines.materialization.complete"
-        return VStack(alignment: .leading, spacing: 8) {
-            Label(statusKey, systemImage: routine.materializationState == .pending ? "clock" : "checkmark.circle")
-            .accessibilityIdentifier("routines.list.status")
-            if routineRefreshFailed {
-                Text("routines.error_unavailable")
-                    .font(.footnote)
-            }
-            if routine.materializationState == .pending || routineRefreshFailed {
-                Button {
-                    onRefreshRoutine()
-                } label: {
-                    if isRefreshingRoutine {
-                        ProgressView()
-                    } else {
-                        Text("routines.materialization.refresh")
-                    }
-                }
-                .disabled(isRefreshingRoutine)
-                .accessibilityIdentifier("routines.list.refresh")
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
-        .background(.background.secondary, in: RoundedRectangle(cornerRadius: 16))
     }
 
     // MARK: Header

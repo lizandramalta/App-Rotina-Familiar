@@ -134,7 +134,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bem-vindo ao App Família"
+            "value" : "Bem-vindo ao Mutua"
           }
         }
       }
@@ -1635,7 +1635,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Convite para entrar na família no Rotina Familiar:\n\nLink: %@\nSenha: %@"
+            "value" : "Convite para entrar na família no Mutua:\n\nLink: %@\nSenha: %@"
           }
         }
       }
@@ -7435,6 +7435,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Você"
+          }
+        }
+      }
+    },
+    "tasks.saved.toast" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tudo certo!"
           }
         }
       }

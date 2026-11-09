@@ -155,7 +155,7 @@ const environmentSchema = z
     // Sign in with Apple (BA-04, SPEC-001). Em development/test as credenciais
     // reais são opcionais para não bloquear o boot local; em production a
     // validação é estrita (ver superRefine abaixo).
-    APPLE_CLIENT_ID: z.string().min(1).default('com.lizandramalta.familyroutine'),
+    APPLE_CLIENT_ID: z.string().min(1).default('com.lizandramalta.mutua'),
     APPLE_TEAM_ID: optionalEnv(appleIdentifierSchema),
     APPLE_KEY_ID: optionalEnv(appleIdentifierSchema),
     APPLE_PRIVATE_KEY: optionalEnv(

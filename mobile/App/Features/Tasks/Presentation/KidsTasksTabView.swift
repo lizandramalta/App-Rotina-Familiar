@@ -51,7 +51,7 @@ struct KidsTasksTabView: View {
                 currentMemberID: currentMemberID,
                 repository: taskRepository,
                 familyRepository: familyRepository,
-                accessToken: accessToken,
+                accessTokenProvider: { _ in accessToken },
                 refreshRevision: listRevision,
                 onSelectTask: { path.append(.detail($0)) },
                 onCreateTask: {},

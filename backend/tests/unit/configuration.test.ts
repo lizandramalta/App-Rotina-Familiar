@@ -90,7 +90,7 @@ describe('Sign in with Apple configuration', () => {
       DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/postgres',
     });
 
-    expect(config.APPLE_CLIENT_ID).toBe('com.lizandramalta.familyroutine');
+    expect(config.APPLE_CLIENT_ID).toBe('com.lizandramalta.mutua');
     expect(config.APPLE_ISSUER).toBe('https://appleid.apple.com');
     expect(config.APPLE_JWKS_URL).toBe('https://appleid.apple.com/auth/keys');
     expect(config.APPLE_TOKEN_URL).toBe('https://appleid.apple.com/auth/token');

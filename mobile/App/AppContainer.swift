@@ -144,6 +144,7 @@ final class AppContainer {
     func makeMyTasksTabView(
         session: ActiveFamilySession,
         accessToken: String,
+        sessionStore: AppSessionStore,
         recognition: RecognitionFeature? = nil
     ) -> MyTasksTabView {
         MyTasksTabView(
@@ -153,6 +154,7 @@ final class AppContainer {
             role: session.role,
             currentMemberID: session.memberID,
             accessToken: accessToken,
+            accessTokenProvider: Self.accessTokenProvider(sessionStore),
             recognition: recognition
         )
     }
@@ -174,10 +176,18 @@ final class AppContainer {
             accessTokenProvider: { [weak sessionStore] in
                 sessionStore?.accessToken
             },
+            validAccessToken: Self.accessTokenProvider(sessionStore),
             makeKidsReviewQueueViewModel: { [unowned self] in
                 self.makeKidsReviewQueueViewModel(sessionStore: sessionStore)
             }
         )
+    }
+
+    private static func accessTokenProvider(_ sessionStore: AppSessionStore) -> AccessTokenProvider {
+        { [weak sessionStore] forceRefresh in
+            guard let sessionStore else { throw AccessError.sessionExpired }
+            return forceRefresh ? try await sessionStore.forceRefreshToken() : try await sessionStore.validAccessToken()
+        }
     }
 
     func makeKidsReviewQueueViewModel(sessionStore: AppSessionStore) -> KidsReviewQueueViewModel {
