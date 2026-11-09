@@ -8,6 +8,8 @@ final class RewardItemsViewModel {
     private let getRewardItems: GetRewardItemsUseCase
     private let accessToken: String
     let role: MemberRole
+    /// `false` when TEL-023 is opened from TEL-024 to consult the catalog (UX-017 §5.2).
+    let allowsManagement: Bool
 
     private(set) var predefined: [RewardItem] = []
     private(set) var custom: [RewardItem] = []
@@ -19,16 +21,17 @@ final class RewardItemsViewModel {
 
     var isAddItemPresented = false
 
-    init(repository: any RewardRepository, role: MemberRole, accessToken: String) {
+    init(repository: any RewardRepository, role: MemberRole, accessToken: String, allowsManagement: Bool = true) {
         self.getRewardItems = GetRewardItemsUseCase(repository: repository)
         self.role = role
+        self.allowsManagement = allowsManagement
         self.accessToken = accessToken
     }
 
     /// RN41/42: only Administrador sees the catalog and the add action (CA-05 — Membro/Kids never
     /// reach this screen; the backend also rejects them with `403 INSUFFICIENT_PERMISSIONS`).
     var canManage: Bool {
-        role == .administrator
+        role == .administrator && allowsManagement
     }
 
     var isCustomEmpty: Bool {

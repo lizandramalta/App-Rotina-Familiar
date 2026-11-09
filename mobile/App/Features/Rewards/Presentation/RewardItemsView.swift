@@ -7,8 +7,13 @@ struct RewardItemsView: View {
     let repository: any RewardRepository
     let accessToken: String
 
-    init(repository: any RewardRepository, role: MemberRole, accessToken: String) {
-        _viewModel = State(initialValue: RewardItemsViewModel(repository: repository, role: role, accessToken: accessToken))
+    init(repository: any RewardRepository, role: MemberRole, accessToken: String, allowsManagement: Bool = true) {
+        _viewModel = State(initialValue: RewardItemsViewModel(
+            repository: repository,
+            role: role,
+            accessToken: accessToken,
+            allowsManagement: allowsManagement
+        ))
         self.repository = repository
         self.accessToken = accessToken
     }

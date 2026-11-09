@@ -32,6 +32,7 @@ struct AuthenticatedHomeView: View {
             return 1
         }
         if scenario == "mission-management" || scenario == "mission-management-member" || scenario == "mission-tracking-refresh-failure"
+            || scenario == "mission-reward" || scenario == "mission-reward-conflict"
             || scenario == "reward-management" || scenario == "reward-management-empty" || scenario == "reward-management-member" {
             return 2
         }

@@ -3559,6 +3559,16 @@
         }
       }
     },
+    "mission.reward.redeem" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resgatar recompensa"
+          }
+        }
+      }
+    },
     "mission.tasks_remaining" : {
       "localizations" : {
         "pt-BR" : {
@@ -3692,6 +3702,7 @@
       }
     },
     "missions.detail.tasks_section_title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -4165,9 +4176,6 @@
         }
       }
     },
-    "OK" : {
-
-    },
     "missions.trail.own_task" : {
       "localizations" : {
         "pt-BR" : {
@@ -4187,6 +4195,9 @@
           }
         }
       }
+    },
+    "OK" : {
+
     },
     "onboarding.discard.confirm" : {
       "localizations" : {
@@ -5401,6 +5412,769 @@
         }
       }
     },
+    "recognition.copied" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mensagem copiada"
+          }
+        }
+      }
+    },
+    "recognition.copy" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiar mensagem"
+          }
+        }
+      }
+    },
+    "recognition.entry.hint" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre seu destaque semanal."
+          }
+        }
+      }
+    },
+    "recognition.entry.subtitle" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque para ver e mandar para a família."
+          }
+        }
+      }
+    },
+    "recognition.entry.title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você é destaque da semana!"
+          }
+        }
+      }
+    },
+    "recognition.error" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível abrir seu destaque agora."
+          }
+        }
+      }
+    },
+    "recognition.first" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fiquei em primeiro em pontos nesta semana!"
+          }
+        }
+      }
+    },
+    "recognition.invite" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mande para sua família e sugira algo para vocês fazerem juntos."
+          }
+        }
+      }
+    },
+    "recognition.loading" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carregando seu destaque"
+          }
+        }
+      }
+    },
+    "recognition.message_hint" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edite o texto antes de compartilhar ou copiar."
+          }
+        }
+      }
+    },
+    "recognition.message_label" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mensagem para a família"
+          }
+        }
+      }
+    },
+    "recognition.message_placeholder" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escreva sua mensagem"
+          }
+        }
+      }
+    },
+    "recognition.message.first" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fiquei em primeiro em pontos nas tarefas desta semana! Que tal fazermos algo juntos para celebrar? Minha sugestão é: ____."
+          }
+        }
+      }
+    },
+    "recognition.message.tie" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fiquei entre os primeiros em pontos nas tarefas desta semana! Que tal fazermos algo juntos para celebrar? Minha sugestão é: ____."
+          }
+        }
+      }
+    },
+    "recognition.notification" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você é destaque da semana! Toque para ver e mandar para a família."
+          }
+        }
+      }
+    },
+    "recognition.period" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Semana de %1$@ a %2$@"
+          }
+        }
+      }
+    },
+    "recognition.points" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pontos"
+          }
+        }
+      }
+    },
+    "recognition.retry" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tentar novamente"
+          }
+        }
+      }
+    },
+    "recognition.share" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartilhar no WhatsApp"
+          }
+        }
+      }
+    },
+    "recognition.share_hint" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre o WhatsApp para você escolher quem recebe e confirmar o envio."
+          }
+        }
+      }
+    },
+    "recognition.summary_accessibility" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@. %2$@ %3$lld pontos e %4$lld tarefas realizadas."
+          }
+        }
+      }
+    },
+    "recognition.tasks" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tarefas realizadas"
+          }
+        }
+      }
+    },
+    "recognition.tie" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fiquei entre os primeiros em pontos nesta semana!"
+          }
+        }
+      }
+    },
+    "recognition.title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meu destaque semanal"
+          }
+        }
+      }
+    },
+    "recognition.whatsapp_unavailable" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não encontramos o WhatsApp neste aparelho. Copie a mensagem para enviar por outro app."
+          }
+        }
+      }
+    },
+    "reward.wheel.accept" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aceitar recompensa"
+          }
+        }
+      }
+    },
+    "reward.wheel.accepted_announcement" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recompensa confirmada: %@"
+          }
+        }
+      }
+    },
+    "reward.wheel.already_accepted" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta missão já teve uma recompensa escolhida."
+          }
+        }
+      }
+    },
+    "reward.wheel.already_accepted_title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recompensa já escolhida"
+          }
+        }
+      }
+    },
+    "reward.wheel.consult" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consultar itens"
+          }
+        }
+      }
+    },
+    "reward.wheel.draw" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sortear recompensa"
+          }
+        }
+      }
+    },
+    "reward.wheel.draw_again" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sortear novamente"
+          }
+        }
+      }
+    },
+    "reward.wheel.error" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível confirmar a recompensa. Atualize a missão antes de tentar de novo."
+          }
+        }
+      }
+    },
+    "reward.wheel.exit" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sair sem aceitar"
+          }
+        }
+      }
+    },
+    "reward.wheel.instruction" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O sorteio só vale depois que você aceitar."
+          }
+        }
+      }
+    },
+    "reward.wheel.load_error" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível carregar as recompensas."
+          }
+        }
+      }
+    },
+    "reward.wheel.mission_context" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Missão · %@"
+          }
+        }
+      }
+    },
+    "reward.wheel.pending" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta recompensa ainda não foi confirmada."
+          }
+        }
+      }
+    },
+    "reward.wheel.refresh_mission" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualizar missão"
+          }
+        }
+      }
+    },
+    "reward.wheel.submitting" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirmando recompensa…"
+          }
+        }
+      }
+    },
+    "reward.wheel.title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolher recompensa"
+          }
+        }
+      }
+    },
+    "reward.wheel.unavailable" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O resgate desta missão não está disponível agora."
+          }
+        }
+      }
+    },
+    "reward.wheel.unavailable_title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resgate indisponível"
+          }
+        }
+      }
+    },
+    "reward.wheel.uncertain" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda estamos confirmando a recompensa escolhida."
+          }
+        }
+      }
+    },
+    "reward.wheel.view_mission" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver missão"
+          }
+        }
+      }
+    },
+    "rewards.editor.close" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fechar"
+          }
+        }
+      }
+    },
+    "rewards.editor.details_counter" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld/255"
+          }
+        }
+      }
+    },
+    "rewards.editor.details_placeholder" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ex.: Escolher juntos o sabor e o filme"
+          }
+        }
+      }
+    },
+    "rewards.editor.discard_cancel" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar editando"
+          }
+        }
+      }
+    },
+    "rewards.editor.discard_confirm" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descartar alterações"
+          }
+        }
+      }
+    },
+    "rewards.editor.discard_message" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os dados não salvos serão perdidos."
+          }
+        }
+      }
+    },
+    "rewards.editor.discard_title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descartar alterações?"
+          }
+        }
+      }
+    },
+    "rewards.editor.error.details_too_long" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A descrição pode ter até 255 caracteres."
+          }
+        }
+      }
+    },
+    "rewards.editor.error.title_duplicate" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Já existe uma recompensa com esse nome na sua família."
+          }
+        }
+      }
+    },
+    "rewards.editor.error.title_required" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informe o nome da recompensa."
+          }
+        }
+      }
+    },
+    "rewards.editor.error.title_too_long" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use no máximo 60 caracteres, sem contar espaços."
+          }
+        }
+      }
+    },
+    "rewards.editor.field.details" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descrição opcional"
+          }
+        }
+      }
+    },
+    "rewards.editor.field.title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome da recompensa"
+          }
+        }
+      }
+    },
+    "rewards.editor.helper" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este item ficará disponível nos próximos sorteios. Ele não será vinculado a uma missão agora."
+          }
+        }
+      }
+    },
+    "rewards.editor.submit" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar item"
+          }
+        }
+      }
+    },
+    "rewards.editor.submitting" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionando…"
+          }
+        }
+      }
+    },
+    "rewards.editor.title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar recompensa"
+          }
+        }
+      }
+    },
+    "rewards.editor.title_counter" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld/60"
+          }
+        }
+      }
+    },
+    "rewards.editor.title_placeholder" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ex.: Noite de pizza"
+          }
+        }
+      }
+    },
+    "rewards.items.add" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar item"
+          }
+        }
+      }
+    },
+    "rewards.items.badge.custom" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Da sua família"
+          }
+        }
+      }
+    },
+    "rewards.items.badge.predefined" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sugestão"
+          }
+        }
+      }
+    },
+    "rewards.items.custom.empty" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda não há itens personalizados. Você pode adicionar uma recompensa para os próximos sorteios."
+          }
+        }
+      }
+    },
+    "rewards.items.load_error" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível carregar os itens de recompensa."
+          }
+        }
+      }
+    },
+    "rewards.items.refresh" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualizar lista"
+          }
+        }
+      }
+    },
+    "rewards.items.section.custom" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Itens da sua família"
+          }
+        }
+      }
+    },
+    "rewards.items.section.predefined" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sugestões para a família"
+          }
+        }
+      }
+    },
+    "rewards.items.subtitle" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esses itens entram nos próximos sorteios."
+          }
+        }
+      }
+    },
+    "rewards.items.title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Itens de recompensa"
+          }
+        }
+      }
+    },
+    "rewards.items.uncertain" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda estamos confirmando se o item foi adicionado."
+          }
+        }
+      }
+    },
+    "routines.detail.origin_hint" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faz parte de uma rotina. Ao editar ou excluir, você escolhe se vale só para esta tarefa ou também para as próximas."
+          }
+        }
+      }
+    },
     "routines.error_frequency_invalid" : {
       "localizations" : {
         "pt-BR" : {
@@ -5417,6 +6191,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Não foi possível confirmar se a rotina foi salva. Confira o estado antes de tentar novamente."
+          }
+        }
+      }
+    },
+    "routines.error_source_task_invalid" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta tarefa não pode definir o alcance da rotina. Atualize e tente novamente."
           }
         }
       }
@@ -5577,6 +6361,86 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Repetição"
+          }
+        }
+      }
+    },
+    "routines.scope.cancel_hint" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar volta ao detalhe sem gravar."
+          }
+        }
+      }
+    },
+    "routines.scope.delete_hint" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Depois você confirma a exclusão.\nCancelar volta ao detalhe sem gravar."
+          }
+        }
+      }
+    },
+    "routines.scope.delete_title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que excluir?"
+          }
+        }
+      }
+    },
+    "routines.scope.only_this" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Somente esta tarefa"
+          }
+        }
+      }
+    },
+    "routines.scope.only_this_hint" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As outras ocorrências da rotina não mudam."
+          }
+        }
+      }
+    },
+    "routines.scope.selected_and_future" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta tarefa e as futuras"
+          }
+        }
+      }
+    },
+    "routines.scope.selected_and_future_hint" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inclui esta tarefa. As anteriores e as concluídas permanecem preservadas."
+          }
+        }
+      }
+    },
+    "routines.scope.title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Onde aplicar esta alteração?"
           }
         }
       }
@@ -5795,6 +6659,16 @@
         }
       }
     },
+    "tasks.assignee_picker.kids_tag" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kids"
+          }
+        }
+      }
+    },
     "tasks.common.error_action_not_allowed" : {
       "localizations" : {
         "pt-BR" : {
@@ -5876,12 +6750,21 @@
       }
     },
     "tasks.delete.error_mission_would_be_empty" : {
-      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vincule outra tarefa à missão antes de excluir esta"
+          }
+        }
+      }
+    },
+    "tasks.delete.error_uncertain" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível confirmar a exclusão. Confira as tarefas antes de tentar novamente."
           }
         }
       }
@@ -6086,6 +6969,36 @@
         }
       }
     },
+    "tasks.form.assignees_row" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quem faz"
+          }
+        }
+      }
+    },
+    "tasks.form.assignees_row_none" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ninguém"
+          }
+        }
+      }
+    },
+    "tasks.form.date_section_title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data e repetição"
+          }
+        }
+      }
+    },
     "tasks.form.discard_message" : {
       "localizations" : {
         "pt-BR" : {
@@ -6136,12 +7049,12 @@
         }
       }
     },
-    "tasks.form.note_counter": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Observação %lld/250"
+    "tasks.form.note_counter" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Observação %lld/250"
           }
         }
       }
@@ -6186,12 +7099,12 @@
         }
       }
     },
-    "tasks.form.title_counter": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Título %lld/60"
+    "tasks.form.title_counter" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Título %lld/60"
           }
         }
       }
@@ -6206,6 +7119,16 @@
         }
       }
     },
+    "tasks.form.weight_hint" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O esforço entra na carga de quem concluir:\n• P1 = peso 1  • P2 = peso 2  • P3 = peso 3"
+          }
+        }
+      }
+    },
     "tasks.form.weight_label" : {
       "localizations" : {
         "pt-BR" : {
@@ -6216,32 +7139,32 @@
         }
       }
     },
-    "tasks.form.weight_option_high": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "P3 - Alto Esforço"
+    "tasks.form.weight_option_high" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "P3 - Alto Esforço"
           }
         }
       }
     },
-    "tasks.form.weight_option_low": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "P1 - Baixo Esforço"
+    "tasks.form.weight_option_low" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "P1 - Baixo Esforço"
           }
         }
       }
     },
-    "tasks.form.weight_option_medium": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "P2 - Médio Esforço"
+    "tasks.form.weight_option_medium" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "P2 - Médio Esforço"
           }
         }
       }
@@ -6571,718 +7494,6 @@
     },
     "Voltar" : {
 
-    },
-    "routines.detail.origin_hint": {
-      "extractionState": "stale",
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Faz parte de uma rotina. Ao editar ou excluir, você escolhe se vale só para esta tarefa ou também para as próximas."
-          }
-        }
-      }
-    },
-    "routines.error_source_task_invalid": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Esta tarefa não pode definir o alcance da rotina. Atualize e tente novamente."
-          }
-        }
-      }
-    },
-    "routines.scope.cancel_hint": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cancelar volta ao detalhe sem gravar."
-          }
-        }
-      }
-    },
-    "routines.scope.delete_hint": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Depois você confirma a exclusão.\nCancelar volta ao detalhe sem gravar."
-          }
-        }
-      }
-    },
-    "routines.scope.delete_title": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O que excluir?"
-          }
-        }
-      }
-    },
-    "routines.scope.only_this": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Somente esta tarefa"
-          }
-        }
-      }
-    },
-    "routines.scope.only_this_hint": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "As outras ocorrências da rotina não mudam."
-          }
-        }
-      }
-    },
-    "routines.scope.selected_and_future": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Esta tarefa e as futuras"
-          }
-        }
-      }
-    },
-    "routines.scope.selected_and_future_hint": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Inclui esta tarefa. As anteriores e as concluídas permanecem preservadas."
-          }
-        }
-      }
-    },
-    "routines.scope.title": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Onde aplicar esta alteração?"
-          }
-        }
-      }
-    },
-    "tasks.assignee_picker.kids_tag": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kids"
-          }
-        }
-      }
-    },
-    "tasks.delete.error_uncertain": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Não foi possível confirmar a exclusão. Confira as tarefas antes de tentar novamente."
-          }
-        }
-      }
-    },
-    "tasks.form.assignees_row": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quem faz"
-          }
-        }
-      }
-    },
-    "tasks.form.assignees_row_none": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ninguém"
-          }
-        }
-      }
-    },
-    "tasks.form.date_section_title": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Data e repetição"
-          }
-        }
-      }
-    },
-    "tasks.form.weight_hint": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O esforço entra na carga de quem concluir:\n• P1 = peso 1  • P2 = peso 2  • P3 = peso 3"
-          }
-        }
-      }
-    },
-    "rewards.items.title": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Itens de recompensa"
-          }
-        }
-      }
-    },
-    "rewards.items.subtitle": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Esses itens entram nos próximos sorteios."
-          }
-        }
-      }
-    },
-    "rewards.items.add": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Adicionar item"
-          }
-        }
-      }
-    },
-    "rewards.items.section.predefined": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sugestões para a família"
-          }
-        }
-      }
-    },
-    "rewards.items.section.custom": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Itens da sua família"
-          }
-        }
-      }
-    },
-    "rewards.items.badge.predefined": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sugestão"
-          }
-        }
-      }
-    },
-    "rewards.items.badge.custom": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Da sua família"
-          }
-        }
-      }
-    },
-    "rewards.items.custom.empty": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ainda não há itens personalizados. Você pode adicionar uma recompensa para os próximos sorteios."
-          }
-        }
-      }
-    },
-    "rewards.items.load_error": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Não foi possível carregar os itens de recompensa."
-          }
-        }
-      }
-    },
-    "rewards.items.uncertain": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ainda estamos confirmando se o item foi adicionado."
-          }
-        }
-      }
-    },
-    "rewards.items.refresh": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Atualizar lista"
-          }
-        }
-      }
-    },
-    "rewards.editor.title": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Adicionar recompensa"
-          }
-        }
-      }
-    },
-    "rewards.editor.field.title": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nome da recompensa"
-          }
-        }
-      }
-    },
-    "rewards.editor.field.details": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Descrição opcional"
-          }
-        }
-      }
-    },
-    "rewards.editor.title_placeholder": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ex.: Noite de pizza"
-          }
-        }
-      }
-    },
-    "rewards.editor.details_placeholder": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ex.: Escolher juntos o sabor e o filme"
-          }
-        }
-      }
-    },
-    "rewards.editor.title_counter": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld/60"
-          }
-        }
-      }
-    },
-    "rewards.editor.details_counter": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld/255"
-          }
-        }
-      }
-    },
-    "rewards.editor.helper": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Este item ficará disponível nos próximos sorteios. Ele não será vinculado a uma missão agora."
-          }
-        }
-      }
-    },
-    "rewards.editor.submit": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Adicionar item"
-          }
-        }
-      }
-    },
-    "rewards.editor.submitting": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Adicionando…"
-          }
-        }
-      }
-    },
-    "rewards.editor.close": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fechar"
-          }
-        }
-      }
-    },
-    "rewards.editor.error.title_required": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Informe o nome da recompensa."
-          }
-        }
-      }
-    },
-    "rewards.editor.error.title_too_long": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Use no máximo 60 caracteres, sem contar espaços."
-          }
-        }
-      }
-    },
-    "rewards.editor.error.title_duplicate": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Já existe uma recompensa com esse nome na sua família."
-          }
-        }
-      }
-    },
-    "rewards.editor.error.details_too_long": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A descrição pode ter até 255 caracteres."
-          }
-        }
-      }
-    },
-    "rewards.editor.discard_title": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Descartar alterações?"
-          }
-        }
-      }
-    },
-    "rewards.editor.discard_confirm": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Descartar alterações"
-          }
-        }
-      }
-    },
-    "rewards.editor.discard_cancel": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Continuar editando"
-          }
-        }
-      }
-    },
-    "rewards.editor.discard_message": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Os dados não salvos serão perdidos."
-          }
-        }
-      }
-    },
-    "recognition.copied" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mensagem copiada"
-          }
-        }
-      }
-    },
-    "recognition.copy" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copiar mensagem"
-          }
-        }
-      }
-    },
-    "recognition.entry.hint" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abre seu destaque semanal."
-          }
-        }
-      }
-    },
-    "recognition.entry.subtitle" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toque para ver e mandar para a família."
-          }
-        }
-      }
-    },
-    "recognition.entry.title" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Você é destaque da semana!"
-          }
-        }
-      }
-    },
-    "recognition.error" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Não foi possível abrir seu destaque agora."
-          }
-        }
-      }
-    },
-    "recognition.first" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fiquei em primeiro em pontos nesta semana!"
-          }
-        }
-      }
-    },
-    "recognition.invite" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mande para sua família e sugira algo para vocês fazerem juntos."
-          }
-        }
-      }
-    },
-    "recognition.loading" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Carregando seu destaque"
-          }
-        }
-      }
-    },
-    "recognition.message_hint" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Edite o texto antes de compartilhar ou copiar."
-          }
-        }
-      }
-    },
-    "recognition.message_label" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mensagem para a família"
-          }
-        }
-      }
-    },
-    "recognition.message_placeholder" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Escreva sua mensagem"
-          }
-        }
-      }
-    },
-    "recognition.message.first" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fiquei em primeiro em pontos nas tarefas desta semana! Que tal fazermos algo juntos para celebrar? Minha sugestão é: ____."
-          }
-        }
-      }
-    },
-    "recognition.message.tie" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fiquei entre os primeiros em pontos nas tarefas desta semana! Que tal fazermos algo juntos para celebrar? Minha sugestão é: ____."
-          }
-        }
-      }
-    },
-    "recognition.notification" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Você é destaque da semana! Toque para ver e mandar para a família."
-          }
-        }
-      }
-    },
-    "recognition.period" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Semana de %1$@ a %2$@"
-          }
-        }
-      }
-    },
-    "recognition.points" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "pontos"
-          }
-        }
-      }
-    },
-    "recognition.retry" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tentar novamente"
-          }
-        }
-      }
-    },
-    "recognition.share" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Compartilhar no WhatsApp"
-          }
-        }
-      }
-    },
-    "recognition.share_hint" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abre o WhatsApp para você escolher quem recebe e confirmar o envio."
-          }
-        }
-      }
-    },
-    "recognition.summary_accessibility" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@. %2$@ %3$lld pontos e %4$lld tarefas realizadas."
-          }
-        }
-      }
-    },
-    "recognition.tasks" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "tarefas realizadas"
-          }
-        }
-      }
-    },
-    "recognition.tie" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fiquei entre os primeiros em pontos nesta semana!"
-          }
-        }
-      }
-    },
-    "recognition.title" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Meu destaque semanal"
-          }
-        }
-      }
-    },
-    "recognition.whatsapp_unavailable" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Não encontramos o WhatsApp neste aparelho. Copie a mensagem para enviar por outro app."
-          }
-        }
-      }
     }
   },
   "version" : "1.0"

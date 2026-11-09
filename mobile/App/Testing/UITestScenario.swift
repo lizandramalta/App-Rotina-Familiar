@@ -41,6 +41,8 @@ enum UITestScenario: String {
     case taskOptimisticFailure = "task-optimistic-failure"
     case routineCreation = "routine-creation"
     case missionManagement = "mission-management"
+    case missionReward = "mission-reward"
+    case missionRewardConflict = "mission-reward-conflict"
     case missionManagementMember = "mission-management-member"
     case missionManagementKids = "mission-management-kids"
     /// SPEC-016 CA-07: the first list load succeeds, every later one fails (non-blocking banner).
@@ -96,6 +98,7 @@ enum UITestScenario: String {
         if self == .taskManagement || self == .familySettings
             || self == .taskCompletionConflict || self == .taskOptimisticDelayed || self == .taskOptimisticFailure
             || self == .routineCreation || self == .missionManagement || self == .missionTrackingRefreshFailure
+            || self == .missionReward || self == .missionRewardConflict
             || self == .rewardManagement || self == .rewardManagementEmpty {
             sessionStore.apply(.session(Self.inviteSession(role: .administrator)))
             return
@@ -1354,6 +1357,24 @@ private actor UITestMissionRepository: MissionRepository {
         let filtered = query.map { text in allTasks.filter { $0.title.localizedCaseInsensitiveContains(text) } } ?? allTasks
         return MissionTaskOptionPage(items: filtered, nextCursor: nil)
     }
+
+    /// SCRUM-90: `mission-reward-conflict` simulates another Administrador accepting first (CA-05).
+    func acceptReward(missionID: UUID, rewardItemID: UUID, accessToken: String) async throws -> AcceptedMissionReward {
+        guard let mission = missions[missionID], mission.status == .completed else {
+            throw RewardAcceptanceError.unavailable
+        }
+        if acceptedRewards[missionID] != nil { throw RewardAcceptanceError.alreadyAccepted }
+        if scenario == .missionRewardConflict {
+            acceptedRewards[missionID] = AcceptedMissionReward(
+                rewardItemID: UUID(uuidString: "00000000-0000-0000-0000-0000000000ff")!,
+                title: "Sorvete no parque"
+            )
+            throw RewardAcceptanceError.alreadyAccepted
+        }
+        let accepted = AcceptedMissionReward(rewardItemID: rewardItemID, title: UITestRewardRepository.title(for: rewardItemID))
+        acceptedRewards[missionID] = accepted
+        return accepted
+    }
 }
 
 /// SPEC-015 Fase 1 UI fixture: three predefined items and, unless `.rewardManagementEmpty`, one
@@ -1367,6 +1388,12 @@ private actor UITestRewardRepository: RewardRepository {
         RewardItem(id: UUID(uuidString: "00000000-0000-0000-0000-0000000000f4")!, title: "Escolher o jantar em família", details: nil, source: .predefined, createdAt: nil),
         RewardItem(id: UUID(uuidString: "00000000-0000-0000-0000-0000000000f5")!, title: "Noite de jogos em família", details: nil, source: .predefined, createdAt: nil),
     ]
+
+    /// Title of a fixture item, for the accepted snapshot of the mission UI tests.
+    static func title(for id: UUID) -> String {
+        if let item = predefinedItems.first(where: { $0.id == id }) { return item.title }
+        return id.uuidString.hasSuffix("f6") ? "Noite de pizza" : "Recompensa"
+    }
 
     init(scenario: UITestScenario) {
         self.scenario = scenario

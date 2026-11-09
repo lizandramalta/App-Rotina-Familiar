@@ -61,6 +61,9 @@ final class MissionRepositorySpy: MissionRepository, @unchecked Sendable {
     private var updateResult: Result<Mission, Error>
     private var missionsResult: Result<MissionCollections, Error>
     private var taskOptionsResult: Result<MissionTaskOptionPage, Error>
+    private var acceptResults: [Result<AcceptedMissionReward, Error>] = []
+    private var _acceptCalls: [(missionID: UUID, rewardItemID: UUID)] = []
+    var acceptCalls: [(missionID: UUID, rewardItemID: UUID)] { lock.withLock { _acceptCalls } }
 
     private var _createCalls: [CreateMissionCommand] = []
     private var _missionCalls: [UUID] = []
@@ -113,6 +116,21 @@ final class MissionRepositorySpy: MissionRepository, @unchecked Sendable {
     func taskOptions(query: String?, cursor: String?, accessToken: String) async throws -> MissionTaskOptionPage {
         lock.withLock { _taskOptionsCalls.append(query) }
         return try taskOptionsResult.get()
+    }
+
+    func acceptReward(missionID: UUID, rewardItemID: UUID, accessToken: String) async throws -> AcceptedMissionReward {
+        let result: Result<AcceptedMissionReward, Error> = lock.withLock {
+            _acceptCalls.append((missionID, rewardItemID))
+            return acceptResults.isEmpty
+                ? .success(AcceptedMissionReward(rewardItemID: rewardItemID, title: "Recompensa"))
+                : acceptResults.removeFirst()
+        }
+        return try result.get()
+    }
+
+    /// Scripted results for consecutive `acceptReward` calls.
+    func setAcceptResults(_ results: [Result<AcceptedMissionReward, Error>]) {
+        lock.withLock { acceptResults = results }
     }
 
     func setMissionResult(_ result: Result<MissionDetail, Error>) {
