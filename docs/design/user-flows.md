@@ -1,10 +1,10 @@
-# User flows — versão 1.24
+# User flows — versão 1.25
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão dos fluxos:** 1.24\
+**Versão dos fluxos:** 1.25\
 **Base funcional:** RN 1.26 / RF 1.25 / UC 1.25\
-**Screen map:** 1.23 — revisão de 2026-10-28\
-**Data:** 2026-10-28\
+**Screen map:** 1.24 — revisão de 2026-11-08\
+**Data:** 2026-11-08\
 **Situação:** referência de navegação aprovada
 
 [Projeto](../../README.md) · [Índice documental](../DOCUMENTACAO.md) · [Screen map](screen-map.md) · [Regras](../01-regras-de-negocio.md) · [Requisitos](../02-requisitos.md) · [Casos de uso](../03-casos-de-uso.md) · [Diagrama de classes](../06-diagrama-de-classes.md)
@@ -579,7 +579,7 @@ flowchart TD
     O -->|Retornar ou cancelar| J
 ```
 
-Texto do convite: “Mande para sua família e sugira algo para vocês fazerem juntos.” Sugestão editável: “Fiquei em primeiro em pontos nas tarefas desta semana! Que tal fazermos algo juntos para celebrar? Minha sugestão é: ____.” Em empate, adaptar para “Fiquei entre os primeiros…”. Nada é enviado automaticamente. Sem notificação externa, o resultado continua disponível no app. Kids reconhecidos usam a mesma tela em variante adequada, sem acesso à carga familiar. Falha de apuração exige retentativa idempotente, sem publicar resultado parcial. Empate reconhece todos os primeiros colocados; todos os perfis ativos são elegíveis e sem pontos positivos não há vencedor; a apuração ocorre às 00:00 de segunda-feira no fuso vigente; resultados finalizados permanecem preservados após correções.
+Texto do convite: “Mande para sua família e sugira algo para vocês fazerem juntos.” Sugestão editável: “Fiquei em primeiro em pontos nas tarefas desta semana! Que tal fazermos algo juntos para celebrar? Minha sugestão é: ____.” Em empate, adaptar para “Fiquei entre os primeiros…”. Nada é enviado automaticamente. A entrada em Minhas tarefas aparece no dia de hoje durante a semana seguinte ao ciclo reconhecido. Mensagem vazia não pode ser compartilhada nem copiada; copiar confirma “Mensagem copiada” sem afirmar envio. A TEL-052 oculta a barra de abas. Sem notificação externa, o resultado continua disponível no app. Kids reconhecidos usam a mesma tela em variante adequada, sem acesso à carga familiar. Falha de apuração exige retentativa idempotente, sem publicar resultado parcial. Empate reconhece todos os primeiros colocados; todos os perfis ativos são elegíveis e sem pontos positivos não há vencedor; a apuração ocorre às 00:00 de segunda-feira no fuso vigente; resultados finalizados permanecem preservados após correções.
 
 <a id="uf-16"></a>
 
@@ -620,6 +620,7 @@ Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imedi
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.25 | RN 1.26 / RF 1.25 / UC 1.25 | 1.24 | 2026-11-08 | UF-15: janela do acesso interno em Minhas tarefas, mensagem vazia e confirmação de cópia. Para UX-020 (UX-01 a UX-04), SCRUM-103. |
 | 1.24 | RN 1.26 / RF 1.25 / UC 1.25 | 1.23 | 2026-10-28 | UF-04: TEL-032 compacta em Dia/Semana domingo–sábado, Parabenizar apenas na Família; filtros TEL-050 e TEL-011 distintos. |
 | 1.23 | RN 1.25 / RF 1.24 / UC 1.24 | 1.22 | 2026-10-28 | UF-12: papel por seleção modal no detalhe; nome Kids em TEL-057, nome adulto em Meu perfil. |
 | 1.22 | RN 1.24 / RF 1.23 / UC 1.23 | 1.21 | 2026-10-28 | UF-04/UF-12: TEL-032 mostra hoje, com menu de gestão no cabeçalho; outros dias por TEL-011. |

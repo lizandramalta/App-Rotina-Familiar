@@ -19,7 +19,7 @@
 | [Especificação dos casos de uso](03-casos-de-uso.md) | 19 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições; versão 1.25. |
 | [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) | Visão geral e cinco recortes UML, com fontes PlantUML e imagens SVG. |
 | [Screen map](design/screen-map.md) | Mapa 1.24: barra de abas somente nas telas principais; TEL-032 compacta em Dia/Semana domingo–sábado; base RN 1.26 / RF 1.25 / UC 1.25. |
-| [User flows](design/user-flows.md) | Fluxos 1.24: TEL-032 em Dia/Semana, gestão e nome Kids autorizado; base RN 1.26 / RF 1.25 / UC 1.25 e screen map 1.23. |
+| [User flows](design/user-flows.md) | Fluxos 1.25: UF-15 com acesso interno ao destaque semanal, mensagem vazia e cópia; base RN 1.26 / RF 1.25 / UC 1.25 e screen map 1.24. |
 | [Modelo de dados (DER)](05-modelo-de-dados.md) | Modelo 1.10: parabéns persistido e fila de push por dispositivo; base RN 1.23 / RF 1.22 / UC 1.22. |
 | [Diagrama de classes](06-diagrama-de-classes.md) | Modelo 1.9: rascunho de membros, resultado de criação, foto antecipada e item pessoal com estado efetivo/exibido; base RN 1.18 / RF 1.17 / UC 1.16. |
 | [Arquitetura mobile](architecture/mobile-architecture.md) | Arquitetura 1.6: Swift + SwiftUI, View + ViewModel, integração do onboarding e projeção pessoal de tarefas. |
