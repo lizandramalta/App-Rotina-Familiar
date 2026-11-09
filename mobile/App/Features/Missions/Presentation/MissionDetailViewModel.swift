@@ -49,6 +49,13 @@ final class MissionDetailViewModel {
         role == .administrator && mission?.status == .inProgress
     }
 
+    /// SPEC-017 CA-08/UX-CA-01: only Administrador, only a completed mission the server reports as
+    /// redeemable. Membro/Kids get no disabled button nor alternative route.
+    var canRedeem: Bool {
+        guard role == .administrator, let mission else { return false }
+        return mission.status == .completed && mission.isRedemptionAvailable == true && mission.acceptedReward == nil
+    }
+
     var rewardState: MissionRewardState? {
         guard let mission else { return nil }
         return MissionRewardState(acceptedReward: mission.acceptedReward, isRedemptionAvailable: mission.isRedemptionAvailable)

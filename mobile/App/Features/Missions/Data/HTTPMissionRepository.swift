@@ -31,6 +31,15 @@ nonisolated private struct MissionSummaryDTO: Decodable {
     let acceptedReward: AcceptedRewardDTO?
 }
 
+nonisolated private struct RewardAcceptanceRequestDTO: Encodable {
+    let rewardItemId: UUID
+}
+
+/// The `200` of the acceptance is the canonical mission; only its snapshot matters here.
+nonisolated private struct RewardAcceptanceResponseDTO: Decodable {
+    let acceptedReward: AcceptedRewardDTO?
+}
+
 nonisolated private struct MissionListResponseDTO: Decodable {
     let inProgress: [MissionSummaryDTO]
     let completed: [MissionSummaryDTO]
@@ -162,6 +171,54 @@ nonisolated struct HTTPMissionRepository: MissionRepository {
         let data = try await send(path: "missions/task-options", method: "GET", queryItems: items, accessToken: accessToken)
         let response = try decode(MissionTaskOptionsResponseDTO.self, from: data)
         return try MissionTaskOptionPage(items: response.items.map(Self.toMissionTaskOption), nextCursor: response.nextCursor)
+    }
+
+    /// SPEC-017 §5.1/§5.2 (decisão R-1 do SCRUM-90): definitive conflicts are typed; a lost
+    /// response, a network failure or a 5xx stays `uncertain` and must be reconciled via `mission(id:)`.
+    func acceptReward(missionID: UUID, rewardItemID: UUID, accessToken: String) async throws -> AcceptedMissionReward {
+        var request = makeRequest(
+            path: "missions/\(missionID.uuidString.lowercased())/reward-acceptance",
+            method: "POST",
+            accessToken: accessToken
+        )
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        do {
+            request.httpBody = try JSONEncoder().encode(RewardAcceptanceRequestDTO(rewardItemId: rewardItemID))
+        } catch {
+            throw RewardAcceptanceError.rejected
+        }
+
+        let data: Data
+        let response: URLResponse
+        do {
+            (data, response) = try await session.data(for: request)
+        } catch {
+            throw RewardAcceptanceError.uncertain
+        }
+        guard let http = response as? HTTPURLResponse else { throw RewardAcceptanceError.uncertain }
+        guard (200 ... 299).contains(http.statusCode) else {
+            throw Self.acceptanceError(for: http.statusCode, data: data)
+        }
+        guard let dto = try? Self.decoder.decode(RewardAcceptanceResponseDTO.self, from: data),
+              let accepted = dto.acceptedReward else {
+            // 2xx whose body can't be read: the accept may have happened — reconcile, never claim it.
+            throw RewardAcceptanceError.uncertain
+        }
+        return Self.toAcceptedReward(accepted)
+    }
+
+    private static func acceptanceError(for statusCode: Int, data: Data) -> RewardAcceptanceError {
+        let problem = try? decoder.decode(ProblemDetailsDTO.self, from: data)
+        switch (statusCode, problem?.code) {
+        case (409, "MISSION_REWARD_ALREADY_ACCEPTED"):
+            return .alreadyAccepted
+        case (409, _), (404, _), (403, _):
+            return .unavailable
+        case (500..., _):
+            return .uncertain
+        default:
+            return .rejected
+        }
     }
 
     private static func toMission(_ dto: MissionDTO) -> Mission {

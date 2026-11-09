@@ -41,6 +41,8 @@ enum UITestScenario: String {
     case taskOptimisticFailure = "task-optimistic-failure"
     case routineCreation = "routine-creation"
     case missionManagement = "mission-management"
+    case missionReward = "mission-reward"
+    case missionRewardConflict = "mission-reward-conflict"
     case missionManagementMember = "mission-management-member"
     case missionManagementKids = "mission-management-kids"
     /// SPEC-016 CA-07: the first list load succeeds, every later one fails (non-blocking banner).
@@ -48,6 +50,9 @@ enum UITestScenario: String {
     case rewardManagement = "reward-management"
     case rewardManagementEmpty = "reward-management-empty"
     case rewardManagementMember = "reward-management-member"
+    case weeklyRecognition = "weekly-recognition"
+    case weeklyRecognitionKidsTie = "weekly-recognition-kids-tie"
+    case weeklyRecognitionFailure = "weekly-recognition-failure"
 
     static var current: UITestScenario? {
         ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"].flatMap(UITestScenario.init(rawValue:))
@@ -67,6 +72,8 @@ enum UITestScenario: String {
             missionRepository: UITestMissionRepository(scenario: self),
             rewardRepository: UITestRewardRepository(scenario: self),
             kidsSignalRepository: UITestKidsSignalRepository(scenario: self),
+            recognitionRepository: UITestRecognitionRepository(scenario: self),
+            highlightSharing: UITestHighlightSharing(isWhatsAppAvailable: self == .weeklyRecognition),
             credentialStore: UITestCredentialStore(),
             installationProofStore: UITestInstallationProof(),
             appleAuthenticator: UITestAppleAuthenticator()
@@ -91,6 +98,7 @@ enum UITestScenario: String {
         if self == .taskManagement || self == .familySettings
             || self == .taskCompletionConflict || self == .taskOptimisticDelayed || self == .taskOptimisticFailure
             || self == .routineCreation || self == .missionManagement || self == .missionTrackingRefreshFailure
+            || self == .missionReward || self == .missionRewardConflict
             || self == .rewardManagement || self == .rewardManagementEmpty {
             sessionStore.apply(.session(Self.inviteSession(role: .administrator)))
             return
@@ -132,7 +140,11 @@ enum UITestScenario: String {
             sessionStore.apply(.session(Self.inviteSession(role: .member)))
             return
         }
-        if self == .dailyTasksKids || self == .dailyTasksKidsApplause {
+        if self == .weeklyRecognition || self == .weeklyRecognitionFailure {
+            sessionStore.apply(.session(Self.inviteSession(role: .administrator, memberID: UITestTaskFixtures.memberID)))
+            return
+        }
+        if self == .dailyTasksKids || self == .dailyTasksKidsApplause || self == .weeklyRecognitionKidsTie {
             // Must match `UITestTaskFixtures.kidMemberID`, the assignee on the Kids-owned fixture
             // tasks, so SPEC-011's `canReopen` check (assignee == current member) finds them.
             sessionStore.apply(.session(AuthenticatedSession(
@@ -1345,6 +1357,24 @@ private actor UITestMissionRepository: MissionRepository {
         let filtered = query.map { text in allTasks.filter { $0.title.localizedCaseInsensitiveContains(text) } } ?? allTasks
         return MissionTaskOptionPage(items: filtered, nextCursor: nil)
     }
+
+    /// SCRUM-90: `mission-reward-conflict` simulates another Administrador accepting first (CA-05).
+    func acceptReward(missionID: UUID, rewardItemID: UUID, accessToken: String) async throws -> AcceptedMissionReward {
+        guard let mission = missions[missionID], mission.status == .completed else {
+            throw RewardAcceptanceError.unavailable
+        }
+        if acceptedRewards[missionID] != nil { throw RewardAcceptanceError.alreadyAccepted }
+        if scenario == .missionRewardConflict {
+            acceptedRewards[missionID] = AcceptedMissionReward(
+                rewardItemID: UUID(uuidString: "00000000-0000-0000-0000-0000000000ff")!,
+                title: "Sorvete no parque"
+            )
+            throw RewardAcceptanceError.alreadyAccepted
+        }
+        let accepted = AcceptedMissionReward(rewardItemID: rewardItemID, title: UITestRewardRepository.title(for: rewardItemID))
+        acceptedRewards[missionID] = accepted
+        return accepted
+    }
 }
 
 /// SPEC-015 Fase 1 UI fixture: three predefined items and, unless `.rewardManagementEmpty`, one
@@ -1358,6 +1388,12 @@ private actor UITestRewardRepository: RewardRepository {
         RewardItem(id: UUID(uuidString: "00000000-0000-0000-0000-0000000000f4")!, title: "Escolher o jantar em família", details: nil, source: .predefined, createdAt: nil),
         RewardItem(id: UUID(uuidString: "00000000-0000-0000-0000-0000000000f5")!, title: "Noite de jogos em família", details: nil, source: .predefined, createdAt: nil),
     ]
+
+    /// Title of a fixture item, for the accepted snapshot of the mission UI tests.
+    static func title(for id: UUID) -> String {
+        if let item = predefinedItems.first(where: { $0.id == id }) { return item.title }
+        return id.uuidString.hasSuffix("f6") ? "Noite de pizza" : "Recompensa"
+    }
 
     init(scenario: UITestScenario) {
         self.scenario = scenario
@@ -1412,3 +1448,66 @@ private final class UITestAppleAuthenticator: AppleAuthenticating {
     }
 }
 #endif
+
+
+/// SCRUM-103: one featured recognition whose cycle ended last Monday, so the entry card shows today.
+private struct UITestRecognitionRepository: RecognitionRepository {
+    let scenario: UITestScenario
+
+    func listOwn(accessToken: String) async throws -> [WeeklyRecognition] {
+        switch scenario {
+        case .weeklyRecognition, .weeklyRecognitionKidsTie, .weeklyRecognitionFailure:
+            return [Self.featured(isTie: scenario == .weeklyRecognitionKidsTie)]
+        default:
+            return []
+        }
+    }
+
+    func recognition(id: UUID, accessToken: String) async throws -> WeeklyRecognition {
+        if scenario == .weeklyRecognitionFailure { throw RecognitionError.network }
+        guard id == Self.recognitionID else { throw RecognitionError.notFound }
+        return Self.featured(isTie: scenario == .weeklyRecognitionKidsTie)
+    }
+
+    func recordOpening(id: UUID, accessToken: String) async throws -> WeeklyRecognition {
+        try await recognition(id: id, accessToken: accessToken)
+    }
+
+    static let recognitionID = UUID(uuidString: "00000000-0000-0000-0000-00000000c052")!
+
+    private static func featured(isTie: Bool) -> WeeklyRecognition {
+        var calendar = Calendar(identifier: .gregorian)
+        let timeZone = TimeZone(identifier: "America/Sao_Paulo") ?? .current
+        calendar.timeZone = timeZone
+        calendar.firstWeekday = 2
+        let weekStart = calendar.dateInterval(of: .weekOfYear, for: Date())?.start ?? Date()
+        let startsAt = calendar.date(byAdding: .day, value: -7, to: weekStart) ?? weekStart
+        return WeeklyRecognition(
+            id: recognitionID,
+            startsAt: startsAt,
+            endsAt: weekStart,
+            timeZoneID: timeZone.identifier,
+            isTransition: false,
+            points: 42,
+            completedTasks: 12,
+            isTie: isTie,
+            openedAt: nil
+        )
+    }
+}
+
+/// Records sharing actions instead of opening WhatsApp or touching the real pasteboard.
+@MainActor
+private final class UITestHighlightSharing: HighlightSharing {
+    let isWhatsAppAvailable: Bool
+
+    init(isWhatsAppAvailable: Bool) {
+        self.isWhatsAppAvailable = isWhatsAppAvailable
+    }
+
+    var canOpenWhatsApp: Bool { isWhatsAppAvailable }
+
+    func openWhatsApp(text: String) async -> Bool { isWhatsAppAvailable }
+
+    func copy(text: String) {}
+}

@@ -13,6 +13,8 @@ final class AppContainer {
     private let missionRepository: any MissionRepository
     private let rewardRepository: any RewardRepository
     private let kidsSignalRepository: any KidsSignalRepository
+    private let recognitionRepository: any RecognitionRepository
+    private let highlightSharing: any HighlightSharing
     private let credentialStore: any SessionCredentialStoring
     private let installationProofStore: any InstallationProofProviding
     private let appleAuthenticator: any AppleAuthenticating
@@ -30,6 +32,8 @@ final class AppContainer {
         missionRepository: any MissionRepository,
         rewardRepository: any RewardRepository,
         kidsSignalRepository: any KidsSignalRepository,
+        recognitionRepository: any RecognitionRepository,
+        highlightSharing: any HighlightSharing,
         credentialStore: any SessionCredentialStoring,
         installationProofStore: any InstallationProofProviding,
         appleAuthenticator: any AppleAuthenticating,
@@ -46,6 +50,8 @@ final class AppContainer {
         self.missionRepository = missionRepository
         self.rewardRepository = rewardRepository
         self.kidsSignalRepository = kidsSignalRepository
+        self.recognitionRepository = recognitionRepository
+        self.highlightSharing = highlightSharing
         self.credentialStore = credentialStore
         self.installationProofStore = installationProofStore
         self.appleAuthenticator = appleAuthenticator
@@ -66,6 +72,8 @@ final class AppContainer {
             missionRepository: HTTPMissionRepository(baseURL: configuration.apiBaseURL),
             rewardRepository: HTTPRewardRepository(baseURL: configuration.apiBaseURL),
             kidsSignalRepository: HTTPKidsSignalRepository(baseURL: configuration.apiBaseURL),
+            recognitionRepository: HTTPRecognitionRepository(baseURL: configuration.apiBaseURL),
+            highlightSharing: SystemHighlightSharing(),
             credentialStore: KeychainSessionCredentialStore(secrets: secrets),
             installationProofStore: KeychainInstallationProofStore(secrets: secrets),
             appleAuthenticator: AppleSignInAdapter()
@@ -124,14 +132,28 @@ final class AppContainer {
         )
     }
 
-    func makeMyTasksTabView(session: ActiveFamilySession, accessToken: String) -> MyTasksTabView {
+    func makeRecognitionFeature(sessionStore: AppSessionStore, router: RecognitionNotificationRouter) -> RecognitionFeature {
+        RecognitionFeature(
+            repository: recognitionRepository,
+            sharing: highlightSharing,
+            session: sessionStore,
+            notificationRouter: router
+        )
+    }
+
+    func makeMyTasksTabView(
+        session: ActiveFamilySession,
+        accessToken: String,
+        recognition: RecognitionFeature? = nil
+    ) -> MyTasksTabView {
         MyTasksTabView(
             taskRepository: taskRepository,
             routineRepository: routineRepository,
             familyRepository: familyRepository,
             role: session.role,
             currentMemberID: session.memberID,
-            accessToken: accessToken
+            accessToken: accessToken,
+            recognition: recognition
         )
     }
 
@@ -170,6 +192,7 @@ final class AppContainer {
     func makeKidsTasksTabView(
         session: ActiveFamilySession,
         accessToken: String,
+        recognition: RecognitionFeature? = nil,
         makeProfileViewModel: @escaping () -> ProfileViewModel
     ) -> KidsTasksTabView {
         KidsTasksTabView(
@@ -178,6 +201,7 @@ final class AppContainer {
             familyRepository: familyRepository,
             currentMemberID: session.memberID,
             accessToken: accessToken,
+            recognition: recognition,
             makeProfileViewModel: makeProfileViewModel
         )
     }

@@ -250,6 +250,49 @@ struct MissionDetailViewModelTests {
         #expect(!member.canEdit)
     }
 
+    @Test("SPEC-017 CA-08/UX-CA-01: only Administrador of a redeemable completed mission can redeem")
+    func canRedeemOnlyAdminWhenAvailable() async {
+        let redeemable = makeMissionDetail(status: .completed, progressPercent: 100, isRedemptionAvailable: true)
+        let admin = makeViewModel(role: .administrator, repository: MissionRepositorySpy(missionResult: .success(redeemable)))
+        await admin.load()
+        #expect(admin.canRedeem)
+
+        let member = makeViewModel(role: .member, repository: MissionRepositorySpy(missionResult: .success(redeemable)))
+        await member.load()
+        #expect(!member.canRedeem)
+
+        let kid = makeViewModel(role: .kid, repository: MissionRepositorySpy(missionResult: .success(
+            makeMissionDetail(status: .completed, progressPercent: 100, isRedemptionAvailable: nil, participations: nil)
+        )))
+        await kid.load()
+        #expect(!kid.canRedeem)
+
+        let inProgress = makeViewModel(role: .administrator, repository: MissionRepositorySpy(missionResult: .success(makeMissionDetail())))
+        await inProgress.load()
+        #expect(!inProgress.canRedeem)
+    }
+
+    @Test("SPEC-017 CA-08: after the accept, the reward shows and the redeem action disappears")
+    func redeemDisappearsAfterAccept() async {
+        let repository = MissionRepositorySpy(missionResult: .success(
+            makeMissionDetail(status: .completed, progressPercent: 100, isRedemptionAvailable: true)
+        ))
+        let viewModel = makeViewModel(role: .administrator, repository: repository)
+        await viewModel.load()
+        #expect(viewModel.canRedeem)
+
+        repository.setMissionResult(.success(makeMissionDetail(
+            status: .completed,
+            progressPercent: 100,
+            isRedemptionAvailable: false,
+            acceptedReward: AcceptedMissionReward(rewardItemID: UUID(), title: "Noite de pizza")
+        )))
+        await viewModel.load()
+
+        #expect(!viewModel.canRedeem)
+        #expect(viewModel.rewardState == .accepted(title: "Noite de pizza"))
+    }
+
     @Test("E-1: Kids only open their own linked tasks, never someone else's")
     func kidsOnlyOpenOwnTasks() async {
         let ownTaskID = UUID()

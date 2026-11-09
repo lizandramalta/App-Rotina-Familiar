@@ -89,4 +89,10 @@ struct RewardItemsViewModelTests {
 
         #expect(!viewModel.showsUncertainBanner)
     }
+
+    @Test("UX-017 R-4: TEL-023 opened from the wheel is consult-only, even for Administrador")
+    func consultModeHasNoManagement() {
+        let consult = RewardItemsViewModel(repository: RewardRepositorySpy(), role: .administrator, accessToken: "token", allowsManagement: false)
+        #expect(!consult.canManage)
+    }
 }

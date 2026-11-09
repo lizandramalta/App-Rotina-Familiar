@@ -15,6 +15,9 @@ struct DailyTaskListView: View {
     let onSelectTask: (UUID) -> Void
     let onCreateTask: () -> Void
     let onRefreshRoutine: () -> Void
+    /// SCRUM-103: internal access to TEL-052, shown on today's list only (E-1).
+    let recognitionEntry: WeeklyRecognitionEntryViewModel?
+    let onOpenRecognition: (UUID) -> Void
 
     /// UX-009 §5: on period change, focus follows the updated header; on failure, it follows the
     /// error message and retry action. Same mechanism already used in EntryView.
@@ -36,7 +39,9 @@ struct DailyTaskListView: View {
         routineRefreshFailed: Bool = false,
         onSelectTask: @escaping (UUID) -> Void,
         onCreateTask: @escaping () -> Void,
-        onRefreshRoutine: @escaping () -> Void = {}
+        onRefreshRoutine: @escaping () -> Void = {},
+        recognitionEntry: WeeklyRecognitionEntryViewModel? = nil,
+        onOpenRecognition: @escaping (UUID) -> Void = { _ in }
     ) {
         let model = DailyTaskListViewModel(
             audience: audience,
@@ -56,6 +61,8 @@ struct DailyTaskListView: View {
         self.onSelectTask = onSelectTask
         self.onCreateTask = onCreateTask
         self.onRefreshRoutine = onRefreshRoutine
+        self.recognitionEntry = recognitionEntry
+        self.onOpenRecognition = onOpenRecognition
     }
 
     var body: some View {
@@ -66,6 +73,9 @@ struct DailyTaskListView: View {
                     routineStatus(routineFeedback)
                 }
                 carousel
+                if let featured = recognitionEntry?.featured, viewModel.isToday(viewModel.selectedDate) {
+                    WeeklyRecognitionEntryCard(recognition: featured, onOpen: onOpenRecognition)
+                }
                 ForEach(viewModel.receivedApplause) { applause in
                     applauseCard(applause)
                 }
@@ -149,10 +159,17 @@ struct DailyTaskListView: View {
                  : "tasks.personal.actionFailedMessage")
         }
         .task(id: refreshRevision) {
+            Task { await refreshRecognitionEntry() }
             await viewModel.load()
         }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active { Task { await viewModel.refreshReceivedApplause() } }
+            if phase == .active {
+                Task { await viewModel.refreshReceivedApplause() }
+                Task { await refreshRecognitionEntry() }
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .weeklyRecognitionDidArrive)) { _ in
+            Task { await refreshRecognitionEntry() }
         }
         .onReceive(NotificationCenter.default.publisher(for: .familyApplauseDidArrive)) { _ in
             Task { await viewModel.refreshReceivedApplause() }
@@ -172,6 +189,10 @@ struct DailyTaskListView: View {
         .onChange(of: viewModel.actionFailure) { _, failure in
             if failure != nil { isErrorFocused = true }
         }
+    }
+
+    private func refreshRecognitionEntry() async {
+        await recognitionEntry?.refresh()
     }
 
     private func applauseCard(_ applause: ReceivedFamilyApplause) -> some View {

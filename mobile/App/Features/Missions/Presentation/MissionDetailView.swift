@@ -1,12 +1,15 @@
 import SwiftUI
 
 /// TEL-021 — Detalhe da missão (SPEC-016 Fase 2 / UX-016 §5.2): título/status, observação,
-/// progresso canônico, tarefas vinculadas, recompensa e participações autorizadas. A ação de
-/// resgate não existe aqui (UX-017 / SCRUM-90).
+/// progresso canônico, tarefas vinculadas, recompensa e participações autorizadas. Administrador
+/// de missão concluída e resgatável vê "Resgatar recompensa", que abre TEL-024 (SPEC-017 Fase 2).
 struct MissionDetailView: View {
     @State private var viewModel: MissionDetailViewModel
     let onRequestEdit: () -> Void
     let onSelectTask: (UUID) -> Void
+    let onRedeem: (MissionDetail) -> Void
+    /// Bumped by the host after TEL-024 so the canonical detail is reloaded (UX-017 §4).
+    let refreshRevision: Int
 
     init(
         missionID: UUID,
@@ -16,7 +19,9 @@ struct MissionDetailView: View {
         taskRepository: any TaskRepository,
         accessToken: String,
         onRequestEdit: @escaping () -> Void,
-        onSelectTask: @escaping (UUID) -> Void
+        onSelectTask: @escaping (UUID) -> Void,
+        onRedeem: @escaping (MissionDetail) -> Void = { _ in },
+        refreshRevision: Int = 0
     ) {
         _viewModel = State(initialValue: MissionDetailViewModel(
             missionID: missionID,
@@ -28,6 +33,8 @@ struct MissionDetailView: View {
         ))
         self.onRequestEdit = onRequestEdit
         self.onSelectTask = onSelectTask
+        self.onRedeem = onRedeem
+        self.refreshRevision = refreshRevision
     }
 
     var body: some View {
@@ -55,7 +62,7 @@ struct MissionDetailView: View {
                 }
             }
         }
-        .task {
+        .task(id: refreshRevision) {
             await viewModel.load()
         }
     }
@@ -98,6 +105,18 @@ struct MissionDetailView: View {
                         .accessibilityElement(children: .ignore)
                         .accessibilityLabel(Text(MissionRewardText.text(for: rewardState)))
                         .accessibilityIdentifier("missions.detail.reward")
+                }
+
+                if viewModel.canRedeem {
+                    Button {
+                        onRedeem(mission)
+                    } label: {
+                        Label("mission.reward.redeem", systemImage: "gift")
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Color.primary)
+                    .accessibilityIdentifier("missions.detail.redeem")
                 }
 
                 if let participations = viewModel.participations {
