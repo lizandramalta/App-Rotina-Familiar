@@ -13,7 +13,7 @@ protocol SecretStoring: Sendable {
 }
 
 final class KeychainSecretStore: SecretStoring, @unchecked Sendable {
-    private let service = "com.lizandramalta.familyroutine.access"
+    private let service = "com.lizandramalta.mutua.access"
 
     func read(key: String) throws -> String? {
         let query: [CFString: Any] = [

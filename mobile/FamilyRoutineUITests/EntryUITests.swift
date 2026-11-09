@@ -12,7 +12,7 @@ final class EntryUITests: XCTestCase {
     }
 
     func testEntryShowsTheAppleActionAndAccessibleWelcomeContent() {
-        XCTAssertTrue(app.staticTexts["Bem-vindo ao App Família"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["Bem-vindo ao Mutua"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.images["Ilustração de uma casa com porta e janelas, representando o lar da família"].exists)
         XCTAssertTrue(app.buttons["access.entry.apple_button"].exists)
     }

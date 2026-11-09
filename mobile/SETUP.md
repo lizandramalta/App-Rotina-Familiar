@@ -65,8 +65,9 @@ xcodebuild test \
 O nome do simulador varia por máquina e por versão do Xcode, por isso a CI resolve o UDID
 do primeiro iPhone disponível em vez de fixar um modelo.
 
-## Destinos ainda não implementados
+## Distribuição TestFlight
 
-O ingresso por convite usa a sessão validada para abrir a navegação de Kids ou de adultos.
-O conteúdo de tarefas, família, missões e perfil ainda é placeholder até a implementação
-dos respectivos cards; as opções de navegação já respeitam o papel recebido na sessão.
+O app aparece como Mutua (`com.lizandramalta.mutua`), com o ícone em `AppIcon`.
+O registro da distribuição atual está em
+[docs/releases/testflight-2.md](../docs/releases/testflight-2.md). Antes de
+arquivar, confira o `Production.xcconfig` local, a API de produção e a assinatura.
