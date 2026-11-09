@@ -1447,8 +1447,6 @@ private final class UITestAppleAuthenticator: AppleAuthenticating {
         )
     }
 }
-#endif
-
 
 /// SCRUM-103: one featured recognition whose cycle ended last Monday, so the entry card shows today.
 private struct UITestRecognitionRepository: RecognitionRepository {
@@ -1511,3 +1509,4 @@ private final class UITestHighlightSharing: HighlightSharing {
 
     func copy(text: String) {}
 }
+#endif
