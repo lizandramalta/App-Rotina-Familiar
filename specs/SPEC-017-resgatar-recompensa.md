@@ -120,13 +120,14 @@ Registrar resultado do comando, `missionId`, família pseudonimizada, papel e c�
 | # | Decisão | Decidido por / data | Altera docs? |
 |---|---|---|---|
 | E-01 | Aceite retorna `200` com missão canônica; conflitos usam os dois códigos `409` definidos e item inelegível usa `422 REWARD_ITEM_NOT_ELIGIBLE`. | Usuária / 2026-10-10 | Sim — consolidado em `docs/architecture/backend-contracts.md` 1.11. |
+| E-02 | No app, falha de rede, resposta perdida ou `5xx` no aceite contam como resultado incerto; `409 MISSION_REWARD_ALREADY_ACCEPTED` mostra “já escolhida”; `409 MISSION_REWARD_REDEMPTION_UNAVAILABLE`, `404` e `403` mostram “indisponível”; demais recusas (`422`, `400`, `401`) mantêm o resultado local como erro. Em incerto ou erro, aceitar e sortear de novo ficam bloqueados até “Atualizar missão” consultar `GET /v1/missions/{missionId}`: recompensa aceita com o item escolhido confirma o aceite; com outro item, “já escolhida”; missão ainda resgatável libera nova tentativa; caso contrário, “indisponível”. | Usuária / 2026-11-08 (SCRUM-90) | Sim — UX-017 §6/§7/§10. Sem mudança de contrato. |
 
 ## 10. Fases de implementação
 
 | Fase | Objetivo | CAs | Prontidão | Status |
 |---|---|---|---|---|
-| 1 | Aceite backend com RBAC, isolamento, validação, transação e concorrência | CA-01 a CA-05 | Testes unitários e de integração verdes | a fazer |
-| 2 | TEL-024, roleta local, integração e recuperação de falha | CA-06 a CA-08 | Testes de ViewModel/UI e UX-spec verificada | a fazer |
+| 1 | Aceite backend com RBAC, isolamento, validação, transação e concorrência | CA-01 a CA-05 | Testes unitários e de integração verdes | concluída (SCRUM-88) |
+| 2 | TEL-024, roleta local, integração e recuperação de falha | CA-06 a CA-08 | Testes de ViewModel/UI e UX-spec verificada | implementada (SCRUM-90), aguardando PR |
 
 Fase 1 não é publicável isoladamente; a ação exige a experiência de TEL-024 da Fase 2.
 
