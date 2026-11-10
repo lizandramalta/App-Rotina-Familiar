@@ -9,12 +9,34 @@ struct MyTasksTabView: View {
     let role: MemberRole
     let currentMemberID: UUID
     let accessToken: String
+    let accessTokenProvider: AccessTokenProvider
+    let recognition: RecognitionFeature?
 
     @State private var path: [FamilyTaskRoute] = []
     @State private var listRevision = 0
-    @State private var routineFeedback: Routine?
-    @State private var isRefreshingRoutine = false
-    @State private var routineRefreshFailed = false
+    @State private var showsSavedToast = false
+    @State private var recognitionEntry: WeeklyRecognitionEntryViewModel?
+
+    init(
+        taskRepository: any TaskRepository,
+        routineRepository: any RoutineRepository,
+        familyRepository: any FamilyRepository,
+        role: MemberRole,
+        currentMemberID: UUID,
+        accessToken: String,
+        accessTokenProvider: @escaping AccessTokenProvider,
+        recognition: RecognitionFeature? = nil
+    ) {
+        self.taskRepository = taskRepository
+        self.routineRepository = routineRepository
+        self.familyRepository = familyRepository
+        self.role = role
+        self.currentMemberID = currentMemberID
+        self.accessToken = accessToken
+        self.accessTokenProvider = accessTokenProvider
+        self.recognition = recognition
+        _recognitionEntry = State(initialValue: recognition?.makeEntryViewModel())
+    }
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -24,19 +46,32 @@ struct MyTasksTabView: View {
                 currentMemberID: currentMemberID,
                 repository: taskRepository,
                 familyRepository: familyRepository,
-                accessToken: accessToken,
+                accessTokenProvider: accessTokenProvider,
                 refreshRevision: listRevision,
-                routineFeedback: routineFeedback,
-                isRefreshingRoutine: isRefreshingRoutine,
-                routineRefreshFailed: routineRefreshFailed,
                 onSelectTask: { path.append(.detail($0)) },
-                onCreateTask: { routineFeedback = nil; path.append(.create) },
-                onRefreshRoutine: refreshRoutine
+                onCreateTask: { path.append(.create) },
+                recognitionEntry: recognitionEntry,
+                onOpenRecognition: { path.append(.weeklyRecognition($0)) }
             )
             .accessibilityIdentifier("access.destination.adult")
             .navigationDestination(for: FamilyTaskRoute.self) { route in
+                // Tab bar only on each tab's root route; every pushed screen hides it.
                 destination(for: route)
+                    .toolbar(.hidden, for: .tabBar)
             }
+        }
+        .onChange(of: recognition?.notificationRouter.pendingRecognitionID, initial: true) { _, pending in
+            guard pending != nil, let id = recognition?.notificationRouter.consume() else { return }
+            path = [.weeklyRecognition(id)]
+        }
+        .overlay {
+            if showsSavedToast { savedToast }
+        }
+        .animation(.spring(duration: 0.3), value: showsSavedToast)
+        .task(id: showsSavedToast) {
+            guard showsSavedToast else { return }
+            try? await Task.sleep(for: .seconds(2))
+            showsSavedToast = false
         }
         #if DEBUG
         .task {
@@ -56,13 +91,8 @@ struct MyTasksTabView: View {
                 familyRepository: familyRepository,
                 accessToken: accessToken,
                 currentMemberID: currentMemberID,
-                onSaved: { _ in routineFeedback = nil; path.removeAll(); listRevision += 1 },
-                onRoutineSaved: { routine in
-                    routineFeedback = routine
-                    routineRefreshFailed = false
-                    path.removeAll()
-                    listRevision += 1
-                }
+                onSaved: { _ in finishCreation() },
+                onRoutineSaved: { _ in finishCreation() }
             )
         case let .detail(taskID):
             TaskDetailView(
@@ -89,25 +119,36 @@ struct MyTasksTabView: View {
                 onSaved: { _ in if !path.isEmpty { path.removeLast() }; listRevision += 1 },
                 onRoutineSaved: { _ in }
             )
+        case let .weeklyRecognition(recognitionID):
+            if let recognition {
+                WeeklyRecognitionView(
+                    viewModel: recognition.makeViewModel(recognitionID: recognitionID, audience: .adult)
+                )
+            }
         }
     }
 
-    private func refreshRoutine() {
-        guard let routineFeedback, !isRefreshingRoutine else { return }
-        isRefreshingRoutine = true
-        routineRefreshFailed = false
-        Task {
-            defer { isRefreshingRoutine = false }
-            do {
-                let latest = try await routineRepository.routine(id: routineFeedback.id, accessToken: accessToken)
-                if self.routineFeedback?.id == latest.id {
-                    self.routineFeedback = latest
-                    listRevision += 1
-                }
-            } catch {
-                routineRefreshFailed = true
-            }
+    private func finishCreation() {
+        path.removeAll()
+        listRevision += 1
+        showsSavedToast = true
+    }
+
+    /// Transient confirmation after creating a task or routine; disappears on its own.
+    private var savedToast: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 48))
+                .foregroundStyle(.green)
+            Text("tasks.saved.toast")
+                .font(.headline)
         }
+        .padding(28)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 24))
+        .transition(.scale.combined(with: .opacity))
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("tasks.saved.toast")
+        .accessibilityAddTraits(.isStaticText)
     }
 
     #if DEBUG

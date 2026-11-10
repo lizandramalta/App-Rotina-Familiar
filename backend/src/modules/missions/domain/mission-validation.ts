@@ -1,5 +1,9 @@
 import { ValidationError } from '../../../shared/domain/domain-error.js';
-import { MissionTasksRequiredError, TaskNotInFamilyError } from './mission-errors.js';
+import {
+  MissionTasksRequiredError,
+  RewardItemNotEligibleError,
+  TaskNotInFamilyError,
+} from './mission-errors.js';
 
 const graphemeSegmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
 const CONTROL_CHARACTERS = /\p{Cc}/u;
@@ -55,4 +59,15 @@ export function normalizeTaskIds(input: unknown): readonly string[] {
     throw new TaskNotInFamilyError();
   }
   return [...new Set((input as string[]).map((id) => id.toLowerCase()))];
+}
+
+/**
+ * SPEC-017 CA-03: um `rewardItemId` malformado nunca pode identificar um item
+ * de outra família, então falha antes de qualquer consulta ao banco.
+ */
+export function validateRewardItemId(input: unknown): string {
+  if (typeof input !== 'string' || !UUID_PATTERN.test(input)) {
+    throw new RewardItemNotEligibleError();
+  }
+  return input.toLowerCase();
 }

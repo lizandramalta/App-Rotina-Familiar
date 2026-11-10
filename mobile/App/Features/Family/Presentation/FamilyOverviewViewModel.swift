@@ -27,19 +27,28 @@ final class FamilyOverviewViewModel {
 
     private let session: ActiveFamilySession
     private let familyRepository: any FamilyRepository
+    /// Synchronous token read handed to child screens; kept fresh by the session store.
     private let accessTokenProvider: @MainActor () -> String?
+    private let validAccessToken: AccessTokenProvider?
     private let makeKidsReviewQueueViewModel: (() -> KidsReviewQueueViewModel)?
 
     init(
         session: ActiveFamilySession,
         familyRepository: any FamilyRepository,
         accessTokenProvider: @escaping @MainActor () -> String?,
+        validAccessToken: AccessTokenProvider? = nil,
         makeKidsReviewQueueViewModel: (() -> KidsReviewQueueViewModel)? = nil
     ) {
         self.makeKidsReviewQueueViewModel = makeKidsReviewQueueViewModel
         self.session = session
         self.familyRepository = familyRepository
         self.accessTokenProvider = accessTokenProvider
+        self.validAccessToken = validAccessToken
+    }
+
+    private func currentToken(forceRefresh: Bool = false) async -> String? {
+        guard let validAccessToken else { return accessTokenProvider() }
+        return try? await validAccessToken(forceRefresh)
     }
 
     /// The server stays the authority (RNF07); this only hides controls the API would refuse.
@@ -59,14 +68,21 @@ final class FamilyOverviewViewModel {
     /// A failed reload keeps the confirmed members and only reports a non-blocking error.
     func loadInitial() async {
         guard !isLoading else { return }
-        loadFailed = false
-        guard let token = accessTokenProvider() else {
-            loadFailed = true
-            return
-        }
-
         isLoading = true
         defer { isLoading = false }
+        // A 401 surfaces as `rejected`: renew the token once before reporting the failure.
+        if await load(forceRefresh: false) == .rejected {
+            await load(forceRefresh: true)
+        }
+    }
+
+    @discardableResult
+    private func load(forceRefresh: Bool) async -> FamilyError? {
+        loadFailed = false
+        guard let token = await currentToken(forceRefresh: forceRefresh) else {
+            loadFailed = true
+            return nil
+        }
         await loadFamilyProfile(token: token)
         await loadOverview(token: token, range: selectedRange)
         await loadTodayOverview(token: token)
@@ -76,12 +92,15 @@ final class FamilyOverviewViewModel {
             members = page.items
             nextCursor = page.nextCursor
             loadMoreFailed = false
+            return nil
         } catch FamilyError.actionNotAllowed {
             clearConfirmedMembers()
             loadFailed = true
+            return .actionNotAllowed
         } catch {
             // Network/availability failures keep the already confirmed list.
             loadFailed = true
+            return error as? FamilyError
         }
     }
 
@@ -129,14 +148,14 @@ final class FamilyOverviewViewModel {
         guard range.startDate <= range.endDate,
               let firstDate = overview?.familyCreatedAt,
               range.startDate >= firstDate,
-              let token = accessTokenProvider() else { return }
+              let token = await currentToken() else { return }
         if range != selectedRange { sentApplauseIDs = [] }
         await loadOverview(token: token, range: range)
         await loadApplauseSummary(token: token)
     }
 
     func previewTaskCount(for range: FamilyDateRange) async throws -> Int {
-        guard let token = accessTokenProvider() else { throw FamilyError.unavailable }
+        guard let token = await currentToken() else { throw FamilyError.unavailable }
         return try await familyRepository.getFamilyOverview(range: range, accessToken: token).progress.total
     }
 
@@ -152,11 +171,14 @@ final class FamilyOverviewViewModel {
 
     func sendApplause(to memberID: UUID) async {
         guard canConfigureFamily, memberID != currentMemberID,
-              let range = selectedRange, let token = accessTokenProvider(),
-              !sendingApplauseIDs.contains(memberID) else { return }
+              let range = selectedRange, !sendingApplauseIDs.contains(memberID) else { return }
         sendingApplauseIDs.insert(memberID)
         applauseFailed = false
         defer { sendingApplauseIDs.remove(memberID) }
+        guard let token = await currentToken() else {
+            applauseFailed = true
+            return
+        }
         do {
             try await familyRepository.sendFamilyApplause(memberID: memberID, range: range, accessToken: token)
             sentApplauseIDs.insert(memberID)
@@ -187,7 +209,7 @@ final class FamilyOverviewViewModel {
     /// Also the explicit retry after a failed page (UX-06).
     func loadMore() async {
         guard hasMorePages, !isLoadingMore, !isLoading, let cursor = nextCursor else { return }
-        guard let token = accessTokenProvider() else {
+        guard let token = await currentToken() else {
             loadMoreFailed = true
             return
         }
@@ -219,7 +241,7 @@ final class FamilyOverviewViewModel {
     func updateFamilyName(_ newName: String) async throws {
         let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, trimmed != familyName else { return }
-        guard let token = accessTokenProvider() else { throw FamilyError.unavailable }
+        guard let token = await currentToken() else { throw FamilyError.unavailable }
         let updated = try await familyRepository.updateFamilyName(trimmed, accessToken: token)
         familyName = updated.name
         timeZoneID = updated.timeZoneID
@@ -235,7 +257,7 @@ final class FamilyOverviewViewModel {
               let member = members.first(where: { $0.id == memberID }),
               member.role == .kid,
               memberID != currentMemberID,
-              let token = accessTokenProvider() else { return .noLongerEligible }
+              let token = await currentToken() else { return .noLongerEligible }
         do {
             let updated = try await familyRepository.updateMemberName(
                 memberID: memberID, name: name, accessToken: token
@@ -254,7 +276,7 @@ final class FamilyOverviewViewModel {
 
     @discardableResult
     func refreshMember(memberID: UUID) async -> FamilyMemberDetail? {
-        guard let token = accessTokenProvider() else { return nil }
+        guard let token = await currentToken() else { return nil }
         do {
             let current = try await familyRepository.getMemberDetail(memberID: memberID, accessToken: token)
             replaceMember(FamilyMember(

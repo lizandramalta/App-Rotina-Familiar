@@ -153,13 +153,15 @@ Logs e métricas nunca registram tokens, senhas ou dados excluídos da projeçã
 | # | Decisão | Decidido por / data | Altera docs? |
 |---|---|---|---|
 | E-01 | RF36 prevalece: Kids consultam recompensa aceita, mas não participações nem resgate. | Pessoa usuária / 2026-10-10 | Sim — `screen-map.md`, `user-flows.md` e SPEC-014 atualizados nesta entrega de especificação. |
+| E-02 | **Aberta.** O protótipo de média fidelidade (Figma 579-59, UX-016) pede dados que o contrato da §5.1 não expõe: (a) avatares de participação nos cartões de `GET /v1/missions`, inclusive em missão `inProgress`, o que conflita com a §6 (não há participações antes do encerramento); (b) data prevista e responsável de cada tarefa em `GET /v1/missions/{missionId}`. Ambos ficaram fora da implementação (UX-016 UX-09). Incluí-los exige decidir a regra, versionar o contrato e planejar card de backend. | Pendente | Se aprovado: §5.1/§6 desta SPEC, `backend-contracts.md` e, no caso (a), RN/RF de participação. |
+| E-03 | **Aberta.** A tela de celebração “Missão concluída!” do protótipo é uma superfície e um gatilho novos (primeira abertura após o encerramento, por pessoa), inexistentes na base funcional e no screen map. Fora desta entrega. | Pendente | Se aprovada: base funcional, `screen-map.md`, `user-flows.md` e nova SPEC/UX ou revisão desta. |
 
 ## 10. Fases de implementação
 
 | Fase | Objetivo | CAs | Prontidão | Status |
 |---|---|---|---|---|
-| 1 | Projeções backend, autorização, isolamento e consistência de leitura | CA-01 a CA-06 | Testes unitários e de integração cobrindo perfis, famílias e reabertura | a fazer |
-| 2 | TEL-020/TEL-021 e recuperação de falhas no mobile | CA-07 e verificação visual dos CA-01 a CA-06 | Testes de ViewModel/UI e UX-spec revisada | a fazer |
+| 1 | Projeções backend, autorização, isolamento e consistência de leitura | CA-01 a CA-06 | Testes unitários e de integração cobrindo perfis, famílias e reabertura | concluída (SCRUM-85) |
+| 2 | TEL-020/TEL-021 e recuperação de falhas no mobile | CA-07 e verificação visual dos CA-01 a CA-06 | Testes de ViewModel/UI e UX-spec revisada | implementada (SCRUM-86), aguardando PR |
 
 Fase 1 não é publicável isoladamente: altera contrato de leitura ainda sem a experiência completa. Fase 2 é publicável com a Fase 1.
 

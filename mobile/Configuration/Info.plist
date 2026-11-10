@@ -6,10 +6,10 @@
 	<string>$(API_BASE_URL)</string>
 	<key>AppEnvironment</key>
 	<string>$(APP_ENVIRONMENT)</string>
-	<key>InviteLinkBaseURL</key>
-	<string>$(INVITE_LINK_BASE_URL)</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Mutua</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -24,10 +24,16 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
-	<key>NSCameraUsageDescription</key>
-	<string>A câmera é usada para tirar a foto do seu perfil ou de uma tarefa sinalizada.</string>
+	<key>InviteLinkBaseURL</key>
+	<string>$(INVITE_LINK_BASE_URL)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>whatsapp</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>A câmera é usada para tirar a foto do seu perfil ou de uma tarefa sinalizada.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

@@ -68,12 +68,19 @@ APNs recebe apenas tipo e ID; falha ou ausência de dispositivo não remove a co
 
 | Fase | Entrega | CAs | Status |
 |---|---|---|---|
-| 1 | Ciclos, apuração, outbox, consultas e autorização | CA-01 a CA-06 | a fazer |
-| 2 | TEL-052 e compartilhamento local | CA-07 a CA-08 | a fazer |
+| 1 | Ciclos, apuração, outbox, consultas e autorização | CA-01 a CA-06 | concluída (SCRUM-102) |
+| 2 | TEL-052 e compartilhamento local | CA-07 a CA-08 | implementada (SCRUM-103), aguardando PR |
 
 Fase 1 não é publicável isoladamente.
 
-## 8. Checklist
+## 8. Premissas e esclarecimentos
+
+| # | Decisão | Decidido por / data | Altera docs? |
+|---|---|---|---|
+| E-01 | O acesso interno em Minhas tarefas mostra o reconhecimento mais recente só durante a semana seguinte ao ciclo apurado, até sete dias civis depois de `endsAt`, no fuso do resultado. Depois disso o resultado continua existindo e consultável pelo contrato, sem card. | Pessoa usuária / 2026-11-08 | Sim — UX-020 §1/§7 e UF-15. Sem mudança de RN/RF ou contrato. |
+| E-02 | Textos de título, mensagem sugerida, push e retorno de cópia definidos em UX-020 §4 (UX-02 a UX-04). | Pessoa usuária / 2026-11-08 | Sim — UX-020 e UF-15. |
+
+## 9. Checklist
 
 - [x] Dependência, regras e contrato técnico mapeados.
 - [x] Segurança, titularidade e falhas presentes na Fase 1.

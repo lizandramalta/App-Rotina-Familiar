@@ -76,6 +76,15 @@ Para Administrador, missão concluída sem aceite mostra a ação “Resgatar re
 | `reward.wheel.unavailable` | O resgate desta missão não está disponível agora. | Estado inválido |
 | `reward.wheel.uncertain` | Ainda estamos confirmando a recompensa escolhida. | Resposta perdida |
 | `reward.wheel.refresh_mission` | Atualizar missão | Reconciliação |
+| `reward.wheel.mission_context` | Missão · %@ | Contexto da missão no cabeçalho |
+| `reward.wheel.instruction` | O sorteio só vale depois que você aceitar. | Antes do primeiro sorteio |
+| `reward.wheel.consult` | Consultar itens | Abre TEL-023 em modo consulta |
+| `reward.wheel.already_accepted_title` | Recompensa já escolhida | Título do alerta de conflito |
+| `reward.wheel.unavailable_title` | Resgate indisponível | Título do alerta de indisponibilidade |
+| `reward.wheel.view_mission` | Ver missão | Ação dos alertas; volta a TEL-021 recarregada |
+| `reward.wheel.error` | Não foi possível confirmar a recompensa. Atualize a missão antes de tentar de novo. | Recusa definitiva |
+| `reward.wheel.load_error` | Não foi possível carregar as recompensas. | Falha do catálogo, com “Tentar novamente” |
+| `reward.wheel.accepted_announcement` | Recompensa confirmada: %@ | Anúncio do VoiceOver após `200` |
 
 ## 8. Acessibilidade e adaptação
 
@@ -94,8 +103,19 @@ Para Administrador, missão concluída sem aceite mostra a ação “Resgatar re
 | UX-CA-04 | Conflito, indisponibilidade e resposta incerta levam à consulta do detalhe, sem alegar aceite. |
 | UX-CA-05 | A experiência é navegável por tecnologia assistiva e respeita Reduce Motion e adaptação iPhone/iPad. |
 
-## 10. Checklist de aprovação
+## 10. Decisões e esclarecimentos de UX
+
+| # | Decisão | Situação | Impacto |
+|---|---|---|---|
+| UX-01 | Respostas do aceite levam aos estados de §6 conforme SPEC-017 E-02; em `Uncertain` e `Error`, aceitar e sortear de novo ficam bloqueados até “Atualizar missão”. | Decidida pela pessoa usuária em 2026-11-08 | O Figma 575:1119 mostra “Aceitar recompensa” habilitado no estado incerto e deve ser ajustado por UX. |
+| UX-02 | `AlreadyAccepted` e `Unavailable` usam alerta com título, mensagem e “Ver missão”, que volta a TEL-021 recarregada. | Decidida pela pessoa usuária em 2026-11-08 | O Figma não tem quadro de indisponibilidade nem de erro definitivo. |
+| UX-03 | “Consultar itens” aparece antes e depois do sorteio; TEL-023 abre sem a ação de adicionar e o resultado local é preservado no retorno. | Decidida pela pessoa usuária em 2026-11-08 | Apresentação. |
+| UX-04 | As fatias da roleta não têm texto; o cartão do resultado nomeia o item sorteado. | Decidida pela pessoa usuária em 2026-11-08 | Apresentação. |
+| UX-05 | TEL-024 oculta a barra de abas, conforme `screen-map.md` 1.24; voltar fica bloqueado enquanto a recompensa é confirmada ou a missão é atualizada. | Decidida pela pessoa usuária em 2026-11-08 | O Figma 575:1119 mostra a barra e deve ser ajustado por UX. |
+
+## 11. Checklist de aprovação
 
 - [x] Fluxo, estados, microcopy e acessibilidade definidos.
 - [x] Permissões visuais alinhadas à SPEC-017 e à UX-016.
 - [x] Revisão e aprovação explícita junto da SPEC funcional em 2026-10-10.
+- [x] Decisões UX-01 a UX-05 registradas em 2026-11-08 (SCRUM-90).

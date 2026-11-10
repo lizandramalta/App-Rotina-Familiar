@@ -41,8 +41,18 @@ enum UITestScenario: String {
     case taskOptimisticFailure = "task-optimistic-failure"
     case routineCreation = "routine-creation"
     case missionManagement = "mission-management"
+    case missionReward = "mission-reward"
+    case missionRewardConflict = "mission-reward-conflict"
     case missionManagementMember = "mission-management-member"
     case missionManagementKids = "mission-management-kids"
+    /// SPEC-016 CA-07: the first list load succeeds, every later one fails (non-blocking banner).
+    case missionTrackingRefreshFailure = "mission-tracking-refresh-failure"
+    case rewardManagement = "reward-management"
+    case rewardManagementEmpty = "reward-management-empty"
+    case rewardManagementMember = "reward-management-member"
+    case weeklyRecognition = "weekly-recognition"
+    case weeklyRecognitionKidsTie = "weekly-recognition-kids-tie"
+    case weeklyRecognitionFailure = "weekly-recognition-failure"
 
     static var current: UITestScenario? {
         ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"].flatMap(UITestScenario.init(rawValue:))
@@ -60,7 +70,10 @@ enum UITestScenario: String {
             routineRepository: UITestRoutineRepository(),
             profileRepository: UITestProfileRepository(scenario: self),
             missionRepository: UITestMissionRepository(scenario: self),
+            rewardRepository: UITestRewardRepository(scenario: self),
             kidsSignalRepository: UITestKidsSignalRepository(scenario: self),
+            recognitionRepository: UITestRecognitionRepository(scenario: self),
+            highlightSharing: UITestHighlightSharing(isWhatsAppAvailable: self == .weeklyRecognition),
             credentialStore: UITestCredentialStore(),
             installationProofStore: UITestInstallationProof(),
             appleAuthenticator: UITestAppleAuthenticator()
@@ -84,11 +97,13 @@ enum UITestScenario: String {
         }
         if self == .taskManagement || self == .familySettings
             || self == .taskCompletionConflict || self == .taskOptimisticDelayed || self == .taskOptimisticFailure
-            || self == .routineCreation || self == .missionManagement {
+            || self == .routineCreation || self == .missionManagement || self == .missionTrackingRefreshFailure
+            || self == .missionReward || self == .missionRewardConflict
+            || self == .rewardManagement || self == .rewardManagementEmpty {
             sessionStore.apply(.session(Self.inviteSession(role: .administrator)))
             return
         }
-        if self == .missionManagementMember {
+        if self == .missionManagementMember || self == .rewardManagementMember {
             sessionStore.apply(.session(Self.inviteSession(role: .member)))
             return
         }
@@ -125,7 +140,11 @@ enum UITestScenario: String {
             sessionStore.apply(.session(Self.inviteSession(role: .member)))
             return
         }
-        if self == .dailyTasksKids || self == .dailyTasksKidsApplause {
+        if self == .weeklyRecognition || self == .weeklyRecognitionFailure {
+            sessionStore.apply(.session(Self.inviteSession(role: .administrator, memberID: UITestTaskFixtures.memberID)))
+            return
+        }
+        if self == .dailyTasksKids || self == .dailyTasksKidsApplause || self == .weeklyRecognitionKidsTie {
             // Must match `UITestTaskFixtures.kidMemberID`, the assignee on the Kids-owned fixture
             // tasks, so SPEC-011's `canReopen` check (assignee == current member) finds them.
             sessionStore.apply(.session(AuthenticatedSession(
@@ -1093,6 +1112,8 @@ private actor UITestProfileRepository: ProfileRepository {
 private enum UITestMissionFixtures {
     static let inProgressMissionID = UUID(uuidString: "00000000-0000-0000-0000-0000000000e1")!
     static let completedMissionID = UUID(uuidString: "00000000-0000-0000-0000-0000000000e2")!
+    /// SPEC-016: completed mission whose reward was already accepted (CA-03).
+    static let rewardedMissionID = UUID(uuidString: "00000000-0000-0000-0000-0000000000e3")!
 }
 
 /// Deterministic queue for TEL-015 (SPEC-013): three pending signals, oldest first, an empty queue or a failing load.
@@ -1141,13 +1162,21 @@ private struct UITestKidsSignalRepository: KidsSignalRepository {
     }
 }
 
-/// SPEC-014 Fase 2 UI fixture: two missions pre-linked to tasks already seeded by
+/// SPEC-014 Fase 2 / SPEC-016 UI fixture: three missions (in progress, completed awaiting reward,
+/// completed with accepted reward) pre-linked to tasks already seeded by
 /// `UITestTaskRepository`, so TEL-021/022's by-id hydration resolves end-to-end without a backend.
 /// The in-progress mission links one task assigned to the adult fixture member and one assigned to
 /// the Kids fixture member, so CA-19's own-task tap-through (and its absence for "de outra pessoa") is testable.
 private actor UITestMissionRepository: MissionRepository {
     private let scenario: UITestScenario
     private var missions: [UUID: Mission]
+    private var acceptedRewards: [UUID: AcceptedMissionReward] = [
+        UITestMissionFixtures.rewardedMissionID: AcceptedMissionReward(
+            rewardItemID: UUID(uuidString: "00000000-0000-0000-0000-0000000000f6")!,
+            title: "Noite de pizza"
+        ),
+    ]
+    private var listCallCount = 0
 
     init(scenario: UITestScenario) {
         self.scenario = scenario
@@ -1175,6 +1204,17 @@ private actor UITestMissionRepository: MissionRepository {
                 isRedemptionAvailable: omitsRedemption ? nil : true,
                 createdAt: Date(timeIntervalSince1970: 1_760_050_000)
             ),
+            UITestMissionFixtures.rewardedMissionID: Mission(
+                id: UITestMissionFixtures.rewardedMissionID,
+                familyID: UITestTaskFixtures.familyID,
+                title: "Quarto arrumado",
+                note: nil,
+                status: .completed,
+                taskIDs: [UITestTaskFixtures.completedTaskID],
+                completedAt: Date(timeIntervalSince1970: 1_760_200_000),
+                isRedemptionAvailable: omitsRedemption ? nil : false,
+                createdAt: Date(timeIntervalSince1970: 1_760_060_000)
+            ),
         ]
     }
 
@@ -1194,26 +1234,75 @@ private actor UITestMissionRepository: MissionRepository {
         return mission
     }
 
-    func mission(id: UUID, accessToken: String) async throws -> Mission {
+    func mission(id: UUID, accessToken: String) async throws -> MissionDetail {
         guard let mission = missions[id] else {
             throw MissionError.notFound
         }
-        return mission
+        let isKids = scenario == .missionManagementKids
+        let tasks = mission.taskIDs.map { taskID in
+            let fixture = Self.linkedTasks[taskID]
+            return MissionLinkedTask(id: taskID, title: fixture?.title ?? "Nova tarefa", status: fixture?.status ?? .pending)
+        }
+        let reward = acceptedRewards[id]
+        return MissionDetail(
+            id: mission.id,
+            title: mission.title,
+            note: mission.note,
+            status: mission.status,
+            tasks: tasks,
+            completedAt: mission.completedAt,
+            progressPercent: Self.progressPercent(tasks),
+            isRedemptionAvailable: isKids ? nil : (mission.status == .completed && reward == nil),
+            acceptedReward: reward,
+            // Kids projection omits participations (SPEC-016 CA-03).
+            participations: isKids ? nil : (mission.status == .completed ? Self.participations : []),
+            createdAt: mission.createdAt
+        )
     }
 
-    func missions(cursor: String?, accessToken: String) async throws -> MissionPage {
-        let items = missions.values
+    func missions(accessToken: String) async throws -> MissionCollections {
+        listCallCount += 1
+        if scenario == .missionTrackingRefreshFailure, listCallCount > 1 {
+            throw MissionError.network
+        }
+        let isKids = scenario == .missionManagementKids
+        let summaries = missions.values
             .sorted { $0.createdAt < $1.createdAt }
-            .map {
-                MissionSummary(
-                    id: $0.id,
-                    title: $0.title,
-                    status: $0.status,
-                    taskCount: $0.taskIDs.count,
-                    completedTaskCount: $0.status == .completed ? $0.taskIDs.count : 0
+            .map { mission -> MissionSummary in
+                let statuses = mission.taskIDs.map { Self.linkedTasks[$0]?.status ?? .pending }
+                let completedCount = statuses.filter { $0 == .completed }.count
+                let reward = acceptedRewards[mission.id]
+                return MissionSummary(
+                    id: mission.id,
+                    title: mission.title,
+                    status: mission.status,
+                    taskCount: statuses.count,
+                    completedTaskCount: completedCount,
+                    progressPercent: statuses.isEmpty ? 0 : Double(completedCount) / Double(statuses.count) * 100,
+                    isRedemptionAvailable: isKids ? nil : (mission.status == .completed && reward == nil),
+                    acceptedReward: reward
                 )
             }
-        return MissionPage(items: items, nextCursor: nil)
+        return MissionCollections(
+            inProgress: summaries.filter { $0.status == .inProgress },
+            completed: summaries.filter { $0.status == .completed }
+        )
+    }
+
+    private static let linkedTasks: [UUID: (title: String, status: TaskStatus)] = [
+        UITestTaskFixtures.pendingTaskID: ("Arrumar os brinquedos", .pending),
+        UITestTaskFixtures.completedTaskID: ("Lavar a louça", .completed),
+        UITestTaskFixtures.awaitingConfirmationTaskID: ("Guardar a roupa", .awaitingConfirmation),
+    ]
+
+    private static let participations: [MissionParticipation] = [
+        MissionParticipation(memberID: UITestTaskFixtures.memberID, displayName: "Ana Silva"),
+        MissionParticipation(memberID: UITestTaskFixtures.kidMemberID, displayName: "Rafa Silva"),
+    ]
+
+    private static func progressPercent(_ tasks: [MissionLinkedTask]) -> Double {
+        guard !tasks.isEmpty else { return 0 }
+        return Double(tasks.filter { $0.status == .completed }.count) / Double(tasks.count) * 100
     }
 
     func updateMission(_ command: UpdateMissionCommand, accessToken: String) async throws -> Mission {
@@ -1268,6 +1357,72 @@ private actor UITestMissionRepository: MissionRepository {
         let filtered = query.map { text in allTasks.filter { $0.title.localizedCaseInsensitiveContains(text) } } ?? allTasks
         return MissionTaskOptionPage(items: filtered, nextCursor: nil)
     }
+
+    /// SCRUM-90: `mission-reward-conflict` simulates another Administrador accepting first (CA-05).
+    func acceptReward(missionID: UUID, rewardItemID: UUID, accessToken: String) async throws -> AcceptedMissionReward {
+        guard let mission = missions[missionID], mission.status == .completed else {
+            throw RewardAcceptanceError.unavailable
+        }
+        if acceptedRewards[missionID] != nil { throw RewardAcceptanceError.alreadyAccepted }
+        if scenario == .missionRewardConflict {
+            acceptedRewards[missionID] = AcceptedMissionReward(
+                rewardItemID: UUID(uuidString: "00000000-0000-0000-0000-0000000000ff")!,
+                title: "Sorvete no parque"
+            )
+            throw RewardAcceptanceError.alreadyAccepted
+        }
+        let accepted = AcceptedMissionReward(rewardItemID: rewardItemID, title: UITestRewardRepository.title(for: rewardItemID))
+        acceptedRewards[missionID] = accepted
+        return accepted
+    }
+}
+
+/// SPEC-015 Fase 1 UI fixture: three predefined items and, unless `.rewardManagementEmpty`, one
+/// custom item. Supports adding a second custom item so CA-02/CA-04 are reachable in UI tests.
+private actor UITestRewardRepository: RewardRepository {
+    private let scenario: UITestScenario
+    private var custom: [RewardItem]
+
+    private static let predefinedItems: [RewardItem] = [
+        RewardItem(id: UUID(uuidString: "00000000-0000-0000-0000-0000000000f3")!, title: "Escolher o filme da noite", details: nil, source: .predefined, createdAt: nil),
+        RewardItem(id: UUID(uuidString: "00000000-0000-0000-0000-0000000000f4")!, title: "Escolher o jantar em família", details: nil, source: .predefined, createdAt: nil),
+        RewardItem(id: UUID(uuidString: "00000000-0000-0000-0000-0000000000f5")!, title: "Noite de jogos em família", details: nil, source: .predefined, createdAt: nil),
+    ]
+
+    /// Title of a fixture item, for the accepted snapshot of the mission UI tests.
+    static func title(for id: UUID) -> String {
+        if let item = predefinedItems.first(where: { $0.id == id }) { return item.title }
+        return id.uuidString.hasSuffix("f6") ? "Noite de pizza" : "Recompensa"
+    }
+
+    init(scenario: UITestScenario) {
+        self.scenario = scenario
+        custom = scenario == .rewardManagementEmpty ? [] : [
+            RewardItem(
+                id: UUID(uuidString: "00000000-0000-0000-0000-0000000000f6")!,
+                title: "Noite de pizza",
+                details: "Escolher juntos o sabor e o filme",
+                source: .custom,
+                createdAt: Date(timeIntervalSince1970: 1_760_000_000)
+            ),
+        ]
+    }
+
+    func rewardItems(accessToken: String) async throws -> RewardCatalog {
+        if scenario == .rewardManagementMember {
+            throw RewardItemError.insufficientPermissions
+        }
+        return RewardCatalog(predefined: Self.predefinedItems, custom: custom)
+    }
+
+    func addRewardItem(_ command: AddRewardItemCommand, accessToken: String) async throws -> RewardItem {
+        if custom.contains(where: { $0.title.caseInsensitiveCompare(command.title) == .orderedSame }) {
+            throw RewardItemError.titleAlreadyExists
+        }
+        let item = RewardItem(id: UUID(), title: command.title, details: command.details, source: .custom, createdAt: Date())
+        custom.append(item)
+        return item
+    }
 }
 
 private final class UITestCredentialStore: SessionCredentialStoring, @unchecked Sendable {
@@ -1291,5 +1446,67 @@ private final class UITestAppleAuthenticator: AppleAuthenticating {
             rawNonce: "ui-test-nonce"
         )
     }
+}
+
+/// SCRUM-103: one featured recognition whose cycle ended last Monday, so the entry card shows today.
+private struct UITestRecognitionRepository: RecognitionRepository {
+    let scenario: UITestScenario
+
+    func listOwn(accessToken: String) async throws -> [WeeklyRecognition] {
+        switch scenario {
+        case .weeklyRecognition, .weeklyRecognitionKidsTie, .weeklyRecognitionFailure:
+            return [Self.featured(isTie: scenario == .weeklyRecognitionKidsTie)]
+        default:
+            return []
+        }
+    }
+
+    func recognition(id: UUID, accessToken: String) async throws -> WeeklyRecognition {
+        if scenario == .weeklyRecognitionFailure { throw RecognitionError.network }
+        guard id == Self.recognitionID else { throw RecognitionError.notFound }
+        return Self.featured(isTie: scenario == .weeklyRecognitionKidsTie)
+    }
+
+    func recordOpening(id: UUID, accessToken: String) async throws -> WeeklyRecognition {
+        try await recognition(id: id, accessToken: accessToken)
+    }
+
+    static let recognitionID = UUID(uuidString: "00000000-0000-0000-0000-00000000c052")!
+
+    private static func featured(isTie: Bool) -> WeeklyRecognition {
+        var calendar = Calendar(identifier: .gregorian)
+        let timeZone = TimeZone(identifier: "America/Sao_Paulo") ?? .current
+        calendar.timeZone = timeZone
+        calendar.firstWeekday = 2
+        let weekStart = calendar.dateInterval(of: .weekOfYear, for: Date())?.start ?? Date()
+        let startsAt = calendar.date(byAdding: .day, value: -7, to: weekStart) ?? weekStart
+        return WeeklyRecognition(
+            id: recognitionID,
+            startsAt: startsAt,
+            endsAt: weekStart,
+            timeZoneID: timeZone.identifier,
+            isTransition: false,
+            points: 42,
+            completedTasks: 12,
+            isTie: isTie,
+            openedAt: nil
+        )
+    }
+}
+
+/// Records sharing actions instead of opening WhatsApp or touching the real pasteboard.
+@MainActor
+private final class UITestHighlightSharing: HighlightSharing {
+    let isWhatsAppAvailable: Bool
+
+    init(isWhatsAppAvailable: Bool) {
+        self.isWhatsAppAvailable = isWhatsAppAvailable
+    }
+
+    var canOpenWhatsApp: Bool { isWhatsAppAvailable }
+
+    func openWhatsApp(text: String) async -> Bool { isWhatsAppAvailable }
+
+    func copy(text: String) {}
 }
 #endif

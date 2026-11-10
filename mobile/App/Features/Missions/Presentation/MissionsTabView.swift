@@ -8,12 +8,15 @@ struct MissionsTabView: View {
     let taskRepository: any TaskRepository
     let routineRepository: any RoutineRepository
     let familyRepository: any FamilyRepository
+    let rewardRepository: any RewardRepository
     let role: MemberRole
     let currentMemberID: UUID
     let accessToken: String
 
     @State private var path: [MissionRoute] = []
     @State private var listRevision = 0
+    /// Reloads TEL-021 when TEL-024 returns, whatever the outcome (UX-017 §4).
+    @State private var detailRevision = 0
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -23,11 +26,21 @@ struct MissionsTabView: View {
                 accessToken: accessToken,
                 refreshRevision: listRevision,
                 onSelectMission: { path.append(.detail($0)) },
-                onCreateMission: { path.append(.create) }
+                onCreateMission: { path.append(.create) },
+                onOpenRewardItems: { path.append(.rewardItems) }
             )
             .accessibilityIdentifier("access.destination.missions")
             .navigationDestination(for: MissionRoute.self) { route in
+                // Tab bar only on each tab's root route; every pushed screen hides it.
                 destination(for: route)
+                    .toolbar(.hidden, for: .tabBar)
+            }
+        }
+        // MA-15 / UX-016 §4: returning to TEL-020 reloads the canonical list, so a card reflects
+        // whatever TEL-021/022 confirmed (including saves, which pop back to the root too).
+        .onChange(of: path) { _, newPath in
+            if newPath.isEmpty {
+                listRevision += 1
             }
         }
         #if DEBUG
@@ -48,7 +61,7 @@ struct MissionsTabView: View {
                 routineRepository: routineRepository,
                 familyRepository: familyRepository,
                 accessToken: accessToken,
-                onSaved: { path.removeAll(); listRevision += 1 }
+                onSaved: { path.removeAll() }
             )
         case let .detail(missionID):
             MissionDetailView(
@@ -59,7 +72,9 @@ struct MissionsTabView: View {
                 taskRepository: taskRepository,
                 accessToken: accessToken,
                 onRequestEdit: { path.append(.edit(missionID)) },
-                onSelectTask: { path.append(.taskDetail($0)) }
+                onSelectTask: { path.append(.taskDetail($0)) },
+                onRedeem: { mission in path.append(.rewardWheel(mission.id, missionTitle: mission.title)) },
+                refreshRevision: detailRevision
             )
         case let .edit(missionID):
             MissionEditorView(
@@ -83,6 +98,32 @@ struct MissionsTabView: View {
                 onRequestEdit: { scope in path.append(.taskEdit(taskID, scope: scope)) },
                 onDeleted: { if !path.isEmpty { path.removeLast() } }
             )
+        case .rewardItems:
+            RewardItemsView(
+                repository: rewardRepository,
+                role: role,
+                accessToken: accessToken
+            )
+        case let .rewardWheel(missionID, missionTitle):
+            RewardWheelView(
+                viewModel: RewardWheelViewModel(
+                    missionID: missionID,
+                    missionTitle: missionTitle,
+                    missionRepository: missionRepository,
+                    rewardRepository: rewardRepository,
+                    accessToken: accessToken
+                ),
+                onAccepted: { _ in returnToMissionDetail() },
+                onLeave: { returnToMissionDetail() },
+                onOpenCatalog: { path.append(.rewardItemsConsult) }
+            )
+        case .rewardItemsConsult:
+            RewardItemsView(
+                repository: rewardRepository,
+                role: role,
+                accessToken: accessToken,
+                allowsManagement: false
+            )
         case let .taskEdit(taskID, scope):
             TaskEditorView(
                 mode: .edit(taskID, scope: scope),
@@ -95,6 +136,14 @@ struct MissionsTabView: View {
                 onRoutineSaved: { _ in }
             )
         }
+    }
+
+    /// Pops TEL-024 (and a consult TEL-023 above it) back to TEL-021 and reloads it.
+    private func returnToMissionDetail() {
+        if let wheel = path.lastIndex(where: { if case .rewardWheel = $0 { true } else { false } }) {
+            path.removeSubrange(wheel...)
+        }
+        detailRevision += 1
     }
 
     #if DEBUG

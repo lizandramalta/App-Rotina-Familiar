@@ -302,7 +302,7 @@ struct InviteMembersView: View {
     private func shareMessage(for generated: GeneratedInvite) -> String {
         let template = String(
             localized: "family.onboarding.invite_share_message",
-            defaultValue: "Convite para entrar na família no Rotina Familiar:\n\nLink: %@\nSenha: %@"
+            defaultValue: "Convite para entrar na família no Mutua:\n\nLink: %@\nSenha: %@"
         )
         return String(format: template, generated.invite.link, generated.invite.password)
     }

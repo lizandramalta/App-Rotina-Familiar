@@ -24,7 +24,7 @@ final class DailyTaskListViewModel {
     private let completeTask: CompleteTaskUseCase
     private let reopenTask: ReopenTaskUseCase
     private let familyRepository: (any FamilyRepository)?
-    private let accessToken: String
+    private let accessTokenProvider: AccessTokenProvider
     let role: MemberRole
     private let currentMemberID: UUID
     private let today: () -> Date
@@ -64,7 +64,7 @@ final class DailyTaskListViewModel {
         currentMemberID: UUID,
         repository: any TaskRepository,
         familyRepository: (any FamilyRepository)? = nil,
-        accessToken: String,
+        accessTokenProvider: @escaping AccessTokenProvider,
         today: @escaping () -> Date = Date.init
     ) {
         self.audience = audience
@@ -74,7 +74,7 @@ final class DailyTaskListViewModel {
         self.completeTask = CompleteTaskUseCase(repository: repository)
         self.reopenTask = ReopenTaskUseCase(repository: repository)
         self.familyRepository = familyRepository
-        self.accessToken = accessToken
+        self.accessTokenProvider = accessTokenProvider
         self.role = role
         self.currentMemberID = currentMemberID
         self.today = today
@@ -114,9 +114,11 @@ final class DailyTaskListViewModel {
 
         let referenceDate = Self.wireString(from: selectedDate)
         do {
-            async let tasksResult = getDailyTasks.execute(referenceDate: referenceDate, cursor: nil, accessToken: accessToken)
-            async let progressResult = getDailyProgress.execute(referenceDate: referenceDate, accessToken: accessToken)
-            let (page, progress) = try await (tasksResult, progressResult)
+            let (page, progress) = try await withAccessToken(accessTokenProvider) { token in
+                async let tasksResult = getDailyTasks.execute(referenceDate: referenceDate, cursor: nil, accessToken: token)
+                async let progressResult = getDailyProgress.execute(referenceDate: referenceDate, accessToken: token)
+                return try await (tasksResult, progressResult)
+            }
             guard referenceDate == Self.wireString(from: selectedDate) else { return }
             var completedAdjustment = 0
             serverItems = page.items.map { item in
@@ -153,8 +155,11 @@ final class DailyTaskListViewModel {
 
     private func loadReceivedApplause() async {
         guard let familyRepository else { return }
-        do { receivedApplause = try await familyRepository.listReceivedFamilyApplause(accessToken: accessToken) }
-        catch { /* Checklist remains usable when optional messages are unavailable. */ }
+        do {
+            receivedApplause = try await withAccessToken(accessTokenProvider) {
+                try await familyRepository.listReceivedFamilyApplause(accessToken: $0)
+            }
+        } catch { /* Checklist remains usable when optional messages are unavailable. */ }
     }
 
     func refreshReceivedApplause() async { await loadReceivedApplause() }
@@ -162,7 +167,9 @@ final class DailyTaskListViewModel {
     func dismissApplause(_ id: UUID) async {
         guard let familyRepository else { return }
         do {
-            try await familyRepository.dismissFamilyApplause(id: id, accessToken: accessToken)
+            try await withAccessToken(accessTokenProvider) {
+                try await familyRepository.dismissFamilyApplause(id: id, accessToken: $0)
+            }
             receivedApplause.removeAll { $0.id == id }
         } catch {
             applauseDismissFailed = true
@@ -226,7 +233,7 @@ final class DailyTaskListViewModel {
         actionInFlight.insert(taskID)
         defer { actionInFlight.remove(taskID) }
         do {
-            let latest = try await getTaskDetail.execute(taskID: taskID, accessToken: accessToken)
+            let latest = try await withAccessToken(accessTokenProvider) { try await getTaskDetail.execute(taskID: taskID, accessToken: $0) }
             mergeCanonical(latest)
             desiredCompleted.removeValue(forKey: taskID)
             unresolvedTasks.remove(taskID)
@@ -269,11 +276,13 @@ final class DailyTaskListViewModel {
             do {
                 let result: FamilyTask
                 if desired {
-                    result = try await completeTask.execute(taskID: taskID, accessToken: accessToken)
+                    result = try await withAccessToken(accessTokenProvider) { try await completeTask.execute(taskID: taskID, accessToken: $0) }
                     guard result.status == .completed else { throw TaskError.rejected }
                 } else {
                     let confirm = confirmedReopenIDs.remove(taskID) != nil
-                    result = try await reopenTask.execute(taskID: taskID, confirm: confirm, accessToken: accessToken)
+                    result = try await withAccessToken(accessTokenProvider) {
+                        try await reopenTask.execute(taskID: taskID, confirm: confirm, accessToken: $0)
+                    }
                     guard result.status != .completed else { throw TaskError.rejected }
                     cancelMissionReopen()
                 }
@@ -308,7 +317,7 @@ final class DailyTaskListViewModel {
             }
         }
         do {
-            let latest = try await getTaskDetail.execute(taskID: taskID, accessToken: accessToken)
+            let latest = try await withAccessToken(accessTokenProvider) { try await getTaskDetail.execute(taskID: taskID, accessToken: $0) }
             mergeCanonical(latest)
             if desiredCompleted[taskID] == (latest.status == .completed) { return true }
             // A later tap is an explicit new intent; only it may initiate another write.
@@ -406,7 +415,7 @@ final class DailyTaskListViewModel {
             var cursor: String?
             var seenCursors = Set<String>()
             repeat {
-                let page = try await familyRepository.listMembers(accessToken: accessToken, cursor: cursor)
+                let page = try await withAccessToken(accessTokenProvider) { try await familyRepository.listMembers(accessToken: $0, cursor: cursor) }
                 for member in page.items {
                     roles[member.id] = member.role
                     names[member.id] = member.name

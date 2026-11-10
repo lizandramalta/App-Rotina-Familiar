@@ -11,7 +11,7 @@ struct CreateMissionUseCase: Sendable {
 struct GetMissionDetailUseCase: Sendable {
     let repository: any MissionRepository
 
-    func execute(missionID: UUID, accessToken: String) async throws -> Mission {
+    func execute(missionID: UUID, accessToken: String) async throws -> MissionDetail {
         try await repository.mission(id: missionID, accessToken: accessToken)
     }
 }
@@ -27,8 +27,8 @@ struct UpdateMissionUseCase: Sendable {
 struct ListMissionsUseCase: Sendable {
     let repository: any MissionRepository
 
-    func execute(cursor: String?, accessToken: String) async throws -> MissionPage {
-        try await repository.missions(cursor: cursor, accessToken: accessToken)
+    func execute(accessToken: String) async throws -> MissionCollections {
+        try await repository.missions(accessToken: accessToken)
     }
 }
 
@@ -41,8 +41,9 @@ struct GetMissionTaskOptionsUseCase: Sendable {
 }
 
 /// Resolves each linked `taskId` via the general single-task lookup (the same one TEL-012 already
-/// uses), since the mission resource itself only carries bare ids (SPEC-014 §5.2). Shared by
-/// TEL-021 and TEL-022's edit mode. All lookups run in parallel; any single failure fails the
+/// uses), since the mission detail projection carries neither assignees nor weight (SPEC-016 §5.1).
+/// Used by TEL-022's edit mode (picker needs weight/date/assignees) and by TEL-021 for Kids only, to
+/// know which linked tasks are their own (decisão E-1 do SCRUM-86). All lookups run in parallel; any single failure fails the
 /// whole operation (OUT_OF_SCOPE_FINDING: no batch "tasks by ids" endpoint exists yet).
 struct HydrateLinkedTasksUseCase: Sendable {
     let taskRepository: any TaskRepository

@@ -1,3 +1,6 @@
+import { PostgresRecognitionRepository } from '../modules/recognition/infrastructure/postgres-recognition-repository.js';
+import { FinalizeWeeklyHighlight } from '../modules/recognition/application/finalize-weekly-highlight.js';
+import { OwnWeeklyRecognitions } from '../modules/recognition/application/own-weekly-recognitions.js';
 import type { Configuration } from './configuration.js';
 import { ConsoleLogger, type Logger } from '../shared/infrastructure/observability/logger.js';
 import { SystemClock, type Clock } from '../shared/application/clock.js';
@@ -104,6 +107,7 @@ import {
 import { PostgresRoutineRepository } from '../modules/routines/infrastructure/postgres-routine-repository.js';
 import { ReopenTaskUseCase } from '../modules/tasks/application/reopen-task-use-case.js';
 import { CloseEligibleMissions } from '../modules/missions/application/close-eligible-missions.js';
+import { AcceptMissionRewardUseCase } from '../modules/missions/application/accept-mission-reward-use-case.js';
 import {
   CreateMissionUseCase,
   EditMissionUseCase,
@@ -119,6 +123,8 @@ import {
 import { PostgresRewardRepository } from '../modules/rewards/infrastructure/postgres-reward-repository.js';
 
 export interface ApplicationContainer {
+  readonly finalizeWeeklyHighlight: FinalizeWeeklyHighlight;
+  readonly ownWeeklyRecognitions: OwnWeeklyRecognitions;
   readonly config: Configuration;
   readonly logger: Logger;
   readonly clock: Clock;
@@ -181,6 +187,7 @@ export interface ApplicationContainer {
   readonly listMissionsUseCase: ListMissionsUseCase;
   readonly getMissionDetailUseCase: GetMissionDetailUseCase;
   readonly getMissionTaskOptionsUseCase: GetMissionTaskOptionsUseCase;
+  readonly acceptMissionRewardUseCase: AcceptMissionRewardUseCase;
   readonly listRewardItemsUseCase: ListRewardItemsUseCase;
   readonly addRewardItemUseCase: AddRewardItemUseCase;
   dispose(): Promise<void>;
@@ -326,6 +333,15 @@ export function createContainer(config: Configuration): ApplicationContainer {
 
   const familySettingsRepository = new PostgresFamilySettingsRepository();
 
+  const recognitionRepository = new PostgresRecognitionRepository();
+  const finalizeWeeklyHighlight = new FinalizeWeeklyHighlight({
+    repository: recognitionRepository,
+    calendar: familySettingsRepository,
+    transactionRunner,
+    newId: () => accessCrypto.newId(),
+  });
+  const ownWeeklyRecognitions = new OwnWeeklyRecognitions(recognitionRepository, transactionRunner);
+
   const getFamilySettingsUseCase = new GetFamilySettingsUseCase({
     repository: familySettingsRepository,
     crypto: accessCrypto,
@@ -342,6 +358,7 @@ export function createContainer(config: Configuration): ApplicationContainer {
   });
 
   const changeFamilyTimeZoneUseCase = new ChangeFamilyTimeZoneUseCase({
+    highlights: finalizeWeeklyHighlight,
     repository: familySettingsRepository,
     crypto: accessCrypto,
     transactionRunner,
@@ -457,6 +474,11 @@ export function createContainer(config: Configuration): ApplicationContainer {
   const listRewardItemsUseCase = new ListRewardItemsUseCase(rewardDependencies);
   const addRewardItemUseCase = new AddRewardItemUseCase({ ...rewardDependencies, clock });
 
+  const acceptMissionRewardUseCase = new AcceptMissionRewardUseCase({
+    ...missionDependencies,
+    rewardCatalog: rewardRepository,
+  });
+
   const taskRepository = new PostgresTaskRepository();
   const taskDependencies = { repository: taskRepository, transactionRunner, clock };
   const createTaskUseCase = new CreateTaskUseCase(taskDependencies);
@@ -528,6 +550,8 @@ export function createContainer(config: Configuration): ApplicationContainer {
   });
 
   return {
+    finalizeWeeklyHighlight,
+    ownWeeklyRecognitions,
     config,
     logger,
     clock,
@@ -590,6 +614,7 @@ export function createContainer(config: Configuration): ApplicationContainer {
     listMissionsUseCase,
     getMissionDetailUseCase,
     getMissionTaskOptionsUseCase,
+    acceptMissionRewardUseCase,
     listRewardItemsUseCase,
     addRewardItemUseCase,
     async dispose(): Promise<void> {

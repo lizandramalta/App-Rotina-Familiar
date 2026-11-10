@@ -1,3 +1,4 @@
+import type { FinalizeFamilyHighlightsPort } from '../../recognition/application/recognition-repository-port.js';
 import type { Clock } from '../../../shared/application/clock.js';
 import type { TransactionRunner } from '../../../shared/application/transaction-runner.js';
 import type { Logger } from '../../../shared/infrastructure/observability/logger.js';
@@ -27,6 +28,7 @@ export class ChangeFamilyTimeZoneUseCase {
   constructor(
     private readonly deps: {
       readonly repository: FamilySettingsRepositoryPort;
+      readonly highlights?: FinalizeFamilyHighlightsPort;
       readonly crypto: Pick<AccessCryptoPort, 'newId'>;
       readonly transactionRunner: TransactionRunner;
       readonly clock: Clock;
@@ -56,6 +58,9 @@ export class ChangeFamilyTimeZoneUseCase {
         });
 
         await persistSettlement({ repository, newId: () => crypto.newId() }, tx, actor, state, now);
+
+        // SPEC-020/BA-13: finalizar vencidos antes de modificar o ciclo aberto.
+        await this.deps.highlights?.finalizeInTransaction(tx, actor.familyId, now);
 
         // Última solicitação válida vence: a programada pendente deixa de valer.
         if (state.pendingScheduled !== undefined) {

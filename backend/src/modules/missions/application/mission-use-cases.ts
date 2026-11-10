@@ -26,6 +26,7 @@ import {
 } from '../domain/mission-validation.js';
 import type { CloseEligibleMissions } from './close-eligible-missions.js';
 import type {
+  AcceptedRewardRecord,
   MissionParticipantRecord,
   MissionRecord,
   MissionRepositoryPort,
@@ -40,6 +41,14 @@ export const TASK_OPTIONS_PAGE_SIZE = 20;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const QUERY_MAX_LENGTH = 60;
 
+export interface AcceptedRewardResponse {
+  readonly rewardItemId: string;
+  readonly title: string;
+  readonly details: string | null;
+  readonly source: 'predefined' | 'custom';
+  readonly acceptedAt: string;
+}
+
 export interface MissionResponse {
   readonly id: string;
   readonly familyId: string;
@@ -49,6 +58,7 @@ export interface MissionResponse {
   readonly taskIds: readonly string[];
   readonly completedAt: string | null;
   readonly isRedemptionAvailable: boolean;
+  readonly acceptedReward: AcceptedRewardResponse | null;
   readonly createdAt: string;
 }
 
@@ -72,8 +82,7 @@ export interface MissionListItem {
   readonly completedTaskCount: number;
   readonly progressPercent: number;
   readonly isRedemptionAvailable: boolean;
-  // Aceite de recompensa é introduzido pela SPEC-017; nenhum registro existe ainda (CA-05).
-  readonly acceptedReward: null;
+  readonly acceptedReward: AcceptedRewardResponse | null;
 }
 
 /** Projeção Kids da lista: sem a situação de resgate (RF36/RN33). */
@@ -84,7 +93,7 @@ export interface KidsMissionListItem {
   readonly taskCount: number;
   readonly completedTaskCount: number;
   readonly progressPercent: number;
-  readonly acceptedReward: null;
+  readonly acceptedReward: AcceptedRewardResponse | null;
 }
 
 export interface MissionListResponse {
@@ -103,7 +112,7 @@ export interface MissionDetailResponse {
   readonly completedAt: string | null;
   readonly progressPercent: number;
   readonly isRedemptionAvailable: boolean;
-  readonly acceptedReward: null;
+  readonly acceptedReward: AcceptedRewardResponse | null;
   readonly participations: readonly MissionParticipantProjection[];
   readonly createdAt: string;
 }
@@ -117,7 +126,7 @@ export interface KidsMissionDetailResponse {
   readonly tasks: readonly MissionTaskProjection[];
   readonly completedAt: string | null;
   readonly progressPercent: number;
-  readonly acceptedReward: null;
+  readonly acceptedReward: AcceptedRewardResponse | null;
   readonly createdAt: string;
 }
 
@@ -137,7 +146,7 @@ export interface EditMissionCommand extends MissionCommand {
   readonly missionId: string;
 }
 
-interface Deps {
+export interface Deps {
   readonly repository: MissionRepositoryPort;
   readonly transactionRunner: TransactionRunner;
   readonly clock: Clock;
@@ -148,7 +157,21 @@ function statusOf(mission: { readonly completedAt: Date | null }): MissionStatus
   return mission.completedAt === null ? 'inProgress' : 'completed';
 }
 
-function toResponse(mission: MissionRecord): MissionResponse {
+function toAcceptedRewardResponse(
+  reward: AcceptedRewardRecord | null,
+): AcceptedRewardResponse | null {
+  return reward === null
+    ? null
+    : {
+        rewardItemId: reward.rewardItemId,
+        title: reward.title,
+        details: reward.details,
+        source: reward.source,
+        acceptedAt: reward.acceptedAt.toISOString(),
+      };
+}
+
+export function toResponse(mission: MissionRecord): MissionResponse {
   return {
     id: mission.id,
     familyId: mission.familyId,
@@ -157,7 +180,8 @@ function toResponse(mission: MissionRecord): MissionResponse {
     status: statusOf(mission),
     taskIds: mission.taskIds,
     completedAt: mission.completedAt?.toISOString() ?? null,
-    isRedemptionAvailable: mission.completedAt !== null,
+    isRedemptionAvailable: mission.completedAt !== null && mission.acceptedReward === null,
+    acceptedReward: toAcceptedRewardResponse(mission.acceptedReward),
     createdAt: mission.createdAt.toISOString(),
   };
 }
@@ -185,9 +209,8 @@ function toMissionDetailResponse(
     tasks: mission.tasks,
     completedAt: mission.completedAt?.toISOString() ?? null,
     progressPercent: progressPercentOf(mission.tasks.length, completedTasksOf(mission.tasks)),
-    isRedemptionAvailable: mission.completedAt !== null,
-    // Aceite de recompensa é introduzido pela SPEC-017; nenhum registro existe ainda (CA-05).
-    acceptedReward: null,
+    isRedemptionAvailable: mission.completedAt !== null && mission.acceptedReward === null,
+    acceptedReward: toAcceptedRewardResponse(mission.acceptedReward),
     participations: participations.map((participant) => ({
       memberId: participant.memberId,
       displayName: participant.displayName,
@@ -205,12 +228,12 @@ function toKidsMissionDetailResponse(mission: MissionRecord): KidsMissionDetailR
     tasks: mission.tasks,
     completedAt: mission.completedAt?.toISOString() ?? null,
     progressPercent: progressPercentOf(mission.tasks.length, completedTasksOf(mission.tasks)),
-    acceptedReward: null,
+    acceptedReward: toAcceptedRewardResponse(mission.acceptedReward),
     createdAt: mission.createdAt.toISOString(),
   };
 }
 
-async function translateDependencyFailure<T>(work: () => Promise<T>): Promise<T> {
+export async function translateDependencyFailure<T>(work: () => Promise<T>): Promise<T> {
   try {
     return await work();
   } catch (error) {
@@ -221,22 +244,27 @@ async function translateDependencyFailure<T>(work: () => Promise<T>): Promise<T>
   }
 }
 
-/** O papel é relido após adquirir o lock: a sessão não amplia privilégio. */
-async function requireAdministrator(
+/**
+ * O papel é relido após adquirir o lock: a sessão não amplia privilégio.
+ * `onDenied` permite que cada caso de uso reporte o código de erro do seu
+ * próprio contrato (p. ex. `INSUFFICIENT_PERMISSIONS` no aceite de recompensa).
+ */
+export async function requireAdministrator(
   deps: Deps,
   tx: TransactionContext,
   actor: ActorContext,
+  onDenied: () => DomainError = () => new MissionManagementNotAllowedError(),
 ): Promise<void> {
   const role = await deps.repository.findMemberRole(tx, actor.familyId, actor.memberId);
   if (role === undefined) {
     throw new NotFoundError('Mission not found.');
   }
   if (role !== MemberRole.ADMINISTRATOR) {
-    throw deniedBy(deps, actor, new MissionManagementNotAllowedError());
+    throw deniedBy(deps, actor, onDenied());
   }
 }
 
-function deniedBy<E extends DomainError>(deps: Deps, actor: ActorContext, error: E): E {
+export function deniedBy<E extends DomainError>(deps: Deps, actor: ActorContext, error: E): E {
   deps.logger.warn('mission_management_denied', {
     actorId: actor.memberId,
     targetFamilyId: actor.familyId,
@@ -257,7 +285,7 @@ async function requireTasksInFamily(
   }
 }
 
-function assertUuid(value: string): void {
+export function assertUuid(value: string): void {
   if (!UUID_PATTERN.test(value)) {
     throw new NotFoundError('Mission not found.');
   }
@@ -424,10 +452,14 @@ function toListItem(
     taskCount: record.taskCount,
     completedTaskCount: record.completedTaskCount,
     progressPercent: progressPercentOf(record.taskCount, record.completedTaskCount),
-    // Aceite de recompensa é introduzido pela SPEC-017; nenhum registro existe ainda (CA-05).
-    acceptedReward: null,
+    acceptedReward: toAcceptedRewardResponse(record.acceptedReward),
   };
-  return isKids ? base : { ...base, isRedemptionAvailable: record.completedAt !== null };
+  return isKids
+    ? base
+    : {
+        ...base,
+        isRedemptionAvailable: record.completedAt !== null && record.acceptedReward === null,
+      };
 }
 
 function encodeCursor(cursor: PageCursor): string {

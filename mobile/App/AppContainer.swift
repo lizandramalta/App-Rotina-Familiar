@@ -11,7 +11,10 @@ final class AppContainer {
     private let routineRepository: any RoutineRepository
     private let profileRepository: any ProfileRepository
     private let missionRepository: any MissionRepository
+    private let rewardRepository: any RewardRepository
     private let kidsSignalRepository: any KidsSignalRepository
+    private let recognitionRepository: any RecognitionRepository
+    private let highlightSharing: any HighlightSharing
     private let credentialStore: any SessionCredentialStoring
     private let installationProofStore: any InstallationProofProviding
     private let appleAuthenticator: any AppleAuthenticating
@@ -27,7 +30,10 @@ final class AppContainer {
         routineRepository: any RoutineRepository,
         profileRepository: any ProfileRepository,
         missionRepository: any MissionRepository,
+        rewardRepository: any RewardRepository,
         kidsSignalRepository: any KidsSignalRepository,
+        recognitionRepository: any RecognitionRepository,
+        highlightSharing: any HighlightSharing,
         credentialStore: any SessionCredentialStoring,
         installationProofStore: any InstallationProofProviding,
         appleAuthenticator: any AppleAuthenticating,
@@ -42,7 +48,10 @@ final class AppContainer {
         self.routineRepository = routineRepository
         self.profileRepository = profileRepository
         self.missionRepository = missionRepository
+        self.rewardRepository = rewardRepository
         self.kidsSignalRepository = kidsSignalRepository
+        self.recognitionRepository = recognitionRepository
+        self.highlightSharing = highlightSharing
         self.credentialStore = credentialStore
         self.installationProofStore = installationProofStore
         self.appleAuthenticator = appleAuthenticator
@@ -61,7 +70,10 @@ final class AppContainer {
             routineRepository: HTTPRoutineRepository(baseURL: configuration.apiBaseURL),
             profileRepository: HTTPProfileRepository(baseURL: configuration.apiBaseURL),
             missionRepository: HTTPMissionRepository(baseURL: configuration.apiBaseURL),
+            rewardRepository: HTTPRewardRepository(baseURL: configuration.apiBaseURL),
             kidsSignalRepository: HTTPKidsSignalRepository(baseURL: configuration.apiBaseURL),
+            recognitionRepository: HTTPRecognitionRepository(baseURL: configuration.apiBaseURL),
+            highlightSharing: SystemHighlightSharing(),
             credentialStore: KeychainSessionCredentialStore(secrets: secrets),
             installationProofStore: KeychainInstallationProofStore(secrets: secrets),
             appleAuthenticator: AppleSignInAdapter()
@@ -120,14 +132,30 @@ final class AppContainer {
         )
     }
 
-    func makeMyTasksTabView(session: ActiveFamilySession, accessToken: String) -> MyTasksTabView {
+    func makeRecognitionFeature(sessionStore: AppSessionStore, router: RecognitionNotificationRouter) -> RecognitionFeature {
+        RecognitionFeature(
+            repository: recognitionRepository,
+            sharing: highlightSharing,
+            session: sessionStore,
+            notificationRouter: router
+        )
+    }
+
+    func makeMyTasksTabView(
+        session: ActiveFamilySession,
+        accessToken: String,
+        sessionStore: AppSessionStore,
+        recognition: RecognitionFeature? = nil
+    ) -> MyTasksTabView {
         MyTasksTabView(
             taskRepository: taskRepository,
             routineRepository: routineRepository,
             familyRepository: familyRepository,
             role: session.role,
             currentMemberID: session.memberID,
-            accessToken: accessToken
+            accessToken: accessToken,
+            accessTokenProvider: Self.accessTokenProvider(sessionStore),
+            recognition: recognition
         )
     }
 
@@ -148,10 +176,18 @@ final class AppContainer {
             accessTokenProvider: { [weak sessionStore] in
                 sessionStore?.accessToken
             },
+            validAccessToken: Self.accessTokenProvider(sessionStore),
             makeKidsReviewQueueViewModel: { [unowned self] in
                 self.makeKidsReviewQueueViewModel(sessionStore: sessionStore)
             }
         )
+    }
+
+    private static func accessTokenProvider(_ sessionStore: AppSessionStore) -> AccessTokenProvider {
+        { [weak sessionStore] forceRefresh in
+            guard let sessionStore else { throw AccessError.sessionExpired }
+            return forceRefresh ? try await sessionStore.forceRefreshToken() : try await sessionStore.validAccessToken()
+        }
     }
 
     func makeKidsReviewQueueViewModel(sessionStore: AppSessionStore) -> KidsReviewQueueViewModel {
@@ -166,6 +202,7 @@ final class AppContainer {
     func makeKidsTasksTabView(
         session: ActiveFamilySession,
         accessToken: String,
+        recognition: RecognitionFeature? = nil,
         makeProfileViewModel: @escaping () -> ProfileViewModel
     ) -> KidsTasksTabView {
         KidsTasksTabView(
@@ -174,6 +211,7 @@ final class AppContainer {
             familyRepository: familyRepository,
             currentMemberID: session.memberID,
             accessToken: accessToken,
+            recognition: recognition,
             makeProfileViewModel: makeProfileViewModel
         )
     }
@@ -184,6 +222,7 @@ final class AppContainer {
             taskRepository: taskRepository,
             routineRepository: routineRepository,
             familyRepository: familyRepository,
+            rewardRepository: rewardRepository,
             role: session.role,
             currentMemberID: session.memberID,
             accessToken: accessToken

@@ -14,6 +14,8 @@ interface FamilyFixture {
 }
 
 const NOW = new Date('2026-10-09T12:00:00.000Z');
+// Item predefinido de RN42 (migration 0011): disponível a qualquer família.
+const PREDEFINED_REWARD_ITEM_ID = 'b2811e28-9ad3-4000-8000-000000000001';
 
 describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
   'SCRUM-56 / SPEC-011 task reopening persistence',
@@ -281,6 +283,42 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
         [family.familyId, family.memberId],
       );
       expect(badges.rows).toEqual([{ badge_code: 'bronze', contributions: 5 }]);
+    });
+
+    it('SPEC-017 RN38/RN43 removes an accepted reward when the mission reopens', async () => {
+      const family = await seedFamily();
+      const taskId = await seedTask(family, [family.memberId]);
+      const missionId = await seedMission(family, taskId);
+      const admin = actor(family, family.adminId, MemberRole.ADMINISTRATOR);
+      await container.completeTaskUseCase.execute(admin, taskId);
+      await container.acceptMissionRewardUseCase.execute({
+        actor: admin,
+        missionId,
+        rewardItemId: PREDEFINED_REWARD_ITEM_ID,
+      });
+      const acceptedBefore = await container.dbPool.query(
+        `select accepted_reward_item_id from app.missions where family_id = $1 and id = $2`,
+        [family.familyId, missionId],
+      );
+      expect(acceptedBefore.rows[0].accepted_reward_item_id).toBe(PREDEFINED_REWARD_ITEM_ID);
+
+      const result = await container.reopenTaskUseCase.execute(admin, taskId, true);
+      expect(result.affectedResources).toMatchObject({ rewardRemoved: true });
+
+      const missionRow = await container.dbPool.query(
+        `select completed_at, accepted_reward_item_id, accepted_reward_title,
+                accepted_reward_details, accepted_reward_source, accepted_reward_accepted_at
+           from app.missions where family_id = $1 and id = $2`,
+        [family.familyId, missionId],
+      );
+      expect(missionRow.rows[0]).toEqual({
+        completed_at: null,
+        accepted_reward_item_id: null,
+        accepted_reward_title: null,
+        accepted_reward_details: null,
+        accepted_reward_source: null,
+        accepted_reward_accepted_at: null,
+      });
     });
 
     it('CA-08 serializes concurrent reopenings and undoes the completion once', async () => {

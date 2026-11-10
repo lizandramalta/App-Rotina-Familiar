@@ -32,6 +32,8 @@ describe('HTTP Presentation Layer (Fastify)', () => {
     mockDbCheckHealth = vi.fn().mockResolvedValue({ isHealthy: true, latencyMs: 2 });
 
     mockContainer = {
+      finalizeWeeklyHighlight: {} as ApplicationContainer['finalizeWeeklyHighlight'],
+      ownWeeklyRecognitions: {} as ApplicationContainer['ownWeeklyRecognitions'],
       config: testConfig,
       logger: new ConsoleLogger('fatal'),
       clock: new SystemClock(),
@@ -213,6 +215,9 @@ describe('HTTP Presentation Layer (Fastify)', () => {
       getMissionTaskOptionsUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['getMissionTaskOptionsUseCase'],
+      acceptMissionRewardUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['acceptMissionRewardUseCase'],
       listRewardItemsUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['listRewardItemsUseCase'],

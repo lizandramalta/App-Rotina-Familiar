@@ -1,3 +1,5 @@
+import { WeeklyHighlightWorker } from '../modules/recognition/infrastructure/weekly-highlight-worker.js';
+import { RecognitionPushWorker } from '../modules/recognition/infrastructure/recognition-push-worker.js';
 import { loadConfiguration, ConfigurationError } from './configuration.js';
 import { createContainer } from './container.js';
 import { ApnsPushGateway } from '../integrations/apple/apns-push-gateway.js';
@@ -24,9 +26,6 @@ async function bootstrapWorker(): Promise<void> {
 
   // Ready for background job processors (BA-06, backend-architecture.md §14):
   // - MaterializeRoutineOccurrences
-  // - AdvanceFamilyCalendar
-  // - FinalizeWeeklyHighlight
-  // - DeliverRecognitionNotification
   // - CleanOrphanMedia
   // - CleanExpiredAccessArtifacts
 
@@ -61,6 +60,47 @@ async function bootstrapWorker(): Promise<void> {
           }),
         )
       : undefined;
+  const highlightWorker = new WeeklyHighlightWorker(
+    container.dbPool,
+    container.finalizeWeeklyHighlight,
+    logger,
+    config.RECOGNITION_JOB_MAX_ATTEMPTS,
+  );
+  const recognitionPushWorker =
+    APNS_KEY_ID && APNS_TEAM_ID && APNS_TOPIC && APNS_PRIVATE_KEY
+      ? new RecognitionPushWorker(
+          container.dbPool,
+          new ApnsPushGateway({
+            keyId: APNS_KEY_ID,
+            teamId: APNS_TEAM_ID,
+            topic: APNS_TOPIC,
+            privateKey: APNS_PRIVATE_KEY,
+          }),
+          config.NODE_ENV === 'production' ? 'production' : 'development',
+          config.RECOGNITION_PUSH_MAX_ATTEMPTS,
+        )
+      : undefined;
+  let recognitionRun: Promise<void> | undefined;
+  const runRecognition = () => {
+    if (!isRunning || recognitionRun) return;
+    recognitionRun = (async () => {
+      try {
+        await highlightWorker.run();
+      } catch {
+        logger.warn('weekly_highlight_worker_failed');
+      }
+      try {
+        await recognitionPushWorker?.run();
+      } catch {
+        logger.warn('recognition_push_worker_failed');
+      }
+    })().finally(() => {
+      recognitionRun = undefined;
+    });
+  };
+  runRecognition();
+  const recognitionTimer = setInterval(runRecognition, 60_000);
+
   let deliveringApplause = false;
   const deliverApplause = async () => {
     if (!isRunning || deliveringApplause || !applauseWorker) return;
@@ -85,6 +125,8 @@ async function bootstrapWorker(): Promise<void> {
     isRunning = false;
     clearInterval(cleanupTimer);
     clearInterval(applauseTimer);
+    clearInterval(recognitionTimer);
+    await recognitionRun;
     logger.info(`Received ${signal}. Shutting down worker process...`);
 
     try {

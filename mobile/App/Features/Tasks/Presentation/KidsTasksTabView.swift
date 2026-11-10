@@ -14,9 +14,12 @@ struct KidsTasksTabView: View {
     let familyRepository: (any FamilyRepository)?
     let currentMemberID: UUID
     let accessToken: String
+    let recognition: RecognitionFeature?
     let makeProfileViewModel: () -> ProfileViewModel
 
-    @State private var path: [UUID] = []
+    /// Task details and TEL-052 (SCRUM-103: destaque Kids is a destination, never a third tab).
+    @State private var path: [FamilyTaskRoute] = []
+    @State private var recognitionEntry: WeeklyRecognitionEntryViewModel?
     @State private var listRevision = 0
     @State private var profileViewModel: ProfileViewModel
 
@@ -26,6 +29,7 @@ struct KidsTasksTabView: View {
         familyRepository: (any FamilyRepository)? = nil,
         currentMemberID: UUID,
         accessToken: String,
+        recognition: RecognitionFeature? = nil,
         makeProfileViewModel: @escaping () -> ProfileViewModel
     ) {
         self.taskRepository = taskRepository
@@ -33,6 +37,8 @@ struct KidsTasksTabView: View {
         self.familyRepository = familyRepository
         self.currentMemberID = currentMemberID
         self.accessToken = accessToken
+        self.recognition = recognition
+        _recognitionEntry = State(initialValue: recognition?.makeEntryViewModel())
         self.makeProfileViewModel = makeProfileViewModel
         _profileViewModel = State(initialValue: makeProfileViewModel())
     }
@@ -45,10 +51,12 @@ struct KidsTasksTabView: View {
                 currentMemberID: currentMemberID,
                 repository: taskRepository,
                 familyRepository: familyRepository,
-                accessToken: accessToken,
+                accessTokenProvider: { _ in accessToken },
                 refreshRevision: listRevision,
-                onSelectTask: { path.append($0) },
-                onCreateTask: {}
+                onSelectTask: { path.append(.detail($0)) },
+                onCreateTask: {},
+                recognitionEntry: recognitionEntry,
+                onOpenRecognition: { path.append(.weeklyRecognition($0)) }
             )
             .accessibilityIdentifier("access.destination.kids")
             .toolbar {
@@ -56,25 +64,48 @@ struct KidsTasksTabView: View {
                     profileButton
                 }
             }
-            .navigationDestination(for: UUID.self) { taskID in
-                TaskDetailView(
-                    taskID: taskID,
-                    role: .kid,
-                    currentMemberID: currentMemberID,
-                    repository: taskRepository,
-                    routineRepository: routineRepository,
-                    accessToken: accessToken,
-                    onRequestEdit: { _ in },
-                    onDeleted: { path.removeAll(); listRevision += 1 },
-                    onReopened: { listRevision += 1 }
+            .navigationDestination(for: FamilyTaskRoute.self) { route in
+                destination(for: route)
+                    .toolbar(.hidden, for: .tabBar)
+            }
+        }
+        .onChange(of: recognition?.notificationRouter.pendingRecognitionID, initial: true) { _, pending in
+            guard pending != nil, let id = recognition?.notificationRouter.consume() else { return }
+            path = [.weeklyRecognition(id)]
+        }
+    }
+
+    @ViewBuilder
+    private func destination(for route: FamilyTaskRoute) -> some View {
+        switch route {
+        case let .detail(taskID):
+            TaskDetailView(
+                taskID: taskID,
+                role: .kid,
+                currentMemberID: currentMemberID,
+                repository: taskRepository,
+                routineRepository: routineRepository,
+                accessToken: accessToken,
+                onRequestEdit: { _ in },
+                onDeleted: { path.removeAll(); listRevision += 1 },
+                onReopened: { listRevision += 1 }
+            )
+        case let .weeklyRecognition(recognitionID):
+            if let recognition {
+                WeeklyRecognitionView(
+                    viewModel: recognition.makeViewModel(recognitionID: recognitionID, audience: .kid)
                 )
             }
+        case .create, .edit:
+            EmptyView()
         }
     }
 
     private var profileButton: some View {
         NavigationLink {
+            // Pushed here (root of the adult Profile tab only), so the tab bar hides.
             ProfileView(viewModel: profileViewModel)
+                .toolbar(.hidden, for: .tabBar)
         } label: {
             Image(systemName: "person.crop.circle")
                 .font(.title2)

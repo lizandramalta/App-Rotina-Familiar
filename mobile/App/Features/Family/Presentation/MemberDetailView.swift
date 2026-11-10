@@ -69,6 +69,7 @@ struct MemberDetailView: View {
         .refreshable { await viewModel.load() }
         .navigationDestination(isPresented: $showsReissueConfirmation) {
             MemberInviteConfirmationView(viewModel: viewModel)
+                .toolbar(.hidden, for: .tabBar)
         }
         .inviteShareSheet(
             viewModel: viewModel,

@@ -13,6 +13,8 @@ struct AuthenticatedHomeView: View {
     @State private var familyOverviewViewModel: FamilyOverviewViewModel
     @State private var familyTaskPath: [FamilyNavigationRoute] = []
     let kidsTasksTabView: KidsTasksTabView?
+    /// A tapped recognition notification brings "Minhas tarefas" forward; that stack opens TEL-052.
+    let recognitionRouter: RecognitionNotificationRouter?
     let missionsTab: MissionsTabView?
     let kidsMissionsTabView: KidsMissionsTabView?
     @State private var profileViewModel: ProfileViewModel
@@ -29,7 +31,9 @@ struct AuthenticatedHomeView: View {
         if scenario == "family-settings" || scenario == "family-overview" || scenario == "family-overview-incentives" || scenario == "family-overview-own-most-tasks" || scenario == "family-overview-member" || scenario == "family-tasks" || scenario == "member-invite" || scenario == "member-invite-uncertain" || scenario == "kids-review-queue" || scenario == "kids-review-queue-empty" || scenario == "kids-review-queue-failure" {
             return 1
         }
-        if scenario == "mission-management" || scenario == "mission-management-member" {
+        if scenario == "mission-management" || scenario == "mission-management-member" || scenario == "mission-tracking-refresh-failure"
+            || scenario == "mission-reward" || scenario == "mission-reward-conflict"
+            || scenario == "reward-management" || scenario == "reward-management-empty" || scenario == "reward-management-member" {
             return 2
         }
         if scenario == "mission-management-kids" {
@@ -45,6 +49,7 @@ struct AuthenticatedHomeView: View {
         makeFamilyOverviewViewModel: () -> FamilyOverviewViewModel,
         makeFamilySettingsViewModel: (() -> FamilySettingsViewModel)? = nil,
         kidsTasksTabView: KidsTasksTabView?,
+        recognitionRouter: RecognitionNotificationRouter? = nil,
         missionsTab: MissionsTabView?,
         kidsMissionsTabView: KidsMissionsTabView?,
         makeProfileViewModel: () -> ProfileViewModel
@@ -53,6 +58,7 @@ struct AuthenticatedHomeView: View {
         self.myTasksTab = myTasksTab
         self.makeFamilySettingsViewModel = makeFamilySettingsViewModel
         self.kidsTasksTabView = kidsTasksTabView
+        self.recognitionRouter = recognitionRouter
         self.missionsTab = missionsTab
         self.kidsMissionsTabView = kidsMissionsTabView
         _familyOverviewViewModel = State(initialValue: makeFamilyOverviewViewModel())
@@ -150,11 +156,16 @@ struct AuthenticatedHomeView: View {
         }
         .tint(Color.primary)
         .id(role)
+        .onChange(of: recognitionRouter?.pendingRecognitionID, initial: true) { _, pending in
+            if pending != nil { selectedTab = 0 }
+        }
     }
 
     private var profileButton: some View {
         NavigationLink {
+            // Pushed here (root of the adult Profile tab only), so the tab bar hides.
             ProfileView(viewModel: profileViewModel)
+                .toolbar(.hidden, for: .tabBar)
         } label: {
             Image(systemName: "person.crop.circle")
                 .font(.title2)
@@ -194,11 +205,14 @@ struct AuthenticatedHomeView: View {
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("access.destination.family")
             .navigationDestination(for: FamilyNavigationRoute.self) { route in
+                // Tab bar only on each tab's root route; every pushed screen hides it.
                 familyTaskDestination(route)
+                    .toolbar(.hidden, for: .tabBar)
             }
             .navigationDestination(isPresented: $showsFamilySettingsScenario) {
                 if let makeFamilySettingsViewModel {
                     FamilySettingsView(viewModel: makeFamilySettingsViewModel())
+                        .toolbar(.hidden, for: .tabBar)
                 }
             }
         }

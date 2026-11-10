@@ -54,15 +54,19 @@ struct MissionEditorViewModelTests {
     func editSuccess() async {
         let missionID = MissionRepositorySpy.fixture.id
         let existingTaskID = UUID()
-        let repository = MissionRepositorySpy(missionResult: .success(Mission(
+        // SPEC-016 §5.1: the detail projection carries `tasks`, not `taskIds`; edit mode takes the
+        // ids from there and still hydrates weight/date/assignees for the picker.
+        let repository = MissionRepositorySpy(missionResult: .success(MissionDetail(
             id: missionID,
-            familyID: MissionRepositorySpy.fixture.familyID,
             title: "Roupa em dia",
             note: nil,
             status: .inProgress,
-            taskIDs: [existingTaskID],
+            tasks: [MissionLinkedTask(id: existingTaskID, title: "Lavar a louça", status: .pending)],
             completedAt: nil,
+            progressPercent: 0,
             isRedemptionAvailable: false,
+            acceptedReward: nil,
+            participations: [],
             createdAt: MissionRepositorySpy.fixture.createdAt
         )))
         let taskRepository = TaskRepositorySpy(taskResult: .success(FamilyTask(

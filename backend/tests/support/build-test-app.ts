@@ -11,6 +11,11 @@ import { ConsoleLogger } from '../../src/shared/infrastructure/observability/log
 type UseCaseMock = { execute: ReturnType<typeof vi.fn> };
 
 export interface TestApp {
+  readonly recognitions: {
+    list: ReturnType<typeof vi.fn>;
+    get: ReturnType<typeof vi.fn>;
+    open: ReturnType<typeof vi.fn>;
+  };
   readonly app: FastifyInstance;
   readonly createFamily: UseCaseMock;
   readonly getFamily: UseCaseMock;
@@ -50,6 +55,7 @@ export interface TestApp {
   readonly listMissions: UseCaseMock;
   readonly getMissionDetail: UseCaseMock;
   readonly getMissionTaskOptions: UseCaseMock;
+  readonly acceptMissionReward: UseCaseMock;
   readonly listRewardItems: UseCaseMock;
   readonly addRewardItem: UseCaseMock;
 }
@@ -73,6 +79,7 @@ export function buildTestApp(): TestApp {
     LOG_LEVEL: 'fatal',
   });
 
+  const recognitions = { list: vi.fn(), get: vi.fn(), open: vi.fn() };
   const createFamily: UseCaseMock = { execute: vi.fn() };
   const getFamily: UseCaseMock = { execute: vi.fn() };
   const updateFamily: UseCaseMock = { execute: vi.fn() };
@@ -111,10 +118,12 @@ export function buildTestApp(): TestApp {
   const listMissions: UseCaseMock = { execute: vi.fn() };
   const getMissionDetail: UseCaseMock = { execute: vi.fn() };
   const getMissionTaskOptions: UseCaseMock = { execute: vi.fn() };
+  const acceptMissionReward: UseCaseMock = { execute: vi.fn() };
   const listRewardItems: UseCaseMock = { execute: vi.fn() };
   const addRewardItem: UseCaseMock = { execute: vi.fn() };
 
   const container = {
+    ownWeeklyRecognitions: recognitions,
     config,
     logger: new ConsoleLogger('fatal'),
     clock: new SystemClock(),
@@ -159,12 +168,14 @@ export function buildTestApp(): TestApp {
     listMissionsUseCase: listMissions,
     getMissionDetailUseCase: getMissionDetail,
     getMissionTaskOptionsUseCase: getMissionTaskOptions,
+    acceptMissionRewardUseCase: acceptMissionReward,
     listRewardItemsUseCase: listRewardItems,
     addRewardItemUseCase: addRewardItem,
     dispose: vi.fn(),
   } as unknown as ApplicationContainer;
 
   return {
+    recognitions,
     app: buildHttpApp(container, config),
     createFamily,
     getFamily,
@@ -204,6 +215,7 @@ export function buildTestApp(): TestApp {
     listMissions,
     getMissionDetail,
     getMissionTaskOptions,
+    acceptMissionReward,
     listRewardItems,
     addRewardItem,
   };

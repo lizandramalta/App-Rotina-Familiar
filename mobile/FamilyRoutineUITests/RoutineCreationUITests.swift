@@ -1,9 +1,9 @@
 import XCTest
 
-/// SCRUM-44 / SPEC-008 Fase 1 — CA-01, CA-02 and the pending state visible after saving.
+/// SCRUM-44 / SPEC-008 Fase 1 — CA-01, CA-02 and the transient confirmation after saving.
 @MainActor
 final class RoutineCreationUITests: XCTestCase {
-    func testAdultSelectsSevenDayRoutineAndSeesPreparationThenCanonicalCompletion() {
+    func testAdultSelectsSevenDayRoutineAndSeesTransientConfirmation() {
         let app = XCUIApplication()
         app.launchEnvironment["UI_TEST_SCENARIO"] = "routine-creation"
         MainActor.assumeIsolated { app.launch() }
@@ -28,8 +28,11 @@ final class RoutineCreationUITests: XCTestCase {
         XCTAssertTrue(save.waitForExistence(timeout: 5))
         save.tap()
 
-        XCTAssertTrue(app.staticTexts["Estamos preparando as próximas tarefas."].waitForExistence(timeout: 5))
-        app.buttons["routines.list.refresh"].tap()
-        XCTAssertTrue(app.staticTexts["Rotina salva. As próximas tarefas estão disponíveis quando entrarem no período consultável."].waitForExistence(timeout: 5))
+        // A transient checkmark replaces the persistent "Rotina salva" card and dismisses itself.
+        let toast = app.descendants(matching: .any)["tasks.saved.toast"]
+        XCTAssertTrue(toast.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["Estamos preparando as próximas tarefas."].exists)
+        let gone = expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: toast)
+        wait(for: [gone], timeout: 5)
     }
 }

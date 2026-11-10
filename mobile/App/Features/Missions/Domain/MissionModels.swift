@@ -20,18 +20,90 @@ nonisolated struct Mission: Equatable, Sendable, Identifiable {
     let createdAt: Date
 }
 
-/// TEL-020's list projection (`GET /v1/missions`) — title and status only, no `note`/`taskIds`.
+/// Snapshot of the reward accepted when the mission was redeemed (SPEC-016 §5.1): only the
+/// identification and the title registered at acceptance — every profile, Kids included (RF36).
+nonisolated struct AcceptedMissionReward: Equatable, Sendable {
+    let rewardItemID: UUID
+    let title: String
+}
+
+/// TEL-020's card projection (`GET /v1/missions`, SPEC-016 §5.1). Progress is canonical: the app
+/// never recalculates it (MA-07). `isRedemptionAvailable` is `nil` in the Kids projection, where
+/// the backend omits it (CA-03) — never assumed present.
 nonisolated struct MissionSummary: Equatable, Sendable, Identifiable {
     let id: UUID
     let title: String
     let status: MissionStatus
     let taskCount: Int
     let completedTaskCount: Int
+    let progressPercent: Double
+    let isRedemptionAvailable: Bool?
+    let acceptedReward: AcceptedMissionReward?
 }
 
-nonisolated struct MissionPage: Equatable, Sendable {
-    let items: [MissionSummary]
-    let nextCursor: String?
+/// `GET /v1/missions` — the server already splits the family's missions (SPEC-016 §5.1).
+nonisolated struct MissionCollections: Equatable, Sendable {
+    let inProgress: [MissionSummary]
+    let completed: [MissionSummary]
+}
+
+/// A linked task as projected by `GET /v1/missions/{missionId}`: no assignees, no weight.
+nonisolated struct MissionLinkedTask: Equatable, Sendable, Identifiable {
+    let id: UUID
+    let title: String
+    let status: TaskStatus
+}
+
+nonisolated struct MissionParticipation: Equatable, Sendable, Identifiable {
+    let memberID: UUID
+    let displayName: String
+
+    var id: UUID { memberID }
+}
+
+/// TEL-021's canonical projection (`GET /v1/missions/{missionId}`, SPEC-016 §5.1). Profile-scoped
+/// (MA-11): Kids receive neither `isRedemptionAvailable` nor `participations`, both `nil` here.
+nonisolated struct MissionDetail: Equatable, Sendable, Identifiable {
+    let id: UUID
+    let title: String
+    let note: String?
+    let status: MissionStatus
+    let tasks: [MissionLinkedTask]
+    let completedAt: Date?
+    let progressPercent: Double
+    let isRedemptionAvailable: Bool?
+    let acceptedReward: AcceptedMissionReward?
+    let participations: [MissionParticipation]?
+    let createdAt: Date
+
+    var completedTaskCount: Int {
+        tasks.filter { $0.status == .completed }.count
+    }
+}
+
+/// What TEL-020/TEL-021 may truthfully say about the reward (SPEC-016 CA-05, UX-016 §5).
+/// Derived only from canonical fields: a reward is never shown as accepted before the server
+/// returns it, and "ready to redeem" is only said when the server sends `isRedemptionAvailable`
+/// (never for Kids, whose projection omits it — decisão E-2 do SCRUM-86).
+nonisolated enum MissionRewardState: Equatable, Sendable {
+    case accepted(title: String)
+    case redemptionAvailable
+    case none
+
+    init(acceptedReward: AcceptedMissionReward?, isRedemptionAvailable: Bool?) {
+        if let acceptedReward {
+            self = .accepted(title: acceptedReward.title)
+        } else if isRedemptionAvailable == true {
+            self = .redemptionAvailable
+        } else {
+            self = .none
+        }
+    }
+}
+
+/// Rounded down so a mission never reads "100%" before it is actually completed (decisão E-3).
+nonisolated func displayedProgressPercent(_ value: Double) -> Int {
+    Int(min(max(value, 0), 100).rounded(.down))
 }
 
 /// A task as shown inside a mission's context — MOD-007's search results (`GET
