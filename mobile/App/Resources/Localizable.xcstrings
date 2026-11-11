@@ -244,6 +244,46 @@
         }
       }
     },
+    "design_system.tab.family" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Família"
+          }
+        }
+      }
+    },
+    "design_system.tab.missions" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Missões"
+          }
+        }
+      }
+    },
+    "design_system.tab.profile" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perfil"
+          }
+        }
+      }
+    },
+    "design_system.tab.tasks" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tarefas"
+          }
+        }
+      }
+    },
     "destination.contentPending" : {
       "localizations" : {
         "pt-BR" : {

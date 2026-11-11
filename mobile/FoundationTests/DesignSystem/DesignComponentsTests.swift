@@ -77,4 +77,54 @@ struct DesignComponentsTests {
         #expect(state.accessibilityTraits.contains(.isSelected) == expectSelected)
         #expect(DayCarouselItemView.size == CGSize(width: 46, height: 62))
     }
+
+    // MARK: AppTabBar
+
+    @Test("tab items keep the Figma order with localized titles")
+    func tabItemsAndTitles() {
+        #expect(AppTabItem.allCases == [.tasks, .family, .missions, .profile])
+        #expect(AppTabItem.allCases.map(\.title) == ["Tarefas", "Família", "Missões", "Perfil"])
+        #expect(AppTabItem.allCases.map(\.id) == AppTabItem.allCases)
+    }
+
+    @Test("active tabs use filled symbols, inactive tabs outlined ones")
+    func tabIcons() {
+        #expect(AppTabItem.allCases.map { $0.systemImage(isSelected: true) }
+            == ["checklist", "person.2.fill", "flag.fill", "person.crop.circle.fill"])
+        #expect(AppTabItem.allCases.map { $0.systemImage(isSelected: false) }
+            == ["checklist", "person.2", "flag", "person.crop.circle"])
+    }
+
+    @Test("active tab is highlighted and selected; inactive tab is a plain button")
+    func tabAppearance() {
+        let active = AppTabBar.ItemAppearance(isSelected: true)
+        let inactive = AppTabBar.ItemAppearance(isSelected: false)
+
+        #expect(active.backgroundColor == Color.App.Background.cardHighlight)
+        #expect(inactive.backgroundColor == .clear)
+        #expect(active.foregroundColor == Color.App.Text.primary)
+        #expect(inactive.foregroundColor == Color.App.Text.primary)
+        #expect(active.font == .system(size: 11, weight: .bold))
+        #expect(inactive.font == .system(size: 11, weight: .regular))
+        #expect(active.accessibilityTraits.contains(.isButton))
+        #expect(active.accessibilityTraits.contains(.isSelected))
+        #expect(inactive.accessibilityTraits.contains(.isButton))
+        #expect(!inactive.accessibilityTraits.contains(.isSelected))
+        #expect(AppTabBar.itemSize == CGSize(width: 88, height: 58))
+    }
+
+    @Test("selecting a tab writes through the binding", arguments: AppTabItem.allCases)
+    func tabSelectionUpdatesBinding(tab: AppTabItem) {
+        let store = SelectionStore()
+        let tabBar = AppTabBar(selectedTab: Binding(get: { store.tab ?? .tasks }, set: { store.tab = $0 }))
+
+        tabBar.select(tab)
+
+        #expect(store.tab == tab)
+    }
+}
+
+@MainActor
+private final class SelectionStore {
+    var tab: AppTabItem?
 }
