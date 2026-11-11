@@ -224,6 +224,26 @@
     "Descartar alterações?" : {
 
     },
+    "design_system.add_button.label" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar"
+          }
+        }
+      }
+    },
+    "design_system.day_carousel.label %@ %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, dia %2$@"
+          }
+        }
+      }
+    },
     "destination.contentPending" : {
       "localizations" : {
         "pt-BR" : {
