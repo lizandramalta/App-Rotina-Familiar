@@ -136,10 +136,10 @@ Cores de identificação individual e trilhas de progresso:
 ---
 
 ### 3.2 Tipografia (`AppTypography` / `Font.app`)
-A escala tipográfica possui 14 papéis funcionais. O aplicativo utiliza fallbacks nativos correspondentes até o empacotamento das fontes personalizadas:
+A escala tipográfica possui 14 papéis funcionais. O aplicativo utiliza a fonte oficial `Sour Gummy` empacotada no projeto (`UIAppFonts`) e fallbacks nativos correspondentes:
 - **Títulos:** Fonte pretendida `Source Serif 4` → fallback nativo `Font.Design.serif`.
 - **Textos de interface:** Fonte pretendida `Nunito` → fallback nativo `Font.Design.default`.
-- **Números:** Fonte pretendida `Sour Gummy` → fallback nativo `Font.Design.rounded`.
+- **Números:** Fonte oficial empacotada `Sour Gummy` (`SourGummy.ttf`, peso Medium 500) → fallback nativo `Font.Design.rounded`.
 
 ```swift
 import SwiftUI
@@ -228,12 +228,13 @@ struct MyView: View {
 }
 ```
 * **Abas:** `.tasks` ("Tarefas"), `.family` ("Família"), `.missions` ("Missões"), `.profile` ("Perfil").
+* **Ícones:** Vetores SVG originais do Figma empacotados em `Assets.xcassets` (`TabBarTasksActive/Inactive`, `TabBarFamilyActive/Inactive`, etc.) com renderização nativa preservada.
 * **Aparência:** Fundo `card` com contorno `separator` de 1.5 pt e raio 34 pt. A aba selecionada possui fundo `cardHighlight` (`#E9EFDC`), raio de 29 pt, ícone preenchido e tipografia bold.
 
 ---
 
 ### 4.2 Controle do Carrossel de Dias (`DayCarouselItemView`)
-Controle de navegação de dias do calendário/rotina diária (RN49), nó Figma `907:13356`.
+Controle de navegação de dias do calendário/rotina diária (RN49), nó Figma `907:13356`. Os números utilizam a fonte `Sour Gummy` tamanho 20 pt (Medium 500).
 
 ```swift
 DayCarouselItemView(
@@ -260,7 +261,7 @@ CircularAddButton {
     // Abrir modal de criação
 }
 ```
-* **Aparência:** Círculo de 44 pt de diâmetro, fundo `Background.app`, borda `Border.separator` de 1.5 pt e ícone `plus` em `Text.primary`.
+* **Aparência:** Botão circular de 44 pt com borda de efeito desenhado a giz/lápis (pincel Drone texturizado, asset `CircularAddButtonBackground`) e ícone `plus` centralizado.
 * **Acessibilidade:** Rótulo localizado `"Adicionar"` e trait `.isButton`.
 
 ---
@@ -279,10 +280,16 @@ InlineFeedbackBanner(
 ---
 
 ### 4.5 Estrela Decorativa (`StarDecorationView`)
-Estrelas de 5 pontas para decoração de cantos em cards de destaque, nós Figma `926:21661` e `926:21662`.
+Estrelas orgânicas com contorno irregular de giz/adesivo e sombra suave para decoração em cards de destaque, nós Figma `926:21661` (`.blue`) e `926:21662` (`.yellow`), renderizadas a partir dos assets `StarDecorationBlue` e `StarDecorationYellow`.
 
 ```swift
 ZStack(alignment: .topTrailing) {
+    CardView()
+    StarDecorationView(variant: .yellow)
+        .padding(AppSpacing.md)
+}
+```
+* **Acessibilidade:** Elemento puramente decorativo, estritamente oculto de tecnologias assistivas (`.accessibilityHidden(true)`).
     CardView()
 
     StarDecorationView(variant: .yellow, size: 48)

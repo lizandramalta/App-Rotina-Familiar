@@ -55,9 +55,9 @@ Text("Nota").font(.app(.note))                  // 13pt Regular
 Text("Nota forte").font(.app(.noteStrong))      // 13pt Bold
 Text("Legenda").font(.app(.caption))            // 12pt Regular
 
-// Números (Rounded / Sour Gummy fallback)
-Text("42").font(.app(.numberLarge))             // 44pt Medium
-Text("10").font(.app(.number))                  // 22pt Medium
+// Números (Fonte oficial Sour Gummy empacotada no app, peso Medium 500)
+Text("42").font(.app(.numberLarge))             // 44pt Medium (Sour Gummy)
+Text("10").font(.app(.number))                  // 22pt Medium (Sour Gummy)
 ```
 
 ---
