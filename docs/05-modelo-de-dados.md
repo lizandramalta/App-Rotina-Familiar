@@ -1,8 +1,8 @@
 # Modelo de dados (DER)
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do modelo:** 1.10 · **Base funcional:** RN 1.23 / RF 1.22 / UC 1.22\
-**Data:** 2026-10-27\
+**Versão do modelo:** 1.11 · **Base funcional:** RN 1.27 / RF 1.26 / UC 1.26\
+**Data:** 2026-11-12\
 **Situação:** modelo alvo atualizado; a preparação de mídia anterior à família ainda exige migração
 
 [Projeto](../README.md) · [Índice](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Classes](06-diagrama-de-classes.md#classe-familytask) · [Arquitetura mobile](architecture/mobile-architecture.md)
@@ -347,7 +347,7 @@ erDiagram
 | Uma sessão ativa por perfil, comprovada pela instalação; checar revogação em toda operação. Refresh sem vencimento temporal | RN47, RNF22 |
 | `GRANT_CRIACAO` não é membro/sessão: mídia de onboarding pertence a um grant e à prova da instalação, sem chave de família. Só a criação confirmada pode convertê-la em foto do próprio Criador | RN01, RN63, RF01/48, RNF06/07/24 |
 | Família, Criador, membros iniciais, ciclo, sessão e vínculo opcional da foto confirmam juntos. `MEMBRO` mantém uma linha por pessoa; não há tabela de rascunho de membros antes do commit | RN01, RN07, RF01/02/40 |
-| Emitir/reenviar convite invalida anteriores e revoga sessão antes de disponibilizar nova credencial; sem prazo temporal de convite | RN46, RF41/54 |
+| Emitir/reenviar convite invalida convites anteriores disponíveis antes de disponibilizar nova credencial, sem revogar a sessão ativa; o ingresso pelo novo convite revoga a sessão anterior do perfil, seus tokens e push; sem prazo temporal de convite | RN46/RN47, RF41/54 |
 | Uma recorrência ativa por template; origem imutável identifica ocorrência mesmo quando data prevista muda | RN14, RN16/17 |
 | No máximo uma conclusão vigente por ocorrência; estado concluído exige conclusão vigente. Zero responsáveis/zero créditos é permitido após edição autorizada | RN17, RN22, RNF11 |
 | Correção de concluída atualiza crédito vigente e audita valores antigos na mesma transação; mantém instante de conclusão | RN17, RN30 |
@@ -407,6 +407,7 @@ A versão 1.1 representava somente um access token na sessão. A versão 1.2 sep
 
 | Versão | Base | Data | Alteração |
 |---|---|---|---|
+| 1.11 | RN 1.27 / RF 1.26 / UC 1.26 | 2026-11-12 | Convite: emissão sempre direta, invalida convites anteriores disponíveis e preserva a sessão; o ingresso pelo novo convite revoga a sessão anterior do perfil, com tokens e push (SCRUM-114; SPEC-004 E-05). |
 | 1.10 | RN 1.23 / RF 1.22 / UC 1.22 | 2026-10-27 | Parabéns persistido por envio e fila de push por dispositivo; ocultação da mensagem preserva eventos. |
 | 1.9 | RN 1.18 / RF 1.17 / UC 1.16 | 2026-10-19 | Preparação de mídia ligada ao grant antes da família, criação conjunta de membros sem tabela de rascunho e `displayStatus` somente como projeção; migração futura explicitada. |
 | 1.8 | 1.17 | 2026-10-10 | Consolida `RECOMPENSA` com autor, descrição opcional e título normalizado único por família (SPEC-015) e `invite_attempt_log` para o limite de tentativas de ingresso (RNF21/SCRUM-32). |

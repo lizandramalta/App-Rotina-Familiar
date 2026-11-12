@@ -1,7 +1,7 @@
 # Decisões da arquitetura backend
 
-**Versão:** 1.7 · **Base funcional:** RN 1.23 / RF 1.22 / UC 1.22\
-**Data:** 2026-11-05 · **Situação:** decisões vigentes e contrato alvo revisado; ampliações recentes ainda não implementadas
+**Versão:** 1.8 · **Base funcional:** RN 1.27 / RF 1.26 / UC 1.26\
+**Data:** 2026-11-12 · **Situação:** decisões vigentes e contrato alvo revisado; ampliações recentes ainda não implementadas
 
 [Arquitetura](backend-architecture.md) · [Contratos](backend-contracts.md) · [Decisões mobile](mobile-decisions.md) · [Índice](../DOCUMENTACAO.md)
 
@@ -23,7 +23,7 @@ Node.js passa a ser a plataforma backend definida pelo usuário. Hospedagem, dis
 | BA-06 | Proposta técnica adotada no desenho | PostgreSQL para jobs, leases e outbox; sem broker/cache adicional obrigatório no MVP |
 | BA-07 | Confirmada; mecanismo detalhado | Edições por última gravação válida; sem versão esperada nem idempotência geral. Consulta após resposta perdida, sem reenvio automático |
 | BA-08 | Proposta técnica adotada no desenho | Escritas curtas serializadas por família, constraints e revalidação no lock; snapshots agregados com leitura consistente |
-| BA-09 | Confirmada; mecanismo detalhado | Convite de uso único sem prazo; emissão nova revoga convites/sessão anteriores. Segredos persistidos por verificadores |
+| BA-09 | Confirmada; mecanismo detalhado | Convite de uso único sem prazo; emissão nova invalida convites anteriores disponíveis sem revogar sessão; o ingresso revoga a sessão anterior do perfil, seus tokens e push (SCRUM-114). Segredos persistidos por verificadores |
 | BA-10 | Confirmada; mecanismo detalhado | Um aparelho por perfil, access 15 minutos, refresh estável sem prazo e revogação em cada chamada. Tokens opacos e prova secreta de instalação são mecanismo proposto |
 | BA-11 | Confirmada; mecanismo detalhado | Recuperação de ingresso por dez minutos, prova da tentativa/instalação, sem segundo consumo; envelope criptografado temporário é mecanismo proposto |
 | BA-12 | Confirmada | Datas livres de cadastro, frequências 1/7/14/21/28, horizonte fim do mês seguinte e recuperação em lotes, sem truncar passado |
@@ -83,7 +83,7 @@ Escolhas técnicas tomadas ao implementar o SCRUM-30, aprovadas em chat em 2026-
 | BA-23 | `429 RATE_LIMITED` **não** é implementado em `IssueMemberInvite` neste card. | A SPEC lista o código, mas não fixa limites e o backend não tem mecanismo de rate limit. Inventar valores seria decidir contrato por conta própria. A emissão já exige sessão de Administrador e serializa por família. **Pendência:** o limite de tentativas de senha é obrigatório no ingresso (SPEC-005/SCRUM-32), pois é ele que compensa a senha curta de BA-22; a emissão deve ser coberta por um card transversal. |
 | BA-24 | O link é `<INVITE_LINK_BASE_URL>/invite/<token>`. A variável tem como padrão o domínio reservado `https://example.invalid` e é **recusada em produção** se terminar em `.invalid`. | O domínio real (universal link) ainda não existe. O padrão `.invalid` (RFC 2606) nunca resolve, então não vaza para um endereço real em dev/test, e a validação no boot impede subir produção emitindo convites inúteis. |
 | BA-25 | Perfil removido: **sem tratamento neste card**. Não foi criada coluna de remoção em `app.members`. | A remoção pertence ao recorte de SPEC-003 ainda sem card. Antecipar a coluna decidiria o modelo de remoção fora do seu escopo. O `404` para removido (SPEC-004 CA-04) deve ser entregue junto com a remoção, que precisa filtrar o alvo em `findTarget`. |
-| BA-26 | Emitir convite para **o próprio ator** responde `409 INVITE_NOT_ISSUABLE`. | A SPEC fala em emitir para "outro perfil" e a emissão revoga a sessão do alvo; se o alvo fosse o ator, o Administrador encerraria a própria sessão. O Criador já é inelegível, então a regra só alcança Administradores não-Criadores. |
+| BA-26 | Emitir convite para **o próprio ator** responde `409 INVITE_NOT_ISSUABLE`. | A SPEC fala em emitir para "outro perfil"; desde SCRUM-114 a emissão não revoga sessão, mas um convite para si mesmo continua sem finalidade e, se usado, encerraria a sessão atual do próprio Administrador. O Criador já é inelegível, então a regra só alcança Administradores não-Criadores. |
 | BA-27 | Eventos `member_invite_issued`, `member_invite_issue_denied` e `member_invite_issue_uncertain` são **logs estruturados**, sem tabela de auditoria. | Não existe infraestrutura de auditoria e a SPEC define só os campos permitidos. Logs cobrem a necessidade sem criar um modelo de dados novo. Token, senha, link e verificadores nunca são registrados. |
 | BA-28 | O hash scrypt é calculado **antes** de adquirir o lock da família; a transação revalida ator, sessão e alvo depois dele. | O scrypt consome CPU e memória por dezenas de milissegundos. Segurar o lock durante o cálculo serializaria todas as escritas da família (backend-architecture.md §7). |
 
@@ -112,6 +112,7 @@ Sequência sugerida: composição e persistência → Apple/bootstrap/sessões/c
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.8 | 2026-11-12 | BA-09 e motivo de BA-26: Convite: emissão sempre direta, invalida convites anteriores disponíveis e preserva a sessão; o ingresso pelo novo convite revoga a sessão anterior do perfil, com tokens e push (SCRUM-114; SPEC-004 E-05). |
 | 1.7 | 2026-11-05 | BA-39 registra persistência, claims recuperáveis e operação do reconhecimento semanal (SCRUM-102). |
 | 1.6 | 2026-10-27 | BA-38: parabéns persistido antes do push, fila por dispositivo de sessão ativa, mensagem interna e tratamento de falhas APNs. |
 | 1.5 | 2026-10-19 | BA-35–BA-37: preparação de foto vinculada ao grant, criação conjunta e edição posterior da família, projeção pessoal de tarefa. Registra migração e código ainda necessários. |

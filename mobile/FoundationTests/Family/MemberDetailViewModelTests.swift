@@ -21,8 +21,7 @@ struct MemberDetailViewModelTests {
         _ result: Result<FamilyMemberDetail, Error>,
         viewerRole: MemberRole = .administrator,
         token: String? = "token-1",
-        inviteResults: [Result<MemberInvite, Error>] = [],
-        hasPreviousInvite: Bool = false
+        inviteResults: [Result<MemberInvite, Error>] = []
     ) -> (MemberDetailViewModel, FamilyRepositorySpy) {
         let repository = FamilyRepositorySpy(memberDetailResult: result, inviteResults: inviteResults)
         let session = ActiveFamilySession(
@@ -35,8 +34,7 @@ struct MemberDetailViewModelTests {
             memberID: memberID,
             session: session,
             familyRepository: repository,
-            accessTokenProvider: { token },
-            hasPreviousInvite: hasPreviousInvite
+            accessTokenProvider: { token }
         )
         return (viewModel, repository)
     }
@@ -210,20 +208,18 @@ struct MemberDetailViewModelTests {
         #expect(!viewModel.canManage)
     }
 
-    // MARK: SPEC-004 Phase 2 — invite issue and reissue
+    // MARK: SPEC-004 Phase 2 — invite issuance (E-05: every issuance is direct)
 
     private func invite(_ password: String = "PW") -> MemberInvite {
         MemberInvite(inviteID: UUID(), link: "https://example.test/i", password: password)
     }
 
     private func loadedViewModel(
-        inviteResults: [Result<MemberInvite, Error>] = [.success(MemberInvite(inviteID: UUID(), link: "https://example.test/i", password: "PW"))],
-        hasPreviousInvite: Bool = false
+        inviteResults: [Result<MemberInvite, Error>] = [.success(MemberInvite(inviteID: UUID(), link: "https://example.test/i", password: "PW"))]
     ) async -> (MemberDetailViewModel, FamilyRepositorySpy) {
         let (viewModel, repository) = makeViewModel(
             .success(detail(manageMembers: true)),
-            inviteResults: inviteResults,
-            hasPreviousInvite: hasPreviousInvite
+            inviteResults: inviteResults
         )
         await viewModel.load()
         return (viewModel, repository)
@@ -233,9 +229,8 @@ struct MemberDetailViewModelTests {
     func firstIssuance() async {
         let (viewModel, repository) = await loadedViewModel()
         #expect(viewModel.canIssueInvite)
-        #expect(!viewModel.hasPreviousInvite)
 
-        await viewModel.issueFirstInvite()
+        await viewModel.issueInvite()
 
         #expect(repository.invitedMemberIDs == [memberID])
         #expect(viewModel.transientInvite != nil)
@@ -248,13 +243,12 @@ struct MemberDetailViewModelTests {
     @Test("SPEC-004 CA-08 closing the share sheet discards the credentials and flags the cancellation")
     func shareCancelled() async {
         let (viewModel, repository) = await loadedViewModel()
-        await viewModel.issueFirstInvite()
+        await viewModel.issueInvite()
 
         viewModel.onShareDismissed(completed: false)
 
         #expect(viewModel.transientInvite == nil)
         #expect(viewModel.shareMessage == nil)
-        #expect(viewModel.hasPreviousInvite)
         #expect(viewModel.wasShareCancelled)
         #expect(repository.inviteCalls == 1)
         #expect(viewModel.detail != nil)
@@ -263,41 +257,39 @@ struct MemberDetailViewModelTests {
     @Test("SPEC-004 CA-08 a completed share discards the credentials without the cancellation notice")
     func shareCompleted() async {
         let (viewModel, _) = await loadedViewModel()
-        await viewModel.issueFirstInvite()
+        await viewModel.issueInvite()
 
         viewModel.onShareDismissed(completed: true)
 
         #expect(viewModel.transientInvite == nil)
-        #expect(viewModel.hasPreviousInvite)
         #expect(!viewModel.wasShareCancelled)
     }
 
-    @Test("SPEC-004 CA-02 a reissue calls the API again and clears the previous cancellation notice")
-    func reissue() async {
+    @Test("SCRUM-114 / SPEC-004 CA-02 issuing again is the same direct call and clears the previous cancellation notice")
+    func issuingAgain() async {
         let (viewModel, repository) = await loadedViewModel(
             inviteResults: [.success(invite("PW-1")), .success(invite("PW-2"))]
         )
-        await viewModel.issueFirstInvite()
+        await viewModel.issueInvite()
         viewModel.onShareDismissed(completed: false)
 
-        await viewModel.confirmReissue()
+        await viewModel.issueInvite()
 
         #expect(repository.inviteCalls == 2)
         #expect(viewModel.shareMessage?.contains("PW-2") == true)
         #expect(!viewModel.wasShareCancelled)
     }
 
-    @Test("SPEC-004 CA-07 a lost response shows no credentials and turns the next attempt into a reissue")
+    @Test("SPEC-004 CA-07 a lost response shows no credentials and the next attempt is a direct issuance")
     func uncertainOutcome() async {
         let errors: [FamilyError] = [.uncertainOutcome, .network, .unavailable]
         for error in errors {
             let (viewModel, _) = await loadedViewModel(inviteResults: [.failure(error)])
 
-            await viewModel.issueFirstInvite()
+            await viewModel.issueInvite()
 
             #expect(viewModel.inviteFailure == .uncertain)
             #expect(viewModel.transientInvite == nil)
-            #expect(viewModel.hasPreviousInvite)
             #expect(viewModel.inviteErrorMessage != nil)
         }
     }
@@ -312,11 +304,10 @@ struct MemberDetailViewModelTests {
         for (error, expected) in cases {
             let (viewModel, _) = await loadedViewModel(inviteResults: [.failure(error)])
 
-            await viewModel.issueFirstInvite()
+            await viewModel.issueInvite()
 
             #expect(viewModel.inviteFailure == expected)
             #expect(viewModel.transientInvite == nil)
-            #expect(!viewModel.hasPreviousInvite)
         }
     }
 
@@ -324,19 +315,19 @@ struct MemberDetailViewModelTests {
     func authorization() async {
         let (member, memberRepository) = makeViewModel(.success(detail(manageMembers: false)), viewerRole: .member)
         await member.load()
-        await member.issueFirstInvite()
+        await member.issueInvite()
         #expect(!member.canIssueInvite)
         #expect(memberRepository.inviteCalls == 0)
 
         let (kid, kidRepository) = makeViewModel(.success(detail(manageMembers: false)), viewerRole: .kid)
         await kid.load()
-        await kid.issueFirstInvite()
+        await kid.issueInvite()
         #expect(!kid.canIssueInvite)
         #expect(kidRepository.inviteCalls == 0)
 
         let (creator, creatorRepository) = makeViewModel(.success(detail(isCreator: true, manageMembers: true)))
         await creator.load()
-        await creator.issueFirstInvite()
+        await creator.issueInvite()
         #expect(!creator.canIssueInvite)
         #expect(creatorRepository.inviteCalls == 0)
     }
@@ -354,16 +345,24 @@ struct MemberDetailViewModelTests {
         await viewModel.load()
         token = nil
 
-        await viewModel.issueFirstInvite()
+        await viewModel.issueInvite()
 
         #expect(repository.inviteCalls == 0)
         #expect(viewModel.inviteFailure == .notAllowed)
     }
 
-    @Test("SPEC-004 a previous invite can be injected so the reissue path is used")
-    func injectedPreviousInvite() async {
-        let (viewModel, _) = await loadedViewModel(hasPreviousInvite: true)
+    @Test("SCRUM-114 / SPEC-004 CA-07 after an uncertain outcome the next tap issues directly")
+    func issuesDirectlyAfterUncertainOutcome() async {
+        let (viewModel, repository) = await loadedViewModel(
+            inviteResults: [.failure(FamilyError.uncertainOutcome), .success(invite("PW-2"))]
+        )
+        await viewModel.issueInvite()
+        #expect(viewModel.inviteFailure == .uncertain)
 
-        #expect(viewModel.hasPreviousInvite)
+        await viewModel.issueInvite()
+
+        #expect(repository.inviteCalls == 2)
+        #expect(viewModel.inviteFailure == nil)
+        #expect(viewModel.shareMessage?.contains("PW-2") == true)
     }
 }

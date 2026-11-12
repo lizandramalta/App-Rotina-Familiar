@@ -414,6 +414,33 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
       expect(active.map((row) => row.id)).toEqual([session.sessionId]);
     });
 
+    it('SPEC-005 E-04 joining by the new invite revokes the profile session on the other device with its tokens and push', async () => {
+      const seeded = await seedInvite('member', { activeGuestSession: true });
+      const db = container.dbPool;
+      const [old] = await activeSessionsOf(seeded.guestId);
+      await db.query(
+        `insert into app.session_access_tokens (id, session_id, token_hash, expires_at)
+         values ($1, $2, $3, now() + interval '15 minutes')`,
+        [randomUUID(), old?.id, `old-access-${randomUUID()}`],
+      );
+      await db.query(
+        `insert into app.push_devices (id, session_id, device_token, environment)
+         values ($1, $2, $3, 'development')`,
+        [randomUUID(), old?.id, `old-device-${randomUUID()}`],
+      );
+
+      await container.joinFamilyByInviteUseCase.execute(joinInput(seeded));
+
+      const revokedAt = async (sql: string) => (await db.query(sql, [old?.id])).rows[0]?.revoked_at;
+      expect(await revokedAt('select revoked_at from app.sessions where id = $1')).not.toBeNull();
+      expect(
+        await revokedAt('select revoked_at from app.session_access_tokens where session_id = $1'),
+      ).not.toBeNull();
+      expect(
+        await revokedAt('select revoked_at from app.push_devices where session_id = $1'),
+      ).not.toBeNull();
+    });
+
     it('revokes the previous session, its tokens and push device on a confirmed switch, keeping its member', async () => {
       const seeded = await seedInvite();
       const previous = await seedPreviousSession();

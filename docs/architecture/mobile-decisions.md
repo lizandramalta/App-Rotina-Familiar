@@ -1,7 +1,7 @@
 # Decisões consolidadas da arquitetura mobile
 
-**Versão:** 1.8 · **Base funcional:** RN 1.26 / RF 1.25 / UC 1.25\
-**Data:** 2026-10-19 · **Situação:** decisões vigentes e integração alvo revisada; jornadas recentes ainda não implementadas
+**Versão:** 1.9 · **Base funcional:** RN 1.27 / RF 1.26 / UC 1.26\
+**Data:** 2026-11-12 · **Situação:** decisões vigentes e integração alvo revisada; jornadas recentes ainda não implementadas
 
 [Arquitetura](mobile-architecture.md) · [Catálogo](mobile-feature-catalog.md) · [Índice](../DOCUMENTACAO.md)
 
@@ -52,7 +52,7 @@ Participa de uma missão quem foi responsável creditado em uma ou mais tarefas 
 <a id="p-03"></a>
 ### P-03 — Convites: resolvida
 
-Gerar ou reenviar sempre cria novo link e senha, invalida os anteriores e revoga a sessão anterior no ato da emissão, preservando perfil e histórico. A primeira emissão explícita em TEL-056 abre diretamente a folha nativa após sucesso; a confirmação dos efeitos é exigida antes de **reemitir**, inclusive se a primeira resposta foi perdida. Convite não expira por tempo, mas deixa de valer por consumo ou revogação/substituição. Exibir credenciais transitoriamente; guardar verificadores, sem reconstrução de senha a partir de hash.
+Gerar ou reenviar sempre cria novo link e senha e invalida os convites anteriores disponíveis, preservando perfil, histórico e a sessão ativa, que só é revogada no ingresso pelo novo convite. Toda emissão explícita, em TEL-032 ou TEL-056, abre diretamente a folha nativa após sucesso, sem confirmação, inclusive se a resposta anterior foi perdida (SCRUM-114). Convite não expira por tempo, mas deixa de valer por consumo ou revogação/substituição. Exibir credenciais transitoriamente; guardar verificadores, sem reconstrução de senha a partir de hash.
 
 <a id="p-04"></a>
 ### P-04 — Datas, rotinas e concluídas: resolvida
@@ -110,6 +110,7 @@ As propostas substituídas (iOS 17, sorteio remoto, controle de versão otimista
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.9 | 2026-11-12 | Convite: emissão sempre direta, invalida convites anteriores disponíveis e preserva a sessão; o ingresso pelo novo convite revoga a sessão anterior do perfil, com tokens e push (SCRUM-114; SPEC-004 E-05). |
 | 1.8 | 2026-10-28 | MA-21: TEL-032 alterna Dia/Semana visual domingo–sábado, com gestão em blocos e edição do nome Kids autorizada; métricas familiares preservadas. |
 | 1.7 | 2026-10-28 | MA-21: composição diária independente de TEL-032, preservando a lista por intervalo em TEL-011 e o contexto da Família no retorno. |
 | 1.6 | 2026-10-28 | Consolida TEL-011 com contagens e filtros sobre overview/lista. |

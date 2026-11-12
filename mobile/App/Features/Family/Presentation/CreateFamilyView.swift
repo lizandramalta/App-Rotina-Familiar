@@ -96,7 +96,7 @@ struct CreateFamilyView: View {
                     } label: {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(TimeZoneDisplay.city(viewModel.timeZoneID))
+                                Text(TimeZoneDisplay.displayName(for: viewModel.timeZoneID))
                                     .font(.body)
                                     .foregroundStyle(Color(uiColor: .label))
 

@@ -107,7 +107,7 @@ struct MissionTaskPickerView: View {
                 Button {
                     path.append(.createTask)
                 } label: {
-                    Label("missions.task_picker.add_new_task", systemImage: "plus")
+                    Text("missions.task_picker.add_new_task")
                 }
                 .padding()
                 .frame(maxWidth: .infinity, alignment: .leading)

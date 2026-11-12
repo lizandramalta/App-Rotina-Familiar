@@ -242,7 +242,7 @@ final class FamilyMembersUITests: XCTestCase {
         XCTAssertTrue(addAction.exists)
     }
 
-    // MARK: SPEC-004 Phase 2 — invite issue and reissue (TEL-032 / TEL-034)
+    // MARK: SPEC-004 Phase 2 — invite issuance (TEL-032 / TEL-034 share sheet)
 
     private func openKidDetail() {
         XCTAssertTrue(memberRings.firstMatch.waitForExistence(timeout: 5))
@@ -362,27 +362,27 @@ final class FamilyMembersUITests: XCTestCase {
     private func dismissShareSheet() {
         let sheet = app.otherElements["ActivityListView"]
         XCTAssertTrue(sheet.waitForExistence(timeout: 10))
-        let close = app.buttons["Close"]
-        if close.waitForExistence(timeout: 2) {
-            close.tap()
-        } else if app.otherElements["PopoverDismissRegion"].exists {
-            app.otherElements["PopoverDismissRegion"]
-                .coordinate(withNormalizedOffset: CGVector(dx: 0.05, dy: 0.05)).tap()
+        let dismissRegion = app.otherElements["PopoverDismissRegion"]
+        if dismissRegion.waitForExistence(timeout: 2) {
+            // iOS 26 shows the share sheet as a popover: tap outside it, away from the status bar.
+            dismissRegion.coordinate(withNormalizedOffset: CGVector(dx: 0.02, dy: 0.3)).tap()
+        } else if app.buttons["Close"].exists {
+            app.buttons["Close"].tap()
         } else {
-            app.swipeDown(velocity: .fast)
+            sheet.swipeDown(velocity: .fast)
         }
         XCTAssertTrue(sheet.waitForNonExistence(timeout: 5))
     }
 
-    func testFirstInviteOpensShareSheetThenRequiresReissueConfirmation() {
+    func testEveryInviteIssuanceOpensShareSheetDirectly() {
         launch("member-invite")
         openKidDetail()
 
         // CA-01: direct issuance, no confirmation screen.
         let issue = app.buttons["memberInvite.issue.title"]
         XCTAssertTrue(issue.waitForExistence(timeout: 5))
+        XCTAssertTrue(issue.label.contains("Gerar convite"), issue.label)
         issue.tap()
-        XCTAssertFalse(app.buttons["memberInvite.reissue.action"].exists)
         dismissShareSheet()
 
         // CA-08: closing keeps the member and warns that a new invite is needed.
@@ -390,35 +390,29 @@ final class FamilyMembersUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["memberInvite.share.cancelled"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.descendants(matching: .any)["Senha: ABC-123"].exists, "credentials are never shown in the app")
 
-        // CA-02: the next attempt goes through TEL-034 and its explicit confirmation.
-        let reissue = app.buttons["memberInvite.reissue.title"]
-        XCTAssertTrue(reissue.exists)
-        reissue.tap()
-        XCTAssertTrue(app.descendants(matching: .any)["memberInvite.effects"].waitForExistence(timeout: 5))
-        let confirm = app.buttons["memberInvite.reissue.action"]
-        XCTAssertTrue(confirm.exists)
-        XCTAssertTrue(app.buttons["memberInvite.cancel.action"].exists)
-
-        app.buttons["memberInvite.cancel.action"].tap()
-        XCTAssertTrue(app.staticTexts["family.member.detail.name"].waitForExistence(timeout: 5))
-
-        reissue.tap()
-        XCTAssertTrue(app.buttons["memberInvite.reissue.action"].waitForExistence(timeout: 5))
-        app.buttons["memberInvite.reissue.action"].tap()
+        // SCRUM-114 / CA-02 (SPEC-004 E-05; UX-004 UX-06/UX-07): the same entry issues again directly, with the
+        // same label and no warning or confirmation step.
+        XCTAssertTrue(issue.exists)
+        XCTAssertTrue(issue.label.contains("Gerar convite"), issue.label)
+        issue.tap()
+        XCTAssertFalse(app.descendants(matching: .any)["memberInvite.effects"].exists)
         dismissShareSheet()
         XCTAssertTrue(app.staticTexts["family.member.detail.name"].waitForExistence(timeout: 5), "closing the sheet returns to TEL-032")
     }
 
-    func testUncertainInviteShowsNoCredentialsAndNextAttemptIsReissue() {
+    func testUncertainInviteShowsNoCredentialsAndNextAttemptIsDirect() {
         launch("member-invite-uncertain")
         openKidDetail()
 
-        app.buttons["memberInvite.issue.title"].tap()
+        let issue = app.buttons["memberInvite.issue.title"]
+        XCTAssertTrue(issue.waitForExistence(timeout: 5))
+        issue.tap()
 
         XCTAssertTrue(app.descendants(matching: .any)["memberInvite.error"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.otherElements["ActivityListView"].exists)
-        XCTAssertTrue(app.buttons["memberInvite.reissue.title"].exists)
-        XCTAssertFalse(app.buttons["memberInvite.issue.title"].exists)
+        // CA-07: the same entry stays available and issues directly, with no confirmation screen.
+        XCTAssertTrue(issue.exists)
+        XCTAssertTrue(issue.isEnabled)
     }
 
     func testCreatorDetailHasNoInviteAction() {
@@ -428,7 +422,6 @@ final class FamilyMembersUITests: XCTestCase {
 
         XCTAssertTrue(app.staticTexts["family.member.detail.name"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.buttons["memberInvite.issue.title"].exists)
-        XCTAssertFalse(app.buttons["memberInvite.reissue.title"].exists)
     }
 }
 

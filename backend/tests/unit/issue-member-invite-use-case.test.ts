@@ -3,10 +3,7 @@
  * Concorrência (CA-06) e persistência real ficam em tests/integration.
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  INVITE_REISSUED_REVOCATION_REASON,
-  IssueMemberInviteUseCase,
-} from '../../src/modules/family/application/issue-member-invite-use-case.js';
+import { IssueMemberInviteUseCase } from '../../src/modules/family/application/issue-member-invite-use-case.js';
 import type { MemberInviteRepositoryPort } from '../../src/modules/family/application/member-invite-repository-port.js';
 import type {
   TransactionContext,
@@ -33,7 +30,6 @@ describe('IssueMemberInviteUseCase — SPEC-004 phase 1', () => {
         .mockResolvedValue({ role: MemberRole.ADMINISTRATOR, sessionActive: true }),
       findTarget: vi.fn().mockResolvedValue({ id: TARGET_ID, isFamilyCreator: false }),
       invalidateAvailableInvites: vi.fn().mockResolvedValue(undefined),
-      revokeActiveSession: vi.fn().mockResolvedValue(undefined),
       insertInvite: vi.fn().mockResolvedValue(undefined),
     };
     transactionRunner = {
@@ -54,7 +50,7 @@ describe('IssueMemberInviteUseCase — SPEC-004 phase 1', () => {
       logger: recording.logger,
     });
 
-  it('CA-01/CA-02/CA-05 invalidates, revokes and inserts under the family lock, persisting only protected verifiers', async () => {
+  it('CA-01/CA-02/CA-05 invalidates previous invites and inserts under the family lock, persisting only protected verifiers', async () => {
     const result = await build().execute(COMMAND);
 
     expect(transactionRunner.forFamily).toHaveBeenCalledWith(
@@ -66,11 +62,8 @@ describe('IssueMemberInviteUseCase — SPEC-004 phase 1', () => {
       memberId: TARGET_ID,
       at: NOW,
     });
-    expect(repository.revokeActiveSession).toHaveBeenCalledWith(expect.anything(), {
-      familyId: TEST_ACTOR.familyId,
-      memberId: TARGET_ID,
-      reason: INVITE_REISSUED_REVOCATION_REASON,
-    });
+    // SPEC-004 E-05 (SCRUM-114): the port has no session revocation; issuing never ends the session.
+    expect(Object.keys(repository)).not.toContain('revokeActiveSession');
     const inserted = repository.insertInvite.mock.calls[0]?.[1] as Record<string, unknown>;
     expect(inserted).toMatchObject({ id: result.inviteId, issuedByMemberId: TEST_ACTOR.memberId });
 
@@ -120,7 +113,7 @@ describe('IssueMemberInviteUseCase — SPEC-004 phase 1', () => {
   it('CA-03 maps a target outside the actor family to RESOURCE_NOT_FOUND without writing', async () => {
     repository.findTarget.mockResolvedValue(undefined);
     await expect(build().execute(COMMAND)).rejects.toMatchObject({ code: 'RESOURCE_NOT_FOUND' });
-    expect(repository.revokeActiveSession).not.toHaveBeenCalled();
+    expect(repository.invalidateAvailableInvites).not.toHaveBeenCalled();
     expect(repository.insertInvite).not.toHaveBeenCalled();
   });
 
@@ -137,7 +130,7 @@ describe('IssueMemberInviteUseCase — SPEC-004 phase 1', () => {
       code: 'INVITE_NOT_ISSUABLE',
       statusCode: 409,
     });
-    expect(repository.revokeActiveSession).not.toHaveBeenCalled();
+    expect(repository.invalidateAvailableInvites).not.toHaveBeenCalled();
     expect(repository.insertInvite).not.toHaveBeenCalled();
   });
 

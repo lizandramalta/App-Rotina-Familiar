@@ -24,14 +24,12 @@ final class MemberDetailViewModel {
 
     enum InviteFailure: Equatable {
         case rateLimited
-        /// The outcome is unknown: no credentials are shown and the next attempt is a reissue (SPEC-004 CA-07).
+        /// The outcome is unknown: no credentials are shown; the next attempt is a plain, direct issuance (SPEC-004 CA-07).
         case uncertain
         case unavailable
         case notAllowed
     }
 
-    /// `true` once an issuance was attempted or may have happened; the next one is then a reissue (CA-02, CA-07).
-    private(set) var hasPreviousInvite: Bool
     private(set) var isIssuingInvite = false
     /// Credentials live only here, until the native share sheet is dismissed (CA-08).
     private(set) var transientInvite: MemberInvite?
@@ -51,12 +49,10 @@ final class MemberDetailViewModel {
         session: ActiveFamilySession,
         familyRepository: any FamilyRepository,
         accessTokenProvider: @escaping @MainActor () -> String?,
-        hasPreviousInvite: Bool = false,
         familyCreatedAt: String? = nil,
         timeZoneID: String = FamilyCreationValidation.defaultTimeZoneID,
         now: Date = .now
     ) {
-        self.hasPreviousInvite = hasPreviousInvite
         self.memberID = memberID
         self.session = session
         self.familyRepository = familyRepository
@@ -233,30 +229,9 @@ final class MemberDetailViewModel {
         }
     }
 
-    /// First issuance: a direct tap, with no confirmation step (CA-01).
-    func issueFirstInvite() async {
-        await issueInvite()
-    }
-
-    /// Reissue after the conscious confirmation of TEL-034 (CA-02).
-    func confirmReissue() async {
-        await issueInvite()
-    }
-
-    /// Called when the native share sheet closes. The credentials are discarded either way and cannot be shared
-    /// again without a reissue (CA-08).
-    func onShareDismissed(completed: Bool) {
-        guard transientInvite != nil else { return }
-        transientInvite = nil
-        hasPreviousInvite = true
-        wasShareCancelled = !completed
-    }
-
-    func clearInviteFailure() {
-        inviteFailure = nil
-    }
-
-    private func issueInvite() async {
+    /// Every issuance is a direct tap with no confirmation step, whether or not an invite was issued before: issuing
+    /// only invalidates unused invites and never ends the member's current session (CA-01, CA-02; SPEC-004 E-05).
+    func issueInvite() async {
         guard canIssueInvite, !isIssuingInvite else { return }
         inviteFailure = nil
         wasShareCancelled = false
@@ -269,7 +244,6 @@ final class MemberDetailViewModel {
         defer { isIssuingInvite = false }
         do {
             transientInvite = try await familyRepository.issueInvite(memberID: memberID, accessToken: token)
-            hasPreviousInvite = true
         } catch FamilyError.rateLimited {
             inviteFailure = .rateLimited
         } catch FamilyError.actionNotAllowed {
@@ -277,9 +251,16 @@ final class MemberDetailViewModel {
         } catch FamilyError.rejected {
             inviteFailure = .unavailable
         } catch {
-            // 503, timeout, lost connection or unreadable body: the invite may exist, so the next try is a reissue.
-            hasPreviousInvite = true
+            // 503, timeout, lost connection or unreadable body: nothing is confirmed, so no credentials are shown.
             inviteFailure = .uncertain
         }
+    }
+
+    /// Called when the native share sheet closes. The credentials are discarded either way and cannot be shared
+    /// again without a new issuance (CA-08).
+    func onShareDismissed(completed: Bool) {
+        guard transientInvite != nil else { return }
+        transientInvite = nil
+        wasShareCancelled = !completed
     }
 }

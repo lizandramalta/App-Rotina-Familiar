@@ -1,9 +1,9 @@
-# Screen map — versão 1.24
+# Screen map — versão 1.25
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do mapa:** 1.24\
-**Base funcional:** RN 1.26 / RF 1.25 / UC 1.25\
-**Data:** 2026-11-08\
+**Versão do mapa:** 1.25\
+**Base funcional:** RN 1.27 / RF 1.26 / UC 1.26\
+**Data:** 2026-11-12\
 **Situação:** referência inicial para design; organização de navegação proposta
 
 [Projeto](../../README.md) · [Índice e versões](../DOCUMENTACAO.md) · [Visão](../00-visao-do-produto.md) · [Regras](../01-regras-de-negocio.md) · [Requisitos](../02-requisitos.md) · [Casos de uso](../03-casos-de-uso.md) · [Diagrama de classes](../06-diagrama-de-classes.md)
@@ -95,7 +95,7 @@ flowchart TD
     T057 -->|Adicionar membro| T033
     T057 -->|Corrigir nome Kids / Admin| KN["Folha · Editar nome Kids"]
     T032 -->|Alterar papel / Admin| RP["Seleção modal de papel"]
-    T032 -->|Reenviar convite / Admin e perfil elegível| T034
+    T032 -->|Gerar convite / Admin e perfil elegível| T034
     T032 -->|Selecionar tarefa do membro| T012
     T033 -->|Perfil salvo| T032
     T050 -->|Todas as tarefas / inclusive sem responsável| T011
@@ -125,7 +125,7 @@ flowchart TD
 
 Entre progresso e Confirmações Kids, TEL-050 apresenta cartões de quem concluiu todas as tarefas atribuídas **hoje** e de quem teve a maior quantidade de tarefas atribuídas no intervalo visível, incluindo empates. Quando o próprio usuário está no destaque de maior quantidade, seu cartão é compacto, usa texto em segunda pessoa e “Ver minhas tarefas” abre TEL-032 na visão de hoje; os demais mantêm o cartão completo. Administrador pode Parabenizar outro membro ativo, inclusive Kids, e repetir o envio; Membro consulta sem ação. Parabenizar permanece apenas nos cartões de TEL-050. O destinatário vê o parabéns em TEL-010 ou TEL-040 e pode ocultá-lo pelo X. A mensagem interna persiste independentemente do push.
 
-**TEL-032 — Detalhe do membro:** Administradores e Membros consultam as tarefas da pessoa selecionada em Dia (inicialmente hoje) ou Semana visual de domingo a sábado no fuso familiar, recortada por RN49. A tela compacta identifica o membro, resume o período e permite abrir a tarefa em TEL-012. Outros intervalos são consultados em TEL-011. Blocos de convite e gestão exibem Gerar/Reenviar convite, Alterar papel e Remover membro somente para Administradores e quando permitidos; Alterar papel abre seleção modal e confirmação. Editar no topo aparece apenas para Kids visto por Administrador autorizado e corrige o nome administrativo; essa correção também existe em TEL-057. Adultos alteram o próprio nome em Meu perfil. A configuração de apelido permanece exclusiva do titular. O Criador retorna por Apple, sem convite de recuperação.
+**TEL-032 — Detalhe do membro:** Administradores e Membros consultam as tarefas da pessoa selecionada em Dia (inicialmente hoje) ou Semana visual de domingo a sábado no fuso familiar, recortada por RN49. A tela compacta identifica o membro, resume o período e permite abrir a tarefa em TEL-012. Outros intervalos são consultados em TEL-011. Blocos de convite e gestão exibem Gerar convite, Alterar papel e Remover membro somente para Administradores e quando permitidos; Alterar papel abre seleção modal e confirmação. Editar no topo aparece apenas para Kids visto por Administrador autorizado e corrige o nome administrativo; essa correção também existe em TEL-057. Adultos alteram o próprio nome em Meu perfil. A configuração de apelido permanece exclusiva do titular. O Criador retorna por Apple, sem convite de recuperação.
 
 TEL-010 e TEL-040 abrem no dia atual e consultam somente o dia selecionado. TEL-050 inicia na semana corrente, limitada ao intervalo disponível. TEL-011 herda exatamente Início e Fim de TEL-050; TEL-032 inicia em Dia e permite Semana visual domingo–sábado, recortada por RN49. Mudanças em TEL-011 não alteram a origem, e voltar de ambas restaura o contexto anterior. TEL-011 apresenta chips de membros, período legível, grupos com contagens completas por estado e linhas com ícone, responsáveis e navegação; inclui tarefas sem responsável. A folha Filtros reúne Início/Fim e status, com “Limpar” para semana corrente e Todos, preservando membro. O menu ••• oferece Gerar relatório PDF; se o intervalo tocar mais de uma semana, TEL-051 solicita a semana antes da geração.
 
@@ -181,12 +181,12 @@ flowchart TD
     T057 -->|Corrigir nome Kids / Admin| KNE["Folha · Editar nome Kids"]
     T032 -->|Alterar papel / Admin e permitido| RP["Seleção modal de papel"]
     RP --> M010
-    T032 -->|Gerar ou reenviar convite / Admin e elegível| T034
+    T032 -->|Gerar convite / Admin e elegível| T034
     T032 -->|Admin e permitido| M010
     T030 -->|Deixar papel Admin / exceto Criador| M010
 ```
 
-TEL-034 disponibiliza link e senha juntos para compartilhamento, a partir do detalhe do membro ou de TEL-056. A primeira emissão por ação explícita abre diretamente a folha nativa, sem confirmação intermediária. A reemissão informa e exige confirmação dos efeitos antes de gerar novas credenciais; revoga convites e sessão anteriores do mesmo perfil. Não reutilizar credenciais consumidas. Na recuperação, parte do perfil existente, sem novo cadastro de membro. A troca de acesso ocorre por convite confirmado e validado, sem migração de histórico ou remoção automática do perfil anterior. Não há seletor livre de identidades nem modo Kids ativado pela criança. Um Administrador altera o papel Kids pelo detalhe e corrige seu nome em TEL-057 ou TEL-032, respeitando as restrições de promoção. A proteção do Criador vale também no próprio perfil; não é adicionada uma operação de saída de família sem caso de uso definido.
+TEL-034 disponibiliza link e senha juntos para compartilhamento, a partir do detalhe do membro ou de TEL-056. Toda emissão por ação explícita, inicial ou seguinte, abre diretamente a folha nativa, sem confirmação intermediária. Uma nova emissão invalida convites anteriores não usados do mesmo perfil sem encerrar a sessão atual, que só é revogada quando o novo convite é usado. Não reutilizar credenciais consumidas. Na recuperação, parte do perfil existente, sem novo cadastro de membro. A troca de acesso ocorre por convite confirmado e validado, sem migração de histórico ou remoção automática do perfil anterior. Não há seletor livre de identidades nem modo Kids ativado pela criança. Um Administrador altera o papel Kids pelo detalhe e corrige seu nome em TEL-057 ou TEL-032, respeitando as restrições de promoção. A proteção do Criador vale também no próprio perfil; não é adicionada uma operação de saída de família sem caso de uso definido.
 
 ## 5. Experiência Kids
 
@@ -272,7 +272,7 @@ A = Administrador (inclui Criador); M = Membro; K = Kids. Códigos RF e RNF são
 | TEL-031 | Reservada — lista de membros | — | Lista e botão Adicionar membro ficam em TEL-057; ID preservado, sem destino navegável | [UC02](../03-casos-de-uso.md#uc02); RF02–06, RF40 |
 | TEL-032 | Detalhe e tarefas do membro | A, M; gestão somente A | Identificação e tarefas em Dia ou Semana visual domingo–sábado no fuso da família; lista compacta abre tarefa; blocos de convite e gestão autorizada com seleção modal de papel; Editar no topo somente para Kids visto por Administrador autorizado; voltar restaura o filtro da Família | [UC11](../03-casos-de-uso.md#uc11), [UC02](../03-casos-de-uso.md#uc02); RF60, RF66, RF03–06, RF41 |
 | TEL-033 | Criar membro | A, após criação da família | Nome e papel na criação, respeitando restrições; membro preparado antes da criação permanece em TEL-002 | [UC02](../03-casos-de-uso.md#uc02); RF02–06, RF40 |
-| TEL-034 | Convite do membro | A | Primeira emissão explícita abre diretamente a folha nativa; reemissão exige confirmação dos efeitos. Link e senha são compartilhados juntos para o mesmo perfil | [UC01](../03-casos-de-uso.md#uc01), [UC02](../03-casos-de-uso.md#uc02); RF41, RF54 |
+| TEL-034 | Convite do membro | A | Toda emissão explícita abre diretamente a folha nativa, sem confirmação. Link e senha são compartilhados juntos para o mesmo perfil | [UC01](../03-casos-de-uso.md#uc01), [UC02](../03-casos-de-uso.md#uc02); RF41, RF54 |
 | TEL-040 | Minhas tarefas Kids | K | Aba inicial; próprias tarefas e progresso diários. O círculo reabre tarefa própria concluída; o restante da linha abre o detalhe. Tarefa sinalizada aparece Aguardando confirmação até decisão válida | [UC11](../03-casos-de-uso.md#uc11), [UC17](../03-casos-de-uso.md#uc17); RF17, RF22, RF49, RF57 |
 | TEL-041 | Detalhe da minha tarefa | K responsável | Informações da tarefa e estado; sinalizar se pendente | [UC15](../03-casos-de-uso.md#uc15); RF23–24, RF55–56 |
 | TEL-050 | Família | A, M | Tela principal; progresso familiar e por membro com Início/Fim livres, lista de membros e entrada em Tarefas da família; Configurações e Confirmações Kids somente A; carga fica para entrega posterior | [UC02](../03-casos-de-uso.md#uc02), [UC03](../03-casos-de-uso.md#uc03), [UC11](../03-casos-de-uso.md#uc11); RF60, RF66, RN60–61 |
@@ -341,6 +341,7 @@ Campos funcionais de data/fuso e seleção de foto estão definidos; o layout vi
 
 | Versão do mapa | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.25 | RN 1.27 / RF 1.26 / UC 1.26 | 2026-11-12 | TEL-032 e TEL-056 usam sempre “Gerar convite” e emitem direto, sem confirmação de reemissão; TEL-034 é a folha de compartilhamento. Para UX-004 (UX-06, UX-07), SCRUM-114. |
 | 1.24 | RN 1.26 / RF 1.25 / UC 1.25 | 2026-11-08 | Barra de abas somente nas telas principais; telas abertas por push a ocultam. Para UX-016 (UX-08). |
 | 1.23 | RN 1.26 / RF 1.25 / UC 1.25 | 2026-10-28 | TEL-032 compacta em Dia/Semana domingo–sábado, com Editar apenas para Kids em visão Admin; filtros TEL-050/TEL-011 distintos. |
 | 1.22 | RN 1.25 / RF 1.24 / UC 1.24 | 2026-10-28 | TEL-032 sem edição de nome; seleção modal de papel. TEL-057 corrige nome Kids; adultos usam Meu perfil. |

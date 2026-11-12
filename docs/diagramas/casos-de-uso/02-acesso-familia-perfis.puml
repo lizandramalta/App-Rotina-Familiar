@@ -53,7 +53,8 @@ note right of UC01
 end note
 note right of UC09
   Link e senha permitem um único ingresso.
-  Sem expiração temporal; reemissão revoga o anterior.
+  Sem expiração temporal; reemissão invalida o anterior.
+  Ingresso pelo novo convite revoga a sessão anterior.
   Um aparelho por perfil; confirmar troca de acesso.
 end note
 

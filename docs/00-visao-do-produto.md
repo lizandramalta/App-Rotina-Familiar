@@ -1,8 +1,8 @@
 # Documento de visão — MVP
 
 **Projeto:** App de Organização Familiar  
-**Versão:** 1.8\
-**Data:** 2026-10-07\
+**Versão:** 1.9\
+**Data:** 2026-11-12\
 **Situação:** visão consolidada do produto
 
 [Projeto](../README.md) · [Índice documental](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -173,7 +173,7 @@ O aplicativo terá iOS/iPadOS 26, Swift/SwiftUI e View + ViewModel com Clean Arc
 
 O fuso é escolhido na criação (padrão `America/Sao_Paulo`) e alterado só por Administradores, imediatamente ou no próximo ciclo. O destaque é apurado à meia-noite de segunda e preservado após correções. Badges são cumulativos por participação em 5, 10, 25 e 50 missões; perfis sem participação não recebem a conquista.
 
-Tarefas e início de rotina aceitam qualquer data passada ou futura, inclusive anterior à criação da família. Edições válidas de tarefas concluídas não protegidas ajustam indicadores e mantêm auditoria. Um perfil usa um aparelho; reenvio de convite emite novo link/senha e revoga os anteriores. Trocar de acesso pede confirmação e não remove o membro da família anterior.
+Tarefas e início de rotina aceitam qualquer data passada ou futura, inclusive anterior à criação da família. Edições válidas de tarefas concluídas não protegidas ajustam indicadores e mantêm auditoria. Um perfil usa um aparelho; reenvio de convite emite novo link/senha e invalida os anteriores não usados; o acesso atual só termina quando o novo convite é usado. Trocar de acesso pede confirmação e não remove o membro da família anterior.
 
 Apenas desenvolvimento e produção estão previstos. Backend Node.js/Clean Architecture passa a estar definido na arquitetura backend, com TypeScript/Fastify como propostas técnicas. Retenção de fotos vinculadas, volumes de teste, hospedagem e distribuição continuam fora desta etapa. As decisões completas estão no registro da arquitetura.
 
@@ -183,6 +183,7 @@ A arquitetura backend 1.0 está em [backend-architecture.md](architecture/backen
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.9 | 2026-11-12 | Convite: emissão sempre direta, invalida convites anteriores disponíveis e preserva a sessão; o ingresso pelo novo convite revoga a sessão anterior do perfil, com tokens e push (SCRUM-114; SPEC-004 E-05). |
 | 1.8 | 2026-10-07 | Jornada inicial passa a configurar o perfil do Criador antes da família e permitir membros opcionais com convite explícito antes da área principal. |
 | 1.7 | 2026-10-07 | Conclusão direta mantém responsáveis ou atribui adulto sem responsável; reabertura pode reabrir missão concluída e reverter recompensa, participações e badges. |
 | 1.6 | 2026-10-06 | Consulta própria diária para todos; consulta familiar Dia/Semana apenas para adultos. Para SPEC-009. |

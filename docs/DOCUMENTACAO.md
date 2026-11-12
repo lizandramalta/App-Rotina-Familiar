@@ -1,8 +1,8 @@
-# Documentação do projeto — versão 1.41
+# Documentação do projeto — versão 1.42
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.41\
-**Data:** 2026-11-09\
+**Versão:** 1.42\
+**Data:** 2026-11-12\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Modelo de dados](05-modelo-de-dados.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -14,22 +14,22 @@
 | [Apresentação do projeto](../README.md) | Propósito, público, jornada e escopo do MVP. |
 | [Visão do produto](00-visao-do-produto.md) | Contexto, objetivos, princípios, escopo e critérios de sucesso. |
 | [Índice e versões](DOCUMENTACAO.md) | Organização documental, rastreabilidade e política de versões. |
-| [Regras de negócio](01-regras-de-negocio.md) | Regras vigentes e suas relações com RF, RNF e UC; versão 1.26. |
-| [Requisitos](02-requisitos.md) | 71 requisitos funcionais e 27 não funcionais, com vínculos às regras e aos casos de uso; versão 1.25. |
-| [Especificação dos casos de uso](03-casos-de-uso.md) | 19 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições; versão 1.25. |
+| [Regras de negócio](01-regras-de-negocio.md) | Regras vigentes e suas relações com RF, RNF e UC; versão 1.27. |
+| [Requisitos](02-requisitos.md) | 71 requisitos funcionais e 27 não funcionais, com vínculos às regras e aos casos de uso; versão 1.26. |
+| [Especificação dos casos de uso](03-casos-de-uso.md) | 19 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições; versão 1.26. |
 | [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) | Visão geral e cinco recortes UML, com fontes PlantUML e imagens SVG. |
-| [Screen map](design/screen-map.md) | Mapa 1.24: barra de abas somente nas telas principais; TEL-032 compacta em Dia/Semana domingo–sábado; base RN 1.26 / RF 1.25 / UC 1.25. |
-| [User flows](design/user-flows.md) | Fluxos 1.25: UF-15 com acesso interno ao destaque semanal, mensagem vazia e cópia; base RN 1.26 / RF 1.25 / UC 1.25 e screen map 1.24. |
-| [Design System](design/design-system.md) | Versão 1.0: tokens de cores, tipografia, espaçamentos, raios e componentes base em SwiftUI (Figma 960:25 e 870:22509). |
-| [Modelo de dados (DER)](05-modelo-de-dados.md) | Modelo 1.10: parabéns persistido e fila de push por dispositivo; base RN 1.23 / RF 1.22 / UC 1.22. |
-| [Diagrama de classes](06-diagrama-de-classes.md) | Modelo 1.9: rascunho de membros, resultado de criação, foto antecipada e item pessoal com estado efetivo/exibido; base RN 1.18 / RF 1.17 / UC 1.16. |
-| [Arquitetura mobile](architecture/mobile-architecture.md) | Arquitetura 1.6: Swift + SwiftUI, View + ViewModel, integração do onboarding e projeção pessoal de tarefas. |
-| [Catálogo mobile](architecture/mobile-feature-catalog.md) | Catálogo 1.13: TEL-032 Dia/Semana com gestão e nome Kids autorizado. |
-| [Decisões da arquitetura mobile](architecture/mobile-decisions.md) | Versão 1.8: MA-01–MA-21 e P-01–P-09, incluindo TEL-032 Dia/Semana, totais de TEL-011, incentivos e mensagens internas. |
+| [Screen map](design/screen-map.md) | Mapa 1.25: rótulo único “Gerar convite” e emissão direta em TEL-032/TEL-056; barra de abas somente nas telas principais; TEL-032 compacta em Dia/Semana domingo–sábado; base RN 1.26 / RF 1.25 / UC 1.25. |
+| [User flows](design/user-flows.md) | Fluxos 1.26: emissão de convite direta e revogação da sessão no ingresso (UF-01–UF-04); base RN 1.27 / RF 1.26 / UC 1.26 e screen map 1.25. |
+| [Design System](design/design-system.md) | Versão 1.0: tokens de cores, tipografia (com Sour Gummy), espaçamentos, raios, componentes base e traço procedural de giz em SwiftUI (Figma 960:25 e 870:22509). |
+| [Modelo de dados (DER)](05-modelo-de-dados.md) | Modelo 1.11: convite invalida anteriores sem revogar sessão, revogada no ingresso; base RN 1.27 / RF 1.26 / UC 1.26. |
+| [Diagrama de classes](06-diagrama-de-classes.md) | Modelo 1.10: convite sem revogação na emissão; rascunho de membros, resultado de criação, foto antecipada e item pessoal com estado efetivo/exibido; base RN 1.27 / RF 1.26 / UC 1.26. |
+| [Arquitetura mobile](architecture/mobile-architecture.md) | Arquitetura 1.7: Swift + SwiftUI, View + ViewModel, integração do onboarding e projeção pessoal de tarefas. |
+| [Catálogo mobile](architecture/mobile-feature-catalog.md) | Catálogo 1.14: TEL-034 como folha nativa sem confirmação de reemissão; TEL-032 Dia/Semana com gestão e nome Kids autorizado. |
+| [Decisões da arquitetura mobile](architecture/mobile-decisions.md) | Versão 1.9: MA-01–MA-21 e P-01–P-09, incluindo TEL-032 Dia/Semana, totais de TEL-011, incentivos e mensagens internas. |
 | [Convenções de código mobile](architecture/mobile-code-conventions.md) | Convenções 1.1 de Swift/SwiftUI, SF Symbols, camadas, concorrência, segurança, testes e revisão. |
-| [Arquitetura backend](architecture/backend-architecture.md) | Backend 1.5: apuração semanal e notificações recuperáveis, além da arquitetura Node.js, Supabase/R2 e onboarding. |
-| [Contratos backend](architecture/backend-contracts.md) | Contratos 1.28 da API `/v1`: consultas próprias de reconhecimento e abertura monotônica, com schemas OpenAPI. |
-| [Decisões backend](architecture/backend-decisions.md) | BA-01–BA-39, versão 1.7: inclui apuração semanal, claims recuperáveis e outbox APNs. |
+| [Arquitetura backend](architecture/backend-architecture.md) | Backend 1.6: convite sem revogação na emissão; apuração semanal e notificações recuperáveis, além da arquitetura Node.js, Supabase/R2 e onboarding. |
+| [Contratos backend](architecture/backend-contracts.md) | Contratos 1.29 da API `/v1`: emissão de convite sem revogar sessão; consultas próprias de reconhecimento e abertura monotônica, com schemas OpenAPI. |
+| [Decisões backend](architecture/backend-decisions.md) | BA-01–BA-39, versão 1.8: BA-09 com revogação no ingresso; inclui apuração semanal, claims recuperáveis e outbox APNs. |
 | [Convenções de código backend](architecture/backend-code-conventions.md) | Convenções de TypeScript/Fastify, camadas, contratos, SQL, segurança, testes e revisão. |
 | [Specs de entrega](../specs/README.md) | Recortes aprovados de implementação compartilhados entre mobile e backend. |
 | [Primeiro TestFlight](releases/testflight-1.md) | Histórico da distribuição Mutua 1.0 (1) com recorte adulto. |
@@ -135,7 +135,7 @@ TEL-014 e TEL-031 permanecem reservadas e fora da navegação; a carga visual fi
 
 ## Política de versionamento
 
-1. A base funcional vigente está na versão **1.26** (regras 1.26, requisitos 1.25 e casos de uso 1.25). O índice documental está na versão **1.41** por consolidar também registros técnicos e de apresentação. Screen map e user flows têm versionamento independente; as arquiteturas mobile e backend também. Documentos alinhados a uma versão funcional anterior devem ser atualizados quando o comportamento que descrevem for afetado.
+1. A base funcional vigente está na versão **1.27** (regras 1.27, requisitos 1.26 e casos de uso 1.26). O índice documental está na versão **1.42** por consolidar também registros técnicos e de apresentação. Screen map e user flows têm versionamento independente; as arquiteturas mobile e backend também. Documentos alinhados a uma versão funcional anterior devem ser atualizados quando o comportamento que descrevem for afetado.
 2. Preserve os identificadores RN, RF, RNF, UC, TEL, MOD e UF. Novos itens recebem novos códigos; códigos retirados não são reutilizados.
 3. A edição vigente fica na raiz e em `docs/`. O Git mantém o histórico e permite comparar ou recuperar versões anteriores por commits e, quando adotadas, tags. Não mantenha cópias da documentação em pastas de versões.
 4. Alterações funcionais e suas referências devem evoluir juntas, com versão, data e histórico dos códigos e comportamentos afetados. Use 1.1, 1.2... para revisões incrementais e 2.0 para mudanças substanciais da base funcional.
@@ -148,6 +148,7 @@ A fundação backend adota Node.js, TypeScript, Fastify e `pg`. Parte da API de 
 
 | Versão | Data | Alteração |
 | --- | --- | --- |
+| 1.42 | 2026-11-12 | SCRUM-114: RN46/RN47 (1.27), RF41/RF46/RF54/RNF22 (1.26) e UC01/UC02/UC09 (1.26) tornam toda emissão de convite direta, sem confirmação; a emissão invalida convites anteriores disponíveis e preserva a sessão, revogada com tokens e push no ingresso pelo novo convite. SPEC-004 E-05, SPEC-005 E-04, UX-004 UX-06/UX-07, UX-002 UX-06/UX-07; mapa 1.25, fluxos 1.26, visão 1.9, DER 1.11, classes 1.10, arquitetura mobile 1.7, catálogo 1.14, MA 1.9, backend 1.6, contratos 1.29 e BA 1.8. |
 | 1.41 | 2026-11-09 | Segundo TestFlight Mutua: produto completo de `develop`, identidade Mutua e correções do primeiro TestFlight; registro da primeira distribuição incluído como histórico; sem mudança da base funcional. |
 | 1.40 | 2026-11-08 | SCRUM-86 / SPEC-016 Fase 2: UX-016 revisada com a anatomia gamificada (Figma 579-59); SPEC-016 registra os esclarecimentos E-02/E-03; mapa 1.24 com barra de abas somente nas telas principais; sem mudança da base funcional. |
 | 1.39 | 2026-11-05 | SCRUM-102 / SPEC-020 Fase 1: contratos 1.28, arquitetura backend 1.5 e decisões 1.7; sem mudança da base funcional. |

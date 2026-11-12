@@ -14,16 +14,14 @@ import type { MemberInviteCredentialsPort } from './member-invite-credentials-po
 import type { InviteCredentialsView, IssueMemberInviteCommand } from './member-invite-dto.js';
 import type { MemberInviteRepositoryPort } from './member-invite-repository-port.js';
 
-/** Motivo gravado na sessão revogada pela reemissão (RN47). */
-export const INVITE_REISSUED_REVOCATION_REASON = 'INVITE_REISSUED';
-
 const ROUTE = 'POST /v1/family/members/{memberId}/invites';
 
 /**
  * Emite ou reemite o convite de um perfil (SPEC-004 Fase 1, UC02/RN45–47).
  *
  * Cada chamada confirmada cria credenciais novas e, no mesmo commit, invalida os
- * convites disponíveis e revoga a sessão do alvo. Não há idempotência nem
+ * convites disponíveis do alvo, sem revogar sua sessão: a sessão anterior só é
+ * revogada quando o novo convite é consumido (SPEC-004 E-05, SCRUM-114). Não há idempotência nem
  * recuperação de senha (BA-07, BA-09): se a resposta se perder, o resultado é
  * incerto e uma nova emissão explícita substitui qualquer conjunto anterior.
  */
@@ -72,7 +70,7 @@ export class IssueMemberInviteUseCase {
           // Alvo externo é indistinguível de inexistente (RNF06).
           throw new NotFoundError('Family member not found.');
         }
-        // O Criador volta por Apple; o próprio ator não revoga a sessão que usa.
+        // O Criador volta por Apple; convite para si mesmo não tem finalidade (BA-26).
         if (target.isFamilyCreator || target.id === actor.memberId) {
           throw new InviteNotIssuableError();
         }
@@ -82,11 +80,6 @@ export class IssueMemberInviteUseCase {
           familyId: actor.familyId,
           memberId,
           at: now,
-        });
-        await this.deps.repository.revokeActiveSession(tx, {
-          familyId: actor.familyId,
-          memberId,
-          reason: INVITE_REISSUED_REVOCATION_REASON,
         });
         await this.deps.repository.insertInvite(tx, {
           id: generated.inviteId,

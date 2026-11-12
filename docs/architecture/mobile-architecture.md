@@ -1,9 +1,9 @@
 # Arquitetura mobile — Swift, SwiftUI e Clean Architecture
 
 **Projeto:** App de Organização Familiar — MVP\
-**Versão da arquitetura:** 1.6\
+**Versão da arquitetura:** 1.7\
 **Base funcional:** RN 1.18 / RF 1.17 / UC 1.16 · Design: screen map 1.14 / fluxos 1.15\
-**Data:** 2026-10-19\
+**Data:** 2026-11-12\
 **Situação:** integração alvo revisada; onboarding e projeção pessoal ainda exigem implementação
 
 [Projeto](../../README.md) · [Índice](../DOCUMENTACAO.md) · [Catálogo mobile](mobile-feature-catalog.md) · [Decisões](mobile-decisions.md)
@@ -243,11 +243,11 @@ Mudanças de papel removem destinos incompatíveis. `403` de recurso não equiva
 
 `SessionRefreshCoordinator` é um actor com uma renovação em andamento compartilhada por chamadas concorrentes. Refresh token e prova da instalação ficam no Keychain, acessíveis no aparelho desbloqueado e sem migração para outro dispositivo. Access token permanece em memória e dura 15 minutos; refresh token é estável durante a sessão, sem expiração temporal e sempre revogável. Toda operação protegida verifica a sessão ativa, sem esperar o token vencer para revogar acesso. Falha de rede ou dispositivo bloqueado não significa credencial ausente.
 
-Uma sessão ativa por perfil é vinculada à instalação e a uma credencial protegida; identificador de instalação sozinho não prova identidade. Novo convite revoga sessão e convites anteriores na emissão, antes de ingresso no novo aparelho. Novo acesso Apple substitui a sessão anterior do Criador. Credenciais não ficam em logs, rotas, preferências ou telemetria.
+Uma sessão ativa por perfil é vinculada à instalação e a uma credencial protegida; identificador de instalação sozinho não prova identidade. Novo convite invalida convites anteriores na emissão, sem revogar a sessão ativa; a sessão anterior é revogada no ingresso pelo novo convite. Novo acesso Apple substitui a sessão anterior do Criador. Credenciais não ficam em logs, rotas, preferências ou telemetria.
 
 Apple usa AuthenticationServices e prova associada à tentativa (`nonce`/`state`), validada pelo backend. Universal Links usam domínio controlado e AASA; parser aceita somente hosts/paths esperados. Senha não vai na URL. Sem app, página direciona à loja e orienta reabrir o link depois de instalar. Credenciais do R2/Supabase e segredos Apple ficam no backend.
 
-Gerar/reenviar convite sempre gera novo link e senha; a primeira emissão explícita de TEL-056 abre a folha nativa após sucesso, e a reemissão pede confirmação prévia dos efeitos. Não recupera senha de hash. Não existe expiração temporal do convite, mas consumo/revogação o invalidam. TEL-034 disponibiliza credenciais transitoriamente para envio conjunto explícito.
+Gerar/reenviar convite sempre gera novo link e senha; toda emissão explícita, em TEL-032 ou TEL-056, abre a folha nativa após sucesso, sem confirmação prévia. Não recupera senha de hash. Não existe expiração temporal do convite, mas consumo/revogação o invalidam. TEL-034 disponibiliza credenciais transitoriamente para envio conjunto explícito.
 
 Ingresso com resposta perdida tem recuperação específica por dez minutos, comprovando a tentativa e a instalação original, sem segundo ingresso. Identificador público não permite recuperar credenciais. Após a janela, obter novo convite. Esse protocolo é exceção limitada ao acesso, não um mecanismo geral de `operationID` para todas as gravações.
 
@@ -381,6 +381,7 @@ A sequência futura permanece: composição/acesso → família/membros → tare
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.7 | 2026-11-12 | Convite: emissão sempre direta, invalida convites anteriores disponíveis e preserva a sessão; o ingresso pelo novo convite revoga a sessão anterior do perfil, com tokens e push (SCRUM-114; SPEC-004 E-05). TEL-034 é somente a folha nativa, apresentada por `InviteSharePresenter`. |
 | 1.6 | 2026-10-19 | Fluxo técnico da foto/membros antes da criação, retorno de TEL-056 sem recriação, primeira emissão de convite e DTO pessoal com estado exibido. |
 | 1.5 | 2026-10-08 | Registra a fundação mobile da Sprint 0: projeto SwiftUI, configuração por ambiente, navegação neutra e testes básicos; funcionalidades de produto permanecem futuras. |
 | 1.4 | 2026-10-07 | `CompleteTaskCommand` não transporta escolha de responsáveis; conclusão é direta e o servidor resolve a atribuição automática. |

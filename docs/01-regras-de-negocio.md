@@ -1,13 +1,13 @@
 # Regras de negócio
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.26\
-**Data:** 2026-10-28\
+**Versão:** 1.27\
+**Data:** 2026-11-12\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
 
-Este documento contém as regras vigentes da versão 1.26. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
+Este documento contém as regras vigentes da versão 1.27. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
 
 **Identificadores preservados:** RN15, RN29 e RN32 não estavam definidos na base recebida e permanecem não utilizados. Não representam conteúdo faltante desta versão.
 
@@ -359,7 +359,7 @@ Os demais perfis, inclusive Administradores promovidos e Kids, ingressam pelo li
 
 ## RN46
 
-Link e senha vinculam uma família e um perfil e admitem um ingresso bem-sucedido, sem expiração temporal. A emissão inicial depende de ação explícita do Administrador e abre diretamente o compartilhamento após a geração, sem confirmação intermediária. Reemitir exige informar e confirmar previamente que o novo convite invalidará os anteriores e revogará a sessão anterior do perfil. Cada emissão produz novo link e nova senha; a invalidação de convites anteriores disponíveis e a revogação da sessão anterior ocorrem na mesma operação. As credenciais são exibidas transitoriamente para envio conjunto; somente verificadores protegidos são persistidos. Senha incorreta não consome o convite. Consumo, ingresso e sessão são consistentes sob concorrência.
+Link e senha vinculam uma família e um perfil e admitem um ingresso bem-sucedido, sem expiração temporal. Toda emissão, inicial ou seguinte, depende de ação explícita do Administrador e abre diretamente o compartilhamento após a geração, sem confirmação intermediária. Cada emissão produz novo link e nova senha e invalida, na mesma operação, os convites anteriores ainda disponíveis do perfil, sem alterar a sessão ativa. A sessão anterior do perfil só é revogada quando um novo convite é consumido com sucesso, no mesmo commit do ingresso. As credenciais são exibidas transitoriamente para envio conjunto; somente verificadores protegidos são persistidos. Senha incorreta não consome o convite. Consumo, ingresso e sessão são consistentes sob concorrência.
 
 **Requisitos funcionais:** [RF41](02-requisitos.md#rf41), [RF42](02-requisitos.md#rf42), [RF43](02-requisitos.md#rf43), [RF44](02-requisitos.md#rf44), [RF46](02-requisitos.md#rf46), [RF54](02-requisitos.md#rf54), [RF68](02-requisitos.md#rf68)\
 **Requisitos não funcionais específicos:** [RNF17](02-requisitos.md#rnf17), [RNF18](02-requisitos.md#rnf18), [RNF19](02-requisitos.md#rnf19), [RNF20](02-requisitos.md#rnf20), [RNF21](02-requisitos.md#rnf21)  
@@ -367,7 +367,7 @@ Link e senha vinculam uma família e um perfil e admitem um ingresso bem-sucedid
 
 ## RN47
 
-Cada perfil mantém acesso em um único aparelho, representado por uma sessão ativa vinculada à instalação. Refresh token não expira por tempo e é revogável; token de acesso tem duração de 15 minutos, com verificação de sessão ativa em operações protegidas para revogação imediata no servidor. Recuperação de convidado usa novo convite para o mesmo perfil, sem recriar histórico. Novo convite revoga a sessão anterior já na emissão. Criador retorna por Apple e novo ingresso substitui a sessão anterior. Falha de rede não equivale a revogação. A recuperação específica de ingresso cuja resposta se perdeu exige prova da tentativa e instalação original, em janela de dez minutos, sem segundo consumo; fora dessa janela é necessário novo convite. Troca de acesso por convite com sessão ativa exige confirmação e não remove o perfil anterior da família.
+Cada perfil mantém acesso em um único aparelho, representado por uma sessão ativa vinculada à instalação. Refresh token não expira por tempo e é revogável; token de acesso tem duração de 15 minutos, com verificação de sessão ativa em operações protegidas para revogação imediata no servidor. Recuperação de convidado usa novo convite para o mesmo perfil, sem recriar histórico. O ingresso por novo convite revoga a sessão anterior do perfil no mesmo commit; a emissão, isoladamente, não a revoga. Criador retorna por Apple e novo ingresso substitui a sessão anterior. Falha de rede não equivale a revogação. A recuperação específica de ingresso cuja resposta se perdeu exige prova da tentativa e instalação original, em janela de dez minutos, sem segundo consumo; fora dessa janela é necessário novo convite. Troca de acesso por convite com sessão ativa exige confirmação e não remove o perfil anterior da família.
 
 **Requisitos funcionais:** [RF41](02-requisitos.md#rf41), [RF45](02-requisitos.md#rf45), [RF46](02-requisitos.md#rf46), [RF54](02-requisitos.md#rf54), [RF68](02-requisitos.md#rf68)\
 **Requisitos não funcionais específicos:** [RNF22](02-requisitos.md#rnf22)  
@@ -580,6 +580,7 @@ A missão admite uma observação opcional de até 250 caracteres, contando espa
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.27 | 2026-11-12 | RN46/RN47: toda emissão de convite é direta, sem confirmação; invalida apenas convites anteriores disponíveis e preserva a sessão ativa, revogada somente no ingresso pelo novo convite (SCRUM-114). |
 | 1.26 | 2026-10-28 | RN60/RN61/RN63: TEL-032 inicia em Dia e alterna para Semana de domingo a sábado; Parabenizar permanece na Família; Administrador pode editar nome Kids também no detalhe. |
 | 1.25 | 2026-10-28 | RN07/RN63: adulto altera o próprio nome; Administrador corrige nome administrativo somente de Kids em Configurações da família. TEL-032 concentra ações de papel, convite e remoção. |
 | 1.24 | 2026-10-28 | RN60–61: TEL-032 apresenta progresso e tarefas de hoje; o intervalo livre permanece na Família e em Tarefas da família. |

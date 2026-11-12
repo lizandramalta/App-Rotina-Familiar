@@ -1,7 +1,7 @@
 # Catálogo de funcionalidades e rastreabilidade mobile
 
-**Versão:** 1.13 · **Base funcional:** RN 1.26 / RF 1.25 / UC 1.25 · **Design:** screen map 1.23 / fluxos 1.24\
-**Data:** 2026-10-28 · **Situação:** catálogo alvo revisado; jornadas recentes ainda exigem implementação
+**Versão:** 1.14 · **Base funcional:** RN 1.27 / RF 1.26 / UC 1.26 · **Design:** screen map 1.25 / fluxos 1.26\
+**Data:** 2026-11-12 · **Situação:** catálogo alvo revisado; jornadas recentes ainda exigem implementação
 
 [Arquitetura mobile](mobile-architecture.md) · [Decisões](mobile-decisions.md) · [Índice documental](../DOCUMENTACAO.md) · [Screen map](../design/screen-map.md) · [User flows](../design/user-flows.md)
 
@@ -51,7 +51,7 @@ Para cada par abaixo, os arquivos são `<View>.swift` e `<ViewModel>.swift`, den
 | TEL-030 | `Profile` | `ProfileView` | `ProfileViewModel` | Aba adulta ou avatar Kids; foto, apelido e badges; saída do papel Admin quando permitida |
 | TEL-032 | `Family` | `MemberDetailView` | `MemberDetailViewModel` | Tarefas do membro em Dia/Semana visual domingo–sábado; convite e gestão em blocos Admin; Editar no topo apenas para Kids visto por Admin |
 | TEL-033 | `Family` | `MemberEditorView` | `MemberEditorViewModel` | Criar membro com nome e papel |
-| TEL-034 | `Family` | `MemberInviteView` | `MemberInviteViewModel` | Emitir novo link e senha, revogando convites e sessão anteriores |
+| TEL-034 | `Family` | `InviteSharePresenter` | `MemberDetailViewModel` / `InitialOnboardingViewModel` | Folha nativa com novo link e senha; a emissão invalida convites anteriores sem revogar sessão |
 | TEL-040 | `Tasks` | `DailyTaskListView` | `DailyTaskListViewModel` | Aba inicial Kids; tarefas/progresso próprios diários e parabéns recebido |
 | TEL-041 | `Tasks` | `KidsTaskDetailView` | `KidsTaskDetailViewModel` | Detalhe somente de tarefa própria; abre sinalização |
 | TEL-050 | `Family` | `FamilyOverviewView` | `FamilyOverviewViewModel` | Progresso familiar por intervalo livre, membros e incentivos; Admin pode Parabenizar; carga visual adiada |
@@ -169,6 +169,7 @@ Os contratos remotos e sua cobertura por UC estão no [catálogo backend](backen
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.14 | 2026-11-12 | TEL-034 passa a ser a folha nativa apresentada por `InviteSharePresenter`, sem tela de confirmação de reemissão (SCRUM-114). |
 | 1.13 | 2026-10-28 | TEL-032 compacta em Dia/Semana domingo–sábado, sem Parabenizar; nome Kids editável pelo Admin também no detalhe. |
 | 1.12 | 2026-10-28 | TEL-032 sem edição de nome; TEL-057 corrige nome de Kids; adultos usam Meu perfil. |
 | 1.11 | 2026-10-28 | TEL-032 separa visão diária do membro da lista familiar por intervalo e move gestão para menu. |
