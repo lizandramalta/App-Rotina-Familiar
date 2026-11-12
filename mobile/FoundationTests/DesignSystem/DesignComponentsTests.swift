@@ -1,29 +1,25 @@
 @testable import FamilyRoutine
 import SwiftUI
 import Testing
+import UIKit
 
 /// SCRUM-112 Phase 2 — core primitive components (Figma nodes 870:22509 / 960:25).
 @MainActor
 struct DesignComponentsTests {
     // MARK: StarDecorationView
 
-    @Test("star variants map to the decoration tokens")
-    func starVariantColors() {
-        #expect(StarDecorationView.Variant.blue.fillColor == Color.App.Decoration.starBlue)
-        #expect(StarDecorationView.Variant.yellow.fillColor == Color.App.Decoration.starYellow)
+    @Test("star variants map to bundled chalk sticker assets")
+    func starVariantAssets() {
+        #expect(StarDecorationView.Variant.blue.assetName == "StarDecorationBlue")
+        #expect(StarDecorationView.Variant.yellow.assetName == "StarDecorationYellow")
+        for variant in StarDecorationView.Variant.allCases {
+            #expect(UIImage(named: variant.assetName) != nil, "missing asset \(variant.assetName)")
+        }
     }
 
     @Test("star is hidden from assistive technologies")
     func starIsAccessibilityHidden() {
         #expect(StarDecorationView.isAccessibilityHidden)
-    }
-
-    @Test("star shape is a closed ten-vertex path inside its rect")
-    func starShapeGeometry() {
-        let rect = CGRect(x: 0, y: 0, width: 48, height: 48)
-        let path = StarShape().path(in: rect)
-        #expect(rect.insetBy(dx: -0.001, dy: -0.001).contains(path.boundingRect))
-        #expect(path.boundingRect.minY == 0)
     }
 
     // MARK: CircularAddButton
@@ -33,6 +29,7 @@ struct DesignComponentsTests {
         #expect(CircularAddButton.accessibilityTraits.contains(.isButton))
         #expect(CircularAddButton.accessibilityLabel == "Adicionar")
         #expect(CircularAddButton.diameter == 44)
+        #expect(UIImage(named: CircularAddButton.assetName)?.size == CGSize(width: 44, height: 44))
     }
 
     // MARK: InlineFeedbackBanner
@@ -87,12 +84,19 @@ struct DesignComponentsTests {
         #expect(AppTabItem.allCases.map(\.id) == AppTabItem.allCases)
     }
 
-    @Test("active tabs use filled symbols, inactive tabs outlined ones")
+    @Test("tabs use the Figma vector icons: solid when active, outlined when inactive")
     func tabIcons() {
-        #expect(AppTabItem.allCases.map { $0.systemImage(isSelected: true) }
-            == ["checklist", "person.2.fill", "flag.fill", "person.crop.circle.fill"])
-        #expect(AppTabItem.allCases.map { $0.systemImage(isSelected: false) }
-            == ["checklist", "person.2", "flag", "person.crop.circle"])
+        #expect(AppTabItem.allCases.map { $0.iconAssetName(isSelected: true) }
+            == ["TabBarTasksActive", "TabBarFamilyActive", "TabBarMissionsActive", "TabBarProfileActive"])
+        #expect(AppTabItem.allCases.map { $0.iconAssetName(isSelected: false) }
+            == ["TabBarTasksInactive", "TabBarFamilyInactive", "TabBarMissionsInactive", "TabBarProfileInactive"])
+        for tab in AppTabItem.allCases {
+            for isSelected in [true, false] {
+                let image = UIImage(named: tab.iconAssetName(isSelected: isSelected))
+                #expect(image?.size == CGSize(width: 24, height: 24), "\(tab) selected=\(isSelected)")
+                #expect(image?.renderingMode != .alwaysTemplate)
+            }
+        }
     }
 
     @Test("active tab is highlighted and selected; inactive tab is a plain button")

@@ -37,8 +37,11 @@ struct DayCarouselItemView: View {
     static let size = CGSize(width: 46, height: 62)
     /// Figma "Alta · Texto/11 · Bold" — not part of the 14-role scale.
     static let weekdayFont = Font.system(size: 11, weight: .bold)
-    /// Figma "Alta · Número/20" — the carousel uses 20 pt instead of the 22 pt `number` role.
-    static let numberFont = Font.system(size: 20, weight: .medium, design: .rounded)
+    /// Figma "Alta · Número/20" (Sour Gummy Medium) — 20 pt instead of the 22 pt `number` role.
+    nonisolated static let numberTypography = AppTypography(
+        size: 20, weight: .medium, design: .rounded, lineHeightMultiple: nil,
+        fontName: AppTypography.sourGummyFontName
+    )
 
     let weekday: String
     let dayNumber: String
@@ -58,7 +61,7 @@ struct DayCarouselItemView: View {
                     .font(Self.weekdayFont)
                     .foregroundStyle(state.weekdayColor)
                 Text(dayNumber)
-                    .font(Self.numberFont)
+                    .font(.app(Self.numberTypography))
                     .foregroundStyle(state.numberColor)
             }
             .frame(width: Self.size.width, height: Self.size.height)

@@ -34,6 +34,10 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>A câmera é usada para tirar a foto do seu perfil ou de uma tarefa sinalizada.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>SourGummy.ttf</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

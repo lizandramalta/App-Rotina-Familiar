@@ -1,7 +1,9 @@
 import CoreGraphics
+import CoreText
 @testable import FamilyRoutine
 import SwiftUI
 import Testing
+import UIKit
 
 /// SCRUM-112 Phase 1 — design tokens foundation (Figma node 960:25).
 @MainActor
@@ -91,8 +93,32 @@ struct DesignTokensTests {
             #expect(role.weight == weight)
             #expect(role.design == design)
             #expect(role.lineHeightMultiple == lineHeight)
-            #expect(Font.app(role) == .system(size: size, weight: weight, design: design))
+            if role.fontName == nil {
+                #expect(Font.app(role) == .system(size: size, weight: weight, design: design))
+            }
         }
+        #expect(AppTypography.allRoles.filter { $0.fontName != nil } == [.numberLarge, .number])
+    }
+
+    @Test("number roles render with the bundled Sour Gummy at the Figma weight",
+          arguments: [AppTypography.numberLarge, .number, DayCarouselItemView.numberTypography])
+    func sourGummyNumberRoles(role: AppTypography) throws {
+        #expect(role.fontName == "SourGummy-Black")
+        #expect(role.weight == .medium)
+
+        let uiFont = try #require(role.uiFont, "SourGummy.ttf is not registered (UIAppFonts)")
+        #expect(uiFont.familyName == "Sour Gummy")
+        #expect(uiFont.pointSize == role.size)
+
+        let variation = CTFontCopyVariation(uiFont as CTFont) as? [NSNumber: NSNumber]
+        #expect(variation?[NSNumber(value: AppTypography.weightAxisTag)]?.doubleValue == 500)
+    }
+
+    @Test("unregistered font names fall back to the system design")
+    func missingFontFallsBack() {
+        let role = AppTypography(size: 22, weight: .medium, design: .rounded, lineHeightMultiple: nil, fontName: "Missing-Font")
+        #expect(role.uiFont == nil)
+        #expect(role.font == .system(size: 22, weight: .medium, design: .rounded))
     }
 
     @Test("spacing scale matches Figma values")

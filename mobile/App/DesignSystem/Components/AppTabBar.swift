@@ -18,14 +18,16 @@ enum AppTabItem: String, CaseIterable, Identifiable, Sendable {
         }
     }
 
-    /// Filled symbol for the active tab, outlined otherwise.
-    func systemImage(isSelected: Bool) -> String {
-        switch self {
-        case .tasks: "checklist"
-        case .family: isSelected ? "person.2.fill" : "person.2"
-        case .missions: isSelected ? "flag.fill" : "flag"
-        case .profile: isSelected ? "person.crop.circle.fill" : "person.crop.circle"
+    /// Figma vector icon: solid for the active tab, outlined otherwise.
+    /// Rendered with original colors (the active Tasks icon has white checkmarks).
+    func iconAssetName(isSelected: Bool) -> String {
+        let base = switch self {
+        case .tasks: "TabBarTasks"
+        case .family: "TabBarFamily"
+        case .missions: "TabBarMissions"
+        case .profile: "TabBarProfile"
         }
+        return base + (isSelected ? "Active" : "Inactive")
     }
 }
 
@@ -78,8 +80,8 @@ struct AppTabBar: View {
             select(tab)
         } label: {
             VStack(spacing: AppSpacing.xxs) {
-                Image(systemName: tab.systemImage(isSelected: isSelected))
-                    .font(.system(size: 20))
+                Image(tab.iconAssetName(isSelected: isSelected))
+                    .resizable()
                     .frame(width: 24, height: 24)
                 Text(tab.title)
                     .font(appearance.font)

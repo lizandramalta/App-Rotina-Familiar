@@ -1,16 +1,17 @@
 import SwiftUI
 
-/// Decorative five-pointed star (Figma "Alta / Decoração / Estrela", nodes 926:21661 / 926:21662).
+/// Hand-drawn chalk star sticker (Figma "Alta / Decoração / Estrela", nodes 926:21661 / 926:21662).
+/// The asset already includes the rough white border and drop shadow.
 /// Purely decorative: always hidden from assistive technologies.
 struct StarDecorationView: View {
     enum Variant: CaseIterable {
         case blue
         case yellow
 
-        var fillColor: Color {
+        var assetName: String {
             switch self {
-            case .blue: Color.App.Decoration.starBlue
-            case .yellow: Color.App.Decoration.starYellow
+            case .blue: "StarDecorationBlue"
+            case .yellow: "StarDecorationYellow"
             }
         }
     }
@@ -19,34 +20,15 @@ struct StarDecorationView: View {
     static let isAccessibilityHidden = true
 
     let variant: Variant
-    var size: CGFloat = 48
+    /// Side of the square frame the sticker fits in; 58 pt is the Figma component frame (star + shadow).
+    var size: CGFloat = 58
 
     var body: some View {
-        StarShape()
-            .fill(variant.fillColor)
-            .overlay(StarShape().stroke(Color.white, style: StrokeStyle(lineWidth: 2.5, lineJoin: .round)))
-            .shadow(color: .black.opacity(0.25), radius: 3, y: 3)
+        Image(variant.assetName)
+            .resizable()
+            .scaledToFit()
             .frame(width: size, height: size)
             .accessibilityHidden(Self.isAccessibilityHidden)
-    }
-}
-
-/// Regular five-pointed star inscribed in the shape's rect, pointing up.
-struct StarShape: Shape {
-    func path(in rect: CGRect) -> Path {
-        let center = CGPoint(x: rect.midX, y: rect.midY)
-        let outerRadius = min(rect.width, rect.height) / 2
-        // Inner/outer radius ratio of a regular pentagram.
-        let innerRadius = outerRadius * 0.382
-        var path = Path()
-        for index in 0..<10 {
-            let radius = index.isMultiple(of: 2) ? outerRadius : innerRadius
-            let angle = Double(index) * .pi / 5 - .pi / 2
-            let point = CGPoint(x: center.x + radius * cos(angle), y: center.y + radius * sin(angle))
-            index == 0 ? path.move(to: point) : path.addLine(to: point)
-        }
-        path.closeSubpath()
-        return path
     }
 }
 
