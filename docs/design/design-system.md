@@ -261,7 +261,7 @@ CircularAddButton {
     // Abrir modal de criação
 }
 ```
-* **Aparência:** Botão circular de 44 pt com borda de efeito desenhado a giz/lápis (pincel Drone texturizado, asset `CircularAddButtonBackground`) e ícone `plus` centralizado.
+* **Aparência:** Botão circular de 44 pt com borda de giz procedural 100% dinâmica (modificador `.chalkBorder(Circle().inset(by: 0.75), color: Color.App.Border.separator, lineWidth: 1.5)`) e ícone `plus` centralizado em `Color.App.Text.primary`.
 * **Acessibilidade:** Rótulo localizado `"Adicionar"` e trait `.isButton`.
 
 ---
@@ -280,7 +280,7 @@ InlineFeedbackBanner(
 ---
 
 ### 4.5 Estrela Decorativa (`StarDecorationView`)
-Estrelas orgânicas com contorno irregular de giz/adesivo e sombra suave para decoração em cards de destaque, nós Figma `926:21661` (`.blue`) e `926:21662` (`.yellow`), renderizadas a partir dos assets `StarDecorationBlue` e `StarDecorationYellow`.
+Estrelas de 5 pontas orgânicas com curvas de Bézier idênticas ao Figma, contorno de giz branco procedural (`.chalkBorder(StarShape(), color: .white, lineWidth: 2.5)`) e sombra suave projetada via `compositingGroup()`, nós Figma `926:21661` (`.blue`) e `926:21662` (`.yellow`).
 
 ```swift
 ZStack(alignment: .topTrailing) {
@@ -290,9 +290,21 @@ ZStack(alignment: .topTrailing) {
 }
 ```
 * **Acessibilidade:** Elemento puramente decorativo, estritamente oculto de tecnologias assistivas (`.accessibilityHidden(true)`).
-    CardView()
 
-    StarDecorationView(variant: .yellow, size: 48)
+---
+
+### 4.6 Pincel de Giz Procedural (`ChalkStroke` / `.chalkBorder`)
+Modificador procedural reutilizável no SwiftUI `Canvas` (Metal) que replica a dispersão de partículas do pincel "Drone" do Figma (`data-figma-scatter="f0.51_w0.06_aj180_sj0.4_sw1.5"`):
+
+```swift
+// Aplica borda de giz a qualquer Shape do SwiftUI:
+Circle()
+    .chalkBorder(Circle(), color: Color.App.Border.separator, lineWidth: 1.5)
+
+RoundedRectangle(cornerRadius: AppRadius.card)
+    .chalkBorder(RoundedRectangle(cornerRadius: AppRadius.card), color: Color.App.Border.card, lineWidth: 2.0)
+```
+* **Parâmetros:** `gap: 0.51 pt`, `wiggle: 0.06` (ondulação perpendicular de até ±0.6 pt), `angleJitter: 180°`, `scaleJitter: 0.4`, e semente determinística `SeededGenerator` (LCG de 64 bits) para evitar qualquer oscilação ou flickering entre frames.
         .rotationEffect(.degrees(15))
         .offset(x: 10, y: -10)
 }
