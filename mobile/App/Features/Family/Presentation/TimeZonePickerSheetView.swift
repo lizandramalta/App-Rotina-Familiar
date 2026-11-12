@@ -14,7 +14,9 @@ struct TimeZonePickerSheetView: View {
             return Self.identifiers
         }
         return Self.identifiers.filter {
-            $0.localizedStandardContains(term) || TimeZoneDisplay.city($0).localizedStandardContains(term)
+            $0.localizedStandardContains(term)
+                || TimeZoneDisplay.city($0).localizedStandardContains(term)
+                || TimeZoneDisplay.displayName(for: $0).localizedStandardContains(term)
         }
     }
 
@@ -27,7 +29,7 @@ struct TimeZonePickerSheetView: View {
                 } label: {
                     HStack {
                         VStack(alignment: .leading) {
-                            Text(TimeZoneDisplay.city(identifier))
+                            Text(TimeZoneDisplay.displayName(for: identifier))
                                 .foregroundStyle(.primary)
                             Text(identifier)
                                 .font(.caption)
