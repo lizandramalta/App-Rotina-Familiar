@@ -65,6 +65,8 @@ final class OnboardingUITests: XCTestCase {
         openFamilyStep()
 
         XCTAssertEqual(app.buttons["family.create.timezone"].value as? String, "America/Sao_Paulo")
+        // SCRUM-113: TEL-002 shows the same localized name as TEL-053.
+        XCTAssertTrue(app.buttons["family.create.timezone"].label.contains("Horário de Brasília"))
         app.buttons["family.create.submit"].tap()
 
         XCTAssertTrue(app.staticTexts["Informe o nome da família para continuar."].waitForExistence(timeout: 2))
@@ -82,6 +84,22 @@ final class OnboardingUITests: XCTestCase {
         app.buttons["family.timezone.option.Europe/Lisbon"].tap()
 
         XCTAssertEqual(app.buttons["family.create.timezone"].value as? String, "Europe/Lisbon")
+        XCTAssertTrue(app.buttons["family.create.timezone"].label.contains("Horário de Lisboa"))
+    }
+
+    func testTimeZonePickerShowsAndSearchesLocalizedNames() {
+        launch("onboarding")
+        openFamilyStep()
+
+        app.buttons["family.create.timezone"].tap()
+        let search = app.searchFields.firstMatch
+        XCTAssertTrue(search.waitForExistence(timeout: 3))
+        search.tap()
+        search.typeText("Brasília")
+
+        let option = app.buttons["family.timezone.option.America/Sao_Paulo"]
+        XCTAssertTrue(option.waitForExistence(timeout: 2))
+        XCTAssertTrue(option.label.contains("Horário de Brasília"))
     }
 
     func testMemberDraftCanBeAddedEditedAndRemoved() {
