@@ -44,8 +44,10 @@ uma base de consulta: use a rastreabilidade da spec para ler a menor fatia neces
 - A spec aprovada define o recorte de entrega e seus critérios de aceitação; ela não
   pode contradizer a base funcional. Se precisar contradizê-la, atualize a base e a
   rastreabilidade antes de aprovar a spec.
-- `docs/design/` e uma UX-spec definem apresentação, textos, navegação e estados
-  visuais; não alteram permissões, estados de domínio ou regras de negócio.
+- `docs/design/` (incluindo `docs/design/design-system.md`) e uma UX-spec definem
+  apresentação, textos, navegação, design tokens e estados visuais; não alteram permissões,
+  estados de domínio ou regras de negócio. Ao implementar código mobile, utilize
+  estritamente os tokens de `Color.App`, `Font.app`, `AppSpacing` e `AppRadius`.
 - `docs/architecture/` define decisões e contratos técnicos. `MA` significa decisão
   de arquitetura mobile e `BA`, decisão de arquitetura backend.
 - PDFs em `output/pdf/` são históricos. Markdown e diagramas referenciados em

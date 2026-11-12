@@ -28,6 +28,7 @@ Código, tipos, arquivos, chaves de localização e comentários técnicos usam 
 - Use `@State` para estado local de apresentação que pertence à View. ViewModels e routers que coordenam estado observável pertencem ao `@MainActor`; componentes estáticos podem permanecer somente como Views.
 - Use `NavigationStack` com rotas tipadas. A View não constrói URLs nem faz parsing de deep link: isso pertence ao router/parser da camada App.
 - Todo texto visível deve vir de catálogo de strings. Inclua `accessibilityLabel`, `accessibilityHint` ou valores equivalentes quando o controle não for autoexplicativo para VoiceOver.
+- Utilize sempre os tokens e componentes do Design System (`Color.App.*`, `Font.app(_:)`, `AppSpacing.*` e `AppRadius.*`), conforme documentado em [`docs/design/design-system.md`](../design/design-system.md). Nunca use literais hexadecimais soltos, tamanhos de fonte arbitrários ou números mágicos em espaçamentos e raios de borda.
 - Use SF Symbols para ícones de ação, navegação e estado da interface. Preserve o significado do símbolo, tamanho de toque e rótulo acessível; assets vetoriais próprios ficam para ilustrações ou identidade visual, não para duplicar ícones do sistema.
 
 ## 4. Concorrência, dados e segurança
@@ -48,6 +49,7 @@ Código, tipos, arquivos, chaves de localização e comentários técnicos usam 
 ## Referências
 
 - [Swift API Design Guidelines](https://www.swift.org/documentation/api-design-guidelines/) — clareza no ponto de uso e documentação de APIs.
+- [Design System](../design/design-system.md) — tokens de cores, tipografia, espaçamentos, raios e componentes base.
 - [Arquitetura mobile](mobile-architecture.md) — fronteiras, estado, concorrência, sessão e contratos.
 - [Catálogo mobile](mobile-feature-catalog.md#7-convenções-de-nomenclatura) — vocabulário e nomes já estabelecidos no produto.
 
@@ -55,5 +57,6 @@ Código, tipos, arquivos, chaves de localização e comentários técnicos usam 
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.2 | 2026-11-12 | Adiciona obrigatoriedade de uso dos tokens e componentes do Design System. |
 | 1.1 | 2026-10-28 | Padroniza ícones de interface com SF Symbols; assets próprios ficam para ilustrações e identidade visual. |
 | 1.0 | 2026-10-08 | Convenções iniciais de Swift/SwiftUI, Clean Architecture, concorrência, segurança, testes e revisão. |

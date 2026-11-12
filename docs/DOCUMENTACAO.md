@@ -20,6 +20,7 @@
 | [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) | Visão geral e cinco recortes UML, com fontes PlantUML e imagens SVG. |
 | [Screen map](design/screen-map.md) | Mapa 1.24: barra de abas somente nas telas principais; TEL-032 compacta em Dia/Semana domingo–sábado; base RN 1.26 / RF 1.25 / UC 1.25. |
 | [User flows](design/user-flows.md) | Fluxos 1.25: UF-15 com acesso interno ao destaque semanal, mensagem vazia e cópia; base RN 1.26 / RF 1.25 / UC 1.25 e screen map 1.24. |
+| [Design System](design/design-system.md) | Versão 1.0: tokens de cores, tipografia, espaçamentos, raios e componentes base em SwiftUI (Figma 960:25 e 870:22509). |
 | [Modelo de dados (DER)](05-modelo-de-dados.md) | Modelo 1.10: parabéns persistido e fila de push por dispositivo; base RN 1.23 / RF 1.22 / UC 1.22. |
 | [Diagrama de classes](06-diagrama-de-classes.md) | Modelo 1.9: rascunho de membros, resultado de criação, foto antecipada e item pessoal com estado efetivo/exibido; base RN 1.18 / RF 1.17 / UC 1.16. |
 | [Arquitetura mobile](architecture/mobile-architecture.md) | Arquitetura 1.6: Swift + SwiftUI, View + ViewModel, integração do onboarding e projeção pessoal de tarefas. |
@@ -51,7 +52,7 @@ agentes e a ordem das fontes de verdade estão em [`AGENTS.md`](../AGENTS.md).
 
 - `docs/`: visão, regras, requisitos, casos de uso, modelo de dados, diagrama de classes e índice documental.
 - `docs/diagramas/casos-de-uso/`: fontes PlantUML e imagens dos diagramas de casos de uso.
-- `docs/design/`: screen map e user flows, com referências à base funcional.
+- `docs/design/`: screen map, user flows e design system, com referências à base funcional e Figma.
 - `docs/architecture/`: arquiteturas mobile/backend, convenções de código, catálogos de funcionalidades/contratos e registros de decisões; fundação técnica e direcionamento para implementações incrementais.
 - `../specs/`: specs aprovadas e o template para cada entrega vertical entre mobile e backend.
 - `../mobile/` e `../backend/`: raízes reservadas para os projetos de implementação.
