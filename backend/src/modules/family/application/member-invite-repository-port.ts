@@ -35,16 +35,6 @@ export interface MemberInviteRepositoryPort {
     params: { readonly familyId: string; readonly memberId: string; readonly at: Date },
   ): Promise<void>;
 
-  /** Revoga a sessão ativa do alvo, seus access tokens e seu dispositivo push. */
-  revokeActiveSession(
-    tx: TransactionContext,
-    params: {
-      readonly familyId: string;
-      readonly memberId: string;
-      readonly reason: string;
-    },
-  ): Promise<void>;
-
   insertInvite(
     tx: TransactionContext,
     params: {

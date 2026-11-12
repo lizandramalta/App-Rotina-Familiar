@@ -378,6 +378,51 @@ struct InitialOnboardingViewModelTests {
         #expect(harness.sessionStore.state == .authenticated(Harness.session.profile))
     }
 
+    @Test("SCRUM-114 / SPEC-004 CA-02, CA-08 each direct issuance, including a new one for the same member, hands a new invite to the share sheet")
+    func issuingAgainHandsNewInviteToShareSheet() async throws {
+        let repository = FamilyRepositorySpy(inviteResults: [
+            .success(MemberInvite(inviteID: UUID(), link: "https://example.test/1", password: "PW-1")),
+            .success(MemberInvite(inviteID: UUID(), link: "https://example.test/2", password: "PW-2")),
+        ])
+        let harness = Harness(repository: repository)
+        await harness.fill()
+        _ = harness.viewModel.saveMember(id: nil, name: "Pedro", role: .member)
+        await harness.viewModel.createFamily()
+        let draftID = try #require(harness.viewModel.members.first?.id)
+
+        await harness.viewModel.generateInvite(for: draftID)
+        let first = try #require(harness.viewModel.generatedInvite)
+        #expect(first.invite.password == "PW-1")
+        #expect(first.memberName == "Pedro")
+
+        // Closing the share sheet drops the transient credentials handed to it.
+        harness.viewModel.generatedInvite = nil
+
+        await harness.viewModel.generateInvite(for: draftID)
+        let second = try #require(harness.viewModel.generatedInvite)
+        #expect(second.invite.password == "PW-2")
+        #expect(second.invite.inviteID != first.invite.inviteID)
+        #expect(repository.inviteCalls == 2)
+        #expect(!harness.viewModel.inviteFailed)
+    }
+
+    @Test("SCRUM-114 / SPEC-004 CA-07 a failed issuance shows the error and hands nothing to the share sheet")
+    func failedIssuanceOpensNoShareSheet() async throws {
+        let repository = FamilyRepositorySpy(inviteResults: [.failure(FamilyError.uncertainOutcome)])
+        let harness = Harness(repository: repository)
+        await harness.fill()
+        _ = harness.viewModel.saveMember(id: nil, name: "Pedro", role: .member)
+        await harness.viewModel.createFamily()
+        let draftID = try #require(harness.viewModel.members.first?.id)
+
+        await harness.viewModel.generateInvite(for: draftID)
+
+        #expect(harness.viewModel.generatedInvite == nil)
+        #expect(harness.viewModel.inviteFailed)
+        #expect(!harness.viewModel.hasGeneratedInvite)
+        #expect(harness.viewModel.invitesInFlight.isEmpty)
+    }
+
     @Test("SPEC-002 CA-11 a failed member creation stays pending and can be retried explicitly")
     func memberCreationRetry() async {
         let repository = FamilyRepositorySpy(memberResults: [.failure(FamilyError.unavailable)])

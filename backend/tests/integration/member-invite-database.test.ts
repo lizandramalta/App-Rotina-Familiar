@@ -152,7 +152,7 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
       expect(member.rows).toEqual([{ role: 'member' }]);
     });
 
-    it('CA-02 reissuing invalidates the previous invite and revokes the session, tokens and push device', async () => {
+    it('CA-02 reissuing invalidates the previous invite and keeps the session, tokens and push device active (SPEC-004 E-05)', async () => {
       const family = await seedFamily();
       const db = container.dbPool;
       await db.query(
@@ -174,26 +174,26 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
         'available',
         'invalidated',
       ]);
+      // SCRUM-114: issuing never ends the current access; only the join of the new invite does.
       const session = await db.query(
         'select revoked_at, revoked_reason from app.sessions where id = $1',
         [family.guestSessionId],
       );
-      expect(session.rows[0]).toMatchObject({ revoked_reason: 'INVITE_REISSUED' });
-      expect(session.rows[0]?.revoked_at).not.toBeNull();
+      expect(session.rows[0]).toMatchObject({ revoked_at: null, revoked_reason: null });
       expect(
         (
           await db.query('select revoked_at from app.session_access_tokens where session_id = $1', [
             family.guestSessionId,
           ])
         ).rows[0]?.revoked_at,
-      ).not.toBeNull();
+      ).toBeNull();
       expect(
         (
           await db.query('select revoked_at from app.push_devices where session_id = $1', [
             family.guestSessionId,
           ])
         ).rows[0]?.revoked_at,
-      ).not.toBeNull();
+      ).toBeNull();
       // A sessão do Administrador que emitiu não é tocada.
       expect(
         (
@@ -239,7 +239,7 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
       expect(await invitesOf(family.creatorId)).toHaveLength(0);
     });
 
-    it('CA-06 concurrent issuances leave exactly one available invite and no active session', async () => {
+    it('CA-06 concurrent issuances leave exactly one available invite and keep the active session', async () => {
       const family = await seedFamily();
       const input = { actor: adminOf(family), memberId: family.guestId, requestId: 'r6' };
 
@@ -253,7 +253,7 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
         'select 1 from app.sessions where member_id = $1 and revoked_at is null',
         [family.guestId],
       );
-      expect(active.rowCount).toBe(0);
+      expect(active.rowCount).toBe(1);
     });
 
     it('database refuses a second available invite for the same member even without the lock', async () => {
@@ -269,7 +269,7 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
       await expect(insert()).rejects.toThrow(/member_invites_one_available_per_member_idx/);
     });
 
-    it('CA-07 rolls everything back when the write fails after the revocation', async () => {
+    it('CA-07 rolls everything back when the write fails after the invalidation', async () => {
       const family = await seedFamily();
       const failing = useCase({
         insertInvite: async () => {

@@ -1,7 +1,7 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.28 · **Base funcional:** RN 1.26 / RF 1.25 / UC 1.25 · **Arquitetura backend:** 1.5\
-**Data:** 2026-11-05\
+**Versão:** 1.29 · **Base funcional:** RN 1.27 / RF 1.26 / UC 1.26 · **Arquitetura backend:** 1.6\
+**Data:** 2026-11-12\
 **Situação:** contratos da aba Família, gestão de membros, sinalização/decisão Kids e snapshot semanal materializados na API; demais contratos alvo seguem por fases
 
 [Arquitetura](backend-architecture.md) · [Decisões](backend-decisions.md) · [Catálogo mobile](mobile-feature-catalog.md) · [UC](../03-casos-de-uso.md) · [Índice](../DOCUMENTACAO.md)
@@ -45,7 +45,7 @@ Rotas públicas não autorizam leitura geral do perfil; respostas de inspeção 
 | `POST /access/apple` | `SignInWithApple` | Prova Apple, contexto da tentativa e instalação → sessão do Criador ou `creationGrant` | Prova Apple válida |
 | `POST /families` | `CreateFamily` | `creationGrant`, `creatorName`, `creatorNickname` opcional, `name`, `timeZoneId` opcional (padrão `America/Sao_Paulo`), `initialMembers` opcional e `creatorPhotoMediaId` opcional; prova da instalação no header → família, Criador, membros iniciais, ciclo semanal inicial e sessão | Grant restrito à criação |
 | `POST /access/invites/inspect` | `InspectInvite` | Token → disponibilidade e contexto mínimo para ingresso, sem senha/dados privados | Posse do token e limites de tentativas |
-| `POST /access/invite-joins` | `JoinFamilyByInvite` | Token, senha, provas de instalação/tentativa; sessão anterior opcional e troca confirmada → sessão nova | Convite válido; antiga só é encerrada com sucesso |
+| `POST /access/invite-joins` | `JoinFamilyByInvite` | Token, senha, provas de instalação/tentativa; sessão anterior opcional e troca confirmada → sessão nova | Convite válido; antiga só é encerrada com sucesso; o mesmo commit revoga a sessão ativa anterior do perfil, com tokens e push |
 | `POST /access/invite-joins/recover` | `RecoverInviteJoin` | `attemptId`, segredo da tentativa e prova original → credenciais daquele ingresso | Janela de dez minutos e sessão ainda ativa |
 | `POST /access/refresh` | `RefreshSession` | Refresh + prova da instalação → novo access token | Sessão ativa e perfil ativo |
 | `GET /me/session` | `GetCurrentSession` | Perfil, família, papel, flag `isFamilyCreator`, capacidades e IDs; nunca hashes | Sessão ativa |
@@ -77,7 +77,7 @@ Troca confirmada não é endpoint para transferir membro. Uma sessão anterior d
 | `POST /family/members/{memberId}/role-changes` | `ChangeMemberRole` | Papel/modo desejado, validando transições e Criador | Admin; Kids sai do modo antes de promoção |
 | `POST /me/administration-exit` | `LeaveAdministration` | Rebaixar próprio Admin para Membro | Admin não Criador |
 | `DELETE /family/members/{memberId}` | `RemoveMember` | Remoção lógica, revogação e recursos afetados | Admin; nunca Criador |
-| `POST /family/members/{memberId}/invites` | `IssueMemberInvite` | Nova emissão/reenvio → link/senha transitórios | Admin; não Criador nem removido |
+| `POST /family/members/{memberId}/invites` | `IssueMemberInvite` | Nova emissão/reenvio → link/senha transitórios; invalida convites disponíveis sem revogar sessão | Admin; não Criador nem removido |
 | `GET /me/profile` | `GetOwnProfile` | `memberId`, `name`, `familyName`, `nickname`, `photoMediaId`, total de participações e próximo marco | Titular, inclusive Kids |
 | `PATCH /me/profile` | `UpdateOwnProfile` | `name` (opcional, só adulto), `nickname`, `photoMediaId` opcionais; `nickname`/`photoMediaId` aceitam `null` → mesmo formato de `GetOwnProfile` | Titular; sem alteração de papel |
 | `GET /me/badges` | `GetOwnBadges` | Marcos cumulativos do titular | Titular |
@@ -274,6 +274,7 @@ O documento OpenAPI 3.1 é gerado pelos schemas HTTP em `/docs/json`, e a interf
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.29 | 2026-11-12 | `IssueMemberInvite` invalida convites disponíveis sem revogar sessão; `JoinFamilyByInvite` revoga a sessão anterior do perfil com tokens e push. Sem mudança de schema (SCRUM-114). |
 | 1.28 | 2026-11-05 | Materializa SPEC-020 Fase 1 (SCRUM-102 CA-01–06): apuração e outbox atômicas, consultas próprias, abertura monotônica, payload APNs e OpenAPI. |
 | 1.27 | 2026-10-28 | `completedAt` permanece no contrato; TEL-032 compacta usa o horário na descrição acessível sem exibi-lo na linha. Sem mudança de API. |
 | 1.26 | 2026-10-28 | PATCH administrativo de nome restrito a Kids, mantendo isolamento familiar, validação e resposta 403 para alvo adulto da mesma família. Base RN 1.25 / RF 1.24 / UC 1.24. |

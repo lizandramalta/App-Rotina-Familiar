@@ -4,7 +4,6 @@ import SwiftUI
 /// Matches Figma 175:1132 design specifications.
 struct InviteMembersView: View {
     @Bindable var viewModel: InitialOnboardingViewModel
-    @State private var memberForRegeneration: DraftMember?
 
     var body: some View {
         ZStack {
@@ -160,34 +159,12 @@ struct InviteMembersView: View {
             .background(Color(.systemGroupedBackground))
         }
         .background {
-            ActivityViewPresenter(
-                generatedInvite: $viewModel.generatedInvite,
-                messageBuilder: shareMessage(for:)
-            )
-        }
-        .alert(
-            "family.onboarding.invite_regenerate_confirm_title",
-            isPresented: Binding(
-                get: { memberForRegeneration != nil },
-                set: { if !$0 { memberForRegeneration = nil } }
-            )
-        ) {
-            Button("Cancelar", role: .cancel) {
-                memberForRegeneration = nil
+            // SPEC-004 CA-08: confirmed issuance opens the system share sheet; closing it drops the credentials.
+            InviteSharePresenter(message: viewModel.generatedInvite.map(shareMessage(for:))) { _ in
+                viewModel.generatedInvite = nil
             }
-            Button("family.onboarding.invite_regenerate") {
-                if let member = memberForRegeneration {
-                    memberForRegeneration = nil
-                    Task { await viewModel.generateInvite(for: member.id) }
-                }
-            }
-        } message: {
-            if let member = memberForRegeneration {
-                Text(String(
-                    localized: "family.onboarding.invite_regenerate_confirm_message",
-                    defaultValue: "Os convites anteriores de \(member.name) deixam de funcionar e o acesso atual dessa pessoa é encerrado."
-                ))
-            }
+            .frame(width: 0, height: 0)
+            .accessibilityHidden(true)
         }
     }
 
@@ -233,14 +210,10 @@ struct InviteMembersView: View {
 
     private func inviteButton(for member: DraftMember) -> some View {
         let isGenerating = viewModel.invitesInFlight.contains(member.id)
-        let hasInvite = viewModel.invites[member.id] != nil
 
+        // UX-004 UX-07: every issuance is direct, with no reissue alert; issuing never ends the member's session.
         return Button {
-            if hasInvite {
-                memberForRegeneration = member
-            } else {
-                Task { await viewModel.generateInvite(for: member.id) }
-            }
+            Task { await viewModel.generateInvite(for: member.id) }
         } label: {
             HStack(spacing: 4) {
                 if isGenerating {
@@ -249,7 +222,8 @@ struct InviteMembersView: View {
                     Text("Gerando...")
                         .lineLimit(1)
                 } else {
-                    Text(hasInvite ? "family.onboarding.invite_regenerate" : "family.onboarding.invite_generate")
+                    // UX-004 UX-06: same label before and after issuance.
+                    Text("family.onboarding.invite_generate")
                         .lineLimit(1)
                         .fixedSize(horizontal: true, vertical: false)
                 }
@@ -267,11 +241,7 @@ struct InviteMembersView: View {
         }
         .disabled(isGenerating)
         .accessibilityIdentifier("family.onboarding.invite_button")
-        .accessibilityLabel(
-            hasInvite
-                ? "Gerar novo convite para \(member.name)"
-                : "Gerar convite para \(member.name)"
-        )
+        .accessibilityLabel("Gerar convite para \(member.name)")
     }
 
     private func initialLetter(for name: String) -> String {
@@ -305,82 +275,5 @@ struct InviteMembersView: View {
             defaultValue: "Convite para entrar na família no Mutua:\n\nLink: %@\nSenha: %@"
         )
         return String(format: template, generated.invite.link, generated.invite.password)
-    }
-}
-
-private struct ActivityViewPresenter: UIViewControllerRepresentable {
-    @Binding var generatedInvite: GeneratedInvite?
-    let messageBuilder: (GeneratedInvite) -> String
-
-    final class Coordinator {
-        var lastPresentedInviteID: UUID?
-        var isPresenting = false
-    }
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator()
-    }
-
-    func makeUIViewController(context: Context) -> UIViewController {
-        UIViewController()
-    }
-
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
-        guard let generated = generatedInvite else {
-            context.coordinator.lastPresentedInviteID = nil
-            context.coordinator.isPresenting = false
-            return
-        }
-
-        // Se este convite específico já foi ou está sendo apresentado, ignora ciclos repetidos do SwiftUI
-        if context.coordinator.lastPresentedInviteID == generated.invite.inviteID || context.coordinator.isPresenting {
-            return
-        }
-
-        context.coordinator.lastPresentedInviteID = generated.invite.inviteID
-        context.coordinator.isPresenting = true
-
-        let message = messageBuilder(generated)
-        let activityVC = UIActivityViewController(activityItems: [message], applicationActivities: nil)
-
-        activityVC.completionWithItemsHandler = { [weak coordinator = context.coordinator] _, _, _, _ in
-            DispatchQueue.main.async {
-                coordinator?.isPresenting = false
-                coordinator?.lastPresentedInviteID = nil
-                self.generatedInvite = nil
-            }
-        }
-
-        DispatchQueue.main.async {
-            let presenter = self.topViewController(from: uiViewController)
-            if presenter.presentedViewController != nil {
-                context.coordinator.isPresenting = false
-                return
-            }
-
-            if let popover = activityVC.popoverPresentationController {
-                popover.sourceView = presenter.view
-                popover.sourceRect = CGRect(x: presenter.view.bounds.midX, y: presenter.view.bounds.midY, width: 0, height: 0)
-                popover.permittedArrowDirections = []
-            }
-
-            presenter.present(activityVC, animated: true)
-        }
-    }
-
-    private func topViewController(from controller: UIViewController) -> UIViewController {
-        if let windowScene = controller.view.window?.windowScene ?? UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first,
-           let root = windowScene.windows.first(where: \.isKeyWindow)?.rootViewController ?? controller.view.window?.rootViewController {
-            var current = root
-            while let presented = current.presentedViewController, !presented.isBeingDismissed {
-                current = presented
-            }
-            return current
-        }
-        var current = controller
-        while let presented = current.presentedViewController, !presented.isBeingDismissed {
-            current = presented
-        }
-        return current
     }
 }

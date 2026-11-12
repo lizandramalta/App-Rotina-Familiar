@@ -212,6 +212,35 @@ describe('Invite join use cases (SPEC-005 phase 1)', () => {
       });
     });
 
+    it('SPEC-005 E-04 revokes the profile session on the other device with its tokens and push in the join commit', async () => {
+      accessRepository.activeSessionIds = ['old-guest-session'];
+      accessRepository.accessTokens.push({
+        tokenHash: 'old-access-hash',
+        sessionId: 'old-guest-session',
+        expiresAt: new Date(Date.now() + 60_000),
+        revokedAt: undefined,
+      });
+      accessRepository.pushDevices.push({
+        pushDeviceId: 'old-push',
+        sessionId: 'old-guest-session',
+        revokedAt: undefined,
+      });
+
+      await join.execute(joinCommand());
+
+      expect(accessRepository.revokedWith).toEqual([
+        expect.objectContaining({ memberId: 'member-guest' }),
+      ]);
+      expect(
+        accessRepository.accessTokens.find((t) => t.sessionId === 'old-guest-session')?.revokedAt,
+      ).toBeInstanceOf(Date);
+      expect(
+        accessRepository.pushDevices.find((d) => d.sessionId === 'old-guest-session')?.revokedAt,
+      ).toBeInstanceOf(Date);
+      const ops = accessRepository.operations;
+      expect(ops.indexOf('revokePushDevicesForSession')).toBeLessThan(ops.indexOf('insertSession'));
+    });
+
     it('stores only hashes and an envelope, never the proofs or tokens in clear', async () => {
       const session = await join.execute(joinCommand());
       const [recovery] = joinRepository.recoveries;

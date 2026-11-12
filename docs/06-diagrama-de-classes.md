@@ -1,9 +1,9 @@
 # Diagrama de classes — versão 1.9
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.9\
-**Base funcional:** RN 1.18 / RF 1.17 / UC 1.16\
-**Data:** 2026-10-19
+**Versão:** 1.10\
+**Base funcional:** RN 1.27 / RF 1.26 / UC 1.26\
+**Data:** 2026-11-12
 **Situação:** referência de modelagem e projeções do contrato alvo; implementação posterior
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Modelo de dados](05-modelo-de-dados.md)
@@ -295,7 +295,7 @@ case kids
 + validate(token: String, password: String, member: Member) throws
 ```
 
-**Restrições:** Sem expiração temporal; um ingresso. Gerar/reenviar sempre substitui link/senha, invalida anteriores e revoga sessão anterior do perfil na mesma operação. Hashes não permitem recuperar senha; credenciais são transitórias. RN46/RN47 e RNF17–22.
+**Restrições:** Sem expiração temporal; um ingresso. Gerar/reenviar sempre substitui link/senha e invalida convites anteriores disponíveis na mesma operação, sem revogar a sessão ativa; o ingresso pelo novo convite revoga a sessão anterior do perfil. Hashes não permitem recuperar senha; credenciais são transitórias. RN46/RN47 e RNF17–22.
 
 <a id="classe-invitestatus"></a>
 ### InviteStatus: String, Codable «enum»
@@ -328,7 +328,7 @@ case invalidated
 + revoke()
 ```
 
-**Restrições:** O vencimento indicado é do token da projeção corrente; outros access tokens ainda válidos podem pertencer à mesma sessão, conforme DER 1.2. Uma sessão ativa por perfil/instalação. Refresh estável, sem vencimento temporal; access token de 15 minutos. Operações verificam sessão vigente para revogação imediata no servidor. Remoção, emissão/reenvio de convite e novo acesso Apple revogam sessão anterior. ID de instalação sozinho não comprova identidade. RN47/RNF22.
+**Restrições:** O vencimento indicado é do token da projeção corrente; outros access tokens ainda válidos podem pertencer à mesma sessão, conforme DER 1.2. Uma sessão ativa por perfil/instalação. Refresh estável, sem vencimento temporal; access token de 15 minutos. Operações verificam sessão vigente para revogação imediata no servidor. Remoção, ingresso por novo convite e novo acesso Apple revogam sessão anterior; a emissão de convite não revoga. ID de instalação sozinho não comprova identidade. RN47/RNF22.
 
 <a id="classe-appleauthenticating"></a>
 ### AppleAuthenticating «protocol»
@@ -368,7 +368,7 @@ case invalidated
 + revokeAccess(of memberID: UUID, by admin: Member) async throws
 ```
 
-**Restrições:** Apple exclusivo do Criador. Foto antecipada é opcional e protegida por grant/prova; upload não cria membro nem família. `createFamily` confirma família, Criador, membros iniciais, ciclo, foto opcional e sessão juntos. Depois de TEL-056, `getFamily`/`updateFamilyName` e `MemberService` editam recursos já persistidos; rascunho igual não gera escrita. Gerar/reenviar convite revoga convites e sessão anteriores e retorna novas credenciais transitórias. Ingresso consome convite e cria sessão única atomicamente; recuperação de resposta perdida por dez minutos exige prova da mesma instalação/tentativa. Troca confirmada só substitui acesso local após sucesso, sem remover perfil anterior. Não há recuperação geral de comandos por operationID. UC01/02/04/09, RN01/46/47, RF01/02/68.
+**Restrições:** Apple exclusivo do Criador. Foto antecipada é opcional e protegida por grant/prova; upload não cria membro nem família. `createFamily` confirma família, Criador, membros iniciais, ciclo, foto opcional e sessão juntos. Depois de TEL-056, `getFamily`/`updateFamilyName` e `MemberService` editam recursos já persistidos; rascunho igual não gera escrita. Gerar/reenviar convite invalida convites anteriores disponíveis, preserva a sessão ativa e retorna novas credenciais transitórias. Ingresso consome convite e cria sessão única atomicamente; recuperação de resposta perdida por dez minutos exige prova da mesma instalação/tentativa. Troca confirmada só substitui acesso local após sucesso, sem remover perfil anterior. Não há recuperação geral de comandos por operationID. UC01/02/04/09, RN01/46/47, RF01/02/68.
 
 <a id="classe-invitecredentials"></a>
 ### InviteCredentials «struct»
@@ -381,7 +381,7 @@ case invalidated
 + password: String
 ```
 
-**Restrições:** Novo link/senha a cada emissão, inclusive reenvio. Dados transitórios para compartilhamento conjunto explícito, sem logs/persistência legível; convite anterior e sessão foram revogados na emissão. RN46/RNF17.
+**Restrições:** Novo link/senha a cada emissão, inclusive reenvio. Dados transitórios para compartilhamento conjunto explícito, sem logs/persistência legível; convites anteriores disponíveis foram invalidados na emissão; a sessão só é revogada no ingresso. RN46/RNF17.
 
 <a id="classe-memberservice"></a>
 ### MemberService «class»
@@ -1484,6 +1484,7 @@ A âncora anterior desta seção foi preservada para compatibilidade. O backend 
 
 | Versão | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.10 | RN 1.27 / RF 1.26 / UC 1.26 | 2026-11-12 | Convite: emissão sempre direta, invalida convites anteriores disponíveis e preserva a sessão; o ingresso pelo novo convite revoga a sessão anterior do perfil, com tokens e push (SCRUM-114; SPEC-004 E-05). |
 | 1.9 | RN 1.18 / RF 1.17 / UC 1.16 | 2026-10-19 | Criação conjunta de família/membros com foto antecipada vinculada ao grant, retorno sem recriação e item pessoal com `status`/`displayStatus` sem segundo estado. |
 | 1.8 | 1.15 | 2026-10-10 | `RewardItem.custom` passa a receber descrição opcional; limites, unicidade por família e catálogo inicial ficam explícitos. Para SPEC-015. |
 | 1.7 | 1.12 | 2026-10-07 | `Mission` ganha `note` opcional (até 250 caracteres); `unlink` sem substituição é rejeitado quando deixaria a missão sem tarefas. Para SPEC-014. |

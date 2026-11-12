@@ -7,7 +7,6 @@ struct MemberDetailView: View {
     @State private var selectedRole: MemberRole?
     @State private var pendingRole: MemberRole?
     @State private var showsRemovalConfirmation = false
-    @State private var showsReissueConfirmation = false
     @State private var showsKidsNameEditor = false
     @State private var draftKidsName = ""
     @State private var kidsNameIsInvalid = false
@@ -67,14 +66,7 @@ struct MemberDetailView: View {
         .toolbar(.hidden, for: .tabBar)
         .task { await viewModel.load() }
         .refreshable { await viewModel.load() }
-        .navigationDestination(isPresented: $showsReissueConfirmation) {
-            MemberInviteConfirmationView(viewModel: viewModel)
-                .toolbar(.hidden, for: .tabBar)
-        }
-        .inviteShareSheet(
-            viewModel: viewModel,
-            isPresented: viewModel.transientInvite != nil && !showsReissueConfirmation
-        )
+        .inviteShareSheet(viewModel: viewModel, isPresented: viewModel.transientInvite != nil)
         .sheet(isPresented: $showsRolePicker, onDismiss: {
             pendingRole = selectedRole
             selectedRole = nil
@@ -189,20 +181,17 @@ struct MemberDetailView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     sectionLabel("family.member.detail.invite_section")
                     Button {
-                        if viewModel.hasPreviousInvite { showsReissueConfirmation = true }
-                        else { Task { await viewModel.issueFirstInvite() } }
+                        Task { await viewModel.issueInvite() }
                     } label: {
+                        // UX-004 UX-06/UX-07: one label and a direct issuance whether or not a previous invite exists.
                         managementRow(
-                            viewModel.hasPreviousInvite
-                                ? "family.member.manage.generate_new_invite"
-                                : "family.member.manage.generate_invite",
+                            "family.member.manage.generate_invite",
                             symbol: "square.and.arrow.up", chevron: true
                         )
                     }
                     .buttonStyle(.plain)
                     .disabled(viewModel.isIssuingInvite)
-                    .accessibilityIdentifier(viewModel.hasPreviousInvite
-                        ? "memberInvite.reissue.title" : "memberInvite.issue.title")
+                    .accessibilityIdentifier("memberInvite.issue.title")
                 }
             }
             if viewModel.canManageTarget {

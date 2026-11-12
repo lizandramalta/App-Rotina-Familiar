@@ -1,10 +1,10 @@
-# User flows — versão 1.25
+# User flows — versão 1.26
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão dos fluxos:** 1.25\
-**Base funcional:** RN 1.26 / RF 1.25 / UC 1.25\
-**Screen map:** 1.24 — revisão de 2026-11-08\
-**Data:** 2026-11-08\
+**Versão dos fluxos:** 1.26\
+**Base funcional:** RN 1.27 / RF 1.26 / UC 1.26\
+**Screen map:** 1.25 — revisão de 2026-11-12\
+**Data:** 2026-11-12\
 **Situação:** referência de navegação aprovada
 
 [Projeto](../../README.md) · [Índice documental](../DOCUMENTACAO.md) · [Screen map](screen-map.md) · [Regras](../01-regras-de-negocio.md) · [Requisitos](../02-requisitos.md) · [Casos de uso](../03-casos-de-uso.md) · [Diagrama de classes](../06-diagrama-de-classes.md)
@@ -85,9 +85,7 @@ flowchart TD
     I -->|Sim · família, Criador e membros criados juntos| COUNT{"Há membros iniciais?"}
     COUNT -->|Não| H
     COUNT -->|Sim| J["TEL-056 · Convites para membros já criados"]
-    J -->|Gerar primeiro convite explicitamente| M["TEL-034 · Folha nativa direta, sem confirmação"]
-    J -->|Reemitir| R["Confirmar invalidação de convite e sessão anteriores"]
-    R --> M
+    J -->|Gerar convite explicitamente, com ou sem emissão anterior| M["TEL-034 · Folha nativa direta, sem confirmação"]
     M --> J
     J -->|Voltar| EDIT["TEL-002 · Editar família existente; salvar só mudanças autorizadas"]
     EDIT -->|Sem mudanças ou após salvar| J
@@ -112,11 +110,8 @@ flowchart TD
       C --> D{"Dados e perfil válidos?"}
       D -->|Não · corrigir| C
       D -->|Sim · salvar| E["TEL-032 · Perfil salvo"]
-      E --> ISSUE{"Primeira emissão ou reemissão?"}
-      INIT["TEL-056 · Membro já criado com a família"] --> ISSUE
-      ISSUE -->|Primeira · ação explícita| G["TEL-034 · Gerar e abrir folha nativa diretamente"]
-      ISSUE -->|Reemissão| F["Informar efeitos e confirmar invalidação de convites e sessão anteriores"]
-      F --> G
+      E -->|Gerar convite · ação explícita| G["TEL-034 · Gerar, invalidar convites não usados e abrir folha nativa diretamente"]
+      INIT["TEL-056 · Membro já criado com a família"] -->|Gerar convite · ação explícita| G
       G --> H["Compartilhar link e senha juntos"]
     end
     subgraph Convidado["Pessoa convidada"]
@@ -130,7 +125,7 @@ flowchart TD
       J -->|Sim| L["Informar senha"]
       L --> M{"Senha válida?"}
       M -->|Não · corrigir| L
-      M -->|Sim| N["Validar, consumir uma vez e substituir acesso local após sucesso"]
+      M -->|Sim| N["Validar, consumir uma vez, revogar sessão anterior do perfil e substituir acesso local após sucesso"]
       N --> O{"Ingresso confirmado?"}
       O -->|Não| P["Informar falha ou convite já consumido"]
       O -->|Sim| Q{"Perfil Kids?"}
@@ -160,7 +155,7 @@ flowchart TD
     E --> F["Admin: TEL-050 → selecionar membro → TEL-032"]
     F --> G{"Mesmo perfil ainda ativo?"}
     G -->|Não| H(["Recuperação indisponível para perfil removido"])
-    G -->|Sim| I["Confirmar novo convite · revogar convites e sessão anteriores · TEL-034"]
+    G -->|Sim| I["Gerar novo convite · invalidar convites não usados · TEL-034"]
     I --> J["Compartilhar novo link e senha"]
     J --> K(["UF-02 · Retomar a partir de TEL-003"])
 ```
@@ -483,11 +478,10 @@ flowchart TD
     K -->|Não| M["MOD-010 · Explicar efeitos e confirmar remoção"]
     M -->|Cancelar| C
     M -->|Confirmar e salvar| N(["TEL-050 · Lista atualizada após remoção"])
-    D -->|Primeiro convite| O(["Gerar e abrir folha nativa · UF-02"])
-    D -->|Reemitir| P(["TEL-034 · Confirmar efeitos · UF-02 ou UF-03"])
+    D -->|Gerar convite| O(["Gerar e abrir folha nativa · UF-02 ou UF-03"])
 ```
 
-Administradores e Membros podem consultar as tarefas em TEL-032; somente Administradores acessam ações de gestão quando permitidas. O nome administrativo de Kids é corrigido em TEL-057 ou no topo do detalhe Kids por Administrador autorizado, e adultos editam o próprio nome em Meu perfil. A primeira emissão abre diretamente o compartilhamento após a ação explícita; reenviar exige confirmação prévia da invalidação de convites e revogação da sessão anterior do mesmo perfil. Cancelar volta ao detalhe preservando o membro e o período Dia/Semana; falha não cria membro duplicado. O Criador recupera acesso por Apple. No onboarding, membros são preparados em TEL-002 e criados com a família; TEL-056 apenas oferece seus convites. Novos membros após a criação usam TEL-033.
+Administradores e Membros podem consultar as tarefas em TEL-032; somente Administradores acessam ações de gestão quando permitidas. O nome administrativo de Kids é corrigido em TEL-057 ou no topo do detalhe Kids por Administrador autorizado, e adultos editam o próprio nome em Meu perfil. Toda emissão abre diretamente o compartilhamento após a ação explícita, sem confirmação; gerar novamente invalida convites não usados e a sessão anterior só é revogada quando o novo convite é usado. Cancelar volta ao detalhe preservando o membro e o período Dia/Semana; falha não cria membro duplicado. O Criador recupera acesso por Apple. No onboarding, membros são preparados em TEL-002 e criados com a família; TEL-056 apenas oferece seus convites. Novos membros após a criação usam TEL-033.
 
 **Restrições:** o Criador não pode ser removido, rebaixado nem sair. Um Administrador não pode permanecer em modo Kids; Kids devem sair desse modo antes da promoção. Alterações obedecem à permissão corrente de quem executa.
 
@@ -620,6 +614,7 @@ Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imedi
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.26 | RN 1.27 / RF 1.26 / UC 1.26 | 1.25 | 2026-11-12 | UF-01/UF-02/UF-03/UF-04: emissão de convite sempre direta, sem confirmação de reemissão; ingresso revoga a sessão anterior do perfil. Para SPEC-004 E-05 e UX-004 UX-07, SCRUM-114. |
 | 1.25 | RN 1.26 / RF 1.25 / UC 1.25 | 1.24 | 2026-11-08 | UF-15: janela do acesso interno em Minhas tarefas, mensagem vazia e confirmação de cópia. Para UX-020 (UX-01 a UX-04), SCRUM-103. |
 | 1.24 | RN 1.26 / RF 1.25 / UC 1.25 | 1.23 | 2026-10-28 | UF-04: TEL-032 compacta em Dia/Semana domingo–sábado, Parabenizar apenas na Família; filtros TEL-050 e TEL-011 distintos. |
 | 1.23 | RN 1.25 / RF 1.24 / UC 1.24 | 1.22 | 2026-10-28 | UF-12: papel por seleção modal no detalhe; nome Kids em TEL-057, nome adulto em Meu perfil. |
