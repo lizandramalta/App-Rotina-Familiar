@@ -990,16 +990,6 @@
         }
       }
     },
-    "family.member.manage.generate_new_invite" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gerar novo convite"
-          }
-        }
-      }
-    },
     "family.member.manage.name" : {
       "localizations" : {
         "pt-BR" : {
@@ -1585,36 +1575,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Senha"
-          }
-        }
-      }
-    },
-    "family.onboarding.invite_regenerate" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gerar novo"
-          }
-        }
-      }
-    },
-    "family.onboarding.invite_regenerate_confirm_message" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Os convites anteriores de %@ deixam de funcionar e o acesso atual dessa pessoa é encerrado."
-          }
-        }
-      }
-    },
-    "family.onboarding.invite_regenerate_confirm_title" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gerar novo convite?"
           }
         }
       }
@@ -2866,9 +2826,6 @@
     "Gerar convite para %@" : {
 
     },
-    "Gerar novo convite para %@" : {
-
-    },
     "Indisponível - gere um convite primeiro" : {
 
     },
@@ -3302,46 +3259,6 @@
         }
       }
     },
-    "memberInvite.a11y.action_hint" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gera novas credenciais e encerra o acesso anterior desta pessoa"
-          }
-        }
-      }
-    },
-    "memberInvite.back.action" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Voltar"
-          }
-        }
-      }
-    },
-    "memberInvite.cancel.action" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancelar"
-          }
-        }
-      }
-    },
-    "memberInvite.confirm.effects" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Um novo convite vai invalidar os anteriores e encerrar o acesso atual desta pessoa."
-          }
-        }
-      }
-    },
     "memberInvite.error.notAllowed" : {
       "localizations" : {
         "pt-BR" : {
@@ -3382,17 +3299,6 @@
         }
       }
     },
-    "memberInvite.issue.action" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gerar convite"
-          }
-        }
-      }
-    },
     "memberInvite.issue.title" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3400,26 +3306,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gerar convite"
-          }
-        }
-      }
-    },
-    "memberInvite.reissue.action" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gerar novo convite"
-          }
-        }
-      }
-    },
-    "memberInvite.reissue.title" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gerar novo convite"
           }
         }
       }
@@ -3440,26 +3326,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Convite para entrar na família\nLink: %@\nSenha: %@"
-          }
-        }
-      }
-    },
-    "memberInvite.submitting" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gerando convite…"
-          }
-        }
-      }
-    },
-    "memberInvite.unavailable.title" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Convite indisponível"
           }
         }
       }
@@ -6226,6 +6092,7 @@
       }
     },
     "routines.materialization.complete" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -6246,6 +6113,7 @@
       }
     },
     "routines.materialization.refresh" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {

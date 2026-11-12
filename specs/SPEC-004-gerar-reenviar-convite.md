@@ -2,7 +2,7 @@
 
 **Status:** aprovada\
 **Autor:** Codex | **Criada em:** 2026-10-06 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-19
-**Base funcional:** RN 1.18 / RF 1.17 / UC 1.16\
+**Base funcional:** RN 1.27 / RF 1.26 / UC 1.26\
 **UX-spec:** [UX-004-gerar-reenviar-convite.md](UX-004-gerar-reenviar-convite.md)  
 **Projetos envolvidos:** ambos  
 **Tema do backlog:** Tema 1 - Acesso, família e perfis
@@ -10,7 +10,7 @@
 ## 1. Contexto e objetivo
 
 - **Problema / necessidade:** um perfil criado para um integrante da família não recebe sessão automaticamente. Um Administrador precisa gerar as credenciais de ingresso e, quando necessário, recuperar o acesso ao mesmo perfil ativo sem duplicar histórico ou vínculos.
-- **Objetivo da entrega:** permitir que um Administrador emita o primeiro convite por ação explícita, abrindo diretamente a folha nativa, e reemita somente após confirmação dos efeitos sobre convites e sessão anteriores.
+- **Objetivo da entrega:** permitir que um Administrador emita convite por ação explícita, abrindo diretamente a folha nativa, inclusive quando já houve emissão anterior; a nova emissão invalida convites anteriores não usados e preserva a sessão ativa do perfil.
 
 ## 2. Rastreabilidade e dependências
 
@@ -32,9 +32,9 @@
 ### 3.1. Dentro do escopo
 
 - Emitir convite inicial ou reemitir convite para perfil ativo existente que não seja o Criador, pelo comando `IssueMemberInvite`.
-- Na primeira emissão, gerar as credenciais após o toque explícito e abrir diretamente a folha nativa, sem confirmação intermediária. Na reemissão, explicar e confirmar previamente a invalidação de convites e a revogação da sessão anterior.
+- Em toda emissão, inicial ou seguinte, gerar as credenciais após o toque explícito e abrir diretamente a folha nativa, sem confirmação intermediária.
 - Criar link e senha novos, sem expiração temporal, e persistir apenas seus verificadores protegidos.
-- Revogar em uma única operação os convites disponíveis anteriores e a sessão ativa anterior do perfil, sem recriar ou alterar o perfil, seu histórico, suas tarefas ou vínculos.
+- Invalidar em uma única operação os convites disponíveis anteriores, sem revogar a sessão ativa do perfil e sem recriar ou alterar o perfil, seu histórico, suas tarefas ou vínculos. A sessão anterior só é revogada no ingresso pelo novo convite (`SPEC-005`).
 - Entregar as credenciais transitórias apenas como conteúdo único da folha de compartilhamento do sistema, contendo link e senha juntos.
 - Permitir que TEL-056 inicie a emissão inicial para membros já criados com a família em TEL-002, sempre por ação explícita e sem criar uma variante de contrato.
 - Tratar autorização, isolamento familiar, concorrência, resposta perdida, auditoria sem segredos e falhas de dependência.
@@ -68,7 +68,7 @@
 
 - **Isolamento familiar (RNF06):** a família vem exclusivamente da sessão ativa. A busca por `memberId` aplica o escopo familiar do ator, de modo que alvo externo é indistinguível de inexistente.
 - **Autorização (RNF07):** o backend valida sessão ativa, papel de Administrador, perfil ativo do alvo e proteção do Criador antes da escrita e novamente depois do lock transacional. A ação oculta no app é apenas proteção de experiência.
-- **Revogação (RN46, RN47, RNF22):** toda emissão efetivada revoga a sessão anterior do alvo na mesma operação. Antes de reemitir, o usuário confirma esse efeito. Cancelar antes da reemissão não grava; fechar a folha após uma emissão efetivada não a reverte. Falha ou resposta incerta exigem reconciliação antes de afirmar o estado.
+- **Sessão (RN46, RN47, RNF22):** a emissão não revoga a sessão ativa do alvo; somente o ingresso pelo novo convite a revoga (`SPEC-005`). Não há confirmação intermediária; fechar a folha após uma emissão efetivada não a reverte. Falha ou resposta incerta exigem reconciliação antes de afirmar o estado.
 
 ## 5. Contrato de dados, interface e validações
 
@@ -116,8 +116,8 @@ Todos os erros usam `application/problem+json` com `type`, `title`, `status`, `c
 ### 5.3. Concorrência e falhas
 
 - Não há `Idempotency-Key`, replay automático ou recuperação de senha. Cada nova ação confirmada gera um conjunto novo de credenciais.
-- A emissão usa transação curta, serializada por família, com revalidação do ator e alvo. Em cada emissão confirmada, os convites disponíveis anteriores e a sessão anterior do alvo são revogados no mesmo commit antes de o novo convite ficar disponível.
-- Se a resposta for perdida, o mobile não mostra sucesso e não reenvia automaticamente. Não existe rota que reconstrua a senha; nova emissão exige confirmação explícita e substitui qualquer conjunto que possa ter sido criado.
+- A emissão usa transação curta, serializada por família, com revalidação do ator e alvo. Em cada emissão confirmada, os convites disponíveis anteriores são invalidados no mesmo commit antes de o novo convite ficar disponível; a sessão ativa do alvo não é alterada.
+- Se a resposta for perdida, o mobile não mostra sucesso e não reenvia automaticamente. Não existe rota que reconstrua a senha; nova emissão exige nova ação explícita e substitui qualquer conjunto que possa ter sido criado.
 - Nenhum token, senha, link, hash, cabeçalho de instalação ou conteúdo da folha de compartilhamento entra em logs, auditoria ou telemetria.
 
 ## 6. Estados de domínio e transições
@@ -125,7 +125,7 @@ Todos os erros usam `application/problem+json` com `type`, `title`, `status`, `c
 | Estado de | Evento | Estado para | Autor | Garantias |
 |---|---|---|---|---|
 | Perfil ativo sem convite disponível | Emitir convite | Novo convite `available` | Administrador | Link e senha novos; perfil e histórico preservados |
-| Convite `available` e eventual sessão ativa | Emitir ou reemitir convite | Convite anterior `invalidated`, sessão anterior revogada e novo convite `available` | Administrador | Uma única operação consistente; novas credenciais são transitórias |
+| Convite `available` e eventual sessão ativa | Emitir novamente | Convite anterior `invalidated`, sessão ativa preservada e novo convite `available` | Administrador | Uma única operação consistente; novas credenciais são transitórias; a sessão só é revogada no ingresso (`SPEC-005`) |
 | Convite `available` | Ingresso bem-sucedido (SPEC-005) | `consumed` | Pessoa convidada | Fora desta entrega; não pode ser reutilizado |
 | Perfil Criador, removido ou fora do escopo familiar | Tentar emitir convite | Sem alteração | Administrador ou ator indevido | Recusa sem criação de credencial nem exposição de dados |
 
@@ -137,11 +137,11 @@ Todos os erros usam `application/problem+json` com `type`, `title`, `status`, `c
   - **ENTÃO O SISTEMA DEVE** criar um novo convite disponível com link e senha inéditos,
   - **E** responder `201 Created` com credenciais transitórias e abrir diretamente o compartilhamento nativo, sem recriar o perfil, seu histórico, tarefas ou vínculos. *(UC01/UC02, RF40/RF41, RN45–RN46)*
 
-- **CA-02: reemissão revoga credenciais e sessão anteriores**
+- **CA-02: nova emissão substitui credenciais sem encerrar a sessão**
   - **DADO QUE** o perfil elegível possui convite disponível e/ou sessão ativa anterior,
-  - **QUANDO** um Administrador ler os efeitos e confirmar a reemissão,
-  - **ENTÃO O SISTEMA DEVE** invalidar os convites disponíveis anteriores e revogar a sessão anterior do perfil na mesma operação que cria as novas credenciais,
-  - **E** manter o perfil, a família, o histórico e os vínculos existentes. *(UC02, RF41, RF54, RN46–RN47, RNF22)*
+  - **QUANDO** um Administrador tocar explicitamente em gerar convite, sem confirmação intermediária,
+  - **ENTÃO O SISTEMA DEVE** invalidar os convites disponíveis anteriores na mesma operação que cria as novas credenciais e abrir diretamente o compartilhamento nativo,
+  - **E** manter ativa a sessão anterior do perfil, assim como o perfil, a família, o histórico e os vínculos existentes. *(UC02, RF41, RF54, RN46–RN47, RNF22)*
 
 - **CA-03: autorização e isolamento familiar**
   - **DADO QUE** um Membro, Kids ou Administrador de outra família tenta emitir um convite,
@@ -165,13 +165,13 @@ Todos os erros usam `application/problem+json` com `type`, `title`, `status`, `c
   - **DADO QUE** duas emissões para o mesmo perfil são confirmadas concorrentemente,
   - **QUANDO** os comandos forem processados,
   - **ENTÃO O SISTEMA DEVE** serializar e revalidar cada transação,
-  - **E** manter no fim no máximo um convite disponível e nenhuma sessão anterior ativa. *(RN46, RNF21, BA-08–BA-10)*
+  - **E** manter no fim no máximo um convite disponível, sem alterar a sessão ativa do perfil. *(RN46, RNF21, BA-08–BA-10)*
 
 - **CA-07: resposta incerta não inventa sucesso**
   - **DADO QUE** a emissão perde a resposta ou retorna indisponibilidade após o envio,
   - **QUANDO** o mobile não puder confirmar o resultado,
   - **ENTÃO O SISTEMA NÃO DEVE** exibir link, senha ou confirmação de compartilhamento,
-  - **E** DEVE preservar o contexto do membro; outra emissão após resultado incerto é reemissão e exige aviso e confirmação de seus efeitos. *(RNF12–RNF13, MA-08, BA-07)*
+  - **E** DEVE preservar o contexto do membro; outra emissão após resultado incerto é uma emissão comum, por ação explícita e sem confirmação intermediária. *(RNF12–RNF13, MA-08, BA-07)*
 
 - **CA-08: compartilhamento nativo único e explícito**
   - **DADO QUE** a emissão retorna credenciais confirmadas,
@@ -196,7 +196,8 @@ Token, senha, link, hashes, cabeçalhos de instalação e conteúdo compartilhad
 | E-01 | Após emissão confirmada, o único meio de entrega é a folha de compartilhamento nativa, com link e senha no mesmo conteúdo; não há cópia individual nem canal próprio. | Pessoa usuária, 2026-10-06 | Não — define apresentação da entrega, coerente com compartilhamento explícito previsto em RF41/RF54 |
 | E-02 | A resposta de emissão usa `inviteId`, `link` e `password`, alinhada ao tipo `InviteCredentials`; o comando não recebe corpo. | Modelo de classes e contrato backend | Não |
 | E-03 | Revisada: TEL-056 oferece emissão inicial após a criação conjunta dos membros com a família; nenhuma emissão é automática. Cancelar o compartilhamento não remove membro nem impede avançar. | Pessoa usuária / 2026-10-19 | Sim — RN01/RN46, RF38/RF41 e UC01/UC02. |
-| E-04 | Primeiro convite: toque explícito gera e abre diretamente a folha nativa; reemissão: aviso e confirmação antes de invalidar convites e revogar sessão. | Pessoa usuária / 2026-10-19 | Sim — RN46/RN47, RF41 e UC01/UC02. |
+| E-04 | Substituída por E-05. Primeiro convite: toque explícito gera e abre diretamente a folha nativa; reemissão: aviso e confirmação antes de invalidar convites e revogar sessão. | Pessoa usuária / 2026-10-19 | Sim — RN46/RN47, RF41 e UC01/UC02. |
+| E-05 | Toda emissão é direta, sem aviso nem confirmação. A emissão invalida apenas convites anteriores não usados e não revoga a sessão ativa; a sessão anterior é revogada, com tokens e push, no ingresso pelo novo convite. | Pessoa usuária / 2026-11-12 (SCRUM-114) | Sim — RN46/RN47, RF41/RF46/RF54, RNF22 e UC01/UC02/UC09. |
 
 Não há esclarecimentos pendentes para este recorte.
 
@@ -205,7 +206,7 @@ Não há esclarecimentos pendentes para este recorte.
 | Fase | Objetivo | CAs | Prontidão | Status |
 |---|---|---|---|---|
 | 1 | Emissão segura: endpoint, geração protegida, transação de revogação, RBAC, isolamento e tratamento de falhas | CA-01 a CA-07 | Testes unitários e de integração verdes, incluindo concorrência e ausência de segredos em logs | concluída — SCRUM-30 |
-| 2 | Jornada mobile: emissão inicial direta, confirmação da reemissão, folha nativa e estados de erro | CA-01, CA-02, CA-07, CA-08 | Testes de UI e integração verdes; UX-spec verificada em iPhone e iPad | a fazer |
+| 2 | Jornada mobile: emissão direta, folha nativa e estados de erro | CA-01, CA-02, CA-07, CA-08 | Testes de UI e integração verdes; UX-spec verificada em iPhone e iPad | a fazer |
 | 3 | Regressão e auditoria | CA-02, CA-05 a CA-08 | Regressão de sessão revogada, resposta incerta, acessibilidade e telemetria segura concluída | a fazer |
 
 **Registro de execução (2026-10-10):** SCRUM-30 concluiu a Fase 1 no backend. A jornada Mobile de emissão e compartilhamento continua planejada na Fase 2 (SCRUM-31).
@@ -222,4 +223,5 @@ Não há esclarecimentos pendentes para este recorte.
 - [x] Contrato, falha incerta e ausência de recuperação de senha definidos.
 - [x] UX-spec vinculada e decisão de compartilhamento nativo registrada.
 - [x] Decisão refletida na base funcional em `docs/`.
+- [x] Revisão de 2026-11-12 (E-05, emissão direta sem revogar sessão; SCRUM-114) aprovada.
 - [x] Revisão de 2026-10-19 aprovada; aprovação anterior de 2026-10-06 preservada no histórico.

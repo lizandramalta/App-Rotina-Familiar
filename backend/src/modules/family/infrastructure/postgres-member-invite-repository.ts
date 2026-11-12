@@ -58,41 +58,6 @@ export class PostgresMemberInviteRepository implements MemberInviteRepositoryPor
     );
   }
 
-  public async revokeActiveSession(
-    tx: TransactionContext,
-    params: {
-      readonly familyId: string;
-      readonly memberId: string;
-      readonly reason: string;
-    },
-  ): Promise<void> {
-    const client = asPostgresClient(tx);
-    // Uma sessão ativa por perfil (RN44): no máximo uma linha é afetada.
-    const revoked = await client.query<{ id: string }>(
-      `update app.sessions
-          set revoked_at = now(), revoked_reason = $3
-        where family_id = $1 and member_id = $2 and revoked_at is null
-    returning id`,
-      [params.familyId, params.memberId, params.reason],
-    );
-    const sessionIds = revoked.rows.map((row) => row.id);
-    if (sessionIds.length === 0) {
-      return;
-    }
-    await client.query(
-      `update app.session_access_tokens
-          set revoked_at = now()
-        where session_id = any($1::uuid[]) and revoked_at is null`,
-      [sessionIds],
-    );
-    await client.query(
-      `update app.push_devices
-          set revoked_at = now(), updated_at = now()
-        where session_id = any($1::uuid[]) and revoked_at is null`,
-      [sessionIds],
-    );
-  }
-
   public async insertInvite(
     tx: TransactionContext,
     params: {

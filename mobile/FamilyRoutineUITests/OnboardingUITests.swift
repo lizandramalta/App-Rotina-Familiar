@@ -28,6 +28,21 @@ final class OnboardingUITests: XCTestCase {
         XCTAssertTrue(app.textFields["family.create.name"].waitForExistence(timeout: 3))
     }
 
+    private func dismissShareSheet() {
+        let sheet = app.otherElements["ActivityListView"]
+        XCTAssertTrue(sheet.waitForExistence(timeout: 10), "the system share sheet must open")
+        let dismissRegion = app.otherElements["PopoverDismissRegion"]
+        if dismissRegion.waitForExistence(timeout: 2) {
+            // iOS 26 shows the share sheet as a popover: tap outside it, away from the status bar.
+            dismissRegion.coordinate(withNormalizedOffset: CGVector(dx: 0.02, dy: 0.3)).tap()
+        } else if app.buttons["Close"].exists {
+            app.buttons["Close"].tap()
+        } else {
+            sheet.swipeDown(velocity: .fast)
+        }
+        XCTAssertTrue(sheet.waitForNonExistence(timeout: 5), "the share sheet must close")
+    }
+
     private func assertMainAppOpened() {
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 5))
     }
@@ -154,11 +169,20 @@ final class OnboardingUITests: XCTestCase {
             || app.collectionViews["family.onboarding.invite_members"].waitForExistence(timeout: 1))
         XCTAssertFalse(app.buttons["family.onboarding.finish_invites"].isEnabled)
 
-        app.buttons["family.onboarding.invite_button"].tap()
+        // SCRUM-114 / SPEC-004 CA-08: the first explicit issuance opens the system share sheet directly.
+        let inviteButton = app.buttons["family.onboarding.invite_button"]
+        XCTAssertEqual(inviteButton.label, "Gerar convite para Pedro")
+        inviteButton.tap()
+        dismissShareSheet()
 
-        let dismissRegion = app.otherElements["PopoverDismissRegion"].firstMatch
-        XCTAssertTrue(dismissRegion.waitForExistence(timeout: 5))
-        dismissRegion.tap()
+        // UX-004 UX-06: the label stays "Gerar convite" after issuance.
+        XCTAssertTrue(inviteButton.waitForExistence(timeout: 5))
+        XCTAssertEqual(inviteButton.label, "Gerar convite para Pedro")
+
+        // SCRUM-114 / SPEC-004 CA-02 (E-05; UX-004 UX-07): issuing again opens the share sheet directly, with no alert.
+        inviteButton.tap()
+        XCTAssertFalse(app.alerts.firstMatch.exists)
+        dismissShareSheet()
 
         XCTAssertTrue(app.buttons["family.onboarding.finish_invites"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["family.onboarding.finish_invites"].isEnabled)

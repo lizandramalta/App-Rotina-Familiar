@@ -22,8 +22,10 @@ export interface IssuedSession {
 
 /**
  * Abre a sessão própria do membro (BA-10). Compartilhado entre o login Apple e a
- * criação de família, para que os dois emitam sessão pelo mesmo caminho: revoga
- * a anterior, grava o hash dos tokens e devolve os tokens brutos uma única vez.
+ * criação de família e o ingresso por convite, para que emitam sessão pelo mesmo
+ * caminho: revoga a anterior do membro com seus tokens e push (no ingresso, é aqui
+ * que o novo convite encerra o acesso anterior — SPEC-005 E-04), grava o hash dos
+ * tokens e devolve os tokens brutos uma única vez.
  *
  * Exige a transação do chamador: a sessão só existe se o restante do comando
  * (por exemplo, a família) for confirmado junto.
@@ -58,7 +60,11 @@ export class SessionIssuer {
       reason,
     });
 
+    // Tokens e push das sessões substituídas encerram no mesmo commit (RNF22). A
+    // leitura já filtra sessões revogadas; isto evita registros órfãos ativos.
     for (const sessionId of revokedSessionIds) {
+      await this.deps.repository.revokeAccessTokensForSession(tx, sessionId);
+      await this.deps.repository.revokePushDevicesForSession(tx, sessionId);
       this.deps.logger.info('session_revoked', {
         sessionId,
         reason,

@@ -1,8 +1,8 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.25\
-**Data:** 2026-10-28\
+**Versão:** 1.26\
+**Data:** 2026-11-12\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -81,7 +81,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 4. O usuário informa o nome e escolhe o fuso da família, inicialmente `America/Sao_Paulo`, e pode preparar zero ou mais membros com nome e papel no mesmo formulário. Adicionar, editar e retirar integrantes nesta etapa altera apenas o rascunho.
 5. O sistema valida os dados e cria, na mesma operação, a família, o perfil do usuário como Administrador e Criador da Família e todos os membros preparados. A foto enviada só é vinculada ao próprio Criador após a criação confirmada; nenhum convite é gerado automaticamente.
 6. O sistema registra a data de criação da família e abre a sessão do Criador. Sem membros iniciais, apresenta diretamente a área principal. Com membros, apresenta a etapa de convites para os perfis já criados.
-7. Na etapa de convites, o Criador pode gerar explicitamente o primeiro convite de cada perfil, com compartilhamento direto e sem confirmação intermediária; pode também adiar os convites. Uma reemissão exige confirmação prévia dos efeitos sobre convite e sessão anteriores.
+7. Na etapa de convites, o Criador pode gerar explicitamente o primeiro convite de cada perfil, com compartilhamento direto e sem confirmação intermediária; pode também adiar os convites. Gerar novamente segue o mesmo fluxo direto e invalida apenas convites anteriores não usados, sem encerrar a sessão do perfil.
 8. Ao concluir ou adiar os convites, o sistema apresenta a área principal do aplicativo.
 
 **Alternativas e exceções:**
@@ -117,7 +117,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Pré-condição:** família existente e permissão de Administrador para operações persistentes de gestão e convite. A preparação de membros em UC01 ocorre antes da criação, como rascunho do futuro Criador, sem perfil ou sessão de Administrador e sem persistência própria.
 
-**Entrada de gestão/convite:** Família → selecionar item da lista → TEL-032; correção do nome Kids: Família → Configurações da família (TEL-057) ou detalhe Kids (TEL-032); no onboarding, a etapa de convites apresenta os membros criados com a família. Consultar o detalhe e suas tarefas é permitido aos adultos por UC11; as ações administrativas seguem este caso de uso. A primeira emissão abre diretamente o compartilhamento após a ação explícita. Reenviar exige confirmação, emite novo link e senha, invalida os convites anteriores e revoga a sessão anterior do mesmo perfil, sem recriar o membro. O Criador retorna por Apple; a configuração de apelido só pode ser alterada pelo titular em UC10.
+**Entrada de gestão/convite:** Família → selecionar item da lista → TEL-032; correção do nome Kids: Família → Configurações da família (TEL-057) ou detalhe Kids (TEL-032); no onboarding, a etapa de convites apresenta os membros criados com a família. Consultar o detalhe e suas tarefas é permitido aos adultos por UC11; as ações administrativas seguem este caso de uso. Toda emissão abre diretamente o compartilhamento após a ação explícita, sem confirmação intermediária. Gerar novamente emite novo link e senha e invalida os convites anteriores não usados, sem recriar o membro nem encerrar a sessão atual; a sessão anterior só é revogada quando o novo convite é usado (UC09). O Criador retorna por Apple; a configuração de apelido só pode ser alterada pelo titular em UC10.
 
 **Fluxo principal — Adicionar membro:**
 
@@ -125,7 +125,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 2. Informa os dados do perfil e define sua configuração, incluindo o Modo Kids quando aplicável.
 3. O sistema valida e salva o perfil na família.
 4. O Administrador solicita explicitamente o convite para o perfil ativo.
-5. Na primeira emissão, o sistema gera link e senha sem confirmação intermediária; na reemissão, informa os efeitos e exige confirmação antes de gerar as novas credenciais. Convites e sessão anteriores do perfil são invalidados na mesma operação da reemissão.
+5. O sistema gera link e senha sem confirmação intermediária, inclusive quando já houve emissão anterior. Convites anteriores ainda disponíveis do perfil são invalidados na mesma operação; a sessão ativa do perfil é preservada.
 6. O sistema disponibiliza o link e a senha para envio conjunto à pessoa convidada.
 
 **Variação — Onboarding inicial:** o futuro Criador prepara zero ou mais membros antes da criação da família em UC01; os perfis são persistidos junto com a família, sem convite automático. Com membros, a etapa seguinte oferece a primeira emissão por ação explícita e compartilhamento direto, ou permite adiar. Sem membros, UC01 segue diretamente à área principal. Voltar da etapa de convites aos dados da família permite editar a família existente e gerenciar seus membros conforme as permissões administrativas; não cria outra família nem repete gravação sem mudanças. Novos membros incluídos após a criação seguem o fluxo persistente normal.
@@ -410,7 +410,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 2. O sistema verifica o convite e solicita a senha de ingresso.
 3. A pessoa informa a senha.
 4. O sistema valida o link, a senha correspondente, o perfil, a família e a disponibilidade do convite.
-5. O sistema efetiva o ingresso no perfil indicado, estabelece uma sessão ativa vinculada à instalação e só então substitui o acesso local, limpando dados anteriores. O membro anterior não é removido da sua família e nenhum histórico é migrado.
+5. O sistema efetiva o ingresso no perfil indicado, estabelece uma sessão ativa vinculada à instalação, revoga no mesmo commit a sessão ativa anterior do perfil em outro aparelho e só então substitui o acesso local, limpando dados anteriores. O membro anterior não é removido da sua família e nenhum histórico é migrado.
 6. O sistema consome o convite e sua senha, impedindo outro ingresso com o mesmo conjunto.
 7. O usuário acessa as funcionalidades permitidas para seu perfil.
 
@@ -845,6 +845,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.26 | 2026-11-12 | UC01/UC02/UC09: emissão de convite sempre direta; nova emissão invalida convites não usados e preserva a sessão, revogada no ingresso pelo novo convite (SCRUM-114). |
 | 1.25 | 2026-10-28 | UC02/UC11: TEL-032 usa Dia/Semana domingo–sábado e permite editar nome Kids ao Administrador; Parabenizar fica na Família. |
 | 1.24 | 2026-10-28 | UC02/UC10/UC11: adulto edita o próprio nome; Administrador corrige nome de Kids em TEL-057. TEL-032 mantém papel, convite e remoção. |
 | 1.23 | 2026-10-28 | UC11: TEL-032 mostra o dia atual e horário de conclusão válida; retorna ao intervalo da Família, enquanto outros dias usam TEL-011. |

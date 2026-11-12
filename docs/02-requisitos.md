@@ -1,8 +1,8 @@
 # Requisitos funcionais e não funcionais
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.25\
-**Data:** 2026-10-28\
+**Versão:** 1.26\
+**Data:** 2026-11-12\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -300,7 +300,7 @@ O sistema deve permitir criar os perfis dos demais membros antes do ingresso no 
 
 ### RF41
 
-O Administrador pode gerar ou reenviar convite para perfil ativo existente, inclusive para membro criado com a família no onboarding. Cada emissão gera novo link e senha, invalida convites anteriores e revoga a sessão anterior atomicamente. A emissão é sempre uma ação explícita, não automática. A primeira emissão gera as credenciais e abre diretamente o compartilhamento, sem confirmação intermediária; a reemissão deve mostrar seus efeitos e exigir confirmação antes de gerar novas credenciais. Em todos os casos, perfil, histórico e vínculos são preservados, e link e senha são disponibilizados para envio conjunto.
+O Administrador pode gerar ou reenviar convite para perfil ativo existente, inclusive para membro criado com a família no onboarding. Cada emissão gera novo link e senha e invalida atomicamente os convites anteriores ainda disponíveis, preservando a sessão ativa do perfil, que só é revogada no ingresso pelo novo convite. A emissão é sempre uma ação explícita, não automática. Toda emissão, inicial ou seguinte, gera as credenciais e abre diretamente o compartilhamento, sem confirmação intermediária. Em todos os casos, perfil, histórico e vínculos são preservados, e link e senha são disponibilizados para envio conjunto.
 
 **Regras de negócio:** [RN45](01-regras-de-negocio.md#rn45), [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47)  
 **Casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02)
@@ -335,7 +335,7 @@ O sistema deve associar a sessão criada após o ingresso à família e ao perfi
 
 ### RF46
 
-O sistema deve manter uma sessão ativa por perfil/aparelho, renovável por refresh token sem expiração temporal e revogável. Token de acesso dura 15 minutos e operações verificam a sessão ativa. Novo convite revoga a sessão anterior; recuperação preserva o mesmo perfil. Resposta perdida no ingresso admite recuperação comprovada da mesma tentativa por dez minutos, sem novo consumo; depois, novo convite.
+O sistema deve manter uma sessão ativa por perfil/aparelho, renovável por refresh token sem expiração temporal e revogável. Token de acesso dura 15 minutos e operações verificam a sessão ativa. O ingresso por novo convite revoga a sessão anterior do perfil; a emissão não a revoga; recuperação preserva o mesmo perfil. Resposta perdida no ingresso admite recuperação comprovada da mesma tentativa por dez minutos, sem novo consumo; depois, novo convite.
 
 **Regras de negócio:** [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47)  
 **Casos de uso:** [UC09](03-casos-de-uso.md#uc09)
@@ -391,7 +391,7 @@ O sistema deve encerrar o resgate da missão para toda a família após a aceita
 
 ### RF54
 
-A emissão, inclusive reenvio, deve gerar novo link e senha sem expiração temporal, revogar convites e sessão anteriores e exigir a nova senha no ingresso único. Exibir credenciais somente para compartilhamento explícito, sem recuperação de senha a partir de hash. A senha não é login permanente.
+A emissão, inclusive reenvio, deve gerar novo link e senha sem expiração temporal, invalidar convites anteriores ainda disponíveis sem revogar a sessão ativa e exigir a nova senha no ingresso único, que revoga a sessão anterior do perfil. Exibir credenciais somente para compartilhamento explícito, sem recuperação de senha a partir de hash. A senha não é login permanente.
 
 **Regras de negócio:** [RN45](01-regras-de-negocio.md#rn45), [RN46](01-regras-de-negocio.md#rn46), [RN47](01-regras-de-negocio.md#rn47)  
 **Casos de uso:** [UC02](03-casos-de-uso.md#uc02), [UC09](03-casos-de-uso.md#uc09)
@@ -720,7 +720,7 @@ O consumo do convite e da senha e a efetivação do ingresso devem permanecer co
 
 **Categoria:** Sessões e revogação
 
-Credenciais são protegidas e a sessão ativa é conferida em toda operação. Cada perfil possui uma sessão ativa vinculada à instalação; refresh token não expira por tempo, permanece estável durante a sessão e é revogável. Access token dura 15 minutos, sem postergar revogação até seu vencimento. Remoção e emissão/reenvio de convite revogam a sessão anterior. Novo acesso Apple substitui a sessão do Criador. Recuperação de ingresso com resposta perdida exige prova da instalação/tentativa original, jamais apenas um identificador público.
+Credenciais são protegidas e a sessão ativa é conferida em toda operação. Cada perfil possui uma sessão ativa vinculada à instalação; refresh token não expira por tempo, permanece estável durante a sessão e é revogável. Access token dura 15 minutos, sem postergar revogação até seu vencimento. Remoção revoga a sessão; o ingresso por novo convite revoga a sessão anterior do perfil, com seus tokens e dispositivos de push, no mesmo commit; a emissão de convite não revoga sessão. Novo acesso Apple substitui a sessão do Criador. Recuperação de ingresso com resposta perdida exige prova da instalação/tentativa original, jamais apenas um identificador público.
 
 **Regras relacionadas:** [RN10](01-regras-de-negocio.md#rn10), [RN47](01-regras-de-negocio.md#rn47)  
 **Aplicação nos casos de uso:** [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19)
@@ -775,6 +775,7 @@ A configuração de apelido deve ser protegida por titularidade no backend, incl
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.26 | 2026-11-12 | RF41/RF46/RF54/RNF22: emissão de convite direta, sem confirmação de reemissão; invalida convites anteriores disponíveis e preserva a sessão, revogada no ingresso pelo novo convite (SCRUM-114). |
 | 1.25 | 2026-10-28 | RF03/RF60/RF66: detalhe do membro com Dia/Semana domingo–sábado; nome Kids editável também no detalhe; Parabenizar permanece na Família. |
 | 1.24 | 2026-10-28 | RF03/RF60: nome administrativo de adultos é editado pelo titular; somente o nome de Kids pode ser corrigido por Administrador em Configurações. TEL-032 mantém papel, convite e remoção. |
 | 1.23 | 2026-10-28 | RF60/RF66: TEL-032 passa a mostrar o dia atual e horário de conclusão válida, com retorno ao intervalo da Família; TEL-011 mantém o filtro livre. |

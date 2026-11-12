@@ -57,8 +57,8 @@
 ### 5.3. TEL-056 — Convites iniciais
 
 - **Objetivo:** oferecer convite aos membros já criados com a família antes de usar a área principal.
-- **Anatomia:** título; lista de membros criados; ação de convite por membro; voltar e botão “Avançar”.
-- **Comportamento:** não cria membros ou convites automaticamente. A primeira emissão explícita abre diretamente a folha nativa, sem confirmação intermediária; reemissão exige aviso e confirmação. Fechar a folha não desfaz a emissão nem bloqueia “Avançar”. Voltar abre TEL-002 para editar a família existente.
+- **Anatomia:** título; lista de membros criados; ação “Gerar convite” por membro, com o mesmo rótulo antes e depois da emissão; voltar e botão “Avançar”.
+- **Comportamento:** não cria membros ou convites automaticamente. Toda emissão explícita, inicial ou seguinte, abre diretamente a folha nativa, sem confirmação intermediária. Fechar a folha não desfaz a emissão nem bloqueia “Avançar”. Voltar abre TEL-002 para editar a família existente.
 
 ### 5.4. TEL-053 — Configurações da família
 
@@ -96,6 +96,7 @@ Não há estado vazio: a criação é um formulário e a configuração sempre p
 | Foto | `onboarding.profile.photo.optional` | “Foto (opcional)” | TEL-055 |
 | Etiqueta | `onboarding.profile.nickname.optional` | “Etiqueta (opcional)” | TEL-055 |
 | Avançar | `onboarding.members.continue` | “Avançar” | TEL-056 |
+| Gerar convite | `family.onboarding.invite_generate` | “Gerar convite” | TEL-056, antes e depois da emissão |
 | Sem membros | `onboarding.members.empty` | “Você pode adicionar pessoas agora ou fazer isso depois.” | TEL-002 |
 | Nome | `family.create.name.label` | “Nome da família” | Campo de entrada |
 | Fuso | `family.create.time_zone.label` | “Fuso horário” | Seletor |
@@ -128,6 +129,8 @@ Não há estado vazio: a criação é um formulário e a configuração sempre p
 | UX-03 | MOD-012 apresenta prévia antes de qualquer gravação e não trata prévia como reserva. | Decidida em 2026-10-06 | Não |
 | UX-04 | Revisada: foto escolhida em TEL-055 é enviada antes da criação; falha permite repetir ou seguir sem foto, sem perfil persistido. | Pessoa usuária, 2026-10-19 | Sim; RN01/RN63/RF48 atualizados. |
 | UX-05 | TEL-002 prepara os membros; TEL-056 é a etapa de convites após a criação e volta para TEL-002 em modo de edição, sem segunda criação. | Pessoa usuária, 2026-10-19 | Sim; RN01/RN07, RF01/RF38 e UC01/UC02 atualizados. |
+| UX-06 | TEL-056 mantém “Gerar convite” após a emissão (UX-004 UX-06). | Pessoa usuária, 2026-11-12 | Não; apresentação. |
+| UX-07 | TEL-056 não tem alerta de reemissão: gerar novamente emite direto e abre a folha nativa (UX-004 UX-07). | Pessoa usuária, 2026-11-12 (SCRUM-114) | Sim — RN46, RF41 e UC01. |
 
 ## 10. Checklist de aprovação
 

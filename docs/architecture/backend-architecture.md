@@ -1,8 +1,8 @@
 # Arquitetura backend — Node.js e Clean Architecture
 
-**Versão:** 1.5\
+**Versão:** 1.6\
 **Base funcional:** RN 1.18 / RF 1.17 / UC 1.16 · Contratos: 1.16\
-**Data:** 2026-11-05\
+**Data:** 2026-11-12\
 **Situação:** arquitetura alvo revisada; ampliações de onboarding e projeção pessoal exigem implementação
 
 [Índice](../DOCUMENTACAO.md) · [Contratos e rastreabilidade](backend-contracts.md) · [Decisões](backend-decisions.md) · [Mobile](mobile-architecture.md) · [DER](../05-modelo-de-dados.md)
@@ -263,7 +263,7 @@ Depois do commit, TEL-056 lida com convites dos membros já criados. Retornar a 
 
 Convites usam token aleatório e senha aleatória independente; geração pelo backend com fonte criptográfica. Persistir hash/verificador, nunca senha legível. Senha usa função resistente a tentativas offline, por exemplo scrypt assíncrono com salt e parâmetros versionados; tokens de alta entropia admitem SHA-256/HMAC. Bibliotecas e parâmetros são fixados ao implementar, com limites de recursos. [Primitivas do Node.js](https://nodejs.org/api/crypto.html).
 
-`IssueMemberInvite` sempre cria link/senha novos, revoga convites disponíveis e sessão do alvo no mesmo commit. Não permite convite ao Criador ou membro removido. Credenciais saem uma vez, com `Cache-Control: no-store`. Se a resposta da emissão se perder, emitir outro mediante nova ação; não existe endpoint para reconstruir senha. Inspeção/ingresso recebem token no body, com logs removidos; a página do link não carrega analytics que recebam a credencial. Limitar tentativas por origem e identificador derivado do convite, sem expirar o convite por tempo.
+`IssueMemberInvite` sempre cria link/senha novos e invalida convites disponíveis do alvo no mesmo commit, sem revogar sua sessão; o ingresso por convite revoga a sessão anterior do perfil, com tokens e push, no commit do consumo. Não permite convite ao Criador ou membro removido. Credenciais saem uma vez, com `Cache-Control: no-store`. Se a resposta da emissão se perder, emitir outro mediante nova ação; não existe endpoint para reconstruir senha. Inspeção/ingresso recebem token no body, com logs removidos; a página do link não carrega analytics que recebam a credencial. Limitar tentativas por origem e identificador derivado do convite, sem expirar o convite por tempo.
 
 Ingresso valida senha antes do lock quando possível e revalida convite, perfil e estado no lock. Consome convite, cria sessão/credenciais e registra recuperação de ingresso em uma transação. Duas tentativas distintas não criam duas sessões. Para troca confirmada, receber opcionalmente credencial da sessão anterior, autenticá-la e encerrá-la somente no mesmo commit bem-sucedido; não remover seu membro. Cancelamento/erro de validação não toca o acesso anterior. Resposta perdida após commit é resultado incerto, não rollback; o app usa recuperação específica.
 
@@ -424,6 +424,7 @@ Validação futura se concentra em comportamentos: acesso entre famílias, privi
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.6 | 2026-11-12 | Convite: emissão sempre direta, invalida convites anteriores disponíveis e preserva a sessão; o ingresso pelo novo convite revoga a sessão anterior do perfil, com tokens e push (SCRUM-114; SPEC-004 E-05). |
 | 1.5 | 2026-11-05 | SPEC-020 Fase 1: worker de apuração e entrega, snapshot imutável, recuperação persistida e integração com alteração de fuso. |
 | 1.4 | 2026-10-19 | Criação conjunta de membros e vínculo de foto antecipada, edição posterior sem recriação e necessidade de migração de mídia de onboarding. |
 | 1.3 | 2026-10-08 | Liquidação preguiçosa de ciclos vencidos e aplicação de mudança programada de fuso (SPEC-002 Fase 3). Sem mudança funcional. |

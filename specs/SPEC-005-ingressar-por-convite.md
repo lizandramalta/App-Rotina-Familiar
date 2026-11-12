@@ -71,7 +71,7 @@
 
 - **Isolamento familiar (RNF06/RNF19):** `familyId`, `memberId`, papel e flag de Criador nunca são recebidos do cliente para definir o ingresso. Eles derivam do convite validado e não são retornados pela inspeção.
 - **Autorização (RNF07):** toda sessão resultante é consultada e autorizada pelo backend em operações protegidas; controles visuais não substituem essa validação.
-- **Sessão e revogação (RN46, RN47, RNF22):** há uma sessão ativa por perfil/aparelho. Access token dura 15 minutos; refresh token é estável, sem expiração temporal e revogável. Novo convite e remoção revogam o acesso nas condições definidas pela base.
+- **Sessão e revogação (RN46, RN47, RNF22):** há uma sessão ativa por perfil/aparelho. Access token dura 15 minutos; refresh token é estável, sem expiração temporal e revogável. Remoção revoga o acesso. O ingresso bem-sucedido por novo convite revoga, no mesmo commit, a sessão ativa anterior do perfil em outro aparelho, com seus tokens e dispositivos de push; a emissão do convite não a revoga (`SPEC-004` E-05).
 
 ## 5. Contrato de dados, interface e validações
 
@@ -151,7 +151,7 @@ Todas as rotas usam prefixo `/v1`, `Cache-Control: no-store` nas respostas que c
 - **CA-02: ingresso válido cria a sessão do perfil correto**
   - **DADO QUE** o convite está disponível, o perfil está ativo e a senha/provas são válidas,
   - **QUANDO** a pessoa confirmar o ingresso,
-  - **ENTÃO O SISTEMA DEVE** consumir o convite e criar uma única sessão vinculada à instalação para a família e perfil definidos pelo convite,
+  - **ENTÃO O SISTEMA DEVE** consumir o convite e criar uma única sessão vinculada à instalação para a família e perfil definidos pelo convite, revogando no mesmo commit a sessão ativa anterior do perfil, seus tokens e dispositivos de push,
   - **E** retornar `SessionResult` com as permissões do perfil, sem aceitar família, papel ou membro enviados pelo cliente. *(RF42–RF46, RN45–RN47, RNF18–RNF22)*
 
 - **CA-03: senha inválida não consome convite**
@@ -213,6 +213,7 @@ Nunca registrar token, senha, verificadores, `attemptSecret`, prova da instalaç
 |---|---|---|---|
 | E-01 | A inspeção é neutra: retorna somente disponibilidade e não exibe identidade, família, perfil ou foto antes do ingresso. | Pessoa usuária, 2026-10-06 | Não — concretiza o “contexto mínimo” já previsto no contrato backend sem mudar o comportamento funcional. |
 | E-02 | Esta SPEC fixa schemas e códigos públicos para inspeção, ingresso e recuperação, seguindo as rotas e garantias já previstas pela arquitetura. | Pessoa usuária, 2026-10-06 | Não — detalhamento técnico permitido por BA-20; qualquer alteração de regra exige revisão da base. |
+| E-04 | A revogação da sessão anterior do perfil acontece somente no ingresso por novo convite, incluindo tokens e dispositivos de push. | Pessoa usuária / 2026-11-12 (SCRUM-114) | Sim — RN46/RN47, RF46/RF54, RNF22 e UC09. |
 | E-03 | `INVITE_UNAVAILABLE` e `JOIN_RECOVERY_UNAVAILABLE` são respostas neutras para estados indisponíveis, evitando revelar consumo, revogação, remoção ou titularidade. | Decisão da SPEC, 2026-10-06 | Não — preserva RNF06, RNF18 e RNF19. |
 
 Não há esclarecimentos pendentes.
@@ -240,3 +241,4 @@ Não há esclarecimentos pendentes.
 - [x] UX-spec vinculada e microcopy localizável prevista.
 - [x] Esclarecimentos resolvidos pela pessoa usuária em 2026-10-06.
 - [x] Status autorizado explicitamente como `aprovada` pela pessoa usuária em 2026-10-06.
+- [x] Revisão de 2026-11-12 (E-04, revogação da sessão anterior no ingresso; SCRUM-114) aprovada.
