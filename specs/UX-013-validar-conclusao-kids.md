@@ -76,6 +76,9 @@ Voltar de TEL-016 sem decidir não altera a sinalização. Não há rascunho ou 
 |---|---|---|---|
 | Título da fila | `kidsReview.queue.title` | "Confirmações Kids" | TEL-015 |
 | Fila vazia | `kidsReview.queue.empty` | "Não há tarefas aguardando avaliação." | Sem pendências |
+| Rótulo dos responsáveis | `kidsReview.detail.assignees` | "Responsáveis" | TEL-016; nomes listados em uma linha |
+| Rótulo da criança | `kidsReview.detail.signaled_by` | "Sinalizada por" | TEL-016 |
+| Rótulo da data/hora | `kidsReview.detail.signaled_at` | "Sinalizada em" | TEL-016; data e hora locais |
 | Foto ausente | `kidsReview.detail.no_photo` | "Nenhuma foto foi enviada." | TEL-016 sem foto |
 | Confirmar | `kidsReview.decision.confirm` | "Confirmar realização" | Decisão disponível |
 | Recusar | `kidsReview.decision.reject` | "Recusar" | Decisão disponível |
@@ -104,6 +107,7 @@ Voltar de TEL-016 sem decidir não altera a sinalização. Não há rascunho ou 
 | UX-01 | Fila mostra pendências da mais antiga para a mais recente. | Pessoa usuária / 2026-10-08 | Sim — SPEC e contrato backend |
 | UX-02 | Decisão já aplicada por outra ação retorna à fila de modo silencioso; não há erro nem segunda confirmação. | Pessoa usuária / 2026-10-08 | Sim — SPEC e contrato backend |
 | UX-03 | Não há histórico navegável de avaliações no app. | Pessoa usuária / 2026-10-08 | Não |
+| UX-04 | TEL-016 rotula responsáveis, criança que sinalizou e data/hora ("Responsáveis", "Sinalizada por", "Sinalizada em"), evitando nomes repetidos sem contexto (SCRUM-115). | Pessoa usuária / 2026-11-12 | Não |
 
 ## 11. Checklist de Aprovação da UX-Spec
 

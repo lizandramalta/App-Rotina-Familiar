@@ -3159,6 +3159,16 @@
         }
       }
     },
+    "kidsReview.detail.assignees" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Responsáveis"
+          }
+        }
+      }
+    },
     "kidsReview.detail.confirm" : {
       "localizations" : {
         "pt-BR" : {
@@ -3215,6 +3225,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Esta sinalização já foi resolvida."
+          }
+        }
+      }
+    },
+    "kidsReview.detail.signaled_at" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sinalizada em"
+          }
+        }
+      }
+    },
+    "kidsReview.detail.signaled_by" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sinalizada por"
           }
         }
       }
