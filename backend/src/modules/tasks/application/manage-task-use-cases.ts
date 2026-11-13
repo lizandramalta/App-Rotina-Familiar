@@ -156,12 +156,17 @@ export class GetTaskUseCase {
   ) {}
 
   public async execute(actor: ActorContext, taskId: string): Promise<TaskResponse> {
-    requireAdult(actor);
     // A leitura é sempre limitada à família da sessão, para não revelar um ID externo.
     const task = await this.deps.transactionRunner.run((tx) =>
       this.deps.repository.findTask(tx, actor.familyId, taskId),
     );
-    if (task === undefined) {
+    // SPEC-011 CA-10 / E-02: Kids lê somente a tarefa da qual é responsável; qualquer
+    // outra responde como indisponível, sem distinguir de uma tarefa de outra família.
+    const isUnavailableToKids =
+      task !== undefined &&
+      actor.role === MemberRole.KIDS &&
+      !task.assigneeIds.includes(actor.memberId);
+    if (task === undefined || isUnavailableToKids) {
       throw new NotFoundError('Task not found.');
     }
     return toResponse(task);

@@ -4,6 +4,7 @@ import {
   CreateTaskUseCase,
   DeleteTaskUseCase,
   EditTaskUseCase,
+  GetTaskUseCase,
 } from '../../src/modules/tasks/application/manage-task-use-cases.js';
 import type { MissionClosurePort } from '../../src/modules/tasks/application/mission-closure-port.js';
 import type {
@@ -288,5 +289,75 @@ describe('Task management use cases — SPEC-007', () => {
       code: 'RESOURCE_NOT_FOUND',
     });
     expect(repository.completeTask).not.toHaveBeenCalled();
+  });
+
+  describe('GetTaskUseCase — SPEC-011 CA-10 / SCRUM-120', () => {
+    const KIDS_ACTOR = {
+      ...TEST_ACTOR,
+      memberId: '3c1b7a52-6f0e-4b4e-9a51-7d2f6c8e9a10',
+      role: MemberRole.KIDS,
+    };
+    const OTHER_MEMBER_ID = '5e2d9b31-8a4c-4f7e-b6d2-0c9a1e3f5b72';
+
+    it.each([MemberRole.ADMINISTRATOR, MemberRole.MEMBER])(
+      'lets %s read any task of the family, including one assigned to someone else',
+      async (role) => {
+        repository.findTask.mockResolvedValue({ ...TASK, assigneeIds: [OTHER_MEMBER_ID] });
+
+        const result = await new GetTaskUseCase(dependencies()).execute(
+          { ...TEST_ACTOR, role },
+          TASK.id,
+        );
+
+        expect(result).toMatchObject({ id: TASK.id, assigneeIds: [OTHER_MEMBER_ID] });
+        expect(repository.findTask).toHaveBeenCalledWith(
+          expect.anything(),
+          TEST_ACTOR.familyId,
+          TASK.id,
+        );
+      },
+    );
+
+    it('CA-10 lets Kids read a task they are assigned to, even when shared with an adult', async () => {
+      repository.findTask.mockResolvedValue({
+        ...TASK,
+        assigneeIds: [TEST_ACTOR.memberId, KIDS_ACTOR.memberId],
+      });
+
+      const result = await new GetTaskUseCase(dependencies()).execute(KIDS_ACTOR, TASK.id);
+
+      expect(result).toMatchObject({
+        id: TASK.id,
+        assigneeIds: [TEST_ACTOR.memberId, KIDS_ACTOR.memberId],
+        createdAt: NOW.toISOString(),
+      });
+    });
+
+    it('CA-10 hides from Kids a task they are not assigned to as RESOURCE_NOT_FOUND', async () => {
+      repository.findTask.mockResolvedValue({ ...TASK, assigneeIds: [OTHER_MEMBER_ID] });
+
+      await expect(
+        new GetTaskUseCase(dependencies()).execute(KIDS_ACTOR, TASK.id),
+      ).rejects.toMatchObject({ code: 'RESOURCE_NOT_FOUND', statusCode: 404 });
+    });
+
+    it('CA-10 hides from Kids an unassigned task as RESOURCE_NOT_FOUND', async () => {
+      repository.findTask.mockResolvedValue({ ...TASK, assigneeIds: [] });
+
+      await expect(
+        new GetTaskUseCase(dependencies()).execute(KIDS_ACTOR, TASK.id),
+      ).rejects.toMatchObject({ code: 'RESOURCE_NOT_FOUND', statusCode: 404 });
+    });
+
+    it.each([MemberRole.ADMINISTRATOR, MemberRole.MEMBER, MemberRole.KIDS])(
+      'does not reveal a task outside the family of a %s actor',
+      async (role) => {
+        repository.findTask.mockResolvedValue(undefined);
+
+        await expect(
+          new GetTaskUseCase(dependencies()).execute({ ...KIDS_ACTOR, role }, TASK.id),
+        ).rejects.toMatchObject({ code: 'RESOURCE_NOT_FOUND', statusCode: 404 });
+      },
+    );
   });
 });

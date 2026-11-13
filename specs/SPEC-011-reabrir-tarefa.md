@@ -36,6 +36,7 @@
 - Recalcular o progresso das missões em andamento vinculadas à tarefa.
 - Quando a tarefa estiver vinculada a ao menos uma missão `completed` e/ou com recompensa aceita: exigir confirmação explícita (`confirm: true`) antes de persistir; ao confirmar, retornar a(s) missão(ões) para `inProgress` e remover recompensa aceita, participações e badges derivados dela, na mesma transação, sem preservar histórico desses dados (RN38/53/58).
 - Autorização: Administrador e Membro em qualquer tarefa acessível da família; Kids somente na própria tarefa, como responsável.
+- `GET /v1/tasks/{taskId}` para Kids: lê a própria tarefa (responsável), pré-condição para chegar ao TEL-012 e reabri-la; tarefa da qual não é responsável, ou de outra família, responde `404 RESOURCE_NOT_FOUND` sem distinguir os casos (E-02).
 - Em TEL-010/TEL-040, o círculo reabre quando permitido; o restante da linha abre o detalhe. Após a ação, lista e progresso consultam o servidor; MOD-006 mantém a mesma confirmação.
 - Isolamento multitenant (RNF06) e consistência sob concorrência (RNF11/25, lock por família BA-08).
 
@@ -62,7 +63,7 @@
 |---|---|---|---|
 | Administrador | Reabrir qualquer tarefa `completed` acessível da família | Reabrir tarefa de outra família | `404 RESOURCE_NOT_FOUND` |
 | Membro | Igual ao Administrador (RN57 não distingue) | Idem | Idem |
-| Kids | Reabrir a própria tarefa `completed` (responsável) | Reabrir tarefa de terceiro, mesmo compartilhada | `403 ACTION_NOT_ALLOWED` / ação oculta na UI |
+| Kids | Consultar e reabrir a própria tarefa `completed` (responsável) | Reabrir tarefa de terceiro, mesmo compartilhada; consultar tarefa da qual não é responsável | Reabrir: `403 ACTION_NOT_ALLOWED` / ação oculta na UI. Consultar: `404 RESOURCE_NOT_FOUND` (E-02) |
 
 - **Isolamento familiar (RNF06):** tarefa de outra família responde `404 RESOURCE_NOT_FOUND`, sem revelar metadados.
 - **Autorização no backend (RNF07):** o backend revalida perfil e vínculo de responsável em toda chamada, independentemente da ocultação visual no mobile.
@@ -209,6 +210,12 @@ Todas as falhas usam `application/problem+json`, com `type`, `title`, `status`, 
   **ENTÃO O SISTEMA NÃO DEVE** apresentar a reabertura como concluída,
   **E** DEVE consultar `GET /v1/tasks/{taskId}` antes de permitir nova tentativa explícita. *(RNF12/13, MA-08)*
 
+- **CA-10: Kids consulta o detalhe da própria tarefa**
+  **DADO QUE** um perfil Kids é responsável por uma tarefa da família, inclusive compartilhada com adulto,
+  **QUANDO** consultar `GET /v1/tasks/{taskId}`,
+  **ENTÃO O SISTEMA DEVE** responder `200 OK` com a projeção canônica da tarefa,
+  **E**, se o Kids não for responsável pela tarefa ou ela pertencer a outra família, DEVE responder `404 RESOURCE_NOT_FOUND`, sem distinguir os casos. *(RNF06/07, UC11, backend-contracts §4, E-02)*
+
 ## 8. Observabilidade
 
 | Evento | Gatilho | Dados permitidos |
@@ -224,6 +231,7 @@ Segredos, tokens e dados de autenticação nunca entram em logs ou telemetria.
 | # | Decisão | Situação | Altera `docs/`? |
 |---|---|---|---|
 | E-01 | O mobile não pré-calcula o impacto de missão: a 1ª chamada de `reopening` (sem `confirm`) já tenta aplicar; se houver impacto, o servidor recusa com `409 MISSION_REOPEN_REQUIRES_CONFIRMATION` e devolve as missões afetadas, sem persistir nada; o mobile reenvia com `confirm: true` para efetivar. Evita estender o contrato já aprovado de `GET /v1/tasks/{taskId}` (SPEC-007) e mantém o servidor como única fonte de verdade (MA-07/08). | Decidida pela pessoa usuária em 2026-10-07 | Não — mecânica de contrato desta spec, comportamento já previsto em RN57/58/UC17 |
+| E-02 | `GET /v1/tasks/{taskId}` passa a aceitar Kids responsável pela tarefa, como já previa `backend-contracts.md` §4 ("Adulto; Kids apenas responsável"); tarefa não própria ou de outra família responde `404 RESOURCE_NOT_FOUND`, seguindo §2 do contrato e o precedente de `SignalTask`. Corrige a lacuna em que SPEC-007 implementou a rota só para adultos, impedindo o Kids de abrir o TEL-012 (CA-04) e a trilha da missão de identificar tarefas próprias (UX-016 UX-04). | Decidida pela pessoa usuária em 2026-11-13 | Não — contrato já vigente; ajusta a tabela de acesso da SPEC-007 |
 | P-01 | Embora SPEC-018 (visualizar carga) ainda não exista, a reversão de crédito definida aqui já deve manter os dados de carga corretos para quando essa tela for implementada. | Premissa | Não |
 | P-02 | `Mission.reward` nunca é preenchido antes de SPEC-017 existir; `rewardRemoved` sempre será `false` até lá. | Premissa | Não |
 
@@ -231,7 +239,7 @@ Segredos, tokens e dados de autenticação nunca entram em logs ou telemetria.
 
 | Fase | Objetivo | CAs atendidos | Prontidão | Status |
 |---|---|---|---|---|
-| **1** | Núcleo (API, RBAC, isolamento, fluxo de confirmação, concorrência) | CA-01 a CA-08 | Testes unitários e de integração verdes | a fazer |
+| **1** | Núcleo (API, RBAC, isolamento, fluxo de confirmação, concorrência) | CA-01 a CA-08, CA-10 | Testes unitários e de integração verdes | a fazer |
 | **2** | Mobile (TEL-010/TEL-040 círculo, TEL-012 ação Reabrir, MOD-006, Kids escopo próprio) | CA-01 a CA-05 integrados à UI | Telas integradas, UX-spec verificada | a fazer |
 | **3** | Resiliência de rede | CA-09 | Suíte de regressão verde | a fazer |
 

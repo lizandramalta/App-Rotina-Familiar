@@ -48,18 +48,32 @@ struct GetMissionTaskOptionsUseCase: Sendable {
 struct HydrateLinkedTasksUseCase: Sendable {
     let taskRepository: any TaskRepository
 
-    func execute(taskIDs: [UUID], accessToken: String) async throws -> [MissionTaskOption] {
+    /// `skippingUnavailable`: a task the actor cannot read (`TaskError.notFound`) is left out
+    /// instead of failing the whole set. Kids only read tasks they are assigned to (SPEC-011
+    /// CA-10), so a mission mixing other members' tasks must still resolve the Kids' own ones
+    /// (UX-016 UX-04). Any other failure still throws, keeping the conservative fallback (E-1).
+    func execute(
+        taskIDs: [UUID],
+        accessToken: String,
+        skippingUnavailable: Bool = false
+    ) async throws -> [MissionTaskOption] {
         let repository = taskRepository
-        return try await withThrowingTaskGroup(of: (Int, MissionTaskOption).self) { group in
+        return try await withThrowingTaskGroup(of: (Int, MissionTaskOption)?.self) { group in
             for (index, taskID) in taskIDs.enumerated() {
                 group.addTask {
-                    let task = try await repository.task(id: taskID, accessToken: accessToken)
-                    return (index, MissionTaskOption(familyTask: task))
+                    do {
+                        let task = try await repository.task(id: taskID, accessToken: accessToken)
+                        return (index, MissionTaskOption(familyTask: task))
+                    } catch TaskError.notFound where skippingUnavailable {
+                        return nil
+                    }
                 }
             }
             var results: [(Int, MissionTaskOption)] = []
             for try await result in group {
-                results.append(result)
+                if let result {
+                    results.append(result)
+                }
             }
             return results.sorted { $0.0 < $1.0 }.map(\.1)
         }

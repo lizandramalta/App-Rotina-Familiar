@@ -63,7 +63,7 @@
 |---|---|---|---|
 | Administrador | Criar, consultar, editar e excluir qualquer tarefa da família, inclusive de outros membros | Excluir tarefa concluída diretamente; alterar dados de missão concluída | `403 ACTION_NOT_ALLOWED` / ação oculta |
 | Membro | Igual ao Administrador (RN20 não distingue) | Idem | `403 ACTION_NOT_ALLOWED` / ação oculta |
-| Kids | Nenhuma ação de gerenciamento (consulta da própria tarefa pertence a UC11, fora desta spec) | Criar, editar ou excluir qualquer tarefa | `403 ACTION_NOT_ALLOWED` / ação oculta na UI |
+| Kids | Nenhuma ação de gerenciamento (consulta da própria tarefa em `GET /v1/tasks/{taskId}` definida por SPEC-011 CA-10) | Criar, editar ou excluir qualquer tarefa | `403 ACTION_NOT_ALLOWED` / ação oculta na UI |
 
 - **Isolamento familiar (RNF06):** qualquer tarefa de outra família responde `404 RESOURCE_NOT_FOUND`, sem revelar metadados.
 - **Autorização no backend (RNF07):** o backend revalida o perfil em toda chamada, independentemente da ocultação visual no mobile.
@@ -118,7 +118,7 @@
 
 | Rota | Finalidade | Entrada / saída | Acesso |
 |---|---|---|---|
-| `GET /v1/tasks/{taskId}` | Detalhe da tarefa | Estado atual, origem, campos e capacidades autorizadas | Administrador, Membro |
+| `GET /v1/tasks/{taskId}` | Detalhe da tarefa | Estado atual, origem, campos e capacidades autorizadas | Administrador, Membro; Kids apenas responsável (SPEC-011 CA-10) |
 | `PATCH /v1/tasks/{taskId}` | Editar campos de uma ocorrência | Campos presentes no dicionário 5.1, incluindo `signalResolution` quando aplicável; campos omitidos são preservados | Administrador, Membro; respeita proteção de missão concluída |
 | `DELETE /v1/tasks/{taskId}` | Excluir tarefa não concluída | Remove vínculos de missão em andamento e recalcula progresso, fechando a missão se restarem só tarefas concluídas; remove sinalização corrente se houver | Administrador, Membro; não concluída/não protegida |
 
