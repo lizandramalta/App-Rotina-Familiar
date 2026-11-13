@@ -54,6 +54,7 @@ struct KidsReviewQueueView: View {
                     } label: {
                         row(item)
                     }
+                        .accessibilityIdentifier("kidsReview.queue.row.\(item.id.uuidString.lowercased())")
                         .task { await viewModel.loadMoreIfNeeded(currentItem: item) }
                 }
                 if viewModel.isLoadingMore {
@@ -90,7 +91,6 @@ struct KidsReviewQueueView: View {
         }
         .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
         .accessibilityElement(children: .combine)
-        .accessibilityIdentifier("kidsReview.queue.row.\(item.id.uuidString.lowercased())")
     }
 
     private func signaledByText(_ item: KidsSignalSummary) -> String {
