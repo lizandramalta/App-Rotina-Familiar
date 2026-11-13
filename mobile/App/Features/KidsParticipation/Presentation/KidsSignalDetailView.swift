@@ -31,17 +31,17 @@ struct KidsSignalDetailView: View {
                     .accessibilityElement(children: .combine)
                     .accessibilityIdentifier("kidsReview.detail.signaled_at")
                 }
-                if detail.photoMediaID != nil {
-                    Section {
-                        if let photo = viewModel.photo, let image = UIImage(data: photo) {
-                            Image(uiImage: image).resizable().scaledToFit()
-                                .accessibilityLabel("kidsReview.detail.photo")
-                        } else if viewModel.photoFailed {
-                            Label("kidsReview.detail.photo_error", systemImage: "exclamationmark.triangle")
-                            Button("kidsReview.queue.retry") { Task { await viewModel.load() } }
-                        } else {
-                            ProgressView()
-                        }
+                Section {
+                    if detail.photoMediaID == nil {
+                        Label("kidsReview.detail.no_photo", systemImage: "photo.on.rectangle.angled")
+                    } else if let photo = viewModel.photo, let image = UIImage(data: photo) {
+                        Image(uiImage: image).resizable().scaledToFit()
+                            .accessibilityLabel("kidsReview.detail.photo")
+                    } else if viewModel.photoFailed {
+                        Label("kidsReview.detail.photo_error", systemImage: "exclamationmark.triangle")
+                        Button("kidsReview.queue.retry") { Task { await viewModel.load() } }
+                    } else {
+                        ProgressView()
                     }
                 }
                 Section {
