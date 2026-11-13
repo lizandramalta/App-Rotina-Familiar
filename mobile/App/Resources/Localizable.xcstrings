@@ -3189,6 +3189,16 @@
         }
       }
     },
+    "kidsReview.detail.no_photo" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhuma foto foi enviada."
+          }
+        }
+      }
+    },
     "kidsReview.detail.photo" : {
       "localizations" : {
         "pt-BR" : {
