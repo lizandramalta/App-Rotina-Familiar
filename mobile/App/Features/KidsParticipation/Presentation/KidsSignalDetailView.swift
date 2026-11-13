@@ -5,6 +5,8 @@ struct KidsSignalDetailView: View {
     @State private var viewModel: KidsSignalDetailViewModel
     let onResolved: () -> Void
 
+    @Environment(\.dismiss) private var dismiss
+
     init(viewModel: KidsSignalDetailViewModel, onResolved: @escaping () -> Void) {
         _viewModel = State(initialValue: viewModel)
         self.onResolved = onResolved
@@ -66,6 +68,11 @@ struct KidsSignalDetailView: View {
         .navigationTitle("kidsReview.detail.title")
         .navigationBarTitleDisplayMode(.inline)
         .task { await viewModel.load() }
-        .onChange(of: viewModel.resolved) { _, resolved in if resolved { onResolved() } }
+        .onChange(of: viewModel.resolved) { _, resolved in
+            if resolved {
+                onResolved()
+                dismiss()
+            }
+        }
     }
 }
