@@ -4,6 +4,42 @@
     "" : {
 
     },
+    ".body (17pt Medium)" : {
+
+    },
+    ".bodyStrong (17pt Bold)" : {
+
+    },
+    ".caption (12pt Regular)" : {
+
+    },
+    ".cardTitle (17pt)" : {
+
+    },
+    ".note (13pt Regular)" : {
+
+    },
+    ".number" : {
+
+    },
+    ".numberLarge" : {
+
+    },
+    ".subtitle (15pt Medium)" : {
+
+    },
+    ".title1 (28pt)" : {
+
+    },
+    ".title2 (22pt)" : {
+
+    },
+    ".title3 (20pt)" : {
+
+    },
+    ".titleLarge (34pt)" : {
+
+    },
     "%@\n\n%@" : {
       "localizations" : {
         "pt-BR" : {
@@ -57,6 +93,15 @@
 
     },
     "+%lld" : {
+
+    },
+    "22" : {
+
+    },
+    "44" : {
+
+    },
+    "Aba selecionada: %@" : {
 
     },
     "access.common.error_network" : {
@@ -209,7 +254,19 @@
         }
       }
     },
+    "Amarela (+15°)" : {
+
+    },
+    "Azul" : {
+
+    },
     "Cancelar" : {
+
+    },
+    "Card com estrela" : {
+
+    },
+    "Catálogo visual de componentes e tokens de alta fidelidade." : {
 
     },
     "Confirmar" : {
@@ -222,6 +279,9 @@
 
     },
     "Descartar alterações?" : {
+
+    },
+    "Design System" : {
 
     },
     "design_system.add_button.label" : {
@@ -283,6 +343,9 @@
           }
         }
       }
+    },
+    "Destaque" : {
+
     },
     "destination.contentPending" : {
       "localizations" : {
@@ -3159,6 +3222,16 @@
         }
       }
     },
+    "kidsReview.detail.assignees" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Responsáveis"
+          }
+        }
+      }
+    },
     "kidsReview.detail.confirm" : {
       "localizations" : {
         "pt-BR" : {
@@ -3215,6 +3288,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Esta sinalização já foi resolvida."
+          }
+        }
+      }
+    },
+    "kidsReview.detail.signaled_at" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sinalizada em"
+          }
+        }
+      }
+    },
+    "kidsReview.detail.signaled_by" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sinalizada por"
           }
         }
       }
@@ -4121,6 +4214,9 @@
           }
         }
       }
+    },
+    "Mutua Design System" : {
+
     },
     "OK" : {
 
@@ -7428,6 +7524,9 @@
       }
     },
     "Tentar novamente" : {
+
+    },
+    "Toques no botão: %lld" : {
 
     },
     "Voltar" : {

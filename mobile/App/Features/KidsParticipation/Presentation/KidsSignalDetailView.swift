@@ -15,9 +15,21 @@ struct KidsSignalDetailView: View {
             if let detail = viewModel.detail {
                 Section {
                     Text(detail.taskTitle).font(.headline)
-                    Text(detail.childName)
-                    Text(detail.signaledAt, style: .date)
-                    ForEach(detail.assignees, id: \.self) { name in Text(name) }
+                    LabeledContent("kidsReview.detail.assignees") {
+                        Text(detail.assignees.formatted(.list(type: .and)))
+                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("kidsReview.detail.assignees")
+                    LabeledContent("kidsReview.detail.signaled_by") {
+                        Text(detail.childName)
+                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("kidsReview.detail.signaled_by")
+                    LabeledContent("kidsReview.detail.signaled_at") {
+                        Text(detail.signaledAt.formatted(date: .abbreviated, time: .shortened))
+                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("kidsReview.detail.signaled_at")
                 }
                 if detail.photoMediaID != nil {
                     Section {
