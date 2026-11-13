@@ -278,6 +278,21 @@ struct TaskDetailViewModelTests {
         #expect(!viewModel.showReopenSuccessBanner)
     }
 
+    @Test("SCRUM-120 / SPEC-011 CA-10: Kids load their own task shared with an adult and can signal it")
+    func kidsLoadOwnSharedTaskAndCanSignal() async {
+        let task = fixture(status: .pending, assigneeIDs: [Self.adultMemberID, Self.kidMemberID])
+        let repository = TaskRepositorySpy(taskResult: .success(task))
+        let viewModel = makeViewModel(taskID: task.id, role: .kid, currentMemberID: Self.kidMemberID, repository: repository)
+
+        await viewModel.load()
+
+        #expect(!viewModel.loadFailed)
+        #expect(viewModel.task == task)
+        #expect(repository.taskCalls == [task.id])
+        #expect(viewModel.canSignal)
+        #expect(!viewModel.canReopen)
+    }
+
     @Test("CA-04 Kids reopens their own completed task")
     func kidsReopensOwnTask() async {
         let task = fixture(status: .completed, assigneeIDs: [Self.kidMemberID])

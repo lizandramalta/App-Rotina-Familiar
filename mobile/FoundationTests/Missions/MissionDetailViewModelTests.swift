@@ -311,6 +311,51 @@ struct MissionDetailViewModelTests {
         #expect(!viewModel.canOpenTaskDetail(otherTask))
     }
 
+    @Test("SCRUM-120 / SPEC-011 CA-10: Kids resolve their own task when the others answer 404")
+    func kidsResolveOwnTaskAmongUnreadableOnes() async {
+        let ownTaskID = UUID()
+        let otherTaskID = UUID()
+        let ownTask = MissionLinkedTask(id: ownTaskID, title: "Trocar a roupa de cama", status: .pending)
+        let otherTask = MissionLinkedTask(id: otherTaskID, title: "Faxina da sala", status: .pending)
+        let repository = MissionRepositorySpy(missionResult: .success(
+            makeMissionDetail(tasks: [otherTask, ownTask], isRedemptionAvailable: nil, participations: nil)
+        ))
+        // Mirrors the backend: Kids read only their own task; anyone else's is RESOURCE_NOT_FOUND.
+        let taskRepository = TaskRepositorySpy(
+            taskResult: .failure(TaskError.notFound),
+            taskResultsByID: [ownTaskID: .success(makeFamilyTask(id: ownTaskID, assigneeIDs: [Self.kidMemberID]))]
+        )
+        let viewModel = makeViewModel(role: .kid, repository: repository, taskRepository: taskRepository)
+
+        await viewModel.load()
+
+        #expect(viewModel.isOwnTask(ownTask))
+        #expect(viewModel.canOpenTaskDetail(ownTask))
+        #expect(!viewModel.isOwnTask(otherTask))
+        #expect(!viewModel.canOpenTaskDetail(otherTask))
+        #expect(!viewModel.loadFailed)
+    }
+
+    @Test("SCRUM-120: a non-404 failure among the lookups keeps every Kids row non-tappable (E-1)")
+    func kidsMixedFailureStaysConservative() async {
+        let ownTaskID = UUID()
+        let ownTask = MissionLinkedTask(id: ownTaskID, title: "Trocar a roupa de cama", status: .pending)
+        let otherTask = MissionLinkedTask(id: UUID(), title: "Faxina da sala", status: .pending)
+        let repository = MissionRepositorySpy(missionResult: .success(
+            makeMissionDetail(tasks: [ownTask, otherTask], isRedemptionAvailable: nil, participations: nil)
+        ))
+        let taskRepository = TaskRepositorySpy(
+            taskResult: .failure(TaskError.network),
+            taskResultsByID: [ownTaskID: .success(makeFamilyTask(id: ownTaskID, assigneeIDs: [Self.kidMemberID]))]
+        )
+        let viewModel = makeViewModel(role: .kid, repository: repository, taskRepository: taskRepository)
+
+        await viewModel.load()
+
+        #expect(!viewModel.canOpenTaskDetail(ownTask))
+        #expect(!viewModel.canOpenTaskDetail(otherTask))
+    }
+
     @Test("E-1: if Kids ownership lookup fails, content stays visible and no row is tappable")
     func kidsOwnershipFailureIsConservative() async {
         let task = MissionLinkedTask(id: UUID(), title: "Trocar a roupa de cama", status: .pending)

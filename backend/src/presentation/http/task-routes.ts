@@ -518,9 +518,14 @@ export function registerTaskRoutes(app: FastifyInstance, container: ApplicationC
       {
         schema: {
           tags: ['Tasks'],
-          summary: 'Get a single task',
+          summary:
+            'Get a single task (adults: any family task; Kids: only tasks they are assigned to)',
           security: [{ bearerAuth: [] }],
-          response: { 200: taskResponseSchema },
+          response: {
+            200: taskResponseSchema,
+            401: problemResponseSchema,
+            404: problemResponseSchema,
+          },
         },
       },
       async (request, reply) =>
