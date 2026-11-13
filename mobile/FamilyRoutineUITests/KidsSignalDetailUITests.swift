@@ -10,6 +10,10 @@ final class KidsSignalDetailUITests: XCTestCase {
     }
 
     private func openFirstSignal() {
+        openSignal(atRow: 0)
+    }
+
+    private func openSignal(atRow index: Int) {
         app = XCUIApplication()
         app.launchEnvironment["UI_TEST_SCENARIO"] = "kids-review-queue"
         app.launch()
@@ -22,7 +26,7 @@ final class KidsSignalDetailUITests: XCTestCase {
             NSPredicate(format: "identifier BEGINSWITH 'kidsReview.queue.row.'")
         )
         XCTAssertTrue(rows.firstMatch.waitForExistence(timeout: 5))
-        rows.element(boundBy: 0).tap()
+        rows.element(boundBy: index).tap()
         XCTAssertTrue(app.navigationBars["Avaliar sinalização"].waitForExistence(timeout: 5))
     }
 
@@ -46,5 +50,23 @@ final class KidsSignalDetailUITests: XCTestCase {
         XCTAssertTrue(signaledBy.label.contains("Sinalizada por"))
         XCTAssertTrue(signaledBy.label.contains("Rafa Silva"))
         XCTAssertTrue(signaledAt.label.contains("Sinalizada em"))
+    }
+
+    /// SCRUM-122: the fixture now returns real image bytes for a signal with `hasPhoto == true`
+    /// ("Arrumar a cama", the first queue row), so this exercises the loaded-photo branch for real
+    /// instead of only through ViewModel unit tests.
+    func testDetailShowsThePhotoWhenTheSignalHasOne() {
+        openFirstSignal()
+
+        XCTAssertTrue(app.images["Foto da sinalização"].waitForExistence(timeout: 5))
+    }
+
+    /// SCRUM-116: "Guardar os brinquedos" (second queue row) has no photo, so the Section that would
+    /// hold it shows the approved no-photo copy instead of rendering nothing (UX-013 §7).
+    func testDetailShowsTheNoPhotoWarningWhenTheSignalHasNone() {
+        openSignal(atRow: 1)
+
+        XCTAssertTrue(app.staticTexts["Nenhuma foto foi enviada."].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.images["Foto da sinalização"].exists)
     }
 }

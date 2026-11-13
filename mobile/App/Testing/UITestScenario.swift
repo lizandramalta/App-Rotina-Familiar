@@ -1135,7 +1135,7 @@ private struct UITestKidsSignalRepository: KidsSignalRepository {
         guard let item = Self.items.first(where: { $0.id == id }) else { throw KidsSignalError.notFound }
         return KidsSignalDetail(id: id, taskID: item.taskID, taskTitle: item.taskTitle,
                                 childName: item.childName, signaledAt: item.signaledAt,
-                                assignees: [item.childName], photoMediaID: nil)
+                                assignees: [item.childName], photoMediaID: item.hasPhoto ? id : nil)
     }
 
     func decideSignal(id: UUID, decision: KidsReviewDecision, accessToken: String) async throws -> KidsDecisionResult {
@@ -1143,7 +1143,12 @@ private struct UITestKidsSignalRepository: KidsSignalRepository {
                            outcome: decision == .confirm ? "confirmed" : "rejected", applied: true)
     }
 
-    func getSignalPhoto(mediaID: UUID, accessToken: String) async throws -> Data { Data() }
+    func getSignalPhoto(mediaID: UUID, accessToken: String) async throws -> Data {
+        UIGraphicsImageRenderer(size: CGSize(width: 64, height: 64)).jpegData(withCompressionQuality: 0.8) { context in
+            UIColor.systemTeal.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 64, height: 64))
+        }
+    }
 
     private static let items: [KidsSignalSummary] = [
         ("Arrumar a cama", "Rafa Silva", "2026-10-27T10:00:00.000Z", true),
