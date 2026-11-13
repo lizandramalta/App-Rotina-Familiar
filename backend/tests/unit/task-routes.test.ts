@@ -5,6 +5,7 @@ import {
   TaskAlreadyCompletedError,
   TaskManagementNotAllowedError,
 } from '../../src/modules/tasks/domain/task-errors.js';
+import { NotFoundError } from '../../src/shared/domain/domain-error.js';
 import { MissionReopenRequiresConfirmationError } from '../../src/modules/tasks/domain/task-reopening-errors.js';
 import { buildTestApp, TEST_ACTOR, type TestApp } from '../support/build-test-app.js';
 
@@ -274,6 +275,41 @@ describe('Task routes — SPEC-007 phases 1 and 2', () => {
 
     expect(response.statusCode).toBe(200);
     expect(test.getTask.execute).toHaveBeenCalledWith(TEST_ACTOR, TASK_ID);
+  });
+
+  it('SCRUM-120 / SPEC-011 CA-10 maps a task unavailable to Kids to RESOURCE_NOT_FOUND', async () => {
+    test.getTask.execute.mockRejectedValue(new NotFoundError('Task not found.'));
+
+    const response = await test.app.inject({
+      method: 'GET',
+      url: `/v1/tasks/${TASK_ID}`,
+      headers: AUTH,
+    });
+
+    expect(response.statusCode).toBe(404);
+    expect(response.json()).toMatchObject({ code: 'RESOURCE_NOT_FOUND', status: 404 });
+  });
+
+  it('SCRUM-120 / SPEC-011 CA-10 requires an active session to read a task', async () => {
+    const response = await test.app.inject({ method: 'GET', url: `/v1/tasks/${TASK_ID}` });
+
+    expect(response.statusCode).toBe(401);
+    expect(test.getTask.execute).not.toHaveBeenCalled();
+  });
+
+  it('SCRUM-120 / SPEC-011 CA-10 documents the secured task detail route in OpenAPI', async () => {
+    const response = await test.app.inject({ method: 'GET', url: '/docs/json' });
+    const document = response.json() as {
+      paths: Record<
+        string,
+        { get?: { security?: unknown[]; responses?: Record<string, unknown> } }
+      >;
+    };
+    const operation = document.paths['/v1/tasks/{taskId}']?.get;
+    expect(operation?.security).toEqual([{ bearerAuth: [] }]);
+    for (const status of ['200', '401', '404']) {
+      expect(operation?.responses).toHaveProperty(status);
+    }
   });
 
   it('SCRUM-40 completes a task without accepting actor or credit data from the client', async () => {

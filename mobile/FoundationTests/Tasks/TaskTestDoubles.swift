@@ -47,6 +47,8 @@ final class TaskRepositorySpy: TaskRepository, @unchecked Sendable {
     private let lock = NSLock()
     private var createResult: Result<FamilyTask, Error>
     private var taskResult: Result<FamilyTask, Error>
+    /// Per-id answers for `task(id:)`; ids not listed fall back to `taskResult`.
+    private let taskResultsByID: [UUID: Result<FamilyTask, Error>]
     private var updateResult: Result<FamilyTask, Error>
     private var deleteResult: Result<UUID, Error>
     private var completeResult: Result<FamilyTask, Error>
@@ -86,10 +88,12 @@ final class TaskRepositorySpy: TaskRepository, @unchecked Sendable {
             DailyProgress(total: 0, completed: 0, percentage: nil, familyCreatedAt: "2020-01-01")
         ),
         reopenResult: Result<FamilyTask, Error> = .success(taskRepositorySpyFixture),
-        completionGate: TaskRequestGate? = nil
+        completionGate: TaskRequestGate? = nil,
+        taskResultsByID: [UUID: Result<FamilyTask, Error>] = [:]
     ) {
         self.createResult = createResult
         self.taskResult = taskResult
+        self.taskResultsByID = taskResultsByID
         self.updateResult = updateResult
         self.deleteResult = deleteResult
         self.completeResult = completeResult
@@ -108,7 +112,7 @@ final class TaskRepositorySpy: TaskRepository, @unchecked Sendable {
 
     func task(id: UUID, accessToken: String) async throws -> FamilyTask {
         lock.withLock { _taskCalls.append(id) }
-        return try taskResult.get()
+        return try (taskResultsByID[id] ?? taskResult).get()
     }
 
     func updateTask(_ command: UpdateTaskCommand, accessToken: String) async throws -> FamilyTask {

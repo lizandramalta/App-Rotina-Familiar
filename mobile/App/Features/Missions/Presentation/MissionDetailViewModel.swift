@@ -135,7 +135,12 @@ final class MissionDetailViewModel {
 
     private func resolveOwnTaskIDs(in detail: MissionDetail) async -> Set<UUID> {
         do {
-            let tasks = try await hydrateLinkedTasks.execute(taskIDs: detail.tasks.map(\.id), accessToken: accessToken)
+            // A linked task the actor cannot read is simply not theirs (SPEC-011 CA-10).
+            let tasks = try await hydrateLinkedTasks.execute(
+                taskIDs: detail.tasks.map(\.id),
+                accessToken: accessToken,
+                skippingUnavailable: true
+            )
             return Set(tasks.filter { $0.assigneeIDs.contains(currentMemberID) }.map(\.id))
         } catch {
             // Conservative fallback (decisão E-1): content stays visible, rows become non-tappable.
