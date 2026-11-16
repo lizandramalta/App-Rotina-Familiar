@@ -395,7 +395,7 @@ struct FamilyOverviewView: View {
         NavigationLink {
             if let queue = viewModel.makeKidsReviewQueue() {
                 KidsReviewQueueView(viewModel: queue)
-                    .toolbar(.hidden, for: .tabBar)
+                    .hidesAppTabBar()
             }
         } label: {
             HStack(spacing: 12) {

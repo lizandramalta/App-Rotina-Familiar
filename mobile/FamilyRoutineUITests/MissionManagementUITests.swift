@@ -187,7 +187,7 @@ final class MissionManagementUITests: XCTestCase {
     /// The tab bar belongs to each tab's root route only; pushed screens hide it.
     func testTabBarOnlyOnRootRoute() {
         launch()
-        let missionsTab = app.tabBars.buttons["Missões"]
+        let missionsTab = app.descendants(matching: .any)["app.tab_bar"].buttons["Missões"]
         let inProgress = row(inProgressMissionID)
         XCTAssertTrue(inProgress.waitForExistence(timeout: 5))
         XCTAssertTrue(missionsTab.exists, "root route shows the tab bar")
@@ -202,8 +202,8 @@ final class MissionManagementUITests: XCTestCase {
 
     func testKidsMissionDetailHidesTabBar() {
         launch(scenario: "mission-management-kids")
-        // Scoped to the tab bar: the detail's back button also reads "Missões e conquistas".
-        let kidsTab = app.tabBars.buttons["Missões e conquistas"]
+        // Scoped to the floating Kids tab bar (TEL-040 label "Missões").
+        let kidsTab = app.descendants(matching: .any)["app.tab_bar"].buttons["Missões"]
         let inProgress = row(inProgressMissionID)
         XCTAssertTrue(inProgress.waitForExistence(timeout: 5))
         XCTAssertTrue(kidsTab.exists)

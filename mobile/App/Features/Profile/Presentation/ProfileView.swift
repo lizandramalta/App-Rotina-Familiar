@@ -35,7 +35,7 @@ struct ProfileView: View {
         .navigationDestination(item: $viewModel.selectedBadgeForDetail) { item in
             if let detailViewModel = viewModel.makeBadgeDetailViewModel(for: item) {
                 BadgeDetailView(viewModel: detailViewModel)
-                    .toolbar(.hidden, for: .tabBar)
+                    .hidesAppTabBar()
             }
         }
         .sheet(isPresented: $viewModel.isShowingLeaveAdminPlaceholder) { leaveAdministrationConfirmation }

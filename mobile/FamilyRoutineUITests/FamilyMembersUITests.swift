@@ -83,7 +83,7 @@ final class FamilyMembersUITests: XCTestCase {
         allTasks.tap()
 
         XCTAssertTrue(app.staticTexts["Tarefas da família"].waitForExistence(timeout: 5))
-        XCTAssertFalse(app.tabBars.firstMatch.exists, "TEL-011 is a full-screen destination")
+        XCTAssertFalse(app.descendants(matching: .any)["app.tab_bar"].exists, "TEL-011 is a full-screen destination")
         XCTAssertTrue(app.buttons["family.tasks.member.all"].exists)
         XCTAssertTrue(app.staticTexts["PENDENTES · 3"].exists)
         XCTAssertTrue(app.staticTexts["AGUARDANDO CONFIRMAÇÃO · 1"].exists)
@@ -248,7 +248,7 @@ final class FamilyMembersUITests: XCTestCase {
         XCTAssertTrue(memberRings.firstMatch.waitForExistence(timeout: 5))
         memberRings.matching(NSPredicate(format: "label CONTAINS 'Rafa Silva'")).firstMatch.tap()
         XCTAssertTrue(app.staticTexts["family.member.detail.name"].waitForExistence(timeout: 5))
-        XCTAssertFalse(app.tabBars.firstMatch.exists, "TEL-032 is a full-screen destination")
+        XCTAssertFalse(app.descendants(matching: .any)["app.tab_bar"].exists, "TEL-032 is a full-screen destination")
     }
 
     func testMemberDetailSwitchesDayAndWeekAndKeepsFamilyNavigationSeparate() {
@@ -257,7 +257,7 @@ final class FamilyMembersUITests: XCTestCase {
         XCTAssertTrue(memberRings.firstMatch.waitForExistence(timeout: 5))
         memberRings.matching(NSPredicate(format: "label CONTAINS 'Rafa Silva'")).firstMatch.tap()
         XCTAssertTrue(app.staticTexts["family.member.detail.name"].waitForExistence(timeout: 5))
-        XCTAssertFalse(app.tabBars.firstMatch.exists, "TEL-032 is a full-screen destination")
+        XCTAssertFalse(app.descendants(matching: .any)["app.tab_bar"].exists, "TEL-032 is a full-screen destination")
         let period = app.segmentedControls["family.member.detail.period"]
         XCTAssertTrue(period.waitForExistence(timeout: 5))
         XCTAssertTrue(period.buttons["Dia"].isSelected)

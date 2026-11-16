@@ -29,7 +29,7 @@ struct BadgeDetailView: View {
         .task { await viewModel.load() }
         .navigationDestination(item: $viewModel.selectedMission) { mission in
             missionPlaceholder(mission)
-                .toolbar(.hidden, for: .tabBar)
+                .hidesAppTabBar()
         }
     }
 

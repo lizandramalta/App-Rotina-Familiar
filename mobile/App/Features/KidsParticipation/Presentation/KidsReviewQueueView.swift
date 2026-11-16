@@ -50,7 +50,7 @@ struct KidsReviewQueueView: View {
                         KidsSignalDetailView(viewModel: viewModel.makeDetailViewModel(id: item.id)) {
                             Task { await viewModel.load() }
                         }
-                        .toolbar(.hidden, for: .tabBar)
+                        .hidesAppTabBar()
                     } label: {
                         row(item)
                     }

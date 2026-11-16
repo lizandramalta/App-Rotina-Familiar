@@ -25,23 +25,28 @@ struct AuthenticatedHomeView: View {
         return false
         #endif
     }()
-    @State private var selectedTab: Int = {
+    @State private var selectedTab: AppTabItem = {
         #if DEBUG
         let scenario = ProcessInfo.processInfo.environment["UI_TEST_SCENARIO"]
         if scenario == "family-settings" || scenario == "family-overview" || scenario == "family-overview-incentives" || scenario == "family-overview-own-most-tasks" || scenario == "family-overview-member" || scenario == "family-tasks" || scenario == "member-invite" || scenario == "member-invite-uncertain" || scenario == "kids-review-queue" || scenario == "kids-review-queue-empty" || scenario == "kids-review-queue-failure" {
-            return 1
+            return .family
         }
         if scenario == "mission-management" || scenario == "mission-management-member" || scenario == "mission-tracking-refresh-failure"
             || scenario == "mission-reward" || scenario == "mission-reward-conflict"
-            || scenario == "reward-management" || scenario == "reward-management-empty" || scenario == "reward-management-member" {
-            return 2
-        }
-        if scenario == "mission-management-kids" {
-            return 1
+            || scenario == "reward-management" || scenario == "reward-management-empty" || scenario == "reward-management-member"
+            || scenario == "mission-management-kids" {
+            return .missions
         }
         #endif
-        return 0
+        return .tasks
     }()
+    /// Tabs are built on first visit (like the native `TabView`) and then kept alive so each
+    /// tab's navigation stack survives tab switches.
+    @State private var visitedTabs: Set<AppTabItem> = []
+    /// One tracker per tab: a pushed screen hides the floating tab bar only for its own tab.
+    @State private var tabBarVisibility: [AppTabItem: AppTabBarVisibility] = Dictionary(
+        uniqueKeysWithValues: AppTabItem.allCases.map { ($0, AppTabBarVisibility()) }
+    )
 
     init(
         session: ActiveFamilySession,
@@ -67,97 +72,90 @@ struct AuthenticatedHomeView: View {
 
     private var role: MemberRole { session.role }
 
+    private var tabs: [AppTabItem] { role == .kid ? KidsTabBar.items : AppTabItem.allCases }
+
+    private var isTabBarHidden: Bool { tabBarVisibility[selectedTab]?.isHidden ?? false }
+
     var body: some View {
-        TabView(selection: $selectedTab) {
-            if role == .kid {
-                Group {
-                    if let kidsTasksTabView {
-                        kidsTasksTabView
-                    } else {
-                        destination("destination.myTasks", icon: "checklist", identifier: "access.destination.kids", showsProfileButton: true)
-                    }
+        ZStack {
+            ForEach(tabs) { tab in
+                if visitedTabs.contains(tab) || tab == selectedTab {
+                    let isActive = tab == selectedTab
+                    tabContent(tab)
+                        .environment(tabBarVisibility[tab])
+                        .opacity(isActive ? 1 : 0)
+                        .allowsHitTesting(isActive)
+                        .accessibilityHidden(!isActive)
                 }
-                .tabItem {
-                    Label {
-                        Text("destination.myTasks")
-                    } icon: {
-                        Image(systemName: "checklist")
-                    }
+            }
+        }
+        // Floating bar only on tab root routes; the inset also lifts root scroll content above it.
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if !isTabBarHidden {
+                tabBar
+                    .padding(.horizontal, AppSpacing.lg)
+                    .padding(.bottom, AppSpacing.sm)
+            }
+        }
+        .background(Color.App.Background.app.ignoresSafeArea())
+        .id(role)
+        .onChange(of: selectedTab, initial: true) { _, tab in
+            visitedTabs.insert(tab)
+        }
+        .onChange(of: recognitionRouter?.pendingRecognitionID, initial: true) { _, pending in
+            if pending != nil { selectedTab = .tasks }
+        }
+    }
+
+    @ViewBuilder
+    private var tabBar: some View {
+        if role == .kid {
+            KidsTabBar(selectedTab: $selectedTab)
+        } else {
+            AppTabBar(selectedTab: $selectedTab)
+        }
+    }
+
+    @ViewBuilder
+    private func tabContent(_ tab: AppTabItem) -> some View {
+        if role == .kid {
+            switch tab {
+            case .missions:
+                if let kidsMissionsTabView {
+                    kidsMissionsTabView
+                } else {
+                    destination("destination.missions", icon: "star", identifier: "access.destination.kids.missions", showsProfileButton: true)
                 }
-                .tag(0)
-                Group {
-                    if let kidsMissionsTabView {
-                        kidsMissionsTabView
-                    } else {
-                        destination("destination.missions", icon: "star", identifier: "access.destination.kids.missions", showsProfileButton: true)
-                    }
+            default:
+                if let kidsTasksTabView {
+                    kidsTasksTabView
+                } else {
+                    destination("destination.myTasks", icon: "checklist", identifier: "access.destination.kids", showsProfileButton: true)
                 }
-                .tabItem {
-                    Label {
-                        Text("destination.missions")
-                    } icon: {
-                        Image(systemName: "flag")
-                    }
+            }
+        } else {
+            switch tab {
+            case .tasks:
+                if let myTasksTab {
+                    myTasksTab
+                } else {
+                    destination("destination.myTasks", icon: "checklist", identifier: "access.destination.adult")
                 }
-                .tag(1)
-            } else {
-                Group {
-                    if let myTasksTab {
-                        myTasksTab
-                    } else {
-                        destination("destination.myTasks", icon: "checklist", identifier: "access.destination.adult")
-                    }
-                }
-                .tabItem {
-                    Label {
-                        Text("tasks.adult.title")
-                    } icon: {
-                        Image(systemName: "checklist")
-                    }
-                }
-                .tag(0)
+            case .family:
                 familyDestination()
-                    .tabItem {
-                        Label {
-                            Text("destination.family")
-                        } icon: {
-                            Image(systemName: "person.2")
-                        }
-                    }
-                    .tag(1)
-                Group {
-                    if let missionsTab {
-                        missionsTab
-                    } else {
-                        destination("destination.missions", icon: "star", identifier: "access.destination.missions")
-                    }
+            case .missions:
+                if let missionsTab {
+                    missionsTab
+                } else {
+                    destination("destination.missions", icon: "star", identifier: "access.destination.missions")
                 }
-                .tabItem {
-                    Label {
-                        Text("tasks.adult.missionsTab")
-                    } icon: {
-                        Image(systemName: "flag")
-                    }
-                }
-                .tag(2)
+            case .profile:
                 NavigationStack {
                     ProfileView(viewModel: profileViewModel)
                         .accessibilityElement(children: .contain)
                         .accessibilityIdentifier("access.destination.profile")
                 }
-                .tabItem {
-                    Label {
-                        Text("tasks.adult.profileTab")
-                    } icon: {
-                        Image(systemName: "person")
-                    }
-                }
             }
-        }
-        .tint(Color.primary)
-        .id(role)
-        .onChange(of: recognitionRouter?.pendingRecognitionID, initial: true) { _, pending in
-            if pending != nil { selectedTab = 0 }
         }
     }
 
@@ -165,7 +163,7 @@ struct AuthenticatedHomeView: View {
         NavigationLink {
             // Pushed here (root of the adult Profile tab only), so the tab bar hides.
             ProfileView(viewModel: profileViewModel)
-                .toolbar(.hidden, for: .tabBar)
+                .hidesAppTabBar()
         } label: {
             Image(systemName: "person.crop.circle")
                 .font(.title2)
@@ -207,12 +205,12 @@ struct AuthenticatedHomeView: View {
             .navigationDestination(for: FamilyNavigationRoute.self) { route in
                 // Tab bar only on each tab's root route; every pushed screen hides it.
                 familyTaskDestination(route)
-                    .toolbar(.hidden, for: .tabBar)
+                    .hidesAppTabBar()
             }
             .navigationDestination(isPresented: $showsFamilySettingsScenario) {
                 if let makeFamilySettingsViewModel {
                     FamilySettingsView(viewModel: makeFamilySettingsViewModel())
-                        .toolbar(.hidden, for: .tabBar)
+                        .hidesAppTabBar()
                 }
             }
         }
