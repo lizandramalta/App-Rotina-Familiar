@@ -1,7 +1,10 @@
 import SwiftUI
 
 /// TEL-016 — inspect a current Kids signal and explicitly confirm or reject it.
+/// UX-013 §4 / SCRUM-117: once the signal is confirmed as resolved — by this decision, a late
+/// `applied: false` decision or a `404` for a signal someone else settled — it returns to TEL-015 on its own.
 struct KidsSignalDetailView: View {
+    @Environment(\.dismiss) private var dismiss
     @State private var viewModel: KidsSignalDetailViewModel
     let onResolved: () -> Void
 
@@ -59,13 +62,14 @@ struct KidsSignalDetailView: View {
                     Button("kidsReview.queue.retry") { Task { await viewModel.load() } }
                 }
             }
-            if viewModel.resolved {
-                ContentUnavailableView("kidsReview.detail.resolved", systemImage: "checkmark.shield")
-            }
         }
         .navigationTitle("kidsReview.detail.title")
         .navigationBarTitleDisplayMode(.inline)
         .task { await viewModel.load() }
-        .onChange(of: viewModel.resolved) { _, resolved in if resolved { onResolved() } }
+        .onChange(of: viewModel.resolved) { _, resolved in
+            guard resolved else { return }
+            dismiss()
+            onResolved()
+        }
     }
 }

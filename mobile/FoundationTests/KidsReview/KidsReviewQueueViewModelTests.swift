@@ -134,6 +134,48 @@ struct KidsReviewQueueViewModelTests {
         #expect(!viewModel.loadMoreFailed)
         #expect(viewModel.items == [first, second])
     }
+
+    @Test("UX-013 §4 / SCRUM-117 a resolved signal leaves the queue at once and the others stay in order")
+    func removesResolvedSignal() async {
+        let first = signal("A")
+        let second = signal("B")
+        let third = signal("C")
+        let (viewModel, _) = makeViewModel([.success(KidsReviewQueuePage(items: [first, second, third], nextCursor: nil))])
+        await viewModel.load()
+
+        viewModel.removeResolved(id: second.id)
+
+        #expect(viewModel.viewState == .content)
+        #expect(viewModel.items == [first, third])
+    }
+
+    @Test("UX-013 §4 / SCRUM-117 resolving the last signal shows the empty queue")
+    func resolvingLastSignalShowsEmpty() async {
+        let only = signal("A")
+        let (viewModel, _) = makeViewModel([.success(KidsReviewQueuePage(items: [only], nextCursor: nil))])
+        await viewModel.load()
+
+        viewModel.removeResolved(id: only.id)
+
+        #expect(viewModel.viewState == .empty)
+    }
+
+    @Test("UX-013 §4 / SCRUM-117 a failed reload after a decision never brings the resolved signal back")
+    func failedReloadKeepsResolvedSignalOut() async {
+        let first = signal("A")
+        let second = signal("B")
+        let (viewModel, _) = makeViewModel([
+            .success(KidsReviewQueuePage(items: [first, second], nextCursor: nil)),
+            .failure(KidsSignalError.network),
+        ])
+        await viewModel.load()
+
+        viewModel.removeResolved(id: first.id)
+        await viewModel.load()
+
+        #expect(viewModel.viewState == .content)
+        #expect(viewModel.items == [second])
+    }
 }
 
 final class KidsSignalRepositorySpy: KidsSignalRepository, @unchecked Sendable {

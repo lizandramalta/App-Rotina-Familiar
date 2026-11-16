@@ -35,6 +35,7 @@ enum UITestScenario: String {
     case kidsReviewQueue = "kids-review-queue"
     case kidsReviewQueueEmpty = "kids-review-queue-empty"
     case kidsReviewQueueFailure = "kids-review-queue-failure"
+    case kidsReviewQueueStale = "kids-review-queue-stale"
     case taskCompletionMember = "task-completion-member"
     case taskCompletionConflict = "task-completion-conflict"
     case taskOptimisticDelayed = "task-optimistic-delayed"
@@ -132,7 +133,7 @@ enum UITestScenario: String {
             )))
             return
         }
-        if [.familyOverview, .familyOverviewIncentives, .memberInvite, .memberInviteUncertain, .kidsReviewQueue, .kidsReviewQueueEmpty, .kidsReviewQueueFailure].contains(self) {
+        if [.familyOverview, .familyOverviewIncentives, .memberInvite, .memberInviteUncertain, .kidsReviewQueue, .kidsReviewQueueEmpty, .kidsReviewQueueFailure, .kidsReviewQueueStale].contains(self) {
             sessionStore.apply(.session(Self.inviteSession(role: .administrator)))
             return
         }
@@ -1117,13 +1118,21 @@ private enum UITestMissionFixtures {
 }
 
 /// Deterministic queue for TEL-015 (SPEC-013): three pending signals, oldest first, an empty queue or a failing load.
-private struct UITestKidsSignalRepository: KidsSignalRepository {
-    let scenario: UITestScenario
+/// Decisions are remembered so the queue and detail stop listing a decided signal (UX-013 §4, SCRUM-117).
+/// `kidsReviewQueueStale` first lists the oldest signal although another Administrator already settled it:
+/// its detail answers `404`, and the next queue read no longer includes it, as the backend does.
+private actor UITestKidsSignalRepository: KidsSignalRepository {
+    private let scenario: UITestScenario
+    private var decidedIDs: Set<UUID> = []
+
+    init(scenario: UITestScenario) {
+        self.scenario = scenario
+    }
 
     func getReviewQueue(accessToken: String, cursor: String?) async throws -> KidsReviewQueuePage {
         switch scenario {
-        case .kidsReviewQueue:
-            return KidsReviewQueuePage(items: Self.items, nextCursor: nil)
+        case .kidsReviewQueue, .kidsReviewQueueStale:
+            return KidsReviewQueuePage(items: Self.items.filter { !decidedIDs.contains($0.id) }, nextCursor: nil)
         case .kidsReviewQueueFailure:
             throw KidsSignalError.network
         default:
@@ -1132,15 +1141,22 @@ private struct UITestKidsSignalRepository: KidsSignalRepository {
     }
 
     func getSignalDetail(id: UUID, accessToken: String) async throws -> KidsSignalDetail {
-        guard let item = Self.items.first(where: { $0.id == id }) else { throw KidsSignalError.notFound }
+        if scenario == .kidsReviewQueueStale, id == Self.items.first?.id {
+            decidedIDs.insert(id)
+            throw KidsSignalError.notFound
+        }
+        guard !decidedIDs.contains(id), let item = Self.items.first(where: { $0.id == id }) else {
+            throw KidsSignalError.notFound
+        }
         return KidsSignalDetail(id: id, taskID: item.taskID, taskTitle: item.taskTitle,
                                 childName: item.childName, signaledAt: item.signaledAt,
                                 assignees: [item.childName], photoMediaID: nil)
     }
 
     func decideSignal(id: UUID, decision: KidsReviewDecision, accessToken: String) async throws -> KidsDecisionResult {
-        KidsDecisionResult(taskStatus: decision == .confirm ? .completed : .pending,
-                           outcome: decision == .confirm ? "confirmed" : "rejected", applied: true)
+        decidedIDs.insert(id)
+        return KidsDecisionResult(taskStatus: decision == .confirm ? .completed : .pending,
+                                  outcome: decision == .confirm ? "confirmed" : "rejected", applied: true)
     }
 
     func getSignalPhoto(mediaID: UUID, accessToken: String) async throws -> Data { Data() }
