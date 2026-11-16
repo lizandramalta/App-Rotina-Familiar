@@ -63,10 +63,14 @@ nonisolated struct AppTypography: Equatable, Sendable {
     static let note = AppTypography(size: 13, weight: .regular, design: .default, lineHeightMultiple: nil)
     static let noteStrong = AppTypography(size: 13, weight: .bold, design: .default, lineHeightMultiple: nil)
     static let caption = AppTypography(size: 12, weight: .regular, design: .default, lineHeightMultiple: nil)
+    static let captionStrong = AppTypography(size: 12, weight: .bold, design: .default, lineHeightMultiple: nil)
 
     // Numbers — Sour Gummy
     static let numberLarge = AppTypography(
         size: 44, weight: .medium, design: .rounded, lineHeightMultiple: nil, fontName: sourGummyFontName
+    )
+    static let numberMedium = AppTypography(
+        size: 28, weight: .medium, design: .rounded, lineHeightMultiple: nil, fontName: sourGummyFontName
     )
     static let number = AppTypography(
         size: 22, weight: .medium, design: .rounded, lineHeightMultiple: nil, fontName: sourGummyFontName
@@ -74,8 +78,8 @@ nonisolated struct AppTypography: Equatable, Sendable {
 
     static let allRoles: [AppTypography] = [
         .titleLarge, .title1, .title2, .title3, .cardTitle,
-        .body, .bodyStrong, .subtitle, .subtitleStrong, .note, .noteStrong, .caption,
-        .numberLarge, .number,
+        .body, .bodyStrong, .subtitle, .subtitleStrong, .note, .noteStrong, .caption, .captionStrong,
+        .numberLarge, .numberMedium, .number,
     ]
 }
 

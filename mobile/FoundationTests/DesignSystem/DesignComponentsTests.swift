@@ -60,13 +60,13 @@ struct DesignComponentsTests {
 
         #expect(DayCarouselState.today.backgroundColor == .clear)
         #expect(DayCarouselState.today.weekdayColor == Color.App.Text.secondary)
-        #expect(DayCarouselState.today.numberColor == Color.App.Status.completed)
+        #expect(DayCarouselState.today.numberColor == Color.App.Action.primary)
 
-        #expect(DayCarouselState.selected.backgroundColor == Color.App.System.dimming)
+        #expect(DayCarouselState.selected.backgroundColor == Color.App.Action.primary)
         #expect(DayCarouselState.selected.weekdayColor == Color.App.Text.onAction)
         #expect(DayCarouselState.selected.numberColor == Color.App.Text.onAction)
 
-        #expect(DayCarouselState.todaySelected.backgroundColor == Color.App.Status.completed)
+        #expect(DayCarouselState.todaySelected.backgroundColor == Color.App.Action.primary)
         #expect(DayCarouselState.todaySelected.weekdayColor == Color.App.Text.onAction)
         #expect(DayCarouselState.todaySelected.numberColor == Color.App.Text.onAction)
     }
@@ -133,6 +133,74 @@ struct DesignComponentsTests {
         tabBar.select(tab)
 
         #expect(store.tab == tab)
+    }
+
+    // MARK: KidsTabBar
+
+    @Test("Kids tab bar shows only Tarefas and Missões with the Figma icons")
+    func kidsTabItems() {
+        #expect(KidsTabBar.items == [.tasks, .missions])
+        #expect(KidsTabBar.items.map(\.title) == ["Tarefas", "Missões"])
+        #expect(KidsTabBar.items.map { $0.iconAssetName(isSelected: true) }
+            == ["TabBarTasksActive", "TabBarMissionsActive"])
+        #expect(KidsTabBar.items.map { $0.iconAssetName(isSelected: false) }
+            == ["TabBarTasksInactive", "TabBarMissionsInactive"])
+    }
+
+    @Test("Kids tab bar matches the TEL-040 geometry")
+    func kidsTabGeometry() {
+        #expect(KidsTabBar.itemWidth == 176)
+        #expect(KidsTabBar.iconSize == 26)
+        #expect(KidsTabBar.itemCornerRadius == 34)
+        #expect(KidsTabBar.capsuleCornerRadius == 40)
+        #expect(KidsTabBar.capsulePadding == 6)
+    }
+
+    @Test("Kids active tab is highlighted and selected; inactive tab is a plain button")
+    func kidsTabAppearance() {
+        let active = KidsTabBar.ItemAppearance(isSelected: true)
+        let inactive = KidsTabBar.ItemAppearance(isSelected: false)
+
+        #expect(active.backgroundColor == Color.App.Background.cardHighlight)
+        #expect(inactive.backgroundColor == .clear)
+        #expect(active.foregroundColor == Color.App.Text.primary)
+        #expect(inactive.foregroundColor == Color.App.Text.primary)
+        #expect(active.font == Font.app(.noteStrong))
+        #expect(inactive.font == Font.app(.noteStrong))
+        #expect(active.accessibilityTraits.contains(.isButton))
+        #expect(active.accessibilityTraits.contains(.isSelected))
+        #expect(inactive.accessibilityTraits.contains(.isButton))
+        #expect(!inactive.accessibilityTraits.contains(.isSelected))
+    }
+
+    @Test("selecting a Kids tab writes through the binding", arguments: KidsTabBar.items)
+    func kidsTabSelectionUpdatesBinding(tab: AppTabItem) {
+        let store = SelectionStore()
+        let tabBar = KidsTabBar(selectedTab: Binding(get: { store.tab ?? .tasks }, set: { store.tab = $0 }))
+
+        tabBar.select(tab)
+
+        #expect(store.tab == tab)
+    }
+
+    // MARK: AppTabBarVisibility
+
+    @Test("tab bar hides while any pushed screen is on screen and returns after the last pop")
+    func tabBarVisibilityCounts() {
+        let visibility = AppTabBarVisibility()
+        #expect(!visibility.isHidden)
+
+        visibility.push()
+        visibility.push()
+        #expect(visibility.isHidden)
+
+        visibility.pop()
+        #expect(visibility.isHidden)
+        visibility.pop()
+        #expect(!visibility.isHidden)
+
+        visibility.pop()
+        #expect(visibility.hiddenRequests == 0)
     }
 
     // MARK: ChalkStroke

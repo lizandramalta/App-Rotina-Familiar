@@ -136,7 +136,7 @@ Cores de identificação individual e trilhas de progresso:
 ---
 
 ### 3.2 Tipografia (`AppTypography` / `Font.app`)
-A escala tipográfica possui 14 papéis funcionais. O aplicativo utiliza a fonte oficial `Sour Gummy` empacotada no projeto (`UIAppFonts`) e fallbacks nativos correspondentes:
+A escala tipográfica possui 16 papéis funcionais (regra de consolidação do nó Figma `960:25`). O aplicativo utiliza a fonte oficial `Sour Gummy` empacotada no projeto (`UIAppFonts`) e fallbacks nativos correspondentes:
 - **Títulos:** Fonte pretendida `Source Serif 4` → fallback nativo `Font.Design.serif`.
 - **Textos de interface:** Fonte pretendida `Nunito` → fallback nativo `Font.Design.default`.
 - **Números:** Fonte oficial empacotada `Sour Gummy` (`SourGummy.ttf`, peso Medium 500) → fallback nativo `Font.Design.rounded`.
@@ -167,7 +167,9 @@ Text("Descrição da rotina")
 | `.note` | 13 pt | Regular | Default | padrão | Notas de rodapé e orientações. |
 | `.noteStrong` | 13 pt | Bold | Default | padrão | Notas de rodapé em destaque. |
 | `.caption` | 12 pt | Regular | Default | padrão | Legendas de status e datas. |
+| `.captionStrong` | 12 pt | Bold | Default | padrão | Legendas e rótulos curtos em destaque. |
 | `.numberLarge` | 44 pt | Medium | Rounded | padrão | Pontuação e contadores de destaque. |
+| `.numberMedium` | 28 pt | Medium | Rounded | padrão | Contadores intermediários (Sour Gummy). |
 | `.number` | 22 pt | Medium | Rounded | padrão | Contadores diários e progresso. |
 
 ---
