@@ -86,6 +86,33 @@ struct DailyTaskListViewModelTests {
         #expect(viewModel.progress?.completed == 0)
     }
 
+    @Test("TEL-010 hi-fi: completed rows sink to the end, keeping order, as soon as they are toggled")
+    func completedRowsSinkToTheEnd() async {
+        func make(_ title: String, _ status: TaskStatus, id: UUID = UUID()) -> FamilyTask {
+            let base = task(status: status)
+            return FamilyTask(
+                id: id, title: title, weight: base.weight, scheduledDate: base.scheduledDate,
+                assigneeIDs: [], note: nil, status: status, routineID: nil, createdAt: base.createdAt
+            )
+        }
+        let first = make("A", .pending), done = make("B", .completed), last = make("C", .pending)
+        let page = OwnTaskPage(
+            items: [first, done, last].map { OwnTaskListItem(task: $0, displayStatus: $0.status) },
+            nextCursor: nil, familyCreatedAt: Self.familyCreatedAt
+        )
+        let repository = TaskRepositorySpy(
+            completeResult: .success(make("A", .completed, id: first.id)), dailyTasksResult: .success(page),
+            dailyProgressResult: .success(DailyProgress(total: 3, completed: 1, percentage: 33, familyCreatedAt: Self.familyCreatedAt))
+        )
+        let viewModel = makeViewModel(repository: repository)
+        await viewModel.load()
+        #expect(viewModel.items.map(\.task.title) == ["A", "C", "B"])
+
+        viewModel.toggle(viewModel.items[0])
+        #expect(viewModel.items.map(\.task.title) == ["C", "A", "B"], "Optimistic completion moves the row before the reply")
+        await waitForAction(viewModel, taskID: first.id)
+    }
+
     @Test("SPEC-010 CA-04: Member cannot complete a Kids task even when its display status is pending")
     func memberCannotCompleteKidsTaskFromList() async {
         let kidID = UUID()

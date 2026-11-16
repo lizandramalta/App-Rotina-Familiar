@@ -21,7 +21,7 @@ final class TaskManagementUITests: XCTestCase {
         let assignees = app.descendants(matching: .any)["tasks.detail.assignees"]
         XCTAssertTrue(weight.label.contains("P2 - Médio Esforço"), weight.label)
         XCTAssertTrue(assignees.label.contains("Maria Silva"), assignees.label)
-        XCTAssertFalse(app.tabBars.firstMatch.exists)
+        XCTAssertFalse(app.descendants(matching: .any)["app.tab_bar"].exists)
         let attachment = XCTAttachment(screenshot: app.screenshot())
         attachment.name = "TEL-012 task detail"
         attachment.lifetime = .keepAlways

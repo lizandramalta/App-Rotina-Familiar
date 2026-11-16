@@ -844,6 +844,16 @@ private actor UITestTaskRepository: TaskRepository {
                 )
             }
         }
+        // Kids own today's pending task so TEL-041/MOD-011 can be exercised live. "Escovar os
+        // dentes" stays with the other member: TaskReopenUITests CA-05 needs a third-party task.
+        if scenario == .dailyTasksKids || scenario == .dailyTasksKidsApplause,
+           let task = tasks[UITestTaskFixtures.todayPendingTaskID] {
+            tasks[task.id] = FamilyTask(
+                id: task.id, title: task.title, weight: task.weight, scheduledDate: task.scheduledDate,
+                assigneeIDs: [UITestTaskFixtures.kidMemberID], note: task.note, status: task.status,
+                routineID: task.routineID, createdAt: task.createdAt
+            )
+        }
     }
 
     private var role: MemberRole {

@@ -57,7 +57,7 @@ struct MyTasksTabView: View {
             .navigationDestination(for: FamilyTaskRoute.self) { route in
                 // Tab bar only on each tab's root route; every pushed screen hides it.
                 destination(for: route)
-                    .toolbar(.hidden, for: .tabBar)
+                    .hidesAppTabBar()
             }
         }
         .onChange(of: recognition?.notificationRouter.pendingRecognitionID, initial: true) { _, pending in
@@ -136,15 +136,16 @@ struct MyTasksTabView: View {
 
     /// Transient confirmation after creating a task or routine; disappears on its own.
     private var savedToast: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: AppSpacing.md) {
             Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 48))
-                .foregroundStyle(.green)
+                .font(.app(.numberLarge))
+                .foregroundStyle(Color.App.Action.primary)
             Text("tasks.saved.toast")
-                .font(.headline)
+                .font(.app(.cardTitle))
+                .foregroundStyle(Color.App.Text.primary)
         }
-        .padding(28)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 24))
+        .padding(AppSpacing.giant)
+        .appCard()
         .transition(.scale.combined(with: .opacity))
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("tasks.saved.toast")

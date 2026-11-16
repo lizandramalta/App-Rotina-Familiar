@@ -13,65 +13,96 @@ struct MissionReopenConfirmationView: View {
 
     private var isKids: Bool { role == .kid }
 
+    private static let iconDiameter: CGFloat = 52
+
+    private var buttonHeight: CGFloat {
+        isKids ? AppPillButtonStyle.kidsHeight : AppPillButtonStyle.height
+    }
+
     var body: some View {
-        NavigationStack {
-            VStack(alignment: .leading, spacing: 20) {
-                Image(systemName: "arrow.counterclockwise.circle.fill")
-                    .font(.largeTitle)
-                    .foregroundStyle(.orange)
+        ScrollView {
+            VStack(spacing: AppSpacing.xxl) {
+                Image(systemName: "arrow.counterclockwise")
+                    .font(.app(.title2))
+                    .foregroundStyle(Color.App.Action.primary)
+                    .frame(width: Self.iconDiameter, height: Self.iconDiameter)
+                    .background(Color.App.Background.cardHighlight, in: Circle())
                     .accessibilityHidden(true)
 
                 Text(isKids ? "task.reopen.mission_warning_title_kids" : "task.reopen.mission_warning_title")
-                    .font(.headline)
+                    .font(.app(.title2))
+                    .foregroundStyle(Color.App.Text.primary)
+                    .multilineTextAlignment(.center)
                     .accessibilityAddTraits(.isHeader)
                     .accessibilityFocused(isWarningFocused)
 
-                VStack(alignment: .leading, spacing: 12) {
-                    ForEach(prompt.missionsAffected) { mission in
-                        HStack(alignment: .top, spacing: 8) {
-                            Image(systemName: "flag.fill")
-                                .foregroundStyle(.secondary)
-                                .accessibilityHidden(true)
-                            Text(missionBody(for: mission))
+                impacts
+
+                VStack(spacing: AppSpacing.md) {
+                    Button(role: .destructive, action: onConfirm) {
+                        HStack(spacing: AppSpacing.sm) {
+                            if isSubmitting {
+                                ProgressView().tint(Color.App.Text.primary)
+                            }
+                            Text("task.reopen.confirm_button")
                         }
                     }
+                    .buttonStyle(AppPillButtonStyle(
+                        kind: .highlight,
+                        height: buttonHeight,
+                        foreground: Color.App.Text.primary,
+                        font: .app(.body)
+                    ))
+                    .accessibilityIdentifier("task.reopen.mission_warning.confirm")
 
-                    if prompt.hasAcceptedReward {
-                        HStack(alignment: .top, spacing: 8) {
-                            Image(systemName: "gift.fill")
-                                .foregroundStyle(.secondary)
-                                .accessibilityHidden(true)
-                            Text("task.reopen.mission_warning_reward")
-                        }
-                    }
-                }
-
-                Spacer()
-            }
-            .padding()
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("task.reopen.cancel_button", action: onCancel)
-                        .disabled(isSubmitting)
-                        .frame(minWidth: 44, minHeight: isKids ? 56 : 44)
+                    Button("task.reopen.cancel_button", role: .cancel, action: onCancel)
+                        .buttonStyle(AppPillButtonStyle(kind: .highlight, height: buttonHeight))
                         .accessibilityIdentifier("task.reopen.mission_warning.cancel")
                 }
-                ToolbarItem(placement: .confirmationAction) {
-                    if isSubmitting {
-                        ProgressView()
-                    } else {
-                        Button("task.reopen.confirm_button", role: .destructive, action: onConfirm)
-                            .frame(minWidth: 44, minHeight: isKids ? 56 : 44)
-                            .accessibilityIdentifier("task.reopen.mission_warning.confirm")
-                    }
+                .disabled(isSubmitting)
+            }
+            .padding(.horizontal, AppSpacing.xxl)
+            .padding(.top, AppSpacing.giant)
+            .padding(.bottom, AppSpacing.xxl)
+        }
+        .scrollBounceBehavior(.basedOnSize)
+        // Figma 907:24022: white sheet surface.
+        .presentationBackground(Color.App.Background.card)
+        .task {
+            isWarningFocused.wrappedValue = true
+        }
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
+        .interactiveDismissDisabled(isSubmitting)
+    }
+
+    private var impacts: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.md) {
+            ForEach(prompt.missionsAffected) { mission in
+                HStack(alignment: .top, spacing: AppSpacing.sm) {
+                    Image(systemName: "flag.fill")
+                        .accessibilityHidden(true)
+                    Text(missionBody(for: mission))
                 }
             }
-            .task {
-                isWarningFocused.wrappedValue = true
+
+            if prompt.hasAcceptedReward {
+                Rectangle()
+                    .fill(Color.App.Border.separator)
+                    .frame(height: 1)
+                HStack(alignment: .top, spacing: AppSpacing.sm) {
+                    Image(systemName: "gift.fill")
+                        .accessibilityHidden(true)
+                    Text("task.reopen.mission_warning_reward")
+                }
             }
         }
-        .interactiveDismissDisabled(isSubmitting)
+        .font(.app(.subtitle))
+        .foregroundStyle(Color.App.Text.primary)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(AppSpacing.lg)
+        // Figma 907:24030: flat app-background box, no card stroke or shadow.
+        .background(Color.App.Background.app, in: RoundedRectangle(cornerRadius: AppRadius.card))
     }
 
     private func missionBody(for mission: AffectedMission) -> String {

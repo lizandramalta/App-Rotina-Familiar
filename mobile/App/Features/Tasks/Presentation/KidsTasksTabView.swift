@@ -56,17 +56,13 @@ struct KidsTasksTabView: View {
                 onSelectTask: { path.append(.detail($0)) },
                 onCreateTask: {},
                 recognitionEntry: recognitionEntry,
-                onOpenRecognition: { path.append(.weeklyRecognition($0)) }
+                onOpenRecognition: { path.append(.weeklyRecognition($0)) },
+                headerAccessory: AnyView(profileButton)
             )
             .accessibilityIdentifier("access.destination.kids")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    profileButton
-                }
-            }
             .navigationDestination(for: FamilyTaskRoute.self) { route in
+                // TaskDetailView and WeeklyRecognitionView hide the floating tab bar themselves.
                 destination(for: route)
-                    .toolbar(.hidden, for: .tabBar)
             }
         }
         .onChange(of: recognition?.notificationRouter.pendingRecognitionID, initial: true) { _, pending in
@@ -101,16 +97,24 @@ struct KidsTasksTabView: View {
         }
     }
 
+    private static let avatarDiameter: CGFloat = 56
+
     private var profileButton: some View {
         NavigationLink {
             // Pushed here (root of the adult Profile tab only), so the tab bar hides.
             ProfileView(viewModel: profileViewModel)
-                .toolbar(.hidden, for: .tabBar)
+                .hidesAppTabBar()
         } label: {
-            Image(systemName: "person.crop.circle")
-                .font(.title2)
-                .frame(minWidth: 56, minHeight: 56)
+            // Figma "Avatar · abre TEL-030": 56 pt circle; no member photo source yet, so a symbol.
+            Image(systemName: "person.fill")
+                .font(.app(.title2))
+                .foregroundStyle(Color.App.Text.highlight)
+                .frame(width: Self.avatarDiameter, height: Self.avatarDiameter)
+                .background(Circle().fill(Color.App.Background.cardHighlight))
+                .chalkBorder(Circle().inset(by: 0.75), color: Color.App.Border.separator)
+                .contentShape(Circle())
         }
+        .buttonStyle(.plain)
         .accessibilityLabel("kids.home.profile_button")
         .accessibilityIdentifier("kids.home.profile_button")
     }
