@@ -31,7 +31,7 @@ final class WeeklyRecognitionUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Mande para sua família e sugira algo para vocês fazerem juntos."].exists)
 
         // Pushed screen hides the tab bar (screen-map 1.24).
-        XCTAssertFalse(app.tabBars.firstMatch.isHittable)
+        XCTAssertFalse(app.descendants(matching: .any)["app.tab_bar"].exists)
 
         // CA-08: editable, explicit and never declared as sent.
         let message = app.textViews["recognition.message"].exists
