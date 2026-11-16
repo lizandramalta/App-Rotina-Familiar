@@ -462,15 +462,15 @@ private actor UITestFamilyRepository: FamilyRepository {
             return FamilyOverview(
                 range: range ?? FamilyDateRange(startDate: "2026-10-26", endDate: "2026-10-31"),
                 familyCreatedAt: "2026-10-01",
-                progress: FamilyProgress(total: 6, completed: 2, pending: 3, awaitingConfirmation: 1, percentage: 33.3),
+                progress: UITestTaskFixtures.familyListProgress(assignee: nil),
                 members: [
                     FamilyMemberProgress(
                         memberID: UITestTaskFixtures.memberID, name: "Maria Silva", role: .administrator,
-                        progress: FamilyProgress(total: 3, completed: 1, pending: 1, awaitingConfirmation: 1, percentage: 33.3)
+                        progress: UITestTaskFixtures.familyListProgress(assignee: UITestTaskFixtures.memberID)
                     ),
                     FamilyMemberProgress(
                         memberID: UITestTaskFixtures.kidMemberID, name: "Rafa Silva", role: .kid,
-                        progress: FamilyProgress(total: 2, completed: 1, pending: 1, awaitingConfirmation: 0, percentage: 50)
+                        progress: UITestTaskFixtures.familyListProgress(assignee: UITestTaskFixtures.kidMemberID)
                     ),
                 ]
             )
@@ -690,6 +690,24 @@ private enum UITestTaskFixtures {
 
     static func familyListTaskID(_ index: Int) -> UUID {
         UUID(uuidString: String(format: "00000000-0000-0000-0000-%012d", index + 1))!
+    }
+
+    /// SCRUM-119: derives from `familyListTasks` (the fixture `listFamilyTasks` itself filters),
+    /// so the mock `FamilyOverview` can never drift from what the member-filtered list shows —
+    /// a hand-maintained duplicate of these counts was the actual root cause of SCRUM-119.
+    static func familyListProgress(assignee memberID: UUID?) -> FamilyProgress {
+        let matching = familyListTasks.filter { memberID == nil || $0.2.contains(memberID!) }
+        let total = matching.count
+        let completed = matching.count { $0.1 == .completed }
+        let pending = matching.count { $0.1 == .pending }
+        let awaitingConfirmation = matching.count { $0.1 == .awaitingConfirmation }
+        return FamilyProgress(
+            total: total,
+            completed: completed,
+            pending: pending,
+            awaitingConfirmation: awaitingConfirmation,
+            percentage: total == 0 ? nil : Double(completed) / Double(total) * 100
+        )
     }
 }
 

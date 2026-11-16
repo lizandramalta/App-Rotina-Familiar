@@ -114,6 +114,25 @@ final class FamilyMembersUITests: XCTestCase {
         XCTAssertFalse(app.staticTexts["PENDENTES · 3"].exists)
     }
 
+    /// SCRUM-119: the "PENDENTES" header count must match the rows actually listed once filtered
+    /// by a member, including a task shared with someone else — not just the unfiltered total.
+    func testFamilyTasksPendingCountMatchesListedRowsWhenFilteredByMember() {
+        launch("family-tasks")
+        let allTasks = app.buttons["family.overview.progress"]
+        XCTAssertTrue(allTasks.waitForExistence(timeout: 12))
+        allTasks.tap()
+
+        XCTAssertTrue(app.staticTexts["Tarefas da família"].waitForExistence(timeout: 5))
+        // Fixed id from `UITestTaskFixtures.memberID` (App/Testing/UITestScenario.swift).
+        app.buttons["family.tasks.member.00000000-0000-0000-0000-0000000000A1"].tap()
+
+        XCTAssertTrue(app.staticTexts["PENDENTES · 2"].waitForExistence(timeout: 5))
+        let pendingRows = app.buttons.matching(
+            NSPredicate(format: "identifier BEGINSWITH 'family.tasks.row.'")
+        )
+        XCTAssertEqual(pendingRows.count, 3, "own tasks: 2 pending (one exclusive, one shared) + 1 completed")
+    }
+
     func testFamilyFilterSheetsApplyOnlyFromShowTasksButton() {
         // SPEC-009 CA-06/12; UX-009 TEL-050/TEL-011: tapping sheet content does not apply filters.
         launch("family-tasks")
