@@ -8,6 +8,7 @@ final class TaskReopenUITests: XCTestCase {
     /// Fixed ids from `UITestTaskFixtures` (App/Testing/UITestScenario.swift).
     private let missionFreeReopenTaskID = "00000000-0000-0000-0000-0000000000d1"
     private let missionReopenTaskID = "00000000-0000-0000-0000-0000000000d2"
+    private let kidsOwnCompletedTaskID = "00000000-0000-0000-0000-0000000000d3"
 
     private func launchAdult(route: String) {
         app.launchEnvironment["UI_TEST_SCENARIO"] = "daily-tasks"
@@ -72,19 +73,21 @@ final class TaskReopenUITests: XCTestCase {
         XCTAssertGreaterThanOrEqual(confirmButton.frame.height, 44)
     }
 
+    /// SCRUM-124 — routes directly via `UI_TEST_TASK_ROUTE` instead of navigating the day
+    /// carousel: the carousel only renders the current week's buttons in the accessibility
+    /// tree, and `kidsOwnCompletedTaskID`'s fixture date ("3 days ago") fell in the previous
+    /// week's page whenever "today" was Sun/Mon/Tue, failing the day-button lookup. The
+    /// carousel isn't part of CA-04 itself — only reaching the task detail is — so routing
+    /// directly removes the calendar dependency instead of compensating with a conditional
+    /// swipe.
     func testCA04KidsReopensOwnCompletedTask() {
         app.launchEnvironment["UI_TEST_SCENARIO"] = "daily-tasks-kids"
+        app.launchEnvironment["UI_TEST_TASK_ROUTE"] = "detail:\(kidsOwnCompletedTaskID)"
         MainActor.assumeIsolated {
             app.launch()
         }
 
-        XCTAssertTrue(app.staticTexts["Guardar as roupas limpas"].waitForExistence(timeout: 5))
-        let threeDaysAgo = Self.wireString(from: Calendar(identifier: .gregorian).date(byAdding: .day, value: -3, to: Date())!)
-        app.buttons["tasks.daily.day.\(threeDaysAgo)"].tap()
-
         XCTAssertTrue(app.staticTexts["Regar as plantas"].waitForExistence(timeout: 5))
-        app.staticTexts["Regar as plantas"].tap()
-
         XCTAssertTrue(app.buttons["tasks.detail.reopen"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.buttons["tasks.detail.edit"].exists, "Kids never edits a task, even their own (SPEC-007)")
         XCTAssertFalse(app.buttons["tasks.detail.delete"].exists, "Kids never deletes a task, even their own (SPEC-007)")
@@ -123,13 +126,5 @@ final class TaskReopenUITests: XCTestCase {
         // accessibility floor, so not a usability regression — tracked as SCRUM-125.
         XCTAssertGreaterThanOrEqual(cancelButton.frame.height, 55)
         XCTAssertGreaterThanOrEqual(confirmButton.frame.height, 55)
-    }
-
-    private static func wireString(from date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.calendar = Calendar(identifier: .gregorian)
-        formatter.timeZone = .current
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.string(from: date)
     }
 }
