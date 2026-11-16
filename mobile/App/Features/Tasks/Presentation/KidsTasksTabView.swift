@@ -69,6 +69,11 @@ struct KidsTasksTabView: View {
             guard pending != nil, let id = recognition?.notificationRouter.consume() else { return }
             path = [.weeklyRecognition(id)]
         }
+        #if DEBUG
+        .task {
+            seedPathForUITestsIfNeeded()
+        }
+        #endif
     }
 
     @ViewBuilder
@@ -98,6 +103,19 @@ struct KidsTasksTabView: View {
     }
 
     private static let avatarDiameter: CGFloat = 56
+
+    #if DEBUG
+    /// Mirrors `MyTasksTabView`'s hook, so `FamilyRoutineUITests` can reach TEL-012 directly for
+    /// the Kids role too (only `detail:<id>` applies — Kids never creates a task).
+    private func seedPathForUITestsIfNeeded() {
+        guard path.isEmpty, let seed = ProcessInfo.processInfo.environment["UI_TEST_TASK_ROUTE"],
+              seed.hasPrefix("detail:"), let id = UUID(uuidString: String(seed.dropFirst("detail:".count)))
+        else {
+            return
+        }
+        path = [.detail(id)]
+    }
+    #endif
 
     private var profileButton: some View {
         NavigationLink {

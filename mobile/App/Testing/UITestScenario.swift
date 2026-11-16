@@ -815,7 +815,8 @@ private actor UITestTaskRepository: TaskRepository {
                 title: "Alimentar o gato",
                 weight: .medium,
                 scheduledDate: "2026-10-05",
-                assigneeIDs: [UITestTaskFixtures.memberID],
+                // Also assigned to Kids so SCRUM-123's UI tests can reach MOD-006's 56pt layout.
+                assigneeIDs: [UITestTaskFixtures.memberID, UITestTaskFixtures.kidMemberID],
                 note: nil,
                 status: .completed,
                 routineID: nil,
