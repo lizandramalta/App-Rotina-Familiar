@@ -373,13 +373,15 @@ final class DailyTaskListViewModel {
     }
 
     private func publishOptimisticState() {
-        items = serverItems.map { item in
+        let mapped = serverItems.map { item in
             guard let desired = desiredCompleted[item.id], desired != (item.task.status == .completed) else {
                 return item
             }
             let status: TaskStatus = desired ? .completed : .pending
             return OwnTaskListItem(task: Self.withStatus(item.task, status), displayStatus: status)
         }
+        // Completed rows sink to the end, keeping relative order within each group.
+        items = mapped.filter { $0.displayStatus != .completed } + mapped.filter { $0.displayStatus == .completed }
         guard let serverProgress else { return }
         let adjustment = serverItems.reduce(0) { result, item in
             guard let desired = desiredCompleted[item.id], desired != (item.task.status == .completed) else {

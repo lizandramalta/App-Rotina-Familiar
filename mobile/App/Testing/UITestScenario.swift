@@ -463,15 +463,15 @@ private actor UITestFamilyRepository: FamilyRepository {
             return FamilyOverview(
                 range: range ?? FamilyDateRange(startDate: "2026-10-26", endDate: "2026-10-31"),
                 familyCreatedAt: "2026-10-01",
-                progress: FamilyProgress(total: 6, completed: 2, pending: 3, awaitingConfirmation: 1, percentage: 33.3),
+                progress: UITestTaskFixtures.familyListProgress(assignee: nil),
                 members: [
                     FamilyMemberProgress(
                         memberID: UITestTaskFixtures.memberID, name: "Maria Silva", role: .administrator,
-                        progress: FamilyProgress(total: 3, completed: 1, pending: 1, awaitingConfirmation: 1, percentage: 33.3)
+                        progress: UITestTaskFixtures.familyListProgress(assignee: UITestTaskFixtures.memberID)
                     ),
                     FamilyMemberProgress(
                         memberID: UITestTaskFixtures.kidMemberID, name: "Rafa Silva", role: .kid,
-                        progress: FamilyProgress(total: 2, completed: 1, pending: 1, awaitingConfirmation: 0, percentage: 50)
+                        progress: UITestTaskFixtures.familyListProgress(assignee: UITestTaskFixtures.kidMemberID)
                     ),
                 ]
             )
@@ -692,6 +692,24 @@ private enum UITestTaskFixtures {
     static func familyListTaskID(_ index: Int) -> UUID {
         UUID(uuidString: String(format: "00000000-0000-0000-0000-%012d", index + 1))!
     }
+
+    /// SCRUM-119: derives from `familyListTasks` (the fixture `listFamilyTasks` itself filters),
+    /// so the mock `FamilyOverview` can never drift from what the member-filtered list shows —
+    /// a hand-maintained duplicate of these counts was the actual root cause of SCRUM-119.
+    static func familyListProgress(assignee memberID: UUID?) -> FamilyProgress {
+        let matching = familyListTasks.filter { memberID == nil || $0.2.contains(memberID!) }
+        let total = matching.count
+        let completed = matching.count { $0.1 == .completed }
+        let pending = matching.count { $0.1 == .pending }
+        let awaitingConfirmation = matching.count { $0.1 == .awaitingConfirmation }
+        return FamilyProgress(
+            total: total,
+            completed: completed,
+            pending: pending,
+            awaitingConfirmation: awaitingConfirmation,
+            percentage: total == 0 ? nil : Double(completed) / Double(total) * 100
+        )
+    }
 }
 
 /// Deterministic, backend-free double for the `.taskManagement`/`.dailyTasks*` UI scenarios.
@@ -816,7 +834,8 @@ private actor UITestTaskRepository: TaskRepository {
                 title: "Alimentar o gato",
                 weight: .medium,
                 scheduledDate: "2026-10-05",
-                assigneeIDs: [UITestTaskFixtures.memberID],
+                // Also assigned to Kids so SCRUM-123's UI tests can reach MOD-006's 56pt layout.
+                assigneeIDs: [UITestTaskFixtures.memberID, UITestTaskFixtures.kidMemberID],
                 note: nil,
                 status: .completed,
                 routineID: nil,
@@ -844,6 +863,16 @@ private actor UITestTaskRepository: TaskRepository {
                     createdAt: Date(timeIntervalSince1970: 1_782_400_000)
                 )
             }
+        }
+        // Kids own today's pending task so TEL-041/MOD-011 can be exercised live. "Escovar os
+        // dentes" stays with the other member: TaskReopenUITests CA-05 needs a third-party task.
+        if scenario == .dailyTasksKids || scenario == .dailyTasksKidsApplause,
+           let task = tasks[UITestTaskFixtures.todayPendingTaskID] {
+            tasks[task.id] = FamilyTask(
+                id: task.id, title: task.title, weight: task.weight, scheduledDate: task.scheduledDate,
+                assigneeIDs: [UITestTaskFixtures.kidMemberID], note: task.note, status: task.status,
+                routineID: task.routineID, createdAt: task.createdAt
+            )
         }
     }
 
@@ -1150,7 +1179,7 @@ private actor UITestKidsSignalRepository: KidsSignalRepository {
         }
         return KidsSignalDetail(id: id, taskID: item.taskID, taskTitle: item.taskTitle,
                                 childName: item.childName, signaledAt: item.signaledAt,
-                                assignees: [item.childName], photoMediaID: nil)
+                                assignees: [item.childName], photoMediaID: item.hasPhoto ? id : nil)
     }
 
     func decideSignal(id: UUID, decision: KidsReviewDecision, accessToken: String) async throws -> KidsDecisionResult {
@@ -1159,7 +1188,12 @@ private actor UITestKidsSignalRepository: KidsSignalRepository {
                                   outcome: decision == .confirm ? "confirmed" : "rejected", applied: true)
     }
 
-    func getSignalPhoto(mediaID: UUID, accessToken: String) async throws -> Data { Data() }
+    func getSignalPhoto(mediaID: UUID, accessToken: String) async throws -> Data {
+        UIGraphicsImageRenderer(size: CGSize(width: 64, height: 64)).jpegData(withCompressionQuality: 0.8) { context in
+            UIColor.systemTeal.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 64, height: 64))
+        }
+    }
 
     private static let items: [KidsSignalSummary] = [
         ("Arrumar a cama", "Rafa Silva", "2026-10-27T10:00:00.000Z", true),

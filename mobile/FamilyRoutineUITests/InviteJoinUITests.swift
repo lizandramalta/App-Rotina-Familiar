@@ -49,10 +49,11 @@ final class InviteJoinUITests: XCTestCase {
         password.typeText("ABC234")
         app.buttons["invite.join.submit"].tap()
 
-        XCTAssertTrue(app.buttons["Minhas tarefas"].firstMatch.waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["Missões e conquistas"].firstMatch.exists)
-        XCTAssertFalse(app.buttons["Família"].firstMatch.exists)
-        XCTAssertFalse(app.buttons["Meu perfil"].firstMatch.exists)
+        let tabBar = app.descendants(matching: .any)["app.tab_bar"]
+        XCTAssertTrue(tabBar.buttons["Tarefas"].waitForExistence(timeout: 5))
+        XCTAssertTrue(tabBar.buttons["Missões"].exists)
+        XCTAssertFalse(tabBar.buttons["Família"].exists)
+        XCTAssertFalse(tabBar.buttons["Perfil"].exists)
     }
 
     func testCA09AdultSessionShowsAdultDestinations() {
@@ -63,9 +64,10 @@ final class InviteJoinUITests: XCTestCase {
         password.typeText("ABC234")
         app.buttons["invite.join.submit"].tap()
 
-        XCTAssertTrue(app.buttons["Minhas tarefas"].firstMatch.waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["Família"].firstMatch.exists)
-        XCTAssertTrue(app.buttons["Meu perfil"].firstMatch.exists)
+        let tabBar = app.descendants(matching: .any)["app.tab_bar"]
+        XCTAssertTrue(tabBar.buttons["Tarefas"].waitForExistence(timeout: 5))
+        XCTAssertTrue(tabBar.buttons["Família"].exists)
+        XCTAssertTrue(tabBar.buttons["Perfil"].exists)
     }
 
     func testCA08UncertainResultRecoversToKids() {
@@ -76,8 +78,9 @@ final class InviteJoinUITests: XCTestCase {
         password.typeText("ABC234")
         app.buttons["invite.join.submit"].tap()
 
-        XCTAssertTrue(app.buttons["Minhas tarefas"].firstMatch.waitForExistence(timeout: 5))
-        XCTAssertFalse(app.buttons["Família"].firstMatch.exists)
+        let tabBar = app.descendants(matching: .any)["app.tab_bar"]
+        XCTAssertTrue(tabBar.buttons["Tarefas"].waitForExistence(timeout: 5))
+        XCTAssertFalse(tabBar.buttons["Família"].exists)
     }
 
     func testCA08UnavailableRecoveryShowsNeutralGuidance() {

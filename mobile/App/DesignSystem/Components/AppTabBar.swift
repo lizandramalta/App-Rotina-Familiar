@@ -67,6 +67,8 @@ struct AppTabBar: View {
             RoundedRectangle(cornerRadius: Self.capsuleCornerRadius)
                 .strokeBorder(Color.App.Border.separator, lineWidth: 1.5)
         )
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("app.tab_bar")
     }
 
     func select(_ tab: AppTabItem) {
@@ -98,6 +100,37 @@ struct AppTabBar: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(tab.title)
         .accessibilityAddTraits(appearance.accessibilityTraits)
+    }
+}
+
+/// Counts the pushed screens currently on screen inside one tab. The floating tab bar shows
+/// only on tab root routes, so the shell hides it while `isHidden` is true.
+@MainActor
+@Observable
+final class AppTabBarVisibility {
+    private(set) var hiddenRequests = 0
+
+    var isHidden: Bool { hiddenRequests > 0 }
+
+    func push() { hiddenRequests += 1 }
+    func pop() { hiddenRequests = max(0, hiddenRequests - 1) }
+}
+
+private struct HidesAppTabBarModifier: ViewModifier {
+    @Environment(AppTabBarVisibility.self) private var visibility: AppTabBarVisibility?
+
+    func body(content: Content) -> some View {
+        content
+            .onAppear { visibility?.push() }
+            .onDisappear { visibility?.pop() }
+    }
+}
+
+extension View {
+    /// Marks a pushed destination: the floating tab bar stays hidden while it is on screen
+    /// (replaces `.toolbar(.hidden, for: .tabBar)` of the former native `TabView`).
+    func hidesAppTabBar() -> some View {
+        modifier(HidesAppTabBarModifier())
     }
 }
 

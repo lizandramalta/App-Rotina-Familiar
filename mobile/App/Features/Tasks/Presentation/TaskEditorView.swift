@@ -40,16 +40,29 @@ struct TaskEditorView: View {
         Group {
             if viewModel.isLoading {
                 ProgressView()
+                    .tint(Color.App.Text.secondary)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if viewModel.loadFailed {
                 ContentUnavailableView {
                     Label("tasks.detail.load_error", systemImage: "exclamationmark.triangle")
+                        .font(.app(.title3))
+                        .foregroundStyle(Color.App.Text.primary)
                 } actions: {
-                    Button("Tentar novamente") { Task { await viewModel.load() } }
+                    Button { Task { await viewModel.load() } } label: {
+                        Text("Tentar novamente")
+                            .font(.app(.subtitleStrong))
+                            .foregroundStyle(Color.App.Text.onAction)
+                            .padding(.horizontal, AppSpacing.xxl)
+                            .padding(.vertical, AppSpacing.md)
+                            .appPrimaryPillSurface()
+                    }
+                    .buttonStyle(.plain)
                 }
             } else {
                 form
             }
         }
+        .background(Color.App.Background.app.ignoresSafeArea())
         .navigationTitle(viewModel.isEditing ? "tasks.edit.title" : "tasks.create.title")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
@@ -63,6 +76,7 @@ struct TaskEditorView: View {
                     }
                 } label: {
                     Image(systemName: "chevron.backward")
+                        .foregroundStyle(Color.App.Text.primary)
                 }
                 .accessibilityIdentifier("tasks.editor.back")
                 .accessibilityLabel("Voltar")
@@ -80,6 +94,7 @@ struct TaskEditorView: View {
                             .fontWeight(.semibold)
                     }
                     .buttonStyle(.glassProminent)
+                    .tint(Color.App.Action.primary)
                     .disabled(!viewModel.isFormValid)
                     .accessibilityIdentifier("tasks.editor.save")
                     .accessibilityLabel("tasks.form.submit")
@@ -126,146 +141,261 @@ struct TaskEditorView: View {
         }
     }
 
-    @ViewBuilder
+    /// TEL-013 high-fidelity layout (Figma 907:21922): stacked white cards on the app background.
     private var form: some View {
-        Form {
-            // Title and note share one card, with both counters in its footer (UX-007 §5.1).
-            Section {
-                TextField("tasks.form.title_placeholder", text: $viewModel.title)
-                    .accessibilityIdentifier("tasks.editor.title")
-                VStack(alignment: .leading, spacing: 6) {
-                    TextField("tasks.form.note_placeholder", text: $viewModel.note, axis: .vertical)
-                        .lineLimit(1 ... 6)
-                        .accessibilityIdentifier("tasks.editor.note")
-                    HStack(spacing: 12) {
-                        Spacer()
-                        Text(Self.counterText(key: "tasks.form.title_counter", count: viewModel.title.count))
-                        Text(Self.counterText(key: "tasks.form.note_counter", count: viewModel.note.count))
-                    }
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                }
-                if let titleError = viewModel.titleError {
-                    Text(titleError == .required ? "tasks.form.error_title_required" : "tasks.form.error_title_too_long")
-                        .font(.footnote)
-                        .foregroundStyle(.red)
-                        .accessibilityIdentifier("tasks.editor.title_error")
-                }
-                if viewModel.noteError != nil {
-                    Text("tasks.form.error_note_too_long")
-                        .font(.footnote)
-                        .foregroundStyle(.red)
-                        .accessibilityIdentifier("tasks.editor.note_error")
-                }
-            }
+        ScrollView {
+            VStack(alignment: .leading, spacing: AppSpacing.md) {
+                fieldsCard
+                fieldErrors
 
-            Section {
-                // The section header carries the visible "Esforço" title; the hidden label keeps
-                // the picker named for VoiceOver.
-                Picker("tasks.form.weight_label", selection: $viewModel.weight) {
-                    Text("tasks.form.weight_option_low").tag(EffortWeight?.some(.low))
-                    Text("tasks.form.weight_option_medium").tag(EffortWeight?.some(.medium))
-                    Text("tasks.form.weight_option_high").tag(EffortWeight?.some(.high))
-                }
-                .pickerStyle(.inline)
-                .labelsHidden()
-                .accessibilityIdentifier("tasks.editor.weight")
-            } header: {
                 sectionHeader("tasks.form.weight_label")
-            } footer: {
-                Text("tasks.form.weight_hint")
-                    .font(.footnote)
-            }
+                weightCard
+                sectionFooter("tasks.form.weight_hint")
 
-            Section {
-                DatePicker("tasks.form.scheduled_date_label", selection: $viewModel.scheduledDate, displayedComponents: .date)
-                    .datePickerStyle(.compact)
-                    .disabled(viewModel.isScheduledDateLocked)
-                    .accessibilityIdentifier("tasks.editor.scheduled_date")
-                if viewModel.isEditing {
-                    // Read-only: editing never changes the recurrence (UX-008 §5.1, UX-05).
-                    HStack {
-                        Text("routines.recurrence.title")
-                        Spacer()
-                        Text(viewModel.editingRecurrenceSummary)
-                            .foregroundStyle(.secondary)
-                    }
-                    .accessibilityElement(children: .combine)
-                    .accessibilityIdentifier("tasks.editor.recurrence_readonly")
-                } else {
-                    Button {
-                        Task { await viewModel.prepareRecurrencePicker() }
-                    } label: {
-                        navigationRow(title: "routines.recurrence.title", value: viewModel.recurrenceSummary)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("routines.recurrence.title")
-                    .accessibilityValue(Text(viewModel.recurrenceSummary))
-                    .accessibilityIdentifier("tasks.editor.recurrence")
-                }
-                if viewModel.startDateError {
-                    Text("routines.error_start_date_invalid")
-                        .font(.footnote)
-                        .foregroundStyle(.red)
-                        .accessibilityIdentifier("tasks.editor.start_date_error")
-                }
-                if viewModel.frequencyError {
-                    Text("routines.error_frequency_invalid")
-                        .font(.footnote)
-                        .foregroundStyle(.red)
-                        .accessibilityIdentifier("tasks.editor.frequency_error")
-                }
-            } header: {
                 sectionHeader("tasks.form.date_section_title")
-            }
+                dateCard
+                dateErrors
 
-            // No footer here: the assignee explanation was dropped from TEL-013 and MOD-001 (UX-06).
-            Section {
-                Button {
-                    viewModel.isAssigneePickerPresented = true
-                } label: {
-                    navigationRow(title: "tasks.form.assignees_row", value: assigneeSummary)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("tasks.form.assignees_row")
-                .accessibilityValue(Text(assigneeSummary))
-                .accessibilityIdentifier("tasks.editor.assignees")
-            } header: {
+                // No footer here: the assignee explanation was dropped from TEL-013 and MOD-001 (UX-06).
                 sectionHeader("tasks.form.assignees_label")
-            }
+                assigneesCard
 
-            if let banner = viewModel.banner {
-                Section {
-                    Text(bannerMessage(for: banner))
-                        .foregroundStyle(.red)
+                if let banner = viewModel.banner {
+                    Label(bannerMessage(for: banner), systemImage: "exclamationmark.triangle.fill")
+                        .font(.app(.subtitle))
+                        .foregroundStyle(Color.App.System.destructive)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, AppSpacing.xxl)
+                        .padding(.vertical, Self.rowVerticalPadding)
+                        .appCard()
                         .accessibilityIdentifier("tasks.editor.banner")
                 }
             }
+            .padding(.horizontal, AppSpacing.lg)
+            .padding(.top, AppSpacing.sm)
+            .padding(.bottom, AppSpacing.xxxl)
+        }
+        .scrollDismissesKeyboard(.interactively)
+        .background(Color.App.Background.app.ignoresSafeArea())
+    }
+
+    // MARK: Cards
+
+    /// Title and note share one card, with both counters below the note (UX-007 §5.1).
+    private var fieldsCard: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: AppSpacing.sm) {
+                TextField("tasks.form.title_placeholder", text: $viewModel.title)
+                    .font(.app(.body))
+                    .foregroundStyle(Color.App.Text.primary)
+                    .accessibilityIdentifier("tasks.editor.title")
+                if viewModel.titleError != nil {
+                    Image(systemName: "exclamationmark.circle.fill")
+                        .foregroundStyle(Color.App.System.destructive)
+                        .accessibilityHidden(true)
+                }
+            }
+            .padding(.vertical, Self.fieldVerticalPadding)
+            separator
+            TextField("tasks.form.note_placeholder", text: $viewModel.note, axis: .vertical)
+                .lineLimit(1 ... 6)
+                .font(.app(.body))
+                .foregroundStyle(Color.App.Text.primary)
+                .padding(.vertical, Self.fieldVerticalPadding)
+                .accessibilityIdentifier("tasks.editor.note")
+            HStack(spacing: Self.counterSpacing) {
+                Spacer()
+                Text(Self.counterText(key: "tasks.form.title_counter", count: viewModel.title.count))
+                Text(Self.counterText(key: "tasks.form.note_counter", count: viewModel.note.count))
+            }
+            .font(.app(.caption))
+            .foregroundStyle(Color.App.Text.secondary)
+        }
+        .padding(.horizontal, AppSpacing.xl)
+        .padding(.top, AppSpacing.xs)
+        .padding(.bottom, Self.fieldsCardBottomPadding)
+        .appCard()
+    }
+
+    @ViewBuilder
+    private var fieldErrors: some View {
+        if let titleError = viewModel.titleError {
+            errorRow(titleError == .required ? "tasks.form.error_title_required" : "tasks.form.error_title_too_long")
+                .accessibilityIdentifier("tasks.editor.title_error")
+        }
+        if viewModel.noteError != nil {
+            errorRow("tasks.form.error_note_too_long")
+                .accessibilityIdentifier("tasks.editor.note_error")
         }
     }
 
-    /// Small secondary section title, as in the prototype, instead of the large default header.
-    private func sectionHeader(_ key: LocalizedStringKey) -> some View {
-        // An explicit label color: `.secondary` inside a Form header is dimmed twice.
-        Text(key)
-            .font(.footnote)
-            .foregroundStyle(Color(uiColor: .secondaryLabel))
-            .textCase(nil)
+    private var weightCard: some View {
+        let options: [(EffortWeight, LocalizedStringKey)] = [
+            (.low, "tasks.form.weight_option_low"),
+            (.medium, "tasks.form.weight_option_medium"),
+            (.high, "tasks.form.weight_option_high"),
+        ]
+        return VStack(spacing: 0) {
+            ForEach(Array(options.enumerated()), id: \.offset) { index, option in
+                if index > 0 { insetSeparator }
+                selectableRow(option.1, isSelected: viewModel.weight == option.0) {
+                    viewModel.weight = option.0
+                }
+            }
+        }
+        .appCard()
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("tasks.editor.weight")
     }
 
-    /// Tappable row in primary text — a plain button style keeps the Form from tinting it with the
-    /// accent color (UX-007 §5.1).
+    private var dateCard: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Text("tasks.form.scheduled_date_label")
+                    .font(.app(.body))
+                    .foregroundStyle(Color.App.Text.primary)
+                Spacer()
+                DatePicker("tasks.form.scheduled_date_label", selection: $viewModel.scheduledDate, displayedComponents: .date)
+                    .datePickerStyle(.compact)
+                    .labelsHidden()
+                    .tint(Color.App.Action.primary)
+                    .background(Color.App.Background.cardHighlight, in: RoundedRectangle(cornerRadius: AppSpacing.sm))
+                    .disabled(viewModel.isScheduledDateLocked)
+                    .accessibilityIdentifier("tasks.editor.scheduled_date")
+            }
+            .padding(.horizontal, AppSpacing.xxl)
+            .padding(.vertical, Self.rowVerticalPadding)
+            insetSeparator
+            if viewModel.isEditing {
+                // Read-only: editing never changes the recurrence (UX-008 §5.1, UX-05).
+                HStack {
+                    Text("routines.recurrence.title")
+                        .foregroundStyle(Color.App.Text.primary)
+                    Spacer()
+                    Text(viewModel.editingRecurrenceSummary)
+                        .foregroundStyle(Color.App.Text.secondary)
+                }
+                .font(.app(.body))
+                .padding(.horizontal, AppSpacing.xxl)
+                .padding(.vertical, Self.rowVerticalPadding)
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier("tasks.editor.recurrence_readonly")
+            } else {
+                Button {
+                    Task { await viewModel.prepareRecurrencePicker() }
+                } label: {
+                    navigationRow(title: "routines.recurrence.title", value: viewModel.recurrenceSummary)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("routines.recurrence.title")
+                .accessibilityValue(Text(viewModel.recurrenceSummary))
+                .accessibilityIdentifier("tasks.editor.recurrence")
+            }
+        }
+        .appCard()
+    }
+
+    @ViewBuilder
+    private var dateErrors: some View {
+        if viewModel.startDateError {
+            errorRow("routines.error_start_date_invalid")
+                .accessibilityIdentifier("tasks.editor.start_date_error")
+        }
+        if viewModel.frequencyError {
+            errorRow("routines.error_frequency_invalid")
+                .accessibilityIdentifier("tasks.editor.frequency_error")
+        }
+    }
+
+    private var assigneesCard: some View {
+        Button {
+            viewModel.isAssigneePickerPresented = true
+        } label: {
+            navigationRow(title: "tasks.form.assignees_row", value: assigneeSummary)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("tasks.form.assignees_row")
+        .accessibilityValue(Text(assigneeSummary))
+        .accessibilityIdentifier("tasks.editor.assignees")
+        .appCard()
+    }
+
+    // MARK: Building blocks
+
+    private static let fieldVerticalPadding: CGFloat = 13
+    private static let rowVerticalPadding: CGFloat = 15
+    private static let fieldsCardBottomPadding: CGFloat = 10
+    private static let counterSpacing: CGFloat = 14
+
+    private var separator: some View {
+        Rectangle().fill(Color.App.Border.separator).frame(height: 1)
+    }
+
+    private var insetSeparator: some View {
+        separator.padding(.leading, AppSpacing.xxl)
+    }
+
+    /// Small secondary section title above a card, as in the prototype.
+    private func sectionHeader(_ key: LocalizedStringKey) -> some View {
+        Text(key)
+            .font(.app(.caption))
+            .foregroundStyle(Color.App.Text.secondary)
+            .padding(.leading, AppSpacing.xxl)
+    }
+
+    private func sectionFooter(_ key: LocalizedStringKey) -> some View {
+        Text(key)
+            .font(.app(.caption))
+            .foregroundStyle(Color.App.Text.secondary)
+            .padding(.horizontal, AppSpacing.xxl)
+    }
+
+    private func errorRow(_ key: LocalizedStringKey) -> some View {
+        Label(key, systemImage: "exclamationmark.circle.fill")
+            .font(.app(.caption))
+            .foregroundStyle(Color.App.System.destructive)
+            .padding(.leading, AppSpacing.xxl)
+    }
+
+    /// Single-choice row with a trailing check when selected (Figma "Alta / Linha selecionável").
+    private func selectableRow(_ title: LocalizedStringKey, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack {
+                Text(title)
+                    .font(.app(.body))
+                    .foregroundStyle(Color.App.Text.primary)
+                Spacer()
+                if isSelected {
+                    Image(systemName: "checkmark")
+                        .font(.app(.bodyStrong))
+                        .foregroundStyle(Color.App.Action.primary)
+                        .accessibilityHidden(true)
+                }
+            }
+            .padding(.horizontal, AppSpacing.xxl)
+            .padding(.vertical, Self.rowVerticalPadding)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text(title))
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+
+    /// Tappable row in primary text with a trailing value and chevron (UX-007 §5.1).
     private func navigationRow(title: LocalizedStringKey, value: String) -> some View {
         HStack {
             Text(title)
-                .foregroundStyle(.primary)
+                .foregroundStyle(Color.App.Text.primary)
             Spacer()
             Text(value)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.App.Text.secondary)
             Image(systemName: "chevron.right")
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(.tertiary)
+                .font(.app(.noteStrong))
+                .foregroundStyle(Color.App.Text.secondary)
         }
+        .font(.app(.body))
+        .padding(.horizontal, AppSpacing.xxl)
+        .padding(.vertical, Self.rowVerticalPadding)
         .contentShape(Rectangle())
     }
 

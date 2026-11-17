@@ -25,7 +25,7 @@ final class RewardWheelUITests: XCTestCase {
         redeem.tap()
         XCTAssertTrue(label("Escolher recompensa").waitForExistence(timeout: 5))
         XCTAssertTrue(label("O sorteio só vale depois que você aceitar.").exists)
-        XCTAssertFalse(app.tabBars.firstMatch.isHittable)
+        XCTAssertFalse(app.descendants(matching: .any)["app.tab_bar"].exists)
         let draw = app.buttons["reward.wheel.draw"]
         XCTAssertTrue(draw.waitForExistence(timeout: 5))
         draw.tap()

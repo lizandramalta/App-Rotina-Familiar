@@ -36,7 +36,7 @@ Text("Subtítulo").foregroundStyle(Color.App.Text.secondary) // #6B6B6B - Texto 
 ---
 
 ### 2. Tipografia
-Sempre use a escala de 14 papéis via `.font(.app(.role))`.
+Sempre use a escala de 16 papéis via `.font(.app(.role))`.
 
 ```swift
 // Títulos (Serif / Source Serif 4 fallback)

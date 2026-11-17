@@ -57,7 +57,7 @@ struct FamilyTasksDesignedView: View {
         .background(Color(uiColor: .systemGroupedBackground).ignoresSafeArea())
         .navigationTitle("")
         .toolbar(.hidden, for: .navigationBar)
-        .toolbar(.hidden, for: .tabBar)
+        .hidesAppTabBar()
         .task { await viewModel.load() }
         .refreshable { await viewModel.load() }
         .sheet(isPresented: $showsFilter) {
@@ -80,7 +80,7 @@ struct FamilyTasksDesignedView: View {
         .navigationDestination(isPresented: $showsWeekSelector) {
             if let report = viewModel.makeReportView() {
                 report
-                    .toolbar(.hidden, for: .tabBar)
+                    .hidesAppTabBar()
             }
         }
         .sheet(item: $reportFile) { FamilyReportShareSheet(url: $0.url) }

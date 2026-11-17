@@ -82,11 +82,13 @@ struct DesignTokensTests {
             (.note, 13, .regular, .default, nil),
             (.noteStrong, 13, .bold, .default, nil),
             (.caption, 12, .regular, .default, nil),
+            (.captionStrong, 12, .bold, .default, nil),
             (.numberLarge, 44, .medium, .rounded, nil),
+            (.numberMedium, 28, .medium, .rounded, nil),
             (.number, 22, .medium, .rounded, nil),
         ]
 
-        #expect(AppTypography.allRoles.count == 14)
+        #expect(AppTypography.allRoles.count == 16)
         #expect(AppTypography.allRoles == expected.map(\.0))
         for (role, size, weight, design, lineHeight) in expected {
             #expect(role.size == size)
@@ -97,11 +99,11 @@ struct DesignTokensTests {
                 #expect(Font.app(role) == .system(size: size, weight: weight, design: design))
             }
         }
-        #expect(AppTypography.allRoles.filter { $0.fontName != nil } == [.numberLarge, .number])
+        #expect(AppTypography.allRoles.filter { $0.fontName != nil } == [.numberLarge, .numberMedium, .number])
     }
 
     @Test("number roles render with the bundled Sour Gummy at the Figma weight",
-          arguments: [AppTypography.numberLarge, .number, DayCarouselItemView.numberTypography])
+          arguments: [AppTypography.numberLarge, .numberMedium, .number, DayCarouselItemView.numberTypography])
     func sourGummyNumberRoles(role: AppTypography) throws {
         #expect(role.fontName == "SourGummy-Black")
         #expect(role.weight == .medium)

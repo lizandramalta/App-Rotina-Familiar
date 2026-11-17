@@ -4,6 +4,42 @@
     "" : {
 
     },
+    ".body (17pt Medium)" : {
+
+    },
+    ".bodyStrong (17pt Bold)" : {
+
+    },
+    ".caption (12pt Regular)" : {
+
+    },
+    ".cardTitle (17pt)" : {
+
+    },
+    ".note (13pt Regular)" : {
+
+    },
+    ".number" : {
+
+    },
+    ".numberLarge" : {
+
+    },
+    ".subtitle (15pt Medium)" : {
+
+    },
+    ".title1 (28pt)" : {
+
+    },
+    ".title2 (22pt)" : {
+
+    },
+    ".title3 (20pt)" : {
+
+    },
+    ".titleLarge (34pt)" : {
+
+    },
     "%@\n\n%@" : {
       "localizations" : {
         "pt-BR" : {
@@ -57,6 +93,15 @@
 
     },
     "+%lld" : {
+
+    },
+    "22" : {
+
+    },
+    "44" : {
+
+    },
+    "Aba selecionada: %@" : {
 
     },
     "access.common.error_network" : {
@@ -209,7 +254,19 @@
         }
       }
     },
+    "Amarela (+15°)" : {
+
+    },
+    "Azul" : {
+
+    },
     "Cancelar" : {
+
+    },
+    "Card com estrela" : {
+
+    },
+    "Catálogo visual de componentes e tokens de alta fidelidade." : {
 
     },
     "Confirmar" : {
@@ -222,6 +279,9 @@
 
     },
     "Descartar alterações?" : {
+
+    },
+    "Design System" : {
 
     },
     "design_system.add_button.label" : {
@@ -284,6 +344,9 @@
         }
       }
     },
+    "Destaque" : {
+
+    },
     "destination.contentPending" : {
       "localizations" : {
         "pt-BR" : {
@@ -295,6 +358,7 @@
       }
     },
     "destination.family" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -3049,6 +3113,46 @@
         }
       }
     },
+    "kids.signal.camera_unavailable" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A câmera não está disponível neste aparelho. Você pode sinalizar sem foto."
+          }
+        }
+      }
+    },
+    "kids.signal.discard_cancel" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar"
+          }
+        }
+      }
+    },
+    "kids.signal.discard_confirm" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sair"
+          }
+        }
+      }
+    },
+    "kids.signal.discard_title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sair sem avisar que você terminou?"
+          }
+        }
+      }
+    },
     "kids.signal.explanation" : {
       "localizations" : {
         "pt-BR" : {
@@ -3185,6 +3289,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Não foi possível confirmar o estado. Atualize antes de tentar novamente."
+          }
+        }
+      }
+    },
+    "kidsReview.detail.no_photo" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhuma foto foi enviada."
           }
         }
       }
@@ -4141,6 +4255,9 @@
           }
         }
       }
+    },
+    "Mutua Design System" : {
+
     },
     "OK" : {
 
@@ -6578,6 +6695,7 @@
       }
     },
     "tasks.adult.missionsTab" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -6588,6 +6706,7 @@
       }
     },
     "tasks.adult.profileTab" : {
+      "extractionState" : "stale",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -6663,6 +6782,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nova tarefa"
+          }
+        }
+      }
+    },
+    "tasks.daily.loading" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carregando tarefas"
           }
         }
       }
@@ -7448,6 +7577,9 @@
       }
     },
     "Tentar novamente" : {
+
+    },
+    "Toques no botão: %lld" : {
 
     },
     "Voltar" : {

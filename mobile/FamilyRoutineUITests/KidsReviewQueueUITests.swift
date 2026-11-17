@@ -73,7 +73,7 @@ final class KidsReviewQueueUITests: XCTestCase {
     func testMemberDoesNotSeeTheShortcut() {
         launch("family-overview-member")
 
-        XCTAssertTrue(app.tabBars.buttons["Família"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.descendants(matching: .any)["app.tab_bar"].buttons["Família"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["Maria Silva"].waitForExistence(timeout: 5))
         XCTAssertFalse(shortcut.exists)
     }

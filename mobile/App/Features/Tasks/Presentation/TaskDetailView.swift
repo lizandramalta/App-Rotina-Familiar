@@ -52,11 +52,23 @@ struct TaskDetailView: View {
         Group {
             if viewModel.isLoading {
                 ProgressView()
+                    .tint(Color.App.Text.secondary)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if viewModel.loadFailed {
                 ContentUnavailableView {
                     Label("tasks.detail.load_error", systemImage: "exclamationmark.triangle")
+                        .font(.app(.title3))
+                        .foregroundStyle(Color.App.Text.primary)
                 } actions: {
-                    Button("Tentar novamente") { Task { await viewModel.load() } }
+                    Button { Task { await viewModel.load() } } label: {
+                        Text("Tentar novamente")
+                            .font(.app(.subtitleStrong))
+                            .foregroundStyle(Color.App.Text.onAction)
+                            .padding(.horizontal, AppSpacing.xxl)
+                            .padding(.vertical, AppSpacing.md)
+                            .appPrimaryPillSurface()
+                    }
+                    .buttonStyle(.plain)
                 }
             } else if let task = viewModel.task {
                 content(for: task)
@@ -65,15 +77,17 @@ struct TaskDetailView: View {
                 Color.clear
             }
         }
+        .background(Color.App.Background.app.ignoresSafeArea())
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar(.hidden, for: .tabBar)
+        .hidesAppTabBar()
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 if viewModel.task != nil, viewModel.canManageTask {
                     Button("Editar") {
                         if viewModel.requestEdit() { onRequestEdit(nil) }
                     }
+                    .tint(Color.App.Action.primary)
                     .accessibilityIdentifier("tasks.detail.edit")
                 }
             }
@@ -163,22 +177,25 @@ struct TaskDetailView: View {
     private func content(for task: FamilyTask) -> some View {
         GeometryReader { geometry in
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: AppSpacing.xxl) {
+                    VStack(alignment: .leading, spacing: AppSpacing.md) {
                         Text(task.title)
-                            .font(.title.bold())
+                            .font(.app(.title1))
+                            .foregroundStyle(Color.App.Text.primary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                         statusBadge(for: displayedStatus(for: task))
                             .accessibilityFocused($isStatusFocused)
                             .accessibilityIdentifier("tasks.detail.status")
                     }
-                    .padding(.horizontal, 4)
+                    .padding(.horizontal, AppSpacing.xs)
 
                     if viewModel.showReopenSuccessBanner {
                         Label("task.reopen.success_banner", systemImage: "checkmark.circle.fill")
+                            .font(.app(.subtitle))
+                            .foregroundStyle(Color.App.Text.primary)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(16)
-                            .background(.background, in: RoundedRectangle(cornerRadius: 16))
+                            .padding(AppSpacing.lg)
+                            .appCard()
                     }
 
                     detailsCard(for: task)
@@ -186,7 +203,7 @@ struct TaskDetailView: View {
                     if viewModel.role != .kid,
                        task.routineID != nil,
                        viewModel.routine?.materializationState == .pending || viewModel.routineLoadFailed {
-                        VStack(alignment: .leading, spacing: 8) {
+                        VStack(alignment: .leading, spacing: AppSpacing.sm) {
                             if viewModel.routine?.materializationState == .pending {
                                 Label("routines.materialization.preparing", systemImage: "clock")
                                     .accessibilityIdentifier("routines.detail.preparing")
@@ -194,55 +211,62 @@ struct TaskDetailView: View {
                             if viewModel.routineLoadFailed {
                                 Label("routines.error_unavailable", systemImage: "exclamationmark.triangle")
                                 Button("tasks.error.retry") { Task { await viewModel.refreshRoutine() } }
+                                    .font(.app(.subtitleStrong))
+                                    .foregroundStyle(Color.App.Text.highlight)
                             }
                         }
+                        .font(.app(.subtitle))
+                        .foregroundStyle(Color.App.Text.primary)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(16)
-                        .background(.background, in: RoundedRectangle(cornerRadius: 20))
+                        .padding(AppSpacing.lg)
+                        .appCard()
                     }
 
                     if let note = task.note, !note.isEmpty {
-                        VStack(alignment: .leading, spacing: 6) {
+                        VStack(alignment: .leading, spacing: AppSpacing.sm) {
                             Text("tasks.detail.note_label")
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
-                                .padding(.leading, 20)
+                                .font(.app(.caption))
+                                .foregroundStyle(Color.App.Text.secondary)
+                                .padding(.leading, AppSpacing.xxl)
                             Text(note)
+                                .font(.app(.body))
+                                .foregroundStyle(Color.App.Text.primary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 14)
-                                .background(.background, in: RoundedRectangle(cornerRadius: 26))
+                                .padding(.horizontal, AppSpacing.xxl)
+                                .padding(.vertical, AppSpacing.base)
+                                .appCard()
                         }
                     }
 
                     if let banner = viewModel.banner {
                         Text(bannerMessageKey(banner))
-                            .foregroundStyle(.red)
+                            .font(.app(.subtitle))
+                            .foregroundStyle(Color.App.System.destructive)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
 
                     if viewModel.reopenFailed {
-                        VStack(alignment: .leading, spacing: 8) {
+                        notice {
                             Text("tasks.common.error_unavailable")
-                                .foregroundStyle(.red)
-                            Button("Tentar novamente") { Task { await viewModel.requestReopen() } }
+                                .foregroundStyle(Color.App.System.destructive)
+                            noticeButton("Tentar novamente") { Task { await viewModel.requestReopen() } }
                         }
                     }
 
                     if viewModel.memberDirectoryLoadFailed {
-                        VStack(alignment: .leading, spacing: 8) {
+                        notice {
                             Text("tasks.detail.assignees_unavailable")
-                                .foregroundStyle(.secondary)
-                            Button("tasks.error.retry") { Task { await viewModel.retryMemberRoles() } }
+                                .foregroundStyle(Color.App.Text.secondary)
+                            noticeButton("tasks.error.retry") { Task { await viewModel.retryMemberRoles() } }
                         }
                     }
 
                     if let failure = viewModel.completionFailure {
-                        VStack(alignment: .leading, spacing: 8) {
+                        notice {
                             Text(completionFailureMessageKey(for: failure))
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(Color.App.Text.secondary)
                             if failure == .needsRefresh {
-                                Button("task.complete.refresh_status") {
+                                noticeButton("task.complete.refresh_status") {
                                     Task { await viewModel.refreshCompletionStatus() }
                                 }
                                 .disabled(viewModel.isCompleting)
@@ -252,25 +276,15 @@ struct TaskDetailView: View {
                         .accessibilityElement(children: .contain)
                     }
 
-                    VStack(spacing: 10) {
-                        if viewModel.canSignal {
-                            Button("kids.signal.open") { showsSignalSheet = true }
-                                .buttonStyle(.borderedProminent)
-                                .frame(maxWidth: .infinity, minHeight: 50)
-                                .accessibilityIdentifier("kids.signal.open")
-                        }
+                    VStack(spacing: AppSpacing.md) {
                         if viewModel.showsCompleteAction {
                             Button {
                                 Task { await viewModel.requestComplete() }
                             } label: {
                                 Text(viewModel.isCompleting ? "task.complete.pending" : "task.complete.button")
-                                    .frame(maxWidth: .infinity, minHeight: 50)
                             }
-                            .buttonStyle(.plain)
-                            .foregroundStyle(.white)
-                            .background(Color(red: 0.11, green: 0.11, blue: 0.12), in: Capsule())
+                            .buttonStyle(AppPillButtonStyle(kind: .primary))
                             .disabled(!viewModel.canComplete)
-                            .opacity(viewModel.canComplete ? 1 : 0.5)
                             .accessibilityIdentifier("tasks.detail.complete")
                             .accessibilityLabel(Text(viewModel.isCompleting ? "task.complete.pending" : "task.complete.button"))
                         }
@@ -280,12 +294,12 @@ struct TaskDetailView: View {
                                 Task { await viewModel.requestReopen() }
                             } label: {
                                 Text(viewModel.isReopening ? "task.reopen.pending" : "task.reopen.button")
-                                    .frame(maxWidth: .infinity, minHeight: 50)
                             }
-                            .buttonStyle(.plain)
-                            .foregroundStyle(.primary)
-                            .background(.background, in: Capsule())
-                            .overlay(Capsule().strokeBorder(Color(uiColor: .separator), lineWidth: 1))
+                            // Kids get the larger 56 pt touch target (TEL-041); adults keep 50 pt.
+                            .buttonStyle(AppPillButtonStyle(
+                                kind: .secondary,
+                                height: viewModel.role == .kid ? AppPillButtonStyle.kidsHeight : AppPillButtonStyle.height
+                            ))
                             .disabled(viewModel.isReopening)
                             .accessibilityIdentifier("tasks.detail.reopen")
                             .accessibilityLabel(Text("task.reopen.accessibilityLabel"))
@@ -295,11 +309,13 @@ struct TaskDetailView: View {
                         if viewModel.canManageTask {
                             Button(role: .destructive) { viewModel.requestDelete() } label: {
                                 Text("tasks.detail.delete_action")
-                                    .frame(maxWidth: .infinity, minHeight: 50)
+                                    .font(.app(.body))
+                                    .frame(maxWidth: .infinity, minHeight: Self.actionHeight)
+                                    .contentShape(Capsule())
                             }
                             .buttonStyle(.plain)
-                            .foregroundStyle(.red)
-                            .background(.background, in: Capsule())
+                            .foregroundStyle(Color.App.System.destructive)
+                            .appCard(cornerRadius: Self.actionHeight / 2)
                             .disabled(!viewModel.canDeleteDirectly || viewModel.isDeleting)
                             .opacity(viewModel.canDeleteDirectly ? 1 : 0.4)
                             .accessibilityIdentifier(viewModel.canDeleteDirectly ? "tasks.detail.delete" : "tasks.detail.delete_disabled")
@@ -307,38 +323,74 @@ struct TaskDetailView: View {
 
                             if !viewModel.canDeleteDirectly {
                                 Text("tasks.delete.error_already_completed")
-                                    .font(.footnote)
-                                    .foregroundStyle(.secondary)
+                                    .font(.app(.caption))
+                                    .foregroundStyle(Color.App.Text.secondary)
                                     .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(.horizontal, 20)
+                                    .padding(.horizontal, AppSpacing.xxl)
                             }
                         }
                     }
 
                     if viewModel.role == .member, task.status == .awaitingConfirmation {
                         Text("tasks.detail.admin_confirmation_hint")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                            .padding(.horizontal, 20)
+                            .font(.app(.caption))
+                            .foregroundStyle(Color.App.Text.secondary)
+                            .padding(.horizontal, AppSpacing.xxl)
                     }
                 }
-                .frame(maxWidth: geometry.size.width >= 1100 ? 694 : 540)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+                .frame(maxWidth: geometry.size.width >= Self.wideLayoutBreakpoint ? Self.wideContentWidth : Self.contentWidth)
+                .padding(.horizontal, AppSpacing.lg)
+                .padding(.vertical, AppSpacing.sm)
                 .frame(maxWidth: .infinity)
             }
-            .background(Color(uiColor: .systemGroupedBackground))
+            .background(Color.App.Background.app)
+            // TEL-041: the Kids signal CTA stays pinned at the bottom of the screen.
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if viewModel.canSignal {
+                    Button { showsSignalSheet = true } label: {
+                        Label("kids.signal.open", systemImage: "hand.raised.fill")
+                    }
+                        .buttonStyle(AppPillButtonStyle(kind: .primary, height: AppPillButtonStyle.kidsHeight))
+                        .accessibilityIdentifier("kids.signal.open")
+                        .frame(maxWidth: Self.contentWidth)
+                        .padding(.horizontal, AppSpacing.lg)
+                        .padding(.vertical, AppSpacing.md)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.App.Background.app.ignoresSafeArea())
+                }
+            }
         }
+    }
+
+    private static let actionHeight: CGFloat = 50
+    private static let wideLayoutBreakpoint: CGFloat = 1100
+    private static let wideContentWidth: CGFloat = 694
+    private static let contentWidth: CGFloat = 540
+    private static let rowMinHeight: CGFloat = 51
+
+    /// Network/error notice card (message + inline retry action).
+    private func notice<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: AppSpacing.sm, content: content)
+            .font(.app(.subtitle))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(AppSpacing.lg)
+            .appCard()
+    }
+
+    private func noticeButton(_ title: LocalizedStringKey, action: @escaping () -> Void) -> some View {
+        Button(title, action: action)
+            .font(.app(.subtitleStrong))
+            .foregroundStyle(Color.App.Text.highlight)
     }
 
     private func detailsCard(for task: FamilyTask) -> some View {
         VStack(spacing: 0) {
             row(label: "tasks.form.weight_label", value: weightLabel(task.weight), identifier: "tasks.detail.weight")
-            Divider().padding(.leading, 20)
+            separator
             row(label: "tasks.form.scheduled_date_label", value: dateLabel(task.scheduledDate), identifier: "tasks.detail.date")
-            Divider().padding(.leading, 20)
+            separator
             row(label: "tasks.form.assignees_label", value: assigneeSummary(task), identifier: "tasks.detail.assignees")
-            Divider().padding(.leading, 20)
+            separator
             row(
                 label: "routines.recurrence.title",
                 value: viewModel.routine.map { frequencyLabel($0.frequency) }
@@ -346,7 +398,14 @@ struct TaskDetailView: View {
                 identifier: "tasks.detail.recurrence"
             )
         }
-        .background(.background, in: RoundedRectangle(cornerRadius: 26))
+        .appCard()
+    }
+
+    private var separator: some View {
+        Rectangle()
+            .fill(Color.App.Border.separator)
+            .frame(height: 1)
+            .padding(.leading, AppSpacing.xxl)
     }
 
     private func bannerMessageKey(_ banner: TaskDetailBanner) -> LocalizedStringKey {
@@ -374,32 +433,48 @@ struct TaskDetailView: View {
     private func row(label: LocalizedStringKey, value: String, identifier: String) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             Text(label)
+                .foregroundStyle(Color.App.Text.primary)
                 .layoutPriority(1)
             Text(value)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.App.Text.secondary)
                 .multilineTextAlignment(.trailing)
                 .frame(maxWidth: .infinity, alignment: .trailing)
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 15)
-        .frame(minHeight: 51)
+        .font(.app(.body))
+        .padding(.horizontal, AppSpacing.xxl)
+        .padding(.vertical, AppSpacing.base)
+        .frame(minHeight: Self.rowMinHeight)
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier(identifier)
     }
 
+    private static let badgeIconSize: CGFloat = 14
+
     private func statusBadge(for status: TaskStatus) -> some View {
-        let (key, icon): (LocalizedStringKey, String) = switch status {
-        case .pending: ("tasks.detail.status_pending", "circle")
-        case .awaitingConfirmation: ("tasks.detail.status_awaiting_confirmation", "clock")
-        case .completed: ("tasks.detail.status_completed", "checkmark.circle.fill")
+        let (key, icon): (LocalizedStringKey, Image) = switch status {
+        case .pending: ("tasks.detail.status_pending", Image(systemName: "circle"))
+        // Figma 907:27388 dashed clock, tinted as a template.
+        case .awaitingConfirmation: (
+            "tasks.detail.status_awaiting_confirmation",
+            Image("TaskStatusAwaiting").renderingMode(.template)
+        )
+        case .completed: ("tasks.detail.status_completed", Image(systemName: "checkmark.circle.fill"))
         }
-        return Label(key, systemImage: icon)
-            .font(.footnote)
-            .foregroundStyle(.primary)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .background(Color(uiColor: .tertiarySystemFill), in: Capsule())
-            .accessibilityElement(children: .combine)
+        return Label {
+            Text(key)
+        } icon: {
+            if status == .awaitingConfirmation {
+                icon.resizable().scaledToFit().frame(width: Self.badgeIconSize, height: Self.badgeIconSize)
+            } else {
+                icon
+            }
+        }
+        .font(.app(.caption))
+        .foregroundStyle(Color.App.Text.primary)
+        .padding(.horizontal, AppSpacing.md)
+        .padding(.vertical, AppSpacing.xs)
+        .background(Color.App.Background.cardHighlight, in: Capsule())
+        .accessibilityElement(children: .combine)
     }
 
     private func displayedStatus(for task: FamilyTask) -> TaskStatus {

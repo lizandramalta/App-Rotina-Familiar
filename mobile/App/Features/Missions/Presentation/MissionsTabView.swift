@@ -33,7 +33,7 @@ struct MissionsTabView: View {
             .navigationDestination(for: MissionRoute.self) { route in
                 // Tab bar only on each tab's root route; every pushed screen hides it.
                 destination(for: route)
-                    .toolbar(.hidden, for: .tabBar)
+                    .hidesAppTabBar()
             }
         }
         // MA-15 / UX-016 §4: returning to TEL-020 reloads the canonical list, so a card reflects

@@ -61,7 +61,7 @@ struct KidsMissionsTabView: View {
             .navigationDestination(for: KidsMissionRoute.self) { route in
                 // Tab bar only on each tab's root route; every pushed screen hides it.
                 destination(for: route)
-                    .toolbar(.hidden, for: .tabBar)
+                    .hidesAppTabBar()
             }
         }
         // MA-15 / UX-016 §4: returning to TEL-020 reloads the canonical list.
@@ -104,7 +104,7 @@ struct KidsMissionsTabView: View {
         NavigationLink {
             // Pushed here (root of the adult Profile tab only), so the tab bar hides.
             ProfileView(viewModel: profileViewModel)
-                .toolbar(.hidden, for: .tabBar)
+                .hidesAppTabBar()
         } label: {
             Image(systemName: "person.crop.circle")
                 .font(.title2)

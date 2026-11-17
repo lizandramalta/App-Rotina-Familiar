@@ -5,6 +5,7 @@ import SwiftUI
 /// requires Kids to reach their own completed task to reopen it (TEL-012/MOD-006).
 struct DailyTaskListView: View {
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var viewModel: DailyTaskListViewModel
     @State private var visibleWeekStart: Date
     private let currentMemberID: UUID
@@ -14,6 +15,8 @@ struct DailyTaskListView: View {
     /// SCRUM-103: internal access to TEL-052, shown on today's list only (E-1).
     let recognitionEntry: WeeklyRecognitionEntryViewModel?
     let onOpenRecognition: (UUID) -> Void
+    /// Trailing header control (TEL-040: avatar that opens TEL-030); the adult header shows "+".
+    let headerAccessory: AnyView?
 
     /// UX-009 §5: on period change, focus follows the updated header; on failure, it follows the
     /// error message and retry action. Same mechanism already used in EntryView.
@@ -33,7 +36,8 @@ struct DailyTaskListView: View {
         onSelectTask: @escaping (UUID) -> Void,
         onCreateTask: @escaping () -> Void,
         recognitionEntry: WeeklyRecognitionEntryViewModel? = nil,
-        onOpenRecognition: @escaping (UUID) -> Void = { _ in }
+        onOpenRecognition: @escaping (UUID) -> Void = { _ in },
+        headerAccessory: AnyView? = nil
     ) {
         let model = DailyTaskListViewModel(
             audience: audience,
@@ -51,11 +55,12 @@ struct DailyTaskListView: View {
         self.onCreateTask = onCreateTask
         self.recognitionEntry = recognitionEntry
         self.onOpenRecognition = onOpenRecognition
+        self.headerAccessory = headerAccessory
     }
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 22) {
+            VStack(alignment: .leading, spacing: AppSpacing.base) {
                 header
                 carousel
                 if let featured = recognitionEntry?.featured, viewModel.isToday(viewModel.selectedDate) {
@@ -66,14 +71,12 @@ struct DailyTaskListView: View {
                 }
                 Group {
                     if viewModel.isLoading, viewModel.items.isEmpty, viewModel.progress == nil {
-                        ProgressView()
-                            .frame(maxWidth: .infinity)
-                            .padding(.top, 40)
+                        loadingSkeleton
                     } else if viewModel.loadFailed, viewModel.items.isEmpty {
                         failureState
                     } else if viewModel.isEmpty {
                         if viewModel.audience == .adult {
-                            VStack(alignment: .leading, spacing: 20) {
+                            VStack(alignment: .leading, spacing: AppSpacing.base) {
                                 progressCard
                                 emptyState
                             }
@@ -81,7 +84,7 @@ struct DailyTaskListView: View {
                             emptyState
                         }
                     } else {
-                        VStack(alignment: .leading, spacing: 20) {
+                        VStack(alignment: .leading, spacing: AppSpacing.base) {
                             progressCard
                             if viewModel.loadFailed {
                                 failureState
@@ -95,13 +98,15 @@ struct DailyTaskListView: View {
                     }
                 }
             }
-            .padding(.horizontal, viewModel.audience == .adult ? 20 : 16)
-            .padding(.top, viewModel.audience == .adult ? 6 : 16)
+            .padding(.horizontal, AppSpacing.xxl)
+            .padding(.top, AppSpacing.sm)
+            // The floating tab bar's safe-area inset already lifts the end of the list above it.
+            .padding(.bottom, AppSpacing.xxxl)
         }
-        .background(Color(.secondarySystemBackground))
+        .background(Color.App.Background.app.ignoresSafeArea())
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar(viewModel.audience == .adult ? .hidden : .visible, for: .navigationBar)
+        .toolbar(.hidden, for: .navigationBar)
         .alert("family.applause.dismiss_error", isPresented: Binding(
             get: { viewModel.applauseDismissFailed },
             set: { if !$0 { viewModel.dismissApplauseFailure() } }
@@ -184,60 +189,60 @@ struct DailyTaskListView: View {
         let messageFormat = applause.senderNames.count > 1
             ? String(localized: "family.applause.received.message_plural")
             : String(localized: "family.applause.received.message")
-        return HStack(alignment: .top, spacing: 12) {
-            Image(systemName: "hands.clap.fill").font(.title2)
-            VStack(alignment: .leading, spacing: 5) {
-                Text("family.applause.received.title").font(.headline)
+        return HStack(alignment: .top, spacing: AppSpacing.md) {
+            Image(systemName: "hands.clap.fill")
+                .font(.app(.title2))
+                .foregroundStyle(Color.App.Text.highlight)
+            VStack(alignment: .leading, spacing: AppSpacing.xs) {
+                Text("family.applause.received.title")
+                    .font(.app(.cardTitle))
                 Text(String(format: messageFormat,
                     ListFormatter.localizedString(byJoining: applause.senderNames)))
-                    .font(.subheadline)
+                    .font(.app(.subtitle))
+                    .foregroundStyle(Color.App.Text.secondary)
             }
             Spacer(minLength: 0)
             Button {
                 Task { await viewModel.dismissApplause(applause.id) }
             } label: {
                 Image(systemName: "xmark")
-                    .font(.caption.weight(.bold))
-                    .frame(width: 30, height: 30)
+                    .font(.app(.captionStrong))
+                    .frame(width: AppSpacing.huge, height: AppSpacing.huge)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("family.applause.dismiss")
         }
-        .foregroundStyle(.primary)
-        .padding(16)
-        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 20))
+        .foregroundStyle(Color.App.Text.primary)
+        .padding(AppSpacing.lg)
+        .appCard()
         .accessibilityIdentifier("family.applause.received.\(applause.id.uuidString.lowercased())")
     }
 
     // MARK: Header
 
     private var header: some View {
-        HStack(alignment: .top, spacing: 8) {
-            VStack(alignment: .leading, spacing: 2) {
+        HStack(alignment: .top, spacing: AppSpacing.sm) {
+            VStack(alignment: .leading, spacing: AppSpacing.xxs) {
                 Text(viewModel.audience == .adult ? "tasks.adult.title" : "destination.myTasks")
-                    .font(.largeTitle.bold())
+                    .font(.app(.titleLarge))
+                    .foregroundStyle(Color.App.Text.primary)
                 Text(Self.dateSubtitle(
                     for: viewModel.selectedDate,
                     isToday: viewModel.audience == .kid && viewModel.isToday(viewModel.selectedDate)
                 ))
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .font(.app(.subtitle))
+                    .foregroundStyle(Color.App.Text.secondary)
             }
-            .padding(.top, viewModel.audience == .adult ? 2 : 0)
             .accessibilityElement(children: .combine)
             .accessibilityFocused($isHeaderFocused)
             Spacer(minLength: 0)
             if viewModel.audience == .adult {
-                Button(action: onCreateTask) {
-                    Image(systemName: "plus")
-                        .font(.title3)
-                        .frame(width: 44, height: 44)
-                }
-                .buttonStyle(.plain)
-                .background(Color(.systemBackground), in: Circle())
-                .overlay(Circle().strokeBorder(Color(.separator), lineWidth: 0.5))
-                .accessibilityLabel(Text("tasks.personal.newTask"))
-                .accessibilityIdentifier("tasks.daily.new")
+                CircularAddButton(action: onCreateTask)
+                    .accessibilityLabel(Text("tasks.personal.newTask"))
+                    .accessibilityIdentifier("tasks.daily.new")
+            } else if let headerAccessory {
+                headerAccessory
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -260,7 +265,7 @@ struct DailyTaskListView: View {
             }
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
-        .frame(height: 56)
+        .frame(height: DayCarouselItemView.size.height)
         .accessibilityElement(children: .contain)
     }
 
@@ -288,73 +293,68 @@ struct DailyTaskListView: View {
     private func dayButton(for date: Date) -> some View {
         let isAvailable = viewModel.isDateAvailable(date)
         let isSelected = viewModel.isSelected(date)
-        return Button {
-            Task { await viewModel.selectDate(date) }
-        } label: {
-            VStack(spacing: 4) {
-                Text(Self.weekdayLetter(for: date))
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(isSelected ? Color(.systemBackground) : Color.secondary)
-                Text(Self.dayNumber(for: date))
-                    .font(.headline)
-                    .foregroundStyle(
-                        isSelected ? Color(.systemBackground)
-                            : (viewModel.audience == .adult && viewModel.isToday(date) ? Color.blue : Color.primary)
-                    )
-            }
-            .frame(width: 46, height: 56)
-            .background(
-                isSelected
-                    ? (viewModel.audience == .adult && viewModel.isToday(date) ? Color.blue : Color.primary)
-                    : Color.clear,
-                in: RoundedRectangle(cornerRadius: 14)
-            )
-        }
-        .buttonStyle(.plain)
+        let isToday = viewModel.isToday(date)
+        return DayCarouselItemView(
+            weekday: Self.weekdayLabel(for: date, abbreviated: isSelected),
+            dayNumber: Self.dayNumber(for: date),
+            state: dayState(isToday: isToday, isSelected: isSelected),
+            action: { Task { await viewModel.selectDate(date) } },
+            customAccessibilityLabel: Self.dayAccessibilityLabel(for: date, isToday: isToday, isSelected: isSelected)
+        )
         .disabled(!isAvailable)
-        .opacity(isAvailable ? 1 : 0.35)
-        .accessibilityLabel(Text(Self.dayAccessibilityLabel(for: date, isToday: viewModel.isToday(date), isSelected: isSelected)))
+        .opacity(isAvailable ? 1 : Self.unavailableDayOpacity)
         .accessibilityIdentifier("tasks.daily.day.\(Self.wireString(from: date))")
     }
+
+    /// Only the adult carousel marks today (UX-009); Kids show the selected day alone (TEL-040).
+    private func dayState(isToday: Bool, isSelected: Bool) -> DayCarouselState {
+        let marksToday = viewModel.audience == .adult && isToday
+        switch (marksToday, isSelected) {
+        case (true, true): return .todaySelected
+        case (true, false): return .today
+        case (false, true): return .selected
+        case (false, false): return .standard
+        }
+    }
+
+    private static let unavailableDayOpacity = 0.35
 
     // MARK: Progress
 
     private var progressCard: some View {
-        VStack(alignment: .leading, spacing: viewModel.audience == .adult ? 14 : 10) {
-            HStack {
+        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+            HStack(spacing: AppSpacing.sm) {
                 Text("tasks.personal.dailyProgress")
-                    .font(.headline)
-                Spacer()
+                    .font(.app(.cardTitle))
+                    .foregroundStyle(Color.App.Text.primary)
+                Spacer(minLength: 0)
                 Text(progressValueText)
-                    .foregroundStyle(.secondary)
+                    .font(.app(.subtitle))
+                    .foregroundStyle(Color.App.Text.secondary)
             }
-            if viewModel.audience == .adult {
-                GeometryReader { geometry in
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(Color(.systemGray5))
-                        Capsule().fill(Color.primary)
-                            .frame(width: geometry.size.width * progressFraction)
-                    }
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color.App.Background.cardHighlight)
+                    Capsule().fill(Color.App.Action.primary)
+                        .frame(width: geometry.size.width * progressFraction)
                 }
-                .frame(height: 12)
-            } else {
-                ProgressView(value: progressFraction)
-                    .tint(.primary)
             }
+            .frame(height: Self.progressBarHeight)
             if viewModel.audience == .adult, (viewModel.progress?.total ?? 0) > 0 {
                 Text("tasks.personal.encouragement")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                    .font(.app(.note))
+                    .foregroundStyle(Color.App.Text.secondary)
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, viewModel.audience == .adult ? 20 : 16)
-        .background(Color(.systemBackground), in: RoundedRectangle(cornerRadius: 18))
+        .padding(AppSpacing.xl)
+        .appCard()
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("tasks.personal.dailyProgress"))
         .accessibilityValue(Text(progressAccessibilityText))
         .accessibilityIdentifier("tasks.daily.progress")
     }
+
+    private static let progressBarHeight: CGFloat = 12
 
     private var progressValueText: String {
         guard let progress = viewModel.progress, progress.total > 0 else {
@@ -389,95 +389,180 @@ struct DailyTaskListView: View {
 
     // MARK: States
 
+    /// Placeholder cards while the day loads (Figma 907:20405 adult, 907:27465 Kids).
+    private var loadingSkeleton: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.base) {
+            if viewModel.audience == .adult {
+                VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                    skeletonBar(width: 150, height: 16)
+                    skeletonBar(maxWidth: 320, height: 12)
+                    skeletonBar(width: 110, height: 14)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(AppSpacing.xl)
+                .appCard()
+                skeletonBar(width: 160, height: 22)
+                    .padding(.top, AppSpacing.sm)
+                ForEach(0 ..< 4, id: \.self) { _ in
+                    HStack(spacing: AppSpacing.md) {
+                        Circle()
+                            .fill(Color.App.Background.cardHighlight)
+                            .frame(width: Self.statusIconSize, height: Self.statusIconSize)
+                        VStack(alignment: .leading, spacing: Self.skeletonLineSpacing) {
+                            skeletonBar(width: 200, height: 14)
+                            skeletonBar(width: 130, height: 12)
+                        }
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.horizontal, AppSpacing.base)
+                    .padding(.vertical, AppSpacing.base)
+                    .appCard()
+                }
+            } else {
+                VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                    skeletonBar(width: 160, height: 16)
+                    skeletonBar(maxWidth: .infinity, height: 10)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(AppSpacing.xl)
+                .appCard()
+                ForEach(0 ..< 3, id: \.self) { _ in
+                    VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                        skeletonBar(width: 200, height: 18)
+                        skeletonBar(width: 120, height: 12)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(AppSpacing.lg)
+                    .appCard()
+                }
+            }
+        }
+        .disabled(true)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("tasks.daily.loading"))
+        .accessibilityIdentifier("tasks.daily.loading")
+    }
+
+    private static let skeletonLineSpacing: CGFloat = 6
+
+    /// Fixed-width bars shrink on narrow screens instead of overflowing the card.
+    private func skeletonBar(width: CGFloat? = nil, maxWidth: CGFloat? = nil, height: CGFloat) -> some View {
+        Capsule()
+            .fill(Color.App.Background.cardHighlight)
+            .frame(maxWidth: width ?? maxWidth, minHeight: height, maxHeight: height)
+    }
+
     private var emptyState: some View {
         Group {
             if viewModel.audience == .adult {
-                VStack(spacing: 8) {
+                VStack(spacing: AppSpacing.sm) {
                     Text("tasks.personal.emptyDay")
-                        .font(.headline)
+                        .font(.app(.cardTitle))
+                        .foregroundStyle(Color.App.Text.primary)
                     Text("tasks.personal.emptyHint")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                    Button("tasks.personal.newTask", action: onCreateTask)
-                        .font(.subheadline)
-                        .foregroundStyle(Color(.systemBackground))
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 12)
-                        .background(Color.primary, in: Capsule())
-                        .accessibilityIdentifier("tasks.daily.empty_new")
+                        .font(.app(.subtitle))
+                        .foregroundStyle(Color.App.Text.secondary)
+                        .multilineTextAlignment(.center)
+                    Button(action: onCreateTask) {
+                        pillLabel("tasks.personal.newTask")
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, AppSpacing.xs)
+                    .accessibilityIdentifier("tasks.daily.empty_new")
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 28)
-                .background(Color(.systemBackground), in: RoundedRectangle(cornerRadius: 18))
+                .padding(.horizontal, AppSpacing.xxl)
+                .padding(.vertical, AppSpacing.giant)
+                .appCard()
             } else {
                 Text("tasks.personal.emptyDay")
-                    .font(.headline)
+                    .font(.app(.cardTitle))
+                    .foregroundStyle(Color.App.Text.primary)
                     .frame(maxWidth: .infinity)
-                    .padding(.top, 40)
+                    .padding(.top, AppSpacing.huge)
             }
         }
     }
 
     private var failureState: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: AppSpacing.md) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 20))
+                .font(.app(.title3))
+                .foregroundStyle(Color.App.Text.highlight)
                 .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: AppSpacing.md) {
                 Text("tasks.personal.loadError")
-                    .font(.subheadline)
+                    .font(.app(.subtitle))
+                    .foregroundStyle(Color.App.Text.primary)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityIdentifier("tasks.daily.load_error")
                     .accessibilityFocused($isErrorFocused)
                 Button {
                     Task { await viewModel.load() }
                 } label: {
-                    Text("tasks.error.retry")
-                        .font(.subheadline)
-                        .foregroundStyle(Color(.systemBackground))
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(Color.primary, in: Capsule())
+                    pillLabel("tasks.error.retry")
                 }
                 .buttonStyle(.plain)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
-        .background(Color(.systemBackground), in: RoundedRectangle(cornerRadius: 18))
+        .padding(AppSpacing.lg)
+        .appCard()
     }
 
     private var actionFailureBanner: some View {
-        HStack {
+        HStack(spacing: AppSpacing.sm) {
             Label(
                 viewModel.actionFailure == .notCompleted
                     ? "task.complete.still_pending"
                     : "tasks.personal.actionError",
                 systemImage: "exclamationmark.triangle.fill"
             )
-            .font(.footnote)
-            Spacer()
+            .font(.app(.subtitle))
+            .foregroundStyle(Color.App.Text.primary)
+            Spacer(minLength: 0)
             Button("task.complete.refresh_status") {
                 Task { await viewModel.refreshActionStatus() }
             }
+            .font(.app(.subtitleStrong))
+            .foregroundStyle(Color.App.Text.highlight)
             .disabled(viewModel.actionFailureTaskID.map { viewModel.actionInFlight.contains($0) } ?? false)
             .accessibilityIdentifier("tasks.daily.action.refresh")
         }
-        .foregroundStyle(.red)
+        .padding(.horizontal, AppSpacing.lg)
+        .padding(.vertical, AppSpacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: AppRadius.banner)
+                .fill(Color.App.Background.card)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: AppRadius.banner)
+                .strokeBorder(Color.App.Border.separator, lineWidth: 1)
+        )
         .accessibilityIdentifier("tasks.daily.action.error")
         .accessibilityFocused($isErrorFocused)
+    }
+
+    /// Primary pill action (Figma "Alta / Botões / Primário"): `appPrimaryPillSurface()` with a
+    /// `Text.onAction` label.
+    private func pillLabel(_ title: LocalizedStringKey) -> some View {
+        Text(title)
+            .font(.app(.subtitleStrong))
+            .foregroundStyle(Color.App.Text.onAction)
+            .padding(.horizontal, AppSpacing.xxl)
+            .padding(.vertical, AppSpacing.md)
+            .appPrimaryPillSurface()
     }
 
     // MARK: List
 
     private var taskList: some View {
-        LazyVStack(alignment: .leading, spacing: 8) {
+        LazyVStack(alignment: .leading, spacing: AppSpacing.md) {
             if viewModel.audience == .adult {
                 Text(sectionHeading)
-                    .font(.title3.bold())
-                    .padding(.bottom, 8)
+                    .font(.app(.title2))
+                    .foregroundStyle(Color.App.Text.primary)
+                    .padding(.top, AppSpacing.sm)
                     .accessibilityIdentifier("tasks.daily.section_heading")
             }
             ForEach(viewModel.items) { item in
@@ -503,13 +588,15 @@ struct DailyTaskListView: View {
     @ViewBuilder
     private func row(for item: OwnTaskListItem) -> some View {
         let isCompleted = item.displayStatus == .completed
-        HStack(spacing: 0) {
+        HStack(spacing: AppSpacing.xs) {
             if viewModel.showsToggle(item) {
                 Button {
-                    viewModel.toggle(item)
+                    withAnimation(reduceMotion ? nil : .spring(response: 0.36, dampingFraction: 0.82)) {
+                        viewModel.toggle(item)
+                    }
                 } label: {
                     statusIcon(for: item.displayStatus)
-                        .frame(minWidth: 44, minHeight: 44)
+                        .frame(minWidth: Self.minTouchTarget, minHeight: Self.minTouchTarget)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
@@ -518,33 +605,29 @@ struct DailyTaskListView: View {
                 .accessibilityIdentifier("tasks.daily.toggle.\(item.id.uuidString)")
             } else {
                 statusIcon(for: item.displayStatus)
-                    .frame(minWidth: 44, minHeight: 44)
+                    .frame(minWidth: Self.minTouchTarget, minHeight: Self.minTouchTarget)
                     .accessibilityHidden(true)
             }
             Button {
                 onSelectTask(item.task.id)
             } label: {
-                HStack(spacing: 12) {
-                    VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: AppSpacing.md) {
+                    VStack(alignment: .leading, spacing: AppSpacing.xxs) {
                         Text(item.task.title)
+                            .font(.app(viewModel.audience == .adult ? .cardTitle : .bodyStrong))
                             .strikethrough(isCompleted)
-                            .foregroundStyle(isCompleted ? .secondary : .primary)
+                            .foregroundStyle(isCompleted ? Color.App.Text.secondary : Color.App.Text.primary)
                         Text(detailText(for: item))
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
+                            .font(.app(.subtitle))
+                            .foregroundStyle(Color.App.Text.secondary)
                     }
-                    Spacer()
-                    if viewModel.audience == .adult {
-                        Image(systemName: "chevron.right")
-                            .font(.footnote)
-                            .foregroundStyle(.tertiary)
-                    } else {
-                        Image(systemName: "chevron.right")
-                            .font(.footnote)
-                            .foregroundStyle(.tertiary)
-                    }
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right")
+                        .font(.app(.noteStrong))
+                        .foregroundStyle(Color.App.Text.secondary)
+                        .accessibilityHidden(true)
                 }
-                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                .frame(maxWidth: .infinity, minHeight: Self.minTouchTarget, alignment: .leading)
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
@@ -553,33 +636,31 @@ struct DailyTaskListView: View {
             .accessibilityIdentifier("tasks.daily.row.\(item.task.id.uuidString)")
             .accessibilityFocused($focusedTaskID, equals: item.id)
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 8)
-        .background(Color(.systemBackground), in: RoundedRectangle(cornerRadius: 18))
+        .padding(.leading, AppSpacing.sm)
+        .padding(.trailing, AppSpacing.xl)
+        .padding(.vertical, AppSpacing.sm)
+        .appCard()
     }
+
+    private static let minTouchTarget: CGFloat = 44
+    private static let statusIconSize: CGFloat = 26
 
     @ViewBuilder
     private func statusIcon(for status: TaskStatus) -> some View {
-        if viewModel.audience == .adult {
-            if status == .completed {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.secondary)
-                    .font(.system(size: 26))
-            } else {
-                Image(systemName: "circle")
-                    .foregroundStyle(.secondary)
-                    .font(.system(size: 26))
-            }
-        } else {
-            let (systemImage, color): (String, Color) = switch status {
-            case .pending: ("circle", .secondary)
-            case .awaitingConfirmation: ("clock", .orange)
-            case .completed: ("checkmark.circle.fill", .green)
-            }
-            Image(systemName: systemImage)
-                .foregroundStyle(color)
-                .font(.title3)
+        let (image, color): (Image, Color) = switch (viewModel.audience, status) {
+        case (.adult, .completed): (Image(systemName: "checkmark.circle.fill"), Color.App.Action.primary)
+        case (.adult, _): (Image(systemName: "circle"), Color.App.Text.secondary)
+        case (_, .pending): (Image(systemName: "circle"), Color.App.Text.secondary)
+        // Figma 907:27388 dashed clock, tinted as a template.
+        case (_, .awaitingConfirmation): (Image("TaskStatusAwaiting").renderingMode(.template), Color.App.Text.secondary)
+        case (_, .completed): (Image(systemName: "checkmark.circle.fill"), Color.App.Action.primary)
         }
+        image
+            .resizable()
+            .scaledToFit()
+            .frame(width: Self.statusIconSize, height: Self.statusIconSize)
+            .foregroundStyle(color)
+            .contentTransition(.symbolEffect(.replace))
     }
 
     private func detailText(for item: OwnTaskListItem) -> String {
@@ -640,11 +721,14 @@ struct DailyTaskListView: View {
         return "\(base) · \(String(localized: "tasks.personal.today"))"
     }
 
-    private static func weekdayLetter(for date: Date) -> String {
+    /// Figma 907:20352: the selected day shows "SEG", the others a single letter.
+    private static func weekdayLabel(for date: Date, abbreviated: Bool) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "pt_BR")
-        formatter.dateFormat = "EEEEE"
-        return formatter.string(from: date).uppercased()
+        formatter.dateFormat = abbreviated ? "EEE" : "EEEEE"
+        return formatter.string(from: date)
+            .replacingOccurrences(of: ".", with: "")
+            .uppercased(with: formatter.locale)
     }
 
     private static func dayNumber(for date: Date) -> String {
@@ -675,3 +759,4 @@ struct DailyTaskListView: View {
         return label
     }
 }
+

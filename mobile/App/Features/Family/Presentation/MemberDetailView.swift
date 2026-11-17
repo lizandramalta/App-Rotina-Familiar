@@ -63,7 +63,7 @@ struct MemberDetailView: View {
         .background(Color(uiColor: .systemGroupedBackground).ignoresSafeArea())
         .navigationTitle("")
         .toolbar(.hidden, for: .navigationBar)
-        .toolbar(.hidden, for: .tabBar)
+        .hidesAppTabBar()
         .task { await viewModel.load() }
         .refreshable { await viewModel.load() }
         .inviteShareSheet(viewModel: viewModel, isPresented: viewModel.transientInvite != nil)

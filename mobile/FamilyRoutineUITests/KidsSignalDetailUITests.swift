@@ -10,8 +10,7 @@ final class KidsSignalDetailUITests: XCTestCase {
     }
 
     /// Fixture signals in `UITestKidsSignalRepository`, oldest first: "Arrumar a cama",
-    /// "Guardar os brinquedos" and "Lavar a louça". One row may expose its identifier on more
-    /// than one accessibility element, so rows are addressed by id instead of counted.
+    /// "Guardar os brinquedos" and "Lavar a louça". Rows are addressed by id rather than counted.
     private func row(_ position: Int) -> XCUIElement {
         app.descendants(matching: .any)
             .matching(identifier: "kidsReview.queue.row.00000000-0000-0000-0000-00000000050\(position)")
@@ -33,8 +32,12 @@ final class KidsSignalDetailUITests: XCTestCase {
     }
 
     private func openFirstSignal() {
+        openSignal(atRow: 1)
+    }
+
+    private func openSignal(atRow position: Int) {
         openQueue()
-        row(1).tap()
+        row(position).tap()
         XCTAssertTrue(app.navigationBars["Avaliar sinalização"].waitForExistence(timeout: 5))
     }
 
@@ -103,5 +106,23 @@ final class KidsSignalDetailUITests: XCTestCase {
         row(1).tap()
 
         assertReturnedToQueueWithoutFirstSignal()
+    }
+
+    /// SCRUM-122: the fixture now returns real image bytes for a signal with `hasPhoto == true`
+    /// ("Arrumar a cama", the first queue row), so this exercises the loaded-photo branch for real
+    /// instead of only through ViewModel unit tests.
+    func testDetailShowsThePhotoWhenTheSignalHasOne() {
+        openFirstSignal()
+
+        XCTAssertTrue(app.images["Foto da sinalização"].waitForExistence(timeout: 5))
+    }
+
+    /// SCRUM-116: "Guardar os brinquedos" (second queue row) has no photo, so the Section that would
+    /// hold it shows the approved no-photo copy instead of rendering nothing (UX-013 §7).
+    func testDetailShowsTheNoPhotoWarningWhenTheSignalHasNone() {
+        openSignal(atRow: 2)
+
+        XCTAssertTrue(app.staticTexts["Nenhuma foto foi enviada."].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.images["Foto da sinalização"].exists)
     }
 }

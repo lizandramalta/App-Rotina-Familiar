@@ -9,46 +9,78 @@ struct SignalResolutionView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 20) {
-                Text("tasks.signal_resolution.title")
-                    .font(.headline)
+            ScrollView {
+                VStack(alignment: .leading, spacing: AppSpacing.md) {
+                    Text("tasks.signal_resolution.title")
+                        .font(.app(.subtitle))
+                        .foregroundStyle(Color.App.Text.primary)
+                        .padding(.horizontal, AppSpacing.xxl)
 
-                VStack(spacing: 0) {
-                    option(
-                        .resetToPending,
-                        title: "tasks.signal_resolution.option_reset",
-                        hint: "tasks.signal_resolution.option_reset_hint"
-                    )
-                    Divider().padding(.leading, 20)
-                    option(
-                        .keepAwaitingConfirmation,
-                        title: "tasks.signal_resolution.option_keep",
-                        hint: "tasks.signal_resolution.option_keep_hint"
-                    )
+                    VStack(spacing: 0) {
+                        option(
+                            .resetToPending,
+                            title: "tasks.signal_resolution.option_reset",
+                            hint: "tasks.signal_resolution.option_reset_hint"
+                        )
+                        Rectangle()
+                            .fill(Color.App.Border.separator)
+                            .frame(height: 1)
+                            .padding(.leading, AppSpacing.xxl)
+                        option(
+                            .keepAwaitingConfirmation,
+                            title: "tasks.signal_resolution.option_keep",
+                            hint: "tasks.signal_resolution.option_keep_hint"
+                        )
+                    }
+                    .appCard()
+
+                    if viewModel.isSaving {
+                        Text("tasks.form.submitting")
+                            .font(.app(.caption))
+                            .foregroundStyle(Color.App.Text.secondary)
+                            .padding(.horizontal, AppSpacing.xxl)
+                    }
                 }
-                .background(.background.secondary, in: RoundedRectangle(cornerRadius: 26))
-
-                Spacer()
+                .padding(.horizontal, AppSpacing.lg)
+                .padding(.top, AppSpacing.sm)
+                .padding(.bottom, AppSpacing.xxxl)
             }
-            .padding()
+            .scrollBounceBehavior(.basedOnSize)
+            .background(Color.App.Background.app.ignoresSafeArea())
+            .navigationTitle("tasks.edit.title")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancelar") { viewModel.cancelSignalResolution() }
-                        .disabled(viewModel.isSaving)
-                        .accessibilityIdentifier("tasks.signal_resolution.cancel")
+                    Button {
+                        viewModel.cancelSignalResolution()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .foregroundStyle(Color.App.Text.primary)
+                    }
+                    .disabled(viewModel.isSaving)
+                    .accessibilityLabel(Text("Cancelar"))
+                    .accessibilityIdentifier("tasks.signal_resolution.cancel")
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     if viewModel.isSaving {
                         ProgressView()
                     } else {
-                        Button("Confirmar") { Task { await viewModel.confirmSignalResolutionAndSave() } }
-                            .disabled(viewModel.signalResolutionChoice == nil)
-                            .accessibilityIdentifier("tasks.signal_resolution.confirm")
+                        Button {
+                            Task { await viewModel.confirmSignalResolutionAndSave() }
+                        } label: {
+                            Image(systemName: "checkmark")
+                                .fontWeight(.semibold)
+                        }
+                        .buttonStyle(.glassProminent)
+                        .tint(Color.App.Action.primary)
+                        .disabled(viewModel.signalResolutionChoice == nil)
+                        .accessibilityLabel(Text("Confirmar"))
+                        .accessibilityIdentifier("tasks.signal_resolution.confirm")
                     }
                 }
             }
         }
+        .presentationDetents([.medium, .large])
         .interactiveDismissDisabled(viewModel.isSaving)
     }
 
@@ -57,21 +89,27 @@ struct SignalResolutionView: View {
             viewModel.chooseSignalResolution(value)
         } label: {
             HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: AppSpacing.xxs) {
                     Text(title)
-                        .foregroundStyle(.primary)
+                        .font(.app(.body))
+                        .foregroundStyle(Color.App.Text.primary)
                     Text(hint)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
+                        .font(.app(.caption))
+                        .foregroundStyle(Color.App.Text.secondary)
                 }
                 Spacer()
                 if viewModel.signalResolutionChoice == value {
                     Image(systemName: "checkmark")
-                        .foregroundStyle(.tint)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.App.Action.primary)
+                        .accessibilityHidden(true)
                 }
             }
-            .padding(20)
+            .padding(AppSpacing.xxl)
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(viewModel.signalResolutionChoice == value ? .isSelected : [])
         .accessibilityIdentifier("tasks.signal_resolution.option.\(value.rawValue)")
     }
 }

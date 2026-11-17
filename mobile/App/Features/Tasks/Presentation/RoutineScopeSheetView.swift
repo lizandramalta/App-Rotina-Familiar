@@ -18,26 +18,38 @@ struct RoutineScopeSheetView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                Section {
-                    option(.onlyThis, title: "routines.scope.only_this", hint: "routines.scope.only_this_hint")
-                    option(
-                        .thisAndFuture,
-                        title: "routines.scope.selected_and_future",
-                        hint: "routines.scope.selected_and_future_hint"
-                    )
-                } header: {
+            ScrollView {
+                VStack(alignment: .leading, spacing: AppSpacing.md) {
                     Text(summary)
-                        .font(.subheadline)
-                        .foregroundStyle(Color(uiColor: .label))
-                        .textCase(nil)
+                        .font(.app(.subtitle))
+                        .foregroundStyle(Color.App.Text.primary)
+                        .padding(.horizontal, AppSpacing.xxl)
                         .accessibilityIdentifier("routines.scope.summary")
-                } footer: {
+
+                    VStack(spacing: 0) {
+                        option(.onlyThis, title: "routines.scope.only_this", hint: "routines.scope.only_this_hint")
+                        Rectangle()
+                            .fill(Color.App.Border.separator)
+                            .frame(height: 1)
+                            .padding(.leading, AppSpacing.xxl)
+                        option(
+                            .thisAndFuture,
+                            title: "routines.scope.selected_and_future",
+                            hint: "routines.scope.selected_and_future_hint"
+                        )
+                    }
+                    .appCard()
+
                     Text(purpose == .delete ? "routines.scope.delete_hint" : "routines.scope.cancel_hint")
-                        .font(.footnote)
+                        .font(.app(.caption))
+                        .foregroundStyle(Color.App.Text.secondary)
+                        .padding(.horizontal, AppSpacing.xxl)
                 }
+                .padding(.horizontal, AppSpacing.lg)
+                .padding(.top, AppSpacing.sm)
+                .padding(.bottom, AppSpacing.xxxl)
             }
-            .contentMargins(.top, 8, for: .scrollContent)
+            .background(Color.App.Background.app.ignoresSafeArea())
             // Content that fits stays still instead of bouncing under the bar.
             .scrollBounceBehavior(.basedOnSize)
             .navigationTitle(purpose == .delete ? "routines.scope.delete_title" : "routines.scope.title")
@@ -46,7 +58,8 @@ struct RoutineScopeSheetView: View {
                 // The prototype shows the whole question between ✕ and ✓, in regular body weight.
                 ToolbarItem(placement: .principal) {
                     Text(purpose == .delete ? "routines.scope.delete_title" : "routines.scope.title")
-                        .font(.body)
+                        .font(.app(.body))
+                        .foregroundStyle(Color.App.Text.primary)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
                         .accessibilityAddTraits(.isHeader)
@@ -56,6 +69,7 @@ struct RoutineScopeSheetView: View {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark")
+                            .foregroundStyle(Color.App.Text.primary)
                     }
                     .accessibilityLabel(Text("Cancelar"))
                     .accessibilityIdentifier("routines.scope.cancel")
@@ -70,7 +84,7 @@ struct RoutineScopeSheetView: View {
                             .fontWeight(.semibold)
                     }
                     .buttonStyle(.glassProminent)
-                    .tint(selection == nil ? Color(uiColor: .systemGray3) : .accentColor)
+                    .tint(selection == nil ? Color.App.Border.cardHighlight : Color.App.Action.primary)
                     .disabled(selection == nil)
                     .accessibilityLabel(Text("Confirmar"))
                     .accessibilityIdentifier("routines.scope.confirm")
@@ -81,30 +95,34 @@ struct RoutineScopeSheetView: View {
         .presentationDetents([.medium])
         .presentationContentInteraction(.scrolls)
         .presentationDragIndicator(.visible)
-        .frame(maxWidth: 540)
+        .frame(maxWidth: Self.maxSheetWidth)
     }
+
+    private static let maxSheetWidth: CGFloat = 540
 
     private func option(_ scope: RoutineScope, title: LocalizedStringKey, hint: LocalizedStringKey) -> some View {
         Button {
             selection = scope
         } label: {
-            HStack(alignment: .center, spacing: 12) {
-                VStack(alignment: .leading, spacing: 2) {
+            HStack(alignment: .center, spacing: AppSpacing.md) {
+                VStack(alignment: .leading, spacing: AppSpacing.xxs) {
                     Text(title)
-                        .foregroundStyle(.primary)
+                        .font(.app(.body))
+                        .foregroundStyle(Color.App.Text.primary)
                     Text(hint)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
+                        .font(.app(.caption))
+                        .foregroundStyle(Color.App.Text.secondary)
                 }
                 Spacer()
                 if selection == scope {
                     Image(systemName: "checkmark")
                         .fontWeight(.semibold)
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(Color.App.Action.primary)
                         .accessibilityHidden(true)
                 }
             }
-            .padding(.vertical, 12)
+            .padding(.horizontal, AppSpacing.xxl)
+            .padding(.vertical, AppSpacing.md)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

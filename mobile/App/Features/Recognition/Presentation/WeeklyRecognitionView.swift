@@ -12,29 +12,38 @@ struct WeeklyRecognitionView: View {
         _viewModel = State(initialValue: viewModel)
     }
 
+    private static let maxContentWidth: CGFloat = 600
+    private static let summaryStarSize: CGFloat = 64
+    private static let skeletonLineHeight: CGFloat = 14
+    private static let skeletonShortLineWidth: CGFloat = 160
+    private static let skeletonMessageHeight: CGFloat = 88
+    private static let retryMaxWidth: CGFloat = 320
+
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: AppSpacing.xl) {
+                VStack(alignment: .leading, spacing: AppSpacing.xs) {
                     Text("recognition.title")
-                        .font(.largeTitle.bold())
+                        .font(.app(.title1))
+                        .foregroundStyle(Color.App.Text.primary)
                         .accessibilityAddTraits(.isHeader)
                     if viewModel.recognition != nil {
                         Text(viewModel.periodText)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .font(.app(.subtitle))
+                            .foregroundStyle(Color.App.Text.secondary)
                             .accessibilityHidden(true)
                     }
                 }
                 content
             }
-            .frame(maxWidth: 600, alignment: .leading)
+            .frame(maxWidth: Self.maxContentWidth, alignment: .leading)
             .frame(maxWidth: .infinity)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
+            .padding(.horizontal, AppSpacing.xxl)
+            .padding(.vertical, AppSpacing.md)
         }
-        .background(Color(.secondarySystemBackground))
+        .background(Color.App.Background.app.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
+        .hidesAppTabBar()
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("recognition.screen")
         .task { await viewModel.load() }
@@ -63,89 +72,90 @@ struct WeeklyRecognitionView: View {
     }
 
     private func loaded(_ recognition: WeeklyRecognition) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: AppSpacing.lg) {
             if viewModel.isWhatsAppUnavailable {
                 Label("recognition.whatsapp_unavailable", systemImage: "exclamationmark.circle.fill")
-                    .font(.subheadline)
-                    .padding(14)
+                    .font(.app(.subtitle))
+                    .foregroundStyle(Color.App.Text.primary)
+                    .padding(AppSpacing.base)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(.systemBackground), in: RoundedRectangle(cornerRadius: 16))
+                    .appCard(cornerRadius: AppRadius.card)
                     .accessibilityFocused($isNoticeFocused)
                     .accessibilityIdentifier("recognition.whatsapp_unavailable")
             }
             summaryCard(recognition)
             Text("recognition.invite")
-                .font(.headline)
+                .font(.app(.bodyStrong))
+                .foregroundStyle(Color.App.Text.primary)
             TextField("recognition.message_placeholder", text: $viewModel.message, axis: .vertical)
                 .lineLimit(3 ... 8)
-                .padding(14)
-                .background(Color(.systemBackground), in: RoundedRectangle(cornerRadius: 16))
+                .font(.app(.body))
+                .foregroundStyle(Color.App.Text.primary)
+                .padding(AppSpacing.base)
+                .appCard(cornerRadius: AppRadius.card)
                 .accessibilityLabel(Text("recognition.message_label"))
                 .accessibilityHint(Text("recognition.message_hint"))
                 .accessibilityIdentifier("recognition.message")
             actions
             if viewModel.showsCopyConfirmation {
                 Label("recognition.copied", systemImage: "checkmark.circle")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .font(.app(.subtitle))
+                    .foregroundStyle(Color.App.Action.primary)
                     .accessibilityIdentifier("recognition.copied")
             }
         }
     }
 
     private func summaryCard(_ recognition: WeeklyRecognition) -> some View {
-        VStack(spacing: 12) {
-            Image(systemName: "star.circle.fill")
-                .font(.system(size: 56))
-                .accessibilityHidden(true)
+        VStack(spacing: AppSpacing.md) {
+            StarDecorationView(variant: .yellow, size: Self.summaryStarSize)
             Text(viewModel.headline)
-                .font(.title3.bold())
+                .font(.app(.title2))
+                .foregroundStyle(Color.App.Text.primary)
                 .multilineTextAlignment(.center)
-            HStack(spacing: 32) {
+            HStack(spacing: AppSpacing.giant) {
                 metric(value: recognition.points, label: "recognition.points")
                 metric(value: recognition.completedTasks, label: "recognition.tasks")
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(20)
-        .background(Color(.systemBackground), in: RoundedRectangle(cornerRadius: 20))
+        .padding(AppSpacing.xxl)
+        .appCard()
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(viewModel.summaryAccessibilityLabel))
         .accessibilityIdentifier(recognition.isTie ? "recognition.summary.tie" : "recognition.summary.first")
     }
 
     private func metric(value: Int, label: LocalizedStringKey) -> some View {
-        VStack(spacing: 2) {
+        VStack(spacing: AppSpacing.xxs) {
             Text(value, format: .number)
-                .font(.title.bold())
+                .font(.app(.numberMedium))
+                .foregroundStyle(Color.App.Text.primary)
             Text(label)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .font(.app(.caption))
+                .foregroundStyle(Color.App.Text.secondary)
         }
     }
 
     private var actions: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: AppSpacing.md) {
             if viewModel.showsWhatsAppAction {
                 Button {
                     Task { await viewModel.shareOnWhatsApp() }
                 } label: {
                     Label("recognition.share", systemImage: "message")
-                        .frame(maxWidth: .infinity, minHeight: 44)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(Color.primary)
+                .buttonStyle(AppPillButtonStyle(kind: .primary))
                 .accessibilityHint(Text("recognition.share_hint"))
                 .accessibilityIdentifier("recognition.share")
             }
+            // Copy is secondary next to WhatsApp and becomes the primary action without it.
             Button {
                 viewModel.copyMessage()
             } label: {
                 Label("recognition.copy", systemImage: "doc.on.doc")
-                    .frame(maxWidth: .infinity, minHeight: 44)
             }
-            .buttonStyle(viewModel.showsWhatsAppAction ? AnyPrimitiveButtonStyle(.bordered) : AnyPrimitiveButtonStyle(.borderedProminent))
-            .tint(Color.primary)
+            .buttonStyle(AppPillButtonStyle(kind: viewModel.showsWhatsAppAction ? .secondary : .primary))
             .accessibilityIdentifier("recognition.copy")
         }
         .disabled(!viewModel.canShare)
@@ -153,16 +163,24 @@ struct WeeklyRecognitionView: View {
 
     private var loadingSkeleton: some View {
         // No provisional result: placeholders only (UX-020 §3 · Carregando).
-        VStack(spacing: 16) {
-            VStack(spacing: 12) {
-                Circle().fill(Color(.systemFill)).frame(width: 56, height: 56)
-                RoundedRectangle(cornerRadius: 6).fill(Color(.systemFill)).frame(height: 14)
-                RoundedRectangle(cornerRadius: 6).fill(Color(.systemFill)).frame(width: 160, height: 14)
+        VStack(spacing: AppSpacing.lg) {
+            VStack(spacing: AppSpacing.md) {
+                Circle()
+                    .fill(Color.App.Background.cardHighlight)
+                    .frame(width: Self.summaryStarSize, height: Self.summaryStarSize)
+                Capsule()
+                    .fill(Color.App.Background.cardHighlight)
+                    .frame(height: Self.skeletonLineHeight)
+                Capsule()
+                    .fill(Color.App.Background.cardHighlight)
+                    .frame(width: Self.skeletonShortLineWidth, height: Self.skeletonLineHeight)
             }
             .frame(maxWidth: .infinity)
-            .padding(20)
-            .background(Color(.systemBackground), in: RoundedRectangle(cornerRadius: 20))
-            RoundedRectangle(cornerRadius: 16).fill(Color(.systemBackground)).frame(height: 88)
+            .padding(AppSpacing.xxl)
+            .appCard()
+            Color.clear
+                .frame(height: Self.skeletonMessageHeight)
+                .appCard(cornerRadius: AppRadius.card)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("recognition.loading"))
@@ -170,39 +188,27 @@ struct WeeklyRecognitionView: View {
     }
 
     private var errorState: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: AppSpacing.base) {
             Image(systemName: "exclamationmark.circle.fill")
-                .font(.title)
+                .font(.app(.title1))
+                .foregroundStyle(Color.App.Text.secondary)
                 .accessibilityHidden(true)
             Text("recognition.error")
-                .font(.headline)
+                .font(.app(.title2))
+                .foregroundStyle(Color.App.Text.primary)
                 .multilineTextAlignment(.center)
             Button {
                 Task { await viewModel.load() }
             } label: {
                 Text("recognition.retry")
-                    .frame(minWidth: 160, minHeight: 44)
             }
-            .buttonStyle(.bordered)
-            .tint(Color.primary)
+            .buttonStyle(AppPillButtonStyle(kind: .secondary))
+            .frame(maxWidth: Self.retryMaxWidth)
             .accessibilityIdentifier("recognition.retry")
         }
         .frame(maxWidth: .infinity)
-        .padding(.top, 32)
+        .padding(.top, AppSpacing.giant)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("recognition.error")
-    }
-}
-
-/// Type-erases the two system button styles used by the copy action.
-private struct AnyPrimitiveButtonStyle: PrimitiveButtonStyle {
-    private let make: (Configuration) -> AnyView
-
-    init<Style: PrimitiveButtonStyle>(_ style: Style) {
-        make = { AnyView(style.makeBody(configuration: $0)) }
-    }
-
-    func makeBody(configuration: Configuration) -> some View {
-        make(configuration)
     }
 }

@@ -5,32 +5,33 @@ struct WeeklyRecognitionEntryCard: View {
     let recognition: WeeklyRecognition
     let onOpen: (UUID) -> Void
 
+    private static let starSize: CGFloat = 44
+    private static let minTouchTarget: CGFloat = 44
+
     var body: some View {
         Button {
             onOpen(recognition.id)
         } label: {
-            HStack(spacing: 12) {
-                Image(systemName: "star.circle.fill")
-                    .font(.title)
-                    .accessibilityHidden(true)
-                VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: AppSpacing.md) {
+                StarDecorationView(variant: .yellow, size: Self.starSize)
+                VStack(alignment: .leading, spacing: AppSpacing.xxs) {
                     Text("recognition.entry.title")
-                        .font(.headline)
+                        .font(.app(.cardTitle))
+                        .foregroundStyle(Color.App.Text.primary)
                     Text("recognition.entry.subtitle")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .font(.app(.subtitle))
+                        .foregroundStyle(Color.App.Text.secondary)
                 }
                 Spacer(minLength: 0)
                 Image(systemName: "chevron.right")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(.tertiary)
+                    .font(.app(.noteStrong))
+                    .foregroundStyle(Color.App.Text.secondary)
                     .accessibilityHidden(true)
             }
-            .foregroundStyle(.primary)
-            .padding(16)
-            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-            .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 20))
-            .contentShape(RoundedRectangle(cornerRadius: 20))
+            .padding(AppSpacing.lg)
+            .frame(maxWidth: .infinity, minHeight: Self.minTouchTarget, alignment: .leading)
+            .appCard()
+            .contentShape(RoundedRectangle(cornerRadius: AppRadius.cardBoard))
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)

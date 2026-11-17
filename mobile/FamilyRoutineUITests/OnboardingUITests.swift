@@ -44,7 +44,7 @@ final class OnboardingUITests: XCTestCase {
     }
 
     private func assertMainAppOpened() {
-        XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.descendants(matching: .any)["app.tab_bar"].waitForExistence(timeout: 5))
     }
 
     func testProfileRequiresNameAndBackPreservesTheDraft() {

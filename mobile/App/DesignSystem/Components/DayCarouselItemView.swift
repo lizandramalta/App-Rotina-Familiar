@@ -14,8 +14,7 @@ enum DayCarouselState: CaseIterable {
     var backgroundColor: Color {
         switch self {
         case .standard, .today: .clear
-        case .selected: Color.App.System.dimming
-        case .todaySelected: Color.App.Status.completed
+        case .selected, .todaySelected: Color.App.Action.primary
         }
     }
 
@@ -26,7 +25,7 @@ enum DayCarouselState: CaseIterable {
     var numberColor: Color {
         switch self {
         case .standard: Color.App.Text.primary
-        case .today: Color.App.Status.completed
+        case .today: Color.App.Action.primary
         case .selected, .todaySelected: Color.App.Text.onAction
         }
     }
@@ -35,7 +34,7 @@ enum DayCarouselState: CaseIterable {
 /// One day in the day carousel (Figma "Alta / Controles / Dia do carrossel", node 907:13356).
 struct DayCarouselItemView: View {
     static let size = CGSize(width: 46, height: 62)
-    /// Figma "Alta · Texto/11 · Bold" — not part of the 14-role scale.
+    /// Figma "Alta · Texto/11 · Bold" — not part of the 16-role scale.
     static let weekdayFont = Font.system(size: 11, weight: .bold)
     /// Figma "Alta · Número/20" (Sour Gummy Medium) — 20 pt instead of the 22 pt `number` role.
     nonisolated static let numberTypography = AppTypography(
@@ -47,9 +46,11 @@ struct DayCarouselItemView: View {
     let dayNumber: String
     let state: DayCarouselState
     var action: (() -> Void)?
+    /// Replaces the default "weekday day" label when the caller has a fuller one (e.g. full date, "hoje").
+    var customAccessibilityLabel: String?
 
     var accessibilityLabel: String {
-        String(localized: "design_system.day_carousel.label \(weekday) \(dayNumber)")
+        customAccessibilityLabel ?? String(localized: "design_system.day_carousel.label \(weekday) \(dayNumber)")
     }
 
     var body: some View {

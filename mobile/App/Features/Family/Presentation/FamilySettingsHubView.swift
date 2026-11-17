@@ -38,7 +38,7 @@ struct FamilySettingsHubView: View {
                 if let makeFamilySettingsViewModel {
                     NavigationLink {
                         FamilySettingsView(viewModel: makeFamilySettingsViewModel())
-                            .toolbar(.hidden, for: .tabBar)
+                            .hidesAppTabBar()
                     } label: {
                         settingsRow(icon: "globe", title: "family.settings.hub.timezone", value: viewModel.timeZoneDisplayName)
                     }
