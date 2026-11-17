@@ -1,7 +1,7 @@
-# Design System — Alta Fidelidade (Mutua Mobile)
+# Design System — Alta Fidelidade (Mora Mobile)
 
-**Versão:** 1.0\
-**Data:** 2026-11-12\
+**Versão:** 1.1\
+**Data:** 2026-11-16\
 **Situação:** norma técnica e guia de utilização do Design System em SwiftUI (`mobile/`)
 
 [Screen map](screen-map.md) · [User flows](user-flows.md) · [Convenções mobile](../architecture/mobile-code-conventions.md) · [Arquitetura mobile](../architecture/mobile-architecture.md) · [Índice](../DOCUMENTACAO.md)
@@ -10,7 +10,7 @@
 
 ## 1. Visão geral e fontes de verdade
 
-Este documento define a especificação e as diretrizes de utilização da camada de apresentação e componentes de interface do aplicativo **Mutua** (iOS/iPadOS). Ele é a **referência canônica para desenvolvedores e agentes de IA** implementarem telas, fluxos e componentes visuais.
+Este documento define a especificação e as diretrizes de utilização da camada de apresentação e componentes de interface do aplicativo **Mora** (iOS/iPadOS). Ele é a **referência canônica para desenvolvedores e agentes de IA** implementarem telas, fluxos e componentes visuais.
 
 ### Fontes no Figma
 As definições visuais deste Design System derivam diretamente dos seguintes nós do arquivo do Figma:
@@ -320,4 +320,5 @@ RoundedRectangle(cornerRadius: AppRadius.card)
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.1 | 2026-11-16 | Nome do aplicativo atualizado para Mora; sem mudança de tokens ou componentes. |
 | 1.0 | 2026-11-12 | Criação da especificação do Design System com base nos nós Figma 960:25 e 870:22509, documentando tokens de cores, tipografia, espaçamentos, raios e componentes primitivos. |
