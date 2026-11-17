@@ -37,6 +37,10 @@ const VALID_COMMAND = {
 describe('SignInWithApple use case (SPEC-001 Fase 1)', () => {
   let repository: InMemoryAccessRepository;
   let crypto: ReturnType<typeof createFakeCrypto>;
+  const secretCipher = {
+    encrypt: (value: string) => `cipher(${value})`,
+    decrypt: (value: string) => value.replace(/^cipher\((.*)\)$/, '$1'),
+  };
   let logger: Logger;
   let verifyIdentityProof: ReturnType<typeof vi.fn>;
   let transactionRunner: TransactionRunner;
@@ -70,6 +74,7 @@ describe('SignInWithApple use case (SPEC-001 Fase 1)', () => {
       repository,
       tokenVerifier: { verifyIdentityProof } as unknown as AppleTokenVerifierPort,
       crypto,
+      secretCipher,
       transactionRunner,
       clock,
       logger,
@@ -361,6 +366,68 @@ describe('SignInWithApple use case (SPEC-001 Fase 1)', () => {
 
       expect(result.role).toBe('member');
       expect(result.isFamilyCreator).toBe(false);
+    });
+  });
+
+  describe('SPEC-001 Fase 4: refresh token Apple guardado para revogação', () => {
+    it('CA-12 stores the Apple refresh token encrypted in the same transaction as the session', async () => {
+      givenLinkedCreator();
+      verifyIdentityProof.mockResolvedValue({
+        subject: APPLE_SUBJECT,
+        refreshToken: 'apple-refresh',
+      });
+
+      await useCase.execute(VALID_COMMAND);
+
+      expect(repository.storedAppleRefreshTokens).toEqual([
+        {
+          creatorIdentityId: repository.identities[0]?.id,
+          refreshTokenEncrypted: 'cipher(apple-refresh)',
+        },
+      ]);
+      expect(repository.operations.indexOf('storeAppleRefreshToken')).toBeLessThan(
+        repository.operations.indexOf('insertSession'),
+      );
+      expect(runCallCount).toBe(1);
+    });
+
+    it('CA-13 also stores it when the identity has no family and receives a creation grant', async () => {
+      verifyIdentityProof.mockResolvedValue({
+        subject: APPLE_SUBJECT,
+        refreshToken: 'apple-refresh',
+      });
+
+      const result = await useCase.execute(VALID_COMMAND);
+
+      expect(result.outcome).toBe('creationGrant');
+      expect(repository.storedAppleRefreshTokens).toHaveLength(1);
+    });
+
+    it('CA-14 signs in normally and keeps the stored token when Apple returns none', async () => {
+      givenLinkedCreator();
+
+      const result = await useCase.execute(VALID_COMMAND);
+
+      expect(result.outcome).toBe('session');
+      expect(repository.storedAppleRefreshTokens).toEqual([]);
+    });
+
+    it('CA-15 never logs the Apple refresh token, only whether it was stored', async () => {
+      givenLinkedCreator();
+      verifyIdentityProof.mockResolvedValue({
+        subject: APPLE_SUBJECT,
+        refreshToken: 'apple-refresh',
+      });
+
+      const result = await useCase.execute(VALID_COMMAND);
+
+      const info = logger.info as ReturnType<typeof vi.fn>;
+      expect(info).toHaveBeenCalledWith(
+        'apple_sign_in_succeeded',
+        expect.objectContaining({ appleRefreshTokenStored: true }),
+      );
+      expect(JSON.stringify(info.mock.calls)).not.toContain('apple-refresh');
+      expect(JSON.stringify(result)).not.toContain('apple-refresh');
     });
   });
 });

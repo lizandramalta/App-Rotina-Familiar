@@ -1,5 +1,6 @@
 import {
   createCipheriv,
+  createDecipheriv,
   createHash,
   randomBytes,
   randomUUID,
@@ -7,6 +8,7 @@ import {
   timingSafeEqual,
 } from 'node:crypto';
 import type { AccessCryptoPort } from '../application/access-crypto-port.js';
+import type { SecretCipherPort } from '../application/secret-cipher-port.js';
 
 /** 256 bits de entropia no token opaco devolvido ao cliente (BA-10). */
 const OPAQUE_TOKEN_BYTES = 32;
@@ -28,7 +30,7 @@ const KEY_DERIVATION_SALT = 'app-rotina-familiar/access/apple-subject';
  * apenas SHA-256 deles. O `sub` da Apple é cifrado em AES-256-GCM, com a chave
  * derivada de `SESSION_SECRET` — o segredo nunca é usado como chave crua.
  */
-export class CryptoTokenService implements AccessCryptoPort {
+export class CryptoTokenService implements AccessCryptoPort, SecretCipherPort {
   private readonly encryptionKey: Buffer;
 
   constructor(sessionSecret: string) {
@@ -70,10 +72,18 @@ export class CryptoTokenService implements AccessCryptoPort {
    * seja detectada na decifragem.
    */
   public encryptAppleSubject(appleSubject: string): string {
+    return this.encrypt(appleSubject);
+  }
+
+  /**
+   * Mesmo formato `iv.ciphertext.authTag` do identificador Apple; usado também
+   * para o refresh token Apple (SPEC-001 Fase 4, BA-40).
+   */
+  public encrypt(plaintext: string): string {
     const iv = randomBytes(AES_IV_BYTES);
     const cipher = createCipheriv('aes-256-gcm', this.encryptionKey, iv);
 
-    const ciphertext = Buffer.concat([cipher.update(appleSubject, 'utf8'), cipher.final()]);
+    const ciphertext = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
     const authTag = cipher.getAuthTag();
 
     return [
@@ -81,5 +91,33 @@ export class CryptoTokenService implements AccessCryptoPort {
       ciphertext.toString('base64url'),
       authTag.toString('base64url'),
     ].join('.');
+  }
+
+  /**
+   * Decifra e autentica o valor. A tag GCM recusa valor adulterado ou cifrado
+   * com outra chave (por exemplo, após trocar `SESSION_SECRET`).
+   */
+  public decrypt(ciphertext: string): string {
+    const [ivPart, bodyPart, tagPart, extra] = ciphertext.split('.');
+    if (
+      ivPart === undefined ||
+      bodyPart === undefined ||
+      tagPart === undefined ||
+      extra !== undefined
+    ) {
+      throw new TypeError('Encrypted value is malformed.');
+    }
+
+    const decipher = createDecipheriv(
+      'aes-256-gcm',
+      this.encryptionKey,
+      Buffer.from(ivPart, 'base64url'),
+    );
+    decipher.setAuthTag(Buffer.from(tagPart, 'base64url'));
+
+    return Buffer.concat([
+      decipher.update(Buffer.from(bodyPart, 'base64url')),
+      decipher.final(),
+    ]).toString('utf8');
   }
 }

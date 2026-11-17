@@ -24,3 +24,4 @@ Cada módulo neste diretório representa uma fronteira de negócio delimitada da
 11. **`recognition`**: Ciclos semanais, apuração de pontuação e destaque semanal.
 12. **`media`**: Upload de imagens, armazenamento privado R2 e limpeza de órfãos.
 13. **`notifications`**: Registro de dispositivos APNs e fila outbox de push.
+14. **`account`**: Exclusão de conta e da família pelo Criador, filas pós-commit de revogação Apple e apagamento no R2 (SPEC-022).

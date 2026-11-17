@@ -1,3 +1,14 @@
+import { DeleteOwnAccountUseCase } from '../modules/account/application/delete-own-account-use-case.js';
+import { DeleteKidsAccountUseCase } from '../modules/account/application/delete-kids-account-use-case.js';
+import { RevokeAppleTokens } from '../modules/account/application/revoke-apple-tokens.js';
+import { DeleteMediaObjects } from '../modules/account/application/delete-media-objects.js';
+import { CleanOrphanAppleTokens } from '../modules/account/application/clean-orphan-apple-tokens.js';
+import { PostgresAccountDeletionRepository } from '../modules/account/infrastructure/postgres-account-deletion-repository.js';
+import {
+  PostgresAppleTokenRevocationQueue,
+  PostgresMediaObjectDeletionQueue,
+  PostgresOrphanAppleTokenCleanup,
+} from '../modules/account/infrastructure/postgres-account-deletion-queues.js';
 import { PostgresRecognitionRepository } from '../modules/recognition/infrastructure/postgres-recognition-repository.js';
 import { FinalizeWeeklyHighlight } from '../modules/recognition/application/finalize-weekly-highlight.js';
 import { OwnWeeklyRecognitions } from '../modules/recognition/application/own-weekly-recognitions.js';
@@ -159,6 +170,11 @@ export interface ApplicationContainer {
   readonly getMediaContentUseCase: GetMediaContentUseCase;
   readonly uploadOnboardingMediaUseCase: UploadOnboardingMediaUseCase;
   readonly cleanOrphanOnboardingMedia: CleanOrphanOnboardingMedia;
+  readonly deleteOwnAccountUseCase: DeleteOwnAccountUseCase;
+  readonly deleteKidsAccountUseCase: DeleteKidsAccountUseCase;
+  readonly revokeAppleTokens: RevokeAppleTokens;
+  readonly deleteMediaObjects: DeleteMediaObjects;
+  readonly cleanOrphanAppleTokens: CleanOrphanAppleTokens;
   readonly updateOwnProfileUseCase: UpdateOwnProfileUseCase;
   readonly getOwnProfileUseCase: GetOwnProfileUseCase;
   readonly getOwnBadgesUseCase: GetOwnBadgesUseCase;
@@ -207,10 +223,11 @@ export function createContainer(config: Configuration): ApplicationContainer {
   const appleConfig = createAppleConfiguration(config);
   const transactionRunner = new PostgresTransactionRunner(dbPool);
 
+  const appleTokenClient = new AppleTokenClient(appleConfig, logger);
   const appleTokenVerifier = new AppleTokenVerifier(
     appleConfig,
     new AppleJwksClient(appleConfig, logger),
-    new AppleTokenClient(appleConfig, logger),
+    appleTokenClient,
   );
 
   const accessRepository = new PostgresAccessRepository();
@@ -221,6 +238,7 @@ export function createContainer(config: Configuration): ApplicationContainer {
     repository: accessRepository,
     tokenVerifier: appleTokenVerifier,
     crypto: accessCrypto,
+    secretCipher: accessCrypto,
     transactionRunner,
     clock,
     logger,
@@ -437,6 +455,52 @@ export function createContainer(config: Configuration): ApplicationContainer {
     logger,
   });
 
+  // SPEC-022 / SPEC-001 Fase 4: exclusão de conta e filas pós-commit (BA-40).
+  const accountDeletionRepository = new PostgresAccountDeletionRepository(
+    memberManagementRepository,
+  );
+  const revokeAppleTokens = new RevokeAppleTokens({
+    queue: new PostgresAppleTokenRevocationQueue(),
+    revocation: appleTokenClient,
+    secretCipher: accessCrypto,
+    transactionRunner,
+    clock,
+    logger,
+    newId: () => accessCrypto.newId(),
+    maxAttempts: config.ACCOUNT_DELETION_JOB_MAX_ATTEMPTS,
+  });
+  const deleteMediaObjects = new DeleteMediaObjects({
+    queue: new PostgresMediaObjectDeletionQueue(),
+    storage: objectStorage,
+    transactionRunner,
+    clock,
+    logger,
+    newId: () => accessCrypto.newId(),
+    maxAttempts: config.ACCOUNT_DELETION_JOB_MAX_ATTEMPTS,
+  });
+  const cleanOrphanAppleTokens = new CleanOrphanAppleTokens({
+    cleanup: new PostgresOrphanAppleTokenCleanup(),
+    transactionRunner,
+    clock,
+    logger,
+  });
+  const deleteOwnAccountUseCase = new DeleteOwnAccountUseCase({
+    repository: accountDeletionRepository,
+    tokenVerifier: appleTokenVerifier,
+    crypto: accessCrypto,
+    secretCipher: accessCrypto,
+    appleTokenRevoker: revokeAppleTokens,
+    transactionRunner,
+    clock,
+    logger,
+  });
+  const deleteKidsAccountUseCase = new DeleteKidsAccountUseCase({
+    repository: accountDeletionRepository,
+    transactionRunner,
+    clock,
+    logger,
+  });
+
   const profileRepository = new PostgresProfileRepository();
   const updateOwnProfileUseCase = new UpdateOwnProfileUseCase({
     profileRepository,
@@ -586,6 +650,11 @@ export function createContainer(config: Configuration): ApplicationContainer {
     getMediaContentUseCase,
     uploadOnboardingMediaUseCase,
     cleanOrphanOnboardingMedia,
+    deleteOwnAccountUseCase,
+    deleteKidsAccountUseCase,
+    revokeAppleTokens,
+    deleteMediaObjects,
+    cleanOrphanAppleTokens,
     updateOwnProfileUseCase,
     getOwnProfileUseCase,
     getOwnBadgesUseCase,

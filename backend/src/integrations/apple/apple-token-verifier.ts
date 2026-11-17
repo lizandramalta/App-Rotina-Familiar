@@ -7,7 +7,10 @@ import {
 } from 'node:crypto';
 import type { AppleConfiguration } from './apple-configuration.js';
 import type { AppleJsonWebKey, AppleJwksPort } from './apple-jwks-port.js';
-import type { AppleTokenExchangePort } from './apple-token-exchange-port.js';
+import type {
+  AppleAuthorizationCodeExchange,
+  AppleTokenExchangePort,
+} from './apple-token-exchange-port.js';
 import type {
   AppleIdentityProof,
   AppleTokenVerifierPort,
@@ -132,10 +135,15 @@ export class AppleTokenVerifier implements AppleTokenVerifierPort {
 
     // A troca vem depois da verificação local: um identityToken inválido é
     // recusado sem gastar uma chamada de rede à Apple.
-    await this.assertAuthorizationCodeBelongsToSubject(proof.authorizationCode, subject);
+    const exchange = await this.assertAuthorizationCodeBelongsToSubject(
+      proof.authorizationCode,
+      subject,
+    );
 
     return {
       subject,
+      refreshToken: exchange.refreshToken,
+      accessToken: exchange.accessToken,
       email: payload.email,
       isEmailVerified: asBoolean(payload.email_verified),
       isPrivateEmail: asBoolean(payload.is_private_email),
@@ -151,18 +159,18 @@ export class AppleTokenVerifier implements AppleTokenVerifierPort {
   private async assertAuthorizationCodeBelongsToSubject(
     authorizationCode: string,
     identityTokenSubject: string,
-  ): Promise<void> {
-    let exchangedSubject: string | undefined;
+  ): Promise<AppleAuthorizationCodeExchange> {
+    let exchange: AppleAuthorizationCodeExchange;
 
     try {
-      const exchange = await this.tokenExchange.exchangeAuthorizationCode(authorizationCode);
-      exchangedSubject = exchange.subject;
+      exchange = await this.tokenExchange.exchangeAuthorizationCode(authorizationCode);
     } catch (error) {
       throw new AppleProofVerificationError(
         error instanceof Error ? error.message : 'authorization_code_exchange_failed',
       );
     }
 
+    const exchangedSubject = exchange.subject;
     if (exchangedSubject === undefined || exchangedSubject.length === 0) {
       throw new AppleProofVerificationError('authorization_code_exchange_missing_subject');
     }
@@ -170,6 +178,8 @@ export class AppleTokenVerifier implements AppleTokenVerifierPort {
     if (!equalsConstantTime(exchangedSubject, identityTokenSubject)) {
       throw new AppleProofVerificationError('authorization_code_subject_mismatch');
     }
+
+    return exchange;
   }
 
   private assertSignature(params: {

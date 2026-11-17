@@ -24,6 +24,7 @@ configuração é usada pela rota `POST /v1/access/apple` para trocar o
 | `APPLE_ISSUER`      | Apple                    | URL                         | sim (tem default)  |
 | `APPLE_JWKS_URL`    | Apple                    | URL                         | sim (tem default)  |
 | `APPLE_TOKEN_URL`   | Apple                    | URL                         | sim (tem default)  |
+| `APPLE_REVOKE_URL`  | Apple                    | URL                         | sim (tem default)  |
 
 Em `development` e `test` o backend sobe sem `APPLE_TEAM_ID`, `APPLE_KEY_ID` e
 `APPLE_PRIVATE_KEY`, para não bloquear quem não tem acesso à conta Apple
@@ -49,7 +50,7 @@ Apple recusaria toda troca de `authorizationCode`. As chaves `.p8` emitidas pelo
 Apple Developer Portal já são P-256; a checagem existe para apontar no boot uma
 chave trocada por engano, em vez de derrubar a autenticação em runtime.
 
-`APPLE_ISSUER`, `APPLE_JWKS_URL` e `APPLE_TOKEN_URL` podem apontar para um stub em
+`APPLE_ISSUER`, `APPLE_JWKS_URL`, `APPLE_TOKEN_URL` e `APPLE_REVOKE_URL` podem apontar para um stub em
 `development` e `test`. Em `production` precisam ser exatamente os endpoints
 canônicos definidos em `.env.example` — conferir a prova de identidade contra
 outra origem invalidaria a autenticação.
@@ -223,3 +224,17 @@ Revogar antes de confirmar a nova chave interrompe o login de todos os usuários
 - [Sign in with Apple REST API](https://developer.apple.com/documentation/signinwithapplerestapi)
 - [Generate and validate tokens](https://developer.apple.com/documentation/signinwithapplerestapi/generate_and_validate_tokens)
 - [Fetch Apple's public key](https://developer.apple.com/documentation/signinwithapplerestapi/fetch_apple_s_public_key_for_verifying_token_signature)
+
+## Refresh token e revogação (SPEC-001 Fase 4, SPEC-022)
+
+A troca do `authorizationCode` em `POST /v1/access/apple` devolve também um
+`refresh_token`. O backend o guarda cifrado (AES-256-GCM, chave derivada de
+`SESSION_SECRET`) na identidade do Criador, substituindo o anterior. Quando o
+Criador exclui a conta, o token entra na fila `app.apple_token_revocations` e é
+revogado em `APPLE_REVOKE_URL` logo após o commit; falhas são retentadas pelo
+worker até `ACCOUNT_DELETION_JOB_MAX_ATTEMPTS`. O token nunca aparece em logs.
+
+Trocar `SESSION_SECRET` torna ilegíveis os tokens guardados: os Criadores afetados
+passam a precisar da nova autenticação Apple de reserva ao excluir a conta, e
+itens já na fila são descartados com o evento `apple_token_revocation_failed`
+(`reason: token_not_decryptable`).

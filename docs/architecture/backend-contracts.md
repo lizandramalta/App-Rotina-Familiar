@@ -251,7 +251,7 @@ Cada linha cobre um objetivo funcional completo, não apenas uma rota. RF/RN per
 | <a id="backend-uc17"></a>[UC17](../03-casos-de-uso.md#uc17) | `ReopenTask` / Tasks, Missions, Rewards | Perfil com acesso à tarefa; confirmação se missão concluída/recompensa; retirar crédito uma vez e reverter dados derivados | RF57–59; RN55/57–59 |
 | <a id="backend-uc18"></a>[UC18](../03-casos-de-uso.md#uc18) | `GetWeeklyReportSnapshot` / Reports, Insights | Snapshot consistente adulto para PDF local | RF61; RN62; RNF26/27 |
 | <a id="backend-uc19"></a>[UC19](../03-casos-de-uso.md#uc19) | `FinalizeWeeklyHighlight`, `GetOwnWeeklyRecognition`, `DeliverRecognitionNotification` | Ciclo encerrado, positivos/empates, resultado preservado e outbox | RF63/64; RN28/30/65; RNF26/27 |
-| <a id="backend-uc20"></a>[UC20](../03-casos-de-uso.md#uc20) | `DeleteOwnAccount`, `DeleteKidsAccount`, `SignInWithApple` (guarda do token), `RevokeAppleToken`, `DeleteMediaObjects` / Access, Family, Media | Exclusão imediata em um commit sob lock familiar; anonimização de não-Criador; exclusão física da família; revogação Apple e limpeza R2 pós-commit em filas recuperáveis | RF72–74; RN05/10/44/47/69/70; RNF16/22/24/28 |
+| <a id="backend-uc20"></a>[UC20](../03-casos-de-uso.md#uc20) | `DeleteOwnAccount`, `DeleteKidsAccount`, `SignInWithApple` (guarda do token), `RevokeAppleTokens`, `DeleteMediaObjects`, `CleanOrphanAppleTokens` / Account, Access, Media | Exclusão imediata em um commit sob lock familiar; anonimização de não-Criador; exclusão física da família; revogação Apple e limpeza R2 pós-commit em filas recuperáveis | RF72–74; RN05/10/44/47/69/70; RNF16/22/24/28 |
 
 ## 8. Cobertura não funcional
 
@@ -277,7 +277,7 @@ O documento OpenAPI 3.1 é gerado pelos schemas HTTP em `/docs/json`, e a interf
 
 | Versão | Data | Alteração |
 |---|---|---|
-| 1.30 | 2026-11-16 | Exclusão de conta (SPEC-022): `POST /me/account-deletion`, `POST /family/members/{memberId}/account-deletion`, guarda do refresh token Apple em `SignInWithApple` e rastreabilidade de UC20. Contrato alvo, ainda não implementado. |
+| 1.30 | 2026-11-16 | Exclusão de conta (SPEC-022): `POST /me/account-deletion`, `POST /family/members/{memberId}/account-deletion`, guarda do refresh token Apple em `SignInWithApple` e rastreabilidade de UC20. Implementado no backend (módulo `account`, migração `0018_account_deletion.sql`). |
 | 1.29 | 2026-11-12 | `IssueMemberInvite` invalida convites disponíveis sem revogar sessão; `JoinFamilyByInvite` revoga a sessão anterior do perfil com tokens e push. Sem mudança de schema (SCRUM-114). |
 | 1.28 | 2026-11-05 | Materializa SPEC-020 Fase 1 (SCRUM-102 CA-01–06): apuração e outbox atômicas, consultas próprias, abertura monotônica, payload APNs e OpenAPI. |
 | 1.27 | 2026-10-28 | `completedAt` permanece no contrato; TEL-032 compacta usa o horário na descrição acessível sem exibi-lo na linha. Sem mudança de API. |

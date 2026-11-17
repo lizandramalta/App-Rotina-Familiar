@@ -263,6 +263,8 @@ class InMemoryDatabase implements FamilyCreationRepositoryPort, AccessRepository
   public async insertCreatorIdentity(): Promise<never> {
     throw new Error('not used');
   }
+  public async storeAppleRefreshToken(): Promise<void> {}
+
   public async findCreatorMembership(): Promise<undefined> {
     return undefined;
   }

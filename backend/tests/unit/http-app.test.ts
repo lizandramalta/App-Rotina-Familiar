@@ -131,6 +131,17 @@ describe('HTTP Presentation Layer (Fastify)', () => {
       cleanOrphanOnboardingMedia: {
         run: vi.fn(),
       } as unknown as ApplicationContainer['cleanOrphanOnboardingMedia'],
+      deleteOwnAccountUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['deleteOwnAccountUseCase'],
+      deleteKidsAccountUseCase: {
+        execute: vi.fn(),
+      } as unknown as ApplicationContainer['deleteKidsAccountUseCase'],
+      revokeAppleTokens: { run: vi.fn() } as unknown as ApplicationContainer['revokeAppleTokens'],
+      deleteMediaObjects: { run: vi.fn() } as unknown as ApplicationContainer['deleteMediaObjects'],
+      cleanOrphanAppleTokens: {
+        run: vi.fn(),
+      } as unknown as ApplicationContainer['cleanOrphanAppleTokens'],
       updateOwnProfileUseCase: {
         execute: vi.fn(),
       } as unknown as ApplicationContainer['updateOwnProfileUseCase'],

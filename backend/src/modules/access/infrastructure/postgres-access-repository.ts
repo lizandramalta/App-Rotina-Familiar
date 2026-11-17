@@ -121,6 +121,18 @@ export class PostgresAccessRepository implements AccessRepositoryPort {
     };
   }
 
+  public async storeAppleRefreshToken(
+    tx: TransactionContext,
+    params: { readonly creatorIdentityId: string; readonly refreshTokenEncrypted: string },
+  ): Promise<void> {
+    await asPostgresClient(tx).query(
+      `update app.creator_identities
+          set apple_refresh_token_encrypted = $2, updated_at = now()
+        where id = $1`,
+      [params.creatorIdentityId, params.refreshTokenEncrypted],
+    );
+  }
+
   public async revokeActiveSessionsForMember(
     tx: TransactionContext,
     params: { readonly memberId: string; readonly reason: string },

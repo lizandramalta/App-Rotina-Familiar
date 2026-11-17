@@ -16,6 +16,7 @@ export interface AppleConfiguration {
   readonly issuer: string;
   readonly jwksUrl: string;
   readonly tokenUrl: string;
+  readonly revokeUrl: string;
 }
 
 export function createAppleConfiguration(config: Configuration): AppleConfiguration {
@@ -30,5 +31,6 @@ export function createAppleConfiguration(config: Configuration): AppleConfigurat
     issuer: config.APPLE_ISSUER,
     jwksUrl: config.APPLE_JWKS_URL,
     tokenUrl: config.APPLE_TOKEN_URL,
+    revokeUrl: config.APPLE_REVOKE_URL,
   };
 }

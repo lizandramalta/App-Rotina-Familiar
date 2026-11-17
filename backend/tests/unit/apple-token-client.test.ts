@@ -11,6 +11,7 @@ import { createPrivateKey, createVerify, generateKeyPairSync, type KeyObject } f
 import {
   AppleTokenClient,
   AppleTokenExchangeError,
+  AppleTokenRevocationError,
 } from '../../src/integrations/apple/apple-token-client.js';
 import type { AppleConfiguration } from '../../src/integrations/apple/apple-configuration.js';
 import { P256_CURVE_NAMES } from '../../src/bootstrap/configuration.js';
@@ -21,6 +22,7 @@ const KEY_ID = 'KEY1234567';
 const CLIENT_ID = 'com.lizandramalta.familyroutine';
 const ISSUER = 'https://appleid.apple.com';
 const TOKEN_URL = 'https://appleid.apple.com/auth/token';
+const REVOKE_URL = 'https://appleid.apple.com/auth/revoke';
 const APPLE_SUBJECT = '001234.abcdef0123456789.0000';
 const NOW_MS = Date.parse('2026-10-08T12:00:00.000Z');
 
@@ -36,6 +38,7 @@ function configWith(overrides: Partial<AppleConfiguration> = {}): AppleConfigura
     issuer: ISSUER,
     jwksUrl: 'https://appleid.apple.com/auth/keys',
     tokenUrl: TOKEN_URL,
+    revokeUrl: REVOKE_URL,
     ...overrides,
   };
 }
@@ -295,6 +298,91 @@ describe('AppleTokenClient', () => {
 
       expect((error as Error).message).not.toContain('secret-authorization-code');
       expect((error as Error).message).not.toContain(privateKeyPem.slice(40, 80));
+    });
+  });
+
+  describe('Apple refresh token (SPEC-001 Fase 4, CA-12/CA-14)', () => {
+    it('returns the refresh and access tokens from the exchange response', async () => {
+      const fetchImpl = vi.fn().mockResolvedValue(
+        jsonResponse({
+          id_token: idTokenWithSubject(APPLE_SUBJECT),
+          refresh_token: 'apple-refresh-token',
+          access_token: 'apple-access-token',
+        }),
+      );
+
+      const result = await createClient(
+        fetchImpl as unknown as typeof fetch,
+      ).exchangeAuthorizationCode('code');
+
+      expect(result.refreshToken).toBe('apple-refresh-token');
+      expect(result.accessToken).toBe('apple-access-token');
+    });
+
+    it('treats a missing or empty refresh token as absent', async () => {
+      const fetchImpl = vi
+        .fn()
+        .mockResolvedValue(
+          jsonResponse({ id_token: idTokenWithSubject(APPLE_SUBJECT), refresh_token: '' }),
+        );
+
+      const result = await createClient(
+        fetchImpl as unknown as typeof fetch,
+      ).exchangeAuthorizationCode('code');
+
+      expect(result.refreshToken).toBeUndefined();
+    });
+  });
+
+  describe('token revocation (SPEC-022 CA-13)', () => {
+    it('posts the token, its type hint and a signed client secret to the revoke URL', async () => {
+      const fetchImpl = vi.fn().mockResolvedValue(new Response(null, { status: 200 }));
+
+      await createClient(fetchImpl as unknown as typeof fetch).revokeToken(
+        'apple-refresh-token',
+        'refresh_token',
+      );
+
+      const [url, init] = fetchImpl.mock.calls[0] as [string, RequestInit];
+      const body = new URLSearchParams(String(init.body));
+      expect(url).toBe(REVOKE_URL);
+      expect(init.method).toBe('POST');
+      expect(body.get('client_id')).toBe(CLIENT_ID);
+      expect(body.get('token')).toBe('apple-refresh-token');
+      expect(body.get('token_type_hint')).toBe('refresh_token');
+      expect(body.get('client_secret')?.split('.')).toHaveLength(3);
+    });
+
+    it('fails when Apple rejects the revocation, without exposing the token', async () => {
+      const fetchImpl = vi.fn().mockResolvedValue(jsonResponse({ error: 'invalid_client' }, 400));
+
+      const error = await createClient(fetchImpl as unknown as typeof fetch)
+        .revokeToken('secret-refresh-token', 'refresh_token')
+        .catch((caught: unknown) => caught);
+
+      expect(error).toBeInstanceOf(AppleTokenRevocationError);
+      expect((error as Error).message).toBe('apple_token_revocation_rejected');
+      expect((error as Error).message).not.toContain('secret-refresh-token');
+    });
+
+    it('fails when Apple is unreachable', async () => {
+      const fetchImpl = vi.fn().mockRejectedValue(new TypeError('fetch failed'));
+
+      await expect(
+        createClient(fetchImpl as unknown as typeof fetch).revokeToken('token', 'refresh_token'),
+      ).rejects.toThrow('apple_token_revocation_unreachable');
+    });
+
+    it('fails closed without Apple credentials', async () => {
+      const fetchImpl = vi.fn();
+
+      await expect(
+        createClient(
+          fetchImpl as unknown as typeof fetch,
+          configWith({ keyId: undefined }),
+        ).revokeToken('token', 'refresh_token'),
+      ).rejects.toBeInstanceOf(AppleTokenRevocationError);
+      expect(fetchImpl).not.toHaveBeenCalled();
     });
   });
 });

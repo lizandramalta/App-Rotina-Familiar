@@ -98,6 +98,15 @@ export interface AccessRepositoryPort {
   ): Promise<CreatorMembershipRecord | undefined>;
 
   /**
+   * Guarda o refresh token Apple cifrado na identidade, substituindo o anterior
+   * (SPEC-001 CA-12/CA-13). Chamado somente quando a Apple devolveu um token.
+   */
+  storeAppleRefreshToken(
+    tx: TransactionContext,
+    params: { readonly creatorIdentityId: string; readonly refreshTokenEncrypted: string },
+  ): Promise<void>;
+
+  /**
    * Revoga toda sessão ativa do membro e devolve os ids revogados, para que o
    * caso de uso possa registrar a substituição (evento `session_revoked`).
    */

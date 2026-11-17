@@ -329,7 +329,7 @@ Todos os erros utilizam `Content-Type: application/problem+json`.
 | **1** | **Núcleo Mínimo:** validação da prova Apple, emissão de sessão/`creationGrant`, isolamento e rejeição explícita. | CA-01, CA-02, CA-03, CA-04, CA-05, CA-06 | Testes unitários e de integração verdes cobrindo os CAs listados. | concluída — SCRUM-11 e SCRUM-13 |
 | **2** | **Sessão utilizável + resiliência:** consulta, renovação e revogação de sessão; tratamento de falha de rede no mobile. | CA-07, CA-08, CA-09, CA-10 | Telas integradas com a API, testes de UI/E2E e UX-spec verificada. | concluída — SCRUM-14 e SCRUM-16 |
 | **3** | **Polimento:** limitação de tentativas e observabilidade. | CA-11 | Suíte de regressão verde e validação de QA concluída. | a fazer |
-| **4** | **Guarda do token Apple para revogação:** guardar, substituir e limpar o refresh token Apple, com sigilo. | CA-12, CA-13, CA-14, CA-15 | Testes de integração com Apple simulada (com e sem `refresh_token`), teste da limpeza de onboarding e verificação de logs verdes. | a fazer |
+| **4** | **Guarda do token Apple para revogação:** guardar, substituir e limpar o refresh token Apple, com sigilo. | CA-12, CA-13, CA-14, CA-15 | Testes de integração com Apple simulada (com e sem `refresh_token`), teste da limpeza de onboarding e verificação de logs verdes. | concluída — branch `feature/SPEC-022_account-deletion` |
 
 **Registro de execução (2026-10-10):** as Fases 1 e 2 estão em `develop`; a Fase 1 foi entregue pelos cards backend SCRUM-11/SCRUM-13 e a Fase 2 por SCRUM-14 (backend) e SCRUM-16 (Mobile). A Fase 3 permanece fora do incremento concluído.
 

@@ -37,6 +37,11 @@ const SENSITIVE_KEYS = new Set([
   'identitytoken',
   'authorizationcode',
   'rawnonce',
+  // SPEC-001 Fase 4 / SPEC-022: refresh token Apple, em claro ou cifrado.
+  'applerefreshtoken',
+  'refreshtokenencrypted',
+  'applerefreshtokenencrypted',
+  'tokenencrypted',
   'installationproof',
   'xinstallationproof',
 ]);

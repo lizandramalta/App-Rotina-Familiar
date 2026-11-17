@@ -1,6 +1,6 @@
 # Spec 022: Excluir conta
 
-**Status:** aprovada\
+**Status:** em implementação (fases 1–3: backend concluído; mobile em andamento)\
 **Autor:** Claude | **Criada em:** 2026-11-16 | **Aprovada por:** Pessoa usuária | **Em:** 2026-11-17\
 **Base funcional:** RN 1.28 / RF 1.27 / UC 1.27\
 **UX-spec:** [UX-022-excluir-conta.md](UX-022-excluir-conta.md)\
@@ -313,9 +313,9 @@ Um perfil excluído mantém somente o registro técnico necessário às referên
 
 | Fase | Objetivo | Critérios atendidos | Definition of Done | Status |
 |---|---|---|---|---|
-| **1** | Exclusão da própria conta por perfis não-Criador (backend e mobile), com anonimização, revogação, mídias, isolamento e falhas | CA-01 a CA-09, CA-19 | Testes de integração do backend e testes de ViewModel verdes; TEL-030, TEL-058 e MOD-015 conforme UX-022 | a fazer |
-| **2** | Guarda do token Apple no login e exclusão da família pelo Criador, com revogação e limpeza do R2 | CA-10 a CA-15, CA-20 | Testes com Apple simulada (troca, revogação, falha e fila); variante Criador de TEL-058 conforme UX-022 | a fazer |
-| **3** | Exclusão de conta Kids pelo Administrador | CA-16 a CA-18 | Testes de autorização e isolamento verdes; ação em TEL-032 conforme UX-022 | a fazer |
+| **1** | Exclusão da própria conta por perfis não-Criador (backend e mobile), com anonimização, revogação, mídias, isolamento e falhas | CA-01 a CA-09, CA-19 | Testes de integração do backend e testes de ViewModel verdes; TEL-030, TEL-058 e MOD-015 conforme UX-022 | backend concluído; mobile a fazer |
+| **2** | Guarda do token Apple no login e exclusão da família pelo Criador, com revogação e limpeza do R2 | CA-10 a CA-15, CA-20 | Testes com Apple simulada (troca, revogação, falha e fila); variante Criador de TEL-058 conforme UX-022 | backend concluído; mobile a fazer |
+| **3** | Exclusão de conta Kids pelo Administrador | CA-16 a CA-18 | Testes de autorização e isolamento verdes; ação em TEL-032 conforme UX-022 | backend concluído; mobile a fazer |
 
 - **Fora da Fase 1:** o Criador não vê a entrada "Excluir conta" em TEL-030; TEL-032 não oferece a ação administrativa.
 - **Fora da Fase 2:** TEL-032 não oferece a ação administrativa.
