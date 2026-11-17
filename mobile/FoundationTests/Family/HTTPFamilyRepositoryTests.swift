@@ -226,6 +226,24 @@ struct HTTPFamilyRepositoryTests {
         #expect(page.items.first?.completedAt == ISO8601DateFormatter().date(from: "2026-10-28T11:10:00Z"))
     }
 
+    @Test("SCRUM-127 combines memberId and status on /family/tasks, since /family/members/{id}/tasks has no status filter")
+    func memberAndStatusFilterUsesFamilyTasksRoute() async throws {
+        let json = #"{"startDate":"2026-10-28","endDate":"2026-10-28","nextCursor":null,"items":[]}"#
+        let stub = StubHTTP.make(status: 200, json: json)
+
+        _ = try await stub.repository.listFamilyTasks(
+            range: FamilyDateRange(startDate: "2026-10-28", endDate: "2026-10-28"),
+            memberID: UUID(uuidString: memberID), status: .pending, cursor: nil,
+            accessToken: "token-1"
+        )
+
+        let request = try #require(stub.requests().first)
+        #expect(request.url.path == "/v1/family/tasks")
+        let items = URLComponents(url: request.url, resolvingAgainstBaseURL: false)?.queryItems ?? []
+        #expect(items.contains(URLQueryItem(name: "memberId", value: memberID.lowercased())))
+        #expect(items.contains(URLQueryItem(name: "status", value: "pending")))
+    }
+
     @Test("SPEC-002 gets and renames the family through GET and PATCH /v1/family")
     func getAndUpdateFamily() async throws {
         let json = """

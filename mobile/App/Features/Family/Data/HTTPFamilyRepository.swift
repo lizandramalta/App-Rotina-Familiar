@@ -575,7 +575,18 @@ nonisolated struct HTTPFamilyRepository: FamilyRepository {
         if let cursor {
             query.append(URLQueryItem(name: "cursor", value: cursor))
         }
-        let route = memberID.map { "family/members/\($0.uuidString.lowercased())/tasks" } ?? "family/tasks"
+        // GET /family/members/{id}/tasks is a fixed-member route with no status filter by
+        // contract (backend-contracts.md); only /family/tasks accepts memberId and status
+        // together, so that's the route TEL-011's combined filters must use (SCRUM-127).
+        let route: String
+        if let memberID, status == .all {
+            route = "family/members/\(memberID.uuidString.lowercased())/tasks"
+        } else {
+            route = "family/tasks"
+            if let memberID {
+                query.append(URLQueryItem(name: "memberId", value: memberID.uuidString.lowercased()))
+            }
+        }
         let data = try await send(
             path: Self.queryPath(route, query: query),
             method: "GET",
