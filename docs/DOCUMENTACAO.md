@@ -1,8 +1,8 @@
-# Documentação do projeto — versão 1.43
+# Documentação do projeto — versão 1.44
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.43\
-**Data:** 2026-11-16\
+**Versão:** 1.44\
+**Data:** 2026-11-17\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Modelo de dados](05-modelo-de-dados.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -34,6 +34,7 @@
 | [Specs de entrega](../specs/README.md) | Recortes aprovados de implementação compartilhados entre mobile e backend. |
 | [Primeiro TestFlight](releases/testflight-1.md) | Histórico da distribuição Mutua 1.0 (1) com recorte adulto. |
 | [Segundo TestFlight](releases/testflight-2.md) | Distribuição Mutua 1.0 (3) com o produto completo de `develop` e pendências operacionais. |
+| [Primeira publicação na App Store](releases/app-store-1.md) | Preparação de Mora 1.0 (4): novo nome e ícone provisório com o mesmo bundle ID, além das pendências para a revisão. |
 
 ## Como usar
 
@@ -135,7 +136,7 @@ TEL-014 e TEL-031 permanecem reservadas e fora da navegação; a carga visual fi
 
 ## Política de versionamento
 
-1. A base funcional vigente está na versão **1.28** (regras 1.28, requisitos 1.27 e casos de uso 1.27). O índice documental está na versão **1.43** por consolidar também registros técnicos e de apresentação. Screen map e user flows têm versionamento independente; as arquiteturas mobile e backend também. Documentos alinhados a uma versão funcional anterior devem ser atualizados quando o comportamento que descrevem for afetado.
+1. A base funcional vigente está na versão **1.28** (regras 1.28, requisitos 1.27 e casos de uso 1.27). O índice documental está na versão **1.44** por consolidar também registros técnicos e de apresentação. Screen map e user flows têm versionamento independente; as arquiteturas mobile e backend também. Documentos alinhados a uma versão funcional anterior devem ser atualizados quando o comportamento que descrevem for afetado.
 2. Preserve os identificadores RN, RF, RNF, UC, TEL, MOD e UF. Novos itens recebem novos códigos; códigos retirados não são reutilizados.
 3. A edição vigente fica na raiz e em `docs/`. O Git mantém o histórico e permite comparar ou recuperar versões anteriores por commits e, quando adotadas, tags. Não mantenha cópias da documentação em pastas de versões.
 4. Alterações funcionais e suas referências devem evoluir juntas, com versão, data e histórico dos códigos e comportamentos afetados. Use 1.1, 1.2... para revisões incrementais e 2.0 para mudanças substanciais da base funcional.
@@ -148,7 +149,8 @@ A fundação backend adota Node.js, TypeScript, Fastify e `pg`. Parte da API de 
 
 | Versão | Data | Alteração |
 | --- | --- | --- |
-| 1.43 | 2026-11-16 | SPEC-022 (exclusão de conta): RN69/RN70 e ajustes em RN05/07/10/30/31/44/47/61/62 (1.28); RF72–RF74, RNF28 e ajustes em RF04/37/39 e RNF09/15/16/22/24 (1.27); UC20 e ajustes em UC02/04/10 (1.27); modelo 1.12, classes 1.11, screen map 1.26, fluxos 1.27, contratos 1.30, BA-40 e MA-22. SVGs de caso de uso aguardam nova renderização. |
+| 1.44 | 2026-11-17 | SPEC-022 (exclusão de conta): RN69/RN70 e ajustes em RN05/07/10/30/31/44/47/61/62 (1.28); RF72–RF74, RNF28 e ajustes em RF04/37/39 e RNF09/15/16/22/24 (1.27); UC20 e ajustes em UC02/04/10 (1.27); modelo 1.12, classes 1.11, screen map 1.26, fluxos 1.27, contratos 1.30, BA-40 e MA-22. SVGs de caso de uso aguardam nova renderização. |
+| 1.43 | 2026-11-16 | Identidade Mora: nome público, textos e ícone provisório substituem Mutua, mantendo o bundle ID `com.lizandramalta.mutua`; registro da preparação para a App Store; Design System 1.1; sem mudança da base funcional. |
 | 1.42 | 2026-11-12 | SCRUM-114: RN46/RN47 (1.27), RF41/RF46/RF54/RNF22 (1.26) e UC01/UC02/UC09 (1.26) tornam toda emissão de convite direta, sem confirmação; a emissão invalida convites anteriores disponíveis e preserva a sessão, revogada com tokens e push no ingresso pelo novo convite. SPEC-004 E-05, SPEC-005 E-04, UX-004 UX-06/UX-07, UX-002 UX-06/UX-07; mapa 1.25, fluxos 1.26, visão 1.9, DER 1.11, classes 1.10, arquitetura mobile 1.7, catálogo 1.14, MA 1.9, backend 1.6, contratos 1.29 e BA 1.8. |
 | 1.41 | 2026-11-09 | Segundo TestFlight Mutua: produto completo de `develop`, identidade Mutua e correções do primeiro TestFlight; registro da primeira distribuição incluído como histórico; sem mudança da base funcional. |
 | 1.40 | 2026-11-08 | SCRUM-86 / SPEC-016 Fase 2: UX-016 revisada com a anatomia gamificada (Figma 579-59); SPEC-016 registra os esclarecimentos E-02/E-03; mapa 1.24 com barra de abas somente nas telas principais; sem mudança da base funcional. |

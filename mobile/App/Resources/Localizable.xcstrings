@@ -179,7 +179,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bem-vindo ao Mutua"
+            "value" : "Bem-vindo ao Mora"
           }
         }
       }
@@ -1719,7 +1719,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Convite para entrar na família no Mutua:\n\nLink: %@\nSenha: %@"
+            "value" : "Convite para entrar na família no Mora:\n\nLink: %@\nSenha: %@"
           }
         }
       }
@@ -4256,7 +4256,7 @@
         }
       }
     },
-    "Mutua Design System" : {
+    "Mora Design System" : {
 
     },
     "OK" : {

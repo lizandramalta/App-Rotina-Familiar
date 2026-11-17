@@ -32,7 +32,7 @@ struct DesignSystemGalleryView: View {
 
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: AppSpacing.xs) {
-            Text("Mutua Design System")
+            Text("Mora Design System")
                 .font(.app(.titleLarge))
                 .foregroundStyle(Color.App.Text.primary)
             Text("Catálogo visual de componentes e tokens de alta fidelidade.")

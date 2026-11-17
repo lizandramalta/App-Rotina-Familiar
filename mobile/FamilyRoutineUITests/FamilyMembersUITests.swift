@@ -75,6 +75,9 @@ final class FamilyMembersUITests: XCTestCase {
         XCTAssertFalse(settingsButton.exists)
     }
 
+    /// The `family-tasks` fixture's default overview range is the *current* week (mirroring the
+    /// backend default), not a hardcoded one, so the "Limpar disabled" assertions here and in
+    /// `testFamilyFilterSheetsApplyOnlyFromShowTasksButton` hold on any run date.
     func testFamilyTasksMatchesApprovedTEL011AndFiltersStatus() {
         // SPEC-009 CA-06/07/12; UX-009 TEL-011; SPEC-019 CA-05–07.
         launch("family-tasks")
