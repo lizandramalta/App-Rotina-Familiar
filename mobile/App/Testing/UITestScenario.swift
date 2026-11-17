@@ -354,6 +354,9 @@ private struct UITestAccessRepository: AccessRepository {
     }
 
     func revokeSession(accessToken: String) async throws {}
+
+    /// SPEC-022: the deletion is confirmed so TEL-001 shows the confirmation banner.
+    func deleteOwnAccount(appleProof: AppleAuthorizationProof?, accessToken: String) async throws {}
 }
 
 private actor UITestFamilyRepository: FamilyRepository {
@@ -449,6 +452,7 @@ private actor UITestFamilyRepository: FamilyRepository {
     }
 
     func removeMember(memberID: UUID, accessToken: String) async throws {}
+    func deleteKidsAccount(memberID: UUID, accessToken: String) async throws {}
 
     func leaveAdministration(accessToken: String) async throws -> FamilyMember {
         FamilyMember(id: UITestTaskFixtures.memberID, name: "Maria Silva", role: .member, isFamilyCreator: false)

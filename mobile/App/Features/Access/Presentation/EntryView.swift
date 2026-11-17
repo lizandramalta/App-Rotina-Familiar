@@ -42,6 +42,10 @@ struct EntryView: View {
                 Spacer(minLength: 40)
 
                 VStack(spacing: 16) {
+                    if let notice = viewModel.notice {
+                        EntryNoticeBanner(notice: notice) { viewModel.dismissNotice() }
+                    }
+
                     if case let .error(feedback) = viewModel.state {
                         InlineFeedback(feedback: feedback)
                     }
@@ -117,6 +121,50 @@ private struct NativeAppleSignInButton: UIViewRepresentable {
 
         @objc func didTap() {
             action()
+        }
+    }
+}
+
+/// UX-022 §5.5 — `account.deletion.success` / `account.ended.body`, dismissible, announced by VoiceOver.
+private struct EntryNoticeBanner: View {
+    let notice: EntryNotice
+    let onDismiss: () -> Void
+
+    var body: some View {
+        HStack(alignment: .top, spacing: AppSpacing.sm) {
+            InlineFeedbackBanner(message: message, systemImage: systemImage)
+            Button(action: onDismiss) {
+                Image(systemName: "xmark")
+                    .font(.app(.noteStrong))
+                    .foregroundStyle(Color.App.Text.secondary)
+                    .frame(minWidth: 44, minHeight: 44)
+            }
+            .accessibilityLabel(Text("account.notice.dismiss"))
+        }
+        .accessibilityIdentifier(identifier)
+        .onAppear {
+            UIAccessibility.post(notification: .announcement, argument: message)
+        }
+    }
+
+    private var message: String {
+        switch notice {
+        case .accountDeleted: String(localized: "account.deletion.success")
+        case .accessEnded: String(localized: "account.ended.body")
+        }
+    }
+
+    private var systemImage: String {
+        switch notice {
+        case .accountDeleted: "checkmark.circle"
+        case .accessEnded: "info.circle"
+        }
+    }
+
+    private var identifier: String {
+        switch notice {
+        case .accountDeleted: "access.entry.notice.account_deleted"
+        case .accessEnded: "access.entry.notice.access_ended"
         }
     }
 }

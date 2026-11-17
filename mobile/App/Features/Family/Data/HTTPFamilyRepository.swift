@@ -494,6 +494,13 @@ nonisolated struct HTTPFamilyRepository: FamilyRepository {
         )
     }
 
+    func deleteKidsAccount(memberID: UUID, accessToken: String) async throws {
+        _ = try await send(
+            path: "family/members/\(memberID.uuidString.lowercased())/account-deletion", method: "POST",
+            headers: ["Authorization": "Bearer \(accessToken)"], json: EmptyRequestDTO()
+        )
+    }
+
     func leaveAdministration(accessToken: String) async throws -> FamilyMember {
         let data = try await send(
             path: "me/administration-exit", method: "POST",

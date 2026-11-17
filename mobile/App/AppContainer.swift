@@ -128,7 +128,8 @@ final class AppContainer {
             sessionStore: sessionStore,
             session: session,
             familyRepository: familyRepository,
-            photoNormalizer: photoNormalizer
+            photoNormalizer: photoNormalizer,
+            appleAuthenticator: appleAuthenticator
         )
     }
 

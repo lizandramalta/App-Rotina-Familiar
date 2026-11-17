@@ -7,6 +7,7 @@ struct MemberDetailView: View {
     @State private var selectedRole: MemberRole?
     @State private var pendingRole: MemberRole?
     @State private var showsRemovalConfirmation = false
+    @State private var showsKidsDeletionConfirmation = false
     @State private var showsKidsNameEditor = false
     @State private var draftKidsName = ""
     @State private var kidsNameIsInvalid = false
@@ -93,6 +94,17 @@ struct MemberDetailView: View {
             }
         } message: {
             Text("family.member.manage.remove_message")
+        }
+        .alert(
+            Text(String(format: String(localized: "account.deletion.confirm.kids_title"), viewModel.targetName)),
+            isPresented: $showsKidsDeletionConfirmation
+        ) {
+            Button("account.common.cancel", role: .cancel) {}
+            Button("account.deletion.confirm.action", role: .destructive) {
+                Task { await viewModel.deleteKidsAccount() }
+            }
+        } message: {
+            Text("account.deletion.confirm.kids_message")
         }
         .onChange(of: viewModel.isRemoved) { _, removed in
             if removed { onRemoved(); dismiss() }
@@ -207,6 +219,17 @@ struct MemberDetailView: View {
                             managementRow("family.member.manage.remove", symbol: "trash", chevron: false, emphasized: true)
                         }
                         .accessibilityIdentifier("family.member.detail.remove")
+                        if viewModel.canDeleteKidsAccount {
+                            Divider().padding(.leading, 48)
+                            Button { showsKidsDeletionConfirmation = true } label: {
+                                managementRow(
+                                    "family.members.delete_account", symbol: "person.crop.circle.badge.xmark",
+                                    chevron: false, emphasized: true
+                                )
+                                .foregroundStyle(Color.App.System.destructive)
+                            }
+                            .accessibilityIdentifier("family.member.detail.delete_account")
+                        }
                     }
                     .buttonStyle(.plain)
                     .disabled(viewModel.isSaving)

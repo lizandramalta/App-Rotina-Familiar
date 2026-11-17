@@ -96,6 +96,9 @@ final class MemberDetailViewModel {
     var canIssueInvite: Bool { canManage && !isCreator && detail?.id != session.memberID }
     var canManageTarget: Bool { canManage && !isCreator && detail?.id != session.memberID }
     var canEditKidsName: Bool { canManageTarget && detail?.role == .kid }
+    /// SPEC-022 CA-16 / UX-022 UX-04: only an administrator, only for a Kids target.
+    var canDeleteKidsAccount: Bool { canManageTarget && detail?.role == .kid }
+    var targetName: String { detail?.name ?? "" }
 
     func selectPeriod(_ selected: Period) async {
         guard selected != period else { return }
@@ -159,6 +162,22 @@ final class MemberDetailViewModel {
         defer { isSaving = false }
         do {
             try await familyRepository.removeMember(memberID: memberID, accessToken: token)
+            detail = nil
+            isRemoved = true
+        } catch {
+            managementFailed = true
+            await load()
+        }
+    }
+
+    /// Same confirmed-only flow as removal: the screen closes after the server accepts (SPEC-022 CA-16).
+    func deleteKidsAccount() async {
+        guard canDeleteKidsAccount, !isSaving, let token = accessTokenProvider() else { return }
+        isSaving = true
+        managementFailed = false
+        defer { isSaving = false }
+        do {
+            try await familyRepository.deleteKidsAccount(memberID: memberID, accessToken: token)
             detail = nil
             isRemoved = true
         } catch {

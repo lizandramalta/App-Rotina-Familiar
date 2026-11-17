@@ -18,6 +18,15 @@ func withAccessToken<T>(
     }
 }
 
+/// Non-blocking message shown in TEL-001 after leaving an authenticated session (UX-022 §5.5).
+enum EntryNotice: Equatable {
+    /// The person deleted their own account (SPEC-022 CA-09).
+    case accountDeleted
+    /// A previously active session was refused on renewal. The server does not say why (removal,
+    /// account or family deletion, device switch), so the message stays neutral (UX-022 UX-03, CA-20).
+    case accessEnded
+}
+
 enum AppRootState: Equatable {
     case restoring
     case entry
@@ -38,6 +47,8 @@ final class AppSessionStore {
     private(set) var tokenExpiresAt: Date?
     /// In-memory onboarding draft kept while the person re-authenticates after an uncertain creation (CA-09).
     private(set) var onboardingDraft: OnboardingDraft?
+    /// Message for TEL-001; cleared when dismissed or when a new session starts.
+    private(set) var entryNotice: EntryNotice?
     /// Refresh token of a just-created family whose Keychain write failed; persisted again on completion.
     private var pendingRefreshToken: String?
 
@@ -71,6 +82,7 @@ final class AppSessionStore {
             state = .authenticated(profile)
         } catch AccessError.sessionExpired, AccessError.sessionRevoked {
             clearCredentials()
+            entryNotice = .accessEnded
             state = .entry
         } catch {
             // Falha de rede ou Keychain não invalida uma sessão ainda recuperável.
@@ -85,6 +97,7 @@ final class AppSessionStore {
                 try credentialStore.save(refreshToken: session.credentials.refreshToken)
                 store(session.credentials.token)
                 onboardingDraft = nil
+                entryNotice = nil
                 state = .authenticated(session.profile)
             } catch {
                 clearCredentials()
@@ -151,9 +164,7 @@ final class AppSessionStore {
                 installationProof: try installationProofProvider.installationProof()
             )
         } catch AccessError.sessionExpired, AccessError.sessionRevoked {
-            onboardingDraft = nil
-            clearCredentials()
-            state = .entry
+            endRevokedSession()
             throw AccessError.sessionExpired
         }
         // Signed out while the refresh was in flight: never resurrect the session.
@@ -234,12 +245,57 @@ final class AppSessionStore {
             store(token)
             return token.accessToken
         } catch AccessError.sessionExpired, AccessError.sessionRevoked {
-            clearCredentials()
-            state = .entry
+            endRevokedSession()
             return nil
         } catch {
             return nil
         }
+    }
+
+    // MARK: Account deletion (SPEC-022)
+
+    /// Sends the deletion for the session holder. Success clears local credentials and opens TEL-001
+    /// with the confirmation (CA-09); any error is rethrown for the caller to reconcile (CA-08).
+    func deleteOwnAccount(appleProof: AppleAuthorizationProof?) async throws {
+        let token = try await validAccessToken()
+        try await repository.deleteOwnAccount(appleProof: appleProof, accessToken: token)
+        completeAccountDeletion()
+    }
+
+    /// Lost-response reconciliation (SPEC-022 CA-08): `false` once the server no longer accepts the
+    /// session (the deletion went through), `true` while it does, `nil` when it cannot be checked.
+    func isSessionStillActive() async -> Bool? {
+        guard let accessToken else { return false }
+        do {
+            _ = try await repository.currentSession(accessToken: accessToken)
+            return true
+        } catch AccessError.sessionExpired, AccessError.sessionRevoked {
+            return false
+        } catch {
+            return nil
+        }
+    }
+
+    func completeAccountDeletion() {
+        onboardingDraft = nil
+        pendingRefreshToken = nil
+        clearCredentials()
+        entryNotice = .accountDeleted
+        state = .entry
+    }
+
+    /// A previously active session was refused: back to TEL-001 with the neutral notice (CA-20).
+    func endRevokedSession() {
+        let wasAuthenticated: Bool
+        if case .authenticated = state { wasAuthenticated = true } else { wasAuthenticated = false }
+        onboardingDraft = nil
+        clearCredentials()
+        if wasAuthenticated { entryNotice = .accessEnded }
+        state = .entry
+    }
+
+    func dismissEntryNotice() {
+        entryNotice = nil
     }
 
     private func store(_ token: SessionToken) {
