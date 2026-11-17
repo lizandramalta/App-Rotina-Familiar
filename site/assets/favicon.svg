@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" fill="#57613D"/>
+  <!-- house: body + roof as one rounded shape -->
+  <path d="M512 250 L790 470 L790 770 Q790 800 760 800 L264 800 Q234 800 234 770 L234 470 Z"
+        fill="#FBFCF8" stroke="#FBFCF8" stroke-width="56" stroke-linejoin="round"/>
+  <!-- arched door -->
+  <path d="M432 828 L432 650 A80 80 0 0 1 592 650 L592 828 Z" fill="#F3ABA5"/>
+  <!-- round window -->
+  <circle cx="512" cy="482" r="54" fill="#829DC4"/>
+  <!-- little heart over the door -->
+  <path d="M512 618 C 496 600, 470 606, 472 628 C 474 646, 500 660, 512 670 C 524 660, 550 646, 552 628 C 554 606, 528 600, 512 618 Z" fill="#FBFCF8"/>
+</svg>

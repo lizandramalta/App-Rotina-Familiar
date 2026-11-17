@@ -40,8 +40,13 @@ O nome leva artigo masculino nos textos: “o Mora”.
 1. **Exclusão de conta dentro do app** (diretriz 5.1.1(v) da App Store), com
    revogação do Sign in with Apple. Em especificação na SPEC-022 / UX-022.
 2. **Política de privacidade e URL de suporte**, ambas obrigatórias na App
-   Store, além dos questionários de privacidade (App Privacy) e de classificação
-   etária no App Store Connect. O app trata fotos e dados de crianças.
+   Store. O site estático em `site/` tem a landing, a política
+   (`/privacidade/`) e o suporte (`/suporte/`). Antes de publicar com
+   `npx wrangler pages deploy site --project-name mora-app`, confirmar que a
+   política reflete a SPEC-022 implementada e, de preferência, passar por
+   revisão jurídica, já que o app trata fotos e dados de crianças. Também
+   faltam os questionários de privacidade (App Privacy) e de classificação
+   etária no App Store Connect.
 3. **Nome na loja:** confirmar no App Store Connect que “Mora” está disponível.
 4. **Capturas de tela** de iPhone 6,9" e iPad 13", porque o app aceita iPad.
 5. **Notas para a revisão:** como testar os perfis Kids e Membro (convite e
