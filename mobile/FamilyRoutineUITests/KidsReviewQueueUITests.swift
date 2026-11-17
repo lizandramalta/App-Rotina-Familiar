@@ -33,12 +33,24 @@ final class KidsReviewQueueUITests: XCTestCase {
             NSPredicate(format: "identifier BEGINSWITH 'kidsReview.queue.row.'")
         )
         XCTAssertTrue(rows.firstMatch.waitForExistence(timeout: 5))
-        XCTAssertEqual(rows.count, 3)
+        // One row may expose its identifier on more than one accessibility element, so count
+        // distinct rows and check the order by on-screen position.
+        XCTAssertEqual(Set(rows.allElementsBoundByIndex.map(\.identifier)).count, 3)
         XCTAssertTrue(app.staticTexts["Da sinalização mais antiga para a mais recente."].exists)
-        XCTAssertTrue(rows.element(boundBy: 0).label.contains("Arrumar a cama"))
-        XCTAssertTrue(rows.element(boundBy: 2).label.contains("Lavar a louça"))
-        XCTAssertTrue(rows.element(boundBy: 0).label.contains("Com foto"))
-        XCTAssertTrue(rows.element(boundBy: 1).label.contains("Sem foto"))
+        let first = row(1), second = row(2), third = row(3)
+        XCTAssertTrue(first.label.contains("Arrumar a cama"))
+        XCTAssertTrue(third.label.contains("Lavar a louça"))
+        XCTAssertTrue(first.label.contains("Com foto"))
+        XCTAssertTrue(second.label.contains("Sem foto"))
+        XCTAssertLessThan(first.frame.minY, second.frame.minY)
+        XCTAssertLessThan(second.frame.minY, third.frame.minY)
+    }
+
+    /// Fixture signals in `UITestKidsSignalRepository`, oldest first.
+    private func row(_ position: Int) -> XCUIElement {
+        app.descendants(matching: .any)
+            .matching(identifier: "kidsReview.queue.row.00000000-0000-0000-0000-00000000050\(position)")
+            .firstMatch
     }
 
     func testEmptyQueueExplainsThereIsNothingToReview() {

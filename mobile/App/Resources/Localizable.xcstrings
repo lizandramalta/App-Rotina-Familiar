@@ -3333,16 +3333,6 @@
         }
       }
     },
-    "kidsReview.detail.resolved" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esta sinalização já foi resolvida."
-          }
-        }
-      }
-    },
     "kidsReview.detail.signaled_at" : {
       "localizations" : {
         "pt-BR" : {

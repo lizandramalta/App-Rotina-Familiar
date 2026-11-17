@@ -48,6 +48,7 @@ struct KidsReviewQueueView: View {
                 ForEach(viewModel.items) { item in
                     NavigationLink {
                         KidsSignalDetailView(viewModel: viewModel.makeDetailViewModel(id: item.id)) {
+                            viewModel.removeResolved(id: item.id)
                             Task { await viewModel.load() }
                         }
                         .hidesAppTabBar()
