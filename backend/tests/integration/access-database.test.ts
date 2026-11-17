@@ -104,6 +104,7 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
         repository,
         tokenVerifier,
         crypto,
+        secretCipher: crypto,
         transactionRunner: container.transactionRunner,
         clock: container.clock,
         logger: container.logger,

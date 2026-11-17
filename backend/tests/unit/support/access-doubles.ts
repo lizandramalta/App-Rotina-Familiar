@@ -99,6 +99,17 @@ export class InMemoryAccessRepository implements AccessRepositoryPort {
     return record;
   }
 
+  public storedAppleRefreshTokens: { creatorIdentityId: string; refreshTokenEncrypted: string }[] =
+    [];
+
+  public async storeAppleRefreshToken(
+    _tx: TransactionContext,
+    params: { readonly creatorIdentityId: string; readonly refreshTokenEncrypted: string },
+  ): Promise<void> {
+    this.operations.push('storeAppleRefreshToken');
+    this.storedAppleRefreshTokens.push({ ...params });
+  }
+
   public async findCreatorMembership(
     tx: TransactionContext,
   ): Promise<CreatorMembershipRecord | undefined> {

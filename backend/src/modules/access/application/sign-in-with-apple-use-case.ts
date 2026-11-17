@@ -7,6 +7,7 @@ import type { Logger } from '../../../shared/infrastructure/observability/logger
 import type { AppleTokenVerifierPort } from '../../../integrations/apple/apple-token-verifier-port.js';
 import { AppleProofInvalidError } from '../domain/access-errors.js';
 import type { AccessCryptoPort } from './access-crypto-port.js';
+import type { SecretCipherPort } from './secret-cipher-port.js';
 import type { AccessRepositoryPort, CreatorMembershipRecord } from './access-repository-port.js';
 import type { SignInWithAppleCommand, SignInWithAppleResult } from './sign-in-with-apple-dto.js';
 import { SessionIssuer } from './session-issuer.js';
@@ -30,6 +31,7 @@ export class SignInWithAppleUseCase {
       readonly repository: AccessRepositoryPort;
       readonly tokenVerifier: AppleTokenVerifierPort;
       readonly crypto: AccessCryptoPort;
+      readonly secretCipher: SecretCipherPort;
       readonly transactionRunner: TransactionRunner;
       readonly clock: Clock;
       readonly logger: Logger;
@@ -60,6 +62,17 @@ export class SignInWithAppleUseCase {
           appleSubjectEncrypted: this.deps.crypto.encryptAppleSubject(identity.subject),
         }));
 
+      // SPEC-001 CA-12/CA-13/CA-14: o refresh token Apple da troca é guardado
+      // cifrado no mesmo commit da sessão ou do grant, substituindo o anterior;
+      // sem token na resposta da Apple, o valor guardado é preservado.
+      const appleRefreshTokenStored = identity.refreshToken !== undefined;
+      if (identity.refreshToken !== undefined) {
+        await this.deps.repository.storeAppleRefreshToken(tx, {
+          creatorIdentityId: creatorIdentity.id,
+          refreshTokenEncrypted: this.deps.secretCipher.encrypt(identity.refreshToken),
+        });
+      }
+
       // A família vem exclusivamente deste vínculo persistido; nada do comando
       // participa da decisão (CA-06, RNF06).
       const membership = await this.deps.repository.findCreatorMembership(tx, creatorIdentity.id);
@@ -69,10 +82,16 @@ export class SignInWithAppleUseCase {
           creatorIdentityId: creatorIdentity.id,
           installationProofHash,
           now,
+          appleRefreshTokenStored,
         });
       }
 
-      return this.issueSession(tx, { membership, installationProofHash, now });
+      return this.issueSession(tx, {
+        membership,
+        installationProofHash,
+        now,
+        appleRefreshTokenStored,
+      });
     });
   }
 
@@ -82,7 +101,7 @@ export class SignInWithAppleUseCase {
    */
   private async verifyProof(
     command: SignInWithAppleCommand,
-  ): Promise<{ readonly subject: string }> {
+  ): Promise<{ readonly subject: string; readonly refreshToken?: string }> {
     try {
       return await this.deps.tokenVerifier.verifyIdentityProof({
         identityToken: command.identityToken,
@@ -106,6 +125,7 @@ export class SignInWithAppleUseCase {
       readonly creatorIdentityId: string;
       readonly installationProofHash: string;
       readonly now: Date;
+      readonly appleRefreshTokenStored: boolean;
     },
   ): Promise<SignInWithAppleResult> {
     const creationGrant = this.deps.crypto.generateOpaqueToken();
@@ -119,7 +139,10 @@ export class SignInWithAppleUseCase {
       expiresAt,
     });
 
-    this.deps.logger.info('apple_sign_in_succeeded', { outcome: 'creationGrant' });
+    this.deps.logger.info('apple_sign_in_succeeded', {
+      outcome: 'creationGrant',
+      appleRefreshTokenStored: params.appleRefreshTokenStored,
+    });
 
     return {
       outcome: 'creationGrant',
@@ -134,6 +157,7 @@ export class SignInWithAppleUseCase {
       readonly membership: CreatorMembershipRecord;
       readonly installationProofHash: string;
       readonly now: Date;
+      readonly appleRefreshTokenStored: boolean;
     },
   ): Promise<SignInWithAppleResult> {
     const { membership } = params;
@@ -150,6 +174,7 @@ export class SignInWithAppleUseCase {
     this.deps.logger.info('apple_sign_in_succeeded', {
       outcome: 'session',
       familyId: membership.familyId,
+      appleRefreshTokenStored: params.appleRefreshTokenStored,
     });
 
     return { outcome: 'session', ...session };

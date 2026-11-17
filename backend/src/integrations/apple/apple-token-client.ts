@@ -6,6 +6,10 @@ import type {
   AppleAuthorizationCodeExchange,
   AppleTokenExchangePort,
 } from './apple-token-exchange-port.js';
+import type {
+  AppleTokenRevocationPort,
+  AppleTokenTypeHint,
+} from './apple-token-revocation-port.js';
 
 /** A Apple aceita client secret com no máximo 6 meses; 5 minutos basta e expõe menos. */
 const CLIENT_SECRET_TTL_SECONDS = 300;
@@ -24,10 +28,23 @@ export class AppleTokenExchangeError extends Error {
   }
 }
 
+/** Falha da revogação de um token Apple (SPEC-022). A razão serve a log e teste. */
+export class AppleTokenRevocationError extends Error {
+  constructor(reason: string) {
+    super(reason);
+    this.name = 'AppleTokenRevocationError';
+  }
+}
+
 interface AppleTokenResponse {
   readonly id_token?: string;
+  readonly refresh_token?: string;
+  readonly access_token?: string;
   readonly error?: string;
 }
+
+const nonEmpty = (value: string | undefined): string | undefined =>
+  typeof value === 'string' && value.length > 0 ? value : undefined;
 
 const base64url = (value: object): string =>
   Buffer.from(JSON.stringify(value)).toString('base64url');
@@ -39,7 +56,7 @@ const base64url = (value: object): string =>
  * `APPLE_TOKEN_URL`. Qualquer recusa, inconsistência ou falha de rede é erro:
  * a troca falha fechada, nunca aceita o código por omissão.
  */
-export class AppleTokenClient implements AppleTokenExchangePort {
+export class AppleTokenClient implements AppleTokenExchangePort, AppleTokenRevocationPort {
   constructor(
     private readonly appleConfig: AppleConfiguration,
     private readonly logger: Logger,
@@ -95,7 +112,56 @@ export class AppleTokenClient implements AppleTokenExchangePort {
       throw new AppleTokenExchangeError('apple_token_exchange_response_not_decodable');
     }
 
-    return { subject: this.readIdTokenSubject(payload.id_token) };
+    return {
+      subject: this.readIdTokenSubject(payload.id_token),
+      refreshToken: nonEmpty(payload.refresh_token),
+      accessToken: nonEmpty(payload.access_token),
+    };
+  }
+
+  /**
+   * Revoga um token Apple em `APPLE_REVOKE_URL` (SPEC-022 CA-13, BA-40). A Apple
+   * responde `200` sem corpo quando aceita; qualquer outra resposta, falha de
+   * rede ou credencial ausente é erro para que a fila tente novamente.
+   */
+  public async revokeToken(token: string, tokenTypeHint: AppleTokenTypeHint): Promise<void> {
+    let clientSecret: string;
+    try {
+      clientSecret = this.buildClientSecret();
+    } catch (error) {
+      throw new AppleTokenRevocationError(
+        error instanceof Error ? error.message : 'apple_token_revocation_client_secret_failed',
+      );
+    }
+
+    let response: Response;
+    try {
+      response = await this.fetchImpl(this.appleConfig.revokeUrl, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded',
+          accept: 'application/json',
+        },
+        body: new URLSearchParams({
+          client_id: this.appleConfig.clientId,
+          client_secret: clientSecret,
+          token,
+          token_type_hint: tokenTypeHint,
+        }).toString(),
+        signal: AbortSignal.timeout(EXCHANGE_TIMEOUT_MS),
+      });
+    } catch {
+      throw new AppleTokenRevocationError('apple_token_revocation_unreachable');
+    }
+
+    if (!response.ok) {
+      const reason = await this.readErrorCode(response);
+      this.logger.warn('apple_token_revocation_rejected', {
+        status: response.status,
+        appleError: reason,
+      });
+      throw new AppleTokenRevocationError('apple_token_revocation_rejected');
+    }
   }
 
   /**

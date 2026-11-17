@@ -1,7 +1,7 @@
 # Catálogo de funcionalidades e rastreabilidade mobile
 
-**Versão:** 1.14 · **Base funcional:** RN 1.27 / RF 1.26 / UC 1.26 · **Design:** screen map 1.25 / fluxos 1.26\
-**Data:** 2026-11-12 · **Situação:** catálogo alvo revisado; jornadas recentes ainda exigem implementação
+**Versão:** 1.15 · **Base funcional:** RN 1.28 / RF 1.27 / UC 1.27 · **Design:** screen map 1.26 / fluxos 1.27\
+**Data:** 2026-11-16 · **Situação:** catálogo alvo revisado; jornadas recentes ainda exigem implementação
 
 [Arquitetura mobile](mobile-architecture.md) · [Decisões](mobile-decisions.md) · [Índice documental](../DOCUMENTACAO.md) · [Screen map](../design/screen-map.md) · [User flows](../design/user-flows.md)
 
@@ -48,7 +48,7 @@ Para cada par abaixo, os arquivos são `<View>.swift` e `<ViewModel>.swift`, den
 | TEL-022 | `Missions` | `MissionEditorView` | `MissionEditorViewModel` | Administrador, ao menos uma tarefa e nenhum prazo |
 | TEL-023 | `Rewards` | `RewardItemsView` | `RewardItemsViewModel` | Catálogo e itens personalizados, com origem, título e descrição preservados |
 | TEL-024 | `Rewards` | `RewardWheelView` | `RewardWheelViewModel` | Resultado, novo sorteio, aceitação ou saída sem resgate |
-| TEL-030 | `Profile` | `ProfileView` | `ProfileViewModel` | Aba adulta ou avatar Kids; foto, apelido e badges; saída do papel Admin quando permitida |
+| TEL-030 | `Profile` | `ProfileView` | `ProfileViewModel` | Aba adulta ou avatar Kids; foto, apelido e badges; saída do papel Admin quando permitida; entrada “Excluir conta” |
 | TEL-032 | `Family` | `MemberDetailView` | `MemberDetailViewModel` | Tarefas do membro em Dia/Semana visual domingo–sábado; convite e gestão em blocos Admin; Editar no topo apenas para Kids visto por Admin |
 | TEL-033 | `Family` | `MemberEditorView` | `MemberEditorViewModel` | Criar membro com nome e papel |
 | TEL-034 | `Family` | `InviteSharePresenter` | `MemberDetailViewModel` / `InitialOnboardingViewModel` | Folha nativa com novo link e senha; a emissão invalida convites anteriores sem revogar sessão |
@@ -62,6 +62,7 @@ Para cada par abaixo, os arquivos são `<View>.swift` e `<ViewModel>.swift`, den
 | TEL-055 | `Access` + `Profile` | `CreatorProfileSetupView` | `CreatorProfileSetupViewModel` | Nome/apelido e foto inicial opcional; upload com grant antes da família |
 | TEL-056 | `Family` | `InitialInvitesView` | `InitialInvitesViewModel` | Membros já criados; convite inicial explícito com compartilhamento direto e opção de adiar |
 | TEL-057 | `Family` | `FamilySettingsHubView` | `FamilyOverviewViewModel` | Configurações da família; criação de membro e correção do nome administrativo de Kids somente para Admin |
+| TEL-058 | `Profile` | `AccountDeletionView` | `AccountDeletionViewModel` | Efeitos por perfil, nome da família para o Criador, folha Apple de reserva, envio, consulta de sessão em resposta perdida e retorno a TEL-001 (SPEC-022) |
 
 **TEL-014 e TEL-031:** IDs reservados, sem View, ViewModel ou rota. A lista de membros está em TEL-050; a carga visual será entregue em superfície futura. Uma ViewModel não é obrigatória para uma tela que se revele estritamente estática na implementação; TEL-004 pode ser somente View e saídas de navegação, sem classe vazia para cumprir tabela.
 
@@ -86,6 +87,7 @@ Modais não se tornam automaticamente novos casos de uso ou novas ViewModels. Se
 | MOD-011 | `KidsSignalComposerView.swift` | `KidsSignalComposerViewModel`; captura, revisão, upload e sinalização |
 | MOD-012 | `TimeZoneChangeConfirmationView.swift` | `FamilySettingsViewModel`; informativo e aplicação imediata/próximo ciclo |
 | MOD-013 | `AccessSwitchConfirmationView.swift` | `JoinInviteViewModel`; confirma troca; mantém sessão antiga até ingresso válido |
+| MOD-015 | Alerta nativo em `AccountDeletionView`/`MemberDetailView` | `AccountDeletionViewModel`/`MemberDetailViewModel`; confirmação destrutiva final da exclusão de conta, inclusive Admin excluindo conta Kids |
 | MOD-014 | `SignalResolutionView.swift` | `TaskEditorViewModel`/`TaskDetailViewModel`; exigido ao salvar edição sobre tarefa Aguardando confirmação: retornar a Pendente ou manter Aguardando confirmação |
 
 `SheetRoute` e `ConfirmationRoute` pertencem à apresentação, com um destino ativo por fluxo. Fechar um modal restaura sua origem. Confirmar reabertura e depois cancelar exclusão não desfaz a reabertura já salva (UF-08).
@@ -115,6 +117,7 @@ Modais não se tornam automaticamente novos casos de uso ou novas ViewModels. Se
 | [UC17](../03-casos-de-uso.md#uc17) | `ReopenTaskUseCase` | TEL-012; MOD-006 | [UF-08](../design/user-flows.md#uf-08) | RF57–59; RN55/57–59; RNF25 |
 | [UC18](../03-casos-de-uso.md#uc18) | `GetWeeklyReportUseCase`, `ExportWeeklyReportUseCase` | TEL-051 | [UF-14](../design/user-flows.md#uf-14) | RF61; RN62; RNF26/27 |
 | [UC19](../03-casos-de-uso.md#uc19) | `GetOwnWeeklyRecognitionUseCase`, `PrepareHighlightShareUseCase`, `RegisterNotificationDeviceUseCase` | TEL-052 | [UF-15](../design/user-flows.md#uf-15) | RF63/64; RN28/30/65; RNF26/27 |
+| [UC20](../03-casos-de-uso.md#uc20) | `AppSessionStore.deleteOwnAccount` (via `AccessRepository.deleteOwnAccount`), `FamilyRepository.deleteKidsAccount`, `AccountDeletionViewModel` | TEL-030/032/058/001; MOD-015 | [UF-17](../design/user-flows.md#uf-17) | RF72–74; RN69/70; RNF12/22/28 |
 
 `UpdateTaskUseCase` inclui alteração de responsáveis, sem precisar de um caso de uso para cada campo. Alcance futuro encaminha para o contrato de rotina correspondente; não executa um loop de alterações individuais no iPhone. `DeleteFutureTasksUseCase` expressa exclusão a partir da ocorrência escolhida, preservando registros protegidos conforme UC07.
 
@@ -169,6 +172,7 @@ Os contratos remotos e sua cobertura por UC estão no [catálogo backend](backen
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.15 | 2026-11-16 | TEL-058, MOD-015 e UC20 (SPEC-022): exclusão de conta a partir de TEL-030 e, para Admin com alvo Kids, de TEL-032; mensagens em TEL-001. |
 | 1.14 | 2026-11-12 | TEL-034 passa a ser a folha nativa apresentada por `InviteSharePresenter`, sem tela de confirmação de reemissão (SCRUM-114). |
 | 1.13 | 2026-10-28 | TEL-032 compacta em Dia/Semana domingo–sábado, sem Parabenizar; nome Kids editável pelo Admin também no detalhe. |
 | 1.12 | 2026-10-28 | TEL-032 sem edição de nome; TEL-057 corrige nome de Kids; adultos usam Meu perfil. |

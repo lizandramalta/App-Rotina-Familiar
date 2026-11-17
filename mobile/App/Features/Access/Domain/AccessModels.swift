@@ -61,6 +61,8 @@ nonisolated enum AppleSignInOutcome: Sendable, Equatable {
 
 nonisolated enum AccessError: Error, Sendable, Equatable {
     case appleProofInvalid
+    /// SPEC-022 CA-10: the creator has no stored Apple token and must re-authenticate with Apple.
+    case appleProofRequired
     case rateLimited
     case sessionExpired
     case sessionRevoked

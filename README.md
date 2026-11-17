@@ -6,10 +6,11 @@ Organização colaborativa das responsabilidades domésticas, com tarefas compar
 **Versão da base do projeto:** 1.22\
 **Data:** 2026-10-28
 
-## Distribuição no TestFlight
+## Distribuição
 
-O app é distribuído no TestFlight com o nome **Mutua**
-(`com.lizandramalta.mutua`). A [segunda distribuição](docs/releases/testflight-2.md)
+O app passa a se chamar **Mora** (`com.lizandramalta.mutua`), em preparação para
+a [primeira publicação na App Store](docs/releases/app-store-1.md). No TestFlight,
+a [segunda distribuição](docs/releases/testflight-2.md)
 leva o produto completo; a [primeira](docs/releases/testflight-1.md) fica como
 histórico do recorte adulto inicial.
 

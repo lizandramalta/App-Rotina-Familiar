@@ -1,6 +1,8 @@
 import SwiftUI
 
 /// TEL-016 — inspect a current Kids signal and explicitly confirm or reject it (UX-013 §5.2; Figma 870:27114).
+/// UX-013 §4 / SCRUM-117: once the signal is confirmed as resolved — by this decision, a late
+/// `applied: false` decision or a `404` for a signal someone else settled — it returns to TEL-015 on its own.
 struct KidsSignalDetailView: View {
     private enum Attempt { case load, decision }
 
@@ -31,13 +33,11 @@ struct KidsSignalDetailView: View {
             .hidesAppTabBar()
             .task { await load() }
             .onChange(of: viewModel.resolved) { _, resolved in
-                // Success, including a late `applied: false`, returns to the refreshed queue silently (UX-013 §5.2).
+                // SCRUM-117 (#57): leave first, then refresh the queue. Embedded in the iPad split there is
+                // nothing to pop: the queue drops the item and selects the next one.
                 guard resolved else { return }
-                onResolved()
                 if !isEmbedded { dismiss() }
-            }
-            .onChange(of: viewModel.isUnavailable) { _, unavailable in
-                if unavailable { onResolved() }
+                onResolved()
             }
             .sheet(isPresented: $showsPhotoViewer) {
                 if let photo = viewModel.photo, let image = UIImage(data: photo), let detail = viewModel.detail {
@@ -91,11 +91,8 @@ struct KidsSignalDetailView: View {
                 .frame(maxWidth: .infinity)
             }
             .safeAreaInset(edge: .bottom) { decisionBar }
-        } else if viewModel.isUnavailable {
-            stateCard(symbol: "checkmark.circle", message: "kidsReview.error.not_found", showsRetry: false)
-                .accessibilityIdentifier("kidsReview.detail.unavailable")
         } else if viewModel.failed && !viewModel.isLoading {
-            stateCard(symbol: "exclamationmark.triangle", message: "kidsReview.detail.error", showsRetry: true)
+            failureCard
                 .accessibilityIdentifier("kidsReview.detail.error")
         } else {
             // Also the state before the first load starts: a branch must always render, or the `.task` and
@@ -305,23 +302,19 @@ struct KidsSignalDetailView: View {
         .accessibilityLabel("family.overview.loading")
     }
 
-    private func stateCard(symbol: String, message: LocalizedStringKey, showsRetry: Bool) -> some View {
+    /// Load failure without a detail: message + retry; the back button stays in `backBar`.
+    private var failureCard: some View {
         VStack(spacing: AppSpacing.lg) {
-            Image(systemName: symbol)
+            Image(systemName: "exclamationmark.triangle")
                 .font(.system(size: 44))
                 .foregroundStyle(Color.App.Action.primary)
                 .accessibilityHidden(true)
-            Text(message)
+            Text("kidsReview.detail.error")
                 .font(.app(.body))
                 .foregroundStyle(Color.App.Text.primary)
                 .multilineTextAlignment(.center)
-            if showsRetry {
-                Button("kidsReview.queue.retry") { Task { await load() } }
-                    .buttonStyle(AppPillButtonStyle(kind: .primary))
-            } else if !isEmbedded {
-                Button("family.tasks.back") { dismiss() }
-                    .buttonStyle(AppPillButtonStyle(kind: .secondary))
-            }
+            Button("kidsReview.queue.retry") { Task { await load() } }
+                .buttonStyle(AppPillButtonStyle(kind: .primary))
         }
         .padding(AppSpacing.xxl)
         .appCard(cornerRadius: AppRadius.cardBoard)

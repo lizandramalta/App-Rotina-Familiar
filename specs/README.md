@@ -56,7 +56,7 @@ da experiência. Isso permite evoluir o visual sem perder decisões, estados e t
 
 ## Mapa de implementação
 
-**Base funcional vigente:** RN 1.22 / RF 1.21 / UC 1.21 (2026-10-27)
+**Base funcional vigente:** RN 1.28 / RF 1.27 / UC 1.27 (2026-11-16)
 
 **Convenção de status:** `não criada` indica apenas uma entrega planejada; `em revisão`
 indica que o par existente foi atualizado após decisões de produto e ainda requer
@@ -76,6 +76,7 @@ planejada antes, mas não deve depender de comportamento ainda indisponível.
 | [`SPEC-004-gerar-reenviar-convite`](SPEC-004-gerar-reenviar-convite.md) - Gerar e reenviar convite | UC02 | ambos | SPEC-003 | aprovada |
 | [`SPEC-005-ingressar-por-convite`](SPEC-005-ingressar-por-convite.md) - Ingressar por convite | UC09 | ambos | SPEC-004 | aprovada |
 | [`SPEC-006-editar-perfil`](SPEC-006-editar-perfil.md) - Editar perfil e consultar badges | UC10 | ambos | SPEC-002, SPEC-003, SPEC-014 | aprovada |
+| [`SPEC-022-excluir-conta`](SPEC-022-excluir-conta.md) - Excluir conta | UC20 | ambos | SPEC-001, SPEC-003, SPEC-006 | aprovada |
 
 `SPEC-002` inclui o onboarding do Criador e o fuso da família: perfil inicial em
 TEL-055, criação conjunta da família e membros iniciais preparados em TEL-002,
@@ -123,7 +124,7 @@ status e resumo; mantenha esta tabela como o panorama do backlog.
 
 | Spec | UX-spec | Status | Projetos | Resumo |
 |---|---|---|---|---|
-| [SPEC-001-autenticar-com-apple](SPEC-001-autenticar-com-apple.md) | [UX-001-autenticar-com-apple.md](UX-001-autenticar-com-apple.md) | aprovada | ambos | Login nativo Apple do Criador, emissão de sessão ou `creationGrant` e encaminhamento seguro ao onboarding. |
+| [SPEC-001-autenticar-com-apple](SPEC-001-autenticar-com-apple.md) | [UX-001-autenticar-com-apple.md](UX-001-autenticar-com-apple.md) | aprovada | ambos | Login nativo Apple do Criador, emissão de sessão ou `creationGrant` e encaminhamento seguro ao onboarding; Fase 4 (revisão de 2026-11-16) guarda o refresh token Apple cifrado para revogação na exclusão de conta (SPEC-022). |
 | [SPEC-002-criar-configurar-familia](SPEC-002-criar-configurar-familia.md) | [UX-002-criar-configurar-familia.md](UX-002-criar-configurar-familia.md) | aprovada | ambos | Foto inicial antecipada; família, Criador e membros iniciais criados juntos em TEL-002; TEL-056 só oferece convites; fuso posterior configurado por Administrador. |
 | [SPEC-003-gerenciar-membros](SPEC-003-gerenciar-membros.md) | [UX-003-gerenciar-membros](UX-003-gerenciar-membros.md) | aprovada | ambos | Gestão persistente de membros após a criação, inclusive no retorno de TEL-056 a TEL-002; papéis, modo Kids e remoção preservam histórico. |
 | [SPEC-004-gerar-reenviar-convite](SPEC-004-gerar-reenviar-convite.md) | [UX-004-gerar-reenviar-convite](UX-004-gerar-reenviar-convite.md) | aprovada | ambos | Convite explícito com folha nativa direta em toda emissão; nova emissão invalida convites não usados e a sessão anterior só é revogada no ingresso. |
@@ -143,6 +144,7 @@ status e resumo; mantenha esta tabela como o panorama do backlog.
 | [SPEC-018-visualizar-carga](SPEC-018-visualizar-carga.md) | [UX-018-visualizar-carga.md](UX-018-visualizar-carga.md) | aprovada | ambos | Carga familiar Dia/Semana integrada à Família, com distribuição sem ranking, períodos efetivos e crédito histórico de membro removido. |
 | [SPEC-019-gerar-relatorio-semanal-pdf](SPEC-019-gerar-relatorio-semanal-pdf.md) | [UX-019-gerar-relatorio-semanal-pdf.md](UX-019-gerar-relatorio-semanal-pdf.md) | aprovada | ambos | Snapshot semanal autorizado e PDF local com gráficos, tabela, dados parciais e crédito histórico preservado. |
 | [SPEC-020-destaque-semanal](SPEC-020-destaque-semanal.md) | [UX-020-destaque-semanal.md](UX-020-destaque-semanal.md) | aprovada | ambos | Apuração semanal única, reconhecimento de empates, consulta própria, notificação opcional e compartilhamento local; acesso interno em Minhas tarefas durante a semana seguinte ao ciclo. |
+| [SPEC-022-excluir-conta](SPEC-022-excluir-conta.md) | [UX-022-excluir-conta.md](UX-022-excluir-conta.md) | aprovada | ambos | Exclusão imediata da própria conta por qualquer perfil e de conta Kids por Administrador, com anonimização como “Membro removido”; exclusão da conta do Criador apaga a família e revoga o token Apple guardado no login. |
 
 ## Templates
 

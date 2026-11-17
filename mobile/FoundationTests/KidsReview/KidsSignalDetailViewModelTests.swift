@@ -58,17 +58,16 @@ struct KidsSignalDetailViewModelTests {
 
         #expect(viewModel.resolved)
         #expect(!viewModel.failed)
-        #expect(!viewModel.isUnavailable)
     }
 
-    @Test("UX-013 §6 NotFound before the first load shows the item as unavailable, not resolved")
-    func notFoundOnFirstLoadIsUnavailable() async {
+    @Test("UX-013 §4 / SCRUM-117 a signal already settled by someone else returns silently (no static screen)")
+    func notFoundOnFirstLoadReturnsSilently() async {
         let viewModel = makeViewModel(KidsSignalDetailRepositoryStub(details: [.failure(KidsSignalError.notFound)]))
 
         await viewModel.load()
 
-        #expect(viewModel.isUnavailable)
-        #expect(!viewModel.resolved)
+        #expect(viewModel.resolved)
+        #expect(!viewModel.failed)
         #expect(viewModel.detail == nil)
     }
 
@@ -81,7 +80,6 @@ struct KidsSignalDetailViewModelTests {
         await viewModel.load()
 
         #expect(viewModel.resolved)
-        #expect(!viewModel.isUnavailable)
     }
 
     @Test("UX-013 §8 the private photo viewer clamps pinch zoom and double-tap toggles 1× and 2.5×")

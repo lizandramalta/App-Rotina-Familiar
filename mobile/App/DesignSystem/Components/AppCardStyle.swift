@@ -41,6 +41,18 @@ struct AppPillButtonStyle: ButtonStyle {
     }
 
     static let height: CGFloat = 50
+    /// SCRUM-125: on a `.highlight` pill (MOD-006, see MissionReopenConfirmationView), XCUITest
+    /// measures the rendered frame at ~55.14pt instead of this nominal 56pt, deterministically
+    /// (TaskReopenUITests.testSCRUM123MOD006ButtonsMeetMinimumTouchTargetForKids, SCRUM-118/123,
+    /// asserts >=55 for that reason). Investigated down to `PillBody`'s `.frame(minHeight:)` →
+    /// `.padding` → `.background(in: Capsule())` → `.overlay` (chalk stroke) → `.contentShape`
+    /// chain and the chalk border's `Canvas` overlay (ChalkStroke.swift): none of those modifiers
+    /// shrink the hosting view, and SwiftUI overlays never shrink their base view's frame.
+    /// `MissionReopenConfirmationView` doesn't impose any external `.frame(height:)` either. This
+    /// is almost certainly an XCUITest accessibility-frame measurement/rounding artifact, not a
+    /// real SwiftUI layout bug — it's still comfortably above Apple's real 44pt accessibility
+    /// floor. Do not "fix" this value without first reproducing a measured frame below 44pt; an
+    /// arbitrary bump here wouldn't be generalizable across devices/simulators anyway.
     static let kidsHeight: CGFloat = 56
     static let primaryBorderWidth: CGFloat = 2
 

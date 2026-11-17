@@ -8,6 +8,8 @@ struct MemberDetailView: View {
     /// MOD-010 currently open; stays open on failure so the error is read in context (UX-003 §6).
     @State private var pendingChange: MemberChangeConfirmationView.Change?
     @State private var changeFailed = false
+    /// SPEC-022 CA-16 / UX-022: Kids account deletion confirmation.
+    @State private var showsKidsDeletionConfirmation = false
     @State private var showsKidsNameEditor = false
     @State private var draftKidsName = ""
     @State private var kidsNameIsInvalid = false
@@ -80,6 +82,18 @@ struct MemberDetailView: View {
             )
         }
         .sheet(isPresented: $showsKidsNameEditor) { NavigationStack { kidsNameEditor } }
+        // Role change and removal use MOD-010; Kids account deletion keeps its SPEC-022 confirmation.
+        .alert(
+            Text(String(format: String(localized: "account.deletion.confirm.kids_title"), viewModel.targetName)),
+            isPresented: $showsKidsDeletionConfirmation
+        ) {
+            Button("account.common.cancel", role: .cancel) {}
+            Button("account.deletion.confirm.action", role: .destructive) {
+                Task { await viewModel.deleteKidsAccount() }
+            }
+        } message: {
+            Text("account.deletion.confirm.kids_message")
+        }
         .onChange(of: viewModel.isRemoved) { _, removed in
             guard removed else { return }
             // With MOD-010 open, leave TEL-032 only once the sheet is gone.
@@ -257,6 +271,16 @@ struct MemberDetailView: View {
                             managementRow("family.member.manage.remove", symbol: "trash", chevron: false, destructive: true)
                         }
                         .accessibilityIdentifier("family.member.detail.remove")
+                        if viewModel.canDeleteKidsAccount {
+                            FamilyCardSeparator(leadingInset: AppSpacing.lg + 24 + AppSpacing.base)
+                            Button { showsKidsDeletionConfirmation = true } label: {
+                                managementRow(
+                                    "family.members.delete_account", symbol: "person.crop.circle.badge.xmark",
+                                    chevron: false, destructive: true
+                                )
+                            }
+                            .accessibilityIdentifier("family.member.detail.delete_account")
+                        }
                     }
                     .buttonStyle(.plain)
                     .disabled(viewModel.isSaving)

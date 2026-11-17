@@ -20,6 +20,7 @@ import { registerRoutineRoutes } from './routine-routes.js';
 import { MissionReopenRequiresConfirmationError } from '../../modules/tasks/domain/task-reopening-errors.js';
 import { registerMissionRoutes } from './mission-routes.js';
 import { registerMemberRoutes } from './member-routes.js';
+import { registerAccountRoutes } from './account-routes.js';
 import { registerRewardRoutes } from './reward-routes.js';
 import { registerReportRoutes } from './report-routes.js';
 import { registerKidsSignalRoutes } from './kids-signal-routes.js';
@@ -83,6 +84,7 @@ export function buildHttpApp(
         { name: 'Access', description: 'Autenticação, convite e início de sessão.' },
         { name: 'Family', description: 'Onboarding e criação de família.' },
         { name: 'Members', description: 'Consulta e criação de perfis da família.' },
+        { name: 'Account', description: 'Exclusão de conta e da família pelo Criador (SPEC-022).' },
         { name: 'Media', description: 'Upload de mídia privada.' },
         { name: 'Profile', description: 'Dados do próprio perfil.' },
         { name: 'Tasks', description: 'Gestão de tarefas únicas.' },
@@ -330,6 +332,7 @@ export function buildHttpApp(
       registerSessionRoutes(scope, container);
       registerFamilyRoutes(scope, container);
       registerMemberRoutes(scope, container);
+      registerAccountRoutes(scope, container);
       registerMediaRoutes(scope, container);
       registerProfileRoutes(scope, container);
       registerTaskRoutes(scope, container);

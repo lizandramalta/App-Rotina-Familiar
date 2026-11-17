@@ -35,6 +35,7 @@ enum UITestScenario: String {
     case kidsReviewQueue = "kids-review-queue"
     case kidsReviewQueueEmpty = "kids-review-queue-empty"
     case kidsReviewQueueFailure = "kids-review-queue-failure"
+    case kidsReviewQueueStale = "kids-review-queue-stale"
     case taskCompletionMember = "task-completion-member"
     case taskCompletionConflict = "task-completion-conflict"
     case taskOptimisticDelayed = "task-optimistic-delayed"
@@ -132,7 +133,7 @@ enum UITestScenario: String {
             )))
             return
         }
-        if [.familyOverview, .familyOverviewIncentives, .memberInvite, .memberInviteUncertain, .kidsReviewQueue, .kidsReviewQueueEmpty, .kidsReviewQueueFailure].contains(self) {
+        if [.familyOverview, .familyOverviewIncentives, .memberInvite, .memberInviteUncertain, .kidsReviewQueue, .kidsReviewQueueEmpty, .kidsReviewQueueFailure, .kidsReviewQueueStale].contains(self) {
             sessionStore.apply(.session(Self.inviteSession(role: .administrator)))
             return
         }
@@ -353,6 +354,9 @@ private struct UITestAccessRepository: AccessRepository {
     }
 
     func revokeSession(accessToken: String) async throws {}
+
+    /// SPEC-022: the deletion is confirmed so TEL-001 shows the confirmation banner.
+    func deleteOwnAccount(appleProof: AppleAuthorizationProof?, accessToken: String) async throws {}
 }
 
 private actor UITestFamilyRepository: FamilyRepository {
@@ -486,6 +490,7 @@ private actor UITestFamilyRepository: FamilyRepository {
     }
 
     func removeMember(memberID: UUID, accessToken: String) async throws {}
+    func deleteKidsAccount(memberID: UUID, accessToken: String) async throws {}
 
     func leaveAdministration(accessToken: String) async throws -> FamilyMember {
         FamilyMember(id: UITestTaskFixtures.memberID, name: "Maria Silva", role: .member, isFamilyCreator: false)
@@ -500,15 +505,16 @@ private actor UITestFamilyRepository: FamilyRepository {
             return FamilyOverview(
                 range: range ?? todayRange,
                 familyCreatedAt: familyCreatedAt,
-                progress: FamilyProgress(total: 6, completed: 2, pending: 3, awaitingConfirmation: 1, percentage: 33.3),
+                // SCRUM-119: derived from the same fixture TEL-011 lists.
+                progress: UITestTaskFixtures.familyListProgress(assignee: nil),
                 members: [
                     FamilyMemberProgress(
                         memberID: UITestTaskFixtures.memberID, name: "Maria Silva", role: .administrator,
-                        progress: FamilyProgress(total: 3, completed: 1, pending: 1, awaitingConfirmation: 1, percentage: 33.3)
+                        progress: UITestTaskFixtures.familyListProgress(assignee: UITestTaskFixtures.memberID)
                     ),
                     FamilyMemberProgress(
                         memberID: UITestTaskFixtures.kidMemberID, name: "Rafa Silva", role: .kid,
-                        progress: FamilyProgress(total: 2, completed: 1, pending: 1, awaitingConfirmation: 0, percentage: 50)
+                        progress: UITestTaskFixtures.familyListProgress(assignee: UITestTaskFixtures.kidMemberID)
                     ),
                 ]
             )
@@ -776,6 +782,24 @@ private enum UITestTaskFixtures {
 
     static func familyListTaskID(_ index: Int) -> UUID {
         UUID(uuidString: String(format: "00000000-0000-0000-0000-%012d", index + 1))!
+    }
+
+    /// SCRUM-119: derives from `familyListTasks` (the fixture `listFamilyTasks` itself filters),
+    /// so the mock `FamilyOverview` can never drift from what the member-filtered list shows —
+    /// a hand-maintained duplicate of these counts was the actual root cause of SCRUM-119.
+    static func familyListProgress(assignee memberID: UUID?) -> FamilyProgress {
+        let matching = familyListTasks.filter { memberID == nil || $0.2.contains(memberID!) }
+        let total = matching.count
+        let completed = matching.count { $0.1 == .completed }
+        let pending = matching.count { $0.1 == .pending }
+        let awaitingConfirmation = matching.count { $0.1 == .awaitingConfirmation }
+        return FamilyProgress(
+            total: total,
+            completed: completed,
+            pending: pending,
+            awaitingConfirmation: awaitingConfirmation,
+            percentage: total == 0 ? nil : Double(completed) / Double(total) * 100
+        )
     }
 }
 
@@ -1227,13 +1251,21 @@ private enum UITestMissionFixtures {
 }
 
 /// Deterministic queue for TEL-015 (SPEC-013): three pending signals, oldest first, an empty queue or a failing load.
-private struct UITestKidsSignalRepository: KidsSignalRepository {
-    let scenario: UITestScenario
+/// Decisions are remembered so the queue and detail stop listing a decided signal (UX-013 §4, SCRUM-117).
+/// `kidsReviewQueueStale` first lists the oldest signal although another Administrator already settled it:
+/// its detail answers `404`, and the next queue read no longer includes it, as the backend does.
+private actor UITestKidsSignalRepository: KidsSignalRepository {
+    private let scenario: UITestScenario
+    private var decidedIDs: Set<UUID> = []
+
+    init(scenario: UITestScenario) {
+        self.scenario = scenario
+    }
 
     func getReviewQueue(accessToken: String, cursor: String?) async throws -> KidsReviewQueuePage {
         switch scenario {
-        case .kidsReviewQueue, .familyOverviewIncentives:
-            return KidsReviewQueuePage(items: Self.items, nextCursor: nil)
+        case .kidsReviewQueue, .kidsReviewQueueStale, .familyOverviewIncentives:
+            return KidsReviewQueuePage(items: Self.items.filter { !decidedIDs.contains($0.id) }, nextCursor: nil)
         case .kidsReviewQueueFailure:
             throw KidsSignalError.network
         default:
@@ -1242,7 +1274,13 @@ private struct UITestKidsSignalRepository: KidsSignalRepository {
     }
 
     func getSignalDetail(id: UUID, accessToken: String) async throws -> KidsSignalDetail {
-        guard let item = Self.items.first(where: { $0.id == id }) else { throw KidsSignalError.notFound }
+        if scenario == .kidsReviewQueueStale, id == Self.items.first?.id {
+            decidedIDs.insert(id)
+            throw KidsSignalError.notFound
+        }
+        guard !decidedIDs.contains(id), let item = Self.items.first(where: { $0.id == id }) else {
+            throw KidsSignalError.notFound
+        }
         return KidsSignalDetail(id: id, taskID: item.taskID, taskTitle: item.taskTitle,
                                 childName: item.childName, signaledAt: item.signaledAt,
                                 assignees: [item.childName], photoMediaID: item.hasPhoto ? id : nil,
@@ -1251,8 +1289,9 @@ private struct UITestKidsSignalRepository: KidsSignalRepository {
     }
 
     func decideSignal(id: UUID, decision: KidsReviewDecision, accessToken: String) async throws -> KidsDecisionResult {
-        KidsDecisionResult(taskStatus: decision == .confirm ? .completed : .pending,
-                           outcome: decision == .confirm ? "confirmed" : "rejected", applied: true)
+        decidedIDs.insert(id)
+        return KidsDecisionResult(taskStatus: decision == .confirm ? .completed : .pending,
+                                  outcome: decision == .confirm ? "confirmed" : "rejected", applied: true)
     }
 
     func getSignalPhoto(mediaID: UUID, accessToken: String) async throws -> Data {

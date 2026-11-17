@@ -14,6 +14,16 @@ nonisolated protocol AccessRepository: Sendable {
     ) async throws -> SessionToken
 
     func revokeSession(accessToken: String) async throws
+
+    /// SPEC-022 `POST /v1/me/account-deletion`. `appleProof` is sent only by a creator without a stored
+    /// Apple token, after `AccessError.appleProofRequired`.
+    func deleteOwnAccount(appleProof: AppleAuthorizationProof?, accessToken: String) async throws
+}
+
+extension AccessRepository {
+    func deleteOwnAccount(appleProof: AppleAuthorizationProof?, accessToken: String) async throws {
+        throw AccessError.unavailable
+    }
 }
 
 @MainActor

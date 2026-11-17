@@ -75,6 +75,9 @@ final class FamilyMembersUITests: XCTestCase {
         XCTAssertFalse(settingsButton.exists)
     }
 
+    /// The `family-tasks` fixture's default overview range is *today* (mirroring the backend daily
+    /// default, RN60/RN61), not a hardcoded one, so the "Limpar disabled" assertions here and in
+    /// `testFamilyFilterSheetsApplyOnlyFromShowTasksButton` hold on any run date.
     func testFamilyTasksMatchesApprovedTEL011AndFiltersStatus() {
         // SPEC-009 CA-06/07/12; UX-009 TEL-011; SPEC-019 CA-05–07.
         launch("family-tasks")
@@ -113,6 +116,25 @@ final class FamilyMembersUITests: XCTestCase {
         apply.tap()
         XCTAssertTrue(app.staticTexts["AGUARDANDO CONFIRMAÇÃO · 1"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.staticTexts["PENDENTES · 3"].exists)
+    }
+
+    /// SCRUM-119: the "PENDENTES" header count must match the rows actually listed once filtered
+    /// by a member, including a task shared with someone else — not just the unfiltered total.
+    func testFamilyTasksPendingCountMatchesListedRowsWhenFilteredByMember() {
+        launch("family-tasks")
+        let allTasks = app.buttons["family.overview.progress"]
+        XCTAssertTrue(allTasks.waitForExistence(timeout: 12))
+        allTasks.tap()
+
+        XCTAssertTrue(app.staticTexts["Tarefas da família"].waitForExistence(timeout: 5))
+        // Fixed id from `UITestTaskFixtures.memberID` (App/Testing/UITestScenario.swift).
+        app.buttons["family.tasks.member.00000000-0000-0000-0000-0000000000A1"].tap()
+
+        XCTAssertTrue(app.staticTexts["PENDENTES · 2"].waitForExistence(timeout: 5))
+        let pendingRows = app.buttons.matching(
+            NSPredicate(format: "identifier BEGINSWITH 'family.tasks.row.'")
+        )
+        XCTAssertEqual(pendingRows.count, 3, "own tasks: 2 pending (one exclusive, one shared) + 1 completed")
     }
 
     func testFamilyFilterSheetsApplyOnlyFromShowTasksButton() {
@@ -347,6 +369,22 @@ final class FamilyMembersUITests: XCTestCase {
         app.buttons["family.member.change.cancel"].tap()
         XCTAssertTrue(changeTitle.waitForNonExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["family.member.detail.name"].exists)
+    }
+
+    func testAdminCanDeleteKidsAccountFromMemberDetail() {
+        // SPEC-022 CA-16; UX-022 UX-04: the action sits in the management block, only for Kids.
+        launch("member-invite")
+        openKidDetail()
+
+        let delete = app.buttons["family.member.detail.delete_account"]
+        XCTAssertTrue(delete.waitForExistence(timeout: 5))
+        delete.tap()
+        let alert = app.alerts.firstMatch
+        XCTAssertTrue(alert.waitForExistence(timeout: 5))
+        XCTAssertTrue(alert.buttons["Excluir"].exists)
+        alert.buttons["Excluir"].firstMatch.tap()
+
+        XCTAssertFalse(app.staticTexts["family.member.detail.name"].waitForExistence(timeout: 3))
     }
 
     func testAdminEditsKidsNameFromMemberDetailTopButton() {

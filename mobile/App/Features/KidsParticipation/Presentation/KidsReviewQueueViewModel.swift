@@ -65,6 +65,13 @@ final class KidsReviewQueueViewModel {
         }
     }
 
+    /// UX-013 §4 / SCRUM-117: TEL-016 confirmed this signal is no longer current (decision `200`,
+    /// including `applied: false`, or detail `404`). Drop it right away so the queue the
+    /// Administrator returns to never lists it — even if the follow-up reload fails.
+    func removeResolved(id: UUID) {
+        items.removeAll { $0.id == id }
+    }
+
     func loadMoreIfNeeded(currentItem: KidsSignalSummary) async {
         guard currentItem.id == items.last?.id else { return }
         await loadMore()

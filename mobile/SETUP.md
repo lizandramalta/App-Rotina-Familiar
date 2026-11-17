@@ -67,7 +67,7 @@ do primeiro iPhone disponível em vez de fixar um modelo.
 
 ## Distribuição TestFlight
 
-O app aparece como Mutua (`com.lizandramalta.mutua`), com o ícone em `AppIcon`.
+O app aparece como Mora (`com.lizandramalta.mutua`), com o ícone em `AppIcon`.
 O registro da distribuição atual está em
-[docs/releases/testflight-2.md](../docs/releases/testflight-2.md). Antes de
+[docs/releases/app-store-1.md](../docs/releases/app-store-1.md). Antes de
 arquivar, confira o `Production.xcconfig` local, a API de produção e a assinatura.

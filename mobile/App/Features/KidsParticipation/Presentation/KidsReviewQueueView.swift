@@ -175,6 +175,8 @@ struct KidsReviewQueueView: View {
         } else {
             NavigationLink {
                 KidsSignalDetailView(viewModel: viewModel.makeDetailViewModel(id: item.id)) {
+                    // SCRUM-117: drop the settled signal right away, even if the reload fails.
+                    viewModel.removeResolved(id: item.id)
                     Task { await viewModel.load() }
                 }
                 .hidesAppTabBar()
@@ -241,7 +243,9 @@ struct KidsReviewQueueView: View {
     private var splitDetail: some View {
         if let selectedID {
             KidsSignalDetailView(viewModel: viewModel.makeDetailViewModel(id: selectedID), isEmbedded: true) {
-                // The decided item leaves the queue; the selection moves to the next one (onChange of items).
+                // The decided item leaves the queue at once (SCRUM-117); the selection moves to the next one
+                // (onChange of items) and the reload confirms the server state.
+                viewModel.removeResolved(id: selectedID)
                 Task { await viewModel.load() }
             }
             .id(selectedID)

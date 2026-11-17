@@ -321,6 +321,19 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
         try lock.withLock { try leaveAdministrationResult.get() }
     }
 
+    /// SPEC-022 CA-16: administrator deletes a Kids account.
+    var kidsAccountDeletionResult: Result<Void, Error> = .success(())
+    private var _deletedKidsAccountIDs: [UUID] = []
+    var deletedKidsAccountIDs: [UUID] { lock.withLock { _deletedKidsAccountIDs } }
+
+    func deleteKidsAccount(memberID: UUID, accessToken: String) async throws {
+        let result = lock.withLock { () -> Result<Void, Error> in
+            _deletedKidsAccountIDs.append(memberID)
+            return kidsAccountDeletionResult
+        }
+        try result.get()
+    }
+
     func updateFamilyName(_ name: String, accessToken: String) async throws -> FamilyProfile {
         try lock.withLock {
             _updatedFamilyNames.append(name)

@@ -12,6 +12,8 @@ nonisolated protocol FamilyRepository: Sendable {
     func updateMemberName(memberID: UUID, name: String, accessToken: String) async throws -> FamilyMember
     func changeMemberRole(memberID: UUID, role: MemberRole, accessToken: String) async throws -> FamilyMember
     func removeMember(memberID: UUID, accessToken: String) async throws
+    /// SPEC-022 CA-16: administrator deletes a Kids account and its personal data.
+    func deleteKidsAccount(memberID: UUID, accessToken: String) async throws
     func leaveAdministration(accessToken: String) async throws -> FamilyMember
     func getFamilyOverview(range: FamilyDateRange?, accessToken: String) async throws -> FamilyOverview
     func listFamilyApplause(range: FamilyDateRange, accessToken: String) async throws -> [FamilyApplauseSummary]
@@ -49,4 +51,10 @@ extension FamilyRepository {
 nonisolated protocol ProfilePhotoNormalizing: Sendable {
     /// Returns JPEG data with the longest side capped at 1600 px, at most 5 MB, without metadata.
     func normalize(_ data: Data) async throws -> Data
+}
+
+extension FamilyRepository {
+    func deleteKidsAccount(memberID: UUID, accessToken: String) async throws {
+        throw FamilyError.unavailable
+    }
 }

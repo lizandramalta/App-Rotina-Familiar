@@ -16,6 +16,7 @@ final class ProfileViewModel {
     private let familyRepository: (any FamilyRepository)?
     private let sessionStore: AppSessionStore
     private let photoNormalizer: any ProfilePhotoNormalizing
+    private let appleAuthenticator: (any AppleAuthenticating)?
     let session: ActiveFamilySession
 
     private(set) var state: State = .loading
@@ -33,15 +34,20 @@ final class ProfileViewModel {
 
     private var avatarMediaID: String?
 
+    /// TEL-058 is pushed while this is set (SPEC-022, UX-022 §4).
+    var accountDeletion: AccountDeletionViewModel?
+
     init(
         repository: any ProfileRepository,
         sessionStore: AppSessionStore,
         session: ActiveFamilySession,
         familyRepository: (any FamilyRepository)? = nil,
-        photoNormalizer: any ProfilePhotoNormalizing = ProfilePhotoNormalizer()
+        photoNormalizer: any ProfilePhotoNormalizing = ProfilePhotoNormalizer(),
+        appleAuthenticator: (any AppleAuthenticating)? = nil
     ) {
         self.repository = repository
         self.familyRepository = familyRepository
+        self.appleAuthenticator = appleAuthenticator
         self.sessionStore = sessionStore
         self.photoNormalizer = photoNormalizer
         self.session = session
@@ -168,6 +174,27 @@ final class ProfileViewModel {
             return String(format: String(localized: "profile.identity.subtitle_name_role"), profile.name, roleTitle)
         }
         return String(format: String(localized: "profile.identity.subtitle_role_family"), roleTitle, profile.familyName)
+    }
+
+    // MARK: Account (SPEC-022)
+
+    /// Every profile can delete its own account; the family name feeds the creator variant.
+    var canDeleteAccount: Bool { profile != nil }
+
+    func startAccountDeletion() {
+        guard let profile else { return }
+        let variant: AccountDeletionViewModel.Variant = if session.isFamilyCreator {
+            .creator(familyName: profile.familyName)
+        } else if isKid {
+            .kids
+        } else {
+            .member
+        }
+        accountDeletion = AccountDeletionViewModel(
+            variant: variant,
+            sessionStore: sessionStore,
+            appleAuthenticator: appleAuthenticator
+        )
     }
 
     // MARK: Role in the family (adults only)

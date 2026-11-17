@@ -10,6 +10,7 @@ O Worker não consulta nem consome o convite. A senha é solicitada apenas dentr
 O backend emite links com `INVITE_LINK_BASE_URL=https://convites.rotina-familiar.workers.dev`. Os builds mobile usam `INVITE_LINK_HOST=convites.rotina-familiar.workers.dev` e o `INVITE_LINK_BASE_URL` correspondente. Para atualizar a hospedagem, use `wrangler deploy` nesta pasta com acesso à mesma conta Cloudflare. A instalação via App Store ainda depende da publicação do app; até lá, quem recebe o convite precisa instalar a versão de teste distribuída pela equipe e reabrir o link.
 
 O AASA inclui `55Z24S2H7V.com.lizandramalta.mutua`, identificador atual do app,
-junto ao identificador antigo, e a página de fallback usa o nome Mutua. Essa
-versão está publicada no Worker existente desde 2026-10-28. O `wrangler.jsonc`
+junto ao identificador antigo. A página de fallback usa o nome Mora desde
+2026-11-16; a versão anterior, com o nome Mutua, está publicada desde 2026-10-28
+até o próximo `wrangler deploy`. O `wrangler.jsonc`
 mantém a URL de produção ativa e desativa URLs de prévia.

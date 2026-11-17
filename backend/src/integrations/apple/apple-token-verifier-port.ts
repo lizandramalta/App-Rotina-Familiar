@@ -17,6 +17,14 @@ export interface VerifiedAppleIdentity {
   readonly email?: string;
   readonly isEmailVerified?: boolean;
   readonly isPrivateEmail?: boolean;
+  /**
+   * Refresh token devolvido pela troca do `authorizationCode`, quando houver.
+   * Guardado cifrado para revogação na exclusão de conta (SPEC-001 Fase 4);
+   * nunca registrado em log, resposta ou telemetria (RNF16).
+   */
+  readonly refreshToken?: string;
+  /** Access token da mesma troca; usado só como alternativa de revogação. */
+  readonly accessToken?: string;
 }
 
 export interface AppleTokenVerifierPort {

@@ -1,12 +1,12 @@
 # Spec 001: Autenticar com Apple
 
 **Status:** aprovada
-**Autor:** Ana Luísa Coleone | **Criada em:** 2026-10-06 | **Aprovada por:** Ana Luísa Coleone | **Em:** 2026-10-06
-**Base funcional:** 1.14
+**Autor:** Ana Luísa Coleone | **Criada em:** 2026-10-06 | **Aprovada por:** Ana Luísa Coleone | **Em:** 2026-10-06 · revisão de 2026-11-16 aprovada pela pessoa usuária em 2026-11-17
+**Base funcional:** RN 1.28 / RF 1.27 / UC 1.27 (versão aprovada anteriormente: 1.14)
 **UX-spec:** [UX-001-autenticar-com-apple.md](UX-001-autenticar-com-apple.md)
 **Projetos envolvidos:** ambos
 **Tema do backlog:** Tema 1 - Acesso, família e perfis
-**Última revisão:** 2026-10-07 — decisões do SCRUM-46
+**Última revisão:** 2026-11-16 — guarda do refresh token Apple para revogação na exclusão de conta (SPEC-022 E-05); revisão anterior em 2026-10-07 (SCRUM-46)
 
 ## 1. Contexto e Objetivo
 
@@ -18,14 +18,14 @@
 | Categoria | Códigos incluídos nesta entrega |
 |---|---|
 | Casos de uso | UC04, UC01 (encaminhamento) |
-| Regras de negócio | RN01, RN44, RN63 |
-| Requisitos funcionais | RF01, RF37–39, RF48 (parcial — encaminhamento ao onboarding; a vinculação é de `SPEC-002`) |
-| Requisitos não funcionais | RNF01, RNF05, RNF06, RNF07, RNF08, RNF12, RNF13, RNF14, RNF15, RNF16, RNF22 |
+| Regras de negócio | RN01, RN44, RN63, RN70 |
+| Requisitos funcionais | RF01, RF37–39, RF48 (parcial — encaminhamento ao onboarding; a vinculação é de `SPEC-002`), RF73 (parcial — guarda do token usado na revogação; a exclusão é de `SPEC-022`) |
+| Requisitos não funcionais | RNF01, RNF05, RNF06, RNF07, RNF08, RNF12, RNF13, RNF14, RNF15, RNF16, RNF22, RNF28 |
 | Telas e fluxos de navegação | TEL-001, TEL-055, UF-01 (trecho de autenticação), UF-03 (trecho "Criador retorna por Apple") |
-| Decisões arquiteturais aplicáveis | MA-10, BA-10, BA-19, BA-21 |
+| Decisões arquiteturais aplicáveis | MA-10, BA-10, BA-19, BA-21, BA-40 |
 
 - **Documentos consultados:** `docs/01-regras-de-negocio.md` (RN01, RN44, RN63), `docs/02-requisitos.md` (RF01, RF37–39, RF48 e RNF citadas), `docs/03-casos-de-uso.md` (UC01, UC04), `docs/design/screen-map.md` (TEL-001, TEL-055), `docs/design/user-flows.md` (UF-01, UF-03), `docs/architecture/mobile-architecture.md` (§9), `docs/architecture/mobile-decisions.md` (MA-10, P-07), `docs/architecture/mobile-feature-catalog.md` (módulo `Access`), `docs/architecture/backend-architecture.md` (§8 "Criador via Apple"), `docs/architecture/backend-contracts.md` (§2, §7 `backend-uc04`), `docs/architecture/backend-decisions.md` (BA-10, BA-19, BA-21).
-- **Depende de (specs pré-requisito):** Nenhuma - entrega independente.
+- **Depende de (specs pré-requisito):** Nenhuma - entrega independente. A Fase 4 é pré-requisito da Fase 2 de `SPEC-022-excluir-conta`, que consome o token guardado.
 - **Dependências externas e infraestrutura:** Sign in with Apple (`AuthenticationServices` no mobile; validação oficial de chaves/emissor/audiência no backend); TLS em todas as chamadas.
 
 ## 3. Escopo da Entrega
@@ -39,6 +39,7 @@
 - Associação de identidade: o backend identifica o Criador pelo `sub` estável extraído de uma prova Apple validada; e-mail, nome e tokens brutos não são chave de vínculo.
 - Ciclo de vida da sessão emitida por esta entrega: `GET /me/session` (consulta), `POST /access/refresh` (renovação do access token), `DELETE /me/session` (revogação).
 - Tela TEL-001 (Entrada): botão nativo Apple e feedback de erro/estado.
+- Guarda protegida do refresh token Apple devolvido na troca do `authorizationCode`, vinculada à identidade Apple e substituindo o anterior, nos dois resultados (sessão ou `creationGrant`). O token serve somente à revogação quando o Criador excluir a conta (`SPEC-022`). Identidade que continua sem família após a expiração do grant tem o token apagado pela limpeza de onboarding já existente; um novo login guarda o token novamente.
 
 ### 3.2. Fora do escopo (desta spec)
 - Perfil inicial, criação da família e telas TEL-055/TEL-002/TEL-056 (UC01) — ficam em `SPEC-002-criar-configurar-familia`, que consome o `creationGrant` emitido aqui.
@@ -53,6 +54,8 @@
 - Não há login por e-mail/senha nem qualquer outro provedor de identidade nesta etapa.
 - O app não solicita `fullName` nem e-mail à Apple nesta entrega; ambos não são necessários para reconhecer a identidade do Criador.
 - O app não reenvia automaticamente uma prova obtida antes de uma falha de rede: uma nova tentativa parte sempre de um novo toque no botão Apple.
+- O refresh token Apple guardado nunca é devolvido ao app nem usado para consultar dados na Apple; o app não solicita escopos adicionais por causa dele.
+- A ausência de refresh token na resposta da Apple não faz o login falhar.
 
 ## 4. Perfis, Atores e Regras de Autorização (RBAC)
 
@@ -80,6 +83,8 @@ Esta entrega não segue a matriz Administrador/Membro/Kids porque a rota é de *
 
 **Identidade Apple persistida:** após validar a prova, o backend extrai o `sub` emitido pela Apple e o usa como identificador estável da identidade do Criador. A associação persistida usa seu valor protegido e seu hash para unicidade; `email`, `fullName`, `identityToken`, `authorizationCode` e `rawNonce` não são usados como chave de vínculo.
 
+**Refresh token Apple guardado:** quando a troca do `authorizationCode` devolve `refresh_token`, o backend o guarda cifrado na identidade Apple, com o mesmo mecanismo de proteção do identificador (BA-40), no mesmo commit que emite a sessão ou o `creationGrant`, substituindo o valor anterior. Sem `refresh_token` na resposta, o valor anterior é mantido. O token nunca aparece em resposta, log ou telemetria. A limpeza de onboarding apaga o token de identidade que permanece sem família após a expiração do grant.
+
 ### 5.2. Contrato de API Compartilhado (Endpoints e Payloads)
 
 #### 5.2.1 `POST /access/apple`
@@ -94,6 +99,8 @@ Payload de entrada:
   "rawNonce": "<nonce gerado pelo app>"
 }
 ```
+
+O payload e as respostas abaixo não mudam com a guarda do refresh token Apple, que é apenas efeito no servidor.
 
 Resposta de sucesso — identidade com família vinculada:
 - **HTTP Status:** `200 OK`
@@ -175,8 +182,8 @@ Todos os erros utilizam `Content-Type: application/problem+json`.
 
 | Estado De | Evento / Ação | Estado Para | Quem Pode Executar | Regras e Validações | Efeitos Colaterais |
 |---|---|---|---|---|---|
-| Sem sessão | `POST /access/apple` com prova válida e família vinculada | Sessão ativa do Criador | Identidade Apple validada | RN44 | Revoga sessão anterior do mesmo Criador |
-| Sem sessão | `POST /access/apple` com prova válida e sem família | `creationGrant` emitido | Identidade Apple validada | BA-21 (expira em 10 min) | Nenhum efeito em dados de família |
+| Sem sessão | `POST /access/apple` com prova válida e família vinculada | Sessão ativa do Criador | Identidade Apple validada | RN44 | Revoga sessão anterior do mesmo Criador; guarda o refresh token Apple, substituindo o anterior |
+| Sem sessão | `POST /access/apple` com prova válida e sem família | `creationGrant` emitido | Identidade Apple validada | BA-21 (expira em 10 min) | Nenhum efeito em dados de família; guarda o refresh token Apple, apagado pela limpeza de onboarding se a identidade continuar sem família após a expiração do grant |
 | Sessão ativa | `POST /access/refresh` | Sessão ativa (novo access token) | Titular da sessão | Refresh válido e não revogado | Access tokens anteriores ainda dentro dos 15 min continuam válidos |
 | Sessão ativa | `DELETE /me/session` | Sem sessão | Titular da sessão | Sessão ativa | Revoga também o registro de push |
 
@@ -248,6 +255,30 @@ Todos os erros utilizam `Content-Type: application/problem+json`.
   - **ENTÃO O SISTEMA DEVE** rejeitar a requisição com HTTP `429 Too Many Requests` e código `RATE_LIMIT_EXCEEDED`, sem emitir sessão ou grant,
   - **E** o app DEVE informar de forma não bloqueante que a pessoa deve aguardar alguns minutos antes de tentar novamente. *(Origem: RNF15, seção 5.2 desta spec)*
 
+- **CA-12: [Guarda do token Apple - Identidade com família]**
+  - **DADO QUE** uma identidade Apple vinculada a uma família conclui `POST /access/apple` com troca de código bem-sucedida,
+  - **QUANDO** a resposta da Apple incluir `refresh_token`,
+  - **ENTÃO O SISTEMA DEVE** guardá-lo cifrado na identidade Apple no mesmo commit que abre a sessão,
+  - **E** substituir qualquer valor guardado anteriormente. *(Origem: RN44, RF37, RNF16, BA-40, SPEC-022 E-05)*
+
+- **CA-13: [Guarda do token Apple - Identidade sem família]**
+  - **DADO QUE** uma identidade Apple sem família conclui `POST /access/apple` e recebe `creationGrant`,
+  - **QUANDO** a resposta da Apple incluir `refresh_token`,
+  - **ENTÃO O SISTEMA DEVE** guardá-lo cifrado na identidade no mesmo commit que emite o grant,
+  - **E**, se a identidade continuar sem família após a expiração do grant, a limpeza de onboarding DEVE apagar o token guardado. *(Origem: RN44, RNF28, SPEC-001 E-12)*
+
+- **CA-14: [Guarda do token Apple - Resposta sem refresh token]**
+  - **DADO QUE** a troca do código é bem-sucedida mas a resposta da Apple não inclui `refresh_token`,
+  - **QUANDO** `POST /access/apple` for processado,
+  - **ENTÃO O SISTEMA DEVE** concluir o login normalmente, com sessão ou grant,
+  - **E** manter o token guardado anteriormente, quando houver. *(Origem: SPEC-001 E-11)*
+
+- **CA-15: [Sigilo do token Apple]**
+  - **DADO QUE** um refresh token Apple foi guardado,
+  - **QUANDO** qualquer rota responder ou qualquer evento de log ou telemetria for emitido,
+  - **ENTÃO O SISTEMA DEVE** omitir o valor do token, cifrado ou não,
+  - **E** os testes DEVEM verificar o corpo de `POST /access/apple` e a saída do logger. *(Origem: RNF08, RNF16)*
+
 ### Checklist de Cobertura Obrigatória dos CAs:
 - [x] Fluxo principal de cada alternativa de UC04 coberto (CA-01, CA-02)
 - [x] Fluxos alternativos e exceções do UC mapeados (CA-03, CA-04)
@@ -261,12 +292,12 @@ Todos os erros utilizam `Content-Type: application/problem+json`.
 
 | Evento | Tipo | Gatilho / Condição | Propriedades Registradas | Destino |
 |---|---|---|---|---|
-| `apple_sign_in_succeeded` | Métrica / Analytics | `POST /access/apple` concedeu sessão ou grant | `outcome` (`session`\|`creationGrant`), `familyId` quando houver | Analytics |
+| `apple_sign_in_succeeded` | Métrica / Analytics | `POST /access/apple` concedeu sessão ou grant | `outcome` (`session`\|`creationGrant`), `familyId` quando houver, `appleRefreshTokenStored` (`true`\|`false`) | Analytics |
 | `apple_sign_in_rejected` | Log de Segurança | Prova Apple inválida ou excesso de tentativas | `requestId`, `reason`, IP de origem | Log estruturado |
 | `apple_sign_in_native_ended` | Diagnóstico técnico | Sheet nativo cancelado ou devolve falha sem prova | `outcome` (`cancelled`\|`native_error`), categoria do erro; nunca tokens ou dados de identidade | Diagnóstico mobile |
 | `session_revoked` | Log de Segurança | Substituição por novo login Apple ou revogação explícita | `sessionId`, `reason` | Log estruturado |
 
-*Nota de Privacidade e Segurança:* `identityToken`, `authorizationCode`, `rawNonce`, `accessToken`, `refreshToken` e o header `X-Installation-Proof` NUNCA são registrados em logs ou eventos de telemetria (RNF08, RNF16).
+*Nota de Privacidade e Segurança:* `identityToken`, `authorizationCode`, `rawNonce`, `accessToken`, `refreshToken`, o refresh token Apple guardado e o header `X-Installation-Proof` NUNCA são registrados em logs ou eventos de telemetria (RNF08, RNF16).
 
 ## 9. Premissas e Esclarecimentos
 
@@ -288,6 +319,8 @@ Todos os erros utilizam `Content-Type: application/problem+json`.
 | E-08 | Como ocorre nova tentativa após falha de rede? | Somente após novo toque no botão Apple; não há retry automático nem reaproveitamento da prova anterior. | Produto / 2026-10-07 | Não |
 | E-09 | Quais dados devem ser solicitados à Apple e qual é a chave de vínculo? | Nenhum `requestedScope` adicional; o backend usa exclusivamente o `sub` estável da prova validada, nunca e-mail, nome ou token bruto. | Produto / 2026-10-07 | Não |
 | E-10 | Qual configuração usa o botão Apple? | Rótulo `.signIn` e estilo `.black`, preservando o componente nativo sem texto, ícone ou fonte customizados. | Produto / 2026-10-07 | Não |
+| E-11 | Como revogar os tokens Apple na exclusão da conta do Criador (SPEC-022 E-05)? | Guardar o refresh token Apple cifrado a cada login, nos dois resultados, substituindo o anterior; sem token na resposta, manter o anterior sem falhar o login. A revogação e a reserva por nova autenticação ficam em SPEC-022. | Pessoa usuária / 2026-11-16 | Sim — RN44, RF37, RNF16, RNF28, `05-modelo-de-dados.md`, BA-40 (já atualizados na base 1.28) |
+| E-12 | O que fazer com o token de identidade que abandona o onboarding? | Apagar o token na limpeza de onboarding já existente quando a identidade continuar sem família após a expiração do grant; novo login guarda novamente. | Pessoa usuária / 2026-11-16 | Sim — `05-modelo-de-dados.md` e BA-40 |
 
 ## 10. Fases de Implementação e Critérios de Conclusão
 
@@ -296,6 +329,7 @@ Todos os erros utilizam `Content-Type: application/problem+json`.
 | **1** | **Núcleo Mínimo:** validação da prova Apple, emissão de sessão/`creationGrant`, isolamento e rejeição explícita. | CA-01, CA-02, CA-03, CA-04, CA-05, CA-06 | Testes unitários e de integração verdes cobrindo os CAs listados. | concluída — SCRUM-11 e SCRUM-13 |
 | **2** | **Sessão utilizável + resiliência:** consulta, renovação e revogação de sessão; tratamento de falha de rede no mobile. | CA-07, CA-08, CA-09, CA-10 | Telas integradas com a API, testes de UI/E2E e UX-spec verificada. | concluída — SCRUM-14 e SCRUM-16 |
 | **3** | **Polimento:** limitação de tentativas e observabilidade. | CA-11 | Suíte de regressão verde e validação de QA concluída. | a fazer |
+| **4** | **Guarda do token Apple para revogação:** guardar, substituir e limpar o refresh token Apple, com sigilo. | CA-12, CA-13, CA-14, CA-15 | Testes de integração com Apple simulada (com e sem `refresh_token`), teste da limpeza de onboarding e verificação de logs verdes. | concluída — branch `feature/SPEC-022_account-deletion` |
 
 **Registro de execução (2026-10-10):** as Fases 1 e 2 estão em `develop`; a Fase 1 foi entregue pelos cards backend SCRUM-11/SCRUM-13 e a Fase 2 por SCRUM-14 (backend) e SCRUM-16 (Mobile). A Fase 3 permanece fora do incremento concluído.
 
@@ -303,6 +337,7 @@ Todos os erros utilizam `Content-Type: application/problem+json`.
 - **Fase 1 — Fora desta fase:** o usuário autenticado ainda não consegue manter a sessão por muito tempo (sem refresh) nem encerrá-la explicitamente; falha de rede e o ciclo completo de sessão ficam para a Fase 2. **Pode ser publicada de forma independente em produção?** Não — depende da Fase 2 para a sessão não cair em 15 minutos.
 - **Fase 2 — Fora desta fase:** sem limites de tentativas abusivas. **Pode ser publicada de forma independente em produção?** Sim.
 - **Fase 3 — Fora desta fase:** nada além de polimento. **Pode ser publicada de forma independente em produção?** Sim.
+- **Fase 4 — Fora desta fase:** a revogação em si e a exclusão de conta (`SPEC-022`). **Pode ser publicada de forma independente em produção?** Sim, e deve sair antes da Fase 2 de `SPEC-022` ou junto com ela; quanto antes sair, menos Criadores dependerão da nova autenticação Apple de reserva.
 
 ## 11. Checklist de Aprovação da Spec (Definition of Ready)
 
@@ -312,7 +347,8 @@ Todos os erros utilizam `Content-Type: application/problem+json`.
 - [x] O dicionário de campos define tipos, limites e códigos de erro estáveis para todos os inputs.
 - [x] Todo critério de aceitação segue o padrão formal BDD e mapeia um teste automatizável.
 - [x] Isolamento entre famílias (RNF06) e recusa por perfil (RNF07) constam explicitamente nos CAs da Fase 1, com a ressalva registrada na seção 7 sobre a natureza desta rota baseada em identidade.
-- [x] Nenhuma premissa sem validação ou esclarecimento pendente na seção 9 — todos os E-01 a E-05 foram decididos.
+- [x] Nenhuma premissa sem validação ou esclarecimento pendente na seção 9 — E-01 a E-12 decididos.
+- [x] Revisão de 2026-11-16 (Fase 4, CA-12 a CA-15) aprovada explicitamente pela pessoa usuária em 2026-11-17.
 - [x] A UX-spec correspondente está vinculada, revisada e coerente.
 - [x] A seção "Fora de questão" elimina riscos de suposições incorretas.
 - [x] Não há detalhes efêmeros de implementação que engessem a arquitetura interna dos módulos.

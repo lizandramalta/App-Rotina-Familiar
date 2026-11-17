@@ -63,12 +63,13 @@ Mapa completo dos 19 casos de uso, agrupados por área. Por ser maior, abra o SV
 | [UC17](03-casos-de-uso.md#uc17) | Retornar tarefa concluída para Pendente |
 | [UC18](03-casos-de-uso.md#uc18) | Gerar relatório semanal em PDF |
 | [UC19](03-casos-de-uso.md#uc19) | Apurar e compartilhar destaque semanal |
+| [UC20](03-casos-de-uso.md#uc20) | Excluir conta |
 
 <a id="02-acesso-familia-perfis"></a>
 
 ## Acesso, família e perfis
 
-Distingue a entrada do Criador via Apple, o ingresso da pessoa convidada e a administração dos perfis. O serviço Apple participa somente da autenticação. Qualquer Administrador configura o fuso em UC01; criação/retorno pelo Apple continua exclusiva do Criador. Editar o próprio perfil (UC10) inclui Kids, foto opcional e apelido exclusivo do titular e difere de gerenciar membros (UC02).
+Distingue a entrada do Criador via Apple, o ingresso da pessoa convidada e a administração dos perfis. O serviço Apple participa somente da autenticação. Qualquer Administrador configura o fuso em UC01; criação/retorno pelo Apple continua exclusiva do Criador. Editar o próprio perfil (UC10) inclui Kids, foto opcional e apelido exclusivo do titular e difere de gerenciar membros (UC02). Excluir conta (UC20) está disponível a todos os perfis; para o Criador, exclui a família e envolve o serviço Apple na revogação do token. As imagens SVG ainda não incluem UC20: a fonte PlantUML foi atualizada em 2026-11-16 e precisa ser renderizada novamente.
 
 ![Diagrama UML — Acesso, família e perfis](diagramas/casos-de-uso/02-acesso-familia-perfis.svg)
 
@@ -81,6 +82,7 @@ Distingue a entrada do Criador via Apple, o ingresso da pessoa convidada e a adm
 | [UC04](03-casos-de-uso.md#uc04) | Autenticar com Apple |
 | [UC09](03-casos-de-uso.md#uc09) | Ingressar por convite |
 | [UC10](03-casos-de-uso.md#uc10) | Editar perfil |
+| [UC20](03-casos-de-uso.md#uc20) | Excluir conta |
 
 <a id="03-tarefas-rotina"></a>
 

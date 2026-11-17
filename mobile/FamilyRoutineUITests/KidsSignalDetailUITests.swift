@@ -9,28 +9,53 @@ final class KidsSignalDetailUITests: XCTestCase {
         continueAfterFailure = false
     }
 
-    private func openFirstSignal() {
-        openSignal(atRow: 0)
+    /// Fixture signals in `UITestKidsSignalRepository`, oldest first: "Arrumar a cama",
+    /// "Guardar os brinquedos" and "Lavar a louça". Rows are addressed by id rather than counted.
+    private func row(_ position: Int) -> XCUIElement {
+        app.descendants(matching: .any)
+            .matching(identifier: "kidsReview.queue.row.00000000-0000-0000-0000-00000000050\(position)")
+            .firstMatch
     }
 
-    private func openSignal(atRow index: Int) {
+    private func openQueue(_ scenario: String = "kids-review-queue") {
         app = XCUIApplication()
-        app.launchEnvironment["UI_TEST_SCENARIO"] = "kids-review-queue"
+        app.launchEnvironment["UI_TEST_SCENARIO"] = scenario
         app.launch()
 
         let shortcut = app.buttons["family.overview.kids_confirmations"]
         XCTAssertTrue(shortcut.waitForExistence(timeout: 5))
         shortcut.tap()
 
-        let rows = app.descendants(matching: .any).matching(
-            NSPredicate(format: "identifier BEGINSWITH 'kidsReview.queue.row.'")
-        )
-        XCTAssertTrue(rows.firstMatch.waitForExistence(timeout: 5))
-        let title = ["Arrumar a cama", "Guardar os brinquedos", "Lavar a louça"][index]
-        rows.element(boundBy: index).tap()
+        XCTAssertTrue(row(1).waitForExistence(timeout: 5))
+        XCTAssertTrue(row(2).exists)
+        XCTAssertTrue(row(3).exists)
+    }
+
+    private func openFirstSignal() {
+        openSignal(atRow: 1)
+    }
+
+    private func openSignal(atRow position: Int) {
+        openQueue()
+        let title = ["Arrumar a cama", "Guardar os brinquedos", "Lavar a louça"][position - 1]
+        row(position).tap()
         // Figma 870:27124: TEL-016 replaces the navigation bar with a circular back button + large title.
         XCTAssertTrue(app.buttons["kidsReview.detail.back"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts[title].waitForExistence(timeout: 5))
+    }
+
+    /// UX-013 §4: back on TEL-015, without the decided "Arrumar a cama" and without any alert.
+    private func assertReturnedToQueueWithoutFirstSignal(file: StaticString = #filePath, line: UInt = #line) {
+        // TEL-015/TEL-016 have no navigation bar (Figma 870:26998 / 870:27124): their back buttons tell them apart.
+        XCTAssertTrue(app.buttons["kidsReview.queue.back"].waitForExistence(timeout: 5), file: file, line: line)
+        XCTAssertFalse(app.buttons["kidsReview.detail.back"].exists, file: file, line: line)
+        expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: row(1))
+        waitForExpectations(timeout: 5)
+        XCTAssertTrue(row(2).exists, file: file, line: line)
+        XCTAssertTrue(row(2).label.contains("Guardar os brinquedos"), file: file, line: line)
+        XCTAssertTrue(row(3).exists, file: file, line: line)
+        XCTAssertTrue(row(3).label.contains("Lavar a louça"), file: file, line: line)
+        XCTAssertFalse(app.alerts.firstMatch.exists, file: file, line: line)
     }
 
     private func field(_ identifier: String) -> XCUIElement {
@@ -53,6 +78,38 @@ final class KidsSignalDetailUITests: XCTestCase {
         XCTAssertTrue(signaledBy.label.contains("Sinalizada por"))
         XCTAssertTrue(signaledBy.label.contains("Rafa Silva"))
         XCTAssertTrue(signaledAt.label.contains("Sinalizada em"))
+    }
+
+    /// SCRUM-117 / UX-013 §4: a successful confirmation returns to TEL-015 on its own.
+    func testConfirmReturnsToQueueWithoutDecidedSignal() {
+        openFirstSignal()
+
+        let confirm = app.buttons["kidsReview.detail.confirm"]
+        XCTAssertTrue(confirm.waitForExistence(timeout: 5))
+        confirm.tap()
+
+        assertReturnedToQueueWithoutFirstSignal()
+    }
+
+    /// SCRUM-117 / UX-013 §4: a successful rejection returns to TEL-015 on its own.
+    func testRejectReturnsToQueueWithoutDecidedSignal() {
+        openFirstSignal()
+
+        let reject = app.buttons["kidsReview.detail.reject"]
+        XCTAssertTrue(reject.waitForExistence(timeout: 5))
+        reject.tap()
+
+        assertReturnedToQueueWithoutFirstSignal()
+    }
+
+    /// SCRUM-117 / UX-013 §4 / SPEC-013 CA-06: a signal another Administrator already settled
+    /// returns silently to TEL-015, with no error and no static "resolved" screen.
+    func testAlreadySettledSignalReturnsSilentlyToQueue() {
+        openQueue("kids-review-queue-stale")
+
+        row(1).tap()
+
+        assertReturnedToQueueWithoutFirstSignal()
     }
 
     /// SCRUM-122: the fixture now returns real image bytes for a signal with `hasPhoto == true`
@@ -93,7 +150,7 @@ final class KidsSignalDetailUITests: XCTestCase {
     /// SCRUM-116: "Guardar os brinquedos" (second queue row) has no photo, so the Section that would
     /// hold it shows the approved no-photo copy instead of rendering nothing (UX-013 §7).
     func testDetailShowsTheNoPhotoWarningWhenTheSignalHasNone() {
-        openSignal(atRow: 1)
+        openSignal(atRow: 2)
 
         XCTAssertTrue(app.staticTexts["Nenhuma foto foi enviada."].waitForExistence(timeout: 5))
         XCTAssertFalse(app.images["Foto da sinalização"].exists)
