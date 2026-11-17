@@ -1,8 +1,8 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.27\
-**Data:** 2026-11-16\
+**Versão:** 1.28\
+**Data:** 2026-11-17\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -906,6 +906,7 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.28 | 2026-11-17 | UC11: abertura inicial da aba Família e "Limpar" nos filtros retornam para hoje (diário); após envio de "Parabenizar", o cartão correspondente é retirado e permanece oculto (SCRUM-126 / SPEC-009). |
 | 1.27 | 2026-11-16 | UC20 (novo): excluir conta, com variações do Criador (exclui a família e revoga o token Apple) e do Administrador para conta Kids. UC02, UC04 e UC10 ajustados. Para SPEC-022. |
 | 1.26 | 2026-11-12 | UC01/UC02/UC09: emissão de convite sempre direta; nova emissão invalida convites não usados e preserva a sessão, revogada no ingresso pelo novo convite (SCRUM-114). |
 | 1.25 | 2026-10-28 | UC02/UC11: TEL-032 usa Dia/Semana domingo–sábado e permite editar nome Kids ao Administrador; Parabenizar fica na Família. |

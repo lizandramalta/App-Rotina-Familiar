@@ -1,9 +1,9 @@
-# Screen map — versão 1.26
+# Screen map — versão 1.27
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do mapa:** 1.26\
-**Base funcional:** RN 1.28 / RF 1.27 / UC 1.27\
-**Data:** 2026-11-16\
+**Versão do mapa:** 1.27\
+**Base funcional:** RN 1.29 / RF 1.28 / UC 1.28\
+**Data:** 2026-11-17\
 **Situação:** referência inicial para design; organização de navegação proposta
 
 [Projeto](../../README.md) · [Índice e versões](../DOCUMENTACAO.md) · [Visão](../00-visao-do-produto.md) · [Regras](../01-regras-de-negocio.md) · [Requisitos](../02-requisitos.md) · [Casos de uso](../03-casos-de-uso.md) · [Diagrama de classes](../06-diagrama-de-classes.md)
@@ -350,6 +350,7 @@ Campos funcionais de data/fuso e seleção de foto estão definidos; o layout vi
 
 | Versão do mapa | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.27 | RN 1.29 / RF 1.28 / UC 1.28 | 2026-11-17 | TEL-050 inicia em hoje (diário) e `Limpar` (TEL-050/TEL-011) restaura hoje; cartões de Atualizações retiram-se após Parabenizar; TEL-015/TEL-016/TEL-032/MOD-010/MOD-012 alinhados à alta fidelidade do Figma (SCRUM-126 / UX-009 / UX-013). |
 | 1.26 | RN 1.28 / RF 1.27 / UC 1.27 | 2026-11-16 | TEL-058 e MOD-015 (novos): excluir conta a partir de TEL-030 para todos os perfis e de TEL-032 para Administrador com alvo Kids; TEL-001 com mensagens de conta excluída e acesso encerrado. Para SPEC-022. |
 | 1.25 | RN 1.27 / RF 1.26 / UC 1.26 | 2026-11-12 | TEL-032 e TEL-056 usam sempre “Gerar convite” e emitem direto, sem confirmação de reemissão; TEL-034 é a folha de compartilhamento. Para UX-004 (UX-06, UX-07), SCRUM-114. |
 | 1.24 | RN 1.26 / RF 1.25 / UC 1.25 | 2026-11-08 | Barra de abas somente nas telas principais; telas abertas por push a ocultam. Para UX-016 (UX-08). |

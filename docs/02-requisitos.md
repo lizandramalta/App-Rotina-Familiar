@@ -1,8 +1,8 @@
 # Requisitos funcionais e não funcionais
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.27\
-**Data:** 2026-11-16\
+**Versão:** 1.28\
+**Data:** 2026-11-17\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -805,6 +805,7 @@ A exclusão de conta deve ser imediata, irreversível e consistente sob concorr�
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.28 | 2026-11-17 | RF60: consulta familiar inicial da aba Família e ação "Limpar" nos filtros de TEL-050/TEL-011 adotam o dia atual (hoje) como padrão, mantendo filtro livre de Início/Fim (SCRUM-126 / SPEC-009). |
 | 1.27 | 2026-11-16 | RF72–RF74 e RNF28 (novos): exclusão da própria conta, exclusão da família pelo Criador com revogação do token Apple e exclusão de conta Kids por Administrador. RF04, RF37, RF39, RNF09, RNF15, RNF16, RNF22 e RNF24 ajustados. Para SPEC-022. |
 | 1.26 | 2026-11-12 | RF41/RF46/RF54/RNF22: emissão de convite direta, sem confirmação de reemissão; invalida convites anteriores disponíveis e preserva a sessão, revogada no ingresso pelo novo convite (SCRUM-114). |
 | 1.25 | 2026-10-28 | RF03/RF60/RF66: detalhe do membro com Dia/Semana domingo–sábado; nome Kids editável também no detalhe; Parabenizar permanece na Família. |

@@ -1,7 +1,7 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.30 · **Base funcional:** RN 1.28 / RF 1.27 / UC 1.27 · **Arquitetura backend:** 1.6\
-**Data:** 2026-11-16\
+**Versão:** 1.31 · **Base funcional:** RN 1.29 / RF 1.28 / UC 1.28 · **Arquitetura backend:** 1.6\
+**Data:** 2026-11-17\
 **Situação:** contratos da aba Família, gestão de membros, sinalização/decisão Kids e snapshot semanal materializados na API; demais contratos alvo seguem por fases
 
 [Arquitetura](backend-architecture.md) · [Decisões](backend-decisions.md) · [Catálogo mobile](mobile-feature-catalog.md) · [UC](../03-casos-de-uso.md) · [Índice](../DOCUMENTACAO.md)
@@ -277,6 +277,7 @@ O documento OpenAPI 3.1 é gerado pelos schemas HTTP em `/docs/json`, e a interf
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.31 | 2026-11-17 | `GET /v1/family/overview` sem datas retorna o dia atual (hoje) no fuso da família (limitado por RN49); `GET /v1/kids/signals/{signalId}` expõe `task.note` opcional para exibição em TEL-016 (SCRUM-126 / SPEC-009 / UX-013). Base funcional RN 1.29 / RF 1.28 / UC 1.28. |
 | 1.30 | 2026-11-16 | Exclusão de conta (SPEC-022): `POST /me/account-deletion`, `POST /family/members/{memberId}/account-deletion`, guarda do refresh token Apple em `SignInWithApple` e rastreabilidade de UC20. Implementado no backend (módulo `account`, migração `0018_account_deletion.sql`). |
 | 1.29 | 2026-11-12 | `IssueMemberInvite` invalida convites disponíveis sem revogar sessão; `JoinFamilyByInvite` revoga a sessão anterior do perfil com tokens e push. Sem mudança de schema (SCRUM-114). |
 | 1.28 | 2026-11-05 | Materializa SPEC-020 Fase 1 (SCRUM-102 CA-01–06): apuração e outbox atômicas, consultas próprias, abertura monotônica, payload APNs e OpenAPI. |

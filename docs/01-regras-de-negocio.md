@@ -1,13 +1,13 @@
 # Regras de negócio
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.28\
-**Data:** 2026-11-16\
+**Versão:** 1.29\
+**Data:** 2026-11-17\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
 
-Este documento contém as regras vigentes da versão 1.28. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
+Este documento contém as regras vigentes da versão 1.29. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
 
 **Identificadores preservados:** RN15, RN29 e RN32 não estavam definidos na base recebida e permanecem não utilizados. Não representam conteúdo faltante desta versão.
 
@@ -602,6 +602,7 @@ O Criador pode excluir a própria conta; como a família é vinculada à sua ide
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.29 | 2026-11-17 | RN60/RN61: período inicial padrão da aba Família (TEL-050) e destino de "Limpar" em TEL-050/TEL-011 passam a ser o dia atual (hoje) no fuso da família, dentro de RN49; após Administrador enviar Parabenizar no cartão de conclusão do dia, o cartão se retira da tela e permanece oculto ao recarregar via `sentByMe` (SCRUM-126 / SPEC-009). |
 | 1.28 | 2026-11-16 | RN69/RN70 (novas): exclusão imediata da própria conta por qualquer perfil e de conta Kids por Administrador, com anonimização como “Membro removido”; exclusão da conta do Criador apaga a família e revoga o token Apple. RN05, RN07, RN10, RN30, RN31, RN44, RN47, RN61 e RN62 ajustadas. Para SPEC-022. |
 | 1.27 | 2026-11-12 | RN46/RN47: toda emissão de convite é direta, sem confirmação; invalida apenas convites anteriores disponíveis e preserva a sessão ativa, revogada somente no ingresso pelo novo convite (SCRUM-114). |
 | 1.26 | 2026-10-28 | RN60/RN61/RN63: TEL-032 inicia em Dia e alterna para Semana de domingo a sábado; Parabenizar permanece na Família; Administrador pode editar nome Kids também no detalhe. |
