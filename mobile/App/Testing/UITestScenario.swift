@@ -482,7 +482,7 @@ private actor UITestFamilyRepository: FamilyRepository {
         }
         if scenario == .familyOverviewOwnMostTasks {
             return FamilyOverview(
-                range: range ?? FamilyDateRange(startDate: "2026-10-19", endDate: "2026-10-25"),
+                range: range ?? Self.defaultWeekRange(familyCreatedAt: "2026-10-01", timeZoneID: familyTimeZoneID),
                 familyCreatedAt: "2026-10-01",
                 progress: FamilyProgress(total: 20, completed: 8, pending: 12, awaitingConfirmation: 0, percentage: 40),
                 members: [
@@ -505,7 +505,7 @@ private actor UITestFamilyRepository: FamilyRepository {
                 ]
             )
         }
-        let selectedRange = range ?? FamilyDateRange(startDate: "2026-10-19", endDate: "2026-10-25")
+        let selectedRange = range ?? Self.defaultWeekRange(familyCreatedAt: "2026-10-01", timeZoneID: familyTimeZoneID)
         let progress = FamilyProgress(
             total: 25,
             completed: 17,
