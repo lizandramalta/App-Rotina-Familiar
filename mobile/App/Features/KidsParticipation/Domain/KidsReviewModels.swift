@@ -25,6 +25,22 @@ nonisolated struct KidsSignalDetail: Sendable, Equatable {
     let signaledAt: Date
     let assignees: [String]
     let photoMediaID: UUID?
+    /// Task observation shown as "Observação" in TEL-016 when present (UX-013 §5.2).
+    let taskNote: String?
+
+    init(
+        id: UUID, taskID: UUID, taskTitle: String, childName: String, signaledAt: Date,
+        assignees: [String], photoMediaID: UUID?, taskNote: String? = nil
+    ) {
+        self.id = id
+        self.taskID = taskID
+        self.taskTitle = taskTitle
+        self.childName = childName
+        self.signaledAt = signaledAt
+        self.assignees = assignees
+        self.photoMediaID = photoMediaID
+        self.taskNote = taskNote
+    }
 }
 
 nonisolated enum KidsReviewDecision: String, Encodable, Sendable {

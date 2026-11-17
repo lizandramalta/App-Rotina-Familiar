@@ -75,8 +75,8 @@ final class FamilyMembersUITests: XCTestCase {
         XCTAssertFalse(settingsButton.exists)
     }
 
-    /// The `family-tasks` fixture's default overview range is the *current* week (mirroring the
-    /// backend default), not a hardcoded one, so the "Limpar disabled" assertions here and in
+    /// The `family-tasks` fixture's default overview range is *today* (mirroring the backend daily
+    /// default, RN60/RN61), not a hardcoded one, so the "Limpar disabled" assertions here and in
     /// `testFamilyFilterSheetsApplyOnlyFromShowTasksButton` hold on any run date.
     func testFamilyTasksMatchesApprovedTEL011AndFiltersStatus() {
         // SPEC-009 CA-06/07/12; UX-009 TEL-011; SPEC-019 CA-05–07.
@@ -103,7 +103,8 @@ final class FamilyMembersUITests: XCTestCase {
 
         app.buttons["family.tasks.range"].tap()
         XCTAssertTrue(app.buttons["family.tasks.status.awaitingConfirmation"].waitForExistence(timeout: 5))
-        XCTAssertFalse(app.buttons["family.tasks.filter.clear"].isEnabled)
+        XCTAssertFalse(app.buttons["family.tasks.filter.clear"].isEnabled,
+                       "RN60/RN61: today + Todos is the default, so Limpar starts disabled")
         let filterScreenshot = XCTAttachment(screenshot: app.screenshot())
         filterScreenshot.name = "TEL-011 filter sheet"
         filterScreenshot.lifetime = .keepAlways
@@ -145,7 +146,7 @@ final class FamilyMembersUITests: XCTestCase {
         XCTAssertFalse(app.buttons["family.tasks.status.pending"].exists,
                        "UX-009 TEL-050 has only the period filter")
         XCTAssertFalse(app.buttons["family.overview.filter.clear"].isEnabled,
-                       "The current default week leaves Limpar disabled")
+                       "RN60/RN61: the daily default (today) leaves Limpar disabled")
         let overviewScreenshot = XCTAttachment(screenshot: app.screenshot())
         overviewScreenshot.name = "TEL-050 period filter sheet"
         overviewScreenshot.lifetime = .keepAlways
@@ -175,19 +176,32 @@ final class FamilyMembersUITests: XCTestCase {
         XCTAssertFalse(apply.waitForExistence(timeout: 2), "Show tasks should close the sheet")
     }
 
-    func testIncentiveCardsAllowRepeatedApplauseToAnotherMember() {
+    func testIncentiveCardDismissesAfterCongratulating() {
+        // RN60/RN61 (SPEC-009 E-13; UX-009 TEL-050; Figma 920:8186/920:8200): each update card has one action.
         launch("family-overview-incentives")
 
-        XCTAssertTrue(app.staticTexts["Terminou todas as tarefas de hoje!"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["Teve muitas tarefas neste período"].exists)
-        let congratulate = app.buttons.matching(
+        let completedToday = app.staticTexts["Terminou todas as tarefas de hoje!"]
+        let mostTasks = app.staticTexts["Teve muitas tarefas neste período"]
+        XCTAssertTrue(completedToday.waitForExistence(timeout: 5))
+        XCTAssertTrue(mostTasks.exists)
+        let congratulateButtons = app.buttons.matching(
             NSPredicate(format: "identifier BEGINSWITH 'family.incentive.congratulate.'")
-        ).firstMatch
-        XCTAssertTrue(congratulate.exists)
-        congratulate.tap()
-        XCTAssertTrue(app.buttons["PARABÉNS ENVIADO"].waitForExistence(timeout: 5))
-        app.buttons["PARABÉNS ENVIADO"].firstMatch.tap()
-        XCTAssertTrue(app.buttons["PARABÉNS ENVIADO"].exists)
+        )
+        let viewRafaTasks = app.buttons.matching(NSPredicate(format: "label == 'Ver tarefas de Rafa'"))
+        // Parabenizar lives only on the completed-today card; "Ver tarefas" only on the most-tasks card.
+        XCTAssertEqual(congratulateButtons.count, 1)
+        XCTAssertEqual(viewRafaTasks.count, 1)
+
+        congratulateButtons.firstMatch.tap()
+
+        // Only the card with Parabenizar leaves; no "PARABÉNS ENVIADO" stays on screen.
+        XCTAssertTrue(completedToday.waitForNonExistence(timeout: 5))
+        XCTAssertEqual(congratulateButtons.count, 0)
+        XCTAssertFalse(app.buttons["PARABÉNS ENVIADO"].exists)
+        XCTAssertFalse(app.staticTexts["Você bateu palmas"].exists, "no applause caption on the remaining card")
+        XCTAssertTrue(mostTasks.exists, "the most-tasks card has no Parabenizar and stays")
+        XCTAssertEqual(viewRafaTasks.count, 1)
+        XCTAssertTrue(app.staticTexts["Atualizações"].exists)
     }
 
     func testOwnMostTasksUsesCompactCardAndOpensOwnTasks() {
@@ -200,8 +214,8 @@ final class FamilyMembersUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Teve muitas tarefas neste período"].exists, "Tied other members retain the regular card")
         XCTAssertEqual(
             app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'family.incentive.congratulate.'")).count,
-            1,
-            "Only the other member can be congratulated"
+            0,
+            "Most-tasks cards offer only 'Ver tarefas'; Parabenizar belongs to the completed-today card (Figma 920:8200)"
         )
 
         ownCard.tap()
@@ -336,13 +350,24 @@ final class FamilyMembersUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Cancelar"].exists)
         XCTAssertTrue(app.buttons["family.member.role.option.member"].exists)
         app.buttons["family.member.role.option.member"].tap()
-        XCTAssertTrue(app.alerts["Confirmar alteração de papel?"].waitForExistence(timeout: 5))
-        app.alerts.buttons["Cancelar"].tap()
+        // UX-003 §5.2/§5.4: the selection closes the picker and opens MOD-010 before saving.
+        let changeTitle = app.staticTexts["family.member.change.title"]
+        XCTAssertTrue(changeTitle.waitForExistence(timeout: 5))
+        XCTAssertEqual(changeTitle.label, "Confirmar alteração de papel")
+        XCTAssertTrue(app.buttons["family.member.change.confirm"].label.contains("Confirmar"))
+        let cancelChange = app.buttons["family.member.change.cancel"]
+        cancelChange.tap()
+        XCTAssertTrue(changeTitle.waitForNonExistence(timeout: 5), "Cancelar closes MOD-010 without saving")
         XCTAssertTrue(app.staticTexts["family.member.detail.name"].exists)
+        XCTAssertEqual(app.staticTexts["family.member.detail.role"].label, "Kids", "the role is unchanged")
 
         app.buttons["Remover membro"].tap()
-        XCTAssertTrue(app.alerts["Remover membro"].waitForExistence(timeout: 5))
-        app.alerts.buttons["Cancelar"].tap()
+        XCTAssertTrue(changeTitle.waitForExistence(timeout: 5))
+        XCTAssertEqual(changeTitle.label, "Remover membro?")
+        XCTAssertTrue(app.staticTexts["O acesso será removido. O histórico da família será preservado."].exists)
+        XCTAssertTrue(app.buttons["family.member.change.confirm"].label.contains("Remover"))
+        app.buttons["family.member.change.cancel"].tap()
+        XCTAssertTrue(changeTitle.waitForNonExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["family.member.detail.name"].exists)
     }
 

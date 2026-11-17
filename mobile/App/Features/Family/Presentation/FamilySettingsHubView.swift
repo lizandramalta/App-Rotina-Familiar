@@ -14,107 +14,36 @@ struct FamilySettingsHubView: View {
     @State private var kidNameSaveFailed = false
     @State private var kidNameRequiresRefresh = false
     @State private var kidNameIsSaving = false
-    @State private var showsKidNameDiscard = false
 
     var body: some View {
-        List {
-            Section("family.settings.hub.family_section") {
-                Button {
-                    draftFamilyName = viewModel.familyName
-                    isEditingFamilyName = true
-                } label: {
-                    settingsRow(icon: "house", title: "family.settings.hub.family_name", value: viewModel.familyName, showsChevron: true)
-                }
-                .foregroundStyle(.primary)
-                .accessibilityIdentifier("family.settings.hub.family_name")
-
-                if familyNameSaveFailed {
-                    Label("family.settings.hub.family_name_error", systemImage: "exclamationmark.triangle")
-                        .font(.footnote)
-                        .foregroundStyle(.red)
-                        .accessibilityIdentifier("family.settings.hub.family_name_error")
-                }
-
-                if let makeFamilySettingsViewModel {
-                    NavigationLink {
-                        FamilySettingsView(viewModel: makeFamilySettingsViewModel())
-                            .hidesAppTabBar()
-                    } label: {
-                        settingsRow(icon: "globe", title: "family.settings.hub.timezone", value: viewModel.timeZoneDisplayName)
-                    }
-                    .accessibilityIdentifier("family.settings.hub.timezone")
-                }
-            }
-
-            if let message = viewModel.errorMessage {
-                Section {
-                    Label(message, systemImage: "exclamationmark.triangle")
-                        .font(.footnote)
-                        .foregroundStyle(.red)
-                        .accessibilityIdentifier("family.members.error")
-                    Button("family.member.detail.retry") {
-                        Task { await viewModel.loadInitial() }
-                    }
-                    .disabled(viewModel.isLoading)
-                }
-            }
-
-            Section {
-                if viewModel.members.isEmpty && viewModel.isLoading {
-                    ProgressView().frame(maxWidth: .infinity)
-                }
-                ForEach(viewModel.members) { member in
-                    HStack(spacing: 8) {
-                        NavigationLink(value: FamilyNavigationRoute.member(member.id)) {
-                            row(member)
+        ScrollView {
+            VStack(alignment: .leading, spacing: AppSpacing.xxl) {
+                familySection
+                if let message = viewModel.errorMessage {
+                    VStack(alignment: .leading, spacing: AppSpacing.xs) {
+                        FamilyNoticeCard(message, tone: .error)
+                            .accessibilityIdentifier("family.members.error")
+                        Button("family.member.detail.retry") {
+                            Task { await viewModel.loadInitial() }
                         }
-                        .accessibilityIdentifier("family.member.row.\(member.id.uuidString.lowercased())")
-                        if viewModel.canConfigureFamily && member.role == .kid {
-                            Button {
-                                draftKidName = member.name
-                                kidNameIsInvalid = false
-                                kidNameSaveFailed = false
-                                kidNameRequiresRefresh = false
-                                editingKid = member
-                            } label: {
-                                Image(systemName: "pencil")
-                                    .frame(width: 44, height: 44)
-                                    .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
-                            .frame(width: 44, height: 44)
-                            .accessibilityLabel("family.settings.hub.edit_kids_name")
-                            .accessibilityIdentifier("family.settings.hub.edit_kids_name.\(member.id.uuidString.lowercased())")
-                        }
-                    }
-                    .task { await viewModel.loadMoreIfNeeded(currentMember: member) }
-                }
-                if viewModel.isLoadingMore {
-                    ProgressView().frame(maxWidth: .infinity)
-                }
-                if viewModel.loadMoreFailed {
-                    Button("family.member.detail.retry") {
-                        Task { await viewModel.loadMore() }
+                        .font(.app(.subtitleStrong))
+                        .foregroundStyle(Color.App.Text.highlight)
+                        .frame(minHeight: 44)
+                        .padding(.leading, AppSpacing.lg)
+                        .disabled(viewModel.isLoading)
                     }
                 }
-                if viewModel.canAddMember {
-                    Button {
-                        editorViewModel = viewModel.makeMemberEditorViewModel()
-                    } label: {
-                        Label("family.members.add.action", systemImage: "plus.circle.fill")
-                    }
-                    .foregroundStyle(.primary)
-                    .accessibilityIdentifier("family.members.add.action")
-                }
-            } header: {
-                Text(String(format: String(localized: "family.settings.hub.members_section"), viewModel.members.count))
-            } footer: {
-                Text("family.settings.hub.members_footer")
+                membersSection
             }
+            .padding(.horizontal, AppSpacing.xxl)
+            .padding(.vertical, AppSpacing.lg)
+            .frame(maxWidth: 540)
+            .frame(maxWidth: .infinity)
         }
-        .listStyle(.insetGrouped)
+        .background(Color.App.Background.app.ignoresSafeArea())
         .navigationTitle("family.settings.hub.title")
         .navigationBarTitleDisplayMode(.inline)
+        .hidesAppTabBar()
         .task { await viewModel.loadInitial() }
         .refreshable { await viewModel.loadInitial() }
         .alert("family.settings.hub.family_name", isPresented: $isEditingFamilyName) {
@@ -147,106 +76,237 @@ struct FamilySettingsHubView: View {
         }
     }
 
-    private func kidsNameEditor(for kid: FamilyMember) -> some View {
-        Form {
-            TextField("family.member.manage.name", text: $draftKidName)
-                .onChange(of: draftKidName) { _, _ in kidNameIsInvalid = false }
-                .accessibilityIdentifier("family.settings.hub.kids_name")
-            if kidNameIsInvalid {
-                Text("family.members.name.error_invalid").foregroundStyle(.red)
-            }
-            if kidNameSaveFailed || kidNameRequiresRefresh {
-                Text("family.member.manage.error").foregroundStyle(.red)
-            }
-            if kidNameRequiresRefresh {
-                Button("family.member.detail.retry") {
-                    Task {
-                        if let current = await viewModel.refreshMember(memberID: kid.id) {
-                            kidNameRequiresRefresh = false
-                            kidNameSaveFailed = current.role != .kid
-                        }
+    // MARK: Família
+
+    private var familySection: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+            FamilySectionLabel("family.settings.hub.family_section")
+            VStack(spacing: 0) {
+                Button {
+                    draftFamilyName = viewModel.familyName
+                    isEditingFamilyName = true
+                } label: {
+                    settingsRow(icon: "house", title: "family.settings.hub.family_name", value: viewModel.familyName)
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("family.settings.hub.family_name")
+
+                if let makeFamilySettingsViewModel {
+                    FamilyCardSeparator(leadingInset: AppSpacing.lg + 24 + AppSpacing.md)
+                    NavigationLink {
+                        FamilySettingsView(viewModel: makeFamilySettingsViewModel())
+                            .hidesAppTabBar()
+                    } label: {
+                        settingsRow(icon: "globe", title: "family.settings.hub.timezone", value: viewModel.timeZoneDisplayName)
                     }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("family.settings.hub.timezone")
                 }
             }
-        }
-        .navigationTitle("family.settings.hub.edit_kids_name")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button("family.settings.hub.cancel") {
-                    if draftKidName != kid.name { showsKidNameDiscard = true }
-                    else { editingKid = nil }
-                }
-                .disabled(kidNameIsSaving)
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("family.settings.hub.save") {
-                    guard case .success = FamilyCreationValidation.validatedName(draftKidName) else {
-                        kidNameIsInvalid = true
-                        return
-                    }
-                    kidNameIsSaving = true
-                    kidNameSaveFailed = false
-                    Task {
-                        let result = await viewModel.updateKidsName(
-                            memberID: kid.id,
-                            name: draftKidName.trimmingCharacters(in: .whitespacesAndNewlines)
-                        )
-                        kidNameIsSaving = false
-                        switch result {
-                        case .saved: editingKid = nil
-                        case .failed, .noLongerEligible: kidNameSaveFailed = true
-                        case .reconciliationRequired: kidNameRequiresRefresh = true
-                        }
-                    }
-                }
-                .disabled(kidNameIsSaving || kidNameRequiresRefresh || draftKidName == kid.name)
+            .appCard(cornerRadius: AppRadius.pill)
+
+            if familyNameSaveFailed {
+                FamilyNoticeCard("family.settings.hub.family_name_error", tone: .error)
+                    .accessibilityIdentifier("family.settings.hub.family_name_error")
             }
         }
-        .confirmationDialog("family.members.discard.title", isPresented: $showsKidNameDiscard) {
-            Button("family.members.discard.confirm", role: .destructive) { editingKid = nil }
-            Button("family.members.discard.keep_editing", role: .cancel) {}
-        } message: {
-            Text("family.members.discard.message")
-        }
-        .interactiveDismissDisabled(kidNameIsSaving || draftKidName != kid.name)
     }
 
-    private func settingsRow(icon: String, title: LocalizedStringKey, value: String, showsChevron: Bool = false) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .foregroundStyle(.secondary)
-                .frame(width: 24)
-            Text(title)
-            Spacer()
-            Text(value).foregroundStyle(.secondary)
-            if showsChevron {
-                Image(systemName: "chevron.right")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(Color(uiColor: .tertiaryLabel))
+    // MARK: Membros
+
+    private var membersSection: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+            FamilySectionLabel(verbatim: String(
+                format: String(localized: "family.settings.hub.members_section"), viewModel.members.count
+            ))
+            VStack(spacing: 0) {
+                if viewModel.members.isEmpty && viewModel.isLoading {
+                    ForEach(0..<2, id: \.self) { index in
+                        if index > 0 { FamilyCardSeparator() }
+                        HStack(spacing: AppSpacing.md) {
+                            Circle().fill(Color.App.Background.subtle).frame(width: 36, height: 36)
+                            Capsule().fill(Color.App.Background.subtle).frame(width: 140, height: 14)
+                            Spacer()
+                        }
+                        .padding(.horizontal, AppSpacing.lg)
+                        .frame(minHeight: 60)
+                    }
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("family.overview.loading")
+                }
+                ForEach(Array(viewModel.members.enumerated()), id: \.element.id) { index, member in
+                    if index > 0 { FamilyCardSeparator(leadingInset: AppSpacing.lg + 36 + AppSpacing.md) }
+                    memberRow(member)
+                        .task { await viewModel.loadMoreIfNeeded(currentMember: member) }
+                }
+                if viewModel.isLoadingMore {
+                    ProgressView().tint(Color.App.Action.primary).frame(maxWidth: .infinity, minHeight: 44)
+                }
+                if viewModel.loadMoreFailed {
+                    Button("family.member.detail.retry") {
+                        Task { await viewModel.loadMore() }
+                    }
+                    .font(.app(.subtitleStrong))
+                    .foregroundStyle(Color.App.Text.highlight)
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                }
+                if viewModel.canAddMember {
+                    FamilyCardSeparator()
+                    Button {
+                        editorViewModel = viewModel.makeMemberEditorViewModel()
+                    } label: {
+                        HStack(spacing: AppSpacing.md) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 22))
+                                .foregroundStyle(Color.App.Action.primary)
+                                .frame(width: 36)
+                                .accessibilityHidden(true)
+                            Text("family.members.add.action")
+                                .font(.app(.bodyStrong))
+                                .foregroundStyle(Color.App.Text.primary)
+                            Spacer()
+                        }
+                        .padding(.horizontal, AppSpacing.lg)
+                        .frame(minHeight: 56)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("family.members.add.action")
+                }
+            }
+            .appCard(cornerRadius: AppRadius.pill)
+
+            Text("family.settings.hub.members_footer")
+                .font(.app(.note))
+                .foregroundStyle(Color.App.Text.secondary)
+                .padding(.horizontal, AppSpacing.lg)
+        }
+    }
+
+    private func memberRow(_ member: FamilyMember) -> some View {
+        HStack(spacing: AppSpacing.xs) {
+            NavigationLink(value: FamilyNavigationRoute.member(member.id)) {
+                row(member)
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("family.member.row.\(member.id.uuidString.lowercased())")
+            if viewModel.canConfigureFamily && member.role == .kid {
+                Button {
+                    draftKidName = member.name
+                    kidNameIsInvalid = false
+                    kidNameSaveFailed = false
+                    kidNameRequiresRefresh = false
+                    editingKid = member
+                } label: {
+                    Image(systemName: "pencil")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(Color.App.Action.primary)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("family.settings.hub.edit_kids_name")
+                .accessibilityIdentifier("family.settings.hub.edit_kids_name.\(member.id.uuidString.lowercased())")
             }
         }
-        .frame(minHeight: 44)
+        .padding(.leading, AppSpacing.lg)
+        .padding(.trailing, AppSpacing.sm)
+    }
+
+    private func kidsNameEditor(for kid: FamilyMember) -> some View {
+        FamilyKidsNameEditor(
+            name: $draftKidName,
+            fieldIdentifier: "family.settings.hub.kids_name",
+            isInvalid: kidNameIsInvalid,
+            showsError: kidNameSaveFailed,
+            requiresRefresh: kidNameRequiresRefresh,
+            isSaving: kidNameIsSaving,
+            hasChanges: draftKidName != kid.name,
+            onRetry: {
+                Task {
+                    if let current = await viewModel.refreshMember(memberID: kid.id) {
+                        kidNameRequiresRefresh = false
+                        kidNameSaveFailed = current.role != .kid
+                    }
+                }
+            },
+            onSave: { saveKidName(kid) },
+            onClose: { editingKid = nil }
+        )
+        .onChange(of: draftKidName) { _, _ in kidNameIsInvalid = false }
+    }
+
+    private func saveKidName(_ kid: FamilyMember) {
+        guard case .success = FamilyCreationValidation.validatedName(draftKidName) else {
+            kidNameIsInvalid = true
+            return
+        }
+        kidNameIsSaving = true
+        kidNameSaveFailed = false
+        Task {
+            let result = await viewModel.updateKidsName(
+                memberID: kid.id,
+                name: draftKidName.trimmingCharacters(in: .whitespacesAndNewlines)
+            )
+            kidNameIsSaving = false
+            switch result {
+            case .saved: editingKid = nil
+            case .failed, .noLongerEligible: kidNameSaveFailed = true
+            case .reconciliationRequired: kidNameRequiresRefresh = true
+            }
+        }
+    }
+
+    private func settingsRow(icon: String, title: LocalizedStringKey, value: String) -> some View {
+        HStack(spacing: AppSpacing.md) {
+            Image(systemName: icon)
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(Color.App.Action.primary)
+                .frame(width: 24)
+                .accessibilityHidden(true)
+            Text(title)
+                .font(.app(.body))
+                .foregroundStyle(Color.App.Text.primary)
+            Spacer(minLength: AppSpacing.sm)
+            Text(value)
+                .font(.app(.subtitle))
+                .foregroundStyle(Color.App.Text.secondary)
+                .multilineTextAlignment(.trailing)
+            Image(systemName: "chevron.right")
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(Color.App.Text.secondary)
+                .accessibilityHidden(true)
+        }
+        .padding(.horizontal, AppSpacing.lg)
+        .frame(minHeight: 54)
+        .contentShape(Rectangle())
     }
 
     private func row(_ member: FamilyMember) -> some View {
-        HStack(spacing: 12) {
-            Text(String(member.name.prefix(1)).uppercased())
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(Color(uiColor: .secondaryLabel))
-                .frame(width: 36, height: 36)
-                .background(Color(uiColor: .secondarySystemFill), in: Circle())
-                .accessibilityHidden(true)
-
-            VStack(alignment: .leading, spacing: 2) {
+        HStack(spacing: AppSpacing.md) {
+            MemberAvatarView(
+                name: member.name,
+                color: FamilyMemberPalette.colors(
+                    for: member.id, isCurrentMember: member.id == viewModel.currentMemberID
+                ).tint,
+                size: 36
+            )
+            VStack(alignment: .leading, spacing: AppSpacing.xxs) {
                 Text(member.id == viewModel.currentMemberID ? "\(member.name) \(String(localized: "family.settings.hub.you"))" : member.name)
-                    .font(.body)
+                    .font(.app(.body))
+                    .foregroundStyle(Color.App.Text.primary)
                 Text(roleLine(member))
-                    .font(.footnote)
-                    .foregroundStyle(Color(uiColor: .secondaryLabel))
+                    .font(.app(.note))
+                    .foregroundStyle(Color.App.Text.secondary)
             }
+            Spacer(minLength: 0)
+            Image(systemName: "chevron.right")
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(Color.App.Text.secondary)
+                .accessibilityHidden(true)
         }
-        .frame(minHeight: 44)
+        .frame(minHeight: 60)
+        .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
     }
 

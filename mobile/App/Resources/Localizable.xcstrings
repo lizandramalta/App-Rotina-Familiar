@@ -1586,6 +1586,56 @@
         }
       }
     },
+    "family.members.change.confirm_action" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirmar"
+          }
+        }
+      }
+    },
+    "family.members.change.remove_action" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover"
+          }
+        }
+      }
+    },
+    "family.members.change.removing" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Removendo…"
+          }
+        }
+      }
+    },
+    "family.members.change.role_transition" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "de %1$@ para %2$@"
+          }
+        }
+      }
+    },
+    "family.members.change.saving" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvando…"
+          }
+        }
+      }
+    },
     "family.members.create.title" : {
       "localizations" : {
         "pt-BR" : {
@@ -1856,6 +1906,26 @@
         }
       }
     },
+    "family.members.remove.message" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O acesso será removido. O histórico da família será preservado."
+          }
+        }
+      }
+    },
+    "family.members.remove.title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover membro?"
+          }
+        }
+      }
+    },
     "family.members.role.admin" : {
       "extractionState" : "extracted_with_value",
       "localizations" : {
@@ -1925,6 +1995,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cuida das tarefas."
+          }
+        }
+      }
+    },
+    "family.members.role_change.title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirmar alteração de papel"
           }
         }
       }
@@ -2138,6 +2218,26 @@
         }
       }
     },
+    "family.overview.completed_caption" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tarefas concluídas"
+          }
+        }
+      }
+    },
+    "family.overview.completed_fraction" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$d / %2$d"
+          }
+        }
+      }
+    },
     "family.overview.completed_short" : {
       "localizations" : {
         "pt-BR" : {
@@ -2318,6 +2418,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hoje · %@"
+          }
+        }
+      }
+    },
+    "family.overview.updates" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualizações"
           }
         }
       }
@@ -2519,6 +2629,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Semana atual parcial"
+          }
+        }
+      }
+    },
+    "family.report.partial_until" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parcial até %@"
           }
         }
       }
@@ -2879,6 +2999,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fuso atual"
+          }
+        }
+      }
+    },
+    "family.settings.time_zone.preview" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver efeitos"
           }
         }
       }
@@ -3603,6 +3733,36 @@
         }
       }
     },
+    "kidsReview.decision.confirm" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirmar realização"
+          }
+        }
+      }
+    },
+    "kidsReview.decision.reject" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recusar"
+          }
+        }
+      }
+    },
+    "kidsReview.decision.submitting" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvando..."
+          }
+        }
+      }
+    },
     "kidsReview.detail.assignees" : {
       "localizations" : {
         "pt-BR" : {
@@ -3643,6 +3803,16 @@
         }
       }
     },
+    "kidsReview.detail.note" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Observação"
+          }
+        }
+      }
+    },
     "kidsReview.detail.photo" : {
       "localizations" : {
         "pt-BR" : {
@@ -3659,6 +3829,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Não foi possível carregar a foto."
+          }
+        }
+      }
+    },
+    "kidsReview.detail.photo_section" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foto"
+          }
+        }
+      }
+    },
+    "kidsReview.detail.private_photo_hint" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foto privada · toque para ampliar"
           }
         }
       }
@@ -3699,6 +3889,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Avaliar sinalização"
+          }
+        }
+      }
+    },
+    "kidsReview.error.not_found" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Essa confirmação não está mais pendente."
+          }
+        }
+      }
+    },
+    "kidsReview.error.submit" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível salvar agora. Tente novamente."
+          }
+        }
+      }
+    },
+    "kidsReview.photo.close" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fechar"
           }
         }
       }
@@ -3789,6 +4009,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Com foto"
+          }
+        }
+      }
+    },
+    "kidsReview.reconciled" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A fila foi atualizada."
           }
         }
       }

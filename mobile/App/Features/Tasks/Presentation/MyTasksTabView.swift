@@ -139,7 +139,7 @@ struct MyTasksTabView: View {
         VStack(spacing: AppSpacing.md) {
             Image(systemName: "checkmark.circle.fill")
                 .font(.app(.numberLarge))
-                .foregroundStyle(Color.App.Action.primary)
+                .foregroundStyle(Color.App.Text.primary)
             Text("tasks.saved.toast")
                 .font(.app(.cardTitle))
                 .foregroundStyle(Color.App.Text.primary)

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// TEL-050 — Família (SPEC-009 CA-05/CA-12, UX-009 §2–§5; Figma 372:4825/372:5195).
+/// TEL-050 — Família (SPEC-009 CA-05/CA-12, UX-009 §2–§5; Figma "04 · Aba Família · Alta fidelidade" 879:13129).
 struct FamilyOverviewView: View {
     @State private var viewModel: FamilyOverviewViewModel
     @State private var showsRangeFilter = false
@@ -12,32 +12,36 @@ struct FamilyOverviewView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
+            VStack(alignment: .leading, spacing: AppSpacing.xxl) {
                 header
                 if let overview = viewModel.overview {
                     period(overview)
+                    if viewModel.overviewFailed {
+                        refreshFailureBanner
+                    }
                     members(overview.members)
                     progressCard(overview)
-                    incentiveCards(overview)
+                    incentiveSection(overview)
                     if viewModel.canReviewKidsConfirmations {
                         kidsConfirmationsCard
                     }
                 } else if viewModel.isLoadingOverview {
                     loadingContent
                 }
-                // Data already on screen stays usable; a background refresh failure is not shown.
                 if viewModel.overview == nil, viewModel.overviewFailed || viewModel.errorMessage != nil {
                     failureCard
                 }
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 6)
-            .padding(.bottom, 32)
+            .padding(.horizontal, AppSpacing.xxl)
+            .padding(.top, AppSpacing.sm)
+            // The shell's safe-area inset lifts the content above the floating tab bar; this extra margin keeps
+            // the last card (Confirmações Kids) fully clear of the bar's shadow and glass edge.
+            .padding(.bottom, AppSpacing.colossal + AppSpacing.md)
             .frame(maxWidth: 780)
             .frame(maxWidth: .infinity)
         }
         .accessibilityIdentifier("family.members.list")
-        .background(Color(uiColor: .systemGroupedBackground).ignoresSafeArea())
+        .background(Color.App.Background.app.ignoresSafeArea())
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .navigationBar)
@@ -72,39 +76,35 @@ struct FamilyOverviewView: View {
         }
     }
 
+    // MARK: Header
+
     private var header: some View {
-        HStack(alignment: .top, spacing: 8) {
+        HStack(alignment: .top, spacing: AppSpacing.sm) {
             Text(viewModel.familyName.isEmpty ? String(localized: "family.overview.title") : viewModel.familyName)
-                .font(.largeTitle.bold())
-                .foregroundStyle(.primary)
-                .lineLimit(2)
+                .font(.app(.titleLarge))
+                .foregroundStyle(Color.App.Text.primary)
+                .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityAddTraits(.isHeader)
 
             Button {
                 showsRangeFilter = true
             } label: {
-                Image(systemName: "line.3.horizontal.decrease")
-                    .font(.system(size: 18, weight: .semibold))
-                    .frame(width: 44, height: 44)
-                    .contentShape(Circle())
-                    .accessibilityHidden(true)
+                FamilyCircleIconLabel(
+                    systemImage: "line.3.horizontal.decrease",
+                    isActive: isCustomRangeActive
+                )
             }
             .buttonStyle(.plain)
-            .background(Color(uiColor: .secondarySystemGroupedBackground), in: Circle())
-            .overlay(Circle().strokeBorder(Color(uiColor: .separator), lineWidth: 0.5))
             .disabled(viewModel.overview == nil)
             .accessibilityLabel("family.period.filter_title")
             .accessibilityIdentifier("family.overview.range_filter")
 
             if viewModel.canConfigureFamily {
                 NavigationLink(value: FamilyNavigationRoute.settingsHub) {
-                    Image(systemName: "gearshape")
-                        .font(.system(size: 19))
-                        .frame(width: 44, height: 44)
+                    FamilyCircleIconLabel(systemImage: "gearshape")
                 }
                 .buttonStyle(.plain)
-                .background(Color(uiColor: .secondarySystemGroupedBackground), in: Circle())
-                .overlay(Circle().strokeBorder(Color(uiColor: .separator), lineWidth: 0.5))
                 .accessibilityLabel("family.settings.title")
                 .accessibilityIdentifier("family.navigation.settings_button")
             }
@@ -112,73 +112,53 @@ struct FamilyOverviewView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    private var isCustomRangeActive: Bool {
+        guard let overview = viewModel.overview else { return false }
+        return FamilyRangeFilterSheet.isCustomRange(
+            overview.range, familyCreatedAt: overview.familyCreatedAt, timeZoneID: viewModel.timeZoneID
+        )
+    }
+
     private func period(_ overview: FamilyOverview) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: AppSpacing.xxs) {
             Text(FamilyOverviewDates.rangeTitle(overview.range, timeZoneID: viewModel.timeZoneID))
-                .font(.title2.bold())
-            Text(FamilyOverviewDates.todaySubtitle(timeZoneID: viewModel.timeZoneID))
-                .font(.subheadline.weight(.semibold))
+                .font(.app(.title2))
+            if FamilyOverviewDates.containsToday(overview.range, timeZoneID: viewModel.timeZoneID) {
+                Text(FamilyOverviewDates.todaySubtitle(for: overview.range, timeZoneID: viewModel.timeZoneID))
+                    .font(.app(.subtitleStrong))
+            }
         }
-        .foregroundStyle(.primary)
+        .foregroundStyle(Color.App.Text.primary)
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
         .accessibilityFocused($isPeriodFocused)
         .accessibilityIdentifier("family.overview.period")
     }
 
+    // MARK: Members
+
     private func members(_ items: [FamilyMemberProgress]) -> some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(alignment: .top, spacing: 16) {
+            HStack(alignment: .top, spacing: AppSpacing.md) {
                 ForEach(items) { member in
                     NavigationLink(value: FamilyNavigationRoute.member(member.id)) {
-                        memberRing(member)
+                        MemberProgressRingView(member: member, colors: colors(for: member.id))
                     }
                     .buttonStyle(.plain)
                     .accessibilityIdentifier("family.member.ring.\(member.id.uuidString.lowercased())")
                 }
             }
-            .padding(.vertical, 1)
+            .padding(.vertical, AppSpacing.xs)
         }
+        .scrollClipDisabled()
         .accessibilityIdentifier("family.overview.member_rings")
     }
 
-    private func memberRing(_ member: FamilyMemberProgress) -> some View {
-        let percentage = member.progress.percentage.map { Int($0.rounded()) }
-        return VStack(spacing: 4) {
-            ZStack {
-                Circle()
-                    .stroke(Color(uiColor: .systemGray4), lineWidth: 5)
-                if let percentage {
-                    Circle()
-                        .trim(from: 0, to: CGFloat(min(max(percentage, 0), 100)) / 100)
-                        .stroke(Color(uiColor: .darkGray), style: StrokeStyle(lineWidth: 5, lineCap: .round))
-                        .rotationEffect(.degrees(-90))
-                }
-                Circle()
-                    .fill(Color(uiColor: .systemGray6))
-                    .padding(9)
-                Text(String(member.name.prefix(1)).uppercased())
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(.secondary)
-            }
-            .frame(width: 68, height: 68)
-
-            Text(member.name)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.primary)
-                .lineLimit(1)
-            Text(percentage.map { "\($0)%" } ?? String(localized: "family.overview.no_tasks_short"))
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-        }
-        .frame(width: 78)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(percentage.map {
-            String(format: String(localized: "family.overview.member_progress_accessibility"), member.name, $0)
-        } ?? String(format: String(localized: "family.overview.no_tasks_accessibility"), member.name))
-        .accessibilityHint("family.overview.member_open_hint")
+    private func colors(for memberID: UUID) -> FamilyMemberPalette.Colors {
+        FamilyMemberPalette.colors(for: memberID, isCurrentMember: memberID == viewModel.currentMemberID)
     }
+
+    // MARK: Progress
 
     private func progressCard(_ overview: FamilyOverview) -> some View {
         Group {
@@ -187,209 +167,249 @@ struct FamilyOverviewView: View {
                     progressCardContent(overview)
                 }
                 .buttonStyle(.plain)
-                .accessibilityIdentifier("family.overview.all_tasks")
             } else {
                 progressCardContent(overview)
             }
         }
-        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 22))
         .accessibilityIdentifier("family.overview.progress")
     }
 
+    /// Figma 879:13356 › "Progresso da família" (879:13406): header, chalk donut + fraction, full-width legend.
     private func progressCardContent(_ overview: FamilyOverview) -> some View {
         let progress = overview.progress
-        return VStack(alignment: .leading, spacing: 14) {
-            HStack(spacing: 8) {
+        return VStack(alignment: .leading, spacing: AppSpacing.base) {
+            HStack(alignment: .center, spacing: AppSpacing.sm) {
                 Image(systemName: "person.2")
-                    .font(.system(size: 18))
+                    .foregroundStyle(Color.App.Text.primary)
+                    .accessibilityHidden(true)
                 Text("family.tasks.title")
-                    .font(.subheadline.weight(.semibold))
+                    .font(.app(.subtitleStrong))
+                    .foregroundStyle(Color.App.Text.primary)
+                Spacer(minLength: AppSpacing.sm)
+                Image(systemName: "chevron.forward")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(Color.App.Text.secondary)
+                    .accessibilityHidden(true)
+            }
+
+            HStack(alignment: .center, spacing: AppSpacing.base) {
+                SegmentedProgressRingView(progress: progress, showsAwaiting: viewModel.canConfigureFamily)
+                VStack(alignment: .leading, spacing: AppSpacing.xs + AppSpacing.xxs) {
+                    if progress.total > 0 {
+                        Text(String(format: String(localized: "family.overview.completed_fraction"), progress.completed, progress.total))
+                            .font(.app(.numberLarge))
+                            .foregroundStyle(Color.App.Text.primary)
+                            .minimumScaleFactor(0.6)
+                            .lineLimit(1)
+                            .accessibilityLabel(String(
+                                format: String(localized: "family.overview.completed_total"), progress.completed, progress.total
+                            ))
+                        Text("family.overview.completed_caption")
+                            .font(.app(.subtitleStrong))
+                            .foregroundStyle(Color.App.Text.highlight)
+                    } else {
+                        Text("family.overview.no_tasks")
+                            .font(.app(.title3))
+                            .foregroundStyle(Color.App.Text.primary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
                 Spacer(minLength: 0)
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
             }
 
-            VStack(alignment: .leading, spacing: 2) {
-                if progress.total > 0 {
-                    Text(String(format: String(localized: "family.overview.completed_short"), progress.completed, progress.total))
-                        .font(.title.bold())
-                    Text(String(
-                        format: String(localized: "family.overview.progress_subtitle"),
-                        Int((progress.percentage ?? 0).rounded())
-                    ))
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                } else {
-                    Text("family.overview.no_tasks")
-                        .font(.title3.weight(.semibold))
-                }
-            }
-
-            progressBar(progress)
-
-            VStack(spacing: 9) {
-                statusRow("family.tasks.status.completed", icon: "checkmark.circle.fill", count: progress.completed)
+            VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                legendRow("family.tasks.status.completed", kind: .completed, count: progress.completed)
                 if viewModel.canConfigureFamily {
-                    statusRow("family.tasks.status.awaiting", icon: "circle.dotted", count: progress.awaitingConfirmation)
+                    legendRow("family.tasks.status.awaiting", kind: .awaiting, count: progress.awaitingConfirmation)
                 }
-                statusRow("family.tasks.status.pending", icon: "circle", count: progress.pending)
+                legendRow("family.tasks.status.pending", kind: .pending, count: progress.pending)
             }
         }
-        .foregroundStyle(.primary)
-        .padding(16)
+        .padding(AppSpacing.lg)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .contentShape(RoundedRectangle(cornerRadius: 22))
-    }
-
-    @ViewBuilder
-    private func progressBar(_ progress: FamilyProgress) -> some View {
-        if progress.total == 0 {
-            Capsule().fill(Color(uiColor: .systemGray4)).frame(height: 10)
-        } else {
-            GeometryReader { proxy in
-                let parts = [progress.completed, viewModel.canConfigureFamily ? progress.awaitingConfirmation : 0, progress.pending]
-                    .filter { $0 > 0 }
-                let width = max(0, proxy.size.width - CGFloat(max(0, parts.count - 1)) * 3)
-                HStack(spacing: 3) {
-                    if progress.completed > 0 {
-                        Capsule().fill(Color.primary)
-                            .frame(width: width * CGFloat(progress.completed) / CGFloat(progress.total))
-                    }
-                    if viewModel.canConfigureFamily && progress.awaitingConfirmation > 0 {
-                        Capsule().fill(Color(uiColor: .systemGray2))
-                            .frame(width: width * CGFloat(progress.awaitingConfirmation) / CGFloat(progress.total))
-                    }
-                    if progress.pending > 0 {
-                        Capsule().fill(Color(uiColor: .systemGray4))
-                            .frame(width: width * CGFloat(progress.pending) / CGFloat(progress.total))
-                    }
-                }
-            }
-            .frame(height: 10)
+        .background(
+            RoundedRectangle(cornerRadius: AppRadius.pill)
+                .fill(Color.App.Background.cardHighlight)
+        )
+        .overlay {
+            ChalkThickBorder(
+                shape: RoundedRectangle(cornerRadius: AppRadius.pill),
+                color: Color.App.Border.cardHighlight,
+                width: 4
+            )
         }
+        // Decorations never intercept the board's tap and never reach VoiceOver.
+        .overlay(alignment: .topTrailing) {
+            // Sits above the corner so the header chevron stays visible.
+            StarDecorationView(variant: .blue, size: 72)
+                .offset(x: 24, y: -46)
+                .allowsHitTesting(false)
+        }
+        .overlay(alignment: .bottomLeading) {
+            StarDecorationView(variant: .yellow, size: 56)
+                .offset(x: -20, y: 24)
+                .allowsHitTesting(false)
+        }
+        .contentShape(RoundedRectangle(cornerRadius: AppRadius.pill))
     }
 
-    private func statusRow(_ title: LocalizedStringKey, icon: String, count: Int) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.system(size: 17))
-                .frame(width: 18)
+    private func legendRow(_ title: LocalizedStringKey, kind: SegmentedProgressRingView.Kind, count: Int) -> some View {
+        HStack(spacing: AppSpacing.sm) {
+            // Status is carried by the label and count, never by the chalk dot's color alone (RNF05).
+            ChalkRingArc(color: SegmentedProgressRingView.color(for: kind), lineWidth: 8, seed: 61)
+                .frame(width: 16, height: 16)
             Text(title)
-                .font(.subheadline)
-            Spacer(minLength: 0)
+                .font(.app(.subtitle))
+            Spacer(minLength: AppSpacing.sm)
             Text("\(count)")
-                .font(.subheadline.weight(.semibold))
+                .font(.app(.subtitleStrong))
         }
+        .foregroundStyle(Color.App.Text.primary)
+        .accessibilityElement(children: .combine)
     }
 
-    @ViewBuilder
-    private func incentiveCards(_ overview: FamilyOverview) -> some View {
-        if let today = viewModel.todayOverview {
-            let completedToday = today.members.filter { $0.progress.total > 0 && $0.progress.completed == $0.progress.total }
-            ForEach(completedToday) { member in
-                incentiveCard(member: member, title: "family.incentive.completed_today", icon: "hand.thumbsup.fill")
-            }
-        }
+    // MARK: Atualizações (incentives)
+
+    private func incentiveSection(_ overview: FamilyOverview) -> some View {
+        let completedToday = (viewModel.todayOverview?.members.filter {
+            $0.progress.total > 0 && $0.progress.completed == $0.progress.total
+        } ?? []).filter { !isDismissedAfterApplause($0.id) }
+        // "Teve muitas tarefas" has no Parabenizar, so it never leaves after congratulating (Figma 920:8200).
+        var mostTasks: [FamilyMemberProgress] = []
         if overview.members.count > 1, let maximum = overview.members.map(\.progress.total).max(), maximum > 0 {
-            ForEach(overview.members.filter { $0.progress.total == maximum }) { member in
-                if member.id == viewModel.currentMemberID {
-                    ownMostTasksCard(member: member)
-                } else {
-                    incentiveCard(member: member, title: "family.incentive.most_tasks", icon: "hands.clap.fill")
+            mostTasks = overview.members.filter { $0.progress.total == maximum }
+        }
+        let hiddenIDs = Set(overview.members.map(\.id).filter(isDismissedAfterApplause))
+        return Group {
+            // No visible card left: the "Atualizações" title goes too, never an empty section.
+            if !completedToday.isEmpty || !mostTasks.isEmpty {
+                VStack(alignment: .leading, spacing: AppSpacing.md) {
+                    Text("family.overview.updates")
+                        .font(.app(.title2))
+                        .foregroundStyle(Color.App.Text.primary)
+                        .accessibilityAddTraits(.isHeader)
+                    ForEach(completedToday) { member in
+                        incentiveCard(member: member, title: "family.incentive.completed_today", action: .congratulate)
+                            .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                    }
+                    ForEach(mostTasks) { member in
+                        if member.id == viewModel.currentMemberID {
+                            ownMostTasksCard(member: member)
+                        } else {
+                            incentiveCard(member: member, title: "family.incentive.most_tasks", action: .viewTasks)
+                        }
+                    }
                 }
             }
         }
+        .animation(.snappy, value: hiddenIDs)
+    }
+
+    /// Only the "Terminou todas as tarefas de hoje!" card (the one with Parabenizar) leaves after an
+    /// Administrator congratulates another member, and stays hidden on reload (RN60/RN61, SPEC-009 E-13).
+    private func isDismissedAfterApplause(_ memberID: UUID) -> Bool {
+        viewModel.canConfigureFamily && memberID != viewModel.currentMemberID && viewModel.isMemberCongratulated(memberID)
+    }
+
+    private func updateCardSurface<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        content()
+            .padding(AppSpacing.lg)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: AppRadius.updateCard)
+                    .fill(Color.App.Background.cardUpdate)
+                    .shadow(color: Color.App.Action.primary.opacity(0.07), radius: 7.5, y: 6)
+            )
+            .chalkStrokeBorder(RoundedRectangle(cornerRadius: AppRadius.updateCard), color: Color.App.Border.card, lineWidth: 2)
     }
 
     private func ownMostTasksCard(member: FamilyMemberProgress) -> some View {
         NavigationLink(value: FamilyNavigationRoute.member(member.id)) {
-            HStack(spacing: 12) {
-                Image(systemName: "hands.clap.fill")
-                    .font(.title2)
-                    .frame(width: 34, height: 34)
-                VStack(alignment: .leading, spacing: 8) {
+            updateCardSurface {
+                VStack(alignment: .leading, spacing: AppSpacing.sm) {
                     Text("family.incentive.my_most_tasks")
-                        .font(.headline)
-                    Text("family.incentive.view_my_tasks")
-                        .font(.subheadline.weight(.semibold))
+                        .font(.app(.bodyStrong))
+                        .foregroundStyle(Color.App.Text.primary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    HStack(spacing: AppSpacing.xs + AppSpacing.xxs) {
+                        Image(systemName: "person.2").accessibilityHidden(true)
+                        Text("family.incentive.view_my_tasks")
+                    }
+                    .modifier(CompactActionLabel(kind: .secondary))
                 }
-                Spacer(minLength: 0)
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
             }
-            .foregroundStyle(.primary)
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 20))
+            .contentShape(RoundedRectangle(cornerRadius: AppRadius.updateCard))
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("family.incentive.own_most_tasks")
     }
 
-    private func incentiveCard(member: FamilyMemberProgress, title: LocalizedStringKey, icon: String) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top, spacing: 12) {
-                Image(systemName: icon)
-                    .font(.title2)
-                    .frame(width: 34, height: 34)
-                VStack(alignment: .leading, spacing: 5) {
-                    Text(member.name).font(.headline)
-                    Text(title).font(.subheadline).foregroundStyle(.secondary)
-                }
-                Spacer(minLength: 0)
-            }
-            if let summary = viewModel.applauseSummary[member.id], summary.count > 0 {
-                Text(applauseCaption(summary))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            HStack(spacing: 12) {
-                NavigationLink(value: FamilyNavigationRoute.member(member.id)) {
-                    Text(String(format: String(localized: "family.incentive.view_tasks"), member.name))
-                        .font(.subheadline.weight(.semibold))
-                }
-                Spacer(minLength: 0)
-                if viewModel.canConfigureFamily && member.id != viewModel.currentMemberID {
-                    Button {
-                        Task { await viewModel.sendApplause(to: member.id) }
-                    } label: {
-                        if viewModel.sendingApplauseIDs.contains(member.id) {
-                            ProgressView()
-                        } else {
-                            Text(viewModel.sentApplauseIDs.contains(member.id)
-                                 ? "family.incentive.sent" : "family.incentive.congratulate")
-                                .font(.caption.weight(.bold))
-                        }
+    /// Each update card carries one action (Figma 920:8186 / 920:8200): "Terminou todas as tarefas de hoje!" offers
+    /// Parabenizar (Administrator, another member); "Teve muitas tarefas" offers "Ver tarefas de <Nome>".
+    private enum IncentiveAction { case congratulate, viewTasks }
+
+    private func incentiveCard(member: FamilyMemberProgress, title: LocalizedStringKey, action: IncentiveAction) -> some View {
+        updateCardSurface {
+            VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                HStack(alignment: .top, spacing: AppSpacing.md) {
+                    MemberAvatarView(name: member.name, color: colors(for: member.id).tint, size: 40)
+                    VStack(alignment: .leading, spacing: AppSpacing.xxs) {
+                        Text(member.name)
+                            .font(.app(.cardTitle))
+                        Text(title)
+                            .font(.app(.subtitle))
+                            .foregroundStyle(Color.App.Text.secondary)
                     }
-                    .disabled(viewModel.sendingApplauseIDs.contains(member.id))
-                    .buttonStyle(.borderedProminent)
-                    .tint(.primary)
-                    .foregroundStyle(Color(uiColor: .systemBackground))
-                    .accessibilityIdentifier("family.incentive.congratulate.\(member.id.uuidString.lowercased())")
+                    .foregroundStyle(Color.App.Text.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 0)
+                }
+                switch action {
+                case .congratulate:
+                    if viewModel.canConfigureFamily && member.id != viewModel.currentMemberID {
+                        congratulateButton(member)
+                    }
+                case .viewTasks:
+                    NavigationLink(value: FamilyNavigationRoute.member(member.id)) {
+                        HStack(spacing: AppSpacing.xs + AppSpacing.xxs) {
+                            Image(systemName: "person.2").accessibilityHidden(true)
+                            Text(String(format: String(localized: "family.incentive.view_tasks"), firstName(member.name)))
+                        }
+                        .modifier(CompactActionLabel(kind: .secondary))
+                    }
+                    .buttonStyle(.plain)
                 }
             }
         }
-        .foregroundStyle(.primary)
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 20))
     }
 
-    private func applauseCaption(_ summary: FamilyApplauseSummary) -> String {
-        if summary.sentByMe {
-            if summary.count == 1 { return String(localized: "family.incentive.only_you") }
-            let key = summary.count == 2
-                ? String(localized: "family.incentive.you_plus_one")
-                : String(localized: "family.incentive.you_plus_many")
-            return String(format: key, summary.count - 1)
+    /// Always "Parabenizar": once the server confirms, the whole card leaves the screen (RN60/RN61).
+    private func congratulateButton(_ member: FamilyMemberProgress) -> some View {
+        let isSending = viewModel.sendingApplauseIDs.contains(member.id)
+        return Button {
+            Task { await viewModel.sendApplause(to: member.id) }
+        } label: {
+            HStack(spacing: AppSpacing.xs + AppSpacing.xxs) {
+                if isSending {
+                    ProgressView().tint(Color.App.Text.onAction)
+                } else {
+                    Image(systemName: "hands.clap").accessibilityHidden(true)
+                    Text("family.incentive.congratulate")
+                        .lineLimit(1)
+                }
+            }
+            .modifier(CompactActionLabel(kind: .primary))
         }
-        let key = summary.count == 1
-            ? String(localized: "family.incentive.one_person")
-            : String(localized: "family.incentive.many_people")
-        return String(format: key, summary.count)
+        .buttonStyle(.plain)
+        .disabled(isSending)
+        .accessibilityIdentifier("family.incentive.congratulate.\(member.id.uuidString.lowercased())")
     }
+
+    private func firstName(_ name: String) -> String {
+        name.split(separator: " ").first.map(String.init) ?? name
+    }
+
+    // MARK: Confirmações Kids
 
     private var kidsConfirmationsCard: some View {
         NavigationLink {
@@ -398,60 +418,121 @@ struct FamilyOverviewView: View {
                     .hidesAppTabBar()
             }
         } label: {
-            HStack(spacing: 12) {
+            HStack(spacing: AppSpacing.md) {
+                // Outline shield aligned with the title, no circle behind it (Figma 879:13443).
                 Image(systemName: "checkmark.shield")
-                    .frame(width: 20)
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(Color.App.Action.primary)
+                    .frame(width: 24)
+                    .accessibilityHidden(true)
                 Text("family.overview.kids_confirmations")
+                    .font(.app(.cardTitle))
+                    .foregroundStyle(Color.App.Text.primary)
                 Spacer(minLength: 0)
                 Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(Color.App.Text.secondary)
+                    .accessibilityHidden(true)
             }
-            .foregroundStyle(.primary)
-            .padding(.horizontal, 16)
-            .frame(minHeight: 52)
-            .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 20))
+            .padding(.horizontal, AppSpacing.lg)
+            .frame(maxWidth: .infinity, minHeight: 64)
+            .appCard(cornerRadius: AppRadius.cardBoard)
+            // The whole card is tappable, including its empty middle.
+            .contentShape(RoundedRectangle(cornerRadius: AppRadius.cardBoard))
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("family.overview.kids_confirmations")
     }
 
+    // MARK: States
+
     private var loadingContent: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            RoundedRectangle(cornerRadius: 6)
-                .fill(Color(uiColor: .systemGray5))
-                .frame(width: 170, height: 28)
-            HStack(spacing: 16) {
+        VStack(alignment: .leading, spacing: AppSpacing.xxl) {
+            RoundedRectangle(cornerRadius: AppRadius.banner)
+                .fill(Color.App.Background.subtle)
+                .frame(width: 170, height: 26)
+            HStack(spacing: AppSpacing.md) {
                 ForEach(0..<4, id: \.self) { _ in
-                    Circle()
-                        .stroke(Color(uiColor: .systemGray5), lineWidth: 5)
-                        .frame(width: 68, height: 68)
-                        .frame(width: 78)
+                    VStack(spacing: AppSpacing.xs) {
+                        Circle()
+                            .fill(Color.App.Background.subtle)
+                            .frame(width: 68, height: 68)
+                        Capsule()
+                            .fill(Color.App.Background.subtle)
+                            .frame(width: 48, height: 10)
+                    }
+                    .frame(width: 78)
                 }
             }
-            RoundedRectangle(cornerRadius: 22)
-                .fill(Color(uiColor: .secondarySystemGroupedBackground))
-                .frame(height: 210)
+            RoundedRectangle(cornerRadius: AppRadius.cardBoard)
+                .fill(Color.App.Background.subtle)
+                .frame(height: 170)
         }
+        .accessibilityElement(children: .ignore)
         .accessibilityLabel("family.overview.loading")
         .accessibilityIdentifier("family.overview.progress_loading")
     }
 
     private var failureCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Label("family.overview.error_load", systemImage: "exclamationmark.triangle")
-                .font(.subheadline)
+        VStack(alignment: .leading, spacing: AppSpacing.lg) {
+            HStack(alignment: .top, spacing: AppSpacing.sm) {
+                Image(systemName: "exclamationmark.triangle")
+                    .accessibilityHidden(true)
+                Text("family.overview.error_load")
+                    .font(.app(.subtitle))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .foregroundStyle(Color.App.Text.primary)
+            .accessibilityElement(children: .combine)
+            .accessibilityFocused($isErrorFocused)
+            Button("family.member.detail.retry") {
+                Task { await viewModel.loadInitial() }
+            }
+            .buttonStyle(AppPillButtonStyle(kind: .primary))
+            .disabled(viewModel.isLoading)
+        }
+        .padding(AppSpacing.xxl)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .appCard(cornerRadius: AppRadius.cardBoard)
+        .accessibilityIdentifier("family.members.error")
+    }
+
+    /// Confirmed content stays on screen; a failed refresh only adds this non-blocking recovery.
+    private var refreshFailureBanner: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+            InlineFeedbackBanner(message: String(localized: "family.overview.error_load"))
                 .accessibilityFocused($isErrorFocused)
             Button("family.member.detail.retry") {
                 Task { await viewModel.loadInitial() }
             }
-            .font(.subheadline.weight(.semibold))
+            .font(.app(.subtitleStrong))
+            .foregroundStyle(Color.App.Text.highlight)
+            .frame(minHeight: 44)
             .disabled(viewModel.isLoading)
         }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 20))
-        .accessibilityIdentifier("family.members.error")
+        .accessibilityIdentifier("family.overview.refresh_error")
+    }
+}
+
+/// Compact action of the "Atualizações" cards (Figma 920:8159/920:8174): hugs its text, 14 pt corners, 2 pt
+/// chalk `Action.primary` border; visually compact but with a 44 pt minimum touch target.
+private struct CompactActionLabel: ViewModifier {
+    enum Kind { case primary, secondary }
+    let kind: Kind
+
+    func body(content: Content) -> some View {
+        content
+            .font(.app(.subtitleStrong))
+            .foregroundStyle(kind == .primary ? Color.App.Text.onAction : Color.App.Text.highlight)
+            .padding(.horizontal, AppSpacing.lg)
+            .frame(minHeight: 44)
+            .background(
+                kind == .primary ? Color.App.Action.primarySoft : Color.App.Background.card,
+                in: RoundedRectangle(cornerRadius: AppRadius.card)
+            )
+            .chalkStrokeBorder(RoundedRectangle(cornerRadius: AppRadius.card), color: Color.App.Action.primary, lineWidth: 2)
+            .contentShape(RoundedRectangle(cornerRadius: AppRadius.card))
+        // No fixed width: it hugs short labels and can still wrap at large Dynamic Type sizes.
     }
 }
 
@@ -483,13 +564,36 @@ enum FamilyOverviewDates {
         return String(format: String(localized: "family.overview.range_other_month"), formatter.string(from: start), formatter.string(from: end))
     }
 
-    static func todaySubtitle(timeZoneID: String) -> String {
+    /// "Hoje · …" is shown only when today belongs to the visible range (UX-009 TEL-050/TEL-011).
+    static func containsToday(_ range: FamilyDateRange, timeZoneID: String, now: Date = .now) -> Bool {
+        let calendar = calendar(timeZoneID)
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = calendar
+        formatter.timeZone = calendar.timeZone
+        formatter.dateFormat = "yyyy-MM-dd"
+        let today = formatter.string(from: now)
+        return range.startDate <= today && today <= range.endDate
+    }
+
+    /// Inclusive number of days in `range`; 1 for a single day or an unreadable range.
+    static func dayCount(in range: FamilyDateRange, timeZoneID: String) -> Int {
+        let calendar = calendar(timeZoneID)
+        guard let start = date(range.startDate, calendar: calendar),
+              let end = date(range.endDate, calendar: calendar),
+              let days = calendar.dateComponents([.day], from: start, to: end).day else { return 1 }
+        return max(1, days + 1)
+    }
+
+    /// "Hoje · terça-feira" for a single day (the date is already the title above it); with two or more days,
+    /// "Hoje · terça-feira, 17 de novembro" (UX-009 TEL-050/TEL-011).
+    static func todaySubtitle(for range: FamilyDateRange, timeZoneID: String, now: Date = .now) -> String {
         let formatter = DateFormatter()
         formatter.locale = .current
         formatter.calendar = calendar(timeZoneID)
         formatter.timeZone = formatter.calendar.timeZone
-        formatter.setLocalizedDateFormatFromTemplate("EEEE d MMMM")
-        return String(format: String(localized: "family.overview.today_subtitle"), formatter.string(from: .now))
+        formatter.setLocalizedDateFormatFromTemplate(dayCount(in: range, timeZoneID: timeZoneID) < 2 ? "EEEE" : "EEEE d MMMM")
+        return String(format: String(localized: "family.overview.today_subtitle"), formatter.string(from: now))
     }
 
     private static func calendar(_ timeZoneID: String) -> Calendar {

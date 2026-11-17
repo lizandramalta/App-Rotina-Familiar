@@ -1,7 +1,7 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.30 · **Base funcional:** RN 1.28 / RF 1.27 / UC 1.27 · **Arquitetura backend:** 1.6\
-**Data:** 2026-11-16\
+**Versão:** 1.31 · **Base funcional:** RN 1.29 / RF 1.28 / UC 1.28 · **Arquitetura backend:** 1.6\
+**Data:** 2026-11-17\
 **Situação:** contratos da aba Família, gestão de membros, sinalização/decisão Kids e snapshot semanal materializados na API; demais contratos alvo seguem por fases
 
 [Arquitetura](backend-architecture.md) · [Decisões](backend-decisions.md) · [Catálogo mobile](mobile-feature-catalog.md) · [UC](../03-casos-de-uso.md) · [Índice](../DOCUMENTACAO.md)
@@ -117,10 +117,10 @@ Preview de fuso é apenas leitura de suporte a MOD-012. A gravação pode reflet
 | `GET /kids/signals/{signalId}` | `GetKidsSignal` | Tarefa, autor, foto opcional e estado da sinalização corrente | Admin |
 | `POST /kids/signals/{signalId}/decision` | `DecideKidsSignal` | `decision: confirm \| reject` → tarefa/resultado canônico | Admin |
 | `GET /me/progress` | `GetOwnProgress` | Totais próprios do dia; sem carga familiar | Todos |
-| `GET /family/overview` | `GetFamilyOverview` | `startDate`/`endDate` opcionais (padrão semana corrente), `familyCreatedAt`, progresso e membros; sem carga | Adulto |
+| `GET /family/overview` | `GetFamilyOverview` | `startDate`/`endDate` opcionais (padrão dia atual no fuso da família), `familyCreatedAt`, progresso e membros; sem carga | Adulto |
 | `GET /family/load` | `GetFamilyLoad` | Distribuição por membro e totais, sem ranking | Adulto |
 
-As consultas familiares de progresso e tarefas aceitam `startDate`/`endDate` livres e inclusivos dentro de RN49; o overview sem parâmetros usa a semana corrente. As rotas pessoais são sempre diárias. `memberId` restringe a lista familiar a um membro ativo da família do ator; sem filtro, a lista inclui tarefas sem responsável. `status=pending` para Membro inclui o estado canônico `awaitingConfirmation` e o projeta como Pendente; Administrador vê ambos separadamente. O cursor pertence ao intervalo e aos filtros escolhidos. `GET /tasks/{id}` resolve criação fora do carrossel quando o ator pode consultar aquela tarefa; isso não cria novo calendário de navegação. Cadastro/edição não bloqueiam passado, meses futuros ou datas anteriores à família.
+As consultas familiares de progresso e tarefas aceitam `startDate`/`endDate` livres e inclusivos dentro de RN49; o overview sem parâmetros usa o dia atual no fuso da família (limitado por RN49). As rotas pessoais são sempre diárias. `memberId` restringe a lista familiar a um membro ativo da família do ator; sem filtro, a lista inclui tarefas sem responsável. `status=pending` para Membro inclui o estado canônico `awaitingConfirmation` e o projeta como Pendente; Administrador vê ambos separadamente. O cursor pertence ao intervalo e aos filtros escolhidos. `GET /tasks/{id}` resolve criação fora do carrossel quando o ator pode consultar aquela tarefa; isso não cria novo calendário de navegação. Cadastro/edição não bloqueiam passado, meses futuros ou datas anteriores à família.
 
 Nas duas rotas de lista familiar, `completedAt` é o instante UTC ISO 8601 da conclusão válida corrente quando `status=completed`; nos demais estados é `null`. A consulta usa apenas `app.completions` da mesma família e tarefa, com `undone_at is null`; a reabertura retira o horário da projeção. O app pode converter o instante para o fuso da família na descrição acessível do estado da tarefa em TEL-032; a linha compacta não exibe esse horário visualmente.
 
@@ -277,6 +277,7 @@ O documento OpenAPI 3.1 é gerado pelos schemas HTTP em `/docs/json`, e a interf
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.31 | 2026-11-17 | `GET /v1/family/overview` sem datas retorna o dia atual (hoje) no fuso da família (limitado por RN49); `GET /v1/kids/signals/{signalId}` expõe `task.note` opcional para exibição em TEL-016 (SCRUM-126 / SPEC-009 / UX-013). Base funcional RN 1.29 / RF 1.28 / UC 1.28. |
 | 1.30 | 2026-11-16 | Exclusão de conta (SPEC-022): `POST /me/account-deletion`, `POST /family/members/{memberId}/account-deletion`, guarda do refresh token Apple em `SignInWithApple` e rastreabilidade de UC20. Implementado no backend (módulo `account`, migração `0018_account_deletion.sql`). |
 | 1.29 | 2026-11-12 | `IssueMemberInvite` invalida convites disponíveis sem revogar sessão; `JoinFamilyByInvite` revoga a sessão anterior do perfil com tokens e push. Sem mudança de schema (SCRUM-114). |
 | 1.28 | 2026-11-05 | Materializa SPEC-020 Fase 1 (SCRUM-102 CA-01–06): apuração e outbox atômicas, consultas próprias, abertura monotônica, payload APNs e OpenAPI. |

@@ -37,14 +37,18 @@ final class KidsSignalDetailUITests: XCTestCase {
 
     private func openSignal(atRow position: Int) {
         openQueue()
+        let title = ["Arrumar a cama", "Guardar os brinquedos", "Lavar a louça"][position - 1]
         row(position).tap()
-        XCTAssertTrue(app.navigationBars["Avaliar sinalização"].waitForExistence(timeout: 5))
+        // Figma 870:27124: TEL-016 replaces the navigation bar with a circular back button + large title.
+        XCTAssertTrue(app.buttons["kidsReview.detail.back"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts[title].waitForExistence(timeout: 5))
     }
 
     /// UX-013 §4: back on TEL-015, without the decided "Arrumar a cama" and without any alert.
     private func assertReturnedToQueueWithoutFirstSignal(file: StaticString = #filePath, line: UInt = #line) {
-        XCTAssertTrue(app.navigationBars["Confirmações Kids"].waitForExistence(timeout: 5), file: file, line: line)
-        XCTAssertFalse(app.navigationBars["Avaliar sinalização"].exists, file: file, line: line)
+        // TEL-015/TEL-016 have no navigation bar (Figma 870:26998 / 870:27124): their back buttons tell them apart.
+        XCTAssertTrue(app.buttons["kidsReview.queue.back"].waitForExistence(timeout: 5), file: file, line: line)
+        XCTAssertFalse(app.buttons["kidsReview.detail.back"].exists, file: file, line: line)
         expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: row(1))
         waitForExpectations(timeout: 5)
         XCTAssertTrue(row(2).exists, file: file, line: line)
@@ -80,7 +84,7 @@ final class KidsSignalDetailUITests: XCTestCase {
     func testConfirmReturnsToQueueWithoutDecidedSignal() {
         openFirstSignal()
 
-        let confirm = app.buttons["Confirmar tarefa"]
+        let confirm = app.buttons["kidsReview.detail.confirm"]
         XCTAssertTrue(confirm.waitForExistence(timeout: 5))
         confirm.tap()
 
@@ -91,7 +95,7 @@ final class KidsSignalDetailUITests: XCTestCase {
     func testRejectReturnsToQueueWithoutDecidedSignal() {
         openFirstSignal()
 
-        let reject = app.buttons["Recusar sinalização"]
+        let reject = app.buttons["kidsReview.detail.reject"]
         XCTAssertTrue(reject.waitForExistence(timeout: 5))
         reject.tap()
 
@@ -115,6 +119,32 @@ final class KidsSignalDetailUITests: XCTestCase {
         openFirstSignal()
 
         XCTAssertTrue(app.images["Foto da sinalização"].waitForExistence(timeout: 5))
+        // Figma 870:27149/870:27162: the task observation and the private-photo hint.
+        XCTAssertTrue(app.staticTexts["Esticar o lençol e alinhar os travesseiros."].exists)
+        XCTAssertTrue(app.staticTexts["Foto privada · toque para ampliar"].exists)
+    }
+
+    /// SCRUM-126 Phase 4 (UX-013 §5.2/§8): tapping the photo opens the private enlarged viewer, which has no
+    /// share/save action and closes back to TEL-016.
+    func testPhotoOpensPrivateViewerAndCloses() {
+        openFirstSignal()
+
+        let photo = app.images["Foto da sinalização"]
+        XCTAssertTrue(photo.waitForExistence(timeout: 5))
+        photo.tap()
+
+        let viewer = field("kidsReview.photo.viewer")
+        XCTAssertTrue(viewer.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["Compartilhar"].exists)
+        XCTAssertFalse(app.buttons["Share"].exists)
+        viewer.doubleTap()
+        let close = app.buttons["kidsReview.photo.close"]
+        XCTAssertTrue(close.exists)
+        XCTAssertEqual(close.label, "Fechar")
+        close.tap()
+
+        XCTAssertTrue(viewer.waitForNonExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["kidsReview.detail.back"].exists)
     }
 
     /// SCRUM-116: "Guardar os brinquedos" (second queue row) has no photo, so the Section that would

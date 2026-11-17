@@ -41,6 +41,7 @@ final class KidsSignalDetailViewModel {
                 }
             }
         } catch KidsSignalError.notFound {
+            // Someone else already settled it: return silently to the refreshed queue (UX-013 §4, SCRUM-117).
             detail = nil
             resolved = true
         } catch KidsSignalError.actionNotAllowed {

@@ -34,10 +34,7 @@ struct KidsTabBar: View {
             RoundedRectangle(cornerRadius: Self.capsuleCornerRadius)
                 .fill(Color.App.Background.card)
         )
-        .overlay(
-            RoundedRectangle(cornerRadius: Self.capsuleCornerRadius)
-                .strokeBorder(Color.App.Border.separator, lineWidth: 1.5)
-        )
+        .chalkStrokeBorder(RoundedRectangle(cornerRadius: Self.capsuleCornerRadius), color: Color.App.Border.separator, lineWidth: 1.5)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("app.tab_bar")
     }

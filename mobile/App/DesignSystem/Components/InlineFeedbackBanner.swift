@@ -21,10 +21,7 @@ struct InlineFeedbackBanner: View {
             RoundedRectangle(cornerRadius: AppRadius.banner)
                 .fill(Color.App.Background.card)
         )
-        .overlay(
-            RoundedRectangle(cornerRadius: AppRadius.banner)
-                .strokeBorder(Color.App.Border.separator, lineWidth: 1)
-        )
+        .chalkStrokeBorder(RoundedRectangle(cornerRadius: AppRadius.banner), color: Color.App.Border.separator, lineWidth: 1)
         .accessibilityElement(children: .combine)
     }
 }

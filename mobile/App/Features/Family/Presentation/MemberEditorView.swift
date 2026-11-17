@@ -11,30 +11,25 @@ struct MemberEditorView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 28) {
+            VStack(alignment: .leading, spacing: AppSpacing.xxl) {
                 nameSection
                 roleSection
                 if let message = viewModel.generalError {
-                    Label {
-                        Text(message)
-                    } icon: {
-                        Image(systemName: "exclamationmark.triangle")
-                    }
-                    .font(.footnote)
-                    .foregroundStyle(.red)
-                    .padding(.horizontal, 8)
-                    .accessibilityIdentifier("family.members.editor.error")
+                    FamilyNoticeCard(message, tone: .error)
+                        .accessibilityIdentifier("family.members.editor.error")
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 16)
-            .padding(.bottom, 24)
-            .onboardingColumn()
+            .padding(.horizontal, AppSpacing.xxl)
+            .padding(.top, AppSpacing.lg)
+            .padding(.bottom, AppSpacing.xxxl)
+            .frame(maxWidth: 540)
+            .frame(maxWidth: .infinity)
         }
-        .background(Color(uiColor: .systemGroupedBackground).ignoresSafeArea())
+        .background(Color.App.Background.app.ignoresSafeArea())
         .navigationTitle("family.members.create.title")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
+        .hidesAppTabBar()
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button("family.members.draft.cancel") {
@@ -44,6 +39,7 @@ struct MemberEditorView: View {
                         dismiss()
                     }
                 }
+                .tint(Color.App.Action.primary)
                 .disabled(viewModel.isLoading)
                 .accessibilityIdentifier("family.members.editor.cancel")
             }
@@ -63,28 +59,26 @@ struct MemberEditorView: View {
     }
 
     private var nameSection: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("family.members.name.label")
-                .font(.footnote)
-                .foregroundStyle(Color(uiColor: .secondaryLabel))
-                .padding(.horizontal, 4)
+        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+            FamilySectionLabel("family.members.name.label")
 
             HStack {
                 TextField("family.members.name.label", text: $viewModel.name)
-                    .font(.body)
+                    .font(.app(.body))
+                    .foregroundStyle(Color.App.Text.primary)
                     .focused($isNameFocused)
                     .disabled(viewModel.isLoading)
                     .accessibilityIdentifier("family.members.editor.name")
 
                 if viewModel.nameError != nil {
                     Image(systemName: "exclamationmark.circle.fill")
-                        .foregroundStyle(.red)
+                        .foregroundStyle(Color.App.System.destructive)
+                        .accessibilityHidden(true)
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, AppSpacing.xxl)
             .frame(minHeight: 52)
-            .background(Color(uiColor: .secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+            .appCard(cornerRadius: AppRadius.pill)
 
             HStack(alignment: .top) {
                 if viewModel.nameError != nil {
@@ -93,67 +87,67 @@ struct MemberEditorView: View {
                     } icon: {
                         Image(systemName: "exclamationmark.circle")
                     }
-                    .font(.footnote)
-                    .foregroundStyle(.red)
+                    .font(.app(.note))
+                    .foregroundStyle(Color.App.System.destructive)
                     .accessibilityIdentifier("family.members.editor.name_error")
                 } else {
                     Text("family.members.name.hint")
-                        .font(.footnote)
-                        .foregroundStyle(Color(uiColor: .secondaryLabel))
+                        .font(.app(.note))
+                        .foregroundStyle(Color.App.Text.secondary)
                 }
                 Spacer()
                 Text("\(viewModel.name.count)/\(FamilyCreationValidation.nameLimit)")
-                    .font(.footnote)
-                    .foregroundStyle(Color(uiColor: .tertiaryLabel))
+                    .font(.app(.note))
+                    .foregroundStyle(Color.App.Text.secondary)
             }
-            .padding(.horizontal, 8)
+            .padding(.horizontal, AppSpacing.lg)
         }
     }
 
     private var roleSection: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("family.members.role.label")
-                .font(.footnote)
-                .foregroundStyle(Color(uiColor: .secondaryLabel))
-                .padding(.horizontal, 4)
+        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+            FamilySectionLabel("family.members.role.label")
 
             VStack(spacing: 0) {
                 ForEach(Array(MemberRole.allCases.enumerated()), id: \.element) { index, option in
+                    if index > 0 { FamilyCardSeparator(leadingInset: AppSpacing.lg + 28 + AppSpacing.md) }
                     Button {
                         viewModel.role = option
                     } label: {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: AppSpacing.md) {
+                            Image(systemName: option.editorSymbol)
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundStyle(Color.App.Action.primary)
+                                .frame(width: 28)
+                                .accessibilityHidden(true)
+                            VStack(alignment: .leading, spacing: AppSpacing.xxs) {
                                 Text(option.onboardingTitleKey)
-                                    .font(.body)
-                                    .foregroundStyle(Color(uiColor: .label))
+                                    .font(.app(.body))
+                                    .foregroundStyle(Color.App.Text.primary)
                                 Text(option.editorDescriptionKey)
-                                    .font(.footnote)
-                                    .foregroundStyle(Color(uiColor: .secondaryLabel))
+                                    .font(.app(.note))
+                                    .foregroundStyle(Color.App.Text.secondary)
                             }
                             Spacer()
                             if viewModel.role == option {
                                 Image(systemName: "checkmark")
-                                    .font(.body.weight(.semibold))
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundStyle(Color.App.Action.primary)
+                                    .accessibilityHidden(true)
                             }
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                        .frame(minHeight: 52)
+                        .padding(.horizontal, AppSpacing.lg)
+                        .padding(.vertical, AppSpacing.md)
+                        .frame(minHeight: 56)
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                     .disabled(viewModel.isLoading)
                     .accessibilityAddTraits(viewModel.role == option ? .isSelected : [])
                     .accessibilityIdentifier("family.members.editor.role.\(option.rawValue)")
-
-                    if index < MemberRole.allCases.count - 1 {
-                        Divider().padding(.leading, 20)
-                    }
                 }
             }
-            .background(Color(uiColor: .secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+            .appCard(cornerRadius: AppRadius.pill)
         }
     }
 
@@ -166,26 +160,32 @@ struct MemberEditorView: View {
                 }
             }
         } label: {
-            Group {
-                if viewModel.isLoading {
-                    ProgressView()
-                } else {
-                    Text("family.members.create.title")
-                }
+            if viewModel.isLoading {
+                ProgressView().tint(Color.App.Text.onAction)
+            } else {
+                Text("family.members.create.title")
             }
-            .frame(maxWidth: .infinity, minHeight: 44)
         }
-        .buttonStyle(.borderedProminent)
+        .buttonStyle(AppPillButtonStyle(kind: .primary))
         .disabled(!viewModel.canSubmit)
         .accessibilityIdentifier("family.members.editor.submit")
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
-        .onboardingColumn()
-        .background(.bar)
+        .padding(.horizontal, AppSpacing.xxl)
+        .padding(.vertical, AppSpacing.sm)
+        .frame(maxWidth: 540)
+        .frame(maxWidth: .infinity)
+        .background(Color.App.Background.app)
     }
 }
 
 private extension MemberRole {
+    var editorSymbol: String {
+        switch self {
+        case .administrator: "person.badge.key.fill"
+        case .member: "person.fill"
+        case .kid: "figure.and.child.holdinghands"
+        }
+    }
+
     var editorDescriptionKey: LocalizedStringKey {
         switch self {
         case .administrator: "family.members.role.administrator.description"

@@ -365,4 +365,68 @@ struct MemberDetailViewModelTests {
         #expect(viewModel.inviteFailure == nil)
         #expect(viewModel.shareMessage?.contains("PW-2") == true)
     }
+
+    // MARK: SCRUM-126 Phase 3 — MOD-010 outcomes (UX-003 §5.4/§6)
+
+    private func member(role: MemberRole) -> FamilyMember {
+        FamilyMember(id: memberID, name: "Maria Silva", role: role, isFamilyCreator: false)
+    }
+
+    @Test("UX-003 MOD-010 a confirmed role change applies the server-confirmed role")
+    func confirmedRoleChangeApplies() async {
+        let (viewModel, repository) = makeViewModel(.success(detail(manageMembers: true)))
+        await viewModel.load()
+        repository.setChangeRoleResult(.success(member(role: .member)))
+
+        await viewModel.changeRole(.member)
+
+        #expect(viewModel.detail?.role == .member)
+        #expect(!viewModel.managementFailed)
+        #expect(!viewModel.isSaving)
+    }
+
+    @Test("UX-003 MOD-010 a failed role change reports the error and keeps the confirmed role")
+    func failedRoleChangeKeepsRole() async {
+        let (viewModel, _) = makeViewModel(.success(detail(manageMembers: true)))
+        await viewModel.load()
+
+        await viewModel.changeRole(.member)
+
+        #expect(viewModel.managementFailed)
+        #expect(viewModel.detail?.role == .administrator)
+    }
+
+    @Test("UX-003 MOD-010 a confirmed removal clears the member and signals TEL-050")
+    func confirmedRemoval() async {
+        let (viewModel, repository) = makeViewModel(.success(detail(manageMembers: true)))
+        await viewModel.load()
+        repository.setRemoveResult(.success(()))
+
+        await viewModel.remove()
+
+        #expect(viewModel.isRemoved)
+        #expect(viewModel.detail == nil)
+        #expect(!viewModel.managementFailed)
+    }
+
+    @Test("UX-003 MOD-010 a failed removal keeps the member and reports the error in the modal")
+    func failedRemovalKeepsMember() async {
+        let (viewModel, _) = makeViewModel(.success(detail(manageMembers: true)))
+        await viewModel.load()
+
+        await viewModel.remove()
+
+        #expect(!viewModel.isRemoved)
+        #expect(viewModel.managementFailed)
+        #expect(viewModel.detail?.name == "Maria Silva")
+    }
+
+    @Test("UX-003 MOD-010 removal is the only destructive change and each change has its own identity")
+    func changeKinds() {
+        #expect(MemberChangeConfirmationView.Change.remove.isDestructive)
+        #expect(!MemberChangeConfirmationView.Change.role(.member).isDestructive)
+        #expect(MemberChangeConfirmationView.Change.role(.member).id != MemberChangeConfirmationView.Change.role(.kid).id)
+        #expect(MemberChangeConfirmationView.Change.remove.titleKey != MemberChangeConfirmationView.Change.role(.kid).titleKey)
+    }
+
 }

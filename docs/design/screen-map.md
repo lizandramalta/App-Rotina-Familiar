@@ -1,9 +1,9 @@
-# Screen map — versão 1.26
+# Screen map — versão 1.27
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do mapa:** 1.26\
-**Base funcional:** RN 1.28 / RF 1.27 / UC 1.27\
-**Data:** 2026-11-16\
+**Versão do mapa:** 1.27\
+**Base funcional:** RN 1.29 / RF 1.28 / UC 1.28\
+**Data:** 2026-11-17\
 **Situação:** referência inicial para design; organização de navegação proposta
 
 [Projeto](../../README.md) · [Índice e versões](../DOCUMENTACAO.md) · [Visão](../00-visao-do-produto.md) · [Regras](../01-regras-de-negocio.md) · [Requisitos](../02-requisitos.md) · [Casos de uso](../03-casos-de-uso.md) · [Diagrama de classes](../06-diagrama-de-classes.md)
@@ -123,11 +123,11 @@ flowchart TD
 
 **TEL-050 — Família:** apresenta progresso das tarefas da família e dos membros no intervalo livre entre Início e Fim, limitado pela criação da família e pelo fim do mês corrente. Cada membro ativo abre TEL-032 em Dia, com opção Semana visual domingo–sábado; o intervalo selecionado fica preservado na Família. A tela abre TEL-011 para todas as tarefas e, somente para Administradores, TEL-015 para Confirmações Kids e TEL-057 para Configurações. A carga familiar de SPEC-018 fica para entrega posterior e não integra esta tela.
 
-Entre progresso e Confirmações Kids, TEL-050 apresenta cartões de quem concluiu todas as tarefas atribuídas **hoje** e de quem teve a maior quantidade de tarefas atribuídas no intervalo visível, incluindo empates. Quando o próprio usuário está no destaque de maior quantidade, seu cartão é compacto, usa texto em segunda pessoa e “Ver minhas tarefas” abre TEL-032 na visão de hoje; os demais mantêm o cartão completo. Administrador pode Parabenizar outro membro ativo, inclusive Kids, e repetir o envio; Membro consulta sem ação. Parabenizar permanece apenas nos cartões de TEL-050. O destinatário vê o parabéns em TEL-010 ou TEL-040 e pode ocultá-lo pelo X. A mensagem interna persiste independentemente do push.
+Entre progresso e Confirmações Kids, TEL-050 apresenta cartões de quem concluiu todas as tarefas atribuídas **hoje** e de quem teve a maior quantidade de tarefas atribuídas no intervalo visível, incluindo empates. Quando o próprio usuário está no destaque de maior quantidade, seu cartão é compacto, usa texto em segunda pessoa e “Ver minhas tarefas” abre TEL-032 na visão de hoje; os demais mantêm o cartão completo. Administrador pode Parabenizar outro membro ativo, inclusive Kids; após enviar o parabéns, o cartão correspondente se retira da tela e permanece oculto ao recarregar/reabrir (`sentByMe` confirmado) para não consumir espaço; Membro consulta sem ação. Parabenizar permanece apenas nos cartões de TEL-050. O destinatário vê o parabéns em TEL-010 ou TEL-040 e pode ocultá-lo pelo X. A mensagem interna persiste independentemente do push.
 
 **TEL-032 — Detalhe do membro:** Administradores e Membros consultam as tarefas da pessoa selecionada em Dia (inicialmente hoje) ou Semana visual de domingo a sábado no fuso familiar, recortada por RN49. A tela compacta identifica o membro, resume o período e permite abrir a tarefa em TEL-012. Outros intervalos são consultados em TEL-011. Blocos de convite e gestão exibem Gerar convite, Alterar papel e Remover membro somente para Administradores e quando permitidos; Alterar papel abre seleção modal e confirmação. Editar no topo aparece apenas para Kids visto por Administrador autorizado e corrige o nome administrativo; essa correção também existe em TEL-057. Adultos alteram o próprio nome em Meu perfil. A configuração de apelido permanece exclusiva do titular. O Criador retorna por Apple, sem convite de recuperação.
 
-TEL-010 e TEL-040 abrem no dia atual e consultam somente o dia selecionado. TEL-050 inicia na semana corrente, limitada ao intervalo disponível. TEL-011 herda exatamente Início e Fim de TEL-050; TEL-032 inicia em Dia e permite Semana visual domingo–sábado, recortada por RN49. Mudanças em TEL-011 não alteram a origem, e voltar de ambas restaura o contexto anterior. TEL-011 apresenta chips de membros, período legível, grupos com contagens completas por estado e linhas com ícone, responsáveis e navegação; inclui tarefas sem responsável. A folha Filtros reúne Início/Fim e status, com “Limpar” para semana corrente e Todos, preservando membro. O menu ••• oferece Gerar relatório PDF; se o intervalo tocar mais de uma semana, TEL-051 solicita a semana antes da geração.
+TEL-010 e TEL-040 abrem no dia atual e consultam somente o dia selecionado. TEL-050 inicia no dia atual (diário) no fuso da família, limitado ao intervalo disponível. TEL-011 herda exatamente Início e Fim de TEL-050; TEL-032 inicia em Dia e permite Semana visual domingo–sábado, recortada por RN49. Mudanças em TEL-011 não alteram a origem, e voltar de ambas restaura o contexto anterior. TEL-011 apresenta chips de membros, período legível, grupos com contagens completas por estado e linhas com ícone, responsáveis e navegação; inclui tarefas sem responsável. A folha Filtros reúne Início/Fim e status, com “Limpar” retornando para o dia atual (hoje) e Todos, preservando membro. O menu ••• oferece Gerar relatório PDF; se o intervalo tocar mais de uma semana, TEL-051 solicita a semana antes da geração.
 
 Progresso é concluídas/total de tarefas previstas no período, sem ponderar peso nem multiplicar responsáveis. Sem tarefas, apresentar “Sem tarefas”. Para Membro, Aguardando confirmação aparece e é contado como Pendente, sem mudar o estado canônico; Administrador vê o estado separado. A carga usa a data de conclusão válida (RN61) quando consultada no relatório. O relatório continua sempre semanal. TEL-015 e TEL-016 são exclusivos do Administrador; fotos de validação mantêm suas permissões.
 
@@ -350,6 +350,7 @@ Campos funcionais de data/fuso e seleção de foto estão definidos; o layout vi
 
 | Versão do mapa | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.27 | RN 1.29 / RF 1.28 / UC 1.28 | 2026-11-17 | TEL-050 inicia em hoje (diário) e `Limpar` (TEL-050/TEL-011) restaura hoje; cartões de Atualizações retiram-se após Parabenizar; TEL-015/TEL-016/TEL-032/MOD-010/MOD-012 alinhados à alta fidelidade do Figma (SCRUM-126 / UX-009 / UX-013). |
 | 1.26 | RN 1.28 / RF 1.27 / UC 1.27 | 2026-11-16 | TEL-058 e MOD-015 (novos): excluir conta a partir de TEL-030 para todos os perfis e de TEL-032 para Administrador com alvo Kids; TEL-001 com mensagens de conta excluída e acesso encerrado. Para SPEC-022. |
 | 1.25 | RN 1.27 / RF 1.26 / UC 1.26 | 2026-11-12 | TEL-032 e TEL-056 usam sempre “Gerar convite” e emitem direto, sem confirmação de reemissão; TEL-034 é a folha de compartilhamento. Para UX-004 (UX-06, UX-07), SCRUM-114. |
 | 1.24 | RN 1.26 / RF 1.25 / UC 1.25 | 2026-11-08 | Barra de abas somente nas telas principais; telas abertas por push a ocultam. Para UX-016 (UX-08). |

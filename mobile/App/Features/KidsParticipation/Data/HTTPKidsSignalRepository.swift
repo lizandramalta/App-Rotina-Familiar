@@ -16,6 +16,8 @@ nonisolated private struct KidsSignalSummaryDTO: Decodable {
 nonisolated private struct KidsSignalTaskDTO: Decodable {
     let id: UUID
     let title: String
+    /// Only the detail sends it; optional so the queue items keep decoding.
+    let note: String?
 }
 
 nonisolated private struct KidsSignaledByDTO: Decodable {
@@ -99,7 +101,8 @@ nonisolated struct HTTPKidsSignalRepository: KidsSignalRepository {
         return KidsSignalDetail(
             id: detail.signalId, taskID: detail.task.id, taskTitle: detail.task.title,
             childName: detail.signaledBy.name, signaledAt: detail.signaledAt,
-            assignees: detail.assignees.map(\.name), photoMediaID: detail.photoMediaId
+            assignees: detail.assignees.map(\.name), photoMediaID: detail.photoMediaId,
+            taskNote: detail.task.note
         )
     }
 

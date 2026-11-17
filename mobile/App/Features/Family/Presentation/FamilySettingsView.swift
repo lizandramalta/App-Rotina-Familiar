@@ -12,43 +12,42 @@ struct FamilySettingsView: View {
         Group {
             switch viewModel.state {
             case .idle, .loading:
-                ProgressView("family.settings.loading")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                loadingSkeleton
             case .accessDenied:
-                ContentUnavailableView {
-                    Label("family.settings.access_denied_title", systemImage: "lock.shield")
-                } description: {
-                    Text("family.settings.access_denied_description")
-                }
+                stateCard(
+                    symbol: "lock.shield",
+                    title: "family.settings.access_denied_title",
+                    message: Text("family.settings.access_denied_description"),
+                    showsRetry: false
+                )
                 .accessibilityIdentifier("family.settings.access_denied")
             case let .error(message):
-                ContentUnavailableView {
-                    Label("family.common.error_network", systemImage: "wifi.exclamationmark")
-                } description: {
-                    Text(message)
-                } actions: {
-                    Button("Tentar novamente") {
-                        Task {
-                            await viewModel.loadSettings()
-                        }
-                    }
-                    .buttonStyle(.borderedProminent)
-                }
+                stateCard(
+                    symbol: "wifi.exclamationmark",
+                    title: "family.common.error_network",
+                    message: Text(message),
+                    showsRetry: true
+                )
             case let .loaded(settings):
                 content(settings)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.App.Background.app.ignoresSafeArea())
         .navigationTitle("family.settings.title")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
+        .hidesAppTabBar()
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button {
                     dismiss()
                 } label: {
-                    Image(systemName: "chevron.left")
+                    Image(systemName: "chevron.backward")
+                        .fontWeight(.semibold)
                 }
-                .accessibilityLabel("Voltar")
+                .tint(Color.App.Text.primary)
+                .accessibilityLabel("family.tasks.back")
                 .accessibilityIdentifier("family.settings.back_button")
             }
         }
@@ -64,67 +63,80 @@ struct FamilySettingsView: View {
         }
     }
 
+    private var loadingSkeleton: some View {
+        VStack(spacing: AppSpacing.xxl) {
+            RoundedRectangle(cornerRadius: AppRadius.pill)
+                .fill(Color.App.Background.subtle)
+                .frame(height: 110)
+            RoundedRectangle(cornerRadius: AppRadius.pill)
+                .fill(Color.App.Background.subtle)
+                .frame(height: 260)
+            Spacer()
+        }
+        .padding(AppSpacing.xxl)
+        .frame(maxWidth: 540)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("family.settings.loading")
+    }
+
+    private func stateCard(symbol: String, title: LocalizedStringKey, message: Text, showsRetry: Bool) -> some View {
+        VStack(spacing: AppSpacing.lg) {
+            Image(systemName: symbol)
+                .font(.system(size: 40))
+                .foregroundStyle(Color.App.Action.primary)
+                .accessibilityHidden(true)
+            Text(title)
+                .font(.app(.title3))
+                .foregroundStyle(Color.App.Text.primary)
+                .multilineTextAlignment(.center)
+            message
+                .font(.app(.subtitle))
+                .foregroundStyle(Color.App.Text.secondary)
+                .multilineTextAlignment(.center)
+            if showsRetry {
+                Button("family.member.detail.retry") {
+                    Task { await viewModel.loadSettings() }
+                }
+                .buttonStyle(AppPillButtonStyle(kind: .primary))
+            }
+        }
+        .padding(AppSpacing.xxl)
+        .appCard(cornerRadius: AppRadius.cardBoard)
+        .padding(AppSpacing.xxl)
+        .frame(maxWidth: 540)
+    }
+
     @ViewBuilder
     private func content(_ settings: FamilySettings) -> some View {
-        Form {
-            if let notice = viewModel.successNotice {
-                Section {
-                    HStack {
+        ScrollView {
+            VStack(alignment: .leading, spacing: AppSpacing.xxl) {
+                if let notice = viewModel.successNotice {
+                    HStack(spacing: AppSpacing.md) {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
+                            .foregroundStyle(Color.App.Text.primary)
+                            .accessibilityHidden(true)
                         Text(notice)
-                            .font(.subheadline)
+                            .font(.app(.subtitle))
+                            .foregroundStyle(Color.App.Text.primary)
                     }
+                    .padding(AppSpacing.lg)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.App.Background.cardHighlight, in: RoundedRectangle(cornerRadius: AppRadius.pill))
+                    .chalkStrokeBorder(RoundedRectangle(cornerRadius: AppRadius.pill), color: Color.App.Border.card, lineWidth: 1.5)
+                    .accessibilityElement(children: .combine)
                 }
-            }
 
-            if let error = viewModel.errorMessage, !viewModel.isConfirmationPresented {
-                Section {
-                    Text(error)
-                        .foregroundStyle(.red)
-                        .font(.subheadline)
+                if let error = viewModel.errorMessage, !viewModel.isConfirmationPresented {
+                    InlineFeedbackBanner(message: error)
                 }
-            }
 
-            Section {
-                LabeledContent {
-                    Text(TimeZoneDisplay.displayName(for: settings.timeZoneID))
-                        .foregroundStyle(.primary)
-                } label: {
-                    Text("family.settings.time_zone.current")
-                        .foregroundStyle(.secondary)
-                }
-                .accessibilityIdentifier("family.settings.current_timezone")
-
-                if let scheduled = settings.scheduledTimeZoneChange {
-                    LabeledContent {
-                        Text("\(TimeZoneDisplay.displayName(for: scheduled.timeZoneID)) (próximo ciclo)")
-                            .foregroundStyle(.primary)
-                    } label: {
-                        Text("family.settings.scheduled_change")
-                            .foregroundStyle(.secondary)
-                    }
-                    .accessibilityIdentifier("family.settings.scheduled_change")
-                }
-            } header: {
-                Text("family.settings.section.current_time_zone")
-            } footer: {
-                if settings.limits.isTransition {
-                    Text("family.settings.transition_footer")
-                } else {
-                    Text("family.settings.help_footer")
-                }
+                currentSection(settings)
+                newTimeZoneSection(settings)
             }
-
-            Section {
-                ForEach(TimeZoneDisplay.standardOptions) { option in
-                    timeZoneRow(option: option, settings: settings)
-                }
-            } header: {
-                Text("family.settings.section.new_time_zone")
-            } footer: {
-                Text("family.settings.selection_footer")
-            }
+            .padding(.horizontal, AppSpacing.xxl)
+            .padding(.vertical, AppSpacing.lg)
+            .frame(maxWidth: 540)
+            .frame(maxWidth: .infinity)
         }
         .safeAreaInset(edge: .bottom) {
             Button {
@@ -132,27 +144,82 @@ struct FamilySettingsView: View {
                     await viewModel.requestPreview()
                 }
             } label: {
-                HStack {
-                    if viewModel.isPreviewLoading {
-                        ProgressView()
-                            .tint(Color(uiColor: .systemBackground))
-                    } else {
-                        Text("family.settings.time_zone.apply")
-                            .fontWeight(.semibold)
-                    }
+                if viewModel.isPreviewLoading {
+                    ProgressView().tint(Color.App.Text.onAction)
+                } else {
+                    Text("family.settings.time_zone.preview")
                 }
-                .frame(maxWidth: .infinity)
-                .frame(height: 50)
-                .background(viewModel.canRequestPreview ? Color(uiColor: .label) : Color(.systemGray5))
-                .foregroundStyle(viewModel.canRequestPreview ? Color(uiColor: .systemBackground) : Color(uiColor: .secondaryLabel))
-                .clipShape(Capsule())
-                .padding(.horizontal, 20)
-                .padding(.vertical, 8)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(AppPillButtonStyle(kind: .primary))
             .disabled(!viewModel.canRequestPreview)
             .accessibilityIdentifier("family.settings.preview_button")
+            .padding(.horizontal, AppSpacing.xxl)
+            .padding(.vertical, AppSpacing.sm)
+            .frame(maxWidth: 540)
+            .frame(maxWidth: .infinity)
+            .background(Color.App.Background.app)
         }
+    }
+
+    private func currentSection(_ settings: FamilySettings) -> some View {
+        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+            FamilySectionLabel("family.settings.section.current_time_zone")
+            VStack(spacing: 0) {
+                valueRow(
+                    label: "family.settings.time_zone.current",
+                    value: TimeZoneDisplay.displayName(for: settings.timeZoneID)
+                )
+                .accessibilityIdentifier("family.settings.current_timezone")
+                if let scheduled = settings.scheduledTimeZoneChange {
+                    FamilyCardSeparator()
+                    valueRow(
+                        label: "family.settings.scheduled_change",
+                        value: "\(TimeZoneDisplay.displayName(for: scheduled.timeZoneID)) · \(String(localized: "family.settings.scheduled_badge"))"
+                    )
+                    .accessibilityIdentifier("family.settings.scheduled_change")
+                }
+            }
+            .appCard(cornerRadius: AppRadius.pill)
+            sectionFooter(settings.limits.isTransition ? "family.settings.transition_footer" : "family.settings.help_footer")
+        }
+    }
+
+    private func newTimeZoneSection(_ settings: FamilySettings) -> some View {
+        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+            FamilySectionLabel("family.settings.section.new_time_zone")
+            VStack(spacing: 0) {
+                ForEach(Array(TimeZoneDisplay.standardOptions.enumerated()), id: \.element.id) { index, option in
+                    if index > 0 { FamilyCardSeparator() }
+                    timeZoneRow(option: option, settings: settings)
+                }
+            }
+            .appCard(cornerRadius: AppRadius.pill)
+            sectionFooter("family.settings.selection_footer")
+        }
+    }
+
+    private func valueRow(label: LocalizedStringKey, value: String) -> some View {
+        HStack(spacing: AppSpacing.md) {
+            Text(label)
+                .font(.app(.body))
+                .foregroundStyle(Color.App.Text.secondary)
+            Spacer(minLength: AppSpacing.sm)
+            Text(value)
+                .font(.app(.subtitleStrong))
+                .foregroundStyle(Color.App.Text.primary)
+                .multilineTextAlignment(.trailing)
+        }
+        .padding(.horizontal, AppSpacing.lg)
+        .frame(minHeight: 52)
+        .accessibilityElement(children: .combine)
+    }
+
+    private func sectionFooter(_ key: LocalizedStringKey) -> some View {
+        Text(key)
+            .font(.app(.note))
+            .foregroundStyle(Color.App.Text.secondary)
+            .padding(.horizontal, AppSpacing.lg)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     @ViewBuilder
@@ -165,30 +232,33 @@ struct FamilySettingsView: View {
         Button {
             viewModel.selectTimeZone(option.identifier)
         } label: {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(option.name)
-                        .foregroundStyle(isDisabled ? .secondary : .primary)
-                        .font(.body)
+            HStack(spacing: AppSpacing.md) {
+                VStack(alignment: .leading, spacing: AppSpacing.xxs) {
+                    HStack(spacing: AppSpacing.xs) {
+                        Text(option.name)
+                            .font(.app(.body))
+                            .foregroundStyle(isDisabled ? Color.App.Text.secondary : Color.App.Text.primary)
+                        if isCurrent || isScheduled {
+                            Text("· \(String(localized: isCurrent ? "family.settings.current_badge" : "family.settings.scheduled_badge"))")
+                                .font(.app(.note))
+                                .foregroundStyle(Color.App.Text.secondary)
+                        }
+                    }
                     Text(option.subtitle)
-                        .foregroundStyle(.secondary)
-                        .font(.caption)
+                        .font(.app(.caption))
+                        .foregroundStyle(Color.App.Text.secondary)
                 }
                 Spacer()
                 if isSelected {
                     Image(systemName: "checkmark")
-                        .foregroundStyle(.tint)
-                        .fontWeight(.semibold)
-                } else if isCurrent {
-                    Text("family.settings.current_badge")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                } else if isScheduled {
-                    Text("family.settings.scheduled_badge")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(Color.App.Action.primary)
+                        .accessibilityHidden(true)
                 }
             }
+            .padding(.horizontal, AppSpacing.lg)
+            .padding(.vertical, AppSpacing.sm)
+            .frame(minHeight: 56)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

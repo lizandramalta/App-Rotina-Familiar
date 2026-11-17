@@ -5,8 +5,10 @@ struct MemberDetailView: View {
     @State private var viewModel: MemberDetailViewModel
     @State private var showsRolePicker = false
     @State private var selectedRole: MemberRole?
-    @State private var pendingRole: MemberRole?
-    @State private var showsRemovalConfirmation = false
+    /// MOD-010 currently open; stays open on failure so the error is read in context (UX-003 §6).
+    @State private var pendingChange: MemberChangeConfirmationView.Change?
+    @State private var changeFailed = false
+    /// SPEC-022 CA-16 / UX-022: Kids account deletion confirmation.
     @State private var showsKidsDeletionConfirmation = false
     @State private var showsKidsNameEditor = false
     @State private var draftKidsName = ""
@@ -14,7 +16,6 @@ struct MemberDetailView: View {
     @State private var kidsNameSaveFailed = false
     @State private var kidsNameRequiresRefresh = false
     @State private var kidsNameIsSaving = false
-    @State private var showsKidsNameDiscard = false
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
     let onOpenTask: (UUID) -> Void
@@ -31,37 +32,28 @@ struct MemberDetailView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
+            VStack(alignment: .leading, spacing: AppSpacing.xxxl) {
                 navigationHeader
-                identification
-                VStack(alignment: .leading, spacing: 22) {
-                    if viewModel.detail != nil {
+                if viewModel.detail != nil {
+                    identification
+                    VStack(alignment: .leading, spacing: AppSpacing.xxl) {
+                        notices
                         managementSections
                         tasksSection
-                    } else if viewModel.isLoading {
-                        ProgressView()
-                            .frame(maxWidth: .infinity, minHeight: 180)
-                            .accessibilityIdentifier("family.member.detail.loading")
                     }
-                    if let message = viewModel.errorMessage { failureCard(message) }
-                    if viewModel.managementFailed { failureCard("family.member.manage.error") }
-                    if let message = viewModel.inviteErrorMessage {
-                        failureCard(message).accessibilityIdentifier("memberInvite.error")
-                    }
-                    if viewModel.wasShareCancelled {
-                        Text("memberInvite.share.cancelled")
-                            .font(.footnote).foregroundStyle(.secondary)
-                            .accessibilityIdentifier("memberInvite.share.cancelled")
-                    }
+                } else if viewModel.isLoading {
+                    loadingSkeleton
+                } else if let message = viewModel.errorMessage {
+                    unavailableState(message)
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
-            .padding(.bottom, 30)
-            .frame(maxWidth: 780)
+            .padding(.horizontal, AppSpacing.xxl)
+            .padding(.top, AppSpacing.sm)
+            .padding(.bottom, AppSpacing.giant)
+            .frame(maxWidth: 540)
             .frame(maxWidth: .infinity)
         }
-        .background(Color(uiColor: .systemGroupedBackground).ignoresSafeArea())
+        .background(Color.App.Background.app.ignoresSafeArea())
         .navigationTitle("")
         .toolbar(.hidden, for: .navigationBar)
         .hidesAppTabBar()
@@ -69,32 +61,28 @@ struct MemberDetailView: View {
         .refreshable { await viewModel.load() }
         .inviteShareSheet(viewModel: viewModel, isPresented: viewModel.transientInvite != nil)
         .sheet(isPresented: $showsRolePicker, onDismiss: {
-            pendingRole = selectedRole
+            // The selection closes the picker first; MOD-010 opens only afterwards (UX-003 §5.2).
+            if let role = selectedRole { openConfirmation(.role(role)) }
             selectedRole = nil
         }) {
             rolePickerSheet
         }
+        .sheet(item: $pendingChange, onDismiss: {
+            if viewModel.isRemoved { finishRemoval() }
+        }) { change in
+            MemberChangeConfirmationView(
+                change: change,
+                memberName: viewModel.detail?.name ?? "",
+                memberColor: memberColor,
+                currentRole: viewModel.detail?.role ?? .member,
+                isSubmitting: viewModel.isSaving,
+                showsError: changeFailed,
+                onConfirm: { Task { await confirm(change) } },
+                onCancel: { pendingChange = nil }
+            )
+        }
         .sheet(isPresented: $showsKidsNameEditor) { NavigationStack { kidsNameEditor } }
-        .alert("family.member.manage.role_confirm", isPresented: Binding(
-            get: { pendingRole != nil },
-            set: { if !$0 { pendingRole = nil } }
-        )) {
-            Button("family.settings.hub.cancel", role: .cancel) { pendingRole = nil }
-            Button("family.member.manage.role_confirm_action") {
-                if let role = pendingRole { Task { await viewModel.changeRole(role) } }
-                pendingRole = nil
-            }
-        } message: {
-            Text("family.member.manage.role_confirm_message")
-        }
-        .alert("family.member.manage.remove", isPresented: $showsRemovalConfirmation) {
-            Button("family.settings.hub.cancel", role: .cancel) {}
-            Button("family.member.manage.remove", role: .destructive) {
-                Task { await viewModel.remove() }
-            }
-        } message: {
-            Text("family.member.manage.remove_message")
-        }
+        // Role change and removal use MOD-010; Kids account deletion keeps its SPEC-022 confirmation.
         .alert(
             Text(String(format: String(localized: "account.deletion.confirm.kids_title"), viewModel.targetName)),
             isPresented: $showsKidsDeletionConfirmation
@@ -107,14 +95,58 @@ struct MemberDetailView: View {
             Text("account.deletion.confirm.kids_message")
         }
         .onChange(of: viewModel.isRemoved) { _, removed in
-            if removed { onRemoved(); dismiss() }
+            guard removed else { return }
+            // With MOD-010 open, leave TEL-032 only once the sheet is gone.
+            if pendingChange == nil { finishRemoval() } else { pendingChange = nil }
         }
     }
 
+    // MARK: MOD-010
+
+    private func openConfirmation(_ change: MemberChangeConfirmationView.Change) {
+        changeFailed = false
+        pendingChange = change
+    }
+
+    private func confirm(_ change: MemberChangeConfirmationView.Change) async {
+        changeFailed = false
+        switch change {
+        case let .role(role):
+            await viewModel.changeRole(role)
+            // A lost response is reconciled by the reload: an already applied role closes the modal too.
+            if !viewModel.managementFailed || viewModel.detail?.role == role {
+                pendingChange = nil
+            } else {
+                changeFailed = true
+            }
+        case .remove:
+            await viewModel.remove()
+            if viewModel.isRemoved { return }
+            // The member is gone or no longer visible: close and let TEL-032 show the confirmed state.
+            if viewModel.detail == nil { pendingChange = nil } else { changeFailed = viewModel.managementFailed }
+        }
+    }
+
+    private func finishRemoval() {
+        onRemoved()
+        dismiss()
+    }
+
+    private var memberColor: Color {
+        guard let detail = viewModel.detail else { return Color.App.Member.you }
+        return FamilyMemberPalette.colors(for: detail.id, isCurrentMember: viewModel.isCurrentMember).tint
+    }
+
+    // MARK: Header & identification
+
     private var navigationHeader: some View {
         HStack {
-            circleButton("chevron.left", label: "family.tasks.back") { dismiss() }
-                .accessibilityIdentifier("family.member.detail.back")
+            Button { dismiss() } label: {
+                FamilyCircleIconLabel(systemImage: "chevron.backward")
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("family.tasks.back")
+            .accessibilityIdentifier("family.member.detail.back")
             Spacer()
             if viewModel.canEditKidsName {
                 Button("family.member.detail.edit") {
@@ -124,177 +156,223 @@ struct MemberDetailView: View {
                     kidsNameRequiresRefresh = false
                     showsKidsNameEditor = true
                 }
-                .font(.system(size: 17))
-                .padding(.horizontal, 14)
-                .frame(minHeight: 34)
-                .background(.white, in: Capsule())
+                .font(.app(.subtitleStrong))
+                .foregroundStyle(Color.App.Text.primary)
+                .padding(.horizontal, AppSpacing.lg)
+                .frame(minHeight: 44)
+                .background(Color.App.Background.card, in: Capsule())
+                .chalkStrokeBorder(Capsule(), color: Color.App.Border.card, lineWidth: 1.5)
+                .contentShape(Capsule())
+                .buttonStyle(.plain)
                 .accessibilityIdentifier("family.member.detail.edit_kids_name")
             }
         }
     }
 
+    @ViewBuilder
     private var identification: some View {
-        VStack(spacing: 5) {
-            if let detail = viewModel.detail {
-                Text(String(detail.name.prefix(1)).uppercased(with: locale))
-                    .font(.system(size: 28, weight: .semibold))
-                    .foregroundStyle(Color(uiColor: .secondaryLabel))
-                    .frame(width: 80, height: 80)
-                    .background(Color(uiColor: .systemGray5), in: Circle())
-                    .accessibilityHidden(true)
+        if let detail = viewModel.detail {
+            VStack(spacing: AppSpacing.xs) {
+                MemberAvatarView(name: detail.name, color: memberColor, size: 80)
                 Text(detail.name)
-                    .font(.system(size: 22, weight: .bold))
+                    .font(.app(.title2))
+                    .foregroundStyle(Color.App.Text.primary)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, AppSpacing.sm)
                     .accessibilityIdentifier("family.member.detail.name")
-                    .padding(.top, 10)
                 Text(detail.role.onboardingTitleKey)
-                    .font(.system(size: 15))
-                    .foregroundStyle(.secondary)
+                    .font(.app(.subtitle))
+                    .foregroundStyle(Color.App.Text.secondary)
                     .accessibilityIdentifier("family.member.detail.role")
                 if detail.isFamilyCreator {
-                    Label("family.member.detail.creator_badge", systemImage: "shield.lefthalf.filled")
-                        .font(.system(size: 13))
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 5)
-                        .background(Color(uiColor: .systemGray5), in: Capsule())
+                    Label("family.member.detail.creator_badge", systemImage: "shield.fill")
+                        .font(.app(.noteStrong))
+                        .foregroundStyle(Color.App.Text.highlight)
+                        .padding(.horizontal, AppSpacing.md)
+                        .padding(.vertical, AppSpacing.xs + AppSpacing.xxs)
+                        .background(Color.App.Background.cardHighlight, in: Capsule())
+                        .padding(.top, AppSpacing.xs)
                         .accessibilityIdentifier("family.member.detail.creator_badge")
                 }
             }
+            .frame(maxWidth: .infinity)
         }
-        .frame(maxWidth: .infinity)
     }
 
-    private func circleButton(
-        _ symbol: String, label: LocalizedStringKey, action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            Image(systemName: symbol)
-                .font(.system(size: 20, weight: .semibold))
-                .frame(width: 20, height: 20)
-                .frame(width: 44, height: 44)
-                .contentShape(Circle())
-                .accessibilityHidden(true)
+    // MARK: Notices (UX-004 TEL-034 outcomes, management/load failures)
+
+    @ViewBuilder
+    private var notices: some View {
+        if let message = viewModel.errorMessage {
+            retryNotice(message)
         }
-        .buttonStyle(.plain)
-        .background(Color(uiColor: .secondarySystemGroupedBackground), in: Circle())
-        .overlay(Circle().strokeBorder(Color(uiColor: .separator), lineWidth: 0.5))
-        .accessibilityLabel(label)
+        if viewModel.managementFailed && pendingChange == nil {
+            retryNotice("family.member.manage.error")
+        }
+        if let message = viewModel.inviteErrorMessage {
+            FamilyNoticeCard(message, tone: .error)
+                .accessibilityIdentifier("memberInvite.error")
+        }
+        if viewModel.wasShareCancelled {
+            FamilyNoticeCard("memberInvite.share.cancelled", tone: .warning)
+                .accessibilityIdentifier("memberInvite.share.cancelled")
+        }
     }
+
+    private func retryNotice(_ message: LocalizedStringKey) -> some View {
+        VStack(alignment: .leading, spacing: AppSpacing.xs) {
+            FamilyNoticeCard(message, tone: .error)
+            Button("family.member.detail.retry") { Task { await viewModel.load() } }
+                .font(.app(.subtitleStrong))
+                .foregroundStyle(Color.App.Text.highlight)
+                .frame(minHeight: 44)
+                .padding(.leading, AppSpacing.lg)
+                .disabled(viewModel.isLoading)
+        }
+        .accessibilityIdentifier("family.member.detail.error")
+    }
+
+    // MARK: Convite & Gestão
 
     @ViewBuilder
     private var managementSections: some View {
         if viewModel.canManage && viewModel.isCreator {
-            Label("family.members.creator_protected", systemImage: "info.circle.fill")
-                .font(.subheadline)
-                .padding(16)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(.white, in: RoundedRectangle(cornerRadius: 20))
+            FamilyNoticeCard("family.members.creator_protected")
+                .accessibilityIdentifier("family.members.creator_protected")
         } else if viewModel.canManage {
             if viewModel.canIssueInvite {
-                VStack(alignment: .leading, spacing: 6) {
-                    sectionLabel("family.member.detail.invite_section")
+                VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                    FamilySectionLabel("family.member.detail.invite_section")
                     Button {
                         Task { await viewModel.issueInvite() }
                     } label: {
                         // UX-004 UX-06/UX-07: one label and a direct issuance whether or not a previous invite exists.
                         managementRow(
                             "family.member.manage.generate_invite",
-                            symbol: "square.and.arrow.up", chevron: true
+                            symbol: "square.and.arrow.up", chevron: true, isBusy: viewModel.isIssuingInvite
                         )
                     }
                     .buttonStyle(.plain)
                     .disabled(viewModel.isIssuingInvite)
+                    .appCard(cornerRadius: AppRadius.pill)
                     .accessibilityIdentifier("memberInvite.issue.title")
                 }
             }
             if viewModel.canManageTarget {
-                VStack(alignment: .leading, spacing: 6) {
-                    sectionLabel("family.member.detail.management_section")
+                VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                    FamilySectionLabel("family.member.detail.management_section")
                     VStack(spacing: 0) {
                         Button { showsRolePicker = true } label: {
                             managementRow("family.member.manage.role", symbol: "person.crop.circle", chevron: true)
                         }
                         .accessibilityIdentifier("family.member.detail.change_role")
-                        Divider().padding(.leading, 48)
-                        Button { showsRemovalConfirmation = true } label: {
-                            managementRow("family.member.manage.remove", symbol: "trash", chevron: false, emphasized: true)
+                        FamilyCardSeparator(leadingInset: AppSpacing.lg + 24 + AppSpacing.base)
+                        Button { openConfirmation(.remove) } label: {
+                            managementRow("family.member.manage.remove", symbol: "trash", chevron: false, destructive: true)
                         }
                         .accessibilityIdentifier("family.member.detail.remove")
                         if viewModel.canDeleteKidsAccount {
-                            Divider().padding(.leading, 48)
+                            FamilyCardSeparator(leadingInset: AppSpacing.lg + 24 + AppSpacing.base)
                             Button { showsKidsDeletionConfirmation = true } label: {
                                 managementRow(
                                     "family.members.delete_account", symbol: "person.crop.circle.badge.xmark",
-                                    chevron: false, emphasized: true
+                                    chevron: false, destructive: true
                                 )
-                                .foregroundStyle(Color.App.System.destructive)
                             }
                             .accessibilityIdentifier("family.member.detail.delete_account")
                         }
                     }
                     .buttonStyle(.plain)
                     .disabled(viewModel.isSaving)
-                    .background(.white, in: RoundedRectangle(cornerRadius: 22))
+                    .appCard(cornerRadius: AppRadius.pill)
                 }
             }
         }
     }
 
-    private func sectionLabel(_ title: LocalizedStringKey) -> some View {
-        Text(title).font(.system(size: 13)).foregroundStyle(.secondary).padding(.leading, 20)
-    }
-
     private func managementRow(
-        _ title: LocalizedStringKey, symbol: String, chevron: Bool, emphasized: Bool = false
+        _ title: LocalizedStringKey, symbol: String, chevron: Bool, destructive: Bool = false, isBusy: Bool = false
     ) -> some View {
-        HStack(spacing: 14) {
-            Image(systemName: symbol).font(.system(size: 19)).frame(width: 20).accessibilityHidden(true)
+        HStack(spacing: AppSpacing.base) {
+            Image(systemName: symbol)
+                .font(.system(size: 18, weight: .semibold))
+                // "Remover membro" is #423C1F, never red (Figma 870:24320); the label and MOD-010 carry the meaning.
+                .foregroundStyle(destructive ? Color.App.Text.primary : Color.App.Action.primary)
+                .frame(width: 24)
+                .accessibilityHidden(true)
             Text(title)
-                .font(.system(size: 16, weight: emphasized ? .semibold : .regular))
+                .font(.app(destructive ? .bodyStrong : .body))
+                .foregroundStyle(Color.App.Text.primary)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            if chevron {
+            if isBusy {
+                ProgressView().tint(Color.App.Action.primary)
+            } else if chevron {
                 Image(systemName: "chevron.right")
-                    .foregroundStyle(.tertiary)
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(Color.App.Text.secondary)
                     .accessibilityHidden(true)
             }
         }
-        .padding(.horizontal, 16)
-        .frame(minHeight: 52)
+        .padding(.horizontal, AppSpacing.lg)
+        .frame(minHeight: 54)
         .contentShape(Rectangle())
-        .background(.white, in: RoundedRectangle(cornerRadius: 22))
     }
 
     private var rolePickerSheet: some View {
         NavigationStack {
-            List {
-                if let currentRole = viewModel.detail?.role {
-                    HStack {
-                        Text("family.members.role.label")
-                        Spacer()
-                        Text(currentRole.onboardingTitleKey)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                ForEach(viewModel.allowedRoles, id: \.self) { role in
-                    Button {
-                        selectedRole = role
-                        showsRolePicker = false
-                    } label: {
+            ScrollView {
+                VStack(alignment: .leading, spacing: AppSpacing.md) {
+                    if let currentRole = viewModel.detail?.role {
                         HStack {
-                            Text(role.onboardingTitleKey)
+                            Text("family.members.role.label")
+                                .font(.app(.body))
+                                .foregroundStyle(Color.App.Text.primary)
                             Spacer()
-                            Image(systemName: "chevron.right")
-                                .foregroundStyle(.secondary)
+                            Text(currentRole.onboardingTitleKey)
+                                .font(.app(.subtitleStrong))
+                                .foregroundStyle(Color.App.Text.secondary)
                         }
-                        .frame(minHeight: 44)
+                        .padding(.horizontal, AppSpacing.lg)
+                        .frame(minHeight: 52)
+                        .appCard(cornerRadius: AppRadius.pill)
+                        .accessibilityElement(children: .combine)
                     }
-                    .accessibilityIdentifier("family.member.role.option.\(role.rawValue)")
+                    VStack(spacing: 0) {
+                        ForEach(Array(viewModel.allowedRoles.enumerated()), id: \.element) { index, role in
+                            if index > 0 { FamilyCardSeparator() }
+                            Button {
+                                selectedRole = role
+                                showsRolePicker = false
+                            } label: {
+                                HStack {
+                                    Text(role.onboardingTitleKey)
+                                        .font(.app(.body))
+                                        .foregroundStyle(Color.App.Text.primary)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 13, weight: .bold))
+                                        .foregroundStyle(Color.App.Text.secondary)
+                                        .accessibilityHidden(true)
+                                }
+                                .padding(.horizontal, AppSpacing.lg)
+                                .frame(minHeight: 52)
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityIdentifier("family.member.role.option.\(role.rawValue)")
+                        }
+                    }
+                    .appCard(cornerRadius: AppRadius.pill)
                 }
+                .padding(AppSpacing.xxl)
             }
+            .background(Color.App.Background.app.ignoresSafeArea())
             .navigationTitle("family.member.manage.role")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("family.settings.hub.cancel") { showsRolePicker = false }
+                        .tint(Color.App.Action.primary)
                 }
             }
         }
@@ -303,77 +381,101 @@ struct MemberDetailView: View {
     }
 
     private var kidsNameEditor: some View {
-        Form {
-            TextField("family.member.manage.name", text: $draftKidsName)
-                .onChange(of: draftKidsName) { _, _ in kidsNameIsInvalid = false }
-                .accessibilityIdentifier("family.member.detail.kids_name")
-            if kidsNameIsInvalid {
-                Text("family.members.name.error_invalid").foregroundStyle(.red)
-            }
-            if kidsNameSaveFailed || kidsNameRequiresRefresh {
-                Text("family.member.manage.error").foregroundStyle(.red)
-            }
-            if kidsNameRequiresRefresh {
-                Button("family.member.detail.retry") {
-                    Task {
-                        if let current = await viewModel.reconcileKidsName() {
-                            kidsNameRequiresRefresh = false
-                            if current.name == draftKidsName && current.role == .kid {
-                                showsKidsNameEditor = false
-                                onUpdated()
-                            } else {
-                                kidsNameSaveFailed = current.role != .kid
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        .navigationTitle("family.settings.hub.edit_kids_name")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button("family.settings.hub.cancel") {
-                    if draftKidsName != viewModel.detail?.name { showsKidsNameDiscard = true }
-                    else { showsKidsNameEditor = false }
-                }
-                .disabled(kidsNameIsSaving)
-            }
-            ToolbarItem(placement: .confirmationAction) {
-                Button("family.settings.hub.save") {
-                    guard case .success = FamilyCreationValidation.validatedName(draftKidsName) else {
-                        kidsNameIsInvalid = true
-                        return
-                    }
-                    kidsNameIsSaving = true
-                    kidsNameSaveFailed = false
-                    Task {
-                        let result = await viewModel.updateKidsName(
-                            draftKidsName.trimmingCharacters(in: .whitespacesAndNewlines)
-                        )
-                        kidsNameIsSaving = false
-                        switch result {
-                        case .saved:
+        FamilyKidsNameEditor(
+            name: $draftKidsName,
+            fieldIdentifier: "family.member.detail.kids_name",
+            isInvalid: kidsNameIsInvalid,
+            showsError: kidsNameSaveFailed,
+            requiresRefresh: kidsNameRequiresRefresh,
+            isSaving: kidsNameIsSaving,
+            hasChanges: draftKidsName != viewModel.detail?.name,
+            onRetry: {
+                Task {
+                    if let current = await viewModel.reconcileKidsName() {
+                        kidsNameRequiresRefresh = false
+                        if current.name == draftKidsName && current.role == .kid {
                             showsKidsNameEditor = false
                             onUpdated()
-                        case .failed, .noLongerEligible:
-                            kidsNameSaveFailed = true
-                        case .reconciliationRequired:
-                            kidsNameRequiresRefresh = true
+                        } else {
+                            kidsNameSaveFailed = current.role != .kid
                         }
                     }
                 }
-                .disabled(kidsNameIsSaving || kidsNameRequiresRefresh || draftKidsName == viewModel.detail?.name)
+            },
+            onSave: saveKidsName,
+            onClose: { showsKidsNameEditor = false }
+        )
+        .onChange(of: draftKidsName) { _, _ in kidsNameIsInvalid = false }
+    }
+
+    private func saveKidsName() {
+        guard case .success = FamilyCreationValidation.validatedName(draftKidsName) else {
+            kidsNameIsInvalid = true
+            return
+        }
+        kidsNameIsSaving = true
+        kidsNameSaveFailed = false
+        Task {
+            let result = await viewModel.updateKidsName(
+                draftKidsName.trimmingCharacters(in: .whitespacesAndNewlines)
+            )
+            kidsNameIsSaving = false
+            switch result {
+            case .saved:
+                showsKidsNameEditor = false
+                onUpdated()
+            case .failed, .noLongerEligible:
+                kidsNameSaveFailed = true
+            case .reconciliationRequired:
+                kidsNameRequiresRefresh = true
             }
         }
-        .confirmationDialog("family.members.discard.title", isPresented: $showsKidsNameDiscard) {
-            Button("family.members.discard.confirm", role: .destructive) { showsKidsNameEditor = false }
-            Button("family.members.discard.keep_editing", role: .cancel) {}
-        } message: {
-            Text("family.members.discard.message")
-        }
-        .interactiveDismissDisabled(kidsNameIsSaving || draftKidsName != viewModel.detail?.name)
     }
+
+    // MARK: States
+
+    private var loadingSkeleton: some View {
+        VStack(spacing: AppSpacing.xxl) {
+            VStack(spacing: AppSpacing.sm) {
+                Circle().fill(Color.App.Background.subtle).frame(width: 80, height: 80)
+                Capsule().fill(Color.App.Background.subtle).frame(width: 160, height: 18)
+                Capsule().fill(Color.App.Background.subtle).frame(width: 90, height: 12)
+            }
+            RoundedRectangle(cornerRadius: AppRadius.pill)
+                .fill(Color.App.Background.subtle)
+                .frame(height: 108)
+            RoundedRectangle(cornerRadius: AppRadius.pill)
+                .fill(Color.App.Background.subtle)
+                .frame(height: 156)
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("family.overview.loading")
+        .accessibilityIdentifier("family.member.detail.loading")
+    }
+
+    /// 403/404 clear the detail: no stale data is shown (UX-003 §6).
+    private func unavailableState(_ message: LocalizedStringKey) -> some View {
+        VStack(spacing: AppSpacing.lg) {
+            Image(systemName: "person.crop.circle.badge.exclamationmark")
+                .font(.system(size: 48))
+                .foregroundStyle(Color.App.Text.secondary)
+                .accessibilityHidden(true)
+            Text(message)
+                .font(.app(.body))
+                .foregroundStyle(Color.App.Text.primary)
+                .multilineTextAlignment(.center)
+            Button("family.member.detail.retry") { Task { await viewModel.load() } }
+                .buttonStyle(AppPillButtonStyle(kind: .secondary))
+                .disabled(viewModel.isLoading)
+        }
+        .padding(AppSpacing.xxl)
+        .frame(maxWidth: .infinity)
+        .appCard(cornerRadius: AppRadius.cardBoard)
+        .accessibilityIdentifier("family.member.detail.error")
+    }
+
+    // MARK: Tasks (UX-009 TEL-032)
 
     private var periodSummary: String {
         let progress = viewModel.taskViewModel.progress
@@ -398,7 +500,7 @@ struct MemberDetailView: View {
     }
 
     private var tasksSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: AppSpacing.md) {
             Picker("family.member.detail.period", selection: Binding(
                 get: { viewModel.period },
                 set: { period in Task { await viewModel.selectPeriod(period) } }
@@ -407,26 +509,28 @@ struct MemberDetailView: View {
                 Text("family.member.detail.week").tag(MemberDetailViewModel.Period.week)
             }
             .pickerStyle(.segmented)
+            .background(SegmentedControlStyler(identifier: "family.member.detail.period"))
             .accessibilityIdentifier("family.member.detail.period")
 
-            Text(periodSummary)
-                .font(.system(size: 13))
-                .foregroundStyle(.secondary)
-                .padding(.leading, 20)
-                .accessibilityAddTraits(.isHeader)
+            FamilySectionLabel(verbatim: periodSummary)
+                .padding(.top, AppSpacing.xs)
             if viewModel.taskViewModel.failed {
-                failureCard("family.tasks.error")
+                retryNotice("family.tasks.error")
             } else if viewModel.taskViewModel.isLoading && viewModel.taskViewModel.items.isEmpty {
-                ProgressView().frame(maxWidth: .infinity, minHeight: 80)
+                RoundedRectangle(cornerRadius: AppRadius.pill)
+                    .fill(Color.App.Background.subtle)
+                    .frame(height: 108)
+                    .accessibilityLabel("family.overview.loading")
             } else if viewModel.taskViewModel.items.isEmpty {
                 Text("family.tasks.empty")
-                    .font(.subheadline).foregroundStyle(.secondary)
+                    .font(.app(.subtitle))
+                    .foregroundStyle(Color.App.Text.secondary)
                     .frame(maxWidth: .infinity, minHeight: 76)
-                    .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18))
+                    .appCard(cornerRadius: AppRadius.pill)
             } else {
                 VStack(spacing: 0) {
                     ForEach(Array(viewModel.taskViewModel.items.enumerated()), id: \.element.id) { index, item in
-                        if index > 0 { Divider().padding(.leading, 54) }
+                        if index > 0 { FamilyCardSeparator(leadingInset: AppSpacing.lg + 24 + AppSpacing.md) }
                         Button {
                             onOpenTask(item.id)
                         } label: {
@@ -436,47 +540,43 @@ struct MemberDetailView: View {
                         .task { await viewModel.taskViewModel.loadMoreIfNeeded(currentItem: item) }
                     }
                 }
-                .background(.white, in: RoundedRectangle(cornerRadius: 22))
+                .appCard(cornerRadius: AppRadius.pill)
             }
-            if viewModel.taskViewModel.isLoadingMore { ProgressView().frame(maxWidth: .infinity) }
+            if viewModel.taskViewModel.isLoadingMore {
+                ProgressView().tint(Color.App.Action.primary).frame(maxWidth: .infinity, minHeight: 44)
+            }
             if viewModel.taskViewModel.loadMoreFailed {
                 Button("family.member.detail.retry") { Task { await viewModel.taskViewModel.loadMore() } }
+                    .font(.app(.subtitleStrong))
+                    .foregroundStyle(Color.App.Text.highlight)
+                    .frame(maxWidth: .infinity, minHeight: 44)
             }
         }
     }
 
     private func taskRow(_ item: FamilyTaskItem) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: statusSymbol(item.displayStatus))
-                .font(.system(size: 20))
-                .frame(width: 22, height: 22).accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(item.task.title)
-                    .font(.system(size: 16, weight: .medium))
-                    .strikethrough(item.displayStatus == .completed)
-                    .foregroundStyle(item.displayStatus == .completed ? .secondary : .primary)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+        let isCompleted = item.displayStatus == .completed
+        return HStack(spacing: AppSpacing.md) {
+            FamilyTaskStatusIcon(status: item.displayStatus)
+            Text(item.task.title)
+                .font(.app(.body))
+                .strikethrough(isCompleted, color: Color.App.Text.secondary)
+                .foregroundStyle(isCompleted ? Color.App.Text.secondary : Color.App.Text.primary)
+                .frame(maxWidth: .infinity, alignment: .leading)
             Image(systemName: "chevron.right")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(.secondary)
-                .frame(width: 14, height: 14).accessibilityHidden(true)
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(Color.App.Text.secondary)
+                .accessibilityHidden(true)
         }
-        .padding(.horizontal, 16)
-        .frame(minHeight: 52)
+        .padding(.leading, AppSpacing.lg)
+        .padding(.trailing, AppSpacing.base)
+        .padding(.vertical, AppSpacing.sm)
+        .frame(minHeight: 54)
         .contentShape(Rectangle())
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(item.task.title), \(statusSubtitle(item))")
         .accessibilityHint("tasks.personal.openDetailHint")
         .accessibilityIdentifier("family.member.detail.task.\(item.id.uuidString)")
-    }
-
-    private func statusSymbol(_ status: TaskStatus) -> String {
-        switch status {
-        case .pending: "circle"
-        case .awaitingConfirmation: "clock"
-        case .completed: "checkmark.circle.fill"
-        }
     }
 
     private func statusTitle(_ status: TaskStatus) -> LocalizedStringResource {
@@ -497,17 +597,6 @@ struct MemberDetailView: View {
                           formatter.string(from: completedAt))
         }
         return String(localized: statusTitle(item.displayStatus))
-    }
-
-    private func failureCard(_ message: LocalizedStringKey) -> some View {
-        VStack(spacing: 8) {
-            Text(message).font(.footnote).foregroundStyle(.red)
-            Button("family.member.detail.retry") { Task { await viewModel.load() } }
-        }
-        .frame(maxWidth: .infinity)
-        .padding(16)
-        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18))
-        .accessibilityIdentifier("family.member.detail.error")
     }
 
 }

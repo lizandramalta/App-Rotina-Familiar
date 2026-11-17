@@ -56,7 +56,7 @@ struct DesignSystemGalleryView: View {
             .padding(.vertical, AppSpacing.md)
             .background(Color.App.Background.card)
             .clipShape(RoundedRectangle(cornerRadius: AppRadius.card))
-            .overlay(RoundedRectangle(cornerRadius: AppRadius.card).stroke(Color.App.Border.card, lineWidth: 1))
+            .chalkStrokeBorder(RoundedRectangle(cornerRadius: AppRadius.card), color: Color.App.Border.card, lineWidth: 1)
         }
     }
 
@@ -74,7 +74,7 @@ struct DesignSystemGalleryView: View {
             .padding(.vertical, AppSpacing.md)
             .background(Color.App.Background.card)
             .clipShape(RoundedRectangle(cornerRadius: AppRadius.card))
-            .overlay(RoundedRectangle(cornerRadius: AppRadius.card).stroke(Color.App.Border.card, lineWidth: 1))
+            .chalkStrokeBorder(RoundedRectangle(cornerRadius: AppRadius.card), color: Color.App.Border.card, lineWidth: 1)
         }
     }
 
@@ -105,7 +105,7 @@ struct DesignSystemGalleryView: View {
             .padding(AppSpacing.lg)
             .background(Color.App.Background.card)
             .clipShape(RoundedRectangle(cornerRadius: AppRadius.card))
-            .overlay(RoundedRectangle(cornerRadius: AppRadius.card).stroke(Color.App.Border.card, lineWidth: 1))
+            .chalkStrokeBorder(RoundedRectangle(cornerRadius: AppRadius.card), color: Color.App.Border.card, lineWidth: 1)
         }
     }
 
@@ -134,7 +134,7 @@ struct DesignSystemGalleryView: View {
                     .padding(AppSpacing.md)
                     .background(Color.App.Background.cardHighlight)
                     .clipShape(RoundedRectangle(cornerRadius: AppRadius.card))
-                    .overlay(RoundedRectangle(cornerRadius: AppRadius.card).stroke(Color.App.Border.cardHighlight, lineWidth: 1))
+                    .chalkStrokeBorder(RoundedRectangle(cornerRadius: AppRadius.card), color: Color.App.Border.cardHighlight, lineWidth: 1)
 
                     StarDecorationView(variant: .yellow, size: 28)
                         .rotationEffect(.degrees(-10))
@@ -145,7 +145,7 @@ struct DesignSystemGalleryView: View {
             .padding(AppSpacing.lg)
             .background(Color.App.Background.card)
             .clipShape(RoundedRectangle(cornerRadius: AppRadius.card))
-            .overlay(RoundedRectangle(cornerRadius: AppRadius.card).stroke(Color.App.Border.card, lineWidth: 1))
+            .chalkStrokeBorder(RoundedRectangle(cornerRadius: AppRadius.card), color: Color.App.Border.card, lineWidth: 1)
         }
     }
 
@@ -178,7 +178,7 @@ struct DesignSystemGalleryView: View {
             .padding(AppSpacing.lg)
             .background(Color.App.Background.card)
             .clipShape(RoundedRectangle(cornerRadius: AppRadius.card))
-            .overlay(RoundedRectangle(cornerRadius: AppRadius.card).stroke(Color.App.Border.card, lineWidth: 1))
+            .chalkStrokeBorder(RoundedRectangle(cornerRadius: AppRadius.card), color: Color.App.Border.card, lineWidth: 1)
         }
     }
 
@@ -209,7 +209,7 @@ struct DesignSystemGalleryView: View {
             .padding(AppSpacing.lg)
             .background(Color.App.Background.card)
             .clipShape(RoundedRectangle(cornerRadius: AppRadius.card))
-            .overlay(RoundedRectangle(cornerRadius: AppRadius.card).stroke(Color.App.Border.card, lineWidth: 1))
+            .chalkStrokeBorder(RoundedRectangle(cornerRadius: AppRadius.card), color: Color.App.Border.card, lineWidth: 1)
         }
     }
 
@@ -227,7 +227,7 @@ struct DesignSystemGalleryView: View {
             .padding(AppSpacing.lg)
             .background(Color.App.Background.card)
             .clipShape(RoundedRectangle(cornerRadius: AppRadius.card))
-            .overlay(RoundedRectangle(cornerRadius: AppRadius.card).stroke(Color.App.Border.card, lineWidth: 1))
+            .chalkStrokeBorder(RoundedRectangle(cornerRadius: AppRadius.card), color: Color.App.Border.card, lineWidth: 1)
         }
     }
 
@@ -274,7 +274,7 @@ struct DesignSystemGalleryView: View {
             .frame(width: 68, height: 50)
             .background(Color.App.Background.cardHighlight)
             .clipShape(RoundedRectangle(cornerRadius: radius))
-            .overlay(RoundedRectangle(cornerRadius: radius).stroke(Color.App.Border.cardHighlight, lineWidth: 1))
+            .chalkStrokeBorder(RoundedRectangle(cornerRadius: radius), color: Color.App.Border.cardHighlight, lineWidth: 1)
     }
 }
 

@@ -274,4 +274,68 @@ struct FamilyOverviewViewModelTests {
             #expect(viewModel.canReviewKidsConfirmations == expected)
         }
     }
+
+    // MARK: SCRUM-126 Phase 7 — card leaves after congratulating (RN60/RN61, SPEC-009 E-13)
+
+    private func overview(_ memberIDs: [UUID]) -> FamilyOverview {
+        let today = "2026-11-16"
+        return FamilyOverview(
+            range: FamilyDateRange(startDate: today, endDate: today),
+            familyCreatedAt: "2026-11-01",
+            progress: FamilyProgress(total: 3, completed: 3, pending: 0, awaitingConfirmation: 0, percentage: 100),
+            members: memberIDs.map {
+                FamilyMemberProgress(
+                    memberID: $0, name: "Rafa", role: .kid,
+                    progress: FamilyProgress(total: 3, completed: 3, pending: 0, awaitingConfirmation: 0, percentage: 100)
+                )
+            }
+        )
+    }
+
+    @Test("RN60/RN61 a confirmed Parabenizar marks the member as congratulated")
+    func sentApplauseMarksMemberCongratulated() async {
+        let kid = UUID(), other = UUID()
+        let (viewModel, repository) = makeViewModel([page([])])
+        repository.setFamilyOverviewResult(.success(overview([kid, other])))
+        repository.setSendApplauseResult(.success(()))
+        await viewModel.loadInitial()
+        #expect(!viewModel.isMemberCongratulated(kid))
+
+        await viewModel.sendApplause(to: kid)
+
+        #expect(viewModel.isMemberCongratulated(kid))
+        #expect(!viewModel.isMemberCongratulated(other))
+    }
+
+    @Test("RN60/RN61 a failed Parabenizar keeps the card")
+    func failedApplauseKeepsCard() async {
+        let kid = UUID()
+        let (viewModel, repository) = makeViewModel([page([])])
+        repository.setFamilyOverviewResult(.success(overview([kid])))
+        await viewModel.loadInitial()
+
+        await viewModel.sendApplause(to: kid)
+
+        #expect(viewModel.applauseFailed)
+        #expect(!viewModel.isMemberCongratulated(kid))
+    }
+
+    @Test("RN60/RN61 the card stays hidden after a reload when the server reports sentByMe")
+    func sentByMeFromServerKeepsCardHidden() async {
+        let kid = UUID(), other = UUID()
+        let (viewModel, repository) = makeViewModel([page([]), page([])])
+        repository.setFamilyOverviewResult(.success(overview([kid, other])))
+        repository.setApplauseSummaries([
+            FamilyApplauseSummary(memberID: kid, count: 2, sentByMe: true),
+            FamilyApplauseSummary(memberID: other, count: 1, sentByMe: false),
+        ])
+
+        await viewModel.loadInitial()
+        #expect(viewModel.isMemberCongratulated(kid))
+        #expect(!viewModel.isMemberCongratulated(other), "another person's applause does not hide my card")
+
+        await viewModel.loadInitial()
+        #expect(viewModel.isMemberCongratulated(kid))
+    }
+
 }

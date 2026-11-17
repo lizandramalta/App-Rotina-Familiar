@@ -118,10 +118,7 @@ struct AssigneePickerView: View {
                     .foregroundStyle(Color.App.Text.secondary)
                     .padding(.horizontal, Self.tagHorizontalPadding)
                     .padding(.vertical, AppSpacing.xxs)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: Self.tagCornerRadius)
-                            .strokeBorder(Color.App.Border.separator, lineWidth: 1.5)
-                    )
+                    .chalkStrokeBorder(RoundedRectangle(cornerRadius: Self.tagCornerRadius), color: Color.App.Border.separator, lineWidth: 1.5)
             }
             Spacer()
             if isSelected {

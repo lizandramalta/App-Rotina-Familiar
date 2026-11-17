@@ -190,6 +190,12 @@ final class FamilyOverviewViewModel {
 
     func dismissApplauseFailure() { applauseFailed = false }
 
+    /// RN60/RN61 (SPEC-009 E-13): once this viewer's applause to `memberID` is confirmed — just sent or reported
+    /// by the server as `sentByMe` — the Administrator's incentive card leaves TEL-050, also after a reload.
+    func isMemberCongratulated(_ memberID: UUID) -> Bool {
+        sentApplauseIDs.contains(memberID) || applauseSummary[memberID]?.sentByMe == true
+    }
+
     /// Name and time zone are confirmed by the server; a failure keeps what is already shown.
     private func loadFamilyProfile(token: String) async {
         do {

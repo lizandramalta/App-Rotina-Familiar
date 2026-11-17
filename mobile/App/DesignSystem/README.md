@@ -20,8 +20,8 @@ import SwiftUI
 .background(Color.App.Background.cardHighlight)// #E9EFDC - Destaques suaves
 
 // Bordas
-.overlay(RoundedRectangle(cornerRadius: AppRadius.card).stroke(Color.App.Border.card, lineWidth: 1))
-.overlay(RoundedRectangle(cornerRadius: AppRadius.card).stroke(Color.App.Border.separator, lineWidth: 1.5))
+.chalkStrokeBorder(RoundedRectangle(cornerRadius: AppRadius.card), color: Color.App.Border.card, lineWidth: 1.5)
+.chalkStrokeBorder(RoundedRectangle(cornerRadius: AppRadius.card), color: Color.App.Border.separator, lineWidth: 1.5)
 
 // Textos
 Text("Título").foregroundStyle(Color.App.Text.primary)   // #423C1F - Texto escuro

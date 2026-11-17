@@ -140,20 +140,41 @@ struct ChalkStroke<S: Shape>: View {
     var body: some View {
         Canvas(rendersAsynchronously: false) { context, size in
             let path = shape.path(in: CGRect(origin: .zero, size: size))
-            for particle in ChalkScatter.particles(along: path, config: config) {
-                let width = config.lineWidth * particle.scale
-                let grain = Path(ellipseIn: CGRect(x: -width / 2, y: -width * 0.35, width: width, height: width * 0.7))
-                let transform = CGAffineTransform(translationX: particle.center.x, y: particle.center.y)
-                    .rotated(by: particle.rotation)
-                context.fill(grain.applying(transform), with: .color(color.opacity(particle.opacity)))
-            }
+            context.fillChalk(ChalkScatter.particles(along: path, config: config), color: color, lineWidth: config.lineWidth)
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
     }
 }
 
+extension GraphicsContext {
+    /// Draws chalk grains (small rotated ellipses) shared by every chalk stroke and ring.
+    func fillChalk(_ particles: [ChalkParticle], color: Color, lineWidth: CGFloat) {
+        for particle in particles {
+            let width = lineWidth * particle.scale
+            let grain = Path(ellipseIn: CGRect(x: -width / 2, y: -width * 0.35, width: width, height: width * 0.7))
+            let transform = CGAffineTransform(translationX: particle.center.x, y: particle.center.y)
+                .rotated(by: particle.rotation)
+            fill(grain.applying(transform), with: .color(color.opacity(particle.opacity)))
+        }
+    }
+}
+
 extension View {
+    /// Chalk replacement for `.overlay(shape.strokeBorder(color, lineWidth:))`: the stroke is inset by half its
+    /// width so it stays inside the frame. Every green border in the app goes through here (no flat outlines).
+    func chalkStrokeBorder<S: InsettableShape>(
+        _ shape: S, color: Color, lineWidth: CGFloat = 1.5, seed: UInt64 = 42
+    ) -> some View {
+        // Grains thinner than 1.5 pt disappear; hairline borders keep the minimum visible chalk size.
+        let width = max(lineWidth, 1.5)
+        return overlay(ChalkStroke(
+            shape: shape.inset(by: width / 2),
+            color: color,
+            config: ChalkStrokeConfig(lineWidth: width, seed: seed)
+        ))
+    }
+
     /// Overlays a procedural chalk stroke traced along `shape`.
     func chalkBorder<S: Shape>(_ shape: S, color: Color, lineWidth: CGFloat = 1.5, seed: UInt64 = 42) -> some View {
         overlay(ChalkStroke(shape: shape, color: color, config: ChalkStrokeConfig(lineWidth: lineWidth, seed: seed)))

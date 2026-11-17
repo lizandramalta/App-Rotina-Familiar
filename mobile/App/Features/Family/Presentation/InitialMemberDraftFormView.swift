@@ -193,6 +193,7 @@ struct InitialMemberDraftFormView: View {
                     Image(systemName: "checkmark")
                         .font(.body.weight(.semibold))
                 }
+                .tint(Color.App.Text.primary)
                 .accessibilityIdentifier("family.members.draft.save")
                 .accessibilityLabel("Salvar")
             }

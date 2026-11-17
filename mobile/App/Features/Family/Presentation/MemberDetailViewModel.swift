@@ -87,6 +87,7 @@ final class MemberDetailViewModel {
     }
 
     var isCreator: Bool { detail?.isFamilyCreator ?? false }
+    var isCurrentMember: Bool { detail?.id == session.memberID }
 
     var canManage: Bool {
         session.role == .administrator && (detail?.capabilities.manageMembers ?? false)

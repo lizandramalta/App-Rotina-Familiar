@@ -111,6 +111,7 @@ struct OwnProfileEditorView: View {
                     Image(systemName: "checkmark")
                 }
             }
+            .tint(Color.App.Text.primary)
             .disabled(!viewModel.canSave)
             .accessibilityLabel(viewModel.isSaving ? "profile.edit.saving" : "profile.edit.save")
             .accessibilityHint("profile.edit.save_hint")

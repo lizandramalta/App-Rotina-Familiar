@@ -138,6 +138,10 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
           closeAfterTaskDeletion: async () => undefined,
         },
       };
+      // RN60/RN61: without dates the overview is today (2026-10-09 in São Paulo) and includes that day's task.
+      const daily = await overview.execute(family.admin, undefined, undefined);
+      expect(daily).toMatchObject({ startDate: '2026-10-09', endDate: '2026-10-09' });
+      expect(daily.progress.total).toBe(1);
       const range = { startDate: '2026-10-07', endDate: '2026-10-10' };
       expect(
         (await overview.execute(family.admin, range.startDate, range.endDate)).progress.total,

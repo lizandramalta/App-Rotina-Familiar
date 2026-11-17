@@ -38,6 +38,7 @@ struct TimeZonePickerSheetView: View {
                         Spacer()
                         if identifier == selection {
                             Image(systemName: "checkmark")
+                                .foregroundStyle(Color.App.Text.primary)
                                 .accessibilityHidden(true)
                         }
                     }
