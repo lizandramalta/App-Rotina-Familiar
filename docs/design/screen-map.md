@@ -1,9 +1,9 @@
-# Screen map — versão 1.25
+# Screen map — versão 1.26
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do mapa:** 1.25\
-**Base funcional:** RN 1.27 / RF 1.26 / UC 1.26\
-**Data:** 2026-11-12\
+**Versão do mapa:** 1.26\
+**Base funcional:** RN 1.28 / RF 1.27 / UC 1.27\
+**Data:** 2026-11-16\
 **Situação:** referência inicial para design; organização de navegação proposta
 
 [Projeto](../../README.md) · [Índice e versões](../DOCUMENTACAO.md) · [Visão](../00-visao-do-produto.md) · [Regras](../01-regras-de-negocio.md) · [Requisitos](../02-requisitos.md) · [Casos de uso](../03-casos-de-uso.md) · [Diagrama de classes](../06-diagrama-de-classes.md)
@@ -184,9 +184,15 @@ flowchart TD
     T032 -->|Gerar convite / Admin e elegível| T034
     T032 -->|Admin e permitido| M010
     T030 -->|Deixar papel Admin / exceto Criador| M010
+    T030 -->|Excluir conta / todos| T058["TEL-058 · Excluir conta"]
+    T058 --> M015("MOD-015 · Confirmar exclusão")
+    T032 -->|Excluir conta e dados / Admin e alvo Kids| M015
+    M015 -->|Própria conta excluída| T001["TEL-001 · Entrada"]
 ```
 
-TEL-034 disponibiliza link e senha juntos para compartilhamento, a partir do detalhe do membro ou de TEL-056. Toda emissão por ação explícita, inicial ou seguinte, abre diretamente a folha nativa, sem confirmação intermediária. Uma nova emissão invalida convites anteriores não usados do mesmo perfil sem encerrar a sessão atual, que só é revogada quando o novo convite é usado. Não reutilizar credenciais consumidas. Na recuperação, parte do perfil existente, sem novo cadastro de membro. A troca de acesso ocorre por convite confirmado e validado, sem migração de histórico ou remoção automática do perfil anterior. Não há seletor livre de identidades nem modo Kids ativado pela criança. Um Administrador altera o papel Kids pelo detalhe e corrige seu nome em TEL-057 ou TEL-032, respeitando as restrições de promoção. A proteção do Criador vale também no próprio perfil; não é adicionada uma operação de saída de família sem caso de uso definido.
+TEL-030 oferece “Excluir conta” a todos os perfis. TEL-058 apresenta os efeitos por perfil: não-Criador e Kids veem o que é apagado e o que permanece como “Membro removido”; o Criador vê que a família inteira será apagada e digita o nome da família. Sem token Apple guardado, a folha nativa da Apple é solicitada antes da exclusão. MOD-015 é a confirmação final. Após a exclusão, TEL-001 mostra a confirmação; perfis que perdem o acesso por ação de outra pessoa veem em TEL-001 a mensagem neutra de acesso encerrado. Em TEL-032, “Excluir conta e dados” aparece só para Administrador com alvo Kids e retorna a TEL-050 (SPEC-022/UX-022).
+
+TEL-034 disponibiliza link e senha juntos para compartilhamento, a partir do detalhe do membro ou de TEL-056. Toda emissão por ação explícita, inicial ou seguinte, abre diretamente a folha nativa, sem confirmação intermediária. Uma nova emissão invalida convites anteriores não usados do mesmo perfil sem encerrar a sessão atual, que só é revogada quando o novo convite é usado. Não reutilizar credenciais consumidas. Na recuperação, parte do perfil existente, sem novo cadastro de membro. A troca de acesso ocorre por convite confirmado e validado, sem migração de histórico ou remoção automática do perfil anterior. Não há seletor livre de identidades nem modo Kids ativado pela criança. Um Administrador altera o papel Kids pelo detalhe e corrige seu nome em TEL-057 ou TEL-032, respeitando as restrições de promoção. A proteção do Criador vale também no próprio perfil; não é adicionada uma operação de saída de família sem caso de uso definido. A exclusão de conta (UC20) não é saída de família: para o Criador, ela exclui a família inteira.
 
 ## 5. Experiência Kids
 
@@ -252,7 +258,8 @@ A = Administrador (inclui Criador); M = Membro; K = Kids. Códigos RF e RNF são
 
 | ID | Tela e objetivo | Acesso | Conteúdo e ações principais | Rastreabilidade |
 |---|---|---|---|---|
-| TEL-001 | Entrada | Sem sessão | Entrada Apple para Criador; orientação para quem recebeu convite ou perdeu acesso | [UC04](../03-casos-de-uso.md#uc04), [UC09](../03-casos-de-uso.md#uc09); RF37, RF46 |
+| TEL-001 | Entrada | Sem sessão | Entrada Apple para Criador; orientação para quem recebeu convite ou perdeu acesso; mensagens de conta excluída e de acesso encerrado (UC20) | [UC04](../03-casos-de-uso.md#uc04), [UC09](../03-casos-de-uso.md#uc09), [UC20](../03-casos-de-uso.md#uc20); RF37, RF46, RF72–74 |
+| TEL-058 | Excluir conta | A, M, K, Criador | Efeitos da exclusão por perfil e aviso de irreversibilidade; Criador digita o nome da família; sem token Apple guardado, folha nativa da Apple; abre MOD-015 | [UC20](../03-casos-de-uso.md#uc20); RF72–73, RN69–70 |
 | TEL-002 | Criar/editar família no onboarding | Futuro Criador; no retorno de TEL-056, Criador Administrador | Informar nome e fuso inicial (padrão America/Sao_Paulo); preparar, alterar ou retirar membros antes da criação atômica. No retorno, editar família existente e membros conforme permissão, sem nova criação ou gravação sem mudanças; fuso posterior segue TEL-053/MOD-012 | [UC01](../03-casos-de-uso.md#uc01), [UC02](../03-casos-de-uso.md#uc02); RF01–03, RF38, RF40, RF67 |
 | TEL-003 | Entrar por convite | Pessoa com link | Validar convite, informar senha e acessar perfil novo ou recuperado | [UC09](../03-casos-de-uso.md#uc09); RF42–46, RF54 |
 | TEL-004 | Recuperar acesso | Sem sessão | Orientar novo convite com Administrador; retorno Apple do Criador | [UC02](../03-casos-de-uso.md#uc02), [UC09](../03-casos-de-uso.md#uc09); RF41, RF46 |
@@ -268,9 +275,9 @@ A = Administrador (inclui Criador); M = Membro; K = Kids. Códigos RF e RNF são
 | TEL-022 | Criar/editar missão | A | Título, observação opcional (≤250 car.) e tarefas individuais, com atalho para criar tarefa nova; sem prazo | [UC05](../03-casos-de-uso.md#uc05); RF28–29, RF31–32, RF50, RF58, RF71 |
 | TEL-023 | Itens de recompensa | A | Consultar predefinidos e personalizados; adicionar item com título e descrição opcional | [UC06](../03-casos-de-uso.md#uc06); RF33–34 |
 | TEL-024 | Roleta da missão | A | Sortear, ver resultado, aceitar ou sortear novamente; sair sem consumir resgate | [UC16](../03-casos-de-uso.md#uc16); RF35, RF51–53 |
-| TEL-030 | Meu perfil | A, M, K | Principal adulta; avatar/cabeçalho para Kids; foto por câmera/galeria, apelido só do titular, badges cumulativos e detalhe dos marcos; deixar papel Admin quando permitido | [UC10](../03-casos-de-uso.md#uc10), [UC02](../03-casos-de-uso.md#uc02); RF48, RF62, RF65, RF03, RF05 |
+| TEL-030 | Meu perfil | A, M, K | Principal adulta; avatar/cabeçalho para Kids; foto por câmera/galeria, apelido só do titular, badges cumulativos e detalhe dos marcos; deixar papel Admin quando permitido; entrada “Excluir conta” para todos | [UC10](../03-casos-de-uso.md#uc10), [UC02](../03-casos-de-uso.md#uc02); RF48, RF62, RF65, RF03, RF05, RF72–73 |
 | TEL-031 | Reservada — lista de membros | — | Lista e botão Adicionar membro ficam em TEL-057; ID preservado, sem destino navegável | [UC02](../03-casos-de-uso.md#uc02); RF02–06, RF40 |
-| TEL-032 | Detalhe e tarefas do membro | A, M; gestão somente A | Identificação e tarefas em Dia ou Semana visual domingo–sábado no fuso da família; lista compacta abre tarefa; blocos de convite e gestão autorizada com seleção modal de papel; Editar no topo somente para Kids visto por Administrador autorizado; voltar restaura o filtro da Família | [UC11](../03-casos-de-uso.md#uc11), [UC02](../03-casos-de-uso.md#uc02); RF60, RF66, RF03–06, RF41 |
+| TEL-032 | Detalhe e tarefas do membro | A, M; gestão somente A | Identificação e tarefas em Dia ou Semana visual domingo–sábado no fuso da família; lista compacta abre tarefa; blocos de convite e gestão autorizada com seleção modal de papel; “Excluir conta e dados” somente para Administrador com alvo Kids; Editar no topo somente para Kids visto por Administrador autorizado; voltar restaura o filtro da Família | [UC11](../03-casos-de-uso.md#uc11), [UC02](../03-casos-de-uso.md#uc02), [UC20](../03-casos-de-uso.md#uc20); RF60, RF66, RF03–06, RF41, RF74 |
 | TEL-033 | Criar membro | A, após criação da família | Nome e papel na criação, respeitando restrições; membro preparado antes da criação permanece em TEL-002 | [UC02](../03-casos-de-uso.md#uc02); RF02–06, RF40 |
 | TEL-034 | Convite do membro | A | Toda emissão explícita abre diretamente a folha nativa, sem confirmação. Link e senha são compartilhados juntos para o mesmo perfil | [UC01](../03-casos-de-uso.md#uc01), [UC02](../03-casos-de-uso.md#uc02); RF41, RF54 |
 | TEL-040 | Minhas tarefas Kids | K | Aba inicial; próprias tarefas e progresso diários. O círculo reabre tarefa própria concluída; o restante da linha abre o detalhe. Tarefa sinalizada aparece Aguardando confirmação até decisão válida | [UC11](../03-casos-de-uso.md#uc11), [UC17](../03-casos-de-uso.md#uc17); RF17, RF22, RF49, RF57 |
@@ -302,6 +309,7 @@ A = Administrador (inclui Criador); M = Membro; K = Kids. Códigos RF e RNF são
 | MOD-012 | Confirmar aplicação do fuso | TEL-053 | Informativo de efeitos; aplicar imediatamente ou próximo ciclo, confirmar/cancelar; só Admin |
 | MOD-013 | Confirmar troca de acesso | Link de convite com sessão ativa | Confirmar segue ingresso; cancelar mantém acesso. Só substituir sessão local após ingresso válido, sem remover membro anterior |
 | MOD-014 | Resolver sinalização pendente | TEL-013, ao salvar edição | Obrigatório sobre tarefa Aguardando confirmação: retornar a Pendente (descarta sinalização) ou manter Aguardando confirmação com os dados editados (UC07) |
+| MOD-015 | Confirmar exclusão de conta | TEL-058, TEL-032 | Alerta destrutivo final; variantes própria conta, Criador (família inteira) e Administrador excluindo conta Kids; cancelar não altera dados (UC20) |
 
 ## 8. Estados que o design deve contemplar
 
@@ -326,6 +334,7 @@ A = Administrador (inclui Criador); M = Membro; K = Kids. Códigos RF e RNF são
 | TEL-054 | Marco e missões contribuintes; sem acesso a configurações alheias; retorno ao perfil preservado. |
 | TEL-003/MOD-013 | Confirmação da troca, cancelamento, convite inválido e resposta perdida; não limpar a sessão anterior antes de novo ingresso válido. |
 | TEL-052 | Resultado disponível ou acesso negado; notificação externa indisponível; WhatsApp ausente permite copiar; cancelamento retorna ao resultado. Não afirmar envio ao abrir app externo. |
+| TEL-058/MOD-015 | Variantes por perfil; nome da família não coincide (botão desabilitado); folha Apple cancelada sem erro; prova Apple inválida; enviando; resposta perdida com consulta da sessão; offline; sucesso retorna a TEL-001. |
 
 Estados e permissões precisam de texto ou ícone além de cores. Aplicam-se RNF01–07, RNF11–13, RNF22–25 conforme a operação. Mensagens ao usuário explicam a ação possível; detalhes como refresh token ficam na especificação técnica.
 
@@ -341,6 +350,7 @@ Campos funcionais de data/fuso e seleção de foto estão definidos; o layout vi
 
 | Versão do mapa | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.26 | RN 1.28 / RF 1.27 / UC 1.27 | 2026-11-16 | TEL-058 e MOD-015 (novos): excluir conta a partir de TEL-030 para todos os perfis e de TEL-032 para Administrador com alvo Kids; TEL-001 com mensagens de conta excluída e acesso encerrado. Para SPEC-022. |
 | 1.25 | RN 1.27 / RF 1.26 / UC 1.26 | 2026-11-12 | TEL-032 e TEL-056 usam sempre “Gerar convite” e emitem direto, sem confirmação de reemissão; TEL-034 é a folha de compartilhamento. Para UX-004 (UX-06, UX-07), SCRUM-114. |
 | 1.24 | RN 1.26 / RF 1.25 / UC 1.25 | 2026-11-08 | Barra de abas somente nas telas principais; telas abertas por push a ocultam. Para UX-016 (UX-08). |
 | 1.23 | RN 1.26 / RF 1.25 / UC 1.25 | 2026-10-28 | TEL-032 compacta em Dia/Semana domingo–sábado, com Editar apenas para Kids em visão Admin; filtros TEL-050/TEL-011 distintos. |

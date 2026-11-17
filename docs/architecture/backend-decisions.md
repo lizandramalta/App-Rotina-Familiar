@@ -1,7 +1,7 @@
 # Decisões da arquitetura backend
 
-**Versão:** 1.8 · **Base funcional:** RN 1.27 / RF 1.26 / UC 1.26\
-**Data:** 2026-11-12 · **Situação:** decisões vigentes e contrato alvo revisado; ampliações recentes ainda não implementadas
+**Versão:** 1.9 · **Base funcional:** RN 1.28 / RF 1.27 / UC 1.27\
+**Data:** 2026-11-16 · **Situação:** decisões vigentes e contrato alvo revisado; ampliações recentes ainda não implementadas
 
 [Arquitetura](backend-architecture.md) · [Contratos](backend-contracts.md) · [Decisões mobile](mobile-decisions.md) · [Índice](../DOCUMENTACAO.md)
 
@@ -41,6 +41,7 @@ Node.js passa a ser a plataforma backend definida pelo usuário. Hospedagem, dis
 | BA-37 | Proposta técnica para SPEC-009 | `GetOwnTasks` devolve `status` canônico e `displayStatus` calculado para o ator. Apenas a lista pessoal adulta projeta `awaitingConfirmation` como `pending`; decisões, autorização, fila e progresso permanecem ligados ao estado canônico. Não há coluna de estado visual. |
 | BA-38 | Implementada para SPEC-009 CA-14/15 | Cada toque em Parabenizar grava um evento `family_applause` e uma intenção por dispositivo ativo no mesmo commit. Mensagem interna é consultada por destinatário e agrupada por intervalo; o X marca os eventos do grupo como ocultos. Worker envia via HTTP/2 ao APNs com JWT ES256, distingue aceitação de entrega, retenta falhas transitórias e revoga token após `410`. Sem configuração APNs, a mensagem interna continua disponível e a fila aguarda. |
 | BA-39 | Implementada para SPEC-020 CA-01–06 | `FinalizeWeeklyHighlight` reutiliza o calendário sob lock familiar e grava snapshot/resultados/outbox no mesmo commit; unicidade por ciclo e reconhecido. Worker varre no início e a cada minuto, usando relógio PostgreSQL, claims UUID, leases de 5 minutos para apuração e 1 minuto para push, com atualização condicionada ao claim. Limites de tentativas configuráveis (10/5), atraso exponencial com variação e estado de falha recuperável. Sem aparelho autorizado, a intenção aguarda 15 minutos sem consumir tentativa. O APNs ocorre fora da transação; consulta/primeira abertura são exclusivas do titular. Mudança efetiva de fuso finaliza vencidos antes de modificar o ciclo aberto. |
+| BA-40 | Proposta técnica para SPEC-022 | `SignInWithApple` passa a guardar o refresh token devolvido pela troca do `authorizationCode`, cifrado com o AES-256-GCM já usado para o identificador Apple (`crypto-token-service.ts`); a chave deriva do segredo de sessão, portanto trocar esse segredo exige plano de recifragem ou nova autenticação. Sem `refresh_token` na resposta da Apple, o valor anterior é mantido; a limpeza de onboarding apaga o token de identidade que continua sem família após a expiração do grant (SPEC-001 Fase 4). `DeleteOwnAccount`/`DeleteKidsAccount` executam em uma transação curta sob lock familiar: não-Criador recebe `excluido_em`, anonimização, revogação de sessões/tokens/push/convites e mídias em `DELETING`; o Criador apaga fisicamente a família e a identidade Apple, gravando antes as chaves R2 e o token cifrado em filas persistentes. Sem token guardado, a prova Apple é trocada antes da transação. Após o commit, uma tentativa imediata de `auth/revoke` e, em falha, jobs com claim, tentativas configuráveis e atraso crescente, no padrão de BA-39; o token e a chave são apagados ao concluir ou esgotar. Nenhuma chamada externa ocorre dentro da transação. |
 
 ## 3. Alternativas consideradas
 
@@ -112,6 +113,7 @@ Sequência sugerida: composição e persistência → Apple/bootstrap/sessões/c
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.9 | 2026-11-16 | BA-40 (proposta): guarda cifrada do refresh token Apple, exclusão de conta transacional e filas pós-commit de revogação Apple e limpeza R2 (SPEC-022). |
 | 1.8 | 2026-11-12 | BA-09 e motivo de BA-26: Convite: emissão sempre direta, invalida convites anteriores disponíveis e preserva a sessão; o ingresso pelo novo convite revoga a sessão anterior do perfil, com tokens e push (SCRUM-114; SPEC-004 E-05). |
 | 1.7 | 2026-11-05 | BA-39 registra persistência, claims recuperáveis e operação do reconhecimento semanal (SCRUM-102). |
 | 1.6 | 2026-10-27 | BA-38: parabéns persistido antes do push, fila por dispositivo de sessão ativa, mensagem interna e tratamento de falhas APNs. |

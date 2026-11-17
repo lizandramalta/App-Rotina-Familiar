@@ -1,13 +1,13 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.26\
-**Data:** 2026-11-12\
+**Versão:** 1.27\
+**Data:** 2026-11-16\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
 
-Os 19 casos de uso abaixo descrevem os fluxos vigentes. As referências de regras são derivadas dos RF associados; os RNFs indicam as condições de qualidade aplicáveis.
+Os 20 casos de uso abaixo descrevem os fluxos vigentes. As referências de regras são derivadas dos RF associados; os RNFs indicam as condições de qualidade aplicáveis.
 
 [Consultar os diagramas UML](04-diagramas-de-caso-de-uso.md) — visão geral e quatro recortes por área.
 
@@ -16,7 +16,7 @@ Os 19 casos de uso abaixo descrevem os fluxos vigentes. As referências de regra
 | Ator | Definição |
 |---|---|
 | Administrador | Gerencia membros, missões e recompensas; valida sinalizações Kids e executa as ações adultas de tarefas. |
-| Criador da Família | Administrador com identificação especial, autenticação Apple e proteção contra remoção, rebaixamento e saída; não é um quarto perfil. |
+| Criador da Família | Administrador com identificação especial, autenticação Apple e proteção contra remoção, rebaixamento e saída, exceto pela exclusão da própria conta, que exclui a família; não é um quarto perfil. |
 | Membro | Perfil adulto com acesso às operações de tarefas, ao próprio perfil, à carga diária ou semanal e ao acompanhamento de missões. |
 | Kids | Consulta tarefas e progresso diário/semanal, sinaliza com câmera opcional, edita foto/apelido próprios, consulta badges e recebe seu reconhecimento semanal. |
 | Pessoa convidada | Pessoa que ainda irá efetivar o vínculo ao perfil previamente criado usando link e senha. |
@@ -26,16 +26,16 @@ Os 19 casos de uso abaixo descrevem os fluxos vigentes. As referências de regra
 
 ## Condições comuns
 
-Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário deve possuir sessão válida associada a um perfil ativo da família. As permissões são verificadas em cada operação. A remoção do perfil revoga o acesso, mesmo por sessão anteriormente aberta. Falhas de gravação são informadas sem apresentar a operação como concluída.
+Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário deve possuir sessão válida associada a um perfil ativo da família. As permissões são verificadas em cada operação. A remoção do perfil ou a exclusão da conta revoga o acesso, mesmo por sessão anteriormente aberta. Falhas de gravação são informadas sem apresentar a operação como concluída.
 
 ## Rastreabilidade dos casos de uso
 
 | Caso de uso | Objetivo | Requisitos funcionais |
 |---|---|---|
 | [UC01](#uc01) | Gerenciar família | [RF01](02-requisitos.md#rf01), [RF02](02-requisitos.md#rf02), [RF38](02-requisitos.md#rf38), [RF39](02-requisitos.md#rf39), [RF40](02-requisitos.md#rf40), [RF41](02-requisitos.md#rf41), [RF48](02-requisitos.md#rf48), [RF67](02-requisitos.md#rf67) |
-| [UC02](#uc02) | Gerenciar membros | [RF02](02-requisitos.md#rf02), [RF03](02-requisitos.md#rf03), [RF04](02-requisitos.md#rf04), [RF05](02-requisitos.md#rf05), [RF06](02-requisitos.md#rf06), [RF40](02-requisitos.md#rf40), [RF41](02-requisitos.md#rf41), [RF54](02-requisitos.md#rf54) |
+| [UC02](#uc02) | Gerenciar membros | [RF02](02-requisitos.md#rf02), [RF03](02-requisitos.md#rf03), [RF04](02-requisitos.md#rf04), [RF05](02-requisitos.md#rf05), [RF06](02-requisitos.md#rf06), [RF40](02-requisitos.md#rf40), [RF41](02-requisitos.md#rf41), [RF54](02-requisitos.md#rf54), [RF74](02-requisitos.md#rf74) |
 | [UC03](#uc03) | Validar conclusão de tarefa Kids | [RF25](02-requisitos.md#rf25), [RF26](02-requisitos.md#rf26), [RF55](02-requisitos.md#rf55), [RF56](02-requisitos.md#rf56) |
-| [UC04](#uc04) | Autenticar com Apple | [RF37](02-requisitos.md#rf37), [RF39](02-requisitos.md#rf39) |
+| [UC04](#uc04) | Autenticar com Apple | [RF37](02-requisitos.md#rf37), [RF39](02-requisitos.md#rf39), [RF73](02-requisitos.md#rf73) |
 | [UC05](#uc05) | Gerenciar missões | [RF28](02-requisitos.md#rf28), [RF29](02-requisitos.md#rf29), [RF31](02-requisitos.md#rf31), [RF32](02-requisitos.md#rf32), [RF50](02-requisitos.md#rf50), [RF58](02-requisitos.md#rf58) |
 | [UC06](#uc06) | Gerenciar itens de recompensas coletivas | [RF33](02-requisitos.md#rf33), [RF34](02-requisitos.md#rf34) |
 | [UC07](#uc07) | Gerenciar tarefas | [RF07](02-requisitos.md#rf07), [RF08](02-requisitos.md#rf08), [RF09](02-requisitos.md#rf09), [RF10](02-requisitos.md#rf10), [RF15](02-requisitos.md#rf15), [RF16](02-requisitos.md#rf16), [RF27](02-requisitos.md#rf27), [RF58](02-requisitos.md#rf58), [RF59](02-requisitos.md#rf59) |
@@ -51,6 +51,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 | [UC17](#uc17) | Retornar tarefa concluída para Pendente | [RF57](02-requisitos.md#rf57), [RF58](02-requisitos.md#rf58), [RF59](02-requisitos.md#rf59) |
 | [UC18](#uc18) | Gerar relatório semanal em PDF | [RF61](02-requisitos.md#rf61) |
 | [UC19](#uc19) | Apurar e compartilhar destaque semanal | [RF63](02-requisitos.md#rf63), [RF64](02-requisitos.md#rf64) |
+| [UC20](#uc20) | Excluir conta | [RF72](02-requisitos.md#rf72), [RF73](02-requisitos.md#rf73), [RF74](02-requisitos.md#rf74) |
 
 ## UC01
 
@@ -138,7 +139,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 - Pode rebaixar outro Administrador, exceto o Criador. Um Administrador também pode deixar seu próprio papel, exceto o Criador.
 - Pode ativar ou desativar o Modo Kids; um Administrador não pode permanecer nesse modo.
 - Ao remover um membro, o sistema revoga seu acesso à família, inclusive pelas sessões existentes; somente ele é retirado das tarefas futuras não concluídas/não protegidas, preservando os demais responsáveis e o histórico.
-- O sistema impede remoção, rebaixamento e saída do Criador.
+- O sistema impede remoção, rebaixamento e saída do Criador. A exclusão da própria conta pelo Criador, que exclui a família, segue [UC20](03-casos-de-uso.md#uc20).
+- O Administrador pode excluir a conta de um perfil Kids pelo detalhe do membro, com os efeitos de [UC20](03-casos-de-uso.md#uc20); contas de adultos só são excluídas pelo próprio titular.
 
 **Pós-condição:** a alteração autorizada está salva. Um perfil removido não pode mais consultar nem alterar os dados da família.
 
@@ -191,8 +193,8 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 
 **Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Acesso, família e perfis](04-diagramas-de-caso-de-uso.md#02-acesso-familia-perfis)
 
-**Requisitos funcionais:** [RF37](02-requisitos.md#rf37), [RF39](02-requisitos.md#rf39)  
-**Regras relacionadas:** [RN44](01-regras-de-negocio.md#rn44)  
+**Requisitos funcionais:** [RF37](02-requisitos.md#rf37), [RF39](02-requisitos.md#rf39), [RF73](02-requisitos.md#rf73)  
+**Regras relacionadas:** [RN44](01-regras-de-negocio.md#rn44), [RN70](01-regras-de-negocio.md#rn70)  
 **Requisitos não funcionais:** [RNF01](02-requisitos.md#rnf01), [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF08](02-requisitos.md#rnf08), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF14](02-requisitos.md#rnf14), [RNF15](02-requisitos.md#rnf15), [RNF16](02-requisitos.md#rnf16)
 
 **Objetivo:** autenticar o Criador e reconhecer sua associação à família.
@@ -209,13 +211,15 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 1. O usuário seleciona entrar com Apple.
 2. O sistema inicia a integração oficial de autenticação.
 3. O usuário conclui a autenticação junto à Apple.
-4. O sistema valida o retorno e identifica o usuário.
+4. O sistema valida o retorno, identifica o usuário e guarda de forma protegida o refresh token devolvido pela Apple, substituindo o anterior.
 5. Havendo família vinculada, o sistema concede acesso e redireciona para ela.
 
 **Alternativas e exceções:**
 
 - Sem família vinculada, o sistema disponibiliza o onboarding de perfil e família pelo [UC01](03-casos-de-uso.md#uc01).
 - Cancelamento ou falha de autenticação não concede acesso.
+- Na exclusão da conta do Criador sem token guardado, [UC20](03-casos-de-uso.md#uc20) solicita esta mesma autenticação apenas como prova para a exclusão e revogação, sem abrir nova sessão.
+- Depois da exclusão da família, a mesma Apple ID é tratada como identidade sem família.
 - Os demais perfis ingressam por convite e senha, conforme [UC09](03-casos-de-uso.md#uc09).
 
 **Pós-condição:** o Criador está autenticado e acessa sua família ou pode criá-la.
@@ -461,6 +465,7 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 - Sem foto, apresentar identificação padrão. Falha de upload mantém a foto anterior e oferece nova tentativa; cancelar não salva.
 - Cada missão encerrada com participação creditada conta uma vez para os marcos cumulativos bronze 5, prata 10, ouro 25 e diamante 50. Selecionar um marco conquistado abre [TEL-054](design/screen-map.md#tel-054); marcos pendentes apenas exibem a meta correspondente e não são selecionáveis. TEL-054 mostra as missões contribuintes e permite abrir TEL-021; voltar restaura a origem. Sem badges, mostrar total e próximo marco, sem simular conquista. Não há concessão retroativa.
 - Dados inválidos exigem correção; alterações de permissões são impedidas. Kids não podem ativar/desativar seu modo nem editar o nome por este fluxo.
+- Meu perfil oferece a todos os perfis a entrada para excluir a própria conta, conduzida por [UC20](03-casos-de-uso.md#uc20).
 
 **Pós-condição:** os dados permitidos estão atualizados, sem alteração indevida de permissões.
 
@@ -841,10 +846,67 @@ Sem tarefas no período, o sistema informa essa condição sem divisão por zero
 
 **Pós-condição:** resultado semanal registrado e acessível ao reconhecido; compartilhamento é opcional e o envio é controlado pelo usuário no aplicativo externo.
 
+## UC20
+
+**Modelo de classes:** [Tipos e rastreabilidade de UC20](06-diagrama-de-classes.md#rastreio-uc20).
+
+**Backend:** [Contratos e garantias de UC20](architecture/backend-contracts.md#backend-uc20).
+
+**Nome:** Excluir conta
+
+**Diagramas:** [Visão geral do sistema](04-diagramas-de-caso-de-uso.md#01-visao-geral) · [Acesso, família e perfis](04-diagramas-de-caso-de-uso.md#02-acesso-familia-perfis)
+
+**Requisitos funcionais:** [RF72](02-requisitos.md#rf72), [RF73](02-requisitos.md#rf73), [RF74](02-requisitos.md#rf74)  
+**Regras relacionadas:** [RN05](01-regras-de-negocio.md#rn05), [RN07](01-regras-de-negocio.md#rn07), [RN10](01-regras-de-negocio.md#rn10), [RN44](01-regras-de-negocio.md#rn44), [RN47](01-regras-de-negocio.md#rn47), [RN69](01-regras-de-negocio.md#rn69), [RN70](01-regras-de-negocio.md#rn70)  
+**Requisitos não funcionais:** RNF01, RNF05–08, RNF12–16, RNF22, RNF24, RNF28.
+
+**Objetivo:** excluir a própria conta, ou a conta de um perfil Kids pelo Administrador, apagando dados pessoais de forma imediata e irreversível; no caso do Criador, excluir a família inteira.
+
+**Atores:** Administrador, Membro, Kids e Criador da Família; Serviço Apple na exclusão da conta do Criador.
+
+**Pré-condição:** perfil ativo com sessão válida.
+
+**Fluxo principal (perfil não-Criador):**
+
+1. O titular abre Meu perfil e seleciona excluir a conta.
+2. O sistema apresenta o que será apagado (nome, apelido, foto e acesso) e o que permanece na família (histórico como “Membro removido”), informando que a ação é irreversível.
+3. O titular confirma a exclusão.
+4. O sistema revoga sessões, push e convites disponíveis, retira o perfil das tarefas futuras não concluídas e não protegidas, apaga nome, apelido e foto e preserva o histórico sem dados pessoais, no mesmo commit.
+5. O sistema apaga, após o commit, os arquivos de foto de perfil e de sinalização do titular.
+6. O aplicativo apaga as credenciais locais e retorna à entrada com a confirmação da exclusão.
+
+**Variação — Criador:**
+
+1. O Criador seleciona excluir a conta; o sistema informa que a família inteira será apagada e que todos perderão o acesso.
+2. O Criador digita o nome da família e confirma.
+3. O sistema usa o refresh token Apple guardado; sem token guardado, solicita autenticação Apple do próprio Criador como prova ([UC04](03-casos-de-uso.md#uc04)).
+4. O sistema apaga a família, todos os perfis, dados, sessões e a identidade Apple no mesmo commit e registra os arquivos para limpeza.
+5. Após o commit, o sistema revoga o token na Apple e apaga os arquivos.
+6. O aplicativo retorna à entrada com a confirmação da exclusão.
+
+**Variação — Administrador exclui conta Kids:**
+
+1. O Administrador abre o detalhe de um perfil Kids e seleciona excluir a conta e os dados.
+2. O sistema informa os efeitos e solicita confirmação.
+3. O sistema aplica os efeitos do fluxo principal ao perfil Kids e retorna à Família.
+
+**Alternativas e exceções:**
+
+- Cancelar em qualquer etapa não altera dados.
+- Prova Apple ausente, inválida ou de outra identidade impede a exclusão da família sem alterar dados.
+- Falha da revogação na Apple é repetida por fila persistente e não desfaz a exclusão.
+- Resposta perdida: o aplicativo consulta a sessão; sessão inválida indica exclusão concluída e sessão válida permite nova tentativa explícita.
+- Membro ou Kids não excluem a conta de outros perfis; Administrador não exclui a conta de outro adulto.
+- Perfil de outra família, removido ou já excluído é tratado como inexistente.
+- Perfis que perdem o acesso por exclusão feita por outra pessoa veem mensagem neutra de acesso encerrado ao retornar ao aplicativo, sem notificação.
+
+**Pós-condição:** a conta excluída não tem acesso nem dados pessoais; o histórico de perfil não-Criador permanece como “Membro removido”. Na exclusão do Criador, a família e a identidade Apple deixam de existir e a mesma Apple ID pode iniciar nova família.
+
 ## Histórico de versões
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.27 | 2026-11-16 | UC20 (novo): excluir conta, com variações do Criador (exclui a família e revoga o token Apple) e do Administrador para conta Kids. UC02, UC04 e UC10 ajustados. Para SPEC-022. |
 | 1.26 | 2026-11-12 | UC01/UC02/UC09: emissão de convite sempre direta; nova emissão invalida convites não usados e preserva a sessão, revogada no ingresso pelo novo convite (SCRUM-114). |
 | 1.25 | 2026-10-28 | UC02/UC11: TEL-032 usa Dia/Semana domingo–sábado e permite editar nome Kids ao Administrador; Parabenizar fica na Família. |
 | 1.24 | 2026-10-28 | UC02/UC10/UC11: adulto edita o próprio nome; Administrador corrige nome de Kids em TEL-057. TEL-032 mantém papel, convite e remoção. |

@@ -1,10 +1,10 @@
-# User flows — versão 1.26
+# User flows — versão 1.27
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão dos fluxos:** 1.26\
-**Base funcional:** RN 1.27 / RF 1.26 / UC 1.26\
-**Screen map:** 1.25 — revisão de 2026-11-12\
-**Data:** 2026-11-12\
+**Versão dos fluxos:** 1.27\
+**Base funcional:** RN 1.28 / RF 1.27 / UC 1.27\
+**Screen map:** 1.26 — revisão de 2026-11-16\
+**Data:** 2026-11-16\
 **Situação:** referência de navegação aprovada
 
 [Projeto](../../README.md) · [Índice documental](../DOCUMENTACAO.md) · [Screen map](screen-map.md) · [Regras](../01-regras-de-negocio.md) · [Requisitos](../02-requisitos.md) · [Casos de uso](../03-casos-de-uso.md) · [Diagrama de classes](../06-diagrama-de-classes.md)
@@ -601,6 +601,42 @@ flowchart TD
 
 Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imediata afeta limites do ciclo aberto; programada mantém o atual até encerrar. Mostrar data de vigência, fuso e identificação de período de transição, sem deslocar datas civis das tarefas. Apurações finalizadas não mudam; ciclos não podem sobrepor-se ou deixar lacunas. Falha não é mostrada como alteração salva.
 
+<a id="uf-17"></a>
+
+## UF-17 — Excluir conta
+
+**Objetivo:** excluir a própria conta, ou a conta de um Kids pelo Administrador, de forma imediata e irreversível.\
+**Entrada:** Meu perfil (TEL-030) → Excluir conta, para todos os perfis; detalhe do membro (TEL-032) → Excluir conta e dados, somente Administrador com alvo Kids.\
+**Referências:** [UC20](../03-casos-de-uso.md#uc20); RF72–74; RN69/RN70; SPEC-022/UX-022.
+
+```mermaid
+flowchart TD
+    A["TEL-030 · Meu perfil"] -->|Excluir conta| B{"Criador?"}
+    B -->|Não| C["TEL-058 · Efeitos: apagado e mantido como Membro removido"]
+    B -->|Sim| D["TEL-058 · Família inteira será apagada; digitar nome da família"]
+    C --> E["MOD-015 · Confirmar exclusão"]
+    D --> E
+    E -->|Cancelar| C
+    E -->|Confirmar| F["Enviar exclusão"]
+    F --> G{"Resultado"}
+    G -->|Prova Apple exigida| H["Folha Sign in with Apple"]
+    H -->|Cancelar| D
+    H -->|Autenticado| F
+    G -->|Confirmada| I["Apagar credenciais locais"]
+    I --> J["TEL-001 · Sua conta foi excluída"]
+    G -->|Falha com estado conhecido| K["Informar falha / nova tentativa"]
+    G -->|Resposta perdida| L["Consultar sessão"]
+    L -->|Sessão inválida| I
+    L -->|Sessão válida| K
+    K --> C
+    M["TEL-032 · Detalhe Kids / Admin"] -->|Excluir conta e dados| N["MOD-015 · Variante Admin"]
+    N -->|Confirmar com sucesso| O["TEL-050 · Família sem o Kids"]
+    N -->|Cancelar| M
+    P["Outro aparelho afetado"] -->|Renovação recusada| Q["TEL-001 · Acesso encerrado"]
+```
+
+A exclusão não tem desfazer. O perfil não-Criador continua no histórico como “Membro removido”, sem nome, apelido ou foto; a exclusão do Criador apaga a família inteira e a mesma Apple ID pode criar uma nova família. O nome digitado pelo Criador é verificado somente no aplicativo. Sem token Apple guardado, a folha da Apple serve apenas como prova para excluir e revogar, sem abrir nova sessão. Quem perde o acesso por ação de outra pessoa não recebe notificação: ao voltar ao aplicativo vê a mensagem neutra de acesso encerrado.
+
 ## Critérios de revisão
 
 - Cada fluxo pode ser percorrido desde sua entrada até resultado, cancelamento ou impedimento explicado.
@@ -608,12 +644,13 @@ Padrão inicial é `America/Sao_Paulo`, selecionável em TEL-002. Mudança imedi
 - As quatro telas principais adultas são entradas independentes; Minhas tarefas continua como inicial.
 - Fluxos Kids não concedem carga, relatório familiar, gestão ou conclusão direta. Perfil próprio e reconhecimento recebido são permitidos.
 - Toda alteração só é apresentada como concluída após confirmação da gravação.
-- TEL/MOD preservam o screen map 1.14; UF-01–UF-16 cobrem UC01–UC19, incluindo TEL-051/052/053/054/055/056 e MOD-012/013.
+- TEL/MOD preservam o screen map 1.14; UF-01–UF-17 cobrem UC01–UC20, incluindo TEL-051/052/053/054/055/056/058 e MOD-012/013/015.
 
 ## Histórico
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.27 | RN 1.28 / RF 1.27 / UC 1.27 | 1.26 | 2026-11-16 | UF-17 (novo): excluir conta por TEL-030 para todos os perfis e por TEL-032 para Administrador com alvo Kids; variante do Criador com nome da família e folha Apple de reserva; mensagem neutra de acesso encerrado. Para SPEC-022/UX-022. |
 | 1.26 | RN 1.27 / RF 1.26 / UC 1.26 | 1.25 | 2026-11-12 | UF-01/UF-02/UF-03/UF-04: emissão de convite sempre direta, sem confirmação de reemissão; ingresso revoga a sessão anterior do perfil. Para SPEC-004 E-05 e UX-004 UX-07, SCRUM-114. |
 | 1.25 | RN 1.26 / RF 1.25 / UC 1.25 | 1.24 | 2026-11-08 | UF-15: janela do acesso interno em Minhas tarefas, mensagem vazia e confirmação de cópia. Para UX-020 (UX-01 a UX-04), SCRUM-103. |
 | 1.24 | RN 1.26 / RF 1.25 / UC 1.25 | 1.23 | 2026-10-28 | UF-04: TEL-032 compacta em Dia/Semana domingo–sábado, Parabenizar apenas na Família; filtros TEL-050 e TEL-011 distintos. |

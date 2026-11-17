@@ -1,8 +1,8 @@
 # Modelo de dados (DER)
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do modelo:** 1.11 · **Base funcional:** RN 1.27 / RF 1.26 / UC 1.26\
-**Data:** 2026-11-12\
+**Versão do modelo:** 1.12 · **Base funcional:** RN 1.28 / RF 1.27 / UC 1.27\
+**Data:** 2026-11-16\
 **Situação:** modelo alvo atualizado; a preparação de mídia anterior à família ainda exige migração
 
 [Projeto](../README.md) · [Índice](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Classes](06-diagrama-de-classes.md#classe-familytask) · [Arquitetura mobile](architecture/mobile-architecture.md)
@@ -15,7 +15,8 @@ Backend único com PostgreSQL no Supabase. Fotos ficam no R2; o banco armazena a
 - Datas previstas/início são datas civis livres, inclusive antes da criação da família; datas de evento/conclusão são instantes UTC. O carrossel limita consulta, não persistência de datas.
 - Carga e progresso são projeções derivadas do estado/crédito vigente. Destaque final é snapshot imutável; badges e participações são concessões persistidas.
 - Edições usam última gravação válida, sem precondição de versão do cliente. Transações e unicidade preservam invariantes. Não há tabela geral de idempotência; recuperação de ingresso é um protocolo específico e restrito.
-- FKs compostas por família isolam relações. Sem exclusão em cascata que apague histórico ou conquistas. Omissões de índices físicos não dispensam as restrições abaixo.
+- FKs compostas por família isolam relações. Sem exclusão em cascata que apague histórico ou conquistas. Omissões de índices físicos não dispensam as restrições abaixo. A única exceção é a exclusão da conta do Criador (RN70), que apaga fisicamente a família, todos os seus registros e a identidade Apple em um commit.
+- Exclusão de conta de perfil não-Criador (RN69) mantém a linha de `MEMBRO` como referência histórica anonimizada: `excluido_em` preenchido, sem nome, apelido ou foto. Créditos, participações, badges, destaques e parabéns continuam apontando para essa linha e são apresentados como “Membro removido”.
 - Foto enviada antes da família é preparação vinculada ao grant, sem `familia_id` ou `titular_id`. Quando a criação confirma, a referência passa a `MIDIA` com família e Criador no mesmo commit; o objeto privado no R2 não precisa ser copiado.
 - `displayStatus` da lista pessoal é calculado a partir do estado efetivo e do perfil do ator. Não há coluna, tabela ou transição de domínio adicional para esse rótulo.
 - Cada toque em Parabenizar gera `PARABENS`, preservado mesmo após reabertura de tarefa ou fechamento da mensagem. `FILA_PARABENS_PUSH` registra intenção por dispositivo ativo no mesmo commit. `oculto_em` é por evento do destinatário; a interface agrupa eventos visíveis do mesmo intervalo.
@@ -106,12 +107,14 @@ erDiagram
         boolean is_family_creator
         uuid identidade_criador_id FK, UK "somente Criador"
         timestamptz removido_em
+        timestamptz excluido_em "exclusao de conta; dados pessoais apagados"
         timestamptz criado_em
     }
     IDENTIDADE_CRIADOR {
         uuid id PK
         char apple_subject_hash UK
         bytea apple_subject_protegido
+        bytea apple_refresh_token_protegido "para revogacao na exclusao"
         timestamptz criada_em
     }
     GRANT_CRIACAO {
@@ -345,6 +348,8 @@ erDiagram
 |---|---|
 | Um Criador por família, sempre Administrador; membro pertence a uma família. Troca de acesso não transfere nem remove perfil anterior | RN01, RN05, RN09, RF68 |
 | Uma sessão ativa por perfil, comprovada pela instalação; checar revogação em toda operação. Refresh sem vencimento temporal | RN47, RNF22 |
+| Exclusão de conta não-Criador: no mesmo commit, `excluido_em`, nome/apelido/foto apagados, sessões/tokens/push/convites revogados, responsabilidades futuras elegíveis ajustadas e mídias do titular em `DELETING`; objetos R2 apagados após o commit. Perfil excluído não recebe convite, responsabilidade, parabéns ou destaque novo | RN10, RN69, RNF24, RNF28 |
+| Exclusão da conta do Criador: família, perfis, dados familiares e `IDENTIDADE_CRIADOR` apagados fisicamente no mesmo commit; chaves R2 e refresh token Apple protegido gravados antes em filas persistentes de limpeza e revogação, apagados ao concluir ou esgotar tentativas | RN44, RN70, RNF28 |
 | `GRANT_CRIACAO` não é membro/sessão: mídia de onboarding pertence a um grant e à prova da instalação, sem chave de família. Só a criação confirmada pode convertê-la em foto do próprio Criador | RN01, RN63, RF01/48, RNF06/07/24 |
 | Família, Criador, membros iniciais, ciclo, sessão e vínculo opcional da foto confirmam juntos. `MEMBRO` mantém uma linha por pessoa; não há tabela de rascunho de membros antes do commit | RN01, RN07, RF01/02/40 |
 | Emitir/reenviar convite invalida convites anteriores disponíveis antes de disponibilizar nova credencial, sem revogar a sessão ativa; o ingresso pelo novo convite revoga a sessão anterior do perfil, seus tokens e push; sem prazo temporal de convite | RN46/RN47, RF41/54 |
@@ -389,7 +394,8 @@ A [arquitetura backend](architecture/backend-architecture.md) complementa este m
 
 | Estrutura técnica | Dados e invariantes |
 |---|---|
-| `creator_identities` / `family_creation_grants` | Identidade Apple verificada antes de existir família; grant restrito, temporário, com hash e vínculo à instalação. No máximo um membro Criador por identidade; grant não é convite/sessão de membro |
+| `creator_identities` / `family_creation_grants` | Identidade Apple verificada antes de existir família; grant restrito, temporário, com hash e vínculo à instalação. No máximo um membro Criador por identidade; grant não é convite/sessão de membro. Guarda o refresh token Apple cifrado (substituído a cada login; mantido quando a Apple não devolve novo) para revogação na exclusão; apagado pela limpeza de onboarding quando a identidade continua sem família após a expiração do grant; apagada com a família (SPEC-001 Fase 4, SPEC-022) |
+| `apple_token_revocations` / `media_object_deletions` (a criar) | Filas persistentes pós-commit da exclusão de conta: token Apple cifrado ou chave de objeto R2, tentativas, próxima tentativa e erro sanitizado; registro apagado ao concluir ou esgotar tentativas (BA-40) |
 | `onboarding_media` (a migrar) | Reserva separada por grant com ID, chave privada de objeto, finalidade única `PROFILE_PHOTO`, estado e metadados. FK em `family_creation_grants(id)` com índice próprio; índice de estado/data para limpeza. A exclusão do grant não pode descartar a única referência a um objeto R2 ainda existente: a limpeza da mídia precede a remoção do registro. O grant/prova autorizam upload, mas não leitura familiar. No commit da criação, bloquear grant e reserva, exigir `READY`, inserir `media_assets` com o mesmo ID/chave e titular Criador e remover a reserva; sem chamada ao R2 dentro da transação. Reservas não vinculadas são limpas após 24 horas com revalidação de estado sob lock. |
 | `session_access_tokens` | Um hash por access token/validade; vários tokens de 15 minutos podem coexistir sob a mesma sessão. Revogar sessão invalida todos, sem criar múltiplos aparelhos |
 | `invite_join_recoveries` | Tentativa e verificadores originais, sessão criada, envelope autenticado criptografado, expiração em dez minutos. Chave fora do banco; nenhuma senha de convite armazenada em claro |
@@ -407,6 +413,7 @@ A versão 1.1 representava somente um access token na sessão. A versão 1.2 sep
 
 | Versão | Base | Data | Alteração |
 |---|---|---|---|
+| 1.12 | RN 1.28 / RF 1.27 / UC 1.27 | 2026-11-16 | Exclusão de conta (SPEC-022): `MEMBRO.excluido_em` com anonimização; refresh token Apple protegido em `IDENTIDADE_CRIADOR`; exceção à regra de não cascata somente para a exclusão da família pelo Criador; filas de revogação Apple e limpeza R2. |
 | 1.11 | RN 1.27 / RF 1.26 / UC 1.26 | 2026-11-12 | Convite: emissão sempre direta, invalida convites anteriores disponíveis e preserva a sessão; o ingresso pelo novo convite revoga a sessão anterior do perfil, com tokens e push (SCRUM-114; SPEC-004 E-05). |
 | 1.10 | RN 1.23 / RF 1.22 / UC 1.22 | 2026-10-27 | Parabéns persistido por envio e fila de push por dispositivo; ocultação da mensagem preserva eventos. |
 | 1.9 | RN 1.18 / RF 1.17 / UC 1.16 | 2026-10-19 | Preparação de mídia ligada ao grant antes da família, criação conjunta de membros sem tabela de rascunho e `displayStatus` somente como projeção; migração futura explicitada. |

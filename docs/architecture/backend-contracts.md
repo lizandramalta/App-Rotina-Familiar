@@ -1,7 +1,7 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.29 · **Base funcional:** RN 1.27 / RF 1.26 / UC 1.26 · **Arquitetura backend:** 1.6\
-**Data:** 2026-11-12\
+**Versão:** 1.30 · **Base funcional:** RN 1.28 / RF 1.27 / UC 1.27 · **Arquitetura backend:** 1.6\
+**Data:** 2026-11-16\
 **Situação:** contratos da aba Família, gestão de membros, sinalização/decisão Kids e snapshot semanal materializados na API; demais contratos alvo seguem por fases
 
 [Arquitetura](backend-architecture.md) · [Decisões](backend-decisions.md) · [Catálogo mobile](mobile-feature-catalog.md) · [UC](../03-casos-de-uso.md) · [Índice](../DOCUMENTACAO.md)
@@ -42,7 +42,7 @@ Rotas públicas não autorizam leitura geral do perfil; respostas de inspeção 
 
 | Método e caminho | Caso de uso de aplicação | Entrada / resultado | Acesso |
 |---|---|---|---|
-| `POST /access/apple` | `SignInWithApple` | Prova Apple, contexto da tentativa e instalação → sessão do Criador ou `creationGrant` | Prova Apple válida |
+| `POST /access/apple` | `SignInWithApple` | Prova Apple, contexto da tentativa e instalação → sessão do Criador ou `creationGrant`; guarda cifrado o refresh token Apple da troca do código, substituindo o anterior; identidade sem família após a expiração do grant tem o token apagado pela limpeza de onboarding (SPEC-001 Fase 4) | Prova Apple válida |
 | `POST /families` | `CreateFamily` | `creationGrant`, `creatorName`, `creatorNickname` opcional, `name`, `timeZoneId` opcional (padrão `America/Sao_Paulo`), `initialMembers` opcional e `creatorPhotoMediaId` opcional; prova da instalação no header → família, Criador, membros iniciais, ciclo semanal inicial e sessão | Grant restrito à criação |
 | `POST /access/invites/inspect` | `InspectInvite` | Token → disponibilidade e contexto mínimo para ingresso, sem senha/dados privados | Posse do token e limites de tentativas |
 | `POST /access/invite-joins` | `JoinFamilyByInvite` | Token, senha, provas de instalação/tentativa; sessão anterior opcional e troca confirmada → sessão nova | Convite válido; antiga só é encerrada com sucesso; o mesmo commit revoga a sessão ativa anterior do perfil, com tokens e push |
@@ -50,6 +50,7 @@ Rotas públicas não autorizam leitura geral do perfil; respostas de inspeção 
 | `POST /access/refresh` | `RefreshSession` | Refresh + prova da instalação → novo access token | Sessão ativa e perfil ativo |
 | `GET /me/session` | `GetCurrentSession` | Perfil, família, papel, flag `isFamilyCreator`, capacidades e IDs; nunca hashes | Sessão ativa |
 | `DELETE /me/session` | `RevokeOwnSession` | Revoga sessão e dispositivo push; sem remover membro | Sessão ativa; contrato técnico de encerramento |
+| `POST /me/account-deletion` | `DeleteOwnAccount` | Corpo vazio ou `apple: {identityToken, authorizationCode, rawNonce}` (somente Criador sem token guardado; mesma validação de `SignInWithApple`) → `204`. Não-Criador: anonimização e revogação; Criador: exclusão física da família e revogação Apple pós-commit. Erros: `400 UNKNOWN_FIELD`, `401 SESSION_EXPIRED`/`SESSION_REVOKED`, `401 APPLE_PROOF_INVALID`, `422 APPLE_PROOF_REQUIRED`, `503 DEPENDENCY_UNAVAILABLE` | Qualquer perfil ativo; alvo sempre o titular (SPEC-022) |
 
 `creationGrant` não cria um quarto perfil. Seu prazo técnico não altera a ausência de expiração temporal de convite/refresh. Para criação concorrente, associação única à identidade Apple impede segunda família; retomar Apple permite descobrir a família criada após resposta perdida.
 
@@ -77,6 +78,7 @@ Troca confirmada não é endpoint para transferir membro. Uma sessão anterior d
 | `POST /family/members/{memberId}/role-changes` | `ChangeMemberRole` | Papel/modo desejado, validando transições e Criador | Admin; Kids sai do modo antes de promoção |
 | `POST /me/administration-exit` | `LeaveAdministration` | Rebaixar próprio Admin para Membro | Admin não Criador |
 | `DELETE /family/members/{memberId}` | `RemoveMember` | Remoção lógica, revogação e recursos afetados | Admin; nunca Criador |
+| `POST /family/members/{memberId}/account-deletion` | `DeleteKidsAccount` | Sem corpo → `204`; mesmos efeitos de `DeleteOwnAccount` para não-Criador. `403 ACTION_NOT_ALLOWED` para ator não Admin ou alvo adulto; `404 RESOURCE_NOT_FOUND` para alvo de outra família, removido ou excluído | Admin; alvo Kids da mesma família (SPEC-022) |
 | `POST /family/members/{memberId}/invites` | `IssueMemberInvite` | Nova emissão/reenvio → link/senha transitórios; invalida convites disponíveis sem revogar sessão | Admin; não Criador nem removido |
 | `GET /me/profile` | `GetOwnProfile` | `memberId`, `name`, `familyName`, `nickname`, `photoMediaId`, total de participações e próximo marco | Titular, inclusive Kids |
 | `PATCH /me/profile` | `UpdateOwnProfile` | `name` (opcional, só adulto), `nickname`, `photoMediaId` opcionais; `nickname`/`photoMediaId` aceitam `null` → mesmo formato de `GetOwnProfile` | Titular; sem alteração de papel |
@@ -249,6 +251,7 @@ Cada linha cobre um objetivo funcional completo, não apenas uma rota. RF/RN per
 | <a id="backend-uc17"></a>[UC17](../03-casos-de-uso.md#uc17) | `ReopenTask` / Tasks, Missions, Rewards | Perfil com acesso à tarefa; confirmação se missão concluída/recompensa; retirar crédito uma vez e reverter dados derivados | RF57–59; RN55/57–59 |
 | <a id="backend-uc18"></a>[UC18](../03-casos-de-uso.md#uc18) | `GetWeeklyReportSnapshot` / Reports, Insights | Snapshot consistente adulto para PDF local | RF61; RN62; RNF26/27 |
 | <a id="backend-uc19"></a>[UC19](../03-casos-de-uso.md#uc19) | `FinalizeWeeklyHighlight`, `GetOwnWeeklyRecognition`, `DeliverRecognitionNotification` | Ciclo encerrado, positivos/empates, resultado preservado e outbox | RF63/64; RN28/30/65; RNF26/27 |
+| <a id="backend-uc20"></a>[UC20](../03-casos-de-uso.md#uc20) | `DeleteOwnAccount`, `DeleteKidsAccount`, `SignInWithApple` (guarda do token), `RevokeAppleToken`, `DeleteMediaObjects` / Access, Family, Media | Exclusão imediata em um commit sob lock familiar; anonimização de não-Criador; exclusão física da família; revogação Apple e limpeza R2 pós-commit em filas recuperáveis | RF72–74; RN05/10/44/47/69/70; RNF16/22/24/28 |
 
 ## 8. Cobertura não funcional
 
@@ -274,6 +277,7 @@ O documento OpenAPI 3.1 é gerado pelos schemas HTTP em `/docs/json`, e a interf
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.30 | 2026-11-16 | Exclusão de conta (SPEC-022): `POST /me/account-deletion`, `POST /family/members/{memberId}/account-deletion`, guarda do refresh token Apple em `SignInWithApple` e rastreabilidade de UC20. Contrato alvo, ainda não implementado. |
 | 1.29 | 2026-11-12 | `IssueMemberInvite` invalida convites disponíveis sem revogar sessão; `JoinFamilyByInvite` revoga a sessão anterior do perfil com tokens e push. Sem mudança de schema (SCRUM-114). |
 | 1.28 | 2026-11-05 | Materializa SPEC-020 Fase 1 (SCRUM-102 CA-01–06): apuração e outbox atômicas, consultas próprias, abertura monotônica, payload APNs e OpenAPI. |
 | 1.27 | 2026-10-28 | `completedAt` permanece no contrato; TEL-032 compacta usa o horário na descrição acessível sem exibi-lo na linha. Sem mudança de API. |

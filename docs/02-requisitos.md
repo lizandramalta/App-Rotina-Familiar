@@ -1,15 +1,15 @@
 # Requisitos funcionais e não funcionais
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.26\
-**Data:** 2026-11-12\
+**Versão:** 1.27\
+**Data:** 2026-11-16\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
 
 RF descreve o comportamento que o sistema deve oferecer. RNF define condições de qualidade, segurança e integridade. As regras de negócio ficam no documento próprio; não é necessário consultar versões anteriores para interpretar esta base.
 
-**Conteúdo:** 70 requisitos funcionais e 27 requisitos não funcionais.
+**Conteúdo:** 74 requisitos funcionais e 28 requisitos não funcionais.
 
 ## Índice
 
@@ -41,9 +41,9 @@ O sistema deve permitir somente a Administradores alterar papel e Modo Kids de o
 
 ### RF04
 
-O sistema deve permitir somente a Administradores remover membros, exceto o Criador. Revogar o acesso e retirar somente o removido dos responsáveis de tarefas futuras não concluídas/não protegidas, preservando os demais. Não alterar automaticamente pendências antigas nem tarefas concluídas/protegidas; preservar histórico, conforme RN10.
+O sistema deve permitir somente a Administradores remover membros, exceto o Criador. Revogar o acesso e retirar somente o removido dos responsáveis de tarefas futuras não concluídas/não protegidas, preservando os demais. Não alterar automaticamente pendências antigas nem tarefas concluídas/protegidas; preservar histórico, conforme RN10. A remoção não apaga dados pessoais; a exclusão de conta segue RF72–RF74.
 
-**Regras de negócio:** [RN05](01-regras-de-negocio.md#rn05), [RN07](01-regras-de-negocio.md#rn07), [RN10](01-regras-de-negocio.md#rn10)  
+**Regras de negócio:** [RN05](01-regras-de-negocio.md#rn05), [RN07](01-regras-de-negocio.md#rn07), [RN10](01-regras-de-negocio.md#rn10), [RN69](01-regras-de-negocio.md#rn69)  
 **Casos de uso:** [UC02](03-casos-de-uso.md#uc02)
 
 ### RF05
@@ -272,10 +272,10 @@ O sistema deve distinguir, na missão concluída, a disponibilidade de resgate e
 
 ### RF37
 
-O sistema deve permitir ao Criador da Família autenticar-se por Sign in with Apple. Esse fluxo deve ser exclusivo do Criador; os demais perfis devem ingressar por convite.
+O sistema deve permitir ao Criador da Família autenticar-se por Sign in with Apple. Esse fluxo deve ser exclusivo do Criador; os demais perfis devem ingressar por convite. Cada autenticação bem-sucedida guarda, de forma protegida, o refresh token devolvido pela Apple, substituindo o anterior.
 
 **Regras de negócio:** [RN44](01-regras-de-negocio.md#rn44)  
-**Casos de uso:** [UC04](03-casos-de-uso.md#uc04)
+**Casos de uso:** [UC04](03-casos-de-uso.md#uc04), [UC20](03-casos-de-uso.md#uc20)
 
 ### RF38
 
@@ -286,10 +286,10 @@ Após autenticação Apple, o sistema deve encaminhar a pessoa sem vínculo ao o
 
 ### RF39
 
-O sistema deve vincular a família ao identificador Apple do Criador obtido no fluxo de autenticação, permitindo reconhecer a associação entre esse usuário e sua família.
+O sistema deve vincular a família ao identificador Apple do Criador obtido no fluxo de autenticação, permitindo reconhecer a associação entre esse usuário e sua família. A exclusão da conta do Criador apaga esse vínculo e a identidade Apple, permitindo que a mesma Apple ID inicie uma nova família.
 
-**Regras de negócio:** [RN44](01-regras-de-negocio.md#rn44)  
-**Casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC04](03-casos-de-uso.md#uc04)
+**Regras de negócio:** [RN44](01-regras-de-negocio.md#rn44), [RN70](01-regras-de-negocio.md#rn70)  
+**Casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC04](03-casos-de-uso.md#uc04), [UC20](03-casos-de-uso.md#uc20)
 
 ### RF40
 
@@ -521,6 +521,27 @@ O sistema deve permitir informar e editar uma observação opcional de até 250 
 **Regras de negócio:** [RN68](01-regras-de-negocio.md#rn68).\
 **Casos de uso:** [UC05](03-casos-de-uso.md#uc05).
 
+### RF72
+
+O sistema deve permitir a Administradores não-Criadores, Membros e Kids excluir a própria conta a partir do próprio perfil, de forma imediata e irreversível. A exclusão revoga sessões, push e convites disponíveis, retira o perfil das tarefas futuras não concluídas e não protegidas como em RN10, apaga nome, apelido, foto de perfil e arquivos de foto de sinalização do titular e preserva o histórico registrado como “Membro removido”.
+
+**Regras de negócio:** [RN10](01-regras-de-negocio.md#rn10), [RN47](01-regras-de-negocio.md#rn47), [RN69](01-regras-de-negocio.md#rn69)\
+**Casos de uso:** [UC20](03-casos-de-uso.md#uc20)
+
+### RF73
+
+O sistema deve permitir ao Criador excluir a própria conta, excluindo a família inteira e a identidade Apple no mesmo commit. A confirmação usa o refresh token Apple guardado ou, na ausência dele, uma nova autenticação Apple do próprio Criador. Após o commit, o sistema deve revogar o token na Apple, repetindo a tentativa em caso de falha sem desfazer a exclusão.
+
+**Regras de negócio:** [RN05](01-regras-de-negocio.md#rn05), [RN44](01-regras-de-negocio.md#rn44), [RN47](01-regras-de-negocio.md#rn47), [RN70](01-regras-de-negocio.md#rn70)\
+**Casos de uso:** [UC20](03-casos-de-uso.md#uc20), [UC04](03-casos-de-uso.md#uc04)
+
+### RF74
+
+O sistema deve permitir somente a Administradores excluir a conta de um perfil Kids da própria família, com os mesmos efeitos de RF72. Administradores não excluem contas de outros adultos.
+
+**Regras de negócio:** [RN07](01-regras-de-negocio.md#rn07), [RN69](01-regras-de-negocio.md#rn69)\
+**Casos de uso:** [UC20](03-casos-de-uso.md#uc20), [UC02](03-casos-de-uso.md#uc02)
+
 <a id="requisitos-nao-funcionais"></a>
 
 ## Requisitos não funcionais
@@ -534,7 +555,7 @@ Os requisitos transversais aplicam-se conforme a operação: por exemplo, persis
 A interface deve apresentar as ações e informações necessárias às atividades de organização familiar com linguagem simples e navegação compreensível, evitando complexidade desnecessária para executar as tarefas previstas.
 
 **Regras relacionadas:** [RN60](01-regras-de-negocio.md#rn60)\
-**Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC04](03-casos-de-uso.md#uc04), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19)
+**Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC04](03-casos-de-uso.md#uc04), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19), [UC20](03-casos-de-uso.md#uc20)
 
 ### RNF02
 
@@ -570,7 +591,7 @@ A interface destinada ao perfil Kids deve usar linguagem e elementos visuais ade
 A interface não deve depender exclusivamente de cores para comunicar status, mensagens ou ações. Deve complementar as cores com texto, ícones identificáveis ou outro indicador que permita compreender a informação.
 
 **Regras relacionadas:** [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61), [RN62](01-regras-de-negocio.md#rn62)\
-**Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC04](03-casos-de-uso.md#uc04), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19)
+**Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC04](03-casos-de-uso.md#uc04), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19), [UC20](03-casos-de-uso.md#uc20)
 
 ### RNF06
 
@@ -579,7 +600,7 @@ A interface não deve depender exclusivamente de cores para comunicar status, me
 O sistema deve restringir o acesso aos dados à família associada ao usuário e às permissões de seu perfil, impedindo a consulta ou alteração de informações de outras famílias e de informações não autorizadas.
 
 **Regras relacionadas:** [RN09](01-regras-de-negocio.md#rn09), [RN10](01-regras-de-negocio.md#rn10), [RN33](01-regras-de-negocio.md#rn33), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61), [RN62](01-regras-de-negocio.md#rn62), [RN63](01-regras-de-negocio.md#rn63), [RN64](01-regras-de-negocio.md#rn64), [RN65](01-regras-de-negocio.md#rn65)\
-**Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC04](03-casos-de-uso.md#uc04), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19)
+**Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC04](03-casos-de-uso.md#uc04), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19), [UC20](03-casos-de-uso.md#uc20)
 
 ### RNF07
 
@@ -588,7 +609,7 @@ O sistema deve restringir o acesso aos dados à família associada ao usuário e
 O sistema deve validar as permissões de perfil em cada operação protegida, sem depender apenas da visibilidade dos controles da interface. Isso inclui gerenciamento de membros, missões e tarefas, reabertura, adição de itens à roleta, sorteio e aceitação de recompensa.
 
 **Regras relacionadas:** [RN02](01-regras-de-negocio.md#rn02), [RN03](01-regras-de-negocio.md#rn03), [RN04](01-regras-de-negocio.md#rn04), [RN05](01-regras-de-negocio.md#rn05), [RN07](01-regras-de-negocio.md#rn07), [RN08](01-regras-de-negocio.md#rn08), [RN19](01-regras-de-negocio.md#rn19), [RN20](01-regras-de-negocio.md#rn20), [RN21](01-regras-de-negocio.md#rn21), [RN24](01-regras-de-negocio.md#rn24), [RN37](01-regras-de-negocio.md#rn37), [RN42](01-regras-de-negocio.md#rn42), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN63](01-regras-de-negocio.md#rn63)\
-**Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC04](03-casos-de-uso.md#uc04), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19)
+**Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC04](03-casos-de-uso.md#uc04), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19), [UC20](03-casos-de-uso.md#uc20)
 
 ### RNF08
 
@@ -597,15 +618,15 @@ O sistema deve validar as permissões de perfil em cada operação protegida, se
 As comunicações que transportem dados de usuários, famílias, tarefas, missões, recompensas ou credenciais de acesso devem utilizar proteção criptográfica em trânsito para evitar sua exposição durante a transmissão.
 
 **Regras relacionadas:** Requisito transversal de qualidade; sem RN específica.  
-**Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC04](03-casos-de-uso.md#uc04), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19)
+**Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC04](03-casos-de-uso.md#uc04), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19), [UC20](03-casos-de-uso.md#uc20)
 
 ### RNF09
 
 **Categoria:** Integridade de dados
 
-O sistema deve manter consistentes os estados, responsáveis, conclusões e vínculos de cada tarefa individual. Deve preservar o histórico das operações, respeitar os alcances de edição, exclusão e reabertura e impedir alterações nos dados preservados de missões concluídas.
+O sistema deve manter consistentes os estados, responsáveis, conclusões e vínculos de cada tarefa individual. Deve preservar o histórico das operações, respeitar os alcances de edição, exclusão e reabertura e impedir alterações nos dados preservados de missões concluídas. A exclusão de conta de perfil não-Criador preserva esse histórico sem dados pessoais; somente a exclusão da conta do Criador apaga a família e seu histórico (RN70).
 
-**Regras relacionadas:** [RN10](01-regras-de-negocio.md#rn10), [RN16](01-regras-de-negocio.md#rn16), [RN17](01-regras-de-negocio.md#rn17), [RN18](01-regras-de-negocio.md#rn18), [RN48](01-regras-de-negocio.md#rn48), [RN55](01-regras-de-negocio.md#rn55), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61), [RN64](01-regras-de-negocio.md#rn64)\
+**Regras relacionadas:** [RN10](01-regras-de-negocio.md#rn10), [RN69](01-regras-de-negocio.md#rn69), [RN16](01-regras-de-negocio.md#rn16), [RN17](01-regras-de-negocio.md#rn17), [RN18](01-regras-de-negocio.md#rn18), [RN48](01-regras-de-negocio.md#rn48), [RN55](01-regras-de-negocio.md#rn55), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59), [RN60](01-regras-de-negocio.md#rn60), [RN61](01-regras-de-negocio.md#rn61), [RN64](01-regras-de-negocio.md#rn64)\
 **Aplicação nos casos de uso:** [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC05](03-casos-de-uso.md#uc05), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC17](03-casos-de-uso.md#uc17)
 
 ### RNF10
@@ -633,7 +654,7 @@ Confirmação, recusa, conclusão manual e reabertura devem respeitar o estado c
 O sistema não deve apresentar uma alteração como salva quando sua persistência falhar. Deve informar a falha ao usuário, evitando que a perda de dados ocorra sem indicação perceptível. Em resposta perdida, consultar estado antes de oferecer nova tentativa, sem retentativa automática de gravações nem recuperação geral por chave de operação. Em criação, informar quando não for possível determinar se a tentativa foi salva.
 
 **Regras relacionadas:** [RN62](01-regras-de-negocio.md#rn62), [RN63](01-regras-de-negocio.md#rn63), [RN65](01-regras-de-negocio.md#rn65)\
-**Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC04](03-casos-de-uso.md#uc04), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19)
+**Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC04](03-casos-de-uso.md#uc04), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19), [UC20](03-casos-de-uso.md#uc20)
 
 ### RNF13
 
@@ -642,7 +663,7 @@ O sistema não deve apresentar uma alteração como salva quando sua persistênc
 As operações de rede não devem bloquear a interface. Durante o processamento, a interface deve permanecer responsiva e apresentar o estado da operação para que o usuário compreenda seu andamento ou eventual falha.
 
 **Regras relacionadas:** [RN62](01-regras-de-negocio.md#rn62)\
-**Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC04](03-casos-de-uso.md#uc04), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19)
+**Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC04](03-casos-de-uso.md#uc04), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19), [UC20](03-casos-de-uso.md#uc20)
 
 ### RNF14
 
@@ -651,25 +672,25 @@ As operações de rede não devem bloquear a interface. Durante o processamento,
 A organização do sistema deve manter separadas as responsabilidades dos domínios de família, tarefas e rotinas, carga diária ou semanal, missões, recompensas e acesso, permitindo sua manutenção sem misturar regras de negócio de áreas distintas.
 
 **Regras relacionadas:** Requisito transversal de qualidade; sem RN específica.  
-**Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC04](03-casos-de-uso.md#uc04), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19)
+**Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC04](03-casos-de-uso.md#uc04), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19), [UC20](03-casos-de-uso.md#uc20)
 
 ### RNF15
 
 **Categoria:** Segurança
 
-A autenticação do Criador deve utilizar a integração oficial do Sign in with Apple e os mecanismos de validação previstos por essa integração.
+A autenticação do Criador deve utilizar a integração oficial do Sign in with Apple e os mecanismos de validação previstos por essa integração, inclusive a revogação de tokens prevista pela Apple quando o Criador excluir a conta.
 
-**Regras relacionadas:** [RN44](01-regras-de-negocio.md#rn44)  
-**Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC04](03-casos-de-uso.md#uc04)
+**Regras relacionadas:** [RN44](01-regras-de-negocio.md#rn44), [RN70](01-regras-de-negocio.md#rn70)  
+**Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC04](03-casos-de-uso.md#uc04), [UC20](03-casos-de-uso.md#uc20)
 
 ### RNF16
 
 **Categoria:** Privacidade
 
-O identificador Apple usado para vincular a família ao Criador deve ser protegido contra acesso ou divulgação não autorizados e utilizado no contexto de autenticação e associação do usuário à família.
+O identificador Apple usado para vincular a família ao Criador deve ser protegido contra acesso ou divulgação não autorizados e utilizado no contexto de autenticação e associação do usuário à família. O refresh token Apple guardado recebe a mesma proteção, nunca é exposto em respostas, logs ou telemetria e é usado somente para revogação na exclusão da conta.
 
-**Regras relacionadas:** [RN44](01-regras-de-negocio.md#rn44)  
-**Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC04](03-casos-de-uso.md#uc04)
+**Regras relacionadas:** [RN44](01-regras-de-negocio.md#rn44), [RN70](01-regras-de-negocio.md#rn70)  
+**Aplicação nos casos de uso:** [UC01](03-casos-de-uso.md#uc01), [UC04](03-casos-de-uso.md#uc04), [UC20](03-casos-de-uso.md#uc20)
 
 ### RNF17
 
@@ -720,10 +741,10 @@ O consumo do convite e da senha e a efetivação do ingresso devem permanecer co
 
 **Categoria:** Sessões e revogação
 
-Credenciais são protegidas e a sessão ativa é conferida em toda operação. Cada perfil possui uma sessão ativa vinculada à instalação; refresh token não expira por tempo, permanece estável durante a sessão e é revogável. Access token dura 15 minutos, sem postergar revogação até seu vencimento. Remoção revoga a sessão; o ingresso por novo convite revoga a sessão anterior do perfil, com seus tokens e dispositivos de push, no mesmo commit; a emissão de convite não revoga sessão. Novo acesso Apple substitui a sessão do Criador. Recuperação de ingresso com resposta perdida exige prova da instalação/tentativa original, jamais apenas um identificador público.
+Credenciais são protegidas e a sessão ativa é conferida em toda operação. Cada perfil possui uma sessão ativa vinculada à instalação; refresh token não expira por tempo, permanece estável durante a sessão e é revogável. Access token dura 15 minutos, sem postergar revogação até seu vencimento. Remoção e exclusão de conta revogam a sessão; o ingresso por novo convite revoga a sessão anterior do perfil, com seus tokens e dispositivos de push, no mesmo commit; a emissão de convite não revoga sessão. Novo acesso Apple substitui a sessão do Criador. Recuperação de ingresso com resposta perdida exige prova da instalação/tentativa original, jamais apenas um identificador público.
 
-**Regras relacionadas:** [RN10](01-regras-de-negocio.md#rn10), [RN47](01-regras-de-negocio.md#rn47)  
-**Aplicação nos casos de uso:** [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19)
+**Regras relacionadas:** [RN10](01-regras-de-negocio.md#rn10), [RN47](01-regras-de-negocio.md#rn47), [RN69](01-regras-de-negocio.md#rn69), [RN70](01-regras-de-negocio.md#rn70)  
+**Aplicação nos casos de uso:** [UC02](03-casos-de-uso.md#uc02), [UC03](03-casos-de-uso.md#uc03), [UC05](03-casos-de-uso.md#uc05), [UC06](03-casos-de-uso.md#uc06), [UC07](03-casos-de-uso.md#uc07), [UC08](03-casos-de-uso.md#uc08), [UC09](03-casos-de-uso.md#uc09), [UC10](03-casos-de-uso.md#uc10), [UC11](03-casos-de-uso.md#uc11), [UC12](03-casos-de-uso.md#uc12), [UC13](03-casos-de-uso.md#uc13), [UC14](03-casos-de-uso.md#uc14), [UC15](03-casos-de-uso.md#uc15), [UC16](03-casos-de-uso.md#uc16), [UC17](03-casos-de-uso.md#uc17), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19), [UC20](03-casos-de-uso.md#uc20)
 
 ### RNF23
 
@@ -738,10 +759,10 @@ A aceitação da recompensa e o encerramento do resgate devem ser persistidos de
 
 **Categoria:** Privacidade das fotos
 
-O armazenamento e a consulta de fotos devem respeitar a associação à família e as permissões do perfil, impedindo acesso público ou por usuários não autorizados. A remoção de um membro também revoga seu acesso às fotos da família.
+O armazenamento e a consulta de fotos devem respeitar a associação à família e as permissões do perfil, impedindo acesso público ou por usuários não autorizados. A remoção de um membro também revoga seu acesso às fotos da família. A exclusão de conta apaga os arquivos de foto de perfil e de sinalização do titular, e a exclusão da família apaga todos os arquivos da família.
 
-**Regras relacionadas:** [RN10](01-regras-de-negocio.md#rn10), [RN54](01-regras-de-negocio.md#rn54), [RN63](01-regras-de-negocio.md#rn63)  
-**Aplicação nos casos de uso:** [UC03](03-casos-de-uso.md#uc03), [UC15](03-casos-de-uso.md#uc15), [UC10](03-casos-de-uso.md#uc10)
+**Regras relacionadas:** [RN10](01-regras-de-negocio.md#rn10), [RN54](01-regras-de-negocio.md#rn54), [RN63](01-regras-de-negocio.md#rn63), [RN69](01-regras-de-negocio.md#rn69), [RN70](01-regras-de-negocio.md#rn70)  
+**Aplicação nos casos de uso:** [UC03](03-casos-de-uso.md#uc03), [UC15](03-casos-de-uso.md#uc15), [UC10](03-casos-de-uso.md#uc10), [UC20](03-casos-de-uso.md#uc20)
 
 ### RNF25
 
@@ -771,10 +792,20 @@ A configuração de apelido deve ser protegida por titularidade no backend, incl
 **Regras relacionadas:** [RN62](01-regras-de-negocio.md#rn62), [RN63](01-regras-de-negocio.md#rn63), [RN65](01-regras-de-negocio.md#rn65).  
 **Aplicação nos casos de uso:** [UC10](03-casos-de-uso.md#uc10), [UC18](03-casos-de-uso.md#uc18), [UC19](03-casos-de-uso.md#uc19).
 
+### RNF28
+
+**Categoria:** Exclusão de conta e retenção
+
+A exclusão de conta deve ser imediata, irreversível e consistente sob concorrência: perfil, acesso e dados pessoais são apagados na mesma operação, sem estado parcial. Arquivos no armazenamento de fotos são apagados após o commit por processo recuperável. A revogação do token Apple ocorre após o commit, com tentativa imediata e fila persistente de novas tentativas; o token protegido existe somente até a revogação ou o esgotamento das tentativas. Identidade Apple que continua sem família após a expiração do grant de criação tem o token apagado pela limpeza de onboarding. Logs sem dados pessoais podem manter identificadores técnicos; backups do provedor do banco expiram conforme o ciclo do provedor, sem rotina própria de backup.
+
+**Regras relacionadas:** [RN69](01-regras-de-negocio.md#rn69), [RN70](01-regras-de-negocio.md#rn70), [RN44](01-regras-de-negocio.md#rn44)  
+**Aplicação nos casos de uso:** [UC20](03-casos-de-uso.md#uc20)
+
 ## Histórico de versões
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.27 | 2026-11-16 | RF72–RF74 e RNF28 (novos): exclusão da própria conta, exclusão da família pelo Criador com revogação do token Apple e exclusão de conta Kids por Administrador. RF04, RF37, RF39, RNF09, RNF15, RNF16, RNF22 e RNF24 ajustados. Para SPEC-022. |
 | 1.26 | 2026-11-12 | RF41/RF46/RF54/RNF22: emissão de convite direta, sem confirmação de reemissão; invalida convites anteriores disponíveis e preserva a sessão, revogada no ingresso pelo novo convite (SCRUM-114). |
 | 1.25 | 2026-10-28 | RF03/RF60/RF66: detalhe do membro com Dia/Semana domingo–sábado; nome Kids editável também no detalhe; Parabenizar permanece na Família. |
 | 1.24 | 2026-10-28 | RF03/RF60: nome administrativo de adultos é editado pelo titular; somente o nome de Kids pode ser corrigido por Administrador em Configurações. TEL-032 mantém papel, convite e remoção. |
