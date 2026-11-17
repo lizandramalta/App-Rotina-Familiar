@@ -20,8 +20,8 @@ struct MissionProgressBar: View {
     let taskCount: Int
     let progressPercent: Double
     var height: CGFloat = 20
-    /// Track contrasts with the surface: gray on white cards, white on the gray detail banner.
-    var trackColor: Color = Color(.systemGray5)
+    /// High-fidelity bar (Figma 907-14795): blue fill over the soft blue track.
+    var trackColor: Color = Color.App.Status.completedBackground
 
     private var fraction: Double {
         Double(displayedProgressPercent(progressPercent)) / 100
@@ -41,14 +41,14 @@ struct MissionProgressBar: View {
                 // No filled segment at 0%, so an untouched mission never looks started.
                 if fraction > 0 {
                     Capsule()
-                        .fill(Color.primary.opacity(0.8))
+                        .fill(Color.App.Status.completed)
                         .frame(width: min(fillWidth, proxy.size.width))
                 }
                 Text(countText)
-                    .font(.caption2.weight(.bold))
+                    .font(.app(.captionStrong))
                     .monospacedDigit()
-                    .foregroundStyle(fraction > 0 ? Color(.systemBackground) : Color.secondary)
-                    .padding(.leading, 12)
+                    .foregroundStyle(fraction > 0 ? Color.App.Text.onCompleted : Color.App.Text.secondary)
+                    .padding(.leading, AppSpacing.md)
             }
         }
         .frame(height: height)
@@ -77,7 +77,9 @@ enum MissionChestState: Equatable {
     }
 }
 
-/// Drawn chest illustration. Decorative: the state it conveys is always present as text nearby.
+/// Drawn chest illustration in high fidelity (Figma "Baú · recompensa ao concluir a missão"):
+/// yellow body and lid with ochre chalk outline and lock. Decorative: the state it conveys is
+/// always present as text nearby.
 struct MissionChestView: View {
     let state: MissionChestState
     var size: CGFloat = 56
@@ -86,30 +88,29 @@ struct MissionChestView: View {
         let bodyHeight = size * 0.46
         let lidHeight = size * 0.26
         let width = size * 0.86
+        let outline = max(size * 0.03, 1.5)
         ZStack {
             // Body
             RoundedRectangle(cornerRadius: size * 0.08)
-                .fill(Color(.systemGray4))
-                .overlay(RoundedRectangle(cornerRadius: size * 0.08).strokeBorder(Color.primary.opacity(0.75), lineWidth: 2))
+                .fill(Color.App.Decoration.yellow)
+                .chalkBorder(RoundedRectangle(cornerRadius: size * 0.08).inset(by: outline / 2), color: Color.App.Decoration.ochre, lineWidth: outline, seed: 3)
                 .frame(width: width, height: bodyHeight)
                 .offset(y: size * 0.16)
-            // Lid
+            // Lid — a ready chest gets the warmer lid so it stands out before redemption.
             RoundedRectangle(cornerRadius: size * 0.1)
-                .fill(state == .ready ? Color(.systemGray2) : Color(.systemGray5))
-                .overlay(RoundedRectangle(cornerRadius: size * 0.1).strokeBorder(Color.primary.opacity(0.75), lineWidth: 2))
+                .fill(state == .ready ? Color.App.Decoration.yellowShadow : Color.App.Decoration.yellow)
+                .chalkBorder(RoundedRectangle(cornerRadius: size * 0.1).inset(by: outline / 2), color: Color.App.Decoration.ochre, lineWidth: outline, seed: 4)
                 .frame(width: width, height: lidHeight)
                 .rotationEffect(.degrees(state == .open ? -18 : 0), anchor: .bottomLeading)
                 .offset(y: state == .open ? -size * 0.2 : -size * 0.1)
             // Lock / reward
             if state == .open {
-                Image(systemName: "plus.circle")
-                    .font(.system(size: size * 0.26, weight: .semibold))
-                    .foregroundStyle(Color.primary.opacity(0.8))
+                StarDecorationView(variant: .yellow, size: size * 0.42)
                     .offset(y: -size * 0.06)
             } else {
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(Color.primary.opacity(0.8))
-                    .frame(width: size * 0.14, height: size * 0.16)
+                RoundedRectangle(cornerRadius: size * 0.03)
+                    .fill(Color.App.Decoration.ochre)
+                    .frame(width: size * 0.16, height: size * 0.18)
                     .offset(y: size * 0.03)
             }
         }
@@ -125,11 +126,11 @@ struct MissionMemberAvatar: View {
 
     var body: some View {
         Text(displayName.first.map { String($0).uppercased() } ?? "?")
-            .font(.system(size: size * 0.42, weight: .semibold))
-            .foregroundStyle(.primary)
+            .font(.app(.subtitleStrong))
+            .foregroundStyle(Color.App.Text.primary)
             .frame(width: size, height: size)
-            .background(Color(.systemGray5), in: Circle())
-            .overlay(Circle().strokeBorder(Color(.systemBackground), lineWidth: 2))
+            .background(Color.App.Background.subtle, in: Circle())
+            .overlay(Circle().strokeBorder(Color.App.Background.card, lineWidth: 2))
             .accessibilityHidden(true)
     }
 }

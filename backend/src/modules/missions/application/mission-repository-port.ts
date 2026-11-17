@@ -12,10 +12,22 @@ export interface AcceptedRewardRecord {
   readonly acceptedAt: Date;
 }
 
+/**
+ * SPEC-016 CA-08: responsável atual da tarefa vinculada. Perfil removido ou com conta
+ * excluída chega com `memberId` nulo e `displayName` "Membro removido" (RN69).
+ */
+export interface MissionTaskAssigneeRecord {
+  readonly memberId: string | null;
+  readonly displayName: string;
+}
+
 export interface MissionTaskRecord {
   readonly id: string;
   readonly title: string;
   readonly status: 'pending' | 'awaitingConfirmation' | 'completed';
+  /** Data prevista da ocorrência (`YYYY-MM-DD`), SPEC-016 CA-08. */
+  readonly scheduledDate: string;
+  readonly assignees: readonly MissionTaskAssigneeRecord[];
 }
 
 export interface MissionRecord {

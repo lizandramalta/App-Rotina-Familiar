@@ -62,10 +62,13 @@ export interface MissionResponse {
   readonly createdAt: string;
 }
 
+/** SPEC-016 CA-08: data e responsáveis são visíveis a todos os perfis, inclusive Kids. */
 export interface MissionTaskProjection {
   readonly id: string;
   readonly title: string;
   readonly status: MissionTaskRecord['status'];
+  readonly scheduledDate: string;
+  readonly assignees: MissionTaskRecord['assignees'];
 }
 
 export interface MissionParticipantProjection {

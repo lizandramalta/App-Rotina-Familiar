@@ -1,6 +1,6 @@
 # Backend — contratos de API e rastreabilidade
 
-**Versão:** 1.30 · **Base funcional:** RN 1.28 / RF 1.27 / UC 1.27 · **Arquitetura backend:** 1.6\
+**Versão:** 1.31 · **Base funcional:** RN 1.28 / RF 1.27 / UC 1.28 · **Arquitetura backend:** 1.6\
 **Data:** 2026-11-16\
 **Situação:** contratos da aba Família, gestão de membros, sinalização/decisão Kids e snapshot semanal materializados na API; demais contratos alvo seguem por fases
 
@@ -147,7 +147,7 @@ Consultas paginadas usam ordenação estável com ID como desempate e cursor opa
 | Método e caminho | Caso de uso de aplicação | Campos / resposta | Permissão |
 |---|---|---|---|
 | `GET /missions` | `ListMissions` | Em andamento/concluídas, progresso e recompensa | Todos |
-| `GET /missions/{missionId}` | `GetMissionDetail` | Título, `note`, vínculos individuais, participações e resgate; projeção Kids restrita | Todos da família |
+| `GET /missions/{missionId}` | `GetMissionDetail` | Título, `note`, vínculos individuais (com `scheduledDate` e `assignees`), participações e resgate; projeção Kids restrita | Todos da família |
 | `GET /missions/task-options` | `GetMissionTaskOptions` | Ocorrências persistidas, filtros e paginação; sem selecionar rotina inteira | Admin |
 | `POST /missions` | `CreateMission` | Título, `note` opcional (≤250 car.) e `taskIds` não vazio; sem prazo nem selo | Admin |
 | `PATCH /missions/{missionId}` | `EditMission` | Título, `note` e/ou conjunto completo de `taskIds`; pode encerrar missão; rejeita `taskIds` vazio | Admin; em andamento |
@@ -167,6 +167,8 @@ Consultas paginadas usam ordenação estável com ID como desempate e cursor opa
 Cada `POST /family/applause` registra um evento novo, inclusive quando o mesmo Administrador repete a ação. O servidor valida o intervalo por RN49/RN61, exige destinatário ativo da família da sessão e proíbe envio para o próprio ator. `GET /family/applause` conta remetentes distintos por destinatário no intervalo. A mensagem interna não depende da aceitação pelo APNs. `DELETE /me/applause/{id}` altera somente a visibilidade do destinatário, sem remover o evento. O worker usa a fila por dispositivo vinculado a sessão ativa; sem configuração APNs a fila permanece pendente.
 
 `GET /reward-items` devolve os seis itens predefinidos de RN42 e somente os personalizados da família da sessão. `POST /reward-items` aceita `{ "title": string, "details"?: string }`: normaliza o título com `trim`, rejeita vazio, caracteres de controle e mais de 60 caracteres não-espaço; aceita descrição opcional de até 255 caracteres contando espaços. A unicidade é por família sobre o título normalizado, sem distinguir maiúsculas/minúsculas; colisão retorna `422 REWARD_TITLE_ALREADY_EXISTS`. Os demais erros de campo usam `422 VALIDATION_FAILED` com `fieldErrors` estáveis (`title` ou `details`). Sucesso retorna `201 Created` com o item canônico e sua origem `custom`. Uma resposta perdida é recuperável por nova consulta do catálogo, sem criar outro item quando o título normalizado já existir.
+
+Em `GET /missions/{missionId}`, cada item de `tasks` contém `id`, `title`, `status`, `scheduledDate` (`YYYY-MM-DD`, data prevista da ocorrência) e `assignees`: lista de `{ memberId, displayName }` dos responsáveis atuais da tarefa, ordenada por apelido. Responsável já removido da família ou com conta excluída aparece com `memberId: null` e `displayName` "Membro removido", sem outros dados pessoais; tarefa sem responsável retorna lista vazia. Os dois campos são expostos a Administrador, Membro e Kids; a projeção Kids continua sem `participations` e `isRedemptionAvailable`. A consulta junta responsáveis somente da mesma família e agrega por tarefa, sem multiplicar linhas. Para SPEC-016 CA-08.
 
 `POST /missions/{missionId}/reward-acceptance` aceita somente `{ "rewardItemId": "uuid" }`, sem `familyId`, resultado de sorteio ou campos de recompensa controlados pelo cliente. Em uma transação, revalida sessão, papel, escopo familiar, missão concluída, ausência de aceite e elegibilidade do item no catálogo da família; ao confirmar, retorna `200 OK` com a projeção canônica da missão e o snapshot da recompensa aceita. Missão fora do escopo familiar retorna `404 RESOURCE_NOT_FOUND`; perfil não administrador retorna `403 INSUFFICIENT_PERMISSIONS`; `rewardItemId` inválido ou não elegível retorna `422 REWARD_ITEM_NOT_ELIGIBLE`, sem revelar a origem de outro item. Missão ainda não resgatável retorna `409 MISSION_REWARD_REDEMPTION_UNAVAILABLE`; se já houver aceite, inclusive por concorrência, retorna `409 MISSION_REWARD_ALREADY_ACCEPTED`. Após resposta perdida, o cliente consulta a missão antes de oferecer nova tentativa; não há retentativa automática nem endpoint para registrar sorteio ou recusa.
 
@@ -277,6 +279,7 @@ O documento OpenAPI 3.1 é gerado pelos schemas HTTP em `/docs/json`, e a interf
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.31 | 2026-11-17 | `GET /missions/{missionId}`: cada tarefa vinculada ganha `scheduledDate` e `assignees` (com "Membro removido"), para todos os perfis. Campos aditivos. Para SPEC-016 CA-08. |
 | 1.30 | 2026-11-16 | Exclusão de conta (SPEC-022): `POST /me/account-deletion`, `POST /family/members/{memberId}/account-deletion`, guarda do refresh token Apple em `SignInWithApple` e rastreabilidade de UC20. Implementado no backend (módulo `account`, migração `0018_account_deletion.sql`). |
 | 1.29 | 2026-11-12 | `IssueMemberInvite` invalida convites disponíveis sem revogar sessão; `JoinFamilyByInvite` revoga a sessão anterior do perfil com tokens e push. Sem mudança de schema (SCRUM-114). |
 | 1.28 | 2026-11-05 | Materializa SPEC-020 Fase 1 (SCRUM-102 CA-01–06): apuração e outbox atômicas, consultas próprias, abertura monotônica, payload APNs e OpenAPI. |

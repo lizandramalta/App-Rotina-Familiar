@@ -76,7 +76,8 @@ nonisolated enum ChalkScatter {
             }
         }
 
-        path.forEach { element in
+        // Explicit closure types keep the Xcode 26.0 type checker within its time budget.
+        path.forEach { (element: Path.Element) -> Void in
             switch element {
             case .move(let to):
                 current = to
@@ -86,22 +87,23 @@ nonisolated enum ChalkScatter {
                 current = to
             case .quadCurve(let to, let control):
                 let from = current
-                addCurve { t in
-                    let u = 1 - t
-                    return CGPoint(
-                        x: u * u * from.x + 2 * u * t * control.x + t * t * to.x,
-                        y: u * u * from.y + 2 * u * t * control.y + t * t * to.y
-                    )
+                addCurve { (t: CGFloat) -> CGPoint in
+                    let u: CGFloat = 1 - t
+                    let x: CGFloat = u * u * from.x + 2 * u * t * control.x + t * t * to.x
+                    let y: CGFloat = u * u * from.y + 2 * u * t * control.y + t * t * to.y
+                    return CGPoint(x: x, y: y)
                 }
             case .curve(let to, let control1, let control2):
                 let from = current
-                addCurve { t in
+                addCurve { (t: CGFloat) -> CGPoint in
                     let u = 1 - t
-                    let a = u * u * u, b = 3 * u * u * t, c = 3 * u * t * t, d = t * t * t
-                    return CGPoint(
-                        x: a * from.x + b * control1.x + c * control2.x + d * to.x,
-                        y: a * from.y + b * control1.y + c * control2.y + d * to.y
-                    )
+                    let a: CGFloat = u * u * u
+                    let b: CGFloat = 3 * u * u * t
+                    let c: CGFloat = 3 * u * t * t
+                    let d: CGFloat = t * t * t
+                    let x: CGFloat = a * from.x + b * control1.x + c * control2.x + d * to.x
+                    let y: CGFloat = a * from.y + b * control1.y + c * control2.y + d * to.y
+                    return CGPoint(x: x, y: y)
                 }
             case .closeSubpath:
                 if current != subpathStart { segments.append((current, subpathStart)) }

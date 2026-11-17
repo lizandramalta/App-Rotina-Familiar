@@ -2,7 +2,8 @@
 
 **Status:** aprovada  
 **Autor:** Codex | **Criada em:** 2026-10-10 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-10  
-**Base funcional:** 1.15  
+**Revisada em:** 2026-11-17 — E-02(b) decidida: data prevista e responsáveis por tarefa no detalhe (CA-08, Fase 3), aprovada pela pessoa usuária  
+**Base funcional:** 1.15 (revisão: UC 1.28)  
 **UX-spec:** [UX-016-acompanhar-missoes-recompensas.md](UX-016-acompanhar-missoes-recompensas.md)  
 **Projetos envolvidos:** ambos  
 **Tema do backlog:** Tema 4 - Missões e recompensas
@@ -69,7 +70,9 @@ Toda rota DEVE conferir a sessão e o perfil no servidor. Recurso de outra famí
 | Rota | Resposta canônica | Acesso |
 |---|---|---|
 | `GET /v1/missions` | Coleções `inProgress` e `completed`, cada missão com `id`, `title`, `status`, `taskCount`, `completedTaskCount`, `progressPercent`, `isRedemptionAvailable` e resumo de recompensa aceita quando houver | Todos da família; Kids em projeção simplificada |
-| `GET /v1/missions/{missionId}` | Dados da lista, `note`, tarefas vinculadas e seus estados, `completedAt`, situação de resgate, recompensa aceita e participações | Admin/Membro: projeção completa; Kids: sem `participations` |
+| `GET /v1/missions/{missionId}` | Dados da lista, `note`, tarefas vinculadas com estado, `scheduledDate` e `assignees`, `completedAt`, situação de resgate, recompensa aceita e participações | Admin/Membro: projeção completa; Kids: sem `participations` (recebe `scheduledDate` e `assignees`) |
+
+Cada tarefa vinculada traz `scheduledDate` (`YYYY-MM-DD`) e `assignees`, lista de `{ memberId, displayName }` dos responsáveis atuais ordenada por apelido. Responsável removido ou com conta excluída aparece com `memberId: null` e `displayName` “Membro removido”; tarefa sem responsável traz lista vazia. Os campos são aditivos e não alteram progresso, estado ou permissões.
 
 `progressPercent` é calculado no servidor como tarefas vinculadas concluídas dividido pelo total de tarefas vinculadas, multiplicado por 100. A recompensa aceita contém apenas a identificação e o título registrado no aceite; nunca expõe informações de outra família.
 
@@ -138,6 +141,12 @@ Toda rota DEVE conferir a sessão e o perfil no servidor. Recurso de outra famí
   - **ENTÃO O APLICATIVO DEVE** preservar o último conteúdo confirmado e informar uma falha recuperável,
   - **E** permitir nova consulta sem afirmar mudança de estado. *(RNF12, RNF13)*
 
+- **CA-08: data e responsáveis das tarefas vinculadas**
+  - **DADO QUE** Administrador, Membro ou Kids consultam uma missão da própria família cujas tarefas têm data prevista e zero, um ou mais responsáveis — inclusive um responsável já removido,
+  - **QUANDO** receberem `GET /v1/missions/{missionId}`,
+  - **ENTÃO O SISTEMA DEVE** retornar em cada tarefa a `scheduledDate` e a lista `assignees` com apelido de cada responsável da mesma família, “Membro removido” com `memberId` nulo para o removido e lista vazia sem responsável,
+  - **E** TEL-021 DEVE exibir abaixo do título a data e os nomes na tarefa pendente e o estado com os nomes na tarefa concluída ou aguardando confirmação, para os três perfis. *(UC14, RNF06, RNF07)*
+
 ## 8. Observabilidade, métricas e auditoria
 
 | Evento | Gatilho | Propriedades permitidas |
@@ -153,7 +162,7 @@ Logs e métricas nunca registram tokens, senhas ou dados excluídos da projeçã
 | # | Decisão | Decidido por / data | Altera docs? |
 |---|---|---|---|
 | E-01 | RF36 prevalece: Kids consultam recompensa aceita, mas não participações nem resgate. | Pessoa usuária / 2026-10-10 | Sim — `screen-map.md`, `user-flows.md` e SPEC-014 atualizados nesta entrega de especificação. |
-| E-02 | **Aberta.** O protótipo de média fidelidade (Figma 579-59, UX-016) pede dados que o contrato da §5.1 não expõe: (a) avatares de participação nos cartões de `GET /v1/missions`, inclusive em missão `inProgress`, o que conflita com a §6 (não há participações antes do encerramento); (b) data prevista e responsável de cada tarefa em `GET /v1/missions/{missionId}`. Ambos ficaram fora da implementação (UX-016 UX-09). Incluí-los exige decidir a regra, versionar o contrato e planejar card de backend. | Pendente | Se aprovado: §5.1/§6 desta SPEC, `backend-contracts.md` e, no caso (a), RN/RF de participação. |
+| E-02 | **(b) decidida em 2026-11-17; (a) aberta.** O protótipo de média fidelidade (Figma 579-59, UX-016) pede dados que o contrato da §5.1 não expõe: (a) avatares de participação nos cartões de `GET /v1/missions`, inclusive em missão `inProgress`, o que conflita com a §6 (não há participações antes do encerramento); (b) data prevista e responsável de cada tarefa em `GET /v1/missions/{missionId}`. Ambos ficaram fora da implementação (UX-016 UX-09). Incluí-los exige decidir a regra, versionar o contrato e planejar card de backend. **(b)** A pessoa usuária decidiu seguir o Figma de alta fidelidade: o detalhe expõe `scheduledDate` e `assignees` a todos os perfis, inclusive Kids (CA-08). **(a)** continua fora. | (b) Pessoa usuária / 2026-11-17; (a) pendente | (b) Sim — UC14 1.28, screen map 1.27, fluxos 1.28, contratos 1.31 e UX-016. (a) Se aprovado: RN/RF de participação. |
 | E-03 | **Aberta.** A tela de celebração “Missão concluída!” do protótipo é uma superfície e um gatilho novos (primeira abertura após o encerramento, por pessoa), inexistentes na base funcional e no screen map. Fora desta entrega. | Pendente | Se aprovada: base funcional, `screen-map.md`, `user-flows.md` e nova SPEC/UX ou revisão desta. |
 
 ## 10. Fases de implementação
@@ -162,8 +171,9 @@ Logs e métricas nunca registram tokens, senhas ou dados excluídos da projeçã
 |---|---|---|---|---|
 | 1 | Projeções backend, autorização, isolamento e consistência de leitura | CA-01 a CA-06 | Testes unitários e de integração cobrindo perfis, famílias e reabertura | concluída (SCRUM-85) |
 | 2 | TEL-020/TEL-021 e recuperação de falhas no mobile | CA-07 e verificação visual dos CA-01 a CA-06 | Testes de ViewModel/UI e UX-spec revisada | implementada (SCRUM-86), aguardando PR |
+| 3 | Data e responsáveis por tarefa no detalhe (backend) e trilha de alta fidelidade de TEL-021 (mobile) | CA-08 | Testes de integração da projeção e de rota; testes de decodificação/apresentação e UI | em andamento (SCRUM-69) |
 
-Fase 1 não é publicável isoladamente: altera contrato de leitura ainda sem a experiência completa. Fase 2 é publicável com a Fase 1.
+Fase 1 não é publicável isoladamente: altera contrato de leitura ainda sem a experiência completa. Fase 2 é publicável com a Fase 1. Fase 3 é aditiva: o backend pode ser publicado antes do app, que tolera a ausência dos campos.
 
 ## 11. Checklist de aprovação
 
@@ -171,3 +181,4 @@ Fase 1 não é publicável isoladamente: altera contrato de leitura ainda sem a 
 - [x] Autorização, isolamento, validação de sessão e falhas incluídos na Fase 1.
 - [x] Decisão sobre recompensa na projeção Kids consolidada nos documentos de design afetados.
 - [x] Contrato e UX-spec revisados e aprovados explicitamente em 2026-10-10.
+- [x] Revisão de CA-08 (E-02 b) aprovada explicitamente em 2026-11-17.

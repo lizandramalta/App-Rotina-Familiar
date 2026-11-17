@@ -89,6 +89,36 @@ struct HTTPMissionRepositoryTests {
         #expect(request.url.path == "/v1/missions/\(missionID)")
     }
 
+    @Test("SPEC-016 CA-08: decodes scheduledDate and assignees, with a removed member as nil id")
+    func decodesTaskScheduleAndAssignees() async throws {
+        let json = """
+        {"id":"\(missionID)","title":"Casa pronta","note":null,"status":"inProgress",
+        "tasks":[{"id":"\(taskID)","title":"Faxina da sala","status":"pending","scheduledDate":"2026-10-10",
+        "assignees":[{"memberId":"00000000-0000-0000-0000-0000000000a1","displayName":"Isa"},{"memberId":null,"displayName":"Membro removido"}]}],
+        "completedAt":null,"progressPercent":0,"acceptedReward":null,"createdAt":"2026-10-07T15:00:00Z"}
+        """
+        let stub = MissionStubHTTP.make(status: 200, json: json)
+
+        let detail = try await stub.repository.mission(id: UUID(uuidString: missionID)!, accessToken: "access-1")
+
+        let task = try #require(detail.tasks.first)
+        #expect(task.scheduledDate == "2026-10-10")
+        #expect(task.assignees == [
+            MissionTaskAssignee(memberID: UUID(uuidString: "00000000-0000-0000-0000-0000000000a1"), displayName: "Isa"),
+            MissionTaskAssignee(memberID: nil, displayName: "Membro removido"),
+        ])
+        #expect(task.isGroupTask)
+    }
+
+    @Test("SPEC-016 CA-08: a server without scheduledDate/assignees still decodes (additive fields)")
+    func toleratesMissingScheduleAndAssignees() async throws {
+        let stub = MissionStubHTTP.make(status: 200, json: detailJSON(kids: false, accepted: true))
+
+        let detail = try await stub.repository.mission(id: UUID(uuidString: missionID)!, accessToken: "access-1")
+
+        #expect(detail.tasks.allSatisfy { $0.scheduledDate == nil && $0.assignees.isEmpty })
+    }
+
     @Test("CA-03: the Kids projection omits isRedemptionAvailable and participations — both decode as nil")
     func decodesKidsDetailProjection() async throws {
         let stub = MissionStubHTTP.make(status: 200, json: detailJSON(kids: true, accepted: true))

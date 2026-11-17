@@ -1,10 +1,10 @@
-# User flows — versão 1.27
+# User flows — versão 1.28
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão dos fluxos:** 1.27\
-**Base funcional:** RN 1.28 / RF 1.27 / UC 1.27\
-**Screen map:** 1.26 — revisão de 2026-11-16\
-**Data:** 2026-11-16\
+**Versão dos fluxos:** 1.28\
+**Base funcional:** RN 1.28 / RF 1.27 / UC 1.28\
+**Screen map:** 1.27 — revisão de 2026-11-17\
+**Data:** 2026-11-17\
 **Situação:** referência de navegação aprovada
 
 [Projeto](../../README.md) · [Índice documental](../DOCUMENTACAO.md) · [Screen map](screen-map.md) · [Regras](../01-regras-de-negocio.md) · [Requisitos](../02-requisitos.md) · [Casos de uso](../03-casos-de-uso.md) · [Diagrama de classes](../06-diagrama-de-classes.md)
@@ -415,7 +415,7 @@ Salvar retorna à origem que abriu o formulário: à lista em criação e ao det
 
 Cada tarefa vinculada conta uma vez, sem incluir a rotina inteira implicitamente. Remover vínculos de missão em andamento pode concluí-la se todas as restantes estiverem concluídas; desmarcar a última tarefa restante sem substituição é bloqueado no próprio MOD-007, com mensagem explicando que uma missão precisa de ao menos uma tarefa. Progresso também é recalculado por conclusões e reaberturas autorizadas fora deste fluxo. Missão concluída não aceita edição; a única exceção é a reabertura confirmada de tarefa vinculada, que remove os dados derivados do encerramento. Não existe expiração por tempo.
 
-**Consulta de tarefas:** adultos podem abrir TEL-012 a partir do detalhe da missão. Kids podem abrir TEL-041 somente para tarefas próprias; acompanhar as demais tarefas da missão não concede ações operacionais. Kids consultam título, observação, tarefas vinculadas, status e recompensa aceita em TEL-020/021 numa apresentação simplificada, sem ações de gestão, participações ou resgate. Voltar retorna a TEL-021.
+**Consulta de tarefas:** adultos podem abrir TEL-012 a partir do detalhe da missão. Kids podem abrir TEL-041 somente para tarefas próprias; acompanhar as demais tarefas da missão não concede ações operacionais. Kids consultam título, observação, tarefas vinculadas (com data prevista e responsáveis), status e recompensa aceita em TEL-020/021 numa apresentação simplificada, sem ações de gestão, participações ou resgate. Voltar retorna a TEL-021.
 
 <a id="uf-11"></a>
 
@@ -650,6 +650,7 @@ A exclusão não tem desfazer. O perfil não-Criador continua no histórico como
 
 | Versão dos fluxos | Base funcional | Screen map | Data | Alteração |
 |---|---|---|---|---|
+| 1.28 | RN 1.28 / RF 1.27 / UC 1.28 | 1.27 | 2026-11-17 | UF-10: tarefas da missão mostram data prevista e responsáveis a todos os perfis, inclusive Kids. Para SPEC-016 CA-08. |
 | 1.27 | RN 1.28 / RF 1.27 / UC 1.27 | 1.26 | 2026-11-16 | UF-17 (novo): excluir conta por TEL-030 para todos os perfis e por TEL-032 para Administrador com alvo Kids; variante do Criador com nome da família e folha Apple de reserva; mensagem neutra de acesso encerrado. Para SPEC-022/UX-022. |
 | 1.26 | RN 1.27 / RF 1.26 / UC 1.26 | 1.25 | 2026-11-12 | UF-01/UF-02/UF-03/UF-04: emissão de convite sempre direta, sem confirmação de reemissão; ingresso revoga a sessão anterior do perfil. Para SPEC-004 E-05 e UX-004 UX-07, SCRUM-114. |
 | 1.25 | RN 1.26 / RF 1.25 / UC 1.25 | 1.24 | 2026-11-08 | UF-15: janela do acesso interno em Minhas tarefas, mensagem vazia e confirmação de cópia. Para UX-020 (UX-01 a UX-04), SCRUM-103. |

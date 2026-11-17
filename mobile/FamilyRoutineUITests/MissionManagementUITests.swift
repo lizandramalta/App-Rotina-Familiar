@@ -184,6 +184,25 @@ final class MissionManagementUITests: XCTestCase {
         XCTAssertFalse(app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Arrumar os brinquedos,")).firstMatch.exists)
     }
 
+    /// SPEC-016 CA-08 / UX-016 UX-10: each node shows date (pending) or state with every assignee,
+    /// for adults and Kids alike.
+    func testTrailShowsDateAndAssigneesForAdultsAndKids() {
+        launch(route: "detail:\(inProgressMissionID)")
+        XCTAssertTrue(app.staticTexts["Sáb, 10 out · Rafa Silva"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Aguardando confirmação · Rafa Silva"].exists)
+        app.terminate()
+
+        launch(scenario: "mission-management-kids")
+        let inProgress = row(inProgressMissionID)
+        XCTAssertTrue(inProgress.waitForExistence(timeout: 5))
+        inProgress.tap()
+        let pendingNode = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label BEGINSWITH %@", "Arrumar os brinquedos,")).firstMatch
+        XCTAssertTrue(pendingNode.waitForExistence(timeout: 5))
+        XCTAssertTrue(pendingNode.label.contains("Sáb, 10 out"))
+        XCTAssertTrue(pendingNode.label.contains("Rafa Silva"))
+    }
+
     /// The tab bar belongs to each tab's root route only; pushed screens hide it.
     func testTabBarOnlyOnRootRoute() {
         launch()

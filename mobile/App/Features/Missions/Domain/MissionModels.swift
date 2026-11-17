@@ -47,11 +47,25 @@ nonisolated struct MissionCollections: Equatable, Sendable {
     let completed: [MissionSummary]
 }
 
-/// A linked task as projected by `GET /v1/missions/{missionId}`: no assignees, no weight.
+/// A current assignee of a linked task (SPEC-016 CA-08). `memberID` is `nil` for a removed
+/// profile or deleted account, whose `displayName` the server already sends as "Membro removido".
+nonisolated struct MissionTaskAssignee: Equatable, Sendable {
+    let memberID: UUID?
+    let displayName: String
+}
+
+/// A linked task as projected by `GET /v1/missions/{missionId}` (no weight). `scheduledDate`
+/// (`YYYY-MM-DD`) and `assignees` come from SPEC-016 CA-08 for every profile; an older server
+/// omits them, so they decode as `nil` / empty and TEL-021 falls back to the task state.
 nonisolated struct MissionLinkedTask: Equatable, Sendable, Identifiable {
     let id: UUID
     let title: String
     let status: TaskStatus
+    var scheduledDate: String? = nil
+    var assignees: [MissionTaskAssignee] = []
+
+    /// UX-016 UX-11: a "group" task has two or more assignees.
+    var isGroupTask: Bool { assignees.count >= 2 }
 }
 
 nonisolated struct MissionParticipation: Equatable, Sendable, Identifiable {

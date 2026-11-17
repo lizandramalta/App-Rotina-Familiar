@@ -2,7 +2,7 @@
 
 **Status:** aprovada  
 **Autor:** Codex | **Criada em:** 2026-10-10 | **Aprovada por:** Pessoa usuária | **Em:** 2026-10-10  
-**Revisada em:** 2026-11-08 — anatomia gamificada aprovada pela pessoa usuária ([Figma 579-59](https://www.figma.com/design/CuxXOp9tKivMbELeeB6mHw/APP-FAM%C3%8DLIA-%7C-C18?node-id=579-59))  
+**Revisada em:** 2026-11-17 — trilha de TEL-021 em alta fidelidade ([Figma 907-14795](https://www.figma.com/design/CuxXOp9tKivMbELeeB6mHw/APP-FAM%C3%8DLIA-%7C-C18?node-id=907-14795)) com data e responsáveis por tarefa (UX-10 a UX-13); 2026-11-08 — anatomia gamificada aprovada pela pessoa usuária ([Figma 579-59](https://www.figma.com/design/CuxXOp9tKivMbELeeB6mHw/APP-FAM%C3%8DLIA-%7C-C18?node-id=579-59))  
 **Spec funcional vinculada:** [SPEC-016-acompanhar-missoes-recompensas.md](SPEC-016-acompanhar-missoes-recompensas.md)  
 **Base funcional:** 1.15  
 **Superfícies de interface:** TEL-020, TEL-021, UF-10
@@ -21,6 +21,7 @@
 | Fluxo | UF-10 |
 | Design consultado | `docs/design/screen-map.md`, `docs/design/user-flows.md` |
 | Protótipo de média fidelidade | [Figma 579-59 — Gamificada · Missões (TEL-020 · TEL-021)](https://www.figma.com/design/CuxXOp9tKivMbELeeB6mHw/APP-FAM%C3%8DLIA-%7C-C18?node-id=579-59) |
+| Protótipo de alta fidelidade | [Figma 907-14795 — iPhone · Administrador · trilha da missão · TEL-021 (gamificada)](https://www.figma.com/design/CuxXOp9tKivMbELeeB6mHw/APP-FAM%C3%8DLIA-%7C-C18?node-id=907-14795) |
 
 ## 3. Escopo da experiência
 
@@ -37,7 +38,7 @@
 
 Não há formulário nesta entrega. Se a consulta falhar, a pessoa pode tentar novamente sem perder o conteúdo já confirmado.
 
-TEL-020 é a única rota desta UX com barra de abas. TEL-021 e as telas abertas a partir dela (TEL-012, TEL-041, TEL-022, TEL-023) ocultam a barra de abas e retornam à origem por Voltar (UX-08).
+TEL-020 é a única rota desta UX com barra de abas; o protótipo de alta de TEL-021 exibe a barra, mas prevalece UX-08 (decisão de 2026-11-17). TEL-021 e as telas abertas a partir dela (TEL-012, TEL-041, TEL-022, TEL-023) ocultam a barra de abas e retornam à origem por Voltar (UX-08).
 
 ## 5. Superfícies
 
@@ -54,8 +55,11 @@ TEL-020 é a única rota desta UX com barra de abas. TEL-021 e as telas abertas 
 
 - **Faixa da missão:** título, “N tarefas para abrir o baú” na missão em andamento ou “Missão concluída!” na concluída, e a barra “x / y”.
 - **Observação:** em cartão próprio, quando houver.
-- **Trilha:** tarefas vinculadas como nós de ao menos 72 pt em zigue-zague, ligados por um caminho pontilhado que termina no baú (fechado ou aberto, como em TEL-020). Ícone do nó: check em nó preenchido para concluída, estrela para pendente e relógio para aguardando confirmação, de modo que esta nunca pareça concluída. Abaixo do título aparece somente o estado da tarefa (UX-09).
-- **Tarefa do titular:** recebe balão “SUA TAREFA” para adultos e “SUA VEZ!” para Kids, com contorno no nó (UX-04).
+- **Trilha:** tarefas vinculadas como nós de ao menos 72 pt em zigue-zague, com contorno de giz, ligados por um caminho de pontos que termina no baú (fechado ou aberto, como em TEL-020).
+  - **Cor do nó (UX-11):** azul com check para tarefa concluída; rosa para tarefa em grupo (dois ou mais responsáveis) não concluída; verde para tarefa individual (zero ou um responsável) não concluída.
+  - **Ícone (UX-12):** estrela na pendente e relógio na aguardando confirmação, com a cor da regra acima, de modo que esta nunca pareça concluída.
+  - **Linha abaixo do título (UX-10):** pendente mostra “data · responsáveis” (ex.: “Sáb, 10 out · Isa e Theo”); concluída mostra “Concluída · responsáveis”; aguardando mostra “Aguardando confirmação · responsáveis”. Todos os nomes aparecem, unidos por vírgula e “e”, sem truncar; sem responsável, só a data ou o estado. Responsável removido aparece como “Membro removido”. Vale para Administrador, Membro e Kids.
+- **Tarefa do titular:** recebe balão “SUA TAREFA” para adultos e “SUA VEZ!” para Kids, sempre inteiro acima do nó (UX-04, UX-13). A cor do nó segue a regra da trilha.
 - **Recompensa:** cartão exibido em missão concluída. Com aceite, mostra o título do item em todos os perfis; sem aceite, explica o estado verdadeiro. A ação de resgate não é exibida nesta spec; ela será introduzida pela UX-017 apenas para Administrador.
 - **Quem já ajudou:** Administrador e Membro veem, em missão concluída, avatares de iniciais e os nomes das participações registradas. Kids não vê o bloco nem uma contagem substituta.
 - **Tarefas:** adultos seguem para TEL-012 a partir de qualquer nó; Kids só pode abrir tarefa própria em TEL-041. Tarefa de outro membro não vira caminho operacional.
@@ -97,13 +101,16 @@ As chaves abaixo são as usadas pelo aplicativo. Textos com quantidade têm vari
 | Sem recompensa | `mission.reward.none` | “Nenhuma recompensa foi escolhida ainda.” | Sem aceite; Kids também em concluída |
 | Balão adulto | `missions.trail.own_task` | “SUA TAREFA” | Tarefa do titular adulto |
 | Balão Kids | `missions.trail.own_task_kids` | “SUA VEZ!” | Tarefa do titular Kids |
+| Data curta do nó | `missions.trail.task_date` | “{{weekday}}, {{day}} {{month}}” (ex.: “Sáb, 10 out”) | Nó pendente |
+| Linha do nó | `missions.trail.task_detail` | “{{date ou estado}} · {{assignees}}” | Pendente: data; concluída/aguardando: estado. Sem responsáveis, só a primeira parte |
+| Responsável removido | `missions.trail.removed_member` | “Membro removido” | Responsável sem `memberId` |
 | Participações | `missions.detail.participations_title` | “Quem já ajudou” | TEL-021, Admin e Membro |
 | Falha | `mission.load.error` | “Não foi possível atualizar esta missão. Tente novamente.” | Falha de consulta |
 
 ## 8. Acessibilidade e adaptação
 
 - A barra mostra “x / y”, mas o VoiceOver anuncia fração e percentual juntos (“1 de 4 tarefas concluídas (25%)”) (UX-07). O percentual exibido é arredondado para baixo (UX-06). Cor e forma não são a única indicação de estado.
-- O rótulo do cartão reúne título, estado, progresso e rodapé. O rótulo do nó reúne título da tarefa, estado e o balão, quando houver.
+- O rótulo do cartão reúne título, estado, progresso e rodapé. O rótulo do nó reúne título da tarefa, estado, data prevista, responsáveis e o balão, quando houver. A cor do nó nunca é a única indicação de grupo ou estado.
 - Baú e ilustração são decorativos e ocultos do VoiceOver; o estado correspondente está sempre em texto.
 - Ordem de foco no detalhe: voltar → título/status → observação → progresso → tarefas → recompensa → participações, quando autorizadas.
 - Recompensa aceita recebe rótulo acessível com título e estado, não apenas ícone.
@@ -123,7 +130,11 @@ As chaves abaixo são as usadas pelo aplicativo. Textos com quantidade têm vari
 | UX-06 | O percentual exibido é arredondado para baixo, para nunca mostrar 100% antes da conclusão. | Decidida pela pessoa usuária em 2026-11-08 | Apresentação; o valor canônico continua vindo do servidor. |
 | UX-07 | A barra exibe somente “x / y”; o percentual permanece no anúncio do VoiceOver. | Decidida pela pessoa usuária em 2026-11-08 | Substitui o uso visível de `mission.progress`. |
 | UX-08 | A barra de abas aparece somente nas telas principais; telas abertas por push a ocultam. | Decidida pela pessoa usuária em 2026-11-08 | Regra geral registrada no `screen-map.md` 1.24. |
-| UX-09 | Avatares de participação nos cartões da lista e data/responsável por tarefa na trilha ficam fora, porque o contrato da SPEC-016 não os expõe. | Decidida pela pessoa usuária em 2026-11-08 | Lacuna registrada em SPEC-016 E-02. |
+| UX-09 | Avatares de participação nos cartões da lista ficam fora, porque o contrato da SPEC-016 não os expõe. Data/responsável por tarefa na trilha foi revista em UX-10. | Decidida pela pessoa usuária em 2026-11-08; revista em 2026-11-17 | Lacuna (a) segue em SPEC-016 E-02. |
+| UX-10 | A trilha mostra data e responsáveis como no Figma de alta, para todos os perfis, com todos os nomes. | Decidida pela pessoa usuária em 2026-11-17 | SPEC-016 CA-08, UC14 1.28, contratos 1.31. |
+| UX-11 | Cor do nó: rosa para grupo não concluído, verde para individual não concluído, azul para concluída. Substitui o rosa do protótipo usado para a tarefa do titular. | Decidida pela pessoa usuária em 2026-11-17 | Apresentação; depende de `assignees` (UX-10). O Figma deve ser ajustado por UX. |
+| UX-12 | Aguardando confirmação usa a cor da regra com ícone de relógio. | Decidida pela pessoa usuária em 2026-11-17 | Apresentação; o protótipo de alta não desenha esse estado. |
+| UX-13 | O balão do titular aparece inteiro, com o texto da §7 em caixa alta; a barra de abas segue oculta em TEL-021 (UX-08). | Decidida pela pessoa usuária em 2026-11-17 | Apresentação; diverge do recorte do frame 907-14795. |
 
 ## 10. Checklist de aprovação
 
@@ -133,3 +144,4 @@ As chaves abaixo são as usadas pelo aplicativo. Textos com quantidade têm vari
 - [x] Microcopy e acessibilidade especificadas.
 - [x] Revisada e aprovada explicitamente com a SPEC funcional em 2026-10-10.
 - [x] Anatomia gamificada (Figma 579-59) aprovada explicitamente em 2026-11-08.
+- [x] Trilha de alta fidelidade (Figma 907-14795) e UX-10 a UX-13 aprovadas explicitamente em 2026-11-17.

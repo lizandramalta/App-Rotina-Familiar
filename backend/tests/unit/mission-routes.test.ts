@@ -36,7 +36,16 @@ const MISSION_DETAIL = {
   note: null,
   status: 'inProgress',
   tasks: [
-    { id: '9f1c2b0e-5b8a-4d0f-9d6e-1f7a8b9c0d1e', title: 'Lavar o carro', status: 'pending' },
+    {
+      id: '9f1c2b0e-5b8a-4d0f-9d6e-1f7a8b9c0d1e',
+      title: 'Lavar o carro',
+      status: 'pending',
+      scheduledDate: '2026-10-10',
+      assignees: [
+        { memberId: 'a1000000-0000-4000-8000-000000000001', displayName: 'Ana' },
+        { memberId: null, displayName: 'Membro removido' },
+      ],
+    },
   ],
   completedAt: null,
   progressPercent: 0,
@@ -282,6 +291,28 @@ describe('Mission routes — SPEC-014 phase 1', () => {
       });
       expect(response.statusCode, `${method} ${url}`).toBe(401);
     }
+  });
+
+  it('SPEC-016 CA-08 serializes scheduledDate and assignees (removed member with null id) in the detail', async () => {
+    const response = await test.app.inject({
+      method: 'GET',
+      url: `/v1/missions/${MISSION_ID}`,
+      headers: AUTH,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().tasks).toEqual(MISSION_DETAIL.tasks);
+  });
+
+  it('SPEC-016 CA-08 documents scheduledDate and assignees on the detail task schema', async () => {
+    const response = await test.app.inject({ method: 'GET', url: '/docs/json' });
+    const detail = response.json().paths['/v1/missions/{missionId}'].get;
+    const task = detail.responses['200'].content['application/json'].schema.properties.tasks.items;
+
+    expect(task.required).toEqual(
+      expect.arrayContaining(['id', 'title', 'status', 'scheduledDate', 'assignees']),
+    );
+    expect(task.properties.assignees.items.required).toEqual(['memberId', 'displayName']);
   });
 
   it('documents the mission routes with bearer security in /docs/json', async () => {

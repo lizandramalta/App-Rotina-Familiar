@@ -33,8 +33,23 @@ const MISSION: MissionRecord = {
   createdAt: NOW,
   taskIds: [TASK_A, TASK_B],
   tasks: [
-    { id: TASK_A, title: 'Lavar o carro', status: 'pending' },
-    { id: TASK_B, title: 'Cortar a grama', status: 'pending' },
+    {
+      id: TASK_A,
+      title: 'Lavar o carro',
+      status: 'pending',
+      scheduledDate: '2026-10-10',
+      assignees: [{ memberId: 'a1000000-0000-4000-8000-000000000001', displayName: 'Ana' }],
+    },
+    {
+      id: TASK_B,
+      title: 'Cortar a grama',
+      status: 'pending',
+      scheduledDate: '2026-10-11',
+      assignees: [
+        { memberId: 'a1000000-0000-4000-8000-000000000001', displayName: 'Ana' },
+        { memberId: null, displayName: 'Membro removido' },
+      ],
+    },
   ],
   acceptedReward: null,
 };
@@ -336,6 +351,27 @@ describe('Mission use cases — SPEC-014 phase 1', () => {
     });
   });
 
+  it('SPEC-016 CA-08 exposes scheduled date and assignees to every profile, Kids included', async () => {
+    for (const actor of [TEST_ACTOR, MEMBER_ACTOR, KIDS_ACTOR]) {
+      const result = await new GetMissionDetailUseCase(base()).execute(actor, MISSION_ID);
+      expect(result.tasks).toEqual([
+        expect.objectContaining({
+          id: TASK_A,
+          scheduledDate: '2026-10-10',
+          assignees: [{ memberId: 'a1000000-0000-4000-8000-000000000001', displayName: 'Ana' }],
+        }),
+        expect.objectContaining({
+          id: TASK_B,
+          scheduledDate: '2026-10-11',
+          assignees: [
+            { memberId: 'a1000000-0000-4000-8000-000000000001', displayName: 'Ana' },
+            { memberId: null, displayName: 'Membro removido' },
+          ],
+        }),
+      ]);
+    }
+  });
+
   it('CA-03 detail for Administrator/Membro includes participations and redemption status', async () => {
     repository.listParticipations.mockResolvedValue([
       { memberId: 'a1000000-0000-4000-8000-000000000001', displayName: 'Ana' },
@@ -359,27 +395,24 @@ describe('Mission use cases — SPEC-014 phase 1', () => {
   it.each([
     ['Administrator', TEST_ACTOR],
     ['Membro', MEMBER_ACTOR],
-  ])(
-    'CA-05 detail recovers an already-accepted reward by query for %s',
-    async (_name, actor) => {
-      repository.findMission.mockResolvedValue({
-        ...MISSION,
-        completedAt: NOW,
-        acceptedReward: ACCEPTED_REWARD,
-      });
+  ])('CA-05 detail recovers an already-accepted reward by query for %s', async (_name, actor) => {
+    repository.findMission.mockResolvedValue({
+      ...MISSION,
+      completedAt: NOW,
+      acceptedReward: ACCEPTED_REWARD,
+    });
 
-      const result = await new GetMissionDetailUseCase(base()).execute(actor, MISSION_ID);
+    const result = await new GetMissionDetailUseCase(base()).execute(actor, MISSION_ID);
 
-      expect(result).toMatchObject({
-        isRedemptionAvailable: false,
-        acceptedReward: {
-          rewardItemId: ACCEPTED_REWARD.rewardItemId,
-          title: ACCEPTED_REWARD.title,
-          source: ACCEPTED_REWARD.source,
-        },
-      });
-    },
-  );
+    expect(result).toMatchObject({
+      isRedemptionAvailable: false,
+      acceptedReward: {
+        rewardItemId: ACCEPTED_REWARD.rewardItemId,
+        title: ACCEPTED_REWARD.title,
+        source: ACCEPTED_REWARD.source,
+      },
+    });
+  });
 
   it('CA-05 Kids detail recovers an already-accepted reward by query', async () => {
     repository.findMission.mockResolvedValue({

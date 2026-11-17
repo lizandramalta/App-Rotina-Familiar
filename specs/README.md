@@ -56,7 +56,7 @@ da experiência. Isso permite evoluir o visual sem perder decisões, estados e t
 
 ## Mapa de implementação
 
-**Base funcional vigente:** RN 1.28 / RF 1.27 / UC 1.27 (2026-11-16)
+**Base funcional vigente:** RN 1.28 / RF 1.27 / UC 1.28 (2026-11-17)
 
 **Convenção de status:** `não criada` indica apenas uma entrega planejada; `em revisão`
 indica que o par existente foi atualizado após decisões de produto e ainda requer
@@ -139,7 +139,7 @@ status e resumo; mantenha esta tabela como o panorama do backlog.
 | [SPEC-012-sinalizar-tarefa-kids](SPEC-012-sinalizar-tarefa-kids.md) | [UX-012-sinalizar-tarefa-kids.md](UX-012-sinalizar-tarefa-kids.md) | aprovada | ambos | Kids sinaliza tarefa própria pendente com foto opcional por câmera direta, movendo-a para Aguardando confirmação sem crédito; habilita `purpose: taskSignal` reservado por SPEC-006. |
 | [SPEC-013-validar-conclusao-kids](SPEC-013-validar-conclusao-kids.md) | [UX-013-validar-conclusao-kids.md](UX-013-validar-conclusao-kids.md) | aprovada | ambos | Fila administrativa de sinalizações Kids, avaliação com foto privada opcional e decisão atômica, incluindo reconciliação silenciosa de ações concorrentes. |
 | [SPEC-015-gerenciar-recompensas-coletivas](SPEC-015-gerenciar-recompensas-coletivas.md) | [UX-015-gerenciar-recompensas-coletivas.md](UX-015-gerenciar-recompensas-coletivas.md) | aprovada | ambos | Catálogo de recompensas coletivas com seis itens predefinidos e cadastro administrativo de item personalizado com título único por família e descrição opcional. |
-| [SPEC-016-acompanhar-missoes-recompensas](SPEC-016-acompanhar-missoes-recompensas.md) | [UX-016-acompanhar-missoes-recompensas.md](UX-016-acompanhar-missoes-recompensas.md) | aprovada | ambos | Consulta segura de progresso, tarefas, participações autorizadas e situação/recompensa aceita da missão; Kids visualiza recompensa aceita, sem participações ou resgate. |
+| [SPEC-016-acompanhar-missoes-recompensas](SPEC-016-acompanhar-missoes-recompensas.md) | [UX-016-acompanhar-missoes-recompensas.md](UX-016-acompanhar-missoes-recompensas.md) | aprovada | ambos | Consulta segura de progresso, tarefas (com data e responsáveis), participações autorizadas e situação/recompensa aceita da missão; Kids visualiza recompensa aceita, sem participações ou resgate. |
 | [SPEC-017-resgatar-recompensa](SPEC-017-resgatar-recompensa.md) | [UX-017-resgatar-recompensa.md](UX-017-resgatar-recompensa.md) | aprovada | ambos | Roleta local e aceite único de recompensa por Administrador, com validação transacional, concorrência e recuperação segura de resultado incerto. |
 | [SPEC-018-visualizar-carga](SPEC-018-visualizar-carga.md) | [UX-018-visualizar-carga.md](UX-018-visualizar-carga.md) | aprovada | ambos | Carga familiar Dia/Semana integrada à Família, com distribuição sem ranking, períodos efetivos e crédito histórico de membro removido. |
 | [SPEC-019-gerar-relatorio-semanal-pdf](SPEC-019-gerar-relatorio-semanal-pdf.md) | [UX-019-gerar-relatorio-semanal-pdf.md](UX-019-gerar-relatorio-semanal-pdf.md) | aprovada | ambos | Snapshot semanal autorizado e PDF local com gráficos, tabela, dados parciais e crédito histórico preservado. |

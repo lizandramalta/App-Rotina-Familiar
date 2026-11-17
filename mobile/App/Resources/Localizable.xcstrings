@@ -4596,6 +4596,36 @@
         }
       }
     },
+    "missions.trail.removed_member" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Membro removido"
+          }
+        }
+      }
+    },
+    "missions.trail.task_date" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$lld %3$@"
+          }
+        }
+      }
+    },
+    "missions.trail.task_detail" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@"
+          }
+        }
+      }
+    },
     "Mora Design System" : {
 
     },

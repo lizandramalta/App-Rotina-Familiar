@@ -112,11 +112,25 @@ const missionDetailResponseSchema = {
       type: 'array',
       items: {
         type: 'object',
-        required: ['id', 'title', 'status'],
+        required: ['id', 'title', 'status', 'scheduledDate', 'assignees'],
         properties: {
           id: { type: 'string' },
           title: { type: 'string' },
           status: { type: 'string', enum: ['pending', 'awaitingConfirmation', 'completed'] },
+          // SPEC-016 CA-08: data prevista e responsáveis, presentes em todos os perfis.
+          scheduledDate: { type: 'string', format: 'date' },
+          assignees: {
+            type: 'array',
+            items: {
+              type: 'object',
+              required: ['memberId', 'displayName'],
+              properties: {
+                // Nulo para perfil removido ou conta excluída ("Membro removido").
+                memberId: { type: ['string', 'null'] },
+                displayName: { type: 'string' },
+              },
+            },
+          },
         },
       },
     },

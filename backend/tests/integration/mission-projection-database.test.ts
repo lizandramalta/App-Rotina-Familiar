@@ -250,6 +250,44 @@ describe.skipIf(!process.env.RUN_INTEGRATION_TESTS)(
       });
     });
 
+    it('SPEC-016 CA-08 detail exposes scheduled date and assignees, removed member anonymized', async () => {
+      const family = await seedFamily();
+      const other = await seedFamily();
+      const solo = await seedTask(family, [family.kidId]);
+      const group = await seedTask(family, [family.memberId, family.adminId]);
+      const none = await seedTask(family, []);
+      const removedId = randomUUID();
+      await container.dbPool.query(
+        `insert into app.members
+          (id, family_id, role, is_family_creator, display_name, created_at, updated_at, removed_at)
+         values ($1, $2, 'member', false, 'Dora', $3, $3, $3)`,
+        [removedId, family.familyId, NOW],
+      );
+      await container.dbPool.query(
+        `insert into app.task_assignees (family_id, task_id, member_id) values ($1, $2, $3)`,
+        [family.familyId, group, removedId],
+      );
+      // Same-named member of another family must never leak into this projection.
+      await seedTask(other, [other.memberId]);
+      const mission = await createMission(family, [solo, group, none]);
+
+      for (const actor of [admin(family), member(family), kid(family)]) {
+        const view = await container.getMissionDetailUseCase.execute(actor, mission.id);
+        const byId = new Map(view.tasks.map((task) => [task.id, task]));
+        expect(byId.get(solo)).toMatchObject({
+          scheduledDate: '2026-10-28',
+          assignees: [{ memberId: family.kidId, displayName: 'Caio' }],
+        });
+        expect(byId.get(group)?.assignees).toEqual([
+          { memberId: family.adminId, displayName: 'Ana' },
+          { memberId: family.memberId, displayName: 'Bruno' },
+          { memberId: null, displayName: 'Membro removido' },
+        ]);
+        expect(byId.get(none)).toMatchObject({ scheduledDate: '2026-10-28', assignees: [] });
+        expect(view.tasks).toHaveLength(3);
+      }
+    });
+
     it('CA-04 hides a mission of another family from list and detail', async () => {
       const family = await seedFamily();
       const foreign = await seedFamily();

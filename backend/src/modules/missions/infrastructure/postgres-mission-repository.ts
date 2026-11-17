@@ -258,11 +258,29 @@ export class PostgresMissionRepository implements MissionRepositoryPort, Mission
               m.accepted_reward_source, m.accepted_reward_accepted_at,
               coalesce(array_agg(mt.task_id::text order by mt.task_id)
                 filter (where mt.task_id is not null), '{}') as task_ids,
-              coalesce(jsonb_agg(jsonb_build_object('id', t.id, 'title', t.title, 'status', t.status)
+              coalesce(jsonb_agg(jsonb_build_object(
+                  'id', t.id, 'title', t.title, 'status', t.status,
+                  'scheduledDate', to_char(t.scheduled_date, 'YYYY-MM-DD'),
+                  'assignees', ta.assignees)
                 order by t.id) filter (where t.id is not null), '[]') as tasks
          from app.missions m
          left join app.mission_tasks mt on mt.family_id = m.family_id and mt.mission_id = m.id
          left join app.task_occurrences t on t.family_id = mt.family_id and t.id = mt.task_id
+         -- SPEC-016 CA-08: responsáveis agregados por tarefa (uma linha por tarefa, sem
+         -- multiplicar task_ids). Removido/excluído vira "Membro removido" sem expor dados.
+         left join lateral (
+           select coalesce(jsonb_agg(jsonb_build_object(
+                      'memberId', case when mb.removed_at is null and mb.deleted_at is null
+                                       then mb.id::text end,
+                      'displayName', case when mb.removed_at is null and mb.deleted_at is null
+                                          then coalesce(mb.display_name, '')
+                                          else 'Membro removido' end)
+                    order by (mb.removed_at is not null or mb.deleted_at is not null),
+                             mb.display_name, mb.id), '[]') as assignees
+             from app.task_assignees a
+             join app.members mb on mb.family_id = a.family_id and mb.id = a.member_id
+            where a.family_id = t.family_id and a.task_id = t.id
+         ) ta on t.id is not null
         where m.family_id = $1 and m.id = $2
         group by m.id`,
       [familyId, missionId],

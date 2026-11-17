@@ -25,7 +25,15 @@ const COMPLETED_MISSION: MissionRecord = {
   completedAt: NOW,
   createdAt: NOW,
   taskIds: ['9f1c2b0e-5b8a-4d0f-9d6e-1f7a8b9c0d1e'],
-  tasks: [{ id: '9f1c2b0e-5b8a-4d0f-9d6e-1f7a8b9c0d1e', title: 'Lavar o carro', status: 'completed' }],
+  tasks: [
+    {
+      id: '9f1c2b0e-5b8a-4d0f-9d6e-1f7a8b9c0d1e',
+      title: 'Lavar o carro',
+      status: 'completed',
+      scheduledDate: '2026-10-10',
+      assignees: [],
+    },
+  ],
   acceptedReward: null,
 };
 
@@ -90,18 +98,16 @@ describe('AcceptMissionRewardUseCase — SPEC-017 phase 1', () => {
   });
 
   it('CA-01 accepts an eligible item for a completed mission under the family lock', async () => {
-    repository.findMission
-      .mockResolvedValueOnce(COMPLETED_MISSION)
-      .mockResolvedValueOnce({
-        ...COMPLETED_MISSION,
-        acceptedReward: {
-          rewardItemId: REWARD_ITEM_ID,
-          title: 'Escolher o filme da noite',
-          details: null,
-          source: 'predefined',
-          acceptedAt: NOW,
-        },
-      });
+    repository.findMission.mockResolvedValueOnce(COMPLETED_MISSION).mockResolvedValueOnce({
+      ...COMPLETED_MISSION,
+      acceptedReward: {
+        rewardItemId: REWARD_ITEM_ID,
+        title: 'Escolher o filme da noite',
+        details: null,
+        source: 'predefined',
+        acceptedAt: NOW,
+      },
+    });
 
     const result = await build().execute(command());
 
@@ -111,7 +117,12 @@ describe('AcceptMissionRewardUseCase — SPEC-017 phase 1', () => {
       expect.objectContaining({
         familyId: TEST_ACTOR.familyId,
         missionId: MISSION_ID,
-        reward: { id: REWARD_ITEM_ID, title: 'Escolher o filme da noite', details: null, source: 'predefined' },
+        reward: {
+          id: REWARD_ITEM_ID,
+          title: 'Escolher o filme da noite',
+          details: null,
+          source: 'predefined',
+        },
         now: NOW,
       }),
     );

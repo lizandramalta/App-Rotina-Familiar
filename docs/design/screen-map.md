@@ -1,9 +1,9 @@
-# Screen map — versão 1.26
+# Screen map — versão 1.27
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão do mapa:** 1.26\
-**Base funcional:** RN 1.28 / RF 1.27 / UC 1.27\
-**Data:** 2026-11-16\
+**Versão do mapa:** 1.27\
+**Base funcional:** RN 1.28 / RF 1.27 / UC 1.28\
+**Data:** 2026-11-17\
 **Situação:** referência inicial para design; organização de navegação proposta
 
 [Projeto](../../README.md) · [Índice e versões](../DOCUMENTACAO.md) · [Visão](../00-visao-do-produto.md) · [Regras](../01-regras-de-negocio.md) · [Requisitos](../02-requisitos.md) · [Casos de uso](../03-casos-de-uso.md) · [Diagrama de classes](../06-diagrama-de-classes.md)
@@ -271,7 +271,7 @@ A = Administrador (inclui Criador); M = Membro; K = Kids. Códigos RF e RNF são
 | TEL-015 | Confirmações Kids | A | Fila de tarefas aguardando avaliação | [UC03](../03-casos-de-uso.md#uc03); RF25–26 |
 | TEL-016 | Avaliar sinalização | A | Responsáveis, criança que sinalizou, foto opcional; confirmar ou recusar | [UC03](../03-casos-de-uso.md#uc03); RF25–26, RF55–56 |
 | TEL-020 | Missões e conquistas | A, M, K | Aba independente para adultos e Kids; listas em andamento/concluídas; abrir detalhe; criar e gerenciar itens somente A | [UC05](../03-casos-de-uso.md#uc05), [UC14](../03-casos-de-uso.md#uc14); RF28–32, RF36 |
-| TEL-021 | Detalhe da missão | A, M, K | Título, observação, tarefas, status e recompensa aceita visíveis a todos (Kids em versão simplificada); progresso e participações ficam para UC14, e o resgate é ação exclusiva de Administrador; edição somente A e conforme estado | [UC05](../03-casos-de-uso.md#uc05), [UC14](../03-casos-de-uso.md#uc14); RF29–32, RF36, RF50, RF58, RF71 |
+| TEL-021 | Detalhe da missão | A, M, K | Título, observação, tarefas (com data prevista e responsáveis), status e recompensa aceita visíveis a todos (Kids em versão simplificada); progresso e participações ficam para UC14, e o resgate é ação exclusiva de Administrador; edição somente A e conforme estado | [UC05](../03-casos-de-uso.md#uc05), [UC14](../03-casos-de-uso.md#uc14); RF29–32, RF36, RF50, RF58, RF71 |
 | TEL-022 | Criar/editar missão | A | Título, observação opcional (≤250 car.) e tarefas individuais, com atalho para criar tarefa nova; sem prazo | [UC05](../03-casos-de-uso.md#uc05); RF28–29, RF31–32, RF50, RF58, RF71 |
 | TEL-023 | Itens de recompensa | A | Consultar predefinidos e personalizados; adicionar item com título e descrição opcional | [UC06](../03-casos-de-uso.md#uc06); RF33–34 |
 | TEL-024 | Roleta da missão | A | Sortear, ver resultado, aceitar ou sortear novamente; sair sem consumir resgate | [UC16](../03-casos-de-uso.md#uc16); RF35, RF51–53 |
@@ -350,6 +350,7 @@ Campos funcionais de data/fuso e seleção de foto estão definidos; o layout vi
 
 | Versão do mapa | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.27 | RN 1.28 / RF 1.27 / UC 1.28 | 2026-11-17 | TEL-021 mostra data prevista e responsáveis de cada tarefa da trilha a todos os perfis, inclusive Kids. Para SPEC-016 CA-08. |
 | 1.26 | RN 1.28 / RF 1.27 / UC 1.27 | 2026-11-16 | TEL-058 e MOD-015 (novos): excluir conta a partir de TEL-030 para todos os perfis e de TEL-032 para Administrador com alvo Kids; TEL-001 com mensagens de conta excluída e acesso encerrado. Para SPEC-022. |
 | 1.25 | RN 1.27 / RF 1.26 / UC 1.26 | 2026-11-12 | TEL-032 e TEL-056 usam sempre “Gerar convite” e emitem direto, sem confirmação de reemissão; TEL-034 é a folha de compartilhamento. Para UX-004 (UX-06, UX-07), SCRUM-114. |
 | 1.24 | RN 1.26 / RF 1.25 / UC 1.25 | 2026-11-08 | Barra de abas somente nas telas principais; telas abertas por push a ocultam. Para UX-016 (UX-08). |

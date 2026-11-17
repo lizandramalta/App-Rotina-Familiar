@@ -16,10 +16,10 @@
 | [Índice e versões](DOCUMENTACAO.md) | Organização documental, rastreabilidade e política de versões. |
 | [Regras de negócio](01-regras-de-negocio.md) | Regras vigentes e suas relações com RF, RNF e UC; versão 1.28. |
 | [Requisitos](02-requisitos.md) | 74 requisitos funcionais e 28 não funcionais, com vínculos às regras e aos casos de uso; versão 1.27. |
-| [Especificação dos casos de uso](03-casos-de-uso.md) | 20 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições; versão 1.27. |
+| [Especificação dos casos de uso](03-casos-de-uso.md) | 20 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições; versão 1.28. |
 | [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) | Visão geral e cinco recortes UML, com fontes PlantUML e imagens SVG; fontes já incluem UC20, imagens SVG pendentes de nova renderização. |
-| [Screen map](design/screen-map.md) | Mapa 1.26: TEL-058 e MOD-015 para excluir conta a partir de TEL-030 (todos) e TEL-032 (Admin com alvo Kids); base RN 1.28 / RF 1.27 / UC 1.27. |
-| [User flows](design/user-flows.md) | Fluxos 1.27: UF-17 excluir conta, com variante do Criador e mensagem neutra de acesso encerrado; base RN 1.28 / RF 1.27 / UC 1.27 e screen map 1.26. |
+| [Screen map](design/screen-map.md) | Mapa 1.27: TEL-021 com data prevista e responsáveis por tarefa para todos os perfis; TEL-058 e MOD-015 para excluir conta; base RN 1.28 / RF 1.27 / UC 1.28. |
+| [User flows](design/user-flows.md) | Fluxos 1.28: UF-10 com data e responsáveis das tarefas da missão; UF-17 excluir conta; base RN 1.28 / RF 1.27 / UC 1.28 e screen map 1.27. |
 | [Design System](design/design-system.md) | Versão 1.0: tokens de cores, tipografia (com Sour Gummy), espaçamentos, raios, componentes base e traço procedural de giz em SwiftUI (Figma 960:25 e 870:22509). |
 | [Modelo de dados (DER)](05-modelo-de-dados.md) | Modelo 1.12: exclusão de conta com `excluido_em` e anonimização, token Apple protegido, exceção de cascata somente para a família do Criador; base RN 1.28 / RF 1.27 / UC 1.27. |
 | [Diagrama de classes](06-diagrama-de-classes.md) | Modelo 1.11: rastreabilidade de UC20 (excluir conta); base RN 1.28 / RF 1.27 / UC 1.27. |
@@ -28,7 +28,7 @@
 | [Decisões da arquitetura mobile](architecture/mobile-decisions.md) | Versão 1.10: MA-01–MA-22 e P-01–P-09, incluindo o fluxo mobile da exclusão de conta (MA-22). |
 | [Convenções de código mobile](architecture/mobile-code-conventions.md) | Convenções 1.1 de Swift/SwiftUI, SF Symbols, camadas, concorrência, segurança, testes e revisão. |
 | [Arquitetura backend](architecture/backend-architecture.md) | Backend 1.6: convite sem revogação na emissão; apuração semanal e notificações recuperáveis, além da arquitetura Node.js, Supabase/R2 e onboarding. |
-| [Contratos backend](architecture/backend-contracts.md) | Contratos 1.30 da API `/v1`: exclusão de conta (`POST /me/account-deletion`, exclusão de conta Kids) e guarda do refresh token Apple; consultas próprias de reconhecimento, com schemas OpenAPI. |
+| [Contratos backend](architecture/backend-contracts.md) | Contratos 1.31 da API `/v1`: detalhe da missão com data e responsáveis por tarefa; exclusão de conta (`POST /me/account-deletion`, exclusão de conta Kids) e guarda do refresh token Apple; consultas próprias de reconhecimento, com schemas OpenAPI. |
 | [Decisões backend](architecture/backend-decisions.md) | BA-01–BA-40, versão 1.9: BA-40 com guarda cifrada do token Apple e filas pós-commit de revogação e limpeza R2. |
 | [Convenções de código backend](architecture/backend-code-conventions.md) | Convenções de TypeScript/Fastify, camadas, contratos, SQL, segurança, testes e revisão. |
 | [Specs de entrega](../specs/README.md) | Recortes aprovados de implementação compartilhados entre mobile e backend. |
@@ -136,7 +136,7 @@ TEL-014 e TEL-031 permanecem reservadas e fora da navegação; a carga visual fi
 
 ## Política de versionamento
 
-1. A base funcional vigente está na versão **1.28** (regras 1.28, requisitos 1.27 e casos de uso 1.27). O índice documental está na versão **1.44** por consolidar também registros técnicos e de apresentação. Screen map e user flows têm versionamento independente; as arquiteturas mobile e backend também. Documentos alinhados a uma versão funcional anterior devem ser atualizados quando o comportamento que descrevem for afetado.
+1. A base funcional vigente está na versão **1.28** (regras 1.28, requisitos 1.27 e casos de uso 1.28). O índice documental está na versão **1.45** por consolidar também registros técnicos e de apresentação. Screen map e user flows têm versionamento independente; as arquiteturas mobile e backend também. Documentos alinhados a uma versão funcional anterior devem ser atualizados quando o comportamento que descrevem for afetado.
 2. Preserve os identificadores RN, RF, RNF, UC, TEL, MOD e UF. Novos itens recebem novos códigos; códigos retirados não são reutilizados.
 3. A edição vigente fica na raiz e em `docs/`. O Git mantém o histórico e permite comparar ou recuperar versões anteriores por commits e, quando adotadas, tags. Não mantenha cópias da documentação em pastas de versões.
 4. Alterações funcionais e suas referências devem evoluir juntas, com versão, data e histórico dos códigos e comportamentos afetados. Use 1.1, 1.2... para revisões incrementais e 2.0 para mudanças substanciais da base funcional.
@@ -149,6 +149,7 @@ A fundação backend adota Node.js, TypeScript, Fastify e `pg`. Parte da API de 
 
 | Versão | Data | Alteração |
 | --- | --- | --- |
+| 1.45 | 2026-11-17 | SPEC-016 CA-08: UC14 (1.28) apresenta data prevista e responsáveis de cada tarefa vinculada a todos os perfis; mapa 1.27, fluxos 1.28, contratos 1.31, SPEC-016 e UX-016 revisadas (trilha de alta fidelidade de TEL-021). |
 | 1.44 | 2026-11-17 | SPEC-022 (exclusão de conta): RN69/RN70 e ajustes em RN05/07/10/30/31/44/47/61/62 (1.28); RF72–RF74, RNF28 e ajustes em RF04/37/39 e RNF09/15/16/22/24 (1.27); UC20 e ajustes em UC02/04/10 (1.27); modelo 1.12, classes 1.11, screen map 1.26, fluxos 1.27, contratos 1.30, BA-40 e MA-22. SVGs de caso de uso aguardam nova renderização. |
 | 1.43 | 2026-11-16 | Identidade Mora: nome público, textos e ícone provisório substituem Mutua, mantendo o bundle ID `com.lizandramalta.mutua`; registro da preparação para a App Store; Design System 1.1; sem mudança da base funcional. |
 | 1.42 | 2026-11-12 | SCRUM-114: RN46/RN47 (1.27), RF41/RF46/RF54/RNF22 (1.26) e UC01/UC02/UC09 (1.26) tornam toda emissão de convite direta, sem confirmação; a emissão invalida convites anteriores disponíveis e preserva a sessão, revogada com tokens e push no ingresso pelo novo convite. SPEC-004 E-05, SPEC-005 E-04, UX-004 UX-06/UX-07, UX-002 UX-06/UX-07; mapa 1.25, fluxos 1.26, visão 1.9, DER 1.11, classes 1.10, arquitetura mobile 1.7, catálogo 1.14, MA 1.9, backend 1.6, contratos 1.29 e BA 1.8. |

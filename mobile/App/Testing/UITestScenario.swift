@@ -1317,7 +1317,13 @@ private actor UITestMissionRepository: MissionRepository {
         let isKids = scenario == .missionManagementKids
         let tasks = mission.taskIDs.map { taskID in
             let fixture = Self.linkedTasks[taskID]
-            return MissionLinkedTask(id: taskID, title: fixture?.title ?? "Nova tarefa", status: fixture?.status ?? .pending)
+            return MissionLinkedTask(
+                id: taskID,
+                title: fixture?.title ?? "Nova tarefa",
+                status: fixture?.status ?? .pending,
+                scheduledDate: fixture?.scheduledDate ?? "2026-10-28",
+                assignees: fixture?.assignees ?? []
+            )
         }
         let reward = acceptedRewards[id]
         return MissionDetail(
@@ -1365,10 +1371,28 @@ private actor UITestMissionRepository: MissionRepository {
         )
     }
 
-    private static let linkedTasks: [UUID: (title: String, status: TaskStatus)] = [
-        UITestTaskFixtures.pendingTaskID: ("Arrumar os brinquedos", .pending),
-        UITestTaskFixtures.completedTaskID: ("Lavar a louça", .completed),
-        UITestTaskFixtures.awaitingConfirmationTaskID: ("Guardar a roupa", .awaitingConfirmation),
+    private typealias LinkedTaskFixture = (
+        title: String, status: TaskStatus, scheduledDate: String, assignees: [MissionTaskAssignee]
+    )
+
+    /// SPEC-016 CA-08: individual pending, group completed (with a removed member) and individual
+    /// awaiting confirmation, so TEL-021 shows every node tone and secondary line.
+    private static let linkedTasks: [UUID: LinkedTaskFixture] = [
+        UITestTaskFixtures.pendingTaskID: (
+            "Arrumar os brinquedos", .pending, "2026-10-10",
+            [MissionTaskAssignee(memberID: UITestTaskFixtures.kidMemberID, displayName: "Rafa Silva")]
+        ),
+        UITestTaskFixtures.completedTaskID: (
+            "Lavar a louça", .completed, "2026-10-08",
+            [
+                MissionTaskAssignee(memberID: UITestTaskFixtures.memberID, displayName: "Ana Silva"),
+                MissionTaskAssignee(memberID: nil, displayName: "Membro removido"),
+            ]
+        ),
+        UITestTaskFixtures.awaitingConfirmationTaskID: (
+            "Guardar a roupa", .awaitingConfirmation, "2026-10-09",
+            [MissionTaskAssignee(memberID: UITestTaskFixtures.kidMemberID, displayName: "Rafa Silva")]
+        ),
     ]
 
     private static let participations: [MissionParticipation] = [

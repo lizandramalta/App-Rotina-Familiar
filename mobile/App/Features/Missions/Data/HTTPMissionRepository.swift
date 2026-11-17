@@ -45,10 +45,19 @@ nonisolated private struct MissionListResponseDTO: Decodable {
     let completed: [MissionSummaryDTO]
 }
 
+nonisolated private struct MissionTaskAssigneeDTO: Decodable {
+    let memberId: UUID?
+    let displayName: String
+}
+
+/// SPEC-016 CA-08 adds `scheduledDate` and `assignees`; both optional here so a server without
+/// them still decodes (the fields are additive).
 nonisolated private struct MissionLinkedTaskDTO: Decodable {
     let id: UUID
     let title: String
     let status: TaskStatus
+    let scheduledDate: String?
+    let assignees: [MissionTaskAssigneeDTO]?
 }
 
 nonisolated private struct MissionParticipationDTO: Decodable {
@@ -254,7 +263,17 @@ nonisolated struct HTTPMissionRepository: MissionRepository {
             title: dto.title,
             note: dto.note,
             status: dto.status,
-            tasks: dto.tasks.map { MissionLinkedTask(id: $0.id, title: $0.title, status: $0.status) },
+            tasks: dto.tasks.map { task in
+                MissionLinkedTask(
+                    id: task.id,
+                    title: task.title,
+                    status: task.status,
+                    scheduledDate: task.scheduledDate,
+                    assignees: (task.assignees ?? []).map {
+                        MissionTaskAssignee(memberID: $0.memberId, displayName: $0.displayName)
+                    }
+                )
+            },
             completedAt: dto.completedAt,
             progressPercent: dto.progressPercent,
             isRedemptionAvailable: dto.isRedemptionAvailable,
