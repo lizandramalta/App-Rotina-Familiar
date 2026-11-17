@@ -12,6 +12,8 @@ final class KidsSignalDetailViewModel {
     private(set) var failed = false
     private(set) var photoFailed = false
     private(set) var resolved = false
+    /// The signal was no longer pending when first opened: nothing was decided here (UX-013 §6 `NotFound`).
+    private(set) var isUnavailable = false
 
     private let id: UUID
     private let repository: any KidsSignalRepository
@@ -41,8 +43,10 @@ final class KidsSignalDetailViewModel {
                 }
             }
         } catch KidsSignalError.notFound {
+            // A signal that was on screen and is now gone was decided elsewhere: reconcile silently.
+            // One that never loaded is shown as unavailable instead of disappearing.
+            if detail == nil { isUnavailable = true } else { resolved = true }
             detail = nil
-            resolved = true
         } catch KidsSignalError.actionNotAllowed {
             detail = nil
             failed = true

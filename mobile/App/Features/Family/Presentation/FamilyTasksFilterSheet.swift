@@ -40,90 +40,72 @@ struct FamilyTasksFilterSheet: View {
         self.onApply = onApply
     }
 
+    private enum Field { case start, end }
+    @State private var expandedField: Field?
+    @State private var detent: PresentationDetent = Self.compactDetent
+    private static let compactDetent = PresentationDetent.height(518)
+
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                Button { dismiss() } label: {
-                    Image(systemName: "xmark")
-                        .font(.subheadline.weight(.semibold))
-                        .frame(width: 44, height: 44)
-                        .contentShape(Circle())
-                        .background(Color(uiColor: .secondarySystemGroupedBackground), in: Circle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("family.settings.hub.cancel")
-                Spacer()
-                Button("family.period.clear") { clear() }
-                    .font(.subheadline)
-                    .foregroundStyle(isDefault ? Color(uiColor: .tertiaryLabel) : .primary)
-                    .fixedSize(horizontal: true, vertical: false)
-                    .disabled(isDefault)
-                    .frame(minWidth: 54, minHeight: 44)
-                    .buttonStyle(.plain)
-                    .accessibilityIdentifier("family.tasks.filter.clear")
-            }
-            .overlay { Text("family.period.filter_title").font(.headline).allowsHitTesting(false) }
-            .padding(.bottom, 18)
+            FamilyFilterSheetTopBar(
+                clearIdentifier: "family.tasks.filter.clear",
+                isDefault: isDefault,
+                onClear: clear,
+                onClose: { dismiss() }
+            )
+            .padding(.bottom, AppSpacing.xl)
 
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("family.period.section")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: AppSpacing.xxl) {
+                    VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                        sectionTitle("family.period.section")
                         VStack(spacing: 0) {
-                            DatePicker("family.period.start", selection: $start,
-                                       in: firstDate ... lastDate, displayedComponents: .date)
-                                .accessibilityIdentifier("family.period.start")
-                            Divider()
-                            DatePicker("family.period.end", selection: $end,
-                                       in: start ... lastDate, displayedComponents: .date)
-                                .accessibilityIdentifier("family.period.end")
+                            FamilyDateCapsuleRow(
+                                title: "family.period.start", identifier: "family.period.start",
+                                selection: $start, bounds: firstDate ... lastDate,
+                                isExpanded: expandedField == .start, onToggle: { toggle(.start) }
+                            )
+                            Rectangle()
+                                .fill(Color.App.Border.separator)
+                                .frame(height: 1)
+                            FamilyDateCapsuleRow(
+                                title: "family.period.end", identifier: "family.period.end",
+                                selection: $end, bounds: start ... lastDate,
+                                isExpanded: expandedField == .end, onToggle: { toggle(.end) }
+                            )
                         }
-                        .datePickerStyle(.compact)
-                        .padding(.horizontal, 16)
-                        .background(Color(uiColor: .secondarySystemGroupedBackground),
-                                    in: RoundedRectangle(cornerRadius: 18))
+                        .padding(.horizontal, AppSpacing.lg)
+                        .appCard(cornerRadius: AppRadius.cardBoard)
                     }
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("family.tasks.filter.status")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(.secondary)
-                        HStack(spacing: 8) {
-                            statusChip(.all)
-                            statusChip(.pending)
-                        }
-                        HStack(spacing: 8) {
-                            if statuses.contains(.awaitingConfirmation) {
-                                statusChip(.awaitingConfirmation)
-                            }
-                            statusChip(.completed)
+                    VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                        sectionTitle("family.tasks.filter.status")
+                        // Wrapping chips: every allowed status stays visible without initial scrolling (UX-009).
+                        FamilyFlowLayout(spacing: AppSpacing.sm) {
+                            ForEach(statuses, id: \.self) { statusChip($0) }
                         }
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .scrollBounceBehavior(.basedOnSize)
+
             Button {
                 onApply(selectedRange, status)
                 dismiss()
             } label: {
                 Text(applyTitle)
-                    .font(.headline)
-                    .frame(maxWidth: .infinity, minHeight: 50)
-                    .foregroundStyle(.white)
-                    .background(Color(red: 0.11, green: 0.11, blue: 0.12), in: Capsule())
-                    .contentShape(Capsule())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(AppPillButtonStyle(kind: .primary))
             .disabled(start > end)
+            .padding(.top, AppSpacing.md)
             .accessibilityIdentifier("family.period.apply")
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 20)
-        .padding(.bottom, 16)
-        .background(Color(uiColor: .systemGroupedBackground).ignoresSafeArea())
+        .padding(.horizontal, AppSpacing.lg)
+        .padding(.top, AppSpacing.xxl)
+        .padding(.bottom, AppSpacing.lg)
+        .background(Color.App.Background.app.ignoresSafeArea())
         .environment(\.timeZone, TimeZone(identifier: timeZoneID) ?? .current)
-        .presentationDetents([.height(518), .large])
+        .presentationDetents([Self.compactDetent, .large], selection: $detent)
         .presentationDragIndicator(.visible)
         .onChange(of: start) { _, value in
             if end < value { end = value }
@@ -139,19 +121,27 @@ struct FamilyTasksFilterSheet: View {
         }
     }
 
+    private func sectionTitle(_ key: LocalizedStringKey) -> some View {
+        Text(key)
+            .font(.app(.subtitleStrong))
+            .foregroundStyle(Color.App.Text.secondary)
+            .padding(.leading, AppSpacing.xs)
+    }
+
+    private func toggle(_ field: Field) {
+        withAnimation(.snappy) {
+            expandedField = expandedField == field ? nil : field
+            if expandedField != nil { detent = .large }
+        }
+    }
+
     private func statusChip(_ value: FamilyTaskStatusFilter) -> some View {
         Button {
             status = value
         } label: {
             Text(title(value))
-                .font(.subheadline.weight(status == value ? .semibold : .regular))
-                .padding(.horizontal, 14)
-                .frame(minHeight: 36)
-                .background(status == value ? Color(red: 0.11, green: 0.11, blue: 0.12) : .white,
-                            in: Capsule())
-                .overlay(Capsule().strokeBorder(status == value ? .clear : Color(uiColor: .separator), lineWidth: 0.5))
-                .foregroundStyle(status == value ? Color.white : Color.primary)
-                .fixedSize(horizontal: true, vertical: false)
+                .padding(.horizontal, AppSpacing.base)
+                .familyChip(isSelected: status == value)
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(status == value ? .isSelected : [])
@@ -186,12 +176,7 @@ struct FamilyTasksFilterSheet: View {
     }
 
     private var defaultRange: (start: Date, end: Date) {
-        let calendar = Self.calendar(for: timeZoneID)
-        let today = calendar.startOfDay(for: Date())
-        let weekday = calendar.component(.weekday, from: today)
-        let monday = calendar.date(byAdding: .day, value: -((weekday + 5) % 7), to: today) ?? today
-        let sunday = calendar.date(byAdding: .day, value: 6, to: monday) ?? today
-        return (max(monday, firstDate), min(sunday, lastDate))
+        FamilyRangeFilterSheet.defaultRange(firstDate: firstDate, lastDate: lastDate, timeZoneID: timeZoneID)
     }
 
     private var isDefault: Bool {

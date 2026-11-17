@@ -1,13 +1,13 @@
 # Regras de negócio
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.27\
-**Data:** 2026-11-12\
+**Versão:** 1.28\
+**Data:** 2026-11-16\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
 
-Este documento contém as regras vigentes da versão 1.27. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
+Este documento contém as regras vigentes da versão 1.28. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
 
 **Identificadores preservados:** RN15, RN29 e RN32 não estavam definidos na base recebida e permanecem não utilizados. Não representam conteúdo faltante desta versão.
 
@@ -472,13 +472,13 @@ A exclusão de tarefa não concluída remove seus vínculos com missões em anda
 
 ## RN60
 
-Administradores e Membros acessam a área Família (Minha família), que apresenta o progresso coletivo e a lista de membros para um intervalo de datas. A consulta inicial usa a semana corrente. O filtro Início/Fim aceita qualquer intervalo válido dentro de RN49. Selecionar um membro abre o detalhe inicialmente no dia atual, com abas Dia e Semana. A aba Semana consulta domingo a sábado no fuso da família, recortada pelos limites de RN49; ao voltar, a Família recupera o mesmo intervalo e os filtros. Para consultar outros intervalos do membro, usa-se Tarefas da família. A consulta complementar Tarefas da família mantém o intervalo e inclui tarefas sem responsável.
+Administradores e Membros acessam a área Família (Minha família), que apresenta o progresso coletivo e a lista de membros para um intervalo de datas. A consulta inicial usa o dia atual (diário) no fuso da família. O filtro Início/Fim aceita qualquer intervalo válido dentro de RN49. Selecionar um membro abre o detalhe inicialmente no dia atual, com abas Dia e Semana. A aba Semana consulta domingo a sábado no fuso da família, recortada pelos limites de RN49; ao voltar, a Família recupera o mesmo intervalo e os filtros. Para consultar outros intervalos do membro, usa-se Tarefas da família. A consulta complementar Tarefas da família mantém o intervalo e inclui tarefas sem responsável.
 
 O progresso familiar é a quantidade de tarefas concluídas dentre as tarefas previstas para o período dividida pelo total de tarefas previstas para esse período. Cada tarefa conta uma vez, independentemente do peso ou dos responsáveis, incluindo as sem responsável no total. Pendentes e Aguardando confirmação não entram no numerador. Sem tarefas, apresentar “Sem tarefas”, sem divisão por zero. Alterações válidas atualizam o indicador.
 
 Na Família, um cartão destaca cada membro ativo que concluiu todas as tarefas atribuídas **hoje**, desde que tenha ao menos uma tarefa no dia. Outro cartão destaca cada membro ativo com a maior quantidade positiva de tarefas atribuídas no intervalo visível, incluindo todos os empatados no máximo quando há ao menos dois membros ativos. O primeiro cartão usa sempre o dia atual no fuso da família, mesmo quando o filtro da tela cobre outro período. Esses destaques não alteram o progresso nem o crédito de carga.
 
-Um Administrador pode parabenizar qualquer **outro** membro ativo da mesma família, inclusive Kids, a partir do destaque da Família. Cada confirmação gera uma mensagem no aplicativo para o destinatário e uma intenção de notificação push, mesmo se o mesmo Administrador já o parabenizou no intervalo. O envio push depende de dispositivo registrado e não condiciona a mensagem no aplicativo. O destinatário pode fechar a mensagem para ocultá-la da interface; o evento permanece registrado. A reabertura posterior de tarefa não apaga os parabéns já enviados. Membros e Kids não podem enviar parabéns.
+Um Administrador pode parabenizar qualquer **outro** membro ativo da mesma família, inclusive Kids, a partir do destaque da Família. Cada envio gera uma mensagem no aplicativo para o destinatário e uma intenção de notificação push. Após enviar o parabéns, o cartão correspondente retira-se da lista de atualizações da Família e permanece oculto para aquele Administrador no mesmo período/dia ao recarregar, evitando ocupar espaço repetido na tela. O envio push depende de dispositivo registrado e não condiciona a mensagem no aplicativo. O destinatário pode fechar a mensagem para ocultá-la da interface; o evento permanece registrado. A reabertura posterior de tarefa não apaga os parabéns já enviados. Membros e Kids não podem enviar parabéns.
 
 Gerar relatório semanal em PDF fica no menu de Tarefas da família para adultos. Configurações da família reúne Adicionar membro, exclusivamente para Administradores, e o acesso às configurações de nome e fuso. Alterar papel, remover membro e gerar/reenviar convite ficam no detalhe do membro, exclusivamente para Administradores e conforme as restrições do perfil; a correção do nome administrativo de Kids fica em Configurações da família e no topo do detalhe Kids para Administrador autorizado; não permitem editar apelido de terceiros. A emissão inicial ocorre por ação explícita; na reemissão, informar os efeitos sobre convites e sessão anteriores antes de confirmar. O Criador retorna por Apple. Confirmações Kids permanecem exclusivas dos Administradores. Kids não acessam esta área.
 
@@ -490,7 +490,7 @@ Gerar relatório semanal em PDF fica no menu de Tarefas da família para adultos
 
 **Tema:** Períodos e métricas
 
-Minhas tarefas (todos os perfis) é uma consulta diária: mostra as tarefas próprias e o progresso da data selecionada. Minha família e Tarefas da família (adultos) compartilham um filtro Início/Fim livre, inclusivo, com Início menor ou igual a Fim e ambas as datas dentro de RN49. O detalhe do membro inicia no dia atual e permite alternar para a semana visual de domingo a sábado no fuso da família, recortada pelos limites de RN49. Essa semana visual não altera a semana de segunda a domingo usada para progresso familiar, carga, PDF e apuração. A seleção inicial é a semana corrente (segunda a domingo), recortada pelos limites de RN49 quando necessário. O progresso pessoal conta tarefas próprias concluídas sobre o total próprio previsto no dia; o familiar usa RN60 e calcula concluídas/total do intervalo inteiro, nunca a média dos percentuais diários.
+Minhas tarefas (todos os perfis) é uma consulta diária: mostra as tarefas próprias e o progresso da data selecionada. Minha família e Tarefas da família (adultos) compartilham um filtro Início/Fim livre, inclusivo, com Início menor ou igual a Fim e ambas as datas dentro de RN49. O detalhe do membro inicia no dia atual e permite alternar para a semana visual de domingo a sábado no fuso da família, recortada pelos limites de RN49. Essa semana visual não altera a semana de segunda a domingo usada para progresso familiar, carga, PDF e apuração. A seleção inicial da Família é o dia atual (diário) no fuso da família, recortado pelos limites de RN49 quando necessário. O progresso pessoal conta tarefas próprias concluídas sobre o total próprio previsto no dia; o familiar usa RN60 e calcula concluídas/total do intervalo inteiro, nunca a média dos percentuais diários.
 
 A carga/sobrecarga usa a data da conclusão válida, enquanto o progresso usa as tarefas previstas para o período e seu estado atual. Uma tarefa atrasada pode contribuir para a carga de hoje e para o progresso do dia em que estava prevista. Crédito histórico de perfil removido permanece em linha identificada como “Membro removido”. A carga indica participação creditada, sem limiar de diagnóstico de sobrecarga definido. Seleção, gráficos e rótulos devem explicitar período e métrica. Sem tarefas ou carga, informar ausência de dados; não simular 100%.
 

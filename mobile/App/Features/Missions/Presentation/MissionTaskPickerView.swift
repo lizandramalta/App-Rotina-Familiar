@@ -66,6 +66,7 @@ struct MissionTaskPickerView: View {
                         } label: {
                             Image(systemName: "checkmark")
                         }
+                        .tint(Color.App.Text.primary)
                         .accessibilityIdentifier("missions.task_picker.confirm")
                         .accessibilityLabel(Text("missions.task_picker.confirm_label"))
                     }
@@ -139,7 +140,7 @@ struct MissionTaskPickerView: View {
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(isSelected ? Color.accentColor : .secondary)
+                    .foregroundStyle(isSelected ? Color.App.Text.primary : Color.App.Text.secondary)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(task.title)
                         .foregroundStyle(.primary)

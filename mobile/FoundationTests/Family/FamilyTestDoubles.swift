@@ -35,6 +35,10 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
     private var changeTimeZoneResults: [Result<FamilySettings, Error>]
     private var listMembersResults: [Result<FamilyMemberPage, Error>]
     private var memberDetailResult: Result<FamilyMemberDetail, Error>
+    private var applauseSummaries: [FamilyApplauseSummary] = []
+    private var sendApplauseResult: Result<Void, Error> = .failure(FamilyError.unavailable)
+    private var changeRoleResult: Result<FamilyMember, Error> = .failure(FamilyError.unavailable)
+    private var removeResult: Result<Void, Error> = .failure(FamilyError.unavailable)
     private var memberNameUpdateResult: Result<FamilyMember, Error> = .failure(FamilyError.unavailable)
     private var _memberNameUpdateRequests: [(UUID, String)] = []
     private var inviteResults: [Result<MemberInvite, Error>]
@@ -80,6 +84,38 @@ final class FamilyRepositorySpy: FamilyRepository, @unchecked Sendable {
 
     func setMemberNameUpdateResult(_ result: Result<FamilyMember, Error>) {
         lock.withLock { memberNameUpdateResult = result }
+    }
+
+    func setApplauseSummaries(_ summaries: [FamilyApplauseSummary]) {
+        lock.withLock { applauseSummaries = summaries }
+    }
+
+    func setSendApplauseResult(_ result: Result<Void, Error>) {
+        lock.withLock { sendApplauseResult = result }
+    }
+
+    func listFamilyApplause(range: FamilyDateRange, accessToken: String) async throws -> [FamilyApplauseSummary] {
+        lock.withLock { applauseSummaries }
+    }
+
+    func sendFamilyApplause(memberID: UUID, range: FamilyDateRange, accessToken: String) async throws {
+        try lock.withLock { try sendApplauseResult.get() }
+    }
+
+    func setChangeRoleResult(_ result: Result<FamilyMember, Error>) {
+        lock.withLock { changeRoleResult = result }
+    }
+
+    func setRemoveResult(_ result: Result<Void, Error>) {
+        lock.withLock { removeResult = result }
+    }
+
+    func changeMemberRole(memberID: UUID, role: MemberRole, accessToken: String) async throws -> FamilyMember {
+        try lock.withLock { try changeRoleResult.get() }
+    }
+
+    func removeMember(memberID: UUID, accessToken: String) async throws {
+        try lock.withLock { try removeResult.get() }
     }
 
     var memberNameUpdateRequests: [(UUID, String)] { lock.withLock { _memberNameUpdateRequests } }

@@ -39,50 +39,49 @@ struct FamilyRangeFilterSheet: View {
         self.onApply = onApply
     }
 
+    private enum Field { case start, end }
+    @State private var expandedField: Field?
+    @State private var detent: PresentationDetent = Self.compactDetent
+    private static let compactDetent = PresentationDetent.height(372)
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack {
-                Button { dismiss() } label: {
-                    Image(systemName: "xmark")
-                        .font(.subheadline.weight(.semibold))
-                        .frame(width: 44, height: 44)
-                        .contentShape(Circle())
-                        .background(Color(uiColor: .secondarySystemGroupedBackground), in: Circle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("family.settings.hub.cancel")
-                Spacer()
-                Button("family.period.clear") { clear() }
-                    .font(.subheadline)
-                    .foregroundStyle(isDefault ? Color(uiColor: .tertiaryLabel) : .primary)
-                    .fixedSize(horizontal: true, vertical: false)
-                    .frame(minWidth: 54, minHeight: 44)
-                    .buttonStyle(.plain)
-                    .disabled(isDefault)
-                    .accessibilityIdentifier("family.overview.filter.clear")
-            }
-            .overlay { Text("family.period.filter_title").font(.headline).allowsHitTesting(false) }
-            .padding(.bottom, 18)
+        VStack(spacing: 0) {
+            FamilyFilterSheetTopBar(
+                clearIdentifier: "family.overview.filter.clear",
+                isDefault: isDefault,
+                onClear: clear,
+                onClose: { dismiss() }
+            )
+            .padding(.bottom, AppSpacing.xl)
 
-            VStack(alignment: .leading, spacing: 10) {
-                Text("family.period.section")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .padding(.leading, 4)
+            ScrollView {
+                VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                    Text("family.period.section")
+                        .font(.app(.subtitleStrong))
+                        .foregroundStyle(Color.App.Text.secondary)
+                        .padding(.leading, AppSpacing.xs)
 
-                VStack(spacing: 0) {
-                    DatePicker("family.period.start", selection: $start, in: firstDate ... lastDate, displayedComponents: .date)
-                        .accessibilityIdentifier("family.period.start")
-                    Divider()
-                    DatePicker("family.period.end", selection: $end, in: start ... lastDate, displayedComponents: .date)
-                        .accessibilityIdentifier("family.period.end")
+                    VStack(spacing: 0) {
+                        FamilyDateCapsuleRow(
+                            title: "family.period.start", identifier: "family.period.start",
+                            selection: $start, bounds: firstDate ... lastDate,
+                            isExpanded: expandedField == .start, onToggle: { toggle(.start) }
+                        )
+                        Rectangle()
+                            .fill(Color.App.Border.separator)
+                            .frame(height: 1)
+                        FamilyDateCapsuleRow(
+                            title: "family.period.end", identifier: "family.period.end",
+                            selection: $end, bounds: start ... lastDate,
+                            isExpanded: expandedField == .end, onToggle: { toggle(.end) }
+                        )
+                    }
+                    .padding(.horizontal, AppSpacing.lg)
+                    .appCard(cornerRadius: AppRadius.cardBoard)
                 }
-                .datePickerStyle(.compact)
-                .padding(.horizontal, 16)
-                .frame(maxWidth: .infinity)
-                .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 20))
             }
-            Spacer(minLength: 0)
+            .scrollBounceBehavior(.basedOnSize)
+
             Button {
                 let calendar = Self.calendar(for: timeZoneID)
                 onApply(FamilyDateRange(
@@ -92,22 +91,18 @@ struct FamilyRangeFilterSheet: View {
                 dismiss()
             } label: {
                 Text(applyTitle)
-                    .font(.headline)
-                    .frame(maxWidth: .infinity, minHeight: 50)
-                    .foregroundStyle(.white)
-                    .background(Color(red: 0.11, green: 0.11, blue: 0.12), in: Capsule())
-                    .contentShape(Capsule())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(AppPillButtonStyle(kind: .primary))
             .disabled(start > end)
+            .padding(.top, AppSpacing.md)
             .accessibilityIdentifier("family.period.apply")
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 20)
-        .padding(.bottom, 16)
+        .padding(.horizontal, AppSpacing.lg)
+        .padding(.top, AppSpacing.xxl)
+        .padding(.bottom, AppSpacing.lg)
         .environment(\.timeZone, TimeZone(identifier: timeZoneID) ?? .current)
-        .background(Color(uiColor: .systemGroupedBackground).ignoresSafeArea())
-        .presentationDetents([.height(372), .large])
+        .background(Color.App.Background.app.ignoresSafeArea())
+        .presentationDetents([Self.compactDetent, .large], selection: $detent)
         .presentationDragIndicator(.visible)
         .onChange(of: start) { _, newValue in
             if end < newValue { end = newValue }
@@ -120,6 +115,14 @@ struct FamilyRangeFilterSheet: View {
             } catch {
                 previewCount = nil
             }
+        }
+    }
+
+    private func toggle(_ field: Field) {
+        withAnimation(.snappy) {
+            expandedField = expandedField == field ? nil : field
+            // The inline calendar does not fit the compact detent.
+            if expandedField != nil { detent = .large }
         }
     }
 
@@ -141,12 +144,31 @@ struct FamilyRangeFilterSheet: View {
     private var previewKey: String { "\(selectedRange.startDate)|\(selectedRange.endDate)" }
 
     private var defaultRange: (start: Date, end: Date) {
-        let calendar = Self.calendar(for: timeZoneID)
-        let today = calendar.startOfDay(for: .now)
-        let weekday = calendar.component(.weekday, from: today)
-        let monday = calendar.date(byAdding: .day, value: -((weekday + 5) % 7), to: today) ?? today
-        let sunday = calendar.date(byAdding: .day, value: 6, to: monday) ?? today
-        return (max(monday, firstDate), min(sunday, lastDate))
+        Self.defaultRange(firstDate: firstDate, lastDate: lastDate, timeZoneID: timeZoneID)
+    }
+
+    /// Today in the family time zone, clamped to RN49 bounds: the initial selection and what "Limpar" restores
+    /// (RN60/RN61, SPEC-009 E-13).
+    static func defaultRange(
+        firstDate: Date, lastDate: Date, timeZoneID: String, now: Date = .now
+    ) -> (start: Date, end: Date) {
+        let today = calendar(for: timeZoneID).startOfDay(for: now)
+        let clamped = min(max(today, firstDate), lastDate)
+        return (clamped, clamped)
+    }
+
+    /// Whether `range` differs from the default day, so the header filter shows as active.
+    static func isCustomRange(
+        _ range: FamilyDateRange, familyCreatedAt: String, timeZoneID: String, now: Date = .now
+    ) -> Bool {
+        let calendar = calendar(for: timeZoneID)
+        let first = date(from: familyCreatedAt, calendar: calendar) ?? now
+        let lastDay = calendar.dateInterval(of: .month, for: now)?.end.addingTimeInterval(-1) ?? now
+        let value = defaultRange(
+            firstDate: first, lastDate: calendar.startOfDay(for: lastDay), timeZoneID: timeZoneID, now: now
+        )
+        return range.startDate != string(from: value.start, calendar: calendar)
+            || range.endDate != string(from: value.end, calendar: calendar)
     }
 
     private var isDefault: Bool {

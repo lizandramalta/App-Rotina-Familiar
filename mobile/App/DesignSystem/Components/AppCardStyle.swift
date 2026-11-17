@@ -2,7 +2,7 @@ import SwiftUI
 
 extension View {
     /// High-fidelity card surface (Figma TEL-010/TEL-012 cards): white card, 2 pt `Border.card`
-    /// stroke and the soft Figma shadow 0 6 15 rgba(47, 60, 17, 0.07) — approximated with
+    /// chalk border (never a flat outline) and the soft Figma shadow 0 6 15 rgba(47, 60, 17, 0.07) — approximated with
     /// `Action.primary`, the closest token hue.
     func appCard(cornerRadius: CGFloat = AppRadius.cardBoard) -> some View {
         background(
@@ -10,10 +10,7 @@ extension View {
                 .fill(Color.App.Background.card)
                 .shadow(color: Color.App.Action.primary.opacity(0.07), radius: 7.5, y: 6)
         )
-        .overlay(
-            RoundedRectangle(cornerRadius: cornerRadius)
-                .strokeBorder(Color.App.Border.card, lineWidth: 2)
-        )
+        .chalkStrokeBorder(RoundedRectangle(cornerRadius: cornerRadius), color: Color.App.Border.card, lineWidth: 2)
     }
 
     /// Primary green pill surface (Figma "Alta / Botões / Primário"): `Action.primarySoft` fill with
@@ -90,7 +87,7 @@ struct AppPillButtonStyle: ButtonStyle {
         private var stroke: some View {
             switch style.kind {
             case .primary: Color.clear.appPrimaryPillBorder()
-            case .secondary: Capsule().strokeBorder(Color.App.Border.separator, lineWidth: 1.5)
+            case .secondary: Color.clear.chalkStrokeBorder(Capsule(), color: Color.App.Border.separator, lineWidth: 1.5)
             case .highlight: EmptyView()
             }
         }

@@ -159,16 +159,11 @@ async function resolveRange(
   let startDate: string;
   let endDate: string;
   if (allowDefault && startInput === undefined && endInput === undefined) {
+    // RN60/RN61 (SPEC-009 E-13): the initial Family selection is today in the family time zone.
+    // Today never precedes the family's creation day nor passes the month's last day (RN49).
     const today = localDate(deps.clock.now(), calendar.timeZoneId);
-    const monday = new Date(today + 'T00:00:00.000Z');
-    monday.setUTCDate(monday.getUTCDate() - ((monday.getUTCDay() + 6) % 7));
-    const sunday = new Date(monday);
-    sunday.setUTCDate(sunday.getUTCDate() + 6);
-    startDate = monday.toISOString().slice(0, 10);
-    endDate = sunday.toISOString().slice(0, 10);
-    if (startDate < familyCreatedAt) startDate = familyCreatedAt;
-    const lastDate = lastDayOfMonth(deps.clock.now(), calendar.timeZoneId);
-    if (endDate > lastDate) endDate = lastDate;
+    startDate = today < familyCreatedAt ? familyCreatedAt : today;
+    endDate = startDate;
   } else {
     startDate = validateDate(startInput, 'startDate');
     endDate = validateDate(endInput, 'endDate');

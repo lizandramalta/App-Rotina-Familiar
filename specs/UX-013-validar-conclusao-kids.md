@@ -51,10 +51,10 @@ Voltar de TEL-016 sem decidir não altera a sinalização. Não há rascunho ou 
 
 ### 5.2. TEL-016 — Avaliar sinalização
 
-- **Cabeçalho:** voltar para a fila, sem menu de edição.
-- **Conteúdo:** título/observação da tarefa quando existente, responsáveis, criança que sinalizou, data/hora e estado "Aguardando confirmação".
-- **Foto:** quando disponível, preview acessível que abre visualização privada; quando ausente, texto "Nenhuma foto foi enviada" sem tom de falha.
-- **Rodapé:** botão primário "Confirmar realização" e ação secundária destrutiva "Recusar". Ambos ficam indisponíveis durante o envio.
+- **Cabeçalho:** botão voltar circular à esquerda sem título inline na barra superior; título da tarefa em destaque no topo do conteúdo.
+- **Conteúdo:** título, pill neutro "Aguardando confirmação", card com sinalizado por/quando/responsáveis, card "Observação" quando existente e seção "Foto".
+- **Foto:** quando disponível, card com preview acessível e legenda "Foto privada · toque para ampliar" que abre visualização privada com legenda inferior; quando ausente, texto "Nenhuma foto foi enviada." sem tom de falha.
+- **Rodapé:** botão primário "Confirmar realização" e ação secundária "Recusar" (fundo branco, borda suave e texto `#423C1F`, lado a lado no iPad). Ambos ficam indisponíveis durante o envio.
 - **Resultado:** após resposta bem-sucedida, inclusive tardia (`applied: false`), retorna à fila atualizada sem alerta técnico.
 
 ## 6. Ciclo de Vida da Interface e Máquina de Estados

@@ -100,7 +100,7 @@ struct WeeklyRecognitionView: View {
             if viewModel.showsCopyConfirmation {
                 Label("recognition.copied", systemImage: "checkmark.circle")
                     .font(.app(.subtitle))
-                    .foregroundStyle(Color.App.Action.primary)
+                    .foregroundStyle(Color.App.Text.primary)
                     .accessibilityIdentifier("recognition.copied")
             }
         }

@@ -50,6 +50,7 @@ struct RewardItemEditorView: View {
                             } label: {
                                 Image(systemName: "checkmark")
                             }
+                            .tint(Color.App.Text.primary)
                             .disabled(!viewModel.isFormValid)
                             .accessibilityIdentifier("rewards.editor.submit")
                             .accessibilityLabel(Text("rewards.editor.submit"))

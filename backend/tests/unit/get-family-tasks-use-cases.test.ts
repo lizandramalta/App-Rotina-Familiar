@@ -119,6 +119,43 @@ describe('Family range queries — SPEC-009 CA-05 to CA-10 and CA-12', () => {
     expect(page.items[0]?.displayStatus).toBe('awaitingConfirmation');
   });
 
+  it('defaults the initial Family selection to today in the family time zone (RN60/RN61, SPEC-009 E-13)', async () => {
+    const daily = await overview.execute(TEST_ACTOR, undefined, undefined);
+
+    expect(daily).toMatchObject({ startDate: '2026-10-27', endDate: '2026-10-27' });
+    expect(repository.findFamilyOverview).toHaveBeenCalledWith(expect.anything(), {
+      familyId: TEST_ACTOR.familyId,
+      startDate: '2026-10-27',
+      endDate: '2026-10-27',
+    });
+  });
+
+  it('uses the family calendar day, not the UTC day, for the daily default', async () => {
+    const lateEvening = new GetFamilyOverviewUseCase({
+      repository: repository as unknown as TaskQueryRepositoryPort,
+      transactionRunner: {
+        run: vi.fn(async (work: (tx: TransactionContext) => Promise<unknown>) =>
+          work({ client: {} }),
+        ),
+        forFamily: vi.fn(),
+      } as unknown as TransactionRunner,
+      // 01:00 UTC on the 28th is still 22:00 on the 27th in São Paulo.
+      clock: {
+        now: () => new Date('2026-10-28T01:00:00Z'),
+        nowIsoString: () => '2026-10-28T01:00:00.000Z',
+      },
+    });
+
+    await expect(lateEvening.execute(TEST_ACTOR, undefined, undefined)).resolves.toMatchObject({
+      startDate: '2026-10-27',
+      endDate: '2026-10-27',
+    });
+  });
+
+  it('keeps explicit dates mandatory for the family task list', async () => {
+    await expect(tasks.execute(TEST_ACTOR, {})).rejects.toMatchObject({ code: 'VALIDATION_FAILED' });
+  });
+
   it('rejects reversed or out-of-range dates and hides family data from Kids', async () => {
     await expect(overview.execute(TEST_ACTOR, '2026-10-20', '2026-10-01')).rejects.toMatchObject({
       code: 'VALIDATION_FAILED',

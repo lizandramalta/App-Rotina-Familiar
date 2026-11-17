@@ -38,6 +38,34 @@ struct HTTPKidsSignalRepositoryTests {
         #expect(page.nextCursor == "cursor-2")
     }
 
+    private func detailJSON(note: String?) -> String {
+        let task = note.map { #"{"id":"\#(taskID)","title":"Arrumar a cama","note":"\#($0)"}"# }
+            ?? #"{"id":"\#(taskID)","title":"Arrumar a cama"}"#
+        return """
+        {"signalId":"\(signalID)","task":\(task),"signaledBy":{"id":"\(childID)","name":"Rafa"},\
+        "signaledAt":"2026-10-27T10:00:00.000Z","assignees":[{"id":"\(childID)","name":"Rafa"}],"photoMediaId":null}
+        """
+    }
+
+    @Test("UX-013 §5.2 the detail maps the task observation to taskNote")
+    func detailMapsTaskNote() async throws {
+        let stub = KidsSignalStubHTTP.make(json: detailJSON(note: "Esticar o lençol"))
+
+        let detail = try await stub.repository.getSignalDetail(id: try #require(UUID(uuidString: signalID)), accessToken: "a")
+
+        #expect(detail.taskNote == "Esticar o lençol")
+        #expect(detail.taskTitle == "Arrumar a cama")
+    }
+
+    @Test("UX-013 §5.2 a detail without observation still decodes with taskNote nil")
+    func detailWithoutNote() async throws {
+        let stub = KidsSignalStubHTTP.make(json: detailJSON(note: nil))
+
+        let detail = try await stub.repository.getSignalDetail(id: try #require(UUID(uuidString: signalID)), accessToken: "a")
+
+        #expect(detail.taskNote == nil)
+    }
+
     @Test("SPEC-013 CA-01 forwards the opaque cursor as a query item")
     func forwardsCursor() async throws {
         let stub = KidsSignalStubHTTP.make(json: #"{"items":[],"nextCursor":null}"#)

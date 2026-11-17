@@ -26,8 +26,11 @@ final class KidsSignalDetailUITests: XCTestCase {
             NSPredicate(format: "identifier BEGINSWITH 'kidsReview.queue.row.'")
         )
         XCTAssertTrue(rows.firstMatch.waitForExistence(timeout: 5))
+        let title = ["Arrumar a cama", "Guardar os brinquedos", "Lavar a louça"][index]
         rows.element(boundBy: index).tap()
-        XCTAssertTrue(app.navigationBars["Avaliar sinalização"].waitForExistence(timeout: 5))
+        // Figma 870:27124: TEL-016 replaces the navigation bar with a circular back button + large title.
+        XCTAssertTrue(app.buttons["kidsReview.detail.back"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts[title].waitForExistence(timeout: 5))
     }
 
     private func field(_ identifier: String) -> XCUIElement {
@@ -59,6 +62,32 @@ final class KidsSignalDetailUITests: XCTestCase {
         openFirstSignal()
 
         XCTAssertTrue(app.images["Foto da sinalização"].waitForExistence(timeout: 5))
+        // Figma 870:27149/870:27162: the task observation and the private-photo hint.
+        XCTAssertTrue(app.staticTexts["Esticar o lençol e alinhar os travesseiros."].exists)
+        XCTAssertTrue(app.staticTexts["Foto privada · toque para ampliar"].exists)
+    }
+
+    /// SCRUM-126 Phase 4 (UX-013 §5.2/§8): tapping the photo opens the private enlarged viewer, which has no
+    /// share/save action and closes back to TEL-016.
+    func testPhotoOpensPrivateViewerAndCloses() {
+        openFirstSignal()
+
+        let photo = app.images["Foto da sinalização"]
+        XCTAssertTrue(photo.waitForExistence(timeout: 5))
+        photo.tap()
+
+        let viewer = field("kidsReview.photo.viewer")
+        XCTAssertTrue(viewer.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["Compartilhar"].exists)
+        XCTAssertFalse(app.buttons["Share"].exists)
+        viewer.doubleTap()
+        let close = app.buttons["kidsReview.photo.close"]
+        XCTAssertTrue(close.exists)
+        XCTAssertEqual(close.label, "Fechar")
+        close.tap()
+
+        XCTAssertTrue(viewer.waitForNonExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["kidsReview.detail.back"].exists)
     }
 
     /// SCRUM-116: "Guardar os brinquedos" (second queue row) has no photo, so the Section that would

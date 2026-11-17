@@ -9,6 +9,8 @@ nonisolated enum AppColor {
         static let cardHighlight = Color(hex: 0xE9EFDC)
         static let subtle = Color(hex: 0xE9EFDC)
         static let cardUpdate = Color(hex: 0xF2F6FC)
+        /// Neutral gray of the unselected date capsule in the Filtros sheets (Figma 879:13345).
+        static let control = Color(hex: 0xE8E8EB)
     }
 
     nonisolated enum Border {
@@ -23,6 +25,8 @@ nonisolated enum AppColor {
         static let highlight = Color(hex: 0x57613D)
         static let onAction = Color(hex: 0xFFFFFF)
         static let onCompleted = Color(hex: 0x2E3F5C)
+        /// Disabled text action, e.g. "Limpar" on the default selection (Figma 879:13332).
+        static let disabled = Color(hex: 0xBFBFC4)
     }
 
     nonisolated enum Action {
@@ -39,6 +43,8 @@ nonisolated enum AppColor {
         static let waitingBackground = Color(hex: 0xFBEAF0)
         static let waitingBorder = Color(hex: 0xD4B3C0)
         static let pending = Color(hex: 0xF3ABA5)
+        /// Neutral, borderless status badge background (Figma 870:27130, "Aguardando confirmação").
+        static let neutralBackground = Color(hex: 0xEDEDF0)
     }
 
     nonisolated enum Member {

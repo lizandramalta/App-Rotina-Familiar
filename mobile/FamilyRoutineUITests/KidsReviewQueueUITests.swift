@@ -22,7 +22,10 @@ final class KidsReviewQueueUITests: XCTestCase {
     private func openQueue() {
         XCTAssertTrue(shortcut.waitForExistence(timeout: 5))
         shortcut.tap()
-        XCTAssertTrue(app.navigationBars["Confirmações Kids"].waitForExistence(timeout: 5))
+        // Figma 870:26998: circular back + large title instead of a navigation bar. The back button only exists on
+        // TEL-015, so it proves navigation (the TEL-050 shortcut also reads "Confirmações Kids").
+        XCTAssertTrue(app.buttons["kidsReview.queue.back"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Confirmações Kids"].waitForExistence(timeout: 5))
     }
 
     func testAdminOpensQueueWithPendingSignalsOldestFirst() {
@@ -65,4 +68,27 @@ final class KidsReviewQueueUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Maria Silva"].waitForExistence(timeout: 5))
         XCTAssertFalse(shortcut.exists)
     }
+
+    /// SCRUM-126 Phase 5: with incentive cards above it, the shortcut can be scrolled fully clear of the floating
+    /// tab bar and opens TEL-015 with a single tap.
+    func testShortcutStaysTappableBelowIncentiveCards() {
+        launch("family-overview-incentives")
+        XCTAssertTrue(shortcut.waitForExistence(timeout: 10))
+        var swipes = 0
+        while !shortcut.isHittable && swipes < 6 {
+            app.swipeUp()
+            swipes += 1
+        }
+        XCTAssertTrue(shortcut.isHittable)
+        let tabBar = app.descendants(matching: .any)["app.tab_bar"]
+        if tabBar.exists {
+            XCTAssertLessThanOrEqual(shortcut.frame.maxY, tabBar.frame.minY, "the card ends above the floating tab bar")
+        }
+        shortcut.tap()
+        // Figma 870:26998: circular back + large title instead of a navigation bar. The back button only exists on
+        // TEL-015, so it proves navigation (the TEL-050 shortcut also reads "Confirmações Kids").
+        XCTAssertTrue(app.buttons["kidsReview.queue.back"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Confirmações Kids"].waitForExistence(timeout: 5))
+    }
+
 }

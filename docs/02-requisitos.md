@@ -1,8 +1,8 @@
 # Requisitos funcionais e não funcionais
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.26\
-**Data:** 2026-11-12\
+**Versão:** 1.27\
+**Data:** 2026-11-16\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -433,7 +433,7 @@ Ao excluir uma tarefa não concluída, o sistema deve remover seus vínculos de 
 
 ### RF60
 
-O sistema deve oferecer a Administradores e Membros a área Família (Minha família) na navegação principal, apresentando progresso total no intervalo selecionado e uma lista de membros. A seleção inicial é a semana corrente; Início/Fim permite qualquer intervalo válido dentro de RN49. Cada item abre o detalhe inicialmente no dia atual, com abas Dia e Semana (domingo a sábado no fuso da família, dentro de RN49); voltar restaura o intervalo e os filtros da origem. Outros intervalos são consultados por Tarefas da família. Tarefas da família mantém o intervalo e apresenta todas as tarefas, inclusive sem responsável. A carga de UC13 terá apresentação própria em entrega posterior, fora da TEL-050 atual.
+O sistema deve oferecer a Administradores e Membros a área Família (Minha família) na navegação principal, apresentando progresso total no intervalo selecionado e uma lista de membros. A seleção inicial (e o retorno ao limpar os filtros) é o dia atual no fuso da família; Início/Fim permite qualquer intervalo válido dentro de RN49. Cada item abre o detalhe inicialmente no dia atual, com abas Dia e Semana (domingo a sábado no fuso da família, dentro de RN49); voltar restaura o intervalo e os filtros da origem. Outros intervalos são consultados por Tarefas da família. Tarefas da família mantém o intervalo e apresenta todas as tarefas, inclusive sem responsável. A carga de UC13 terá apresentação própria em entrega posterior, fora da TEL-050 atual.
 
 O progresso deve mostrar concluídas/total e percentual, contar cada tarefa uma vez e apresentar “Sem tarefas” quando o total for zero. Carga e progresso seguem RN60–61 e são atualizados após alterações válidas.
 

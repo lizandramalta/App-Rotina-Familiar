@@ -81,6 +81,8 @@ struct MissionEditorView: View {
                     } label: {
                         Image(systemName: "checkmark")
                     }
+                    // No blue confirmation in the app: #423C1F instead of the default iOS tint (SCRUM-126 Phase 9).
+                    .tint(Color.App.Text.primary)
                     .disabled(!viewModel.isFormValid)
                     .accessibilityIdentifier("missions.editor.save")
                     .accessibilityLabel("missions.form.submit")

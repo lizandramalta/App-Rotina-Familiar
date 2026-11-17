@@ -15,50 +15,112 @@ struct FamilyWeeklyReportView: View {
     @State private var pdfURL: URL?
     @State private var isGenerating = false
     @State private var failed = false
+    /// Server cut-off of the last generated snapshot; before generating, "now" is the effective cut-off.
+    @State private var generatedAt: Date?
 
     var body: some View {
-        List {
-            Section("family.report.week_section") {
-                if spansMultipleWeeks {
-                    DatePicker("family.report.week", selection: $referenceDate, in: dateBounds, displayedComponents: .date)
-                        .datePickerStyle(.graphical)
-                        .environment(\.timeZone, TimeZone(identifier: timeZoneID) ?? .current)
-                }
-                Text(weekDescription)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            }
-            if failed {
-                Section {
-                    Label("family.report.error", systemImage: "exclamationmark.triangle")
-                        .foregroundStyle(.red)
-                }
-            }
-            Section {
+        ScrollView {
+            VStack(alignment: .leading, spacing: AppSpacing.xxl) {
+                weekCard
+                if failed { errorBanner }
                 Button {
                     Task { await generate() }
                 } label: {
-                    if isGenerating { ProgressView() }
-                    else { Label("family.tasks.generate_pdf", systemImage: "doc.richtext") }
+                    if isGenerating {
+                        ProgressView().tint(Color.App.Text.onAction)
+                    } else {
+                        Label("family.tasks.generate_pdf", systemImage: "doc.richtext")
+                    }
                 }
+                .buttonStyle(AppPillButtonStyle(kind: .primary))
                 .disabled(isGenerating)
                 .accessibilityIdentifier("family.report.generate")
+                if let pdfURL { preview(pdfURL) }
             }
-            if let pdfURL {
-                Section("family.report.preview") {
-                    FamilyPDFPreview(url: pdfURL)
-                        .frame(minHeight: 420)
-                        .accessibilityIdentifier("family.report.preview")
-                    ShareLink(item: pdfURL) {
-                        Label("family.report.share", systemImage: "square.and.arrow.up")
-                    }
-                    .accessibilityIdentifier("family.report.share")
-                }
-            }
+            .padding(.horizontal, AppSpacing.xxl)
+            .padding(.vertical, AppSpacing.lg)
+            .frame(maxWidth: 540)
+            .frame(maxWidth: .infinity)
         }
+        .background(Color.App.Background.app.ignoresSafeArea())
         .navigationTitle("family.report.title")
         .navigationBarTitleDisplayMode(.inline)
+        .hidesAppTabBar()
         .onAppear { referenceDate = min(civilDate(range.endDate) ?? Date(), Date()) }
+        .onChange(of: referenceDate) { _, _ in generatedAt = nil }
+    }
+
+    private var weekCard: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.md) {
+            Text("family.report.week_section")
+                .font(.app(.cardTitle))
+                .foregroundStyle(Color.App.Text.primary)
+                .accessibilityAddTraits(.isHeader)
+            if spansMultipleWeeks {
+                DatePicker("family.report.week", selection: $referenceDate, in: dateBounds, displayedComponents: .date)
+                    .datePickerStyle(.graphical)
+                    .tint(Color.App.Action.primary)
+                    .environment(\.timeZone, calendar.timeZone)
+            }
+            VStack(alignment: .leading, spacing: AppSpacing.xs) {
+                Text(weekDescription)
+                    .font(.app(.subtitleStrong))
+                    .foregroundStyle(Color.App.Text.primary)
+                Label(TimeZoneDisplay.displayName(for: timeZoneID), systemImage: "globe")
+                    .font(.app(.note))
+                    .foregroundStyle(Color.App.Text.secondary)
+                if isCurrentWeek {
+                    Text(String(format: String(localized: "family.report.partial_until"), partialCutoff))
+                        .font(.app(.noteStrong))
+                        .foregroundStyle(Color.App.Text.highlight)
+                        .padding(.horizontal, AppSpacing.md)
+                        .padding(.vertical, AppSpacing.xs)
+                        .background(Color.App.Background.cardHighlight, in: Capsule())
+                        .accessibilityIdentifier("family.report.partial")
+                }
+            }
+            .accessibilityElement(children: .combine)
+        }
+        .padding(AppSpacing.xxl)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .appCard(cornerRadius: AppRadius.cardBoard)
+    }
+
+    private var errorBanner: some View {
+        InlineFeedbackBanner(message: String(localized: "family.report.error"))
+            .accessibilityIdentifier("family.report.error")
+    }
+
+    private func preview(_ url: URL) -> some View {
+        VStack(alignment: .leading, spacing: AppSpacing.md) {
+            Text("family.report.preview")
+                .font(.app(.cardTitle))
+                .foregroundStyle(Color.App.Text.primary)
+                .accessibilityAddTraits(.isHeader)
+            FamilyPDFPreview(url: url)
+                .frame(minHeight: 420)
+                .clipShape(RoundedRectangle(cornerRadius: AppRadius.card))
+                .chalkStrokeBorder(RoundedRectangle(cornerRadius: AppRadius.card), color: Color.App.Border.separator, lineWidth: 1)
+                .accessibilityIdentifier("family.report.preview")
+            ShareLink(item: url) {
+                Label("family.report.share", systemImage: "square.and.arrow.up")
+            }
+            .buttonStyle(AppPillButtonStyle(kind: .secondary))
+            .accessibilityIdentifier("family.report.share")
+        }
+        .padding(AppSpacing.lg)
+        .appCard(cornerRadius: AppRadius.cardBoard)
+    }
+
+    /// The selected Monday–Sunday week still contains today (UX-019: current week is partial).
+    private var isCurrentWeek: Bool {
+        monday(for: calendar.startOfDay(for: referenceDate)) == monday(for: calendar.startOfDay(for: Date()))
+    }
+
+    private var partialCutoff: String {
+        var style = Date.FormatStyle.dateTime.day().month(.abbreviated).hour().minute()
+        style.timeZone = calendar.timeZone
+        return (generatedAt ?? Date()).formatted(style)
     }
 
     private var calendar: Calendar {
@@ -86,7 +148,10 @@ struct FamilyWeeklyReportView: View {
     private var weekDescription: String {
         let first = monday(for: referenceDate)
         let sunday = calendar.date(byAdding: .day, value: 6, to: first) ?? first
-        return "\(first.formatted(date: .abbreviated, time: .omitted)) – \(sunday.formatted(date: .abbreviated, time: .omitted))"
+        // Shown in the family time zone, not the device's (UX-019 §2).
+        var style = Date.FormatStyle.dateTime.weekday(.abbreviated).day().month(.abbreviated)
+        style.timeZone = calendar.timeZone
+        return "\(first.formatted(style)) – \(sunday.formatted(style))"
     }
 
     private func civilDate(_ value: String) -> Date? {
@@ -117,6 +182,7 @@ struct FamilyWeeklyReportView: View {
                 .appending(path: "family-report-\(snapshot.period.startDate).pdf")
             try data.write(to: file, options: .atomic)
             pdfURL = file
+            generatedAt = snapshot.isPartial ? snapshot.generatedAt : nil
         } catch {
             failed = true
         }
@@ -163,7 +229,7 @@ enum FamilyPDFRenderer {
             let bar = CGRect(x: 40, y: 290, width: 515, height: 18)
             UIColor.systemGray5.setFill(); UIBezierPath(roundedRect: bar, cornerRadius: 9).fill()
             if let percentage = snapshot.progress.percentage, percentage > 0 {
-                UIColor.systemGreen.setFill()
+                UIColor(Color.App.Action.primary).setFill()
                 UIBezierPath(roundedRect: CGRect(x: 40, y: 290, width: 515 * min(percentage, 100) / 100, height: 18), cornerRadius: 9).fill()
             }
             draw(String(localized: "family.report.shared_note"), y: 318, size: 10, color: muted)
@@ -180,7 +246,7 @@ enum FamilyPDFRenderer {
                     UIColor.systemGray5.setFill()
                     UIBezierPath(roundedRect: CGRect(x: 40, y: y + 44, width: 280, height: 8), cornerRadius: 4).fill()
                     if let percentage = member.percentage, percentage > 0 {
-                        UIColor.systemBlue.setFill()
+                        UIColor(Color.App.Action.primarySoft).setFill()
                         UIBezierPath(roundedRect: CGRect(x: 40, y: y + 44, width: 280 * min(percentage, 100) / 100, height: 8), cornerRadius: 4).fill()
                     }
                     y += 72

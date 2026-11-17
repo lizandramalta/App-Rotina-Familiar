@@ -1,8 +1,8 @@
-# Documentação do projeto — versão 1.42
+# Documentação do projeto — versão 1.43
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.42\
-**Data:** 2026-11-12\
+**Versão:** 1.43\
+**Data:** 2026-11-16\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Modelo de dados](05-modelo-de-dados.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -14,9 +14,9 @@
 | [Apresentação do projeto](../README.md) | Propósito, público, jornada e escopo do MVP. |
 | [Visão do produto](00-visao-do-produto.md) | Contexto, objetivos, princípios, escopo e critérios de sucesso. |
 | [Índice e versões](DOCUMENTACAO.md) | Organização documental, rastreabilidade e política de versões. |
-| [Regras de negócio](01-regras-de-negocio.md) | Regras vigentes e suas relações com RF, RNF e UC; versão 1.27. |
-| [Requisitos](02-requisitos.md) | 71 requisitos funcionais e 27 não funcionais, com vínculos às regras e aos casos de uso; versão 1.26. |
-| [Especificação dos casos de uso](03-casos-de-uso.md) | 19 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições; versão 1.26. |
+| [Regras de negócio](01-regras-de-negocio.md) | Regras vigentes e suas relações com RF, RNF e UC; versão 1.28. |
+| [Requisitos](02-requisitos.md) | 71 requisitos funcionais e 27 não funcionais, com vínculos às regras e aos casos de uso; versão 1.27. |
+| [Especificação dos casos de uso](03-casos-de-uso.md) | 19 casos de uso completos, com atores, pré-condições, fluxos, alternativas e pós-condições; versão 1.27. |
 | [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) | Visão geral e cinco recortes UML, com fontes PlantUML e imagens SVG. |
 | [Screen map](design/screen-map.md) | Mapa 1.25: rótulo único “Gerar convite” e emissão direta em TEL-032/TEL-056; barra de abas somente nas telas principais; TEL-032 compacta em Dia/Semana domingo–sábado; base RN 1.26 / RF 1.25 / UC 1.25. |
 | [User flows](design/user-flows.md) | Fluxos 1.26: emissão de convite direta e revogação da sessão no ingresso (UF-01–UF-04); base RN 1.27 / RF 1.26 / UC 1.26 e screen map 1.25. |

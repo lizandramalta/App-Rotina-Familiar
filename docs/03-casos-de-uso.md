@@ -1,8 +1,8 @@
 # Especificação dos casos de uso
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.26\
-**Data:** 2026-11-12\
+**Versão:** 1.27\
+**Data:** 2026-11-16\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
@@ -507,11 +507,11 @@ Salvo nos fluxos de autenticação, criação de família e ingresso, o usuário
 **Consulta complementar — Família (Administrador e Membro):**
 
 1. O adulto seleciona Família na navegação principal.
-2. O sistema abre a semana corrente e apresenta concluídas/total das tarefas previstas no intervalo, contando cada tarefa uma vez, inclusive compartilhadas ou sem responsável.
-3. O adulto escolhe qualquer intervalo Início/Fim dentro dos limites de RN49 e RN61; o progresso acompanha o intervalo inteiro.
+2. O sistema abre o dia atual (diário) no fuso da família e apresenta concluídas/total das tarefas previstas no intervalo, contando cada tarefa uma vez, inclusive compartilhadas ou sem responsável.
+3. O adulto escolhe qualquer intervalo Início/Fim dentro dos limites de RN49 e RN61; o progresso acompanha o intervalo inteiro, e limpar os filtros retorna ao dia atual.
 4. Ao abrir Tarefas da família, o sistema mantém exatamente o intervalo e permite consultar tarefas de outras pessoas e sem responsável, filtrando por membro e estado. Gerenciar e concluir continuam sujeitos a UC07 e UC12.
 5. O menu de Tarefas da família oferece Gerar relatório PDF por UC18. A Família apresenta a lista de membros: selecionar uma pessoa abre TEL-032 inicialmente em Dia, com opção Semana de domingo a sábado no fuso da família e limites de RN49. Voltar restaura o intervalo e os filtros da Família; outros intervalos são consultados por TEL-011. Somente Administradores acessam Configurações da família e Adicionar membro, bem como Alterar papel, Remover membro e Gerar/reenviar convite no detalhe quando permitidos por UC02. O nome administrativo de Kids pode ser corrigido em Configurações da família ou no detalhe Kids por Administrador autorizado; adultos alteram o próprio nome em Meu perfil. Confirmações Kids continuam exclusivas dos Administradores. A carga de UC13 terá apresentação posterior, fora da TEL-050 atual.
-6. A Família destaca quem concluiu todas as tarefas de hoje e quem tem a maior quantidade de tarefas atribuídas no intervalo selecionado, conforme RN60. Um Administrador pode tocar Parabenizar para outro membro ativo, inclusive Kids. O sistema registra cada envio, permite repeti-lo e disponibiliza mensagem em Minhas tarefas do destinatário, com intenção de push. O destinatário pode fechar a mensagem para ocultá-la da interface.
+6. A Família destaca quem concluiu todas as tarefas de hoje e quem tem a maior quantidade de tarefas atribuídas no intervalo selecionado, conforme RN60. Um Administrador pode tocar Parabenizar para outro membro ativo, inclusive Kids. O sistema registra o envio, retira o cartão correspondente da lista de atualizações (mantendo-o oculto ao recarregar enquanto já parabenizado pelo Administrador no período/dia) e disponibiliza mensagem em Minhas tarefas do destinatário, com intenção de push. O destinatário pode fechar a mensagem para ocultá-la da interface.
 
 Sem tarefas no período, o sistema informa essa condição sem divisão por zero. Tarefas aguardando confirmação não entram nas concluídas; para Membro, aparecem e são contadas como Pendentes na Família, enquanto Administrador vê Aguardando confirmação separadamente. O estado canônico e as permissões não mudam. Conclusão, reabertura e exclusão autorizadas atualizam o progresso. Kids não acessam esta área.
 

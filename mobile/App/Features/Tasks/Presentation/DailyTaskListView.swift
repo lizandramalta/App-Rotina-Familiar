@@ -535,10 +535,7 @@ struct DailyTaskListView: View {
             RoundedRectangle(cornerRadius: AppRadius.banner)
                 .fill(Color.App.Background.card)
         )
-        .overlay(
-            RoundedRectangle(cornerRadius: AppRadius.banner)
-                .strokeBorder(Color.App.Border.separator, lineWidth: 1)
-        )
+        .chalkStrokeBorder(RoundedRectangle(cornerRadius: AppRadius.banner), color: Color.App.Border.separator, lineWidth: 1)
         .accessibilityIdentifier("tasks.daily.action.error")
         .accessibilityFocused($isErrorFocused)
     }
@@ -648,12 +645,12 @@ struct DailyTaskListView: View {
     @ViewBuilder
     private func statusIcon(for status: TaskStatus) -> some View {
         let (image, color): (Image, Color) = switch (viewModel.audience, status) {
-        case (.adult, .completed): (Image(systemName: "checkmark.circle.fill"), Color.App.Action.primary)
+        case (.adult, .completed): (Image(systemName: "checkmark.circle.fill"), Color.App.Text.primary)
         case (.adult, _): (Image(systemName: "circle"), Color.App.Text.secondary)
         case (_, .pending): (Image(systemName: "circle"), Color.App.Text.secondary)
         // Figma 907:27388 dashed clock, tinted as a template.
         case (_, .awaitingConfirmation): (Image("TaskStatusAwaiting").renderingMode(.template), Color.App.Text.secondary)
-        case (_, .completed): (Image(systemName: "checkmark.circle.fill"), Color.App.Action.primary)
+        case (_, .completed): (Image(systemName: "checkmark.circle.fill"), Color.App.Text.primary)
         }
         image
             .resizable()
