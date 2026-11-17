@@ -34,7 +34,6 @@ struct AccountDeletionView: View {
         .navigationTitle("account.deletion.title")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(viewModel.isBusy)
-        .accessibilityIdentifier("account.deletion.screen")
         .alert(confirmationTitle, isPresented: $viewModel.isShowingConfirmation) {
             Button("account.common.cancel", role: .cancel) {}
             Button("account.deletion.confirm.action", role: .destructive) {

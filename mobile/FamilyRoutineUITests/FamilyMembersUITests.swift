@@ -357,7 +357,7 @@ final class FamilyMembersUITests: XCTestCase {
         let alert = app.alerts.firstMatch
         XCTAssertTrue(alert.waitForExistence(timeout: 5))
         XCTAssertTrue(alert.buttons["Excluir"].exists)
-        alert.buttons["Excluir"].tap()
+        alert.buttons["Excluir"].firstMatch.tap()
 
         XCTAssertFalse(app.staticTexts["family.member.detail.name"].waitForExistence(timeout: 3))
     }

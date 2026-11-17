@@ -16,7 +16,9 @@ struct ProfileView: View {
                 content(isLandscape: isRegular && proxy.size.width > proxy.size.height)
                     .padding(.horizontal, 20)
                     .padding(.top, 8)
-                    .padding(.bottom, 24)
+                    // The floating tab bar overlaps the scroll end: keep the last section (Conta,
+                    // SPEC-022) reachable above it.
+                    .padding(.bottom, 24 + AppTabBar.itemSize.height + AppSpacing.xxxl)
                     .frame(maxWidth: .infinity)
             }
         }

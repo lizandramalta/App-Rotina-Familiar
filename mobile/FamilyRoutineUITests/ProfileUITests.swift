@@ -146,13 +146,16 @@ final class ProfileUITests: XCTestCase {
         launch("profile-adult")
         openAdultProfile()
 
+        // The section is the last one: scroll to the end so the floating tab bar does not cover it.
         let entry = app.buttons["profile.account.delete_button"]
         reveal(entry)
+        app.swipeUp()
+        app.swipeUp()
         XCTAssertTrue(entry.waitForExistence(timeout: 5))
         entry.tap()
 
-        XCTAssertTrue(app.navigationBars["Excluir conta"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["Essa ação não pode ser desfeita."].exists)
+        let irreversible = app.descendants(matching: .any)["account.deletion.irreversible"]
+        XCTAssertTrue(irreversible.waitForExistence(timeout: 5))
         let delete = app.buttons["account.deletion.button"]
         XCTAssertTrue(delete.waitForExistence(timeout: 5))
         delete.tap()
@@ -160,11 +163,11 @@ final class ProfileUITests: XCTestCase {
         let alert = app.alerts["Excluir sua conta definitivamente?"]
         XCTAssertTrue(alert.waitForExistence(timeout: 5))
         alert.buttons["Cancelar"].tap()
-        XCTAssertTrue(app.navigationBars["Excluir conta"].exists)
+        XCTAssertTrue(delete.waitForExistence(timeout: 5))
 
         delete.tap()
         XCTAssertTrue(alert.waitForExistence(timeout: 5))
-        alert.buttons["Excluir"].tap()
+        alert.buttons["Excluir"].firstMatch.tap()
 
         XCTAssertTrue(app.otherElements["access.entry.notice.account_deleted"].waitForExistence(timeout: 5)
             || app.staticTexts["Sua conta foi excluída."].waitForExistence(timeout: 5))
