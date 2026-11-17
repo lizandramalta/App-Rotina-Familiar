@@ -1,6 +1,6 @@
-# Mutua Mobile Design System
+# Mora Mobile Design System
 
-Este diretório contém a fundação do **Design System de Alta Fidelidade** do aplicativo Mutua em Swift/SwiftUI.
+Este diretório contém a fundação do **Design System de Alta Fidelidade** do aplicativo Mora em Swift/SwiftUI.
 
 > 📖 **Documentação Completa de Design:** Consulte [`docs/design/design-system.md`](../../../docs/design/design-system.md) para a especificação canônica com a rastreabilidade aos nós do Figma (`960:25` e `870:22509`).
 
