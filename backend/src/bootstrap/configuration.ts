@@ -98,6 +98,7 @@ const APPLE_CANONICAL_URLS = {
   APPLE_ISSUER: 'https://appleid.apple.com',
   APPLE_JWKS_URL: 'https://appleid.apple.com/auth/keys',
   APPLE_TOKEN_URL: 'https://appleid.apple.com/auth/token',
+  APPLE_REVOKE_URL: 'https://appleid.apple.com/auth/revoke',
 } as const;
 
 const environmentSchema = z
@@ -164,9 +165,11 @@ const environmentSchema = z
     APPLE_ISSUER: z.string().url().default(APPLE_CANONICAL_URLS.APPLE_ISSUER),
     APPLE_JWKS_URL: z.string().url().default(APPLE_CANONICAL_URLS.APPLE_JWKS_URL),
     APPLE_TOKEN_URL: z.string().url().default(APPLE_CANONICAL_URLS.APPLE_TOKEN_URL),
+    APPLE_REVOKE_URL: z.string().url().default(APPLE_CANONICAL_URLS.APPLE_REVOKE_URL),
 
     RECOGNITION_JOB_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(100).default(10),
     RECOGNITION_PUSH_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(100).default(5),
+    ACCOUNT_DELETION_JOB_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(100).default(10),
     APNS_KEY_ID: z.string().optional(),
     APNS_TEAM_ID: z.string().optional(),
     APNS_TOPIC: z.string().optional(),

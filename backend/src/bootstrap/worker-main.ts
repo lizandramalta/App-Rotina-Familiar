@@ -38,6 +38,12 @@ async function bootstrapWorker(): Promise<void> {
     } catch (error) {
       logger.error('onboarding_media_cleanup_run_failed', error);
     }
+    // SPEC-001 CA-13 / E-12: token Apple de identidade que ficou sem família.
+    try {
+      await container.cleanOrphanAppleTokens.run();
+    } catch (error) {
+      logger.error('orphan_apple_token_cleanup_run_failed', error);
+    }
   };
   void clean();
   const cleanupTimer = setInterval(
@@ -118,6 +124,29 @@ async function bootstrapWorker(): Promise<void> {
     void deliverApplause();
   }, 30_000);
 
+  // SPEC-022 / BA-40: filas pós-commit da exclusão de conta.
+  let processingAccountDeletions = false;
+  const processAccountDeletions = async () => {
+    if (!isRunning || processingAccountDeletions) return;
+    processingAccountDeletions = true;
+    try {
+      await container.revokeAppleTokens.run();
+    } catch (error) {
+      logger.error('apple_token_revocation_run_failed', error);
+    }
+    try {
+      await container.deleteMediaObjects.run();
+    } catch (error) {
+      logger.error('media_deletion_run_failed', error);
+    } finally {
+      processingAccountDeletions = false;
+    }
+  };
+  void processAccountDeletions();
+  const accountDeletionTimer = setInterval(() => {
+    void processAccountDeletions();
+  }, 60_000);
+
   const handleShutdown = async (signal: string) => {
     if (!isRunning) {
       return;
@@ -126,6 +155,7 @@ async function bootstrapWorker(): Promise<void> {
     clearInterval(cleanupTimer);
     clearInterval(applauseTimer);
     clearInterval(recognitionTimer);
+    clearInterval(accountDeletionTimer);
     await recognitionRun;
     logger.info(`Received ${signal}. Shutting down worker process...`);
 

@@ -1,9 +1,9 @@
 # Diagrama de classes — versão 1.9
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.10\
-**Base funcional:** RN 1.27 / RF 1.26 / UC 1.26\
-**Data:** 2026-11-12
+**Versão:** 1.11\
+**Base funcional:** RN 1.28 / RF 1.27 / UC 1.27\
+**Data:** 2026-11-16
 **Situação:** referência de modelagem e projeções do contrato alvo; implementação posterior
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas de caso de uso](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Modelo de dados](05-modelo-de-dados.md)
@@ -65,6 +65,7 @@ Os RF e RN são os vínculos declarados em cada UC na base funcional. A lista de
 | <a id="rastreio-uc17"></a>[UC17](03-casos-de-uso.md#uc17) — Retornar tarefa concluída para Pendente | [FamilyTask](#classe-familytask), [Completion](#classe-completion), [TaskService](#classe-taskservice), [Mission](#classe-mission), [MissionService](#classe-missionservice) | [RF57](02-requisitos.md#rf57), [RF58](02-requisitos.md#rf58), [RF59](02-requisitos.md#rf59) | [RN38](01-regras-de-negocio.md#rn38), [RN50](01-regras-de-negocio.md#rn50), [RN53](01-regras-de-negocio.md#rn53), [RN55](01-regras-de-negocio.md#rn55), [RN57](01-regras-de-negocio.md#rn57), [RN58](01-regras-de-negocio.md#rn58), [RN59](01-regras-de-negocio.md#rn59) |
 | <a id="rastreio-uc18"></a>[UC18](03-casos-de-uso.md#uc18) — Gerar relatório semanal em PDF | [WeeklyReport](#classe-weeklyreport), [WeeklyReportService](#classe-weeklyreportservice), [MemberReportLine](#classe-memberreportline), [PDFRendering](#classe-pdfrendering), [FamilyArea](#classe-familyarea), [PeriodCalculator](#classe-periodcalculator), [PeriodLoad](#classe-periodload), [PeriodProgress](#classe-periodprogress) | [RF61](02-requisitos.md#rf61) | [RN62](01-regras-de-negocio.md#rn62) |
 | <a id="rastreio-uc19"></a>[UC19](03-casos-de-uso.md#uc19) — Apurar e compartilhar destaque semanal | [WeeklyHighlight](#classe-weeklyhighlight), [WeeklyHighlightService](#classe-weeklyhighlightservice), [HighlightNotifying](#classe-highlightnotifying), [PeriodLoad](#classe-periodload), [WeeklyRecognition](#classe-weeklyrecognition), [WeeklyHighlightScheduling](#classe-weeklyhighlightscheduling), [HighlightSharing](#classe-highlightsharing), [PeriodCalculator](#classe-periodcalculator) , [WeeklyCycle](#classe-weeklycycle) , [NotificationDelivery](#classe-notificationdelivery) | [RF63](02-requisitos.md#rf63), [RF64](02-requisitos.md#rf64) | [RN28](01-regras-de-negocio.md#rn28), [RN30](01-regras-de-negocio.md#rn30), [RN65](01-regras-de-negocio.md#rn65) |
+| <a id="rastreio-uc20"></a>[UC20](03-casos-de-uso.md#uc20) — Excluir conta | [Member](#classe-member), [Family](#classe-family), [AccessService](#classe-accessservice), [MemberService](#classe-memberservice), [Session](#classe-session), [AppleAuthenticating](#classe-appleauthenticating), [AccessControl](#classe-accesscontrol) | [RF72](02-requisitos.md#rf72), [RF73](02-requisitos.md#rf73), [RF74](02-requisitos.md#rf74) | [RN05](01-regras-de-negocio.md#rn05), [RN10](01-regras-de-negocio.md#rn10), [RN44](01-regras-de-negocio.md#rn44), [RN69](01-regras-de-negocio.md#rn69), [RN70](01-regras-de-negocio.md#rn70) |
 
 <a id="restricoes-nao-funcionais"></a>
 ## Restrições não funcionais
@@ -1484,6 +1485,7 @@ A âncora anterior desta seção foi preservada para compatibilidade. O backend 
 
 | Versão | Base funcional | Data | Alteração |
 |---|---|---|---|
+| 1.11 | RN 1.28 / RF 1.27 / UC 1.27 | 2026-11-16 | UC20 (excluir conta) rastreado a `Member`, `Family`, `AccessService`, `MemberService`, `Session`, `AppleAuthenticating` e `AccessControl`; anonimização do perfil, exclusão da família e revogação Apple detalhadas em `05-modelo-de-dados.md` e SPEC-022. |
 | 1.10 | RN 1.27 / RF 1.26 / UC 1.26 | 2026-11-12 | Convite: emissão sempre direta, invalida convites anteriores disponíveis e preserva a sessão; o ingresso pelo novo convite revoga a sessão anterior do perfil, com tokens e push (SCRUM-114; SPEC-004 E-05). |
 | 1.9 | RN 1.18 / RF 1.17 / UC 1.16 | 2026-10-19 | Criação conjunta de família/membros com foto antecipada vinculada ao grant, retorno sem recriação e item pessoal com `status`/`displayStatus` sem segundo estado. |
 | 1.8 | 1.15 | 2026-10-10 | `RewardItem.custom` passa a receber descrição opcional; limites, unicidade por família e catálogo inicial ficam explícitos. Para SPEC-015. |

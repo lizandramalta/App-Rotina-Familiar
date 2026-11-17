@@ -58,6 +58,8 @@ export interface TestApp {
   readonly acceptMissionReward: UseCaseMock;
   readonly listRewardItems: UseCaseMock;
   readonly addRewardItem: UseCaseMock;
+  readonly deleteOwnAccount: UseCaseMock;
+  readonly deleteKidsAccount: UseCaseMock;
 }
 
 export const TEST_ACTOR: ActorContext = {
@@ -121,6 +123,8 @@ export function buildTestApp(): TestApp {
   const acceptMissionReward: UseCaseMock = { execute: vi.fn() };
   const listRewardItems: UseCaseMock = { execute: vi.fn() };
   const addRewardItem: UseCaseMock = { execute: vi.fn() };
+  const deleteOwnAccount: UseCaseMock = { execute: vi.fn() };
+  const deleteKidsAccount: UseCaseMock = { execute: vi.fn() };
 
   const container = {
     ownWeeklyRecognitions: recognitions,
@@ -171,6 +175,8 @@ export function buildTestApp(): TestApp {
     acceptMissionRewardUseCase: acceptMissionReward,
     listRewardItemsUseCase: listRewardItems,
     addRewardItemUseCase: addRewardItem,
+    deleteOwnAccountUseCase: deleteOwnAccount,
+    deleteKidsAccountUseCase: deleteKidsAccount,
     dispose: vi.fn(),
   } as unknown as ApplicationContainer;
 
@@ -218,5 +224,7 @@ export function buildTestApp(): TestApp {
     acceptMissionReward,
     listRewardItems,
     addRewardItem,
+    deleteOwnAccount,
+    deleteKidsAccount,
   };
 }

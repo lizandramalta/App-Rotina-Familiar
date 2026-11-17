@@ -32,6 +32,7 @@ rectangle "App de Organização Familiar" {
   usecase "UC04\nAutenticar com Apple" as UC04
   usecase "UC09\nIngressar por convite" as UC09
   usecase "UC10\nEditar perfil" as UC10
+  usecase "UC20\nExcluir conta" as UC20
   }
   package "Tarefas e rotina" {
   usecase "UC07\nGerenciar tarefas" as UC07
@@ -74,6 +75,10 @@ Membro -- UC07
 Membro -- UC08
 Membro -- UC10
 Kids -- UC10
+Admin -- UC20
+Membro -- UC20
+Kids -- UC20
+Criador -- UC20
 Membro -- UC11
 Membro -- UC12
 Membro -- UC13
@@ -86,6 +91,7 @@ Criador -- UC01
 Criador -- UC04
 Convidado -- UC09
 UC04 -- Apple
+UC20 -- Apple
 Criador -up-|> Admin
 note bottom of Criador
   Papel de Administrador após criar a família.

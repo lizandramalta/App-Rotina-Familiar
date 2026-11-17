@@ -34,6 +34,7 @@ const appleConfig: AppleConfiguration = {
   issuer: ISSUER,
   jwksUrl: 'https://appleid.apple.com/auth/keys',
   tokenUrl: 'https://appleid.apple.com/auth/token',
+  revokeUrl: 'https://appleid.apple.com/auth/revoke',
 };
 
 let privateKey: KeyObject;

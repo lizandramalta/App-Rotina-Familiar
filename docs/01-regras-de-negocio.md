@@ -1,19 +1,19 @@
 # Regras de negócio
 
 **Projeto:** App de Organização Familiar — MVP  
-**Versão:** 1.27\
-**Data:** 2026-11-12\
+**Versão:** 1.28\
+**Data:** 2026-11-16\
 **Situação:** base documental consolidada
 
 [Projeto](../README.md) · [Visão do produto](00-visao-do-produto.md) · [Índice e versões](DOCUMENTACAO.md) · [Regras de negócio](01-regras-de-negocio.md) · [Requisitos](02-requisitos.md) · [Casos de uso](03-casos-de-uso.md) · [Diagramas UML](04-diagramas-de-caso-de-uso.md) · [Screen map](design/screen-map.md) · [Diagrama de classes](06-diagrama-de-classes.md)
 
-Este documento contém as regras vigentes da versão 1.27. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
+Este documento contém as regras vigentes da versão 1.28. Os requisitos concretizam essas regras, e os casos de uso descrevem os fluxos em que são aplicadas. As referências de UC nesta página são derivadas dos requisitos relacionados.
 
 **Identificadores preservados:** RN15, RN29 e RN32 não estavam definidos na base recebida e permanecem não utilizados. Não representam conteúdo faltante desta versão.
 
 ## Índice de regras
 
-[RN01](#rn01) · [RN02](#rn02) · [RN03](#rn03) · [RN04](#rn04) · [RN05](#rn05) · [RN06](#rn06) · [RN07](#rn07) · [RN08](#rn08) · [RN09](#rn09) · [RN10](#rn10) · [RN11](#rn11) · [RN12](#rn12) · [RN13](#rn13) · [RN14](#rn14) · [RN16](#rn16) · [RN17](#rn17) · [RN18](#rn18) · [RN19](#rn19) · [RN20](#rn20) · [RN21](#rn21) · [RN22](#rn22) · [RN23](#rn23) · [RN24](#rn24) · [RN25](#rn25) · [RN26](#rn26) · [RN27](#rn27) · [RN28](#rn28) · [RN30](#rn30) · [RN31](#rn31) · [RN33](#rn33) · [RN34](#rn34) · [RN35](#rn35) · [RN36](#rn36) · [RN37](#rn37) · [RN38](#rn38) · [RN39](#rn39) · [RN40](#rn40) · [RN41](#rn41) · [RN42](#rn42) · [RN43](#rn43) · [RN44](#rn44) · [RN45](#rn45) · [RN46](#rn46) · [RN47](#rn47) · [RN48](#rn48) · [RN49](#rn49) · [RN50](#rn50) · [RN51](#rn51) · [RN52](#rn52) · [RN53](#rn53) · [RN54](#rn54) · [RN55](#rn55) · [RN56](#rn56) · [RN57](#rn57) · [RN58](#rn58) · [RN59](#rn59) · [RN60](#rn60) · [RN61](#rn61) · [RN62](#rn62) · [RN63](#rn63) · [RN64](#rn64) · [RN65](#rn65) · [RN66](#rn66) · [RN67](#rn67)
+[RN01](#rn01) · [RN02](#rn02) · [RN03](#rn03) · [RN04](#rn04) · [RN05](#rn05) · [RN06](#rn06) · [RN07](#rn07) · [RN08](#rn08) · [RN09](#rn09) · [RN10](#rn10) · [RN11](#rn11) · [RN12](#rn12) · [RN13](#rn13) · [RN14](#rn14) · [RN16](#rn16) · [RN17](#rn17) · [RN18](#rn18) · [RN19](#rn19) · [RN20](#rn20) · [RN21](#rn21) · [RN22](#rn22) · [RN23](#rn23) · [RN24](#rn24) · [RN25](#rn25) · [RN26](#rn26) · [RN27](#rn27) · [RN28](#rn28) · [RN30](#rn30) · [RN31](#rn31) · [RN33](#rn33) · [RN34](#rn34) · [RN35](#rn35) · [RN36](#rn36) · [RN37](#rn37) · [RN38](#rn38) · [RN39](#rn39) · [RN40](#rn40) · [RN41](#rn41) · [RN42](#rn42) · [RN43](#rn43) · [RN44](#rn44) · [RN45](#rn45) · [RN46](#rn46) · [RN47](#rn47) · [RN48](#rn48) · [RN49](#rn49) · [RN50](#rn50) · [RN51](#rn51) · [RN52](#rn52) · [RN53](#rn53) · [RN54](#rn54) · [RN55](#rn55) · [RN56](#rn56) · [RN57](#rn57) · [RN58](#rn58) · [RN59](#rn59) · [RN60](#rn60) · [RN61](#rn61) · [RN62](#rn62) · [RN63](#rn63) · [RN64](#rn64) · [RN65](#rn65) · [RN66](#rn66) · [RN67](#rn67) · [RN68](#rn68) · [RN69](#rn69) · [RN70](#rn70)
 
 ## RN01
 
@@ -55,9 +55,9 @@ Um Administrador pode deixar o papel por conta própria, exceto o Criador da Fam
 
 ## RN05
 
-O Criador da Família não pode ser removido, rebaixado nem sair da família. Assim, a família sempre tem pelo menos um Administrador.
+O Criador da Família não pode ser removido, rebaixado nem sair da família. Assim, a família sempre tem pelo menos um Administrador. A única exceção é a exclusão da própria conta pelo Criador, que exclui a família inteira conforme [RN70](#rn70).
 
-**Requisitos funcionais:** [RF04](02-requisitos.md#rf04), [RF05](02-requisitos.md#rf05)  
+**Requisitos funcionais:** [RF04](02-requisitos.md#rf04), [RF05](02-requisitos.md#rf05), [RF73](02-requisitos.md#rf73)  
 **Requisitos não funcionais específicos:** [RNF07](02-requisitos.md#rnf07)  
 **Casos de uso relacionados:** [UC02](03-casos-de-uso.md#uc02)
 
@@ -71,11 +71,11 @@ Existem três perfis: Administrador, Membro e Kids. O Criador da Família é um 
 
 ## RN07
 
-Apenas Administradores podem adicionar, alterar papel e remover membros administrativamente, e corrigir o nome administrativo de perfis Kids. Adultos alteram o próprio nome pelo perfil, conforme RN63; a configuração de etiqueta/apelido pertence exclusivamente ao titular, inclusive quando o titular é Kids. Antes de existir família ou sessão de Administrador, o futuro Criador pode apenas preparar a lista de membros do próprio onboarding, sem persistir perfis ou exercer outras capacidades administrativas. Os perfis preparados são criados junto com a família conforme RN01. Depois da criação, o Criador atua como Administrador; alterações na lista ao voltar da etapa de convites obedecem às permissões e proteções normais de gestão de membros.
+Apenas Administradores podem adicionar, alterar papel e remover membros administrativamente, corrigir o nome administrativo de perfis Kids e excluir a conta de um perfil Kids conforme [RN69](#rn69). Adultos alteram o próprio nome pelo perfil, conforme RN63; a configuração de etiqueta/apelido pertence exclusivamente ao titular, inclusive quando o titular é Kids. Antes de existir família ou sessão de Administrador, o futuro Criador pode apenas preparar a lista de membros do próprio onboarding, sem persistir perfis ou exercer outras capacidades administrativas. Os perfis preparados são criados junto com a família conforme RN01. Depois da criação, o Criador atua como Administrador; alterações na lista ao voltar da etapa de convites obedecem às permissões e proteções normais de gestão de membros.
 
-**Requisitos funcionais:** [RF02](02-requisitos.md#rf02), [RF03](02-requisitos.md#rf03), [RF04](02-requisitos.md#rf04), [RF40](02-requisitos.md#rf40)  
+**Requisitos funcionais:** [RF02](02-requisitos.md#rf02), [RF03](02-requisitos.md#rf03), [RF04](02-requisitos.md#rf04), [RF40](02-requisitos.md#rf40), [RF74](02-requisitos.md#rf74)  
 **Requisitos não funcionais específicos:** [RNF07](02-requisitos.md#rnf07)  
-**Casos de uso relacionados:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02)
+**Casos de uso relacionados:** [UC01](03-casos-de-uso.md#uc01), [UC02](03-casos-de-uso.md#uc02), [UC20](03-casos-de-uso.md#uc20)
 
 ## RN08
 
@@ -95,7 +95,7 @@ Cada perfil pertence a uma única família. Ao autenticar-se, o Criador que já 
 
 ## RN10
 
-A remoção de um membro revoga seu acesso, inclusive por sessão existente, renovação e fotos. Nas tarefas futuras ainda não concluídas e não protegidas, retirar somente esse membro da lista de responsáveis; preservar os demais e deixar sem responsável apenas se a lista ficar vazia. Não há alteração automática das tarefas antigas pendentes, das futuras já concluídas ou das protegidas por conquistas. Preservar histórico, créditos e participações já registrados.
+A remoção de um membro revoga seu acesso, inclusive por sessão existente, renovação e fotos. Nas tarefas futuras ainda não concluídas e não protegidas, retirar somente esse membro da lista de responsáveis; preservar os demais e deixar sem responsável apenas se a lista ficar vazia. Não há alteração automática das tarefas antigas pendentes, das futuras já concluídas ou das protegidas por conquistas. Preservar histórico, créditos e participações já registrados. A remoção administrativa não apaga os dados pessoais do perfil; a exclusão de conta segue [RN69](#rn69) e aplica os mesmos efeitos sobre acesso e responsabilidades, apagando também os dados pessoais.
 
 **Requisitos funcionais:** [RF04](02-requisitos.md#rf04), [RF43](02-requisitos.md#rf43)  
 **Requisitos não funcionais específicos:** [RNF06](02-requisitos.md#rnf06), [RNF09](02-requisitos.md#rnf09), [RNF18](02-requisitos.md#rnf18), [RNF22](02-requisitos.md#rnf22), [RNF24](02-requisitos.md#rnf24)  
@@ -239,7 +239,7 @@ A semana vai de segunda-feira a domingo no fuso IANA da família, cujo padrão n
 
 ## RN30
 
-A carga de um membro é a soma dos pesos integrais das tarefas com conclusão válida no dia ou na semana selecionada nas quais ele consta como responsável da conclusão. Em tarefas compartilhadas, cada responsável recebe o peso integral. Executar a ação de concluir não gera crédito para quem não for responsável. Crédito válido de perfil posteriormente removido permanece nos períodos históricos e é apresentado como “Membro removido”, sem expor dados pessoais além dessa identificação. Pontos do destaque semanal usam essa mesma soma, sem uma segunda moeda de pontuação.
+A carga de um membro é a soma dos pesos integrais das tarefas com conclusão válida no dia ou na semana selecionada nas quais ele consta como responsável da conclusão. Em tarefas compartilhadas, cada responsável recebe o peso integral. Executar a ação de concluir não gera crédito para quem não for responsável. Crédito válido de perfil posteriormente removido ou com conta excluída permanece nos períodos históricos e é apresentado como “Membro removido”, sem expor dados pessoais além dessa identificação. Pontos do destaque semanal usam essa mesma soma, sem uma segunda moeda de pontuação.
 
 **Requisitos funcionais:** [RF15](02-requisitos.md#rf15), [RF18](02-requisitos.md#rf18), [RF19](02-requisitos.md#rf19), [RF20](02-requisitos.md#rf20), [RF56](02-requisitos.md#rf56), [RF63](02-requisitos.md#rf63)  
 **Requisitos não funcionais específicos:** [RNF03](02-requisitos.md#rnf03), [RNF10](02-requisitos.md#rnf10)  
@@ -247,7 +247,7 @@ A carga de um membro é a soma dos pesos integrais das tarefas com conclusão v�
 
 ## RN31
 
-A carga total da família é a soma das cargas individuais, inclusive créditos históricos de membro removido. A participação de cada membro é sua carga dividida pela carga total, em percentual. Quando o total for zero, não se realiza divisão por zero.
+A carga total da família é a soma das cargas individuais, inclusive créditos históricos de membro removido ou com conta excluída. A participação de cada membro é sua carga dividida pela carga total, em percentual. Quando o total for zero, não se realiza divisão por zero.
 
 **Requisitos funcionais:** [RF20](02-requisitos.md#rf20), [RF21](02-requisitos.md#rf21)  
 **Requisitos não funcionais específicos:** [RNF03](02-requisitos.md#rnf03), [RNF10](02-requisitos.md#rnf10)  
@@ -345,9 +345,11 @@ Uma missão concluída sem resgate permite ao Administrador abrir a roleta. O ap
 
 Apenas o Criador da Família se autentica via Sign in with Apple, e a família é vinculada ao identificador Apple dele. Uma identidade Apple sem vínculo não recebe acesso a dados familiares: ela segue somente o onboarding que coleta o rascunho do perfil e cria sua primeira família.
 
-**Requisitos funcionais:** [RF37](02-requisitos.md#rf37), [RF38](02-requisitos.md#rf38), [RF39](02-requisitos.md#rf39)  
-**Requisitos não funcionais específicos:** [RNF15](02-requisitos.md#rnf15), [RNF16](02-requisitos.md#rnf16)  
-**Casos de uso relacionados:** [UC01](03-casos-de-uso.md#uc01), [UC04](03-casos-de-uso.md#uc04)
+A cada autenticação Apple bem-sucedida, o refresh token devolvido pela Apple é guardado de forma protegida, vinculado à identidade, para permitir sua revogação quando o Criador excluir a conta ([RN70](#rn70)). Na exclusão, a identidade Apple é apagada; a mesma Apple ID pode depois iniciar o onboarding de uma nova família, sem acesso aos dados da família excluída.
+
+**Requisitos funcionais:** [RF37](02-requisitos.md#rf37), [RF38](02-requisitos.md#rf38), [RF39](02-requisitos.md#rf39), [RF73](02-requisitos.md#rf73)  
+**Requisitos não funcionais específicos:** [RNF15](02-requisitos.md#rnf15), [RNF16](02-requisitos.md#rnf16), [RNF28](02-requisitos.md#rnf28)  
+**Casos de uso relacionados:** [UC01](03-casos-de-uso.md#uc01), [UC04](03-casos-de-uso.md#uc04), [UC20](03-casos-de-uso.md#uc20)
 
 ## RN45
 
@@ -367,11 +369,11 @@ Link e senha vinculam uma família e um perfil e admitem um ingresso bem-sucedid
 
 ## RN47
 
-Cada perfil mantém acesso em um único aparelho, representado por uma sessão ativa vinculada à instalação. Refresh token não expira por tempo e é revogável; token de acesso tem duração de 15 minutos, com verificação de sessão ativa em operações protegidas para revogação imediata no servidor. Recuperação de convidado usa novo convite para o mesmo perfil, sem recriar histórico. O ingresso por novo convite revoga a sessão anterior do perfil no mesmo commit; a emissão, isoladamente, não a revoga. Criador retorna por Apple e novo ingresso substitui a sessão anterior. Falha de rede não equivale a revogação. A recuperação específica de ingresso cuja resposta se perdeu exige prova da tentativa e instalação original, em janela de dez minutos, sem segundo consumo; fora dessa janela é necessário novo convite. Troca de acesso por convite com sessão ativa exige confirmação e não remove o perfil anterior da família.
+Cada perfil mantém acesso em um único aparelho, representado por uma sessão ativa vinculada à instalação. Refresh token não expira por tempo e é revogável; token de acesso tem duração de 15 minutos, com verificação de sessão ativa em operações protegidas para revogação imediata no servidor. Recuperação de convidado usa novo convite para o mesmo perfil, sem recriar histórico. O ingresso por novo convite revoga a sessão anterior do perfil no mesmo commit; a emissão, isoladamente, não a revoga. Criador retorna por Apple e novo ingresso substitui a sessão anterior. Falha de rede não equivale a revogação. A recuperação específica de ingresso cuja resposta se perdeu exige prova da tentativa e instalação original, em janela de dez minutos, sem segundo consumo; fora dessa janela é necessário novo convite. Troca de acesso por convite com sessão ativa exige confirmação e não remove o perfil anterior da família. A exclusão de conta revoga, no mesmo commit, sessões, tokens, dispositivos de push e convites disponíveis dos perfis afetados ([RN69](#rn69), [RN70](#rn70)).
 
-**Requisitos funcionais:** [RF41](02-requisitos.md#rf41), [RF45](02-requisitos.md#rf45), [RF46](02-requisitos.md#rf46), [RF54](02-requisitos.md#rf54), [RF68](02-requisitos.md#rf68)\
+**Requisitos funcionais:** [RF41](02-requisitos.md#rf41), [RF45](02-requisitos.md#rf45), [RF46](02-requisitos.md#rf46), [RF54](02-requisitos.md#rf54), [RF68](02-requisitos.md#rf68), [RF72](02-requisitos.md#rf72), [RF73](02-requisitos.md#rf73)\
 **Requisitos não funcionais específicos:** [RNF22](02-requisitos.md#rnf22)  
-**Casos de uso relacionados:** [UC02](03-casos-de-uso.md#uc02), [UC09](03-casos-de-uso.md#uc09)
+**Casos de uso relacionados:** [UC02](03-casos-de-uso.md#uc02), [UC09](03-casos-de-uso.md#uc09), [UC20](03-casos-de-uso.md#uc20)
 
 ## RN48
 
@@ -492,7 +494,7 @@ Gerar relatório semanal em PDF fica no menu de Tarefas da família para adultos
 
 Minhas tarefas (todos os perfis) é uma consulta diária: mostra as tarefas próprias e o progresso da data selecionada. Minha família e Tarefas da família (adultos) compartilham um filtro Início/Fim livre, inclusivo, com Início menor ou igual a Fim e ambas as datas dentro de RN49. O detalhe do membro inicia no dia atual e permite alternar para a semana visual de domingo a sábado no fuso da família, recortada pelos limites de RN49. Essa semana visual não altera a semana de segunda a domingo usada para progresso familiar, carga, PDF e apuração. A seleção inicial é a semana corrente (segunda a domingo), recortada pelos limites de RN49 quando necessário. O progresso pessoal conta tarefas próprias concluídas sobre o total próprio previsto no dia; o familiar usa RN60 e calcula concluídas/total do intervalo inteiro, nunca a média dos percentuais diários.
 
-A carga/sobrecarga usa a data da conclusão válida, enquanto o progresso usa as tarefas previstas para o período e seu estado atual. Uma tarefa atrasada pode contribuir para a carga de hoje e para o progresso do dia em que estava prevista. Crédito histórico de perfil removido permanece em linha identificada como “Membro removido”. A carga indica participação creditada, sem limiar de diagnóstico de sobrecarga definido. Seleção, gráficos e rótulos devem explicitar período e métrica. Sem tarefas ou carga, informar ausência de dados; não simular 100%.
+A carga/sobrecarga usa a data da conclusão válida, enquanto o progresso usa as tarefas previstas para o período e seu estado atual. Uma tarefa atrasada pode contribuir para a carga de hoje e para o progresso do dia em que estava prevista. Crédito histórico de perfil removido ou com conta excluída permanece em linha identificada como “Membro removido”. A carga indica participação creditada, sem limiar de diagnóstico de sobrecarga definido. Seleção, gráficos e rótulos devem explicitar período e métrica. Sem tarefas ou carga, informar ausência de dados; não simular 100%.
 
 **Requisitos funcionais:** [RF18](02-requisitos.md#rf18), [RF49](02-requisitos.md#rf49), [RF60](02-requisitos.md#rf60), [RF66](02-requisitos.md#rf66)  
 **Requisitos não funcionais específicos:** [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF09](02-requisitos.md#rnf09), [RNF10](02-requisitos.md#rnf10)  
@@ -504,7 +506,7 @@ A carga/sobrecarga usa a data da conclusão válida, enquanto o progresso usa as
 
 O backend fornece um snapshot consistente e o aplicativo gera o arquivo. Administradores e Membros podem gerar, a partir de Tarefas da família, um relatório familiar em PDF para uma semana selecionada de segunda a domingo. Quando o intervalo consultado alcançar mais de uma semana, o aplicativo solicita a escolha da semana antes da geração; para uma única semana, usa essa semana. O documento identifica família, período e momento de geração, inclui gráficos da distribuição de carga semanal por membro e do progresso total da família, além do peso total creditado e número de tarefas realizadas por membro. O gráfico de progresso usa concluídas/total de tarefas previstas para a semana (RN60); peso e quantidade realizada por membro usam conclusões válidas naquela semana (RN30).
 
-Uma tarefa compartilhada conta uma vez para cada responsável no número individual e credita o peso integral a cada um; o total familiar de tarefas realizadas conta tarefas distintas, sem somar contagens individuais. O relatório explica essa diferença. Crédito histórico de perfil removido é identificado como “Membro removido”, sem dado pessoal. A semana é selecionada por data de referência e resolvida de segunda a domingo no fuso da família. Semana atual é identificada como parcial até o momento da geração; semanas futuras não geram relatório. Na semana de criação, manter o intervalo explícito e considerar as tarefas retroativas cadastradas; não presumir ausência de dados apenas por uma data prevista anteceder a criação da família. Semana sem dados pode gerar relatório com zeros e indicação “Sem tarefas” onde aplicável. O PDF reflete os dados no momento de geração; reabrir uma tarefa exige gerar novo arquivo para obter valores atualizados. Não incluir fotos de validação, credenciais ou configuração privada de perfil.
+Uma tarefa compartilhada conta uma vez para cada responsável no número individual e credita o peso integral a cada um; o total familiar de tarefas realizadas conta tarefas distintas, sem somar contagens individuais. O relatório explica essa diferença. Crédito histórico de perfil removido ou com conta excluída é identificado como “Membro removido”, sem dado pessoal. A semana é selecionada por data de referência e resolvida de segunda a domingo no fuso da família. Semana atual é identificada como parcial até o momento da geração; semanas futuras não geram relatório. Na semana de criação, manter o intervalo explícito e considerar as tarefas retroativas cadastradas; não presumir ausência de dados apenas por uma data prevista anteceder a criação da família. Semana sem dados pode gerar relatório com zeros e indicação “Sem tarefas” onde aplicável. O PDF reflete os dados no momento de geração; reabrir uma tarefa exige gerar novo arquivo para obter valores atualizados. Não incluir fotos de validação, credenciais ou configuração privada de perfil.
 
 **Requisitos funcionais:** [RF61](02-requisitos.md#rf61)  
 **Requisitos não funcionais específicos:** [RNF05](02-requisitos.md#rnf05), [RNF06](02-requisitos.md#rnf06), [RNF10](02-requisitos.md#rnf10), [RNF12](02-requisitos.md#rnf12), [RNF13](02-requisitos.md#rnf13), [RNF26](02-requisitos.md#rnf26), [RNF27](02-requisitos.md#rnf27)  
@@ -576,10 +578,31 @@ A missão admite uma observação opcional de até 250 caracteres, contando espa
 **Requisitos não funcionais específicos:** Sem vínculo específico; requisitos transversais se aplicam conforme a operação.\
 **Casos de uso relacionados:** [UC05](03-casos-de-uso.md#uc05)
 
+## RN69
+
+**Tema:** Exclusão de conta
+
+Administradores não-Criadores, Membros e Kids podem excluir a própria conta a partir do próprio perfil. Um Administrador pode excluir a conta de um perfil Kids da mesma família; não pode excluir a conta de outro adulto, que continua sujeito apenas à remoção de [RN10](#rn10). A exclusão é imediata e irreversível, sem período de carência ou restauração. Ela aplica os efeitos de [RN10](#rn10) sobre acesso e responsabilidades futuras, revoga sessões, push e convites disponíveis e apaga nome, apelido, foto de perfil e os arquivos de foto de sinalização do titular; as sinalizações permanecem registradas sem foto. Conclusões, créditos, participações, badges, destaques e parabéns já registrados permanecem e são apresentados como “Membro removido”, sem recalcular valores. O perfil excluído não pode ser recuperado por convite; voltar à família exige um novo perfil. A exclusão não é comunicada aos demais membros por notificação.
+
+**Requisitos funcionais:** [RF72](02-requisitos.md#rf72), [RF74](02-requisitos.md#rf74)  
+**Requisitos não funcionais específicos:** [RNF06](02-requisitos.md#rnf06), [RNF07](02-requisitos.md#rnf07), [RNF22](02-requisitos.md#rnf22), [RNF24](02-requisitos.md#rnf24), [RNF28](02-requisitos.md#rnf28)  
+**Casos de uso relacionados:** [UC20](03-casos-de-uso.md#uc20), [UC02](03-casos-de-uso.md#uc02)
+
+## RN70
+
+**Tema:** Exclusão de conta do Criador
+
+O Criador pode excluir a própria conta; como a família é vinculada à sua identidade Apple ([RN44](#rn44)), a exclusão apaga a família inteira: perfis, tarefas, rotinas, missões, recompensas, conquistas, destaques, mensagens, convites, sessões, mídias e a identidade Apple. Todos os membros perdem o acesso no mesmo commit. A exclusão é imediata e irreversível. A confirmação exige o refresh token Apple guardado ou uma nova autenticação Apple do próprio Criador quando não houver token guardado. Após a exclusão, o backend revoga o token na Apple; a falha da revogação é tentada novamente e não desfaz a exclusão. Esta é a única exceção à proteção do Criador em [RN05](#rn05) e à preservação de histórico.
+
+**Requisitos funcionais:** [RF73](02-requisitos.md#rf73)  
+**Requisitos não funcionais específicos:** [RNF15](02-requisitos.md#rnf15), [RNF16](02-requisitos.md#rnf16), [RNF22](02-requisitos.md#rnf22), [RNF28](02-requisitos.md#rnf28)  
+**Casos de uso relacionados:** [UC20](03-casos-de-uso.md#uc20)
+
 ## Histórico de versões
 
 | Versão | Data | Alteração |
 |---|---|---|
+| 1.28 | 2026-11-16 | RN69/RN70 (novas): exclusão imediata da própria conta por qualquer perfil e de conta Kids por Administrador, com anonimização como “Membro removido”; exclusão da conta do Criador apaga a família e revoga o token Apple. RN05, RN07, RN10, RN30, RN31, RN44, RN47, RN61 e RN62 ajustadas. Para SPEC-022. |
 | 1.27 | 2026-11-12 | RN46/RN47: toda emissão de convite é direta, sem confirmação; invalida apenas convites anteriores disponíveis e preserva a sessão ativa, revogada somente no ingresso pelo novo convite (SCRUM-114). |
 | 1.26 | 2026-10-28 | RN60/RN61/RN63: TEL-032 inicia em Dia e alterna para Semana de domingo a sábado; Parabenizar permanece na Família; Administrador pode editar nome Kids também no detalhe. |
 | 1.25 | 2026-10-28 | RN07/RN63: adulto altera o próprio nome; Administrador corrige nome administrativo somente de Kids em Configurações da família. TEL-032 concentra ações de papel, convite e remoção. |

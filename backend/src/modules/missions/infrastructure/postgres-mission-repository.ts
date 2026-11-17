@@ -370,7 +370,11 @@ export class PostgresMissionRepository implements MissionRepositoryPort, Mission
     missionId: string,
   ): Promise<readonly MissionParticipantRecord[]> {
     const result = await asPostgresClient(tx).query<ParticipationRow>(
-      `select p.member_id, coalesce(m.display_name, '') as display_name
+      // SPEC-022 CA-02 / RN69: conta excluída aparece como "Membro removido",
+      // sem o nome apagado na anonimização.
+      `select p.member_id,
+              case when m.deleted_at is not null then 'Membro removido'
+                   else coalesce(m.display_name, '') end as display_name
          from app.mission_participations p
          join app.members m on m.family_id = p.family_id and m.id = p.member_id
         where p.family_id = $1 and p.mission_id = $2
