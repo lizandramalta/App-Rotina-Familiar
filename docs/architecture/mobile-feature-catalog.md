@@ -117,7 +117,7 @@ Modais não se tornam automaticamente novos casos de uso ou novas ViewModels. Se
 | [UC17](../03-casos-de-uso.md#uc17) | `ReopenTaskUseCase` | TEL-012; MOD-006 | [UF-08](../design/user-flows.md#uf-08) | RF57–59; RN55/57–59; RNF25 |
 | [UC18](../03-casos-de-uso.md#uc18) | `GetWeeklyReportUseCase`, `ExportWeeklyReportUseCase` | TEL-051 | [UF-14](../design/user-flows.md#uf-14) | RF61; RN62; RNF26/27 |
 | [UC19](../03-casos-de-uso.md#uc19) | `GetOwnWeeklyRecognitionUseCase`, `PrepareHighlightShareUseCase`, `RegisterNotificationDeviceUseCase` | TEL-052 | [UF-15](../design/user-flows.md#uf-15) | RF63/64; RN28/30/65; RNF26/27 |
-| [UC20](../03-casos-de-uso.md#uc20) | `DeleteOwnAccountUseCase`, `DeleteKidsAccountUseCase` | TEL-030/032/058/001; MOD-015 | [UF-17](../design/user-flows.md#uf-17) | RF72–74; RN69/70; RNF12/22/28 |
+| [UC20](../03-casos-de-uso.md#uc20) | `AppSessionStore.deleteOwnAccount` (via `AccessRepository.deleteOwnAccount`), `FamilyRepository.deleteKidsAccount`, `AccountDeletionViewModel` | TEL-030/032/058/001; MOD-015 | [UF-17](../design/user-flows.md#uf-17) | RF72–74; RN69/70; RNF12/22/28 |
 
 `UpdateTaskUseCase` inclui alteração de responsáveis, sem precisar de um caso de uso para cada campo. Alcance futuro encaminha para o contrato de rotina correspondente; não executa um loop de alterações individuais no iPhone. `DeleteFutureTasksUseCase` expressa exclusão a partir da ocorrência escolhida, preservando registros protegidos conforme UC07.
 

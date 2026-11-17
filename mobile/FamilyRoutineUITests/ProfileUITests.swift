@@ -16,7 +16,8 @@ final class ProfileUITests: XCTestCase {
     }
 
     private func openAdultProfile() {
-        let tab = app.buttons["Meu perfil"].firstMatch
+        // The adult tab bar labels this tab "Perfil" (`design_system.tab.profile`).
+        let tab = app.buttons["Perfil"].firstMatch
         XCTAssertTrue(tab.waitForExistence(timeout: 5))
         tab.tap()
         XCTAssertTrue(app.staticTexts["profile.identity.title"].waitForExistence(timeout: 5))
@@ -138,5 +139,34 @@ final class ProfileUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Seu apelido"].exists)
         XCTAssertFalse(app.textFields["profile.edit.name"].exists)
         XCTAssertFalse(app.staticTexts["Seu nome"].exists)
+    }
+
+    /// SPEC-022 CA-01/CA-09, UX-022 §4/§5: TEL-030 → TEL-058 → MOD-015 → TEL-001 with the confirmation.
+    func testAdultDeletesOwnAccountAndReturnsToEntry() {
+        launch("profile-adult")
+        openAdultProfile()
+
+        let entry = app.buttons["profile.account.delete_button"]
+        reveal(entry)
+        XCTAssertTrue(entry.waitForExistence(timeout: 5))
+        entry.tap()
+
+        XCTAssertTrue(app.navigationBars["Excluir conta"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Essa ação não pode ser desfeita."].exists)
+        let delete = app.buttons["account.deletion.button"]
+        XCTAssertTrue(delete.waitForExistence(timeout: 5))
+        delete.tap()
+
+        let alert = app.alerts["Excluir sua conta definitivamente?"]
+        XCTAssertTrue(alert.waitForExistence(timeout: 5))
+        alert.buttons["Cancelar"].tap()
+        XCTAssertTrue(app.navigationBars["Excluir conta"].exists)
+
+        delete.tap()
+        XCTAssertTrue(alert.waitForExistence(timeout: 5))
+        alert.buttons["Excluir"].tap()
+
+        XCTAssertTrue(app.otherElements["access.entry.notice.account_deleted"].waitForExistence(timeout: 5)
+            || app.staticTexts["Sua conta foi excluída."].waitForExistence(timeout: 5))
     }
 }

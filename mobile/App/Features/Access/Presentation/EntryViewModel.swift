@@ -36,10 +36,18 @@ final class EntryViewModel {
         self.sessionStore = sessionStore
     }
 
+    /// UX-022 §5.5: confirmation after deleting the account or neutral notice after a refused session.
+    var notice: EntryNotice? { sessionStore.entryNotice }
+
+    func dismissNotice() {
+        sessionStore.dismissEntryNotice()
+    }
+
     func signInWithApple() async {
         guard !state.isSubmitting else {
             return
         }
+        sessionStore.dismissEntryNotice()
 
         do {
             let proof = try await appleAuthenticator.authorize()
@@ -58,7 +66,7 @@ final class EntryViewModel {
                 .error(.appleProofInvalid)
             case .rateLimited:
                 .error(.rateLimited)
-            case .network, .unavailable, .invalidResponse:
+            case .network, .unavailable, .invalidResponse, .appleProofRequired:
                 .error(.network)
             case .sessionExpired, .sessionRevoked:
                 .error(.network)

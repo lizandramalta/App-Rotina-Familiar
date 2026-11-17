@@ -123,13 +123,21 @@
 | Alerta Admin | `Alert` título | `account.deletion.confirm.kids_title` | "Excluir a conta de {name}?" | MOD-015 | CA-16 |
 | Alerta Admin | `Alert` mensagem | `account.deletion.confirm.kids_message` | "Nome, apelido e foto serão apagados. As tarefas feitas continuam na família como “Membro removido”." | MOD-015 | CA-16 |
 | Confirmar | `Alert` botão | `account.deletion.confirm.action` | "Excluir" | MOD-015 | CA-01 |
-| Cancelar | `Alert` botão | `common.cancel` | "Cancelar" | MOD-015 | — |
+| Cancelar | `Alert` botão | `account.common.cancel` | "Cancelar" | MOD-015 | — |
 | Ação Admin | Botão em TEL-032 | `family.members.delete_account` | "Excluir conta e dados" | TEL-032 | CA-16 |
 | Sucesso | Banner | `account.deletion.success` | "Sua conta foi excluída." | TEL-001 | CA-09 |
 | Encerrado | Banner | `account.ended.body` | "Seu acesso a esta família foi encerrado." | TEL-001 | CA-20 |
 | Erro geral | Banner | `account.deletion.error.generic` | "Não foi possível excluir agora. Tente novamente." | `Error` | CA-08 |
 | Erro Apple | Banner | `account.deletion.error.apple` | "Não conseguimos confirmar com a Apple. Tente novamente." | `APPLE_PROOF_INVALID` | CA-11 |
-| Rede | Aviso | `common.network.error` | (existente) | `Offline` | CA-08 |
+| Rede | Aviso | `account.common.error_network` | "Não foi possível conectar. Verifique sua internet." | `Offline` / falha de rede | CA-08 |
+| Bloco apagado | `Label` | `account.deletion.member.deleted_title` | "O que será apagado" | Não-Criador | CA-02 |
+| Bloco mantido | `Label` | `account.deletion.member.kept_title` | "O que continua na família" | Não-Criador | CA-02 |
+| Bloco Kids | `Label` | `account.deletion.kids.title` | "Sua conta vai sumir" | Kids | CA-05 |
+| Bloco Criador | `Label` | `account.deletion.creator.title` | "A família inteira será apagada" | Criador | CA-12 |
+| Bloco efeitos | `Label` | `account.deletion.creator.effects_title` | "O que acontece" | Criador | CA-12 |
+| Dica entrada | Accessibility hint | `account.deletion.entry_hint` | "Abre as informações sobre a exclusão da conta" | TEL-030 | — |
+| Dica botão | Accessibility hint | `account.deletion.button_hint` | "Abre a confirmação final" | TEL-058 | — |
+| Fechar aviso | Botão | `account.notice.dismiss` | "Fechar aviso" | TEL-001 | CA-09/CA-20 |
 
 ## 8. Acessibilidade e adaptação de dispositivo
 
@@ -152,6 +160,7 @@
 | UX-02 | Mensagem para quem perde o acesso | Banner neutro em TEL-001, sem push (SPEC-022 E-09) | Pessoa usuária / 2026-11-16 | Não |
 | UX-03 | A mensagem neutra vale para qualquer sessão revogada? | Sim: o servidor não distingue a causa da revogação, então o banner aparece sempre que uma sessão antes ativa é recusada na renovação, inclusive após remoção (RN10) ou troca de aparelho. Hoje o app volta a TEL-001 sem mensagem | Pessoa usuária / 2026-11-17 | Não |
 | UX-04 | Onde fica a ação administrativa para Kids | No bloco de gestão de TEL-032, abaixo de "Remover membro" | Pessoa usuária / 2026-11-17 | Não |
+| UX-05 | Alinhamento na implementação | `common.cancel` e `common.network.error` não existiam no catálogo do app; foram criadas `account.common.cancel` e `account.common.error_network`. Títulos dos blocos de efeito, dicas de acessibilidade e o botão de fechar o aviso entraram na tabela da seção 7 | Claude / 2026-11-17 — informado à pessoa usuária | Não |
 
 ## 11. Checklist de aprovação da UX-spec
 

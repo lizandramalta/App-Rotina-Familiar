@@ -38,6 +38,10 @@ struct ProfileView: View {
                     .hidesAppTabBar()
             }
         }
+        .navigationDestination(item: $viewModel.accountDeletion) { deletion in
+            AccountDeletionView(viewModel: deletion)
+                .hidesAppTabBar()
+        }
         .sheet(isPresented: $viewModel.isShowingLeaveAdminPlaceholder) { leaveAdministrationConfirmation }
         .sheet(
             item: Binding(get: { viewModel.editor }, set: { if $0 == nil { viewModel.dismissEditor() } })
@@ -89,6 +93,7 @@ struct ProfileView: View {
                     VStack(spacing: 18) {
                         identityCard
                         if viewModel.showsRoleSection { roleSection }
+                        accountSection
                     }
                     .frame(width: 420)
                     achievements.frame(maxWidth: .infinity)
@@ -98,6 +103,7 @@ struct ProfileView: View {
                     identityCard
                     achievements
                     if viewModel.showsRoleSection { roleSection }
+                    accountSection
                 }
                 .frame(maxWidth: isRegular ? 600 : .infinity)
             }
@@ -288,6 +294,31 @@ struct ProfileView: View {
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 4)
                 .accessibilityIdentifier("profile.role.footer")
+        }
+    }
+
+    // MARK: Account (SPEC-022, UX-022 §5.1)
+
+    private var accountSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("account.section.title")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 4)
+                .accessibilityAddTraits(.isHeader)
+
+            Button(role: .destructive) {
+                viewModel.startAccountDeletion()
+            } label: {
+                Label("account.deletion.entry", systemImage: "trash")
+                    .font(.headline)
+                    .foregroundStyle(Color.App.System.destructive)
+                    .frame(maxWidth: .infinity, minHeight: max(50, minimumTarget), alignment: .leading)
+            }
+            .padding(.horizontal, 16)
+            .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 22))
+            .accessibilityHint(Text("account.deletion.entry_hint"))
+            .accessibilityIdentifier("profile.account.delete_button")
         }
     }
 

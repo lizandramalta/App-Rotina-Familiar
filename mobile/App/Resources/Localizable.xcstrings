@@ -254,6 +254,336 @@
         }
       }
     },
+    "account.common.cancel" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar"
+          }
+        }
+      }
+    },
+    "account.common.error_network" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível conectar. Verifique sua internet."
+          }
+        }
+      }
+    },
+    "account.deletion.button" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluir conta"
+          }
+        }
+      }
+    },
+    "account.deletion.button_hint" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre a confirmação final"
+          }
+        }
+      }
+    },
+    "account.deletion.confirm.action" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluir"
+          }
+        }
+      }
+    },
+    "account.deletion.confirm.creator_title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluir a família %@?"
+          }
+        }
+      }
+    },
+    "account.deletion.confirm.kids_message" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome, apelido e foto serão apagados. As tarefas feitas continuam na família como “Membro removido”."
+          }
+        }
+      }
+    },
+    "account.deletion.confirm.kids_title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluir a conta de %@?"
+          }
+        }
+      }
+    },
+    "account.deletion.confirm.title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluir sua conta definitivamente?"
+          }
+        }
+      }
+    },
+    "account.deletion.confirming" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirmando…"
+          }
+        }
+      }
+    },
+    "account.deletion.creator.body" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você criou a família %@. Excluir sua conta apaga a família inteira."
+          }
+        }
+      }
+    },
+    "account.deletion.creator.button" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluir família e conta"
+          }
+        }
+      }
+    },
+    "account.deletion.creator.confirm_label" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Digite o nome da família para confirmar"
+          }
+        }
+      }
+    },
+    "account.deletion.creator.effects" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos os membros perdem o acesso. Tarefas, missões, conquistas e fotos são apagadas. Sua Apple ID deixa de estar ligada ao app."
+          }
+        }
+      }
+    },
+    "account.deletion.creator.effects_title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que acontece"
+          }
+        }
+      }
+    },
+    "account.deletion.creator.title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A família inteira será apagada"
+          }
+        }
+      }
+    },
+    "account.deletion.entry" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluir conta"
+          }
+        }
+      }
+    },
+    "account.deletion.entry_hint" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre as informações sobre a exclusão da conta"
+          }
+        }
+      }
+    },
+    "account.deletion.error.apple" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não conseguimos confirmar com a Apple. Tente novamente."
+          }
+        }
+      }
+    },
+    "account.deletion.error.generic" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível excluir agora. Tente novamente."
+          }
+        }
+      }
+    },
+    "account.deletion.irreversible" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Essa ação não pode ser desfeita."
+          }
+        }
+      }
+    },
+    "account.deletion.kids.body" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sua conta vai sumir do app. Suas tarefas feitas continuam contando para a família."
+          }
+        }
+      }
+    },
+    "account.deletion.kids.title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sua conta vai sumir"
+          }
+        }
+      }
+    },
+    "account.deletion.member.deleted" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seu nome, apelido e foto serão apagados, e você perderá o acesso neste aparelho."
+          }
+        }
+      }
+    },
+    "account.deletion.member.deleted_title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que será apagado"
+          }
+        }
+      }
+    },
+    "account.deletion.member.kept" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tarefas e conquistas já registradas continuam na família como “Membro removido”."
+          }
+        }
+      }
+    },
+    "account.deletion.member.kept_title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que continua na família"
+          }
+        }
+      }
+    },
+    "account.deletion.submitting" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluindo…"
+          }
+        }
+      }
+    },
+    "account.deletion.success" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sua conta foi excluída."
+          }
+        }
+      }
+    },
+    "account.deletion.title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluir conta"
+          }
+        }
+      }
+    },
+    "account.ended.body" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seu acesso a esta família foi encerrado."
+          }
+        }
+      }
+    },
+    "account.notice.dismiss" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fechar aviso"
+          }
+        }
+      }
+    },
+    "account.section.title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conta"
+          }
+        }
+      }
+    },
     "Amarela (+15°)" : {
 
     },
@@ -1283,6 +1613,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O Criador da família não pode ser removido nem ter o papel alterado."
+          }
+        }
+      }
+    },
+    "family.members.delete_account" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluir conta e dados"
           }
         }
       }

@@ -6,6 +6,18 @@ nonisolated private struct AppleSignInRequestDTO: Encodable {
     let rawNonce: String
 }
 
+nonisolated private struct AccountDeletionRequestDTO: Encodable {
+    let apple: AppleSignInRequestDTO?
+
+    func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        // The route refuses unknown fields; an absent proof is omitted, never sent as `null`.
+        try container.encodeIfPresent(apple, forKey: .apple)
+    }
+
+    private enum CodingKeys: String, CodingKey { case apple }
+}
+
 nonisolated private struct RefreshSessionRequestDTO: Encodable {
     let refreshToken: String
 }
@@ -133,6 +145,21 @@ nonisolated struct HTTPAccessRepository: AccessRepository {
         )
     }
 
+    func deleteOwnAccount(appleProof: AppleAuthorizationProof?, accessToken: String) async throws {
+        _ = try await request(
+            path: "me/account-deletion",
+            method: "POST",
+            headers: ["Authorization": "Bearer \(accessToken)"],
+            body: AccountDeletionRequestDTO(apple: appleProof.map {
+                AppleSignInRequestDTO(
+                    identityToken: $0.identityToken,
+                    authorizationCode: $0.authorizationCode,
+                    rawNonce: $0.rawNonce
+                )
+            })
+        )
+    }
+
     private var decoder: JSONDecoder {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
@@ -178,6 +205,8 @@ nonisolated struct HTTPAccessRepository: AccessRepository {
         switch (statusCode, code) {
         case (401, "APPLE_PROOF_INVALID"):
             return .appleProofInvalid
+        case (422, "APPLE_PROOF_REQUIRED"):
+            return .appleProofRequired
         case (401, "SESSION_REVOKED"):
             return .sessionRevoked
         case (401, "SESSION_EXPIRED"):

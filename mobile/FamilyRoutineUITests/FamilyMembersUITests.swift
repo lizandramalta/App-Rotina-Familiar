@@ -346,6 +346,22 @@ final class FamilyMembersUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["family.member.detail.name"].exists)
     }
 
+    func testAdminCanDeleteKidsAccountFromMemberDetail() {
+        // SPEC-022 CA-16; UX-022 UX-04: the action sits in the management block, only for Kids.
+        launch("member-invite")
+        openKidDetail()
+
+        let delete = app.buttons["family.member.detail.delete_account"]
+        XCTAssertTrue(delete.waitForExistence(timeout: 5))
+        delete.tap()
+        let alert = app.alerts.firstMatch
+        XCTAssertTrue(alert.waitForExistence(timeout: 5))
+        XCTAssertTrue(alert.buttons["Excluir"].exists)
+        alert.buttons["Excluir"].tap()
+
+        XCTAssertFalse(app.staticTexts["family.member.detail.name"].waitForExistence(timeout: 3))
+    }
+
     func testAdminEditsKidsNameFromMemberDetailTopButton() {
         // SPEC-003 CA-02/03/07; UX-003 TEL-032: only a Kids target exposes Editar.
         launch("member-invite")
