@@ -23,6 +23,10 @@ O nome leva artigo masculino nos textos: “o Mora”.
 - `ITSAppUsesNonExemptEncryption = NO` no `Info.plist`: o app usa apenas a
   criptografia padrão do sistema (HTTPS e Keychain).
 - `CURRENT_PROJECT_VERSION` passa para `4`.
+- O app fica disponível só em iPhone e iPad: `SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD`,
+  `SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD` e `SUPPORTS_MACCATALYST` passam a `NO`.
+  No App Store Connect, em Preço e disponibilidade, desmarque também a
+  disponibilidade em Mac e Apple Vision Pro.
 - A página de fallback do Worker de convites passa a exibir o nome Mora.
 
 ## O que não muda
