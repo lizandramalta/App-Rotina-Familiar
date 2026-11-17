@@ -461,7 +461,7 @@ private actor UITestFamilyRepository: FamilyRepository {
     func getFamilyOverview(range: FamilyDateRange?, accessToken: String) async throws -> FamilyOverview {
         if scenario == .familyTasks {
             return FamilyOverview(
-                range: range ?? FamilyDateRange(startDate: "2026-10-26", endDate: "2026-10-31"),
+                range: range ?? Self.defaultWeekRange(familyCreatedAt: "2026-10-01", timeZoneID: familyTimeZoneID),
                 familyCreatedAt: "2026-10-01",
                 progress: UITestTaskFixtures.familyListProgress(assignee: nil),
                 members: [
@@ -536,6 +536,28 @@ private actor UITestFamilyRepository: FamilyRepository {
                 ),
             ]
         )
+    }
+
+    /// Mirrors the backend default range (`resolveRange` with `allowDefault`): the current
+    /// Monday–Sunday week in the family time zone, clamped to the family creation date and the
+    /// last day of the current month. A hardcoded week made "Limpar" (which compares against this
+    /// same current week) enabled whenever the tests ran outside the week they were written in.
+    private static func defaultWeekRange(familyCreatedAt: String, timeZoneID: String) -> FamilyDateRange {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: timeZoneID) ?? .current
+        let formatter = DateFormatter()
+        formatter.calendar = calendar
+        formatter.timeZone = calendar.timeZone
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+        let today = calendar.startOfDay(for: .now)
+        let weekday = calendar.component(.weekday, from: today)
+        let monday = calendar.date(byAdding: .day, value: -((weekday + 5) % 7), to: today) ?? today
+        let sunday = calendar.date(byAdding: .day, value: 6, to: monday) ?? today
+        let monthEnd = calendar.dateInterval(of: .month, for: today)?.end.addingTimeInterval(-1) ?? today
+        let start = max(formatter.string(from: monday), familyCreatedAt)
+        let end = min(formatter.string(from: sunday), formatter.string(from: monthEnd))
+        return FamilyDateRange(startDate: start, endDate: end)
     }
 
     func listFamilyApplause(range: FamilyDateRange, accessToken: String) async throws -> [FamilyApplauseSummary] {
