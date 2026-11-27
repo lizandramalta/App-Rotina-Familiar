@@ -95,6 +95,11 @@ struct FamilyTasksDesignedView: View {
         } message: {
             Text("family.report.failure_message")
         }
+        // UX-019: VoiceOver announces the generating state as soon as it starts.
+        .onChange(of: isGeneratingReport) { _, isGenerating in
+            guard isGenerating else { return }
+            AccessibilityNotification.Announcement(String(localized: "family.report.generating")).post()
+        }
         .overlay(alignment: .bottom) {
             if isGeneratingReport {
                 HStack(spacing: AppSpacing.sm) {
@@ -155,10 +160,6 @@ struct FamilyTasksDesignedView: View {
                     }
                 } label: {
                     HStack(spacing: AppSpacing.md) {
-                        Image(systemName: "doc.richtext")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundStyle(Color.App.Action.primary)
-                            .accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: AppSpacing.xxs) {
                             Text("family.tasks.generate_pdf")
                                 .font(.app(.subtitleStrong))
@@ -167,6 +168,12 @@ struct FamilyTasksDesignedView: View {
                                 .font(.app(.caption))
                                 .foregroundStyle(Color.App.Text.secondary)
                         }
+                        Spacer(minLength: AppSpacing.md)
+                        // Figma 870:23703: the system share glyph, trailing — not a leading doc icon.
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundStyle(Color.App.Text.primary)
+                            .accessibilityHidden(true)
                     }
                     .frame(minWidth: 220, minHeight: 44, alignment: .leading)
                     .padding(AppSpacing.md)
@@ -401,7 +408,8 @@ struct FamilyTasksDesignedView: View {
     private func assignees(_ ids: [UUID]) -> some View {
         if ids.isEmpty {
             HStack(spacing: AppSpacing.xs) {
-                Image(systemName: "person.crop.circle")
+                // Figma shows a bare figure, no enclosing circle (870:23195).
+                Image(systemName: "person")
                     .font(.system(size: 16))
                 Text("family.tasks.unassigned")
                     .font(.app(.note))
@@ -475,17 +483,10 @@ struct FamilyTasksDesignedView: View {
         }
     }
 
+    /// Reuses TEL-050's formatter (FamilyOverviewView.swift) so a single day collapses to one date
+    /// instead of "D a D" — TEL-011's own copy of this logic had drifted and lost that case.
     private var rangeLabel: String {
-        guard let start = civilDate(viewModel.range.startDate),
-              let end = civilDate(viewModel.range.endDate) else { return "" }
-        if familyCalendar.isDate(start, equalTo: end, toGranularity: .month) {
-            return String(format: String(localized: "family.tasks.range_same_month"),
-                          familyCalendar.component(.day, from: start),
-                          familyCalendar.component(.day, from: end),
-                          dateText(end, pattern: "MMM"))
-        }
-        return String(format: String(localized: "family.tasks.range_other_month"),
-                      dateText(start, pattern: "d MMM"), dateText(end, pattern: "d MMM"))
+        FamilyOverviewDates.rangeTitle(viewModel.range, timeZoneID: viewModel.timeZoneID)
     }
 
     private var reportWeekLabel: String {
