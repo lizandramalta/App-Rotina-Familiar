@@ -5,40 +5,39 @@ import Testing
 /// SCRUM-126 Phase 1 — TEL-050 high-fidelity helpers (SPEC-009 CA-05/CA-12, UX-009 §2).
 @MainActor
 struct FamilyHighFidelityComponentsTests {
-    private func progress(completed: Int, awaiting: Int, pending: Int) -> FamilyProgress {
-        FamilyProgress(
-            total: completed + awaiting + pending,
-            completed: completed,
-            pending: pending,
-            awaitingConfirmation: awaiting,
-            percentage: nil
+    private func memberProgress(_ id: UUID, completed: Int) -> FamilyMemberProgress {
+        FamilyMemberProgress(
+            memberID: id, name: "Member \(id)", role: .administrator,
+            progress: FamilyProgress(total: completed, completed: completed, pending: 0, awaitingConfirmation: 0, percentage: nil)
         )
     }
 
-    @Test("SPEC-009 CA-12 Admin ring splits completed, awaiting and pending proportionally")
-    func adminSegmentsAreProportional() {
-        let segments = SegmentedProgressRingView.segments(
-            for: progress(completed: 2, awaiting: 1, pending: 1), showsAwaiting: true
-        )
-        #expect(segments.map(\.kind) == [.completed, .awaiting, .pending])
-        #expect(segments.map(\.end) == [0.5, 0.75, 1.0])
-        #expect(segments.first?.start == 0)
+    @Test("Figma 879:13406 the completion star attributes bands to members, not to a status mix")
+    func starBandsAttributeToMembers() throws {
+        let first = try #require(UUID(uuidString: "11111111-1111-1111-1111-111111111111"))
+        let second = try #require(UUID(uuidString: "22222222-2222-2222-2222-222222222222"))
+        let members = [memberProgress(first, completed: 2), memberProgress(second, completed: 1)]
+        let bands = MemberCompletionStarView.bands(members: members, total: 4)
+        // Top-to-bottom: neutral remainder first, then members reversed so the first server member
+        // ends up at the star's base.
+        #expect(bands.map(\.memberID) == [nil, second, first])
+        #expect(bands.map(\.fraction) == [0.25, 0.25, 0.5])
     }
 
-    @Test("SPEC-009 CA-12 Member ring never draws an awaiting arc")
-    func memberSegmentsHideAwaiting() {
-        let segments = SegmentedProgressRingView.segments(
-            for: progress(completed: 1, awaiting: 2, pending: 1), showsAwaiting: false
-        )
-        #expect(segments.map(\.kind) == [.completed, .pending])
-        #expect(segments.last?.end == 1.0)
+    @Test("A member with nothing completed contributes no band")
+    func starHidesMembersWithNoCompletion() throws {
+        let first = try #require(UUID(uuidString: "11111111-1111-1111-1111-111111111111"))
+        let second = try #require(UUID(uuidString: "22222222-2222-2222-2222-222222222222"))
+        let members = [memberProgress(first, completed: 0), memberProgress(second, completed: 3)]
+        let bands = MemberCompletionStarView.bands(members: members, total: 3)
+        #expect(bands.map(\.memberID) == [second])
+        #expect(bands.map(\.fraction) == [1.0])
     }
 
-    @Test("UX-009 §3 a period without tasks keeps only the neutral track")
-    func emptyProgressHasNoSegments() {
-        #expect(SegmentedProgressRingView.segments(
-            for: progress(completed: 0, awaiting: 0, pending: 0), showsAwaiting: true
-        ).isEmpty)
+    @Test("UX-009 §3 a period without tasks keeps only the neutral band")
+    func emptyProgressHasOnlyNeutralBand() {
+        let bands = MemberCompletionStarView.bands(members: [], total: 0)
+        #expect(bands == [MemberCompletionStarView.Band(memberID: nil, fraction: 1)])
     }
 
     @Test("TEL-050 member colors are stable and the signed-in member uses Você")
@@ -165,13 +164,6 @@ struct FamilyHighFidelityComponentsTests {
         #expect(weekly.contains("17"), "a range repeats today's date: \(weekly)")
         #expect(weekly.count > daily.count)
     }
-
-    @Test("Figma 918:8277 the family donut uses a thin 7.5 pt chalk band")
-    func donutIsThin() {
-        let progress = FamilyProgress(total: 1, completed: 1, pending: 0, awaitingConfirmation: 0, percentage: 100)
-        #expect(SegmentedProgressRingView(progress: progress, showsAwaiting: true).lineWidth == 7.5)
-    }
-
 
     // MARK: SCRUM-126 Phase 10 — wrapping status chips (Figma 870:23478)
 

@@ -193,7 +193,7 @@ struct FamilyOverviewView: View {
             }
 
             HStack(alignment: .center, spacing: AppSpacing.base) {
-                SegmentedProgressRingView(progress: progress, showsAwaiting: viewModel.canConfigureFamily)
+                MemberCompletionStarView(members: overview.members, total: progress.total, colorFor: { colors(for: $0).tint })
                 VStack(alignment: .leading, spacing: AppSpacing.xs + AppSpacing.xxs) {
                     if progress.total > 0 {
                         Text(String(format: String(localized: "family.overview.completed_fraction"), progress.completed, progress.total))
@@ -218,11 +218,15 @@ struct FamilyOverviewView: View {
             }
 
             VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                legendRow("family.tasks.status.completed", kind: .completed, count: progress.completed)
-                if viewModel.canConfigureFamily {
-                    legendRow("family.tasks.status.awaiting", kind: .awaiting, count: progress.awaitingConfirmation)
+                statusCountRow("family.tasks.status.completed", count: progress.completed)
+                let contributors = overview.members.filter { $0.progress.completed > 0 }
+                if !contributors.isEmpty {
+                    memberLegendRow(contributors)
                 }
-                legendRow("family.tasks.status.pending", kind: .pending, count: progress.pending)
+                if viewModel.canConfigureFamily {
+                    statusCountRow("family.tasks.status.awaiting", count: progress.awaitingConfirmation)
+                }
+                statusCountRow("family.tasks.status.pending", count: progress.pending)
             }
         }
         .padding(AppSpacing.lg)
@@ -238,31 +242,34 @@ struct FamilyOverviewView: View {
                 width: 4
             )
         }
-        // Decorations never intercept the board's tap and never reach VoiceOver.
-        .overlay(alignment: .topTrailing) {
-            // Sits above the corner so the header chevron stays visible.
-            StarDecorationView(variant: .blue, size: 72)
-                .offset(x: 24, y: -46)
-                .allowsHitTesting(false)
-        }
-        .overlay(alignment: .bottomLeading) {
-            StarDecorationView(variant: .yellow, size: 56)
-                .offset(x: -20, y: 24)
-                .allowsHitTesting(false)
-        }
         .contentShape(RoundedRectangle(cornerRadius: AppRadius.pill))
     }
 
-    private func legendRow(_ title: LocalizedStringKey, kind: SegmentedProgressRingView.Kind, count: Int) -> some View {
+    private func statusCountRow(_ title: LocalizedStringKey, count: Int) -> some View {
         HStack(spacing: AppSpacing.sm) {
-            // Status is carried by the label and count, never by the chalk dot's color alone (RNF05).
-            ChalkRingArc(color: SegmentedProgressRingView.color(for: kind), lineWidth: 8, seed: 61)
-                .frame(width: 16, height: 16)
             Text(title)
                 .font(.app(.subtitle))
             Spacer(minLength: AppSpacing.sm)
             Text("\(count)")
                 .font(.app(.subtitleStrong))
+        }
+        .foregroundStyle(Color.App.Text.primary)
+        .accessibilityElement(children: .combine)
+    }
+
+    /// Names which member each star band belongs to (Figma 879:13406): colored dot + first name,
+    /// one per contributor, in the same server order the star stacks them in.
+    private func memberLegendRow(_ members: [FamilyMemberProgress]) -> some View {
+        FamilyFlowLayout(spacing: AppSpacing.md) {
+            ForEach(members) { member in
+                HStack(spacing: AppSpacing.xs) {
+                    Circle()
+                        .fill(colors(for: member.id).tint)
+                        .frame(width: 10, height: 10)
+                    Text(firstName(member.name))
+                        .font(.app(.subtitle))
+                }
+            }
         }
         .foregroundStyle(Color.App.Text.primary)
         .accessibilityElement(children: .combine)
@@ -289,14 +296,24 @@ struct FamilyOverviewView: View {
                         .foregroundStyle(Color.App.Text.primary)
                         .accessibilityAddTraits(.isHeader)
                     ForEach(completedToday) { member in
-                        incentiveCard(member: member, title: "family.incentive.completed_today", action: .congratulate)
-                            .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                        incentiveCard(
+                            member: member,
+                            message: String(format: String(localized: "family.incentive.completed_today"), member.name),
+                            prompt: "family.incentive.completed_today_prompt",
+                            action: .congratulate
+                        )
+                        .transition(.opacity.combined(with: .scale(scale: 0.96)))
                     }
                     ForEach(mostTasks) { member in
                         if member.id == viewModel.currentMemberID {
                             ownMostTasksCard(member: member)
                         } else {
-                            incentiveCard(member: member, title: "family.incentive.most_tasks", action: .viewTasks)
+                            incentiveCard(
+                                member: member,
+                                message: mostTasksMessage(for: overview.range, name: member.name),
+                                prompt: "family.incentive.most_tasks_prompt",
+                                action: .viewTasks
+                            )
                         }
                     }
                 }
@@ -305,8 +322,22 @@ struct FamilyOverviewView: View {
         .animation(.snappy, value: hiddenIDs)
     }
 
-    /// Only the "Terminou todas as tarefas de hoje!" card (the one with Parabenizar) leaves after an
-    /// Administrator congratulates another member, and stays hidden on reload (RN60/RN61, SPEC-009 E-13).
+    /// "<Nome> está com muitas tarefas hoje/nesta semana/neste período." (Figma 920:8200): the suffix
+    /// matches the visible range exactly for a single day or a calendar week, and falls back to the
+    /// generic phrasing UX-009 already uses for the own-user variant for any other custom range.
+    private func mostTasksMessage(for range: FamilyDateRange, name: String) -> String {
+        let key: String.LocalizationValue
+        switch FamilyOverviewDates.dayCount(in: range, timeZoneID: viewModel.timeZoneID) {
+        case 1: key = "family.incentive.most_tasks_today"
+        case 7: key = "family.incentive.most_tasks_week"
+        default: key = "family.incentive.most_tasks"
+        }
+        return String(format: String(localized: key), name)
+    }
+
+    /// Only the "<Nome> terminou todas as tarefas de hoje!" card (the one with Parabenizar) leaves
+    /// after an Administrator congratulates another member, and stays hidden on reload (RN60/RN61,
+    /// SPEC-009 E-13).
     private func isDismissedAfterApplause(_ memberID: UUID) -> Bool {
         viewModel.canConfigureFamily && memberID != viewModel.currentMemberID && viewModel.isMemberCongratulated(memberID)
     }
@@ -344,26 +375,28 @@ struct FamilyOverviewView: View {
         .accessibilityIdentifier("family.incentive.own_most_tasks")
     }
 
-    /// Each update card carries one action (Figma 920:8186 / 920:8200): "Terminou todas as tarefas de hoje!" offers
-    /// Parabenizar (Administrator, another member); "Teve muitas tarefas" offers "Ver tarefas de <Nome>".
+    /// Each update card carries one action (Figma 920:8186 / 920:8200): "<Nome> terminou todas as
+    /// tarefas de hoje!" offers Parabenizar (Administrator, another member); "<Nome> está com muitas
+    /// tarefas ..." offers "Ver tarefas de <Nome>". The name is part of the bold sentence itself, not
+    /// a separate heading line — only the prompt below it is secondary-colored.
     private enum IncentiveAction { case congratulate, viewTasks }
 
-    private func incentiveCard(member: FamilyMemberProgress, title: LocalizedStringKey, action: IncentiveAction) -> some View {
+    private func incentiveCard(
+        member: FamilyMemberProgress, message: String, prompt: LocalizedStringKey, action: IncentiveAction
+    ) -> some View {
         updateCardSurface {
             VStack(alignment: .leading, spacing: AppSpacing.sm) {
                 HStack(alignment: .top, spacing: AppSpacing.md) {
                     MemberAvatarView(name: member.name, color: colors(for: member.id).tint, size: 40)
-                    VStack(alignment: .leading, spacing: AppSpacing.xxs) {
-                        Text(member.name)
-                            .font(.app(.cardTitle))
-                        Text(title)
-                            .font(.app(.subtitle))
-                            .foregroundStyle(Color.App.Text.secondary)
-                    }
-                    .foregroundStyle(Color.App.Text.primary)
-                    .fixedSize(horizontal: false, vertical: true)
+                    Text(message)
+                        .font(.app(.cardTitle))
+                        .foregroundStyle(Color.App.Text.primary)
+                        .fixedSize(horizontal: false, vertical: true)
                     Spacer(minLength: 0)
                 }
+                Text(prompt)
+                    .font(.app(.subtitle))
+                    .foregroundStyle(Color.App.Text.secondary)
                 switch action {
                 case .congratulate:
                     if viewModel.canConfigureFamily && member.id != viewModel.currentMemberID {

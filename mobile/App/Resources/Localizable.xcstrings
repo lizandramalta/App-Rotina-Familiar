@@ -1039,7 +1039,17 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Terminou todas as tarefas de hoje!"
+            "value" : "%1$@ terminou todas as tarefas de hoje!"
+          }
+        }
+      }
+    },
+    "family.incentive.completed_today_prompt" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Que tal dar os parabéns?"
           }
         }
       }
@@ -1069,7 +1079,37 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Teve muitas tarefas neste período"
+            "value" : "%1$@ está com muitas tarefas neste período."
+          }
+        }
+      }
+    },
+    "family.incentive.most_tasks_prompt" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ofereça ajuda com alguma delas."
+          }
+        }
+      }
+    },
+    "family.incentive.most_tasks_today" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ está com muitas tarefas hoje."
+          }
+        }
+      }
+    },
+    "family.incentive.most_tasks_week" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ está com muitas tarefas nesta semana."
           }
         }
       }

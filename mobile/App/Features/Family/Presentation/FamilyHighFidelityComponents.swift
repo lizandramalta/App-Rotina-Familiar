@@ -111,60 +111,52 @@ struct MemberProgressRingView: View {
     }
 }
 
-/// Donut ring with one arc per status, proportional to the counts. Awaiting is shown only for
-/// Administrators: for Members the server already folds it into Pendentes (SPEC-009 CA-12).
-struct SegmentedProgressRingView: View {
-    enum Kind: Equatable { case completed, awaiting, pending }
-
-    struct Segment: Equatable {
-        let kind: Kind
-        let start: Double
-        let end: Double
+/// Chalk star chart attributing "Concluídas" to *who* completed it, not to a status mix (Figma
+/// 879:13406): each contributing member's band is proportional to their share of the period's
+/// total tasks, tinted with their ring color (`FamilyMemberPalette`) and stacked bottom-up in
+/// server order; the uncompleted remainder fills the top in a neutral tone. Awaiting/Pendentes
+/// stay as plain counts beside it — this view only ever visualizes completion.
+struct MemberCompletionStarView: View {
+    struct Band: Equatable {
+        /// `nil` marks the neutral "not completed yet" band.
+        let memberID: UUID?
+        let fraction: Double
     }
 
-    let progress: FamilyProgress
-    let showsAwaiting: Bool
-    var size: CGFloat = 70
-    /// Thin chalk band, proportional to Figma 918:8277 (~8 pt once the grain spreads).
-    var lineWidth: CGFloat = 7.5
+    let members: [FamilyMemberProgress]
+    let total: Int
+    let colorFor: (UUID) -> Color
+    /// ~150 pt measured off the Figma reference screenshot (879:13406); larger than the 58 pt
+    /// decorative stars since this one carries the card's primary content, not a background accent.
+    var size: CGFloat = 132
 
-    /// Arc fractions in drawing order; empty when there is nothing to draw (neutral track only).
-    static func segments(for progress: FamilyProgress, showsAwaiting: Bool) -> [Segment] {
-        let parts: [(Kind, Int)] = [
-            (.completed, progress.completed),
-            (.awaiting, showsAwaiting ? progress.awaitingConfirmation : 0),
-            (.pending, progress.pending),
-        ].filter { $0.1 > 0 }
-        let total = parts.reduce(0) { $0 + $1.1 }
-        guard total > 0 else { return [] }
-        var start = 0.0
-        return parts.map { kind, count in
-            let end = start + Double(count) / Double(total)
-            defer { start = end }
-            return Segment(kind: kind, start: start, end: end)
+    /// Bands in top-to-bottom drawing order; the first server member ends up at the star's base.
+    static func bands(members: [FamilyMemberProgress], total: Int) -> [Band] {
+        guard total > 0 else { return [Band(memberID: nil, fraction: 1)] }
+        let memberBands = members.compactMap { member -> Band? in
+            guard member.progress.completed > 0 else { return nil }
+            return Band(memberID: member.id, fraction: Double(member.progress.completed) / Double(total))
         }
-    }
-
-    static func color(for kind: Kind) -> Color {
-        switch kind {
-        case .completed: Color.App.Status.completed
-        case .awaiting: Color.App.Status.waiting
-        case .pending: Color.App.Status.pending
+        let remaining = 1 - memberBands.reduce(0) { $0 + $1.fraction }
+        var ordered = Array(memberBands.reversed())
+        if remaining > 0.0001 {
+            ordered.insert(Band(memberID: nil, fraction: remaining), at: 0)
         }
+        return ordered
     }
 
     var body: some View {
-        ZStack {
-            // Neutral chalk track, visible alone when the period has no tasks.
-            ChalkRingArc(color: Color.App.Background.app, lineWidth: lineWidth, seed: 5)
-            ForEach(Array(Self.segments(for: progress, showsAwaiting: showsAwaiting).enumerated()), id: \.offset) { index, segment in
-                ChalkRingArc(
-                    from: segment.start, to: segment.end,
-                    color: Self.color(for: segment.kind), lineWidth: lineWidth, seed: 101 &+ UInt64(index) &* 13
-                )
+        VStack(spacing: 0) {
+            ForEach(Array(Self.bands(members: members, total: total).enumerated()), id: \.offset) { _, band in
+                (band.memberID.map(colorFor) ?? Color.App.Border.cardHighlight)
+                    .frame(height: size * band.fraction)
             }
         }
         .frame(width: size, height: size)
+        .clipShape(StarShape())
+        .chalkBorder(StarShape(), color: .white, lineWidth: StarDecorationView.borderWidth, seed: 61)
+        .compositingGroup()
+        .shadow(color: .black.opacity(0.25), radius: 3, y: 3)
         .accessibilityHidden(true)
     }
 }
