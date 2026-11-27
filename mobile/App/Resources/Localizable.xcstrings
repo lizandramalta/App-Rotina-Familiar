@@ -3164,26 +3164,6 @@
         }
       }
     },
-    "family.tasks.range_other_month" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ a %@"
-          }
-        }
-      }
-    },
-    "family.tasks.range_same_month" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%ld a %ld de %@"
-          }
-        }
-      }
-    },
     "family.tasks.section_count" : {
       "localizations" : {
         "pt-BR" : {
