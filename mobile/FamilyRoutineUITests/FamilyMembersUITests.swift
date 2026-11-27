@@ -180,8 +180,8 @@ final class FamilyMembersUITests: XCTestCase {
         // RN60/RN61 (SPEC-009 E-13; UX-009 TEL-050; Figma 920:8186/920:8200): each update card has one action.
         launch("family-overview-incentives")
 
-        let completedToday = app.staticTexts["Terminou todas as tarefas de hoje!"]
-        let mostTasks = app.staticTexts["Teve muitas tarefas neste período"]
+        let completedToday = app.staticTexts["Rafa Silva terminou todas as tarefas de hoje!"]
+        let mostTasks = app.staticTexts["Rafa Silva está com muitas tarefas hoje."]
         XCTAssertTrue(completedToday.waitForExistence(timeout: 5))
         XCTAssertTrue(mostTasks.exists)
         let congratulateButtons = app.buttons.matching(
@@ -211,7 +211,7 @@ final class FamilyMembersUITests: XCTestCase {
         XCTAssertTrue(ownCard.waitForExistence(timeout: 5))
         XCTAssertTrue(ownCard.label.contains("Você está entre quem teve mais tarefas neste período"))
         XCTAssertTrue(ownCard.label.contains("Ver minhas tarefas"))
-        XCTAssertTrue(app.staticTexts["Teve muitas tarefas neste período"].exists, "Tied other members retain the regular card")
+        XCTAssertTrue(app.staticTexts["Rafa Silva está com muitas tarefas hoje."].exists, "Tied other members retain the regular card")
         XCTAssertEqual(
             app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'family.incentive.congratulate.'")).count,
             0,
