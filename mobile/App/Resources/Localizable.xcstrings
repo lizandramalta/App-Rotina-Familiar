@@ -1574,6 +1574,26 @@
         }
       }
     },
+    "family.member.manage.role_confirm_message.admin_to_member" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ deixará de gerenciar membros, missões e recompensas e de validar sinalizações Kids."
+          }
+        }
+      }
+    },
+    "family.member.manage.role_confirm_message.member_to_admin" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ poderá gerenciar membros, missões e recompensas e validar sinalizações Kids."
+          }
+        }
+      }
+    },
     "family.member.manage.title" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4130,6 +4150,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Convite para entrar na família\nLink: %@\nSenha: %@"
+          }
+        }
+      }
+    },
+    "memberInvite.submitting" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gerando convite…"
           }
         }
       }

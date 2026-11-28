@@ -15,28 +15,23 @@ struct MemberChangeConfirmationView: View {
             }
         }
 
-        var titleKey: LocalizedStringKey {
+        var titleKey: LocalizedStringResource {
             switch self {
             case .role: "family.members.role_change.title"
             case .remove: "family.members.remove.title"
             }
         }
 
-        var effectKey: LocalizedStringKey {
-            switch self {
-            case .role: "family.member.manage.role_confirm_message"
-            case .remove: "family.members.remove.message"
-            }
-        }
-
-        var confirmKey: LocalizedStringKey {
+        var confirmKey: LocalizedStringResource {
             switch self {
             case .role: "family.members.change.confirm_action"
             case .remove: "family.members.change.remove_action"
             }
         }
 
-        var progressKey: LocalizedStringKey {
+        /// Used both as the button's in-flight label and as the accessibility announcement text
+        /// (870:25375 "Enviando: anuncia progresso"), so it needs a `String(localized:)`-friendly type.
+        var progressKey: LocalizedStringResource {
             switch self {
             case .role: "family.members.change.saving"
             case .remove: "family.members.change.removing"
@@ -69,10 +64,12 @@ struct MemberChangeConfirmationView: View {
                         .accessibilityFocused($isTitleFocused)
                         .accessibilityIdentifier("family.member.change.title")
                     summaryCard
-                    FamilyNoticeCard(change.effectKey)
+                    FamilyNoticeCard(effectText)
                         .accessibilityIdentifier("family.member.change.effect")
                     if showsError {
-                        FamilyNoticeCard("family.member.manage.error", tone: .error)
+                        // UX-003 copy table: "Falha de rede" is family.members.error_network, not
+                        // family.member.manage.error (870:25472) — the key used here had drifted.
+                        FamilyNoticeCard("family.members.error_network", tone: .error)
                             .accessibilityAddTraits(.isStaticText)
                             .accessibilityIdentifier("family.member.change.error")
                     }
@@ -91,6 +88,11 @@ struct MemberChangeConfirmationView: View {
         .presentationDragIndicator(.visible)
         .interactiveDismissDisabled(isSubmitting)
         .onAppear { isTitleFocused = true }
+        // Accessibility node 870:25375: "Enviando: anuncia progresso."
+        .onChange(of: isSubmitting) { _, submitting in
+            guard submitting else { return }
+            AccessibilityNotification.Announcement(String(localized: change.progressKey)).post()
+        }
     }
 
     private var summaryCard: some View {
@@ -129,6 +131,36 @@ struct MemberChangeConfirmationView: View {
         .appCard(cornerRadius: AppRadius.pill)
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("family.member.change.summary")
+    }
+
+    /// Admin↔Membro transitions name the exact capabilities affected (Figma 870:25411), backed by
+    /// RN07 (gerenciar membros), RN37/RN42 (missões e recompensas) and RN24 (validar sinalização Kids).
+    /// Transitions involving Kids touch a broader, less certain set of effects with no Figma reference
+    /// for this phase, so they keep the generic message.
+    private var effectText: Text {
+        switch change {
+        case let .role(newRole):
+            switch (currentRole, newRole) {
+            case (.administrator, .member):
+                return Text(String(
+                    format: String(localized: "family.member.manage.role_confirm_message.admin_to_member"),
+                    firstName
+                ))
+            case (.member, .administrator):
+                return Text(String(
+                    format: String(localized: "family.member.manage.role_confirm_message.member_to_admin"),
+                    firstName
+                ))
+            default:
+                return Text("family.member.manage.role_confirm_message")
+            }
+        case .remove:
+            return Text("family.members.remove.message")
+        }
+    }
+
+    private var firstName: String {
+        memberName.split(separator: " ").first.map(String.init) ?? memberName
     }
 
     private var actions: some View {
