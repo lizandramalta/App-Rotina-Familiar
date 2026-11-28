@@ -185,7 +185,8 @@ struct MemberDetailView: View {
                     .foregroundStyle(Color.App.Text.secondary)
                     .accessibilityIdentifier("family.member.detail.role")
                 if detail.isFamilyCreator {
-                    Label("family.member.detail.creator_badge", systemImage: "shield.fill")
+                    // Outline shield with a checkmark, like TEL-050's own badge (870:24419, Figma 879:13443).
+                    Label("family.member.detail.creator_badge", systemImage: "checkmark.shield")
                         .font(.app(.noteStrong))
                         .foregroundStyle(Color.App.Text.highlight)
                         .padding(.horizontal, AppSpacing.md)
@@ -263,7 +264,8 @@ struct MemberDetailView: View {
                     FamilySectionLabel("family.member.detail.management_section")
                     VStack(spacing: 0) {
                         Button { showsRolePicker = true } label: {
-                            managementRow("family.member.manage.role", symbol: "person.crop.circle", chevron: true)
+                            // Figma 870:24275: a bare person glyph, not person.crop.circle.
+                            managementRow("family.member.manage.role", symbol: "person", chevron: true)
                         }
                         .accessibilityIdentifier("family.member.detail.change_role")
                         FamilyCardSeparator(leadingInset: AppSpacing.lg + 24 + AppSpacing.base)
@@ -271,6 +273,7 @@ struct MemberDetailView: View {
                             managementRow("family.member.manage.remove", symbol: "trash", chevron: false, destructive: true)
                         }
                         .accessibilityIdentifier("family.member.detail.remove")
+                        .accessibilityHint("family.member.manage.remove_hint")
                         if viewModel.canDeleteKidsAccount {
                             FamilyCardSeparator(leadingInset: AppSpacing.lg + 24 + AppSpacing.base)
                             Button { showsKidsDeletionConfirmation = true } label: {
@@ -441,9 +444,9 @@ struct MemberDetailView: View {
                 Capsule().fill(Color.App.Background.subtle).frame(width: 160, height: 18)
                 Capsule().fill(Color.App.Background.subtle).frame(width: 90, height: 12)
             }
-            RoundedRectangle(cornerRadius: AppRadius.pill)
-                .fill(Color.App.Background.subtle)
-                .frame(height: 108)
+            // Figma 870:24516: a single placeholder card — the confirmed content may be only
+            // tasks (member consult) or also invite/management rows (admin view), so the
+            // skeleton must not hint at a fixed number of sections (no anticipated actions).
             RoundedRectangle(cornerRadius: AppRadius.pill)
                 .fill(Color.App.Background.subtle)
                 .frame(height: 156)
@@ -455,19 +458,31 @@ struct MemberDetailView: View {
     }
 
     /// 403/404 clear the detail: no stale data is shown (UX-003 §6).
+    /// A removed/not-found member (870:24540) is permanent — no retry can bring it back — while a
+    /// transient network failure keeps its retry affordance.
     private func unavailableState(_ message: LocalizedStringKey) -> some View {
-        VStack(spacing: AppSpacing.lg) {
-            Image(systemName: "person.crop.circle.badge.exclamationmark")
+        let isPermanentlyGone = viewModel.failure == .notFound
+        return VStack(spacing: AppSpacing.lg) {
+            // Figma shows a bare person glyph, not person.crop.circle.badge.exclamationmark.
+            Image(systemName: "person")
                 .font(.system(size: 48))
                 .foregroundStyle(Color.App.Text.secondary)
                 .accessibilityHidden(true)
+            if isPermanentlyGone {
+                Text("family.member.detail.unavailable_title")
+                    .font(.app(.title2))
+                    .foregroundStyle(Color.App.Text.primary)
+                    .multilineTextAlignment(.center)
+            }
             Text(message)
                 .font(.app(.body))
-                .foregroundStyle(Color.App.Text.primary)
+                .foregroundStyle(isPermanentlyGone ? Color.App.Text.secondary : Color.App.Text.primary)
                 .multilineTextAlignment(.center)
-            Button("family.member.detail.retry") { Task { await viewModel.load() } }
-                .buttonStyle(AppPillButtonStyle(kind: .secondary))
-                .disabled(viewModel.isLoading)
+            if !isPermanentlyGone {
+                Button("family.member.detail.retry") { Task { await viewModel.load() } }
+                    .buttonStyle(AppPillButtonStyle(kind: .secondary))
+                    .disabled(viewModel.isLoading)
+            }
         }
         .padding(AppSpacing.xxl)
         .frame(maxWidth: .infinity)
