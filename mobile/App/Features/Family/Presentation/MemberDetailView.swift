@@ -99,6 +99,11 @@ struct MemberDetailView: View {
             // With MOD-010 open, leave TEL-032 only once the sheet is gone.
             if pendingChange == nil { finishRemoval() } else { pendingChange = nil }
         }
+        // UX-004 §6 Submitting: VoiceOver announces the invite is in flight as soon as it starts.
+        .onChange(of: viewModel.isIssuingInvite) { _, isIssuing in
+            guard isIssuing else { return }
+            AccessibilityNotification.Announcement(String(localized: "memberInvite.submitting")).post()
+        }
     }
 
     // MARK: MOD-010

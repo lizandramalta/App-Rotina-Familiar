@@ -306,6 +306,12 @@ struct FamilyNoticeCard: View {
         self.tone = tone
     }
 
+    /// For callers that need a formatted/interpolated message (e.g. a name), not a plain catalog key.
+    init(_ text: Text, tone: Tone = .info) {
+        message = text
+        self.tone = tone
+    }
+
     var body: some View {
         HStack(alignment: .top, spacing: AppSpacing.md) {
             Image(systemName: symbol)
