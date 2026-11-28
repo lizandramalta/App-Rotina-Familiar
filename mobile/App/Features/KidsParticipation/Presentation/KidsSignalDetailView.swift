@@ -36,6 +36,12 @@ struct KidsSignalDetailView: View {
                 // SCRUM-117 (#57): leave first, then refresh the queue. Embedded in the iPad split there is
                 // nothing to pop: the queue drops the item and selects the next one.
                 guard resolved else { return }
+                // UX-013 §4/UX-02/CA-06: any outcome caused by someone else's action returns silently —
+                // confirmed by the existing testAlreadySettledSignalReturnsSilentlyToQueue coverage —
+                // with only an accessible announcement, never a blocking alert.
+                if let announcement = viewModel.reconciliationAnnouncement {
+                    AccessibilityNotification.Announcement(String(localized: announcement)).post()
+                }
                 if !isEmbedded { dismiss() }
                 onResolved()
             }
@@ -197,8 +203,10 @@ struct KidsSignalDetailView: View {
         }
         if detail.photoMediaID == nil {
             // Absence of a photo is not a failure (UX-013 §5.2).
+            // Figma 870:27170: the same slashed glyph as TEL-015 (camera.slash doesn't exist in SF
+            // Symbols — verified empirically — rectangle.slash is the closest valid match).
             HStack(spacing: AppSpacing.md) {
-                Image(systemName: "photo")
+                Image(systemName: "rectangle.slash")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(Color.App.Text.secondary)
                     .accessibilityHidden(true)

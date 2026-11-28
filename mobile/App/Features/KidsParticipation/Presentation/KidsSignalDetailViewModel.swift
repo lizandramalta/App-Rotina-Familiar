@@ -12,6 +12,10 @@ final class KidsSignalDetailViewModel {
     private(set) var failed = false
     private(set) var photoFailed = false
     private(set) var resolved = false
+    /// UX-013 §4/§7/UX-02: whenever `resolved` fires because of someone ELSE's action (never my own
+    /// applied decision), this names which accessible announcement to post — always silent, never a
+    /// blocking alert, confirmed by the existing SCRUM-117/CA-06 coverage of the `load()` 404 case.
+    private(set) var reconciliationAnnouncement: LocalizedStringResource?
 
     private let id: UUID
     private let repository: any KidsSignalRepository
@@ -41,8 +45,10 @@ final class KidsSignalDetailViewModel {
                 }
             }
         } catch KidsSignalError.notFound {
-            // Someone else already settled it: return silently to the refreshed queue (UX-013 §4, SCRUM-117).
+            // UX-013 §4: "outra decisão/conclusão já ocorreu" returns silently, no error alert — the
+            // copy table ties this exact string to "carregamento de item removido da fila" (§7).
             detail = nil
+            reconciliationAnnouncement = "kidsReview.error.not_found"
             resolved = true
         } catch KidsSignalError.actionNotAllowed {
             detail = nil
@@ -58,7 +64,11 @@ final class KidsSignalDetailViewModel {
         failed = false
         defer { isDeciding = false }
         do {
-            _ = try await repository.decideSignal(id: id, decision: decision, accessToken: token)
+            let result = try await repository.decideSignal(id: id, decision: decision, accessToken: token)
+            // UX-013 §6 `Reconciled`: `applied: false` means this decision arrived too late — someone
+            // else already settled it. Still returns to the queue, but silently with an announcement;
+            // my own applied decision needs no announcement at all.
+            reconciliationAnnouncement = result.applied ? nil : "kidsReview.reconciled"
             resolved = true
             detail = nil
         } catch {
@@ -67,6 +77,8 @@ final class KidsSignalDetailViewModel {
                 _ = try await repository.getSignalDetail(id: id, accessToken: token)
                 failed = true
             } catch KidsSignalError.notFound {
+                // Also `Reconciled`: someone else fully settled it while my decision was in flight.
+                reconciliationAnnouncement = "kidsReview.reconciled"
                 resolved = true
                 detail = nil
             } catch {
