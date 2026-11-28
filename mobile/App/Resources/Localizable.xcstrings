@@ -1270,7 +1270,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Este membro não está mais disponível."
+            "value" : "Este perfil não está mais disponível nesta família."
           }
         }
       }
@@ -1444,6 +1444,16 @@
         }
       }
     },
+    "family.member.detail.unavailable_title" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perfil indisponível"
+          }
+        }
+      }
+    },
     "family.member.detail.week" : {
       "localizations" : {
         "pt-BR" : {
@@ -1500,6 +1510,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Remover membro"
+          }
+        }
+      }
+    },
+    "family.member.manage.remove_hint" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre confirmação"
           }
         }
       }
