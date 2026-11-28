@@ -97,8 +97,9 @@ struct KidsReviewQueueView: View {
             }
             .accessibilityIdentifier("kidsReview.queue.empty")
         case .failed:
-            stateCard {
-                Image(systemName: "exclamationmark.triangle")
+            // Figma 870:27094: no card border here, unlike the empty state — floats directly on the background.
+            stateCard(bordered: false) {
+                Image(systemName: "exclamationmark.circle.fill")
                     .font(.system(size: 44))
                     .foregroundStyle(Color.App.Text.primary)
                     .accessibilityHidden(true)
@@ -113,7 +114,7 @@ struct KidsReviewQueueView: View {
                 Button("kidsReview.queue.retry") {
                     Task { await viewModel.load() }
                 }
-                .buttonStyle(AppPillButtonStyle(kind: .primary))
+                .buttonStyle(AppPillButtonStyle(kind: .secondary))
                 .accessibilityIdentifier("kidsReview.queue.retry")
             }
         }
@@ -206,10 +207,11 @@ struct KidsReviewQueueView: View {
                     .font(.app(.note))
                     .foregroundStyle(Color.App.Text.secondary)
                 // Photo availability is text + icon, never color alone (RNF05).
+                // Figma 870:26997: a camera glyph, not the mountain/photo one.
                 Label {
                     Text(item.hasPhoto ? "kidsReview.queue.with_photo" : "kidsReview.queue.no_photo")
                 } icon: {
-                    Image(systemName: item.hasPhoto ? "photo.fill" : "photo")
+                    Image(systemName: item.hasPhoto ? "camera" : "rectangle.slash")
                 }
                 .font(.app(.noteStrong))
                 .foregroundStyle(item.hasPhoto ? Color.App.Text.highlight : Color.App.Text.secondary)
@@ -260,17 +262,23 @@ struct KidsReviewQueueView: View {
 
     // MARK: States
 
+    /// Figma 870:27070: one grouped card with internal separators, two text placeholders per row —
+    /// matching the real queue's shape, not the subtitle (not yet known to apply) or separate cards.
     private var loadingSkeleton: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.md) {
-            Capsule().fill(Color.App.Background.subtle).frame(width: 240, height: 12)
-            ForEach(0..<3, id: \.self) { _ in
-                RoundedRectangle(cornerRadius: AppRadius.pill)
-                    .fill(Color.App.Background.subtle)
-                    .frame(height: 96)
+        VStack(spacing: 0) {
+            ForEach(0..<3, id: \.self) { index in
+                if index > 0 { FamilyCardSeparator() }
+                VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                    Capsule().fill(Color.App.Background.subtle).frame(width: 220, height: 14)
+                    Capsule().fill(Color.App.Background.subtle).frame(width: 130, height: 10)
+                }
+                .padding(AppSpacing.lg)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            Spacer()
         }
-        .padding(isSplit ? AppSpacing.lg : AppSpacing.xxl)
+        .appCard(cornerRadius: AppRadius.pill)
+        .padding(.horizontal, isSplit ? AppSpacing.lg : AppSpacing.xxl)
+        .padding(.top, AppSpacing.lg)
         .frame(maxWidth: 540)
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .ignore)
@@ -278,13 +286,21 @@ struct KidsReviewQueueView: View {
         .accessibilityIdentifier("kidsReview.queue.loading")
     }
 
-    private func stateCard<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
-        VStack(spacing: AppSpacing.lg) {
+    @ViewBuilder
+    private func stateCard<Content: View>(bordered: Bool = true, @ViewBuilder _ content: () -> Content) -> some View {
+        let body = VStack(spacing: AppSpacing.lg) {
             content()
         }
         .padding(AppSpacing.xxl)
         .frame(maxWidth: .infinity)
-        .appCard(cornerRadius: AppRadius.cardBoard)
+
+        Group {
+            if bordered {
+                body.appCard(cornerRadius: AppRadius.cardBoard)
+            } else {
+                body
+            }
+        }
         .padding(isSplit ? AppSpacing.lg : AppSpacing.xxl)
         .frame(maxWidth: 540)
         .frame(maxWidth: .infinity, maxHeight: .infinity)

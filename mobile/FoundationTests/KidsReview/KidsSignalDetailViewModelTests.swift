@@ -32,7 +32,7 @@ struct KidsSignalDetailViewModelTests {
         #expect(!viewModel.isDeciding)
     }
 
-    @Test("UX-013 §5.2 a successful decision, even late (applied: false), resolves silently")
+    @Test("UX-013 §6 Reconciled: a successful decision that arrives late (applied: false) resolves silently, flagged for the 'A fila foi atualizada.' announcement")
     func successfulDecisionResolves() async {
         let repository = KidsSignalDetailRepositoryStub(
             details: [.success(detail())],
@@ -44,11 +44,27 @@ struct KidsSignalDetailViewModelTests {
         await viewModel.decide(.confirm)
 
         #expect(viewModel.resolved)
+        #expect(viewModel.reconciliationAnnouncement != nil, "applied: false means someone else settled it first")
         #expect(viewModel.detail == nil)
         #expect(!viewModel.failed)
     }
 
-    @Test("UX-013 §6 a lost response whose signal is gone reconciles as resolved")
+    @Test("UX-013 §6 my own applied decision resolves without any announcement")
+    func ownDecisionResolvesWithoutAnnouncement() async {
+        let repository = KidsSignalDetailRepositoryStub(
+            details: [.success(detail())],
+            decision: .success(KidsDecisionResult(taskStatus: .completed, outcome: "confirmed", applied: true))
+        )
+        let viewModel = makeViewModel(repository)
+        await viewModel.load()
+
+        await viewModel.decide(.confirm)
+
+        #expect(viewModel.resolved)
+        #expect(viewModel.reconciliationAnnouncement == nil)
+    }
+
+    @Test("UX-013 §6 Reconciled: a lost response whose signal is gone resolves silently, flagged for the announcement")
     func lostResponseReconciles() async {
         let repository = KidsSignalDetailRepositoryStub(details: [.success(detail()), .failure(KidsSignalError.notFound)])
         let viewModel = makeViewModel(repository)
@@ -57,11 +73,15 @@ struct KidsSignalDetailViewModelTests {
         await viewModel.decide(.reject)
 
         #expect(viewModel.resolved)
+        #expect(viewModel.reconciliationAnnouncement != nil)
         #expect(!viewModel.failed)
     }
 
-    @Test("UX-013 §4 / SCRUM-117 a signal already settled by someone else returns silently (no static screen)")
-    func notFoundOnFirstLoadReturnsSilently() async {
+    /// UX-013 §4/CA-06: "outra decisão/conclusão já ocorreu" returns silently, with no error alert —
+    /// confirmed by the existing testAlreadySettledSignalReturnsSilentlyToQueue UI coverage. The copy
+    /// table (§7) ties kidsReview.error.not_found specifically to this "loading a removed item" case.
+    @Test("UX-013 §4 a signal already settled by someone else, discovered on first load, resolves silently")
+    func notFoundOnFirstLoadResolvesSilently() async {
         let viewModel = makeViewModel(KidsSignalDetailRepositoryStub(details: [.failure(KidsSignalError.notFound)]))
 
         await viewModel.load()
@@ -69,10 +89,11 @@ struct KidsSignalDetailViewModelTests {
         #expect(viewModel.resolved)
         #expect(!viewModel.failed)
         #expect(viewModel.detail == nil)
+        #expect(viewModel.reconciliationAnnouncement != nil)
     }
 
-    @Test("UX-013 §6 a signal decided elsewhere while open reconciles silently on reload")
-    func notFoundAfterLoadResolves() async {
+    @Test("UX-013 §4 any load() call discovering a 404 resolves silently, not just the first one")
+    func notFoundOnReloadAlsoResolvesSilently() async {
         let repository = KidsSignalDetailRepositoryStub(details: [.success(detail()), .failure(KidsSignalError.notFound)])
         let viewModel = makeViewModel(repository)
         await viewModel.load()
